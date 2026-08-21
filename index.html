@@ -1,4 +1,195 @@
-   section {
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>The Panda | 13 East 47th Street, New York City</title>
+
+  <meta
+    name="description"
+    content="The history of The Panda Restaurant and Supper Club at 13 East 47th Street in New York City, the Ronzitti family, and an ongoing effort to document the restaurant through photographs, newspapers, records, memorabilia and family history."
+  >
+
+  <style>
+    :root {
+      --ink:#171511;
+      --paper:#f5efe4;
+      --paper2:#ebe0ce;
+      --cream:#fffaf1;
+      --gold:#b4945a;
+      --gold2:#d5bd8b;
+      --wine:#7e2723;
+      --charcoal:#191816;
+      --muted:#726b61;
+      --line:#d3c4ae;
+    }
+
+    * {
+      box-sizing:border-box;
+    }
+
+    html {
+      scroll-behavior:smooth;
+    }
+
+    body {
+      margin:0;
+      background:var(--paper);
+      color:var(--ink);
+      font-family:Georgia,"Times New Roman",serif;
+      line-height:1.65;
+    }
+
+    img {
+      max-width:100%;
+    }
+
+    a {
+      color:inherit;
+    }
+
+    nav {
+      position:sticky;
+      top:0;
+      z-index:100;
+      background:rgba(22,21,19,.98);
+      border-bottom:1px solid #3d3832;
+    }
+
+    .nav-inner {
+      width:min(1160px,92%);
+      min-height:66px;
+      margin:auto;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:26px;
+    }
+
+    .brand {
+      color:#fff;
+      font-family:Arial,Helvetica,sans-serif;
+      font-weight:700;
+      letter-spacing:3px;
+      text-transform:uppercase;
+      font-size:14px;
+    }
+
+    .nav-links {
+      display:flex;
+      flex-wrap:wrap;
+      gap:18px;
+    }
+
+    .nav-links a {
+      color:#d8d4cc;
+      text-decoration:none;
+      font-family:Arial,Helvetica,sans-serif;
+      font-size:12px;
+      letter-spacing:.5px;
+    }
+
+    .hero {
+      background:
+        radial-gradient(circle at 20% 15%,rgba(180,148,90,.13),transparent 28%),
+        linear-gradient(145deg,#171511 0%,#24211c 65%,#11100f 100%);
+      color:white;
+      padding:86px 0 72px;
+      overflow:hidden;
+    }
+
+    .hero-grid {
+      width:min(1220px,92%);
+      margin:auto;
+      display:grid;
+      grid-template-columns:.82fr 1.18fr;
+      gap:55px;
+      align-items:center;
+    }
+
+    .hero-copy {
+      position:relative;
+      z-index:2;
+    }
+
+    .eyebrow {
+      font-family:Arial,Helvetica,sans-serif;
+      text-transform:uppercase;
+      letter-spacing:4px;
+      font-size:12px;
+      color:var(--gold2);
+      margin-bottom:14px;
+    }
+
+    h1 {
+      margin:0;
+      font-size:clamp(62px,8vw,112px);
+      line-height:.9;
+      font-weight:normal;
+      letter-spacing:-3px;
+    }
+
+    .hero-rule {
+      width:90px;
+      height:2px;
+      margin:28px 0;
+      background:var(--gold);
+    }
+
+    .hero-subtitle {
+      max-width:560px;
+      margin:0;
+      font-size:clamp(19px,2.1vw,27px);
+      color:#ece7df;
+    }
+
+    .hero-address {
+      margin-top:22px;
+      font-family:Arial,Helvetica,sans-serif;
+      font-size:13px;
+      letter-spacing:2px;
+      text-transform:uppercase;
+      color:#cfc7bb;
+    }
+
+    .hero-photo-wrap {
+      position:relative;
+    }
+
+    .hero-photo-wrap::before {
+      content:"";
+      position:absolute;
+      width:92%;
+      height:92%;
+      right:-22px;
+      bottom:-22px;
+      border:1px solid rgba(213,189,139,.5);
+    }
+
+    .hero-photo {
+      position:relative;
+      background:#0d0d0c;
+      padding:13px;
+      box-shadow:0 24px 60px rgba(0,0,0,.5);
+    }
+
+    .hero-photo img {
+      width:100%;
+      max-height:710px;
+      object-fit:contain;
+      display:block;
+      background:#111;
+    }
+
+    .hero-caption {
+      margin-top:14px;
+      color:#aaa49a;
+      font-size:13px;
+      font-style:italic;
+    }
+
+    section {
       padding:88px 0;
     }
 
