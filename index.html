@@ -1,946 +1,3208 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>The Panda | 13 East 47th Street, New York City</title>
-  <meta name="description" content="The history of The Panda Restaurant and Supper Club at 13 East 47th Street in New York City, the Ronzitti family, and the ongoing effort to document the restaurant through photographs, newspapers, records, memorabilia and family history.">
 
-  <style>
-    :root {
-      --ink:#171511;
-      --paper:#f5efe4;
-      --paper2:#ebe0ce;
-      --cream:#fffaf1;
-      --gold:#b4945a;
-      --gold2:#d5bd8b;
-      --wine:#7e2723;
-      --charcoal:#191816;
-      --muted:#726b61;
-      --line:#d3c4ae;
-    }
+<meta charset="UTF-8">
 
-    * { box-sizing:border-box; }
-    html { scroll-behavior:smooth; }
-    body {
-      margin:0;
-      background:var(--paper);
-      color:var(--ink);
-      font-family:Georgia,"Times New Roman",serif;
-      line-height:1.65;
-    }
-    img { max-width:100%; }
-    a { color:inherit; }
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    nav {
-      position:sticky;
-      top:0;
-      z-index:100;
-      background:rgba(22,21,19,.98);
-      border-bottom:1px solid #3d3832;
-    }
-    .nav-inner {
-      width:min(1160px,92%);
-      min-height:66px;
-      margin:auto;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:26px;
-    }
-    .brand {
-      color:#fff;
-      font-family:Arial,Helvetica,sans-serif;
-      font-weight:700;
-      letter-spacing:3px;
-      text-transform:uppercase;
-      font-size:14px;
-    }
-    .nav-links {
-      display:flex;
-      flex-wrap:wrap;
-      gap:18px;
-    }
-    .nav-links a {
-      color:#d8d4cc;
-      text-decoration:none;
-      font-family:Arial,Helvetica,sans-serif;
-      font-size:12px;
-      letter-spacing:.5px;
-    }
+<title>The Panda | 13 East 47th Street, New York City</title>
 
-    .hero {
-      background:
-        radial-gradient(circle at 20% 15%,rgba(180,148,90,.13),transparent 28%),
-        linear-gradient(145deg,#171511 0%,#24211c 65%,#11100f 100%);
-      color:#fff;
-      padding:86px 0 72px;
-      overflow:hidden;
-    }
-    .hero-grid {
-      width:min(1180px,91%);
-      margin:auto;
-      display:grid;
-      grid-template-columns:.9fr 1.1fr;
-      gap:60px;
-      align-items:center;
-    }
-    .eyebrow {
-      font-family:Arial,Helvetica,sans-serif;
-      text-transform:uppercase;
-      letter-spacing:4px;
-      font-size:12px;
-      color:var(--gold2);
-      margin-bottom:14px;
-    }
-    h1 {
-      margin:0;
-      font-size:clamp(62px,8vw,112px);
-      line-height:.9;
-      font-weight:normal;
-      letter-spacing:-3px;
-    }
-    .hero-rule {
-      width:90px;
-      height:2px;
-      margin:28px 0;
-      background:var(--gold);
-    }
-    .hero-subtitle {
-      max-width:560px;
-      margin:0;
-      font-size:clamp(19px,2.1vw,27px);
-      color:#ece7df;
-    }
-    .hero-address {
-      margin-top:22px;
-      font-family:Arial,Helvetica,sans-serif;
-      font-size:13px;
-      letter-spacing:2px;
-      text-transform:uppercase;
-      color:#cfc7bb;
-    }
-    .hero-photo-wrap { position:relative; }
-    .hero-photo-wrap::before {
-      content:"";
-      position:absolute;
-      width:92%;
-      height:92%;
-      right:-22px;
-      bottom:-22px;
-      border:1px solid rgba(213,189,139,.5);
-    }
-    .hero-photo {
-      position:relative;
-      background:#0d0d0c;
-      padding:13px;
-      box-shadow:0 24px 60px rgba(0,0,0,.5);
-    }
-    .hero-photo img {
-      width:100%;
-      max-height:690px;
-      object-fit:contain;
-      display:block;
-      background:#111;
-    }
-    .hero-caption {
-      margin-top:14px;
-      color:#aaa49a;
-      font-size:13px;
-      font-style:italic;
-    }
+<meta
+  name="description"
+  content="The history of The Panda Restaurant and Supper Club at 13 East 47th Street in New York City, Michele (Mike) Ronzitti and Ester Ronzitti, and the ongoing effort to document the restaurant through photographs, newspapers, records, memorabilia and family history."
+>
 
-    section { padding:88px 0; }
-    .container { width:min(1060px,88%); margin:auto; }
-    .wide { width:min(1160px,91%); margin:auto; }
-    .section-label {
-      color:var(--wine);
-      font-family:Arial,Helvetica,sans-serif;
-      text-transform:uppercase;
-      letter-spacing:3px;
-      font-weight:700;
-      font-size:11px;
-      margin-bottom:8px;
-    }
-    .dark .section-label { color:var(--gold2); }
-    h2 {
-      margin:0 0 26px;
-      font-size:clamp(36px,5vw,55px);
-      line-height:1.06;
-      font-weight:normal;
-    }
-    h3 { font-weight:normal; }
-    .lead { font-size:21px; max-width:830px; }
-    .dark { background:var(--charcoal); color:#efebe4; }
-    .warm { background:var(--paper2); }
+<style>
 
-    .artifact-feature {
-      display:grid;
-      grid-template-columns:1.08fr .92fr;
-      gap:56px;
-      align-items:center;
-    }
-    .artifact-image {
-      background:#fff;
-      padding:12px;
-      border:1px solid var(--line);
-      box-shadow:0 12px 32px rgba(0,0,0,.12);
-    }
-    .artifact-image img { display:block; width:100%; }
-    .dark .artifact-image {
-      background:#111;
-      border-color:#4a443d;
-    }
-    .quote-box {
-      border-left:4px solid var(--gold);
-      padding:3px 0 3px 22px;
-      margin:27px 0;
-      font-size:21px;
-      line-height:1.5;
-    }
-    .fact-box {
-      margin-top:28px;
-      padding:22px 25px;
-      background:#fffaf1;
-      border-left:4px solid var(--wine);
-    }
+:root {
 
-    .timeline {
-      margin-top:50px;
-      border-left:2px solid var(--gold);
-      padding-left:32px;
-    }
-    .timeline-item {
-      position:relative;
-      padding:0 0 42px 17px;
-    }
-    .timeline-item::before {
-      content:"";
-      width:12px;
-      height:12px;
-      position:absolute;
-      left:-39px;
-      top:8px;
-      border-radius:50%;
-      background:var(--gold);
-    }
-    .year {
-      color:var(--wine);
-      font-family:Arial,Helvetica,sans-serif;
-      font-weight:700;
-      font-size:12px;
-      letter-spacing:2px;
-      text-transform:uppercase;
-    }
-    .timeline-item h3 {
-      margin:4px 0 7px;
-      font-size:24px;
-    }
-    .timeline-item p { margin-top:0; }
-    .source-note {
-      display:inline-block;
-      margin-top:4px;
-      font-family:Arial,Helvetica,sans-serif;
-      font-size:11px;
-      text-transform:uppercase;
-      letter-spacing:1px;
-      color:var(--muted);
-    }
+  --ink:#171511;
 
-    .archive-grid {
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:25px;
-      margin-top:42px;
-    }
-    .archive-card {
-      background:#f7f2e9;
-      border:1px solid #cfc1ac;
-      padding:12px;
-      color:var(--ink);
-      display:flex;
-      flex-direction:column;
-    }
-    .archive-image {
-      height:250px;
-      background:#e5dccf;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      overflow:hidden;
-    }
-    .archive-image img {
-      width:100%;
-      height:100%;
-      object-fit:contain;
-    }
-    .archive-card h3 {
-      margin:15px 5px 5px;
-      font-size:19px;
-    }
-    .archive-card p {
-      margin:0 5px 8px;
-      color:#5d574f;
-      font-size:14px;
-      line-height:1.5;
-    }
-    .tag {
-      display:inline-block;
-      align-self:flex-start;
-      margin:6px 5px 2px;
-      padding:4px 8px;
-      font-family:Arial,Helvetica,sans-serif;
-      font-size:10px;
-      letter-spacing:1px;
-      text-transform:uppercase;
-      border:1px solid #b8a98f;
-      color:#665d4e;
-    }
+  --paper:#f5efe4;
+
+  --paper2:#ebe0ce;
+
+  --cream:#fffaf1;
+
+  --gold:#b4945a;
+
+  --gold2:#d5bd8b;
+
+  --wine:#7e2723;
+
+  --charcoal:#191816;
+
+  --muted:#726b61;
+
+  --line:#d3c4ae;
+
+}
 
 
-    .family-feature {
-      display:grid;
-      grid-template-columns:.9fr 1.1fr;
-      gap:52px;
-      align-items:center;
-      margin-top:42px;
-      margin-bottom:58px;
-      padding:30px;
-      background:#fffaf1;
-      border:1px solid var(--line);
-    }
-    .family-photo {
-      background:#e5dccf;
-      padding:12px;
-      border:1px solid #cfc1ac;
-      box-shadow:0 12px 32px rgba(0,0,0,.12);
-    }
-    .family-photo img {
-      width:100%;
-      display:block;
-      object-fit:contain;
-      max-height:620px;
-    }
-    .family-copy h3 {
-      margin:5px 0 15px;
-      font-size:32px;
-    }
-    .family-copy p {
-      font-size:17px;
-    }
-    .family-caption {
-      margin-top:12px;
-      color:var(--muted);
-      font-family:Arial,Helvetica,sans-serif;
-      font-size:12px;
-      font-style:italic;
-    }
+* {
 
-    .records-grid {
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:25px;
-      margin-top:38px;
-    }
-    .record-card {
-      background:#fffaf1;
-      border:1px solid var(--line);
-      padding:12px;
-    }
-    .record-card img {
-      width:100%;
-      height:300px;
-      object-fit:contain;
-      display:block;
-      background:#eee7dd;
-    }
-    .record-card h3 {
-      margin:14px 4px 4px;
-      font-size:19px;
-    }
-    .record-card p {
-      margin:0 4px 8px;
-      font-size:14px;
-      color:#625c54;
-    }
-    .record-detail {
-      margin-top:12px !important;
-      padding-top:12px;
-      border-top:1px solid var(--line);
-      font-size:13px !important;
-    }
+  box-sizing:border-box;
 
-    .verification-grid {
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:24px;
-      margin-top:40px;
-    }
-    .verification-card {
-      border-top:3px solid var(--gold);
-      padding:22px 20px;
-      background:rgba(255,255,255,.045);
-    }
-    .verification-card h3 {
-      margin:0 0 10px;
-      font-size:23px;
-    }
-    .verification-card p {
-      margin-bottom:0;
-      color:#d1cbc2;
-      font-size:15px;
-    }
-    .verification-card strong { color:#fff; }
+}
 
-    .research-note {
-      padding:30px 0;
-      border-top:1px solid var(--gold);
-      border-bottom:1px solid var(--gold);
-      font-size:19px;
-    }
-    .small-note {
-      margin-top:28px;
-      color:var(--muted);
-      font-family:Arial,Helvetica,sans-serif;
-      font-size:12px;
-      line-height:1.6;
-    }
 
-    footer {
-      padding:45px 20px;
-      text-align:center;
-      background:#0e0d0c;
-      color:#a9a49b;
-      font-family:Arial,Helvetica,sans-serif;
-      font-size:12px;
-    }
-    footer strong { color:#fff; letter-spacing:.4px; }
+html {
 
-    @media (max-width:850px) {
-      .hero-grid,
-      .artifact-feature,
-      .archive-grid,
-      .records-grid,
-      .verification-grid,
-      .family-feature {
-        grid-template-columns:1fr;
-      }
-      .hero { padding-top:62px; }
-      .hero-photo-wrap { max-width:620px; }
-      .nav-inner {
-        align-items:flex-start;
-        flex-direction:column;
-        padding:14px 0;
-      }
-      .nav-links { gap:11px 16px; }
-      section { padding:62px 0; }
-      .archive-image,
-      .record-card img {
-        height:auto;
-        min-height:220px;
-        max-height:520px;
-      }
-    }
-  </style>
+  scroll-behavior:smooth;
+
+}
+
+
+body {
+
+  margin:0;
+
+  background:var(--paper);
+
+  color:var(--ink);
+
+  font-family:Georgia,"Times New Roman",serif;
+
+  line-height:1.65;
+
+}
+
+
+img {
+
+  max-width:100%;
+
+}
+
+
+a {
+
+  color:inherit;
+
+}
+
+
+/* ========================================
+   NAVIGATION
+   ======================================== */
+
+
+nav {
+
+  position:sticky;
+
+  top:0;
+
+  z-index:100;
+
+  background:rgba(22,21,19,.98);
+
+  border-bottom:1px solid #3d3832;
+
+}
+
+
+.nav-inner {
+
+  width:min(1160px,92%);
+
+  min-height:66px;
+
+  margin:auto;
+
+  display:flex;
+
+  justify-content:space-between;
+
+  align-items:center;
+
+  gap:26px;
+
+}
+
+
+.brand {
+
+  color:#fff;
+
+  font-family:Arial,Helvetica,sans-serif;
+
+  font-weight:700;
+
+  letter-spacing:3px;
+
+  text-transform:uppercase;
+
+  font-size:14px;
+
+}
+
+
+.nav-links {
+
+  display:flex;
+
+  flex-wrap:wrap;
+
+  gap:18px;
+
+}
+
+
+.nav-links a {
+
+  color:#d8d4cc;
+
+  text-decoration:none;
+
+  font-family:Arial,Helvetica,sans-serif;
+
+  font-size:12px;
+
+  letter-spacing:.5px;
+
+}
+
+
+.nav-links a:hover {
+
+  color:var(--gold2);
+
+}
+
+
+/* ========================================
+   HERO
+   ======================================== */
+
+
+.hero {
+
+  background:
+
+    radial-gradient(
+      circle at 20% 15%,
+      rgba(180,148,90,.13),
+      transparent 28%
+    ),
+
+    linear-gradient(
+      145deg,
+      #171511 0%,
+      #24211c 65%,
+      #11100f 100%
+    );
+
+  color:#fff;
+
+  padding:86px 0 72px;
+
+  overflow:hidden;
+
+}
+
+
+.hero-grid {
+
+  width:min(1180px,91%);
+
+  margin:auto;
+
+  display:grid;
+
+  grid-template-columns:.9fr 1.1fr;
+
+  gap:60px;
+
+  align-items:center;
+
+}
+
+
+.eyebrow {
+
+  font-family:Arial,Helvetica,sans-serif;
+
+  text-transform:uppercase;
+
+  letter-spacing:4px;
+
+  font-size:12px;
+
+  color:var(--gold2);
+
+  margin-bottom:14px;
+
+}
+
+
+h1 {
+
+  margin:0;
+
+  font-size:clamp(62px,8vw,112px);
+
+  line-height:.9;
+
+  font-weight:normal;
+
+  letter-spacing:-3px;
+
+}
+
+
+.hero-rule {
+
+  width:90px;
+
+  height:2px;
+
+  margin:28px 0;
+
+  background:var(--gold);
+
+}
+
+
+.hero-subtitle {
+
+  max-width:560px;
+
+  margin:0;
+
+  font-size:clamp(19px,2.1vw,27px);
+
+  color:#ece7df;
+
+}
+
+
+.hero-address {
+
+  margin-top:22px;
+
+  font-family:Arial,Helvetica,sans-serif;
+
+  font-size:13px;
+
+  letter-spacing:2px;
+
+  text-transform:uppercase;
+
+  color:#cfc7bb;
+
+}
+
+
+.hero-photo-wrap {
+
+  position:relative;
+
+}
+
+
+.hero-photo-wrap::before {
+
+  content:"";
+
+  position:absolute;
+
+  width:92%;
+
+  height:92%;
+
+  right:-22px;
+
+  bottom:-22px;
+
+  border:1px solid rgba(213,189,139,.5);
+
+}
+
+
+.hero-photo {
+
+  position:relative;
+
+  background:#0d0d0c;
+
+  padding:13px;
+
+  box-shadow:0 24px 60px rgba(0,0,0,.5);
+
+}
+
+
+.hero-photo img {
+
+  width:100%;
+
+  max-height:690px;
+
+  object-fit:contain;
+
+  display:block;
+
+  background:#111;
+
+}
+
+
+.hero-caption {
+
+  margin-top:14px;
+
+  color:#aaa49a;
+
+  font-size:13px;
+
+  font-style:italic;
+
+}
+
+
+/* ========================================
+   GENERAL SECTIONS
+   ======================================== */
+
+
+section {
+
+  padding:88px 0;
+
+}
+
+
+.container {
+
+  width:min(1060px,88%);
+
+  margin:auto;
+
+}
+
+
+.wide {
+
+  width:min(1160px,91%);
+
+  margin:auto;
+
+}
+
+
+.section-label {
+
+  color:var(--wine);
+
+  font-family:Arial,Helvetica,sans-serif;
+
+  text-transform:uppercase;
+
+  letter-spacing:3px;
+
+  font-weight:700;
+
+  font-size:11px;
+
+  margin-bottom:8px;
+
+}
+
+
+.dark .section-label {
+
+  color:var(--gold2);
+
+}
+
+
+h2 {
+
+  margin:0 0 26px;
+
+  font-size:clamp(36px,5vw,55px);
+
+  line-height:1.06;
+
+  font-weight:normal;
+
+}
+
+
+h3 {
+
+  font-weight:normal;
+
+}
+
+
+.lead {
+
+  font-size:21px;
+
+  max-width:830px;
+
+}
+
+
+.dark {
+
+  background:var(--charcoal);
+
+  color:#efebe4;
+
+}
+
+
+.warm {
+
+  background:var(--paper2);
+
+}
+
+
+/* ========================================
+   FEATURED ARTIFACTS
+   ======================================== */
+
+
+.artifact-feature {
+
+  display:grid;
+
+  grid-template-columns:1.08fr .92fr;
+
+  gap:56px;
+
+  align-items:center;
+
+}
+
+
+.artifact-image {
+
+  background:#fff;
+
+  padding:12px;
+
+  border:1px solid var(--line);
+
+  box-shadow:0 12px 32px rgba(0,0,0,.12);
+
+}
+
+
+.artifact-image img {
+
+  display:block;
+
+  width:100%;
+
+}
+
+
+.dark .artifact-image {
+
+  background:#111;
+
+  border-color:#4a443d;
+
+}
+
+
+.quote-box {
+
+  border-left:4px solid var(--gold);
+
+  padding:3px 0 3px 22px;
+
+  margin:27px 0;
+
+  font-size:21px;
+
+  line-height:1.5;
+
+}
+
+
+.fact-box {
+
+  margin-top:28px;
+
+  padding:22px 25px;
+
+  background:#fffaf1;
+
+  border-left:4px solid var(--wine);
+
+}
+
+
+/* ========================================
+   TIMELINE
+   ======================================== */
+
+
+.timeline {
+
+  margin-top:50px;
+
+  border-left:2px solid var(--gold);
+
+  padding-left:32px;
+
+}
+
+
+.timeline-item {
+
+  position:relative;
+
+  padding:0 0 42px 17px;
+
+}
+
+
+.timeline-item::before {
+
+  content:"";
+
+  width:12px;
+
+  height:12px;
+
+  position:absolute;
+
+  left:-39px;
+
+  top:8px;
+
+  border-radius:50%;
+
+  background:var(--gold);
+
+}
+
+
+.year {
+
+  color:var(--wine);
+
+  font-family:Arial,Helvetica,sans-serif;
+
+  font-weight:700;
+
+  font-size:12px;
+
+  letter-spacing:2px;
+
+  text-transform:uppercase;
+
+}
+
+
+.timeline-item h3 {
+
+  margin:4px 0 7px;
+
+  font-size:24px;
+
+}
+
+
+.timeline-item p {
+
+  margin-top:0;
+
+}
+
+
+.source-note {
+
+  display:inline-block;
+
+  margin-top:4px;
+
+  font-family:Arial,Helvetica,sans-serif;
+
+  font-size:11px;
+
+  text-transform:uppercase;
+
+  letter-spacing:1px;
+
+  color:var(--muted);
+
+}
+
+
+/* ========================================
+   ARCHIVE
+   ======================================== */
+
+
+.archive-grid {
+
+  display:grid;
+
+  grid-template-columns:repeat(3,1fr);
+
+  gap:25px;
+
+  margin-top:42px;
+
+}
+
+
+.archive-card {
+
+  background:#f7f2e9;
+
+  border:1px solid #cfc1ac;
+
+  padding:12px;
+
+  color:var(--ink);
+
+  display:flex;
+
+  flex-direction:column;
+
+}
+
+
+.archive-image {
+
+  height:250px;
+
+  background:#e5dccf;
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:center;
+
+  overflow:hidden;
+
+}
+
+
+.archive-image img {
+
+  width:100%;
+
+  height:100%;
+
+  object-fit:contain;
+
+}
+
+
+.archive-card h3 {
+
+  margin:15px 5px 5px;
+
+  font-size:19px;
+
+}
+
+
+.archive-card p {
+
+  margin:0 5px 8px;
+
+  color:#5d574f;
+
+  font-size:14px;
+
+  line-height:1.5;
+
+}
+
+
+.tag {
+
+  display:inline-block;
+
+  align-self:flex-start;
+
+  margin:6px 5px 2px;
+
+  padding:4px 8px;
+
+  font-family:Arial,Helvetica,sans-serif;
+
+  font-size:10px;
+
+  letter-spacing:1px;
+
+  text-transform:uppercase;
+
+  border:1px solid #b8a98f;
+
+  color:#665d4e;
+
+}
+
+
+/* ========================================
+   FAMILY PHOTOGRAPH
+   ======================================== */
+
+
+.family-feature {
+
+  display:grid;
+
+  grid-template-columns:.9fr 1.1fr;
+
+  gap:52px;
+
+  align-items:center;
+
+  margin-top:42px;
+
+  margin-bottom:42px;
+
+  padding:30px;
+
+  background:#fffaf1;
+
+  border:1px solid var(--line);
+
+}
+
+
+.family-photo {
+
+  background:#e5dccf;
+
+  padding:12px;
+
+  border:1px solid #cfc1ac;
+
+  box-shadow:0 12px 32px rgba(0,0,0,.12);
+
+}
+
+
+.family-photo img {
+
+  width:100%;
+
+  display:block;
+
+  object-fit:contain;
+
+  max-height:620px;
+
+}
+
+
+.family-copy h3 {
+
+  margin:5px 0 15px;
+
+  font-size:32px;
+
+}
+
+
+.family-copy p {
+
+  font-size:17px;
+
+}
+
+
+.family-caption {
+
+  margin-top:12px;
+
+  color:var(--muted);
+
+  font-family:Arial,Helvetica,sans-serif;
+
+  font-size:12px;
+
+  font-style:italic;
+
+}
+
+
+/* ========================================
+   FAMILY RECORDS
+   ======================================== */
+
+
+.records-grid {
+
+  display:grid;
+
+  grid-template-columns:repeat(3,1fr);
+
+  gap:25px;
+
+  margin-top:38px;
+
+}
+
+
+.record-card {
+
+  background:#fffaf1;
+
+  border:1px solid var(--line);
+
+  padding:12px;
+
+}
+
+
+.record-card img {
+
+  width:100%;
+
+  height:300px;
+
+  object-fit:contain;
+
+  display:block;
+
+  background:#eee7dd;
+
+}
+
+
+.record-card h3 {
+
+  margin:14px 4px 4px;
+
+  font-size:19px;
+
+}
+
+
+.record-card p {
+
+  margin:0 4px 8px;
+
+  font-size:14px;
+
+  color:#625c54;
+
+}
+
+
+.record-detail {
+
+  margin-top:12px !important;
+
+  padding-top:12px;
+
+  border-top:1px solid var(--line);
+
+  font-size:13px !important;
+
+}
+
+
+/* ========================================
+   VERIFICATION
+   ======================================== */
+
+
+.verification-grid {
+
+  display:grid;
+
+  grid-template-columns:repeat(3,1fr);
+
+  gap:24px;
+
+  margin-top:40px;
+
+}
+
+
+.verification-card {
+
+  border-top:3px solid var(--gold);
+
+  padding:22px 20px;
+
+  background:rgba(255,255,255,.045);
+
+}
+
+
+.verification-card h3 {
+
+  margin:0 0 10px;
+
+  font-size:23px;
+
+}
+
+
+.verification-card p {
+
+  margin-bottom:0;
+
+  color:#d1cbc2;
+
+  font-size:15px;
+
+}
+
+
+.verification-card strong {
+
+  color:#fff;
+
+}
+
+
+.research-note {
+
+  padding:30px 0;
+
+  border-top:1px solid var(--gold);
+
+  border-bottom:1px solid var(--gold);
+
+  font-size:19px;
+
+}
+
+
+.small-note {
+
+  margin-top:28px;
+
+  color:var(--muted);
+
+  font-family:Arial,Helvetica,sans-serif;
+
+  font-size:12px;
+
+  line-height:1.6;
+
+}
+
+
+/* ========================================
+   FOOTER
+   ======================================== */
+
+
+footer {
+
+  padding:45px 20px;
+
+  text-align:center;
+
+  background:#0e0d0c;
+
+  color:#a9a49b;
+
+  font-family:Arial,Helvetica,sans-serif;
+
+  font-size:12px;
+
+}
+
+
+footer strong {
+
+  color:#fff;
+
+  letter-spacing:.4px;
+
+}
+
+
+/* ========================================
+   MOBILE
+   ======================================== */
+
+
+@media (max-width:850px) {
+
+  .hero-grid,
+  .artifact-feature,
+  .archive-grid,
+  .records-grid,
+  .verification-grid,
+  .family-feature {
+
+    grid-template-columns:1fr;
+
+  }
+
+
+  .hero {
+
+    padding-top:62px;
+
+  }
+
+
+  .hero-photo-wrap {
+
+    max-width:620px;
+
+  }
+
+
+  .nav-inner {
+
+    align-items:flex-start;
+
+    flex-direction:column;
+
+    padding:14px 0;
+
+  }
+
+
+  .nav-links {
+
+    gap:11px 16px;
+
+  }
+
+
+  section {
+
+    padding:62px 0;
+
+  }
+
+
+  .archive-image,
+  .record-card img {
+
+    height:auto;
+
+    min-height:220px;
+
+    max-height:520px;
+
+  }
+
+}
+
+</style>
+
 </head>
+
 
 <body>
 
+
+<!-- ========================================
+     NAVIGATION
+     ======================================== -->
+
+
 <nav>
+
   <div class="nav-inner">
-    <div class="brand">The Panda</div>
-    <div class="nav-links">
-      <a href="#story">Story</a>
-      <a href="#evidence">Evidence</a>
-      <a href="#timeline">Timeline</a>
-      <a href="#archive">Archive</a>
-      <a href="#records">Family Records</a>
-      <a href="#verification">Verification</a>
-      <a href="#research">Research</a>
+
+
+    <div class="brand">
+
+      The Panda
+
     </div>
+
+
+    <div class="nav-links">
+
+      <a href="#story">
+        Story
+      </a>
+
+      <a href="#family-introduction">
+        Michele &amp; Ester
+      </a>
+
+      <a href="#evidence">
+        Evidence
+      </a>
+
+      <a href="#timeline">
+        Timeline
+      </a>
+
+      <a href="#archive">
+        Archive
+      </a>
+
+      <a href="#records">
+        Family Records
+      </a>
+
+      <a href="#verification">
+        Verification
+      </a>
+
+      <a href="#research">
+        Research
+      </a>
+
+    </div>
+
+
   </div>
+
 </nav>
 
+
+<!-- ========================================
+     HERO
+     ======================================== -->
+
+
 <header class="hero">
+
+
   <div class="hero-grid">
+
+
     <div>
-      <div class="eyebrow">A New York Family Story</div>
-      <h1>The Panda</h1>
-      <div class="hero-rule"></div>
+
+
+      <div class="eyebrow">
+
+        A New York Family Story
+
+      </div>
+
+
+      <h1>
+
+        The Panda
+
+      </h1>
+
+
+      <div class="hero-rule">
+
+      </div>
+
+
       <p class="hero-subtitle">
-        A restaurant and supper club in Midtown Manhattan, the family behind it,
-        and an ongoing effort to recover a nearly forgotten piece of New York history.
+
+        A restaurant and supper club in Midtown Manhattan,
+        the family behind it,
+        and an ongoing effort to recover
+        a nearly forgotten piece of New York history.
+
       </p>
-      <div class="hero-address">13 East 47th Street · New York City · Circa 1949–1951</div>
+
+
+      <div class="hero-address">
+
+        13 East 47th Street ·
+        New York City ·
+        Circa 1949–1951
+
+      </div>
+
+
     </div>
+
 
     <div class="hero-photo-wrap">
+
+
       <div class="hero-photo">
-        <img src="panda-restaurant-nypl.jpg" alt="Historic exterior photograph of The Panda Restaurant at 13 East 47th Street">
+
+
+        <img
+          src="panda-restaurant-nypl.jpg"
+          alt="Historic exterior photograph of The Panda Restaurant at 13 East 47th Street"
+        >
+
+
       </div>
+
+
       <div class="hero-caption">
-        The Panda at 13 East 47th Street. The rounded canopy and storefront signage
-        are visible. Photograph located in the Lloyd Acker collection, New York Public Library.
+
+        The Panda at 13 East 47th Street.
+
+        The rounded canopy and storefront signage are visible.
+
+        Photograph located in the Lloyd Acker collection,
+        New York Public Library.
+
       </div>
+
+
     </div>
+
+
   </div>
+
+
 </header>
 
+
+<!-- ========================================
+     STORY
+     ======================================== -->
+
+
 <section id="story">
+
+
   <div class="container">
-    <div class="section-label">The Story</div>
-    <h2>A supper club in postwar Manhattan</h2>
-    <p class="lead">
-      In the late 1940s and early 1950s, The Panda operated at 13 East 47th Street
-      in Midtown Manhattan, on the north side of the block between Fifth and Madison Avenues.
-    </p>
-    <p>
-      Family history records that Michele (Mike) Ronzitti entered the restaurant business
-      with Andy and Gus. The three acquired an existing restaurant called The Panda and
-      retained its name in hopes of keeping its established customers. Michele (Mike) later bought out
-      Andy and Gus and became sole proprietor.
-    </p>
-    <p>
-      Surviving restaurant material shows that The Panda presented itself as more than a
-      place to eat. Its promotional material advertised cocktails, dinner, supper, music,
-      entertainment and dancing — the language of a small Midtown restaurant and supper club.
-    </p>
-    <div class="fact-box">
-      <strong>One of the restaurant's specialties:</strong>
-      surviving Panda matchbooks advertise <em>“Shrimp à la Panda.”</em>
-      Locating a surviving menu remains one of the project's highest research priorities.
+
+
+    <div class="section-label">
+
+      The Story
+
     </div>
+
+
+    <h2>
+
+      A restaurant and supper club in postwar Manhattan
+
+    </h2>
+
+
+    <p class="lead">
+
+      In the late 1940s and early 1950s,
+      The Panda operated at
+
+      <strong>
+        13 East 47th Street
+      </strong>
+
+      in Midtown Manhattan,
+      on the north side of the block
+      between Fifth and Madison Avenues.
+
+    </p>
+
+
+    <p>
+
+      Family history records that
+
+      <strong>
+        Michele (Mike) Ronzitti
+      </strong>
+
+      entered the restaurant business
+      with Andy and Gus.
+
+      The three acquired an existing restaurant
+      called
+
+      <strong>
+        The Panda
+      </strong>
+
+      and retained its name
+      in hopes of keeping its established customers.
+
+      Michele (Mike) later bought out
+      Andy and Gus
+      and became sole proprietor.
+
+    </p>
+
+
+    <p>
+
+      Surviving restaurant material shows that
+      The Panda presented itself as more than
+      a place to eat.
+
+      Its promotional material advertised
+      cocktails,
+      dinner,
+      supper,
+      music,
+      entertainment
+      and dancing —
+
+      the language of a small Midtown
+
+      <strong>
+        restaurant and supper club
+      </strong>.
+
+    </p>
+
+
+    <div class="fact-box">
+
+
+      <strong>
+        One of the restaurant's specialties:
+      </strong>
+
+
+      surviving Panda matchbooks advertise
+
+
+      <em>
+        “Shrimp à la Panda.”
+      </em>
+
+
+      Locating a surviving menu remains
+      one of the project's highest research priorities.
+
+
+    </div>
+
+
   </div>
+
+
 </section>
 
-<section id="evidence" class="warm">
+
+<!-- ========================================
+     MICHELE (MIKE) AND ESTER
+     ======================================== -->
+
+
+<section
+  id="family-introduction"
+  class="warm"
+>
+
+
   <div class="wide">
-    <div class="section-label">Surviving Evidence</div>
-    <h2>The Panda in its own words</h2>
-    <div class="artifact-feature">
-      <div class="artifact-image">
-        <img src="panda-business-card.jpg" alt="The Panda Restaurant promotional card naming Mike, Andy and Gus">
-      </div>
-      <div>
-        <p class="lead">
-          One surviving promotional card provides one of the clearest contemporary records of the business.
-        </p>
-        <p>
-          It identifies <strong>The Panda Restaurant, Inc.</strong> at
-          <strong>13 East 47th Street, New York City</strong> and names
-          <strong>Mike, Andy and Gus</strong>.
-        </p>
-        <div class="quote-box">
-          Cocktails · Dinner · Supper<br>
-          Music · Entertainment · Dancing
-        </div>
-        <p>
-          The card also records the restaurant telephone number:
-          <strong>ELdorado 5-7808</strong>.
-        </p>
-      </div>
+
+
+    <div class="section-label">
+
+      The Family Behind The Panda
+
     </div>
+
+
+    <h2>
+
+      Michele (Mike) &amp; Ester Ronzitti
+
+    </h2>
+
+
+    <div class="family-feature">
+
+
+      <div>
+
+
+        <div class="family-photo">
+
+
+          <img
+            src="Mike + Ester.jpg"
+            alt="Michele (Mike) Ronzitti and Ester Ronzitti"
+          >
+
+
+        </div>
+
+
+        <div class="family-caption">
+
+          Michele (Mike) Ronzitti
+          and Ester Ronzitti.
+
+          Family photograph.
+
+        </div>
+
+
+      </div>
+
+
+      <div class="family-copy">
+
+
+        <p class="lead">
+
+          Michele (Mike) Ronzitti
+          and his wife, Ester,
+          are at the center
+          of this family history.
+
+        </p>
+
+
+        <p>
+
+          Michele was born
+          in Genoa, Italy,
+
+          and Ester
+          in Yekaterinburg, Russia.
+
+          Their individual journeys
+          eventually brought them
+          to New York City,
+
+          where they built
+          a life together
+
+          and raised their daughters,
+
+          Nicoletta Sema
+          and Susan.
+
+        </p>
+
+
+        <p>
+
+          In the late 1940s,
+          Michele's story
+          became intertwined
+          with The Panda
+          at 13 East 47th Street.
+
+          For the Ronzitti family,
+          the restaurant was not simply
+          a Midtown business.
+
+          It became part
+          of the family's history.
+
+        </p>
+
+
+      </div>
+
+
+    </div>
+
+
   </div>
+
+
 </section>
+
+
+<!-- ========================================
+     SURVIVING BUSINESS CARD
+     ======================================== -->
+
+
+<section
+  id="evidence"
+>
+
+
+  <div class="wide">
+
+
+    <div class="section-label">
+
+      Surviving Evidence
+
+    </div>
+
+
+    <h2>
+
+      The Panda in its own words
+
+    </h2>
+
+
+    <div class="artifact-feature">
+
+
+      <div class="artifact-image">
+
+
+        <img
+          src="panda-business-card.jpg"
+          alt="The Panda Restaurant promotional card naming Mike, Andy and Gus"
+        >
+
+
+      </div>
+
+
+      <div>
+
+
+        <p class="lead">
+
+          One surviving promotional card
+          provides one of the clearest
+          contemporary records of the business.
+
+        </p>
+
+
+        <p>
+
+          It identifies
+
+          <strong>
+            The Panda Restaurant, Inc.
+          </strong>
+
+          at
+
+          <strong>
+            13 East 47th Street,
+            New York City
+          </strong>
+
+          and names
+
+          <strong>
+            Mike, Andy and Gus
+          </strong>.
+
+        </p>
+
+
+        <div class="quote-box">
+
+          Cocktails ·
+          Dinner ·
+          Supper
+
+          <br>
+
+          Music ·
+          Entertainment ·
+          Dancing
+
+        </div>
+
+
+        <p>
+
+          The card also records
+          the restaurant telephone number:
+
+          <strong>
+            ELdorado 5-7808
+          </strong>.
+
+        </p>
+
+
+      </div>
+
+
+    </div>
+
+
+  </div>
+
+
+</section>
+
+
+<!-- ========================================
+     MATCHBOOKS
+     ======================================== -->
+
 
 <section class="dark">
+
+
   <div class="wide">
+
+
     <div class="artifact-feature">
+
+
       <div>
-        <div class="section-label">Restaurant Branding</div>
-        <h2>A panda was part of the identity</h2>
-        <p class="lead">
-          Surviving matchbooks show that the restaurant did not rely on the name alone.
-          A panda illustration formed part of its visual branding.
-        </p>
-        <p>
-          The matchbooks display the Panda name, the East 47th Street address,
-          the ELdorado telephone number and the phrase <strong>“Shrimp à la Panda.”</strong>
-        </p>
-      </div>
-      <div>
-        <div class="artifact-image">
-          <img src="panda-matchbooks.jpg" alt="Three surviving Panda Restaurant matchbooks">
+
+
+        <div class="section-label">
+
+          Restaurant Branding
+
         </div>
-        <div class="hero-caption">Surviving Panda Restaurant matchbooks.</div>
+
+
+        <h2>
+
+          A panda was part of the identity
+
+        </h2>
+
+
+        <p class="lead">
+
+          Surviving matchbooks show
+          that the restaurant did not rely
+          on the name alone.
+
+          A panda illustration formed part
+          of its visual branding.
+
+        </p>
+
+
+        <p>
+
+          The matchbooks display
+          the Panda name,
+          the East 47th Street address,
+          the ELdorado telephone number
+          and the phrase
+
+          <strong>
+            “Shrimp à la Panda.”
+          </strong>
+
+        </p>
+
+
       </div>
+
+
+      <div>
+
+
+        <div class="artifact-image">
+
+
+          <img
+            src="panda-matchbooks.jpg"
+            alt="Three surviving Panda Restaurant matchbooks"
+          >
+
+
+        </div>
+
+
+        <div class="hero-caption">
+
+          Surviving Panda Restaurant matchbooks.
+
+        </div>
+
+
+      </div>
+
+
     </div>
+
+
   </div>
+
+
 </section>
 
+
+<!-- ========================================
+     TIMELINE
+     ======================================== -->
+
+
 <section id="timeline">
+
+
   <div class="container">
-    <div class="section-label">Family &amp; Restaurant Timeline</div>
-    <h2>From Genoa and Yekaterinburg to East 47th Street</h2>
+
+
+    <div class="section-label">
+
+      Family &amp; Restaurant Timeline
+
+    </div>
+
+
+    <h2>
+
+      From Genoa and Yekaterinburg
+      to East 47th Street
+
+    </h2>
+
+
     <p class="lead">
-      The history of The Panda is inseparable from the story of Michele (Mike) and Ester Ronzitti.
-      Documentary evidence and family history are shown together below.
+
+      The history of The Panda
+      is inseparable from the story of
+
+      <strong>
+        Michele (Mike) and Ester Ronzitti
+      </strong>.
+
+      Documentary evidence
+      and family history
+      are shown together below.
+
     </p>
+
 
     <div class="timeline">
 
-      <div class="timeline-item">
-        <div class="year">1910</div>
-        <h3>Michele (Mike) Ronzitti is born</h3>
-        <p>Michele Ronzitti — later known as Michael or Mike — was born in Genoa, Italy.</p>
-        <span class="source-note">Family and genealogical research</span>
-      </div>
+
+      <!-- 1910 -->
+
 
       <div class="timeline-item">
-        <div class="year">Circa 1915–1916</div>
-        <h3>Ester Kavish is born</h3>
+
+
+        <div class="year">
+
+          1910
+
+        </div>
+
+
+        <h3>
+
+          Michele (Mike) Ronzitti is born
+
+        </h3>
+
+
         <p>
-          Ester Kavish Ronzitti was born in Yekaterinburg, Russia.
-          Her age in the 1950 United States Census places her birth at approximately 1915–1916.
+
+          Michele Ronzitti —
+          later known as Michael or Mike —
+          was born in Genoa, Italy.
+
         </p>
-        <span class="source-note">Census-supported estimate</span>
+
+
+        <span class="source-note">
+
+          Family and genealogical research
+
+        </span>
+
+
       </div>
 
+
+      <!-- ESTER -->
+
+
       <div class="timeline-item">
-        <div class="year">Immigration Years</div>
-        <h3>Michele (Mike) comes to New York</h3>
+
+
+        <div class="year">
+
+          Circa 1915–1916
+
+        </div>
+
+
+        <h3>
+
+          Ester Kavish is born
+
+        </h3>
+
+
         <p>
-          Family history records that Michele (Mike) came to New York as a crewman or seaman.
-          Research continues into ship manifests and alien crew records that may document his arrival.
+
+          Ester Kavish Ronzitti
+          was born in Yekaterinburg, Russia.
+
+          Her age in the
+          1950 United States Census
+          places her birth
+          at approximately 1915–1916.
+
         </p>
-        <span class="source-note">Family history · research ongoing</span>
+
+
+        <span class="source-note">
+
+          Census-supported estimate
+
+        </span>
+
+
       </div>
 
+
+      <!-- IMMIGRATION -->
+
+
       <div class="timeline-item">
-        <div class="year">Marriage &amp; Family</div>
-        <h3>Michele (Mike) and Ester build a life in New York</h3>
+
+
+        <div class="year">
+
+          Immigration Years
+
+        </div>
+
+
+        <h3>
+
+          Michele (Mike) comes to New York
+
+        </h3>
+
+
         <p>
-          Michele (Mike) and Ester raised two daughters, Nicoletta Sema — known as Sema — and Susan.
+
+          Family history records that
+          Michele (Mike) Ronzitti
+          came to New York
+          as a crewman or seaman.
+
+          Research continues into
+          ship manifests
+          and alien crew records
+          that may document his arrival.
+
         </p>
-        <span class="source-note">Family records</span>
+
+
+        <span class="source-note">
+
+          Family history · research ongoing
+
+        </span>
+
+
       </div>
 
+
+      <!-- MARRIAGE AND FAMILY -->
+
+
       <div class="timeline-item">
-        <div class="year">1941</div>
-        <h3>The earlier Panda storefront</h3>
+
+
+        <div class="year">
+
+          Marriage &amp; Family
+
+        </div>
+
+
+        <h3>
+
+          Michele (Mike) and Ester
+          build a life in New York
+
+        </h3>
+
+
         <p>
-          A New York City tax-era photograph shows the earlier establishment at
-          13 East 47th Street with its distinctive checkered awning.
-          Family research identifies this as the Panda restaurant that Michele (Mike), Andy and Gus later acquired.
+
+          Michele (Mike) and Ester
+          raised two daughters,
+
+          Nicoletta Sema —
+          known as Sema —
+
+          and Susan.
+
         </p>
-        <span class="source-note">Archival photograph + family history</span>
+
+
+        <span class="source-note">
+
+          Family records
+
+        </span>
+
+
       </div>
 
+
+      <!-- EARLIER PANDA -->
+
+
       <div class="timeline-item">
-        <div class="year">1943</div>
-        <h3>Michele (Mike) becomes an American citizen</h3>
+
+
+        <div class="year">
+
+          1941
+
+        </div>
+
+
+        <h3>
+
+          The earlier Panda storefront
+
+        </h3>
+
+
         <p>
-          Michele (Mike) Ronzitti's surviving naturalization documentation records an important milestone
+
+          A New York City tax-era photograph
+          shows the earlier establishment
+          at 13 East 47th Street
+          with its distinctive
+          checkered awning.
+
+          Family research identifies this
+          as the Panda restaurant
+          that Michele (Mike),
+          Andy and Gus later acquired.
+
+        </p>
+
+
+        <span class="source-note">
+
+          Archival photograph + family history
+
+        </span>
+
+
+      </div>
+
+
+      <!-- NATURALIZATION -->
+
+
+      <div class="timeline-item">
+
+
+        <div class="year">
+
+          1943
+
+        </div>
+
+
+        <h3>
+
+          Michele (Mike)
+          becomes an American citizen
+
+        </h3>
+
+
+        <p>
+
+          Michele (Mike) Ronzitti's
+          surviving naturalization documentation
+          records an important milestone
           in his life in the United States.
+
         </p>
-        <span class="source-note">United States naturalization record</span>
+
+
+        <span class="source-note">
+
+          United States naturalization record
+
+        </span>
+
+
       </div>
 
-      <div class="timeline-item">
-        <div class="year">Late 1940s</div>
-        <h3>Michele (Mike), Andy and Gus acquire The Panda</h3>
-        <p>
-          Family history records that Michele (Mike), Andy and Gus acquired the existing restaurant together.
-          A surviving Panda promotional card names all three men.
-        </p>
-        <span class="source-note">Period ephemera + family history</span>
-      </div>
+
+      <!-- PANDA ACQUISITION -->
+
 
       <div class="timeline-item">
-        <div class="year">Circa 1949–1951</div>
-        <h3>Michele (Mike) becomes sole proprietor</h3>
+
+
+        <div class="year">
+
+          Late 1940s
+
+        </div>
+
+
+        <h3>
+
+          Michele (Mike), Andy and Gus
+          acquire The Panda
+
+        </h3>
+
+
         <p>
-          According to family testimony, Michele (Mike) later bought out Andy and Gus and became sole proprietor.
+
+          Family history records that
+          Michele (Mike) Ronzitti,
+          Andy and Gus
+          acquired the existing restaurant together.
+
+          A surviving Panda promotional card
+          names all three men.
+
         </p>
-        <span class="source-note">Family-provided history</span>
+
+
+        <span class="source-note">
+
+          Period ephemera + family history
+
+        </span>
+
+
       </div>
 
-      <div class="timeline-item">
-        <div class="year">1950</div>
-        <h3>The Ronzitti household</h3>
-        <p>
-          The 1950 United States Census records Michael and Ester Ronzitti
-          with their daughters, Nicoletta Sema and Susan.
-        </p>
-        <span class="source-note">1950 United States Census</span>
-      </div>
+
+      <!-- SOLE PROPRIETOR -->
+
 
       <div class="timeline-item">
-        <div class="year">June 1951</div>
-        <h3>Michele (Mike) Ronzitti dies at The Panda</h3>
+
+
+        <div class="year">
+
+          Circa 1949–1951
+
+        </div>
+
+
+        <h3>
+
+          Michele (Mike)
+          becomes sole proprietor
+
+        </h3>
+
+
         <p>
-          Period newspaper coverage reported that Michael Ronzitti, age 41 and proprietor
-          of The Panda Restaurant at 13 East 47th Street, collapsed and died at his table in the club.
+
+          According to family testimony,
+          Michele (Mike) later bought out
+          Andy and Gus
+          and became sole proprietor
+          of The Panda.
+
         </p>
-        <span class="source-note">Period newspaper evidence</span>
+
+
+        <span class="source-note">
+
+          Family-provided history
+
+        </span>
+
+
       </div>
 
+
+      <!-- 1950 CENSUS -->
+
+
       <div class="timeline-item">
-        <div class="year">Today</div>
-        <h3>The reconstruction continues</h3>
+
+
+        <div class="year">
+
+          1950
+
+        </div>
+
+
+        <h3>
+
+          The Ronzitti household
+
+        </h3>
+
+
         <p>
-          Photographs, newspaper clippings, government records, restaurant ephemera,
-          family documents and personal recollections continue to be assembled.
+
+          The 1950 United States Census
+          records
+
+          <strong>
+            Michael and Ester Ronzitti
+          </strong>
+
+          with their daughters,
+          Nicoletta Sema and Susan.
+
         </p>
-        <span class="source-note">Ongoing family research project</span>
+
+
+        <span class="source-note">
+
+          1950 United States Census
+
+        </span>
+
+
       </div>
+
+
+      <!-- 1951 DEATH -->
+
+
+      <div class="timeline-item">
+
+
+        <div class="year">
+
+          June 1951
+
+        </div>
+
+
+        <h3>
+
+          Michele (Mike) Ronzitti
+          dies at The Panda
+
+        </h3>
+
+
+        <p>
+
+          Period newspaper coverage reported that
+
+          <strong>
+            Michael Ronzitti
+          </strong>,
+
+          age 41 and proprietor
+          of The Panda Restaurant
+          at 13 East 47th Street,
+
+          collapsed and died
+          at his table in the club.
+
+        </p>
+
+
+        <span class="source-note">
+
+          Period newspaper evidence
+
+        </span>
+
+
+      </div>
+
+
+      <!-- TODAY -->
+
+
+      <div class="timeline-item">
+
+
+        <div class="year">
+
+          Today
+
+        </div>
+
+
+        <h3>
+
+          The reconstruction continues
+
+        </h3>
+
+
+        <p>
+
+          Photographs,
+          newspaper clippings,
+          government records,
+          restaurant ephemera,
+          family documents
+          and personal recollections
+          continue to be assembled.
+
+        </p>
+
+
+        <span class="source-note">
+
+          Ongoing family research project
+
+        </span>
+
+
+      </div>
+
 
     </div>
+
+
   </div>
+
+
 </section>
 
-<section id="archive" class="dark">
+
+<!-- ========================================
+     ARCHIVE
+     ======================================== -->
+
+
+<section
+  id="archive"
+  class="dark"
+>
+
+
   <div class="wide">
-    <div class="section-label">The Panda Archive</div>
-    <h2>Photographs, ephemera &amp; newspaper coverage</h2>
+
+
+    <div class="section-label">
+
+      The Panda Archive
+
+    </div>
+
+
+    <h2>
+
+      Photographs, ephemera
+      &amp; newspaper coverage
+
+    </h2>
+
+
     <p class="lead">
-      Each surviving item contributes a different piece of the story.
+
+      Each surviving item contributes
+      a different piece of the story.
+
     </p>
+
 
     <div class="archive-grid">
 
-      <div class="archive-card">
-        <div class="archive-image">
-          <img src="panda-restaurant-nypl.jpg" alt="Historic exterior view of The Panda Restaurant">
-        </div>
-        <span class="tag">Archival photograph</span>
-        <h3>The Panda storefront</h3>
-        <p>
-          Exterior photograph located in the Lloyd Acker collection at The New York Public Library.
-        </p>
-      </div>
+
+      <!-- PANDA STOREFRONT -->
+
 
       <div class="archive-card">
+
+
         <div class="archive-image">
-          <img src="panda-1941-streetscape.jpg" alt="1941 East 47th Street streetscape">
+
+
+          <img
+            src="panda-restaurant-nypl.jpg"
+            alt="Historic exterior view of The Panda Restaurant"
+          >
+
+
         </div>
-        <span class="tag">Historical photograph</span>
-        <h3>The earlier Panda</h3>
+
+
+        <span class="tag">
+
+          Archival photograph
+
+        </span>
+
+
+        <h3>
+
+          The Panda storefront
+
+        </h3>
+
+
         <p>
-          Earlier view of the block showing the checkered-awning storefront at 13 East 47th Street.
+
+          Exterior photograph located
+          in the Lloyd Acker collection
+          at The New York Public Library.
+
         </p>
+
+
       </div>
 
-      <div class="archive-card">
-        <div class="archive-image">
-          <img src="panda-business-card.jpg" alt="The Panda Restaurant promotional card">
-        </div>
-        <span class="tag">Restaurant ephemera</span>
-        <h3>Mike, Andy &amp; Gus</h3>
-        <p>
-          Promotional material identifying all three men and advertising dinner, supper,
-          entertainment and dancing.
-        </p>
-      </div>
+
+      <!-- EARLIER PANDA -->
+
 
       <div class="archive-card">
+
+
         <div class="archive-image">
-          <img src="panda-matchbooks.jpg" alt="Panda Restaurant matchbooks">
+
+
+          <img
+            src="panda-1941-streetscape.jpg"
+            alt="1941 East 47th Street streetscape"
+          >
+
+
         </div>
-        <span class="tag">Restaurant ephemera</span>
-        <h3>The Panda matchbooks</h3>
+
+
+        <span class="tag">
+
+          Historical photograph
+
+        </span>
+
+
+        <h3>
+
+          The earlier Panda
+
+        </h3>
+
+
         <p>
-          Matchbooks displaying the panda logo, address, telephone number and
-          the specialty “Shrimp à la Panda.”
+
+          Earlier view of the block
+          showing the checkered-awning storefront
+          at 13 East 47th Street.
+
         </p>
+
+
       </div>
 
-      <div class="archive-card">
-        <div class="archive-image">
-          <img src="TP10.png" alt="Sterling silver panda charm handed out at The Panda supper club">
-        </div>
-        <span class="tag">Restaurant memorabilia</span>
-        <h3>The sterling Panda charm</h3>
-        <p>
-          According to family history, sterling panda charms like this one were handed out
-          at The Panda. This surviving example remains on a card marked “Top Hat Charm” and “Sterling.”
-        </p>
-      </div>
+
+      <!-- BUSINESS CARD -->
+
 
       <div class="archive-card">
+
+
         <div class="archive-image">
-          <img src="panda-veterans-newspaper.jpg" alt="Newspaper clipping involving The Panda">
+
+
+          <img
+            src="panda-business-card.jpg"
+            alt="The Panda Restaurant promotional card"
+          >
+
+
         </div>
-        <span class="tag">Period newspaper</span>
-        <h3>Rally for Veterans</h3>
+
+
+        <span class="tag">
+
+          Restaurant ephemera
+
+        </span>
+
+
+        <h3>
+
+          Mike, Andy &amp; Gus
+
+        </h3>
+
+
         <p>
-          Period newspaper coverage of a public event associated with The Panda and its management.
+
+          Promotional material
+          identifying all three men
+          and advertising
+          dinner,
+          supper,
+          entertainment
+          and dancing.
+
         </p>
+
+
       </div>
 
+
+      <!-- MATCHBOOKS -->
+
+
       <div class="archive-card">
+
+
         <div class="archive-image">
-          <img src="mike-ronzitti-newspaper.jpg" alt="Period newspaper article featuring Mike Ronzitti">
+
+
+          <img
+            src="panda-matchbooks.jpg"
+            alt="Panda Restaurant matchbooks"
+          >
+
+
         </div>
-        <span class="tag">Period newspaper</span>
-        <h3>Michele (Mike) Ronzitti</h3>
+
+
+        <span class="tag">
+
+          Restaurant ephemera
+
+        </span>
+
+
+        <h3>
+
+          The Panda matchbooks
+
+        </h3>
+
+
         <p>
-          Newspaper coverage connecting Michele (Mike) Ronzitti directly with The Panda and its food.
+
+          Matchbooks displaying
+          the panda logo,
+          address,
+          telephone number
+          and the specialty
+
+          “Shrimp à la Panda.”
+
         </p>
+
+
       </div>
+
+
+      <!-- STERLING CHARM -->
+
+
+      <div class="archive-card">
+
+
+        <div class="archive-image">
+
+
+          <img
+            src="TP10.png"
+            alt="Sterling silver panda charm handed out at The Panda supper club"
+          >
+
+
+        </div>
+
+
+        <span class="tag">
+
+          Restaurant memorabilia
+
+        </span>
+
+
+        <h3>
+
+          The sterling Panda charm
+
+        </h3>
+
+
+        <p>
+
+          According to family history,
+          sterling panda charms
+          like this one
+          were handed out at The Panda.
+
+          This surviving example
+          remains on a card marked
+          “Top Hat Charm”
+          and “Sterling.”
+
+        </p>
+
+
+      </div>
+
+
+      <!-- VETERANS ARTICLE -->
+
+
+      <div class="archive-card">
+
+
+        <div class="archive-image">
+
+
+          <img
+            src="panda-veterans-newspaper.jpg"
+            alt="Newspaper clipping involving The Panda"
+          >
+
+
+        </div>
+
+
+        <span class="tag">
+
+          Period newspaper
+
+        </span>
+
+
+        <h3>
+
+          Rally for Veterans
+
+        </h3>
+
+
+        <p>
+
+          Period newspaper coverage
+          of a public event
+          associated with The Panda
+          and its management.
+
+        </p>
+
+
+      </div>
+
+
+      <!-- MICHELE ARTICLE -->
+
+
+      <div class="archive-card">
+
+
+        <div class="archive-image">
+
+
+          <img
+            src="mike-ronzitti-newspaper.jpg"
+            alt="Period newspaper article featuring Michele Mike Ronzitti"
+          >
+
+
+        </div>
+
+
+        <span class="tag">
+
+          Period newspaper
+
+        </span>
+
+
+        <h3>
+
+          Michele (Mike) Ronzitti
+
+        </h3>
+
+
+        <p>
+
+          Newspaper coverage connecting
+          Michele (Mike) Ronzitti
+          directly with The Panda
+          and its food.
+
+        </p>
+
+
+      </div>
+
 
     </div>
+
+
   </div>
+
+
 </section>
 
+
+<!-- ========================================
+     FAMILY RECORDS
+     ======================================== -->
+
+
 <section id="records">
+
+
   <div class="wide">
-    <div class="section-label">Family Records</div>
-    <h2>The people behind the restaurant</h2>
+
+
+    <div class="section-label">
+
+      Family Records
+
+    </div>
+
+
+    <h2>
+
+      Documents behind the family story
+
+    </h2>
+
+
     <p class="lead">
-      Marriage, naturalization and census records help reconstruct Michele (Mike) and Ester's lives
-      and place The Panda within the larger story of their family.
+
+      Marriage records,
+      naturalization documents
+      and census records
+      help reconstruct the lives of
+
+      <strong>
+        Michele (Mike) and Ester Ronzitti
+      </strong>
+
+      and place The Panda
+      within the larger story
+      of their family.
+
     </p>
 
-    <div class="family-feature">
-      <div>
-        <div class="family-photo">
-          <img src="Mike + Ester.jpg" alt="Michele (Mike) Ronzitti and Ester Ronzitti">
-        </div>
-        <div class="family-caption">
-          Michele (Mike) Ronzitti and Ester Ronzitti. Family photograph.
-        </div>
-      </div>
 
-      <div class="family-copy">
-        <div class="section-label">Family Photograph</div>
-        <h3>Michele (Mike) &amp; Ester Ronzitti</h3>
-        <p>
-          Michele (Mike) Ronzitti and his wife, Ester, are at the center of this family history.
-        </p>
-        <p>
-          Michele was born in Genoa, Italy, and Ester in Yekaterinburg, Russia.
-          Their individual journeys eventually brought them to New York City,
-          where they built a life together and raised their daughters, Nicoletta Sema and Susan.
-        </p>
-        <p>
-          In the late 1940s, Michele's story became intertwined with The Panda at
-          13 East 47th Street. For the Ronzitti family, the restaurant was not simply
-          a Midtown business; it became part of the family's history.
-        </p>
-      </div>
-    </div>
+    <!-- ====================================
+         FAMILY DOCUMENTS
+         ==================================== -->
+
 
     <div class="records-grid">
 
-      <div class="record-card">
-        <img src="mike-ester-marriage-certificate.jpg" alt="Marriage documentation for Michele (Mike) and Ester Ronzitti">
-        <h3>Marriage record</h3>
-        <p>
-          The marriage documentation connects Michele (Mike) and Ester as a couple and helps connect
-          their individual histories to the Ronzitti family that later became part of The Panda story.
-        </p>
-        <p class="record-detail">
-          <strong>Why it matters:</strong> civil records can provide names, ages, residences,
-          birthplaces and other details useful in tracing both families.
-        </p>
-      </div>
+
+      <!-- MARRIAGE RECORD -->
+
 
       <div class="record-card">
-        <img src="mike-ronzitti-naturalization.jpg" alt="United States naturalization documentation for Michele (Mike) Ronzitti">
-        <h3>Naturalization</h3>
+
+
+        <img
+          src="mike-ester-marriage-certificate.jpg"
+          alt="Marriage documentation for Michele Mike and Ester Ronzitti"
+        >
+
+
+        <h3>
+
+          Marriage record
+
+        </h3>
+
+
         <p>
-          Michele (Mike) Ronzitti's naturalization documentation records his path to United States citizenship.
+
+          The marriage documentation
+          connects Michele (Mike)
+          and Ester as a couple
+
+          and helps connect
+          their individual histories
+          to the Ronzitti family
+          that later became part
+          of The Panda story.
+
         </p>
+
+
         <p class="record-detail">
-          <strong>Why it matters:</strong> naturalization files can identify birth information,
-          immigration details, residences, occupation and family relationships.
+
+
+          <strong>
+            Why it matters:
+          </strong>
+
+
+          civil records can provide
+          names,
+          ages,
+          residences,
+          birthplaces
+
+          and other details
+          useful in tracing
+          both families.
+
+
         </p>
+
+
       </div>
 
+
+      <!-- NATURALIZATION -->
+
+
       <div class="record-card">
-        <img src="ronzitti-census-record.jpg" alt="1950 United States Census record showing the Ronzitti household">
-        <h3>1950 Census</h3>
+
+
+        <img
+          src="mike-ronzitti-naturalization.jpg"
+          alt="United States naturalization documentation for Michele Mike Ronzitti"
+        >
+
+
+        <h3>
+
+          Naturalization
+
+        </h3>
+
+
         <p>
-          The 1950 United States Census records Michael and Ester Ronzitti with
-          their daughters, Nicoletta Sema and Susan.
+
+          Michele (Mike) Ronzitti's
+          naturalization documentation
+          records his path
+          to United States citizenship.
+
         </p>
+
+
         <p class="record-detail">
-          <strong>Why it matters:</strong> Ester's recorded age of approximately 34 supports
-          a birth year around 1915–1916 and helps narrow the search for her birth documentation.
+
+
+          <strong>
+            Why it matters:
+          </strong>
+
+
+          naturalization files
+          can identify
+          birth information,
+          immigration details,
+          residences,
+          occupation
+
+          and family relationships.
+
+
         </p>
+
+
       </div>
+
+
+      <!-- CENSUS -->
+
+
+      <div class="record-card">
+
+
+        <img
+          src="ronzitti-census-record.jpg"
+          alt="1950 United States Census record showing the Ronzitti household"
+        >
+
+
+        <h3>
+
+          1950 Census
+
+        </h3>
+
+
+        <p>
+
+          The 1950 United States Census
+          records
+
+          <strong>
+            Michael and Ester Ronzitti
+          </strong>
+
+          with their daughters,
+
+          Nicoletta Sema
+          and Susan.
+
+        </p>
+
+
+        <p class="record-detail">
+
+
+          <strong>
+            Why it matters:
+          </strong>
+
+
+          Ester's recorded age
+          of approximately 34
+          supports a birth year
+          around 1915–1916
+
+          and helps narrow
+          the search
+          for her birth documentation.
+
+
+        </p>
+
+
+      </div>
+
 
     </div>
+
+
   </div>
+
+
 </section>
 
-<section id="verification" class="dark">
+
+<!-- ========================================
+     VERIFICATION
+     ======================================== -->
+
+
+<section
+  id="verification"
+  class="dark"
+>
+
+
   <div class="container">
-    <div class="section-label">Sources &amp; Verification</div>
-    <h2>How this history is being reconstructed</h2>
+
+
+    <div class="section-label">
+
+      Sources &amp; Verification
+
+    </div>
+
+
+    <h2>
+
+      How this history
+      is being reconstructed
+
+    </h2>
+
 
     <div class="verification-grid">
-      <div class="verification-card">
-        <h3>Documented</h3>
-        <p>
-          <strong>Archival photographs, newspaper clippings, government records and surviving Panda ephemera</strong>
-          are treated as documentary evidence.
-        </p>
-      </div>
+
+
+      <!-- DOCUMENTED -->
+
 
       <div class="verification-card">
-        <h3>Family History</h3>
+
+
+        <h3>
+
+          Documented
+
+        </h3>
+
+
         <p>
-          Details including <strong>Michele (Mike), Andy and Gus acquiring The Panda together,
-          Michele (Mike) later buying them out, and the Panda charms being handed out</strong>
-          are presented as family-provided history unless independently documented.
+
+
+          <strong>
+
+            Archival photographs,
+            newspaper clippings,
+            government records
+            and surviving Panda ephemera
+
+          </strong>
+
+
+          are treated
+          as documentary evidence.
+
+
         </p>
+
+
       </div>
 
+
+      <!-- FAMILY HISTORY -->
+
+
       <div class="verification-card">
-        <h3>Still Being Researched</h3>
+
+
+        <h3>
+
+          Family History
+
+        </h3>
+
+
         <p>
-          Exact ownership dates, additional exterior photographs, interior photographs,
-          a surviving menu and further business records remain active areas of research.
+
+          Details including
+
+
+          <strong>
+
+            Michele (Mike),
+            Andy and Gus
+            acquiring The Panda together,
+
+            Michele later buying them out,
+
+            and the Panda charms
+            being handed out
+
+          </strong>
+
+
+          are presented
+          as family-provided history
+
+          unless independently documented.
+
+
         </p>
+
+
       </div>
+
+
+      <!-- STILL RESEARCHING -->
+
+
+      <div class="verification-card">
+
+
+        <h3>
+
+          Still Being Researched
+
+        </h3>
+
+
+        <p>
+
+          Exact ownership dates,
+
+          additional exterior photographs,
+
+          interior photographs,
+
+          a surviving menu
+
+          and further business records
+
+          remain active areas
+          of research.
+
+        </p>
+
+
+      </div>
+
+
     </div>
 
-    <div class="research-note" style="margin-top:45px;">
-      <strong>Storefront verification:</strong>
-      the exterior photograph clearly shows the Panda name on the rounded canopy and
-      “The Panda RESTAURANT” in the storefront window. The historical photograph is
-      displayed without rewriting or reconstructing the signage.
+
+    <div
+      class="research-note"
+      style="margin-top:45px;"
+    >
+
+
+      <strong>
+
+        Storefront verification:
+
+      </strong>
+
+
+      the exterior photograph
+      clearly shows the Panda name
+      on the rounded canopy
+
+      and
+
+      “The Panda RESTAURANT”
+
+      in the storefront window.
+
+      The historical photograph
+      is displayed without rewriting
+      or reconstructing the signage.
+
+
     </div>
+
+
   </div>
+
+
 </section>
 
-<section id="research" class="warm">
+
+<!-- ========================================
+     ONGOING RESEARCH
+     ======================================== -->
+
+
+<section
+  id="research"
+  class="warm"
+>
+
+
   <div class="container">
-    <div class="section-label">Ongoing Research</div>
-    <h2>Help us find more</h2>
+
+
+    <div class="section-label">
+
+      Ongoing Research
+
+    </div>
+
+
+    <h2>
+
+      Help us find more
+
+    </h2>
+
 
     <div class="research-note">
-      We are continuing to search for photographs, menus, advertisements, matchbooks,
-      postcards, newspaper stories, memorabilia and personal memories of
-      <strong>The Panda Restaurant &amp; Supper Club at 13 East 47th Street</strong>,
-      particularly from approximately 1949–1951.
+
+
+      We are continuing to search
+      for photographs,
+      menus,
+      advertisements,
+      matchbooks,
+      postcards,
+      newspaper stories,
+      memorabilia
+
+      and personal memories of
+
+
+      <strong>
+
+        The Panda Restaurant
+        &amp; Supper Club
+        at 13 East 47th Street
+
+      </strong>,
+
+
+      particularly from
+      approximately 1949–1951.
+
+
     </div>
 
-    <p>
-      We are especially interested in <strong>interior photographs</strong>,
-      additional <strong>exterior photographs</strong>, photographs of East 47th Street
-      between Fifth and Madison Avenues, and an original <strong>Panda menu</strong>.
-    </p>
 
     <p>
-      The archive will continue to change as additional material is located,
-      evaluated and verified.
+
+
+      We are especially interested in
+
+
+      <strong>
+
+        interior photographs
+
+      </strong>,
+
+
+      additional
+
+
+      <strong>
+
+        exterior photographs
+
+      </strong>,
+
+
+      photographs of East 47th Street
+      between Fifth
+      and Madison Avenues,
+
+      and an original
+
+
+      <strong>
+
+        Panda menu
+
+      </strong>.
+
+
     </p>
+
+
+    <p>
+
+      The archive will continue
+      to change
+
+      as additional material
+      is located,
+
+      evaluated
+
+      and verified.
+
+    </p>
+
 
     <div class="small-note">
-      This site is a family historical research project. Family recollections are
-      identified separately from documentary evidence whenever possible.
+
+      This site is a family
+      historical research project.
+
+      Family recollections
+      are identified separately
+      from documentary evidence
+      whenever possible.
+
     </div>
+
+
   </div>
+
+
 </section>
 
+
+<!-- ========================================
+     FOOTER
+     ======================================== -->
+
+
 <footer>
-  <strong>The Panda · Restaurant &amp; Supper Club · 13 East 47th Street · New York City</strong>
-  <br><br>
-  A family history and archival research project.
+
+
+  <strong>
+
+    The Panda ·
+    Restaurant &amp; Supper Club ·
+    13 East 47th Street ·
+    New York City
+
+  </strong>
+
+
+  <br>
+
+  <br>
+
+
+  A family history
+  and archival research project.
+
+
 </footer>
 
+
 </body>
+
+
 </html>
