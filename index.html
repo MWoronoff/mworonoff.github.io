@@ -113,32 +113,37 @@
           </label>
         </div>
 
-        <div class="label-like">ZIP median HHI bands (ranking only)</div>
+        <div class="label-like">Market Fit Criteria — ZIP median HHI (ranking only)</div>
         <div class="age-grid" id="hhiBands">
-          <label class="age-chip"><input type="checkbox" data-hhi-band="under50" checked> Under $50K</label>
-          <label class="age-chip"><input type="checkbox" data-hhi-band="50-74" checked> $50K–$74K</label>
-          <label class="age-chip"><input type="checkbox" data-hhi-band="75-99" checked> $75K–$99K</label>
-          <label class="age-chip"><input type="checkbox" data-hhi-band="100-149" checked> $100K–$149K</label>
+          <label class="age-chip"><input type="checkbox" data-hhi-band="0-19" checked> &lt;$20K</label>
+          <label class="age-chip"><input type="checkbox" data-hhi-band="20-39" checked> $20K–$39K</label>
+          <label class="age-chip"><input type="checkbox" data-hhi-band="40-59" checked> $40K–$59K</label>
+          <label class="age-chip"><input type="checkbox" data-hhi-band="60-79" checked> $60K–$79K</label>
+          <label class="age-chip"><input type="checkbox" data-hhi-band="80-99" checked> $80K–$99K</label>
+          <label class="age-chip"><input type="checkbox" data-hhi-band="100-124" checked> $100K–$124K</label>
+          <label class="age-chip"><input type="checkbox" data-hhi-band="125-149" checked> $125K–$149K</label>
           <label class="age-chip"><input type="checkbox" data-hhi-band="150-199" checked> $150K–$199K</label>
           <label class="age-chip"><input type="checkbox" data-hhi-band="200+" checked> $200K+</label>
         </div>
-        <div class="helper"><strong>Ranking only:</strong> HHI selections affect the Target Group Score only; they do not change Target Audience counts. Bands classify each ZIP by its median household income; they are not counts of households within those income ranges.</div>
+        <div class="helper"><strong>Ranking only:</strong> HHI selections affect Target Group Score, not Target Audience. Continuous fit avoids artificial penalties at band boundaries.</div>
+
+        <div class="label-like">Housing tenure (ranking only)</div>
+        <label>Housing target
+          <select id="housingTarget"><option value="all">All</option><option value="owner">Homeowners</option><option value="renter">Renters</option></select>
+        </label>
+        <div class="helper">Housing is a ZIP-level fit criterion; it does not imply a person-level age/gender × tenure cross-tab.</div>
 
         <div class="label-like">Target Group Score weights</div>
         <div class="two-col">
-          <label>Demo fit %<input id="weightDemo" type="number" min="0" max="100" step="5" value="50" /></label>
-          <label>HHI fit %<input id="weightHHI" type="number" min="0" max="100" step="5" value="30" /></label>
-          <label>Audience scale %<input id="weightScale" type="number" min="0" max="100" step="5" value="20" /></label>
+          <label>Demo fit %<input id="weightDemo" type="number" min="0" max="100" step="5" value="40" /></label>
+          <label>HHI fit %<input id="weightHHI" type="number" min="0" max="100" step="5" value="25" /></label>
+          <label>Housing fit %<input id="weightHousing" type="number" min="0" max="100" step="5" value="20" /></label>
+          <label>Audience scale %<input id="weightScale" type="number" min="0" max="100" step="5" value="15" /></label>
           <label>Rank ZIPs by
-            <select id="rankBy">
-              <option value="targetGroupScore">Target Group Score (0–100)</option>
-              <option value="target">Audience Size</option>
-              <option value="index">Audience Index</option>
-              <option value="hhi">Median HHI</option>
-            </select>
+            <select id="rankBy"><option value="targetGroupScore">Target Group Score (0–100)</option><option value="target">Audience Size</option><option value="index">Audience Index</option><option value="hhi">Median HHI</option></select>
           </label>
         </div>
-        <div class="helper">Weights are normalized automatically, so they do not need to total 100.</div>
+        <div class="helper">Inactive/nonrestrictive criteria are removed automatically and remaining weights are renormalized.</div>
       </section>
 
       <section class="panel">
@@ -197,7 +202,7 @@
         <div class="table-wrap">
           <table id="resultsTable">
             <thead><tr>
-              <th data-key="zip">ZIP</th><th data-key="city">City</th><th data-key="state">State</th><th data-key="population">Population</th><th data-key="households">HH</th><th data-key="target">Target</th><th data-key="share">Target %</th><th data-key="index">Audience Index</th><th data-key="targetGroupScore">Target Group Score</th><th data-key="hhi">Median HHI</th><th data-key="homeValue">Home Value</th><th data-key="ownerPct">Owner %</th><th data-key="bachelors">Bachelor's %</th><th data-key="poverty">Poverty %</th><th data-key="businesses">Businesses</th>
+              <th data-key="rank">Rank</th><th data-key="zip">ZIP</th><th data-key="city">City</th><th data-key="state">State</th><th data-key="population">Population</th><th data-key="households">HH</th><th data-key="target">Target</th><th data-key="share">Target %</th><th data-key="index">Audience Index</th><th data-key="demoFit">Demo Fit</th><th data-key="hhiFit">HHI Fit</th><th data-key="housingFit">Housing Fit</th><th data-key="audienceScale">Audience Scale</th><th data-key="targetGroupScore">Target Group Score</th><th data-key="hhi">Median HHI</th><th data-key="homeValue">Home Value</th><th data-key="ownerPct">Owner %</th><th data-key="bachelors">Bachelor's %</th><th data-key="poverty">Poverty %</th><th data-key="businesses">Businesses</th>
             </tr></thead>
             <tbody></tbody>
           </table>
@@ -212,12 +217,12 @@
     <div class="dialog-body">
       <h3>Geography</h3>
       <p>ZIP + radius currently includes ZIP codes whose supplied latitude/longitude centroid falls within the selected straight-line radius. This is not the same as a drive-time area or a true ZIP/ZCTA boundary-intersection calculation.</p>
-      <h3>Audience counts</h3>
+      <h3>Residential ZIP eligibility</h3><p>Audience rankings default to residential ZIPs with population, households, and usable coordinates greater than zero. PO Box, unique, military, and other non-residential records without meaningful residential population/households are excluded from rankings.</p><h3>Audience counts</h3>
       <p>Age/gender counts are derived from the supplied 5-year bands and 18+ totals. Race/ethnicity counts and household counts are used directly from the supplied fields. Target percentages use population as the denominator for person audiences and total households for household audiences.</p>
       <h3>Market filters</h3>
       <p>Median HHI, median home value, education, poverty, businesses, and homeownership are ZIP-level characteristics. Filtering on them does not create an estimated person-level intersection. For example, “Age 35–54 + ZIP median HHI ≥ $100K” means people age 35–54 who live in ZIPs with a median HHI of at least $100K—not a count of age 35–54 people personally earning $100K+.</p>
       <h3>Target Group Score (0–100)</h3>
-      <p>The Target Group Score is a 0–100 ZIP-ranking score combining three equally normalized components using the weights selected in Target Group: Demographic Fit (the percentile rank of the unchanged national Audience Index within the selected geography), HHI Fit (continuous closeness of ZIP median household income to the selected income band or bands), and Audience Scale (the percentile rank of Target Audience count within the selected geography). Percentile components are calculated across the selected geography before optional Market Filters are applied, so filtering does not redefine the scoring benchmark. Default weights are 50% Demographic Fit, 30% HHI Fit, and 20% Audience Scale. HHI selections affect ranking only and never change the underlying Target Audience count.</p>
+      <p>The Target Group Score is a 0–100 ZIP-ranking score combining active normalized components using the weights selected in Target Group: Demographic Fit (the percentile rank of the unchanged national Audience Index within the selected geography), HHI Fit (continuous closeness of ZIP median household income to the selected income band or bands), Housing Fit (the percentile strength of homeowner or renter concentration when selected), and Audience Scale (the percentile rank of Target Audience count within the selected geography). Percentile components are calculated across the selected geography before optional Market Filters are applied, so filtering does not redefine the scoring benchmark. Default weights are 40% Demographic Fit, 25% HHI Fit, 20% Housing Fit, and 15% Audience Scale. Nonrestrictive criteria are removed and remaining weights renormalized. HHI and Housing selections affect ranking only and never change the underlying Target Audience count.</p>
       <h3>Audience Index</h3>
       <p>Audience Index = each ZIP or selected geography's target share ÷ national target share × 100. An index of 125 means the audience is 25% more concentrated than the national benchmark in the supplied ZIP universe. This national concentration measure is unchanged and is not replaced by the Target Group Score.</p>
       <h3>Source-vintage caution</h3>
@@ -310,6 +315,8 @@ window.ZIP_DATA=[["00501","HOLTSVILLE","NY","SUFFOLK","New York-Newark-Jersey Ci
 (()=>{
 'use strict';
 const C=window.ZipCore, I=C.I, DATA=window.ZIP_DATA||[], META=window.ZIP_META||{};
+const isResidential=r=>Number(r[I.population])>0&&Number(r[I.households])>0&&Number.isFinite(Number(r[I.lat]))&&Number.isFinite(Number(r[I.lon]));
+const RES_DATA=DATA.filter(isResidential);
 const $=id=>document.getElementById(id), fmt=new Intl.NumberFormat('en-US'), money=new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0});
 const pct=v=>`${(100*v).toFixed(1)}%`, num=v=>fmt.format(Math.round(v||0));
 const zipMap=new Map(DATA.map(r=>[r[I.zip],r]));
@@ -341,24 +348,23 @@ function audienceLabel(){
   const sel=c.type==='race'?$('raceMetric'):$('householdMetric'); return sel.options[sel.selectedIndex].text;
 }
 const HHI_BANDS=[
-  {id:'under50',min:0,max:50000},{id:'50-74',min:50000,max:75000},{id:'75-99',min:75000,max:100000},
-  {id:'100-149',min:100000,max:150000},{id:'150-199',min:150000,max:200000},{id:'200+',min:200000,max:Infinity}
+  {id:'0-19',min:0,max:20000},{id:'20-39',min:20000,max:40000},{id:'40-59',min:40000,max:60000},{id:'60-79',min:60000,max:80000},{id:'80-99',min:80000,max:100000},
+  {id:'100-124',min:100000,max:125000},{id:'125-149',min:125000,max:150000},{id:'150-199',min:150000,max:200000},{id:'200+',min:200000,max:Infinity}
 ];
 function selectedHHIBands(){return [...$('hhiBands').querySelectorAll('input:checked')].map(x=>x.dataset.hhiBand)}
-function hhiBandFor(v){const x=+v||0;return HHI_BANDS.findIndex(b=>x>=b.min&&x<b.max)}
 function hhiFitScore(hhi, selected){
   if(!selected.length||selected.length===HHI_BANDS.length)return 100;
   const x=+hhi; if(!Number.isFinite(x)||x<=0)return 0;
   const ranges=selected.map(id=>HHI_BANDS.find(b=>b.id===id)).filter(Boolean);
   if(ranges.some(b=>x>=b.min&&x<b.max))return 100;
   let distance=Infinity;
-  ranges.forEach(b=>{
-    if(x<b.min)distance=Math.min(distance,b.min-x);
-    else if(Number.isFinite(b.max)&&x>=b.max)distance=Math.min(distance,x-b.max);
-  });
-  // Continuous boundary treatment: full fit inside a selected band, then a smooth
-  // linear decline to zero across the next $50,000 of median-HHI distance.
-  return Math.max(0,100-distance/500);
+  ranges.forEach(b=>{if(x<b.min)distance=Math.min(distance,b.min-x);else if(Number.isFinite(b.max)&&x>=b.max)distance=Math.min(distance,x-b.max)});
+  return Math.max(0,100-distance/500); // 50-point loss per $25K outside selected range
+}
+function demographicCriterionActive(cfg){return !(cfg.type==='age'&&cfg.gender==='all'&&cfg.bands.length===(META.ageBands||[]).length)}
+function housingFitValues(items, target){
+  if(target==='all')return items.map(()=>100);
+  return percentileScores(items,x=>target==='owner'?x.ownerPct:(100-x.ownerPct));
 }
 function percentileScores(items, valueFn){
   const ranked=items.map((x,i)=>({i,v:+valueFn(x)||0})).sort((a,b)=>a.v-b.v);
@@ -373,35 +379,36 @@ function percentileScores(items, valueFn){
   }
   return out;
 }
-function compositeScore(demoFit,hhiScore,audienceScale){
-  const wd=Math.max(0,+$('weightDemo').value||0), wh=Math.max(0,+$('weightHHI').value||0), ws=Math.max(0,+$('weightScale').value||0);
-  const total=wd+wh+ws||1, cap=v=>Math.max(0,Math.min(100,+v||0));
-  return (wd*cap(demoFit)+wh*cap(hhiScore)+ws*cap(audienceScale))/total;
+function compositeScore(demoFit,hhiScore,housingFit,audienceScale,active){
+  const weights={demo:Math.max(0,+$('weightDemo').value||0),hhi:Math.max(0,+$('weightHHI').value||0),housing:Math.max(0,+$('weightHousing').value||0),scale:Math.max(0,+$('weightScale').value||0)};
+  const vals={demo:demoFit,hhi:hhiScore,housing:housingFit,scale:audienceScale}, cap=v=>Math.max(0,Math.min(100,+v||0));
+  const keys=Object.keys(weights).filter(k=>active[k]&&weights[k]>0), total=keys.reduce((a,k)=>a+weights[k],0)||1;
+  return keys.reduce((a,k)=>a+weights[k]*cap(vals[k]),0)/total;
 }
 function rowMetrics(r, natShare){
   const a=C.audienceForRow(r,audienceCfg()), share=a.base?a.target/a.base:0;
   return {r,target:a.target,base:a.base,share,index:natShare?100*share/natShare:0,zip:r[I.zip],city:r[I.city],state:r[I.state],population:r[I.population]||0,households:r[I.households]||0,hhi:r[I.medianHHI]||0,homeValue:r[I.medianHomeValue]||0,ownerPct:C.ownerPct(r),bachelors:r[I.bachelorsPct]||0,poverty:r[I.povertyPct]||0,businesses:r[I.businesses]||0};
 }
 function refresh(){
-  const cfg=audienceCfg(), nat=C.nationalShare(DATA,cfg), f=filters();
-  const allMetrics=geography.map(r=>rowMetrics(r,nat)), selected=selectedHHIBands();
-  const demoFits=percentileScores(allMetrics,x=>x.index), scaleScores=percentileScores(allMetrics,x=>x.target);
-  allMetrics.forEach((x,i)=>{x.demoFit=demoFits[i];x.hhiFit=hhiFitScore(x.hhi,selected);x.audienceScale=scaleScores[i];x.targetGroupScore=compositeScore(x.demoFit,x.hhiFit,x.audienceScale)});
+  const cfg=audienceCfg(), nat=C.nationalShare(RES_DATA,cfg), f=filters();
+  const allMetrics=geography.filter(isResidential).map(r=>rowMetrics(r,nat)), selected=selectedHHIBands(), housing=$('housingTarget').value;
+  const demoFits=percentileScores(allMetrics,x=>x.index), scaleScores=percentileScores(allMetrics,x=>x.target), housingFits=housingFitValues(allMetrics,housing);
+  const active={demo:demographicCriterionActive(cfg),hhi:selected.length>0&&selected.length<HHI_BANDS.length,housing:housing!=='all',scale:true};
+  allMetrics.forEach((x,i)=>{x.demoFit=demoFits[i];x.hhiFit=hhiFitScore(x.hhi,selected);x.housingFit=housingFits[i];x.audienceScale=scaleScores[i];x.targetGroupScore=compositeScore(x.demoFit,x.hhiFit,x.housingFit,x.audienceScale,active)});
   filtered=allMetrics.filter(x=>C.passesFilters(x.r,f));
-  const rows=filtered.map(x=>x.r);
-  sortKey=$('rankBy').value; sortDir=-1;
-  const summary=C.summarize(rows,cfg,nat);
-  renderKpis(summary); renderProfile(summary); renderTopBars(); renderTable(); renderMap();
-  $('tableSub').textContent=`${audienceLabel()} • Target Group Score combines 0–100 Demographic Fit, continuous HHI Fit, and percentile-based Audience Scale.`;
+  const rows=filtered.map(x=>x.r); sortKey=$('rankBy').value; sortDir=-1;
+  const summary=C.summarize(rows,cfg,nat); renderKpis(summary); renderProfile(summary); renderTopBars(); renderTable(); renderMap();
+  const hhiLabel=selected.length===HHI_BANDS.length?'All HHI':selected.join(', '), houseLabel=housing==='all'?'All housing':housing==='owner'?'Homeowners':'Renters';
+  $('tableSub').textContent=`Target: ${audienceLabel()} | HHI: ${hhiLabel} | Housing: ${houseLabel} • Residential ZIPs only`;
 }
 function renderKpis(s){
-  const cards=[['ZIPs',num(s.zips)],['Population',num(s.population)],['Households',num(s.households)],['Target Audience',num(s.target),'emphasis'],['Target Share',pct(s.share),'emphasis'],['Index',s.index?Math.round(s.index):'—','emphasis']];
+  const cards=[['ZIPs',num(s.zips)],['Population',num(s.population)],['Households',num(s.households)],['Target Audience',num(s.target),'emphasis'],['Target Share',pct(s.share),'emphasis'],['Audience Index',s.index?Math.round(s.index):'—','emphasis']];
   $('kpis').innerHTML=cards.map(c=>`<div class="kpi ${c[2]||''}"><div class="label">${c[0]}</div><div class="value">${c[1]}</div></div>`).join('');
 }
 function renderProfile(s){ $('weightedHHI').textContent=s.weightedHHI?money.format(s.weightedHHI):'—'; $('weightedHomeValue').textContent=s.weightedHomeValue?money.format(s.weightedHomeValue):'—'; }
 function renderTopBars(){
   const metric=$('rankBy').value, top=[...filtered].sort((a,b)=>(b[metric]||0)-(a[metric]||0)).slice(0,6), max=Math.max(1,...top.map(x=>x[metric]||0));
-  $('topBars').innerHTML=top.length?top.map(x=>`<div class="bar-row"><strong>${x.zip}</strong><div class="bar-track"><div class="bar-fill" style="width:${100*(x[metric]||0)/max}%"></div></div><span>${metric==='target'?num(x.target):Math.round(x[metric]||0)}</span></div>`).join(''):'<div class="helper">No ZIPs match the current filters.</div>';
+  $('topBars').innerHTML=top.length?top.map(x=>`<div class="bar-row"><strong>${x.zip} ${x.city}</strong><div class="bar-track"><div class="bar-fill" style="width:${100*(x[metric]||0)/max}%"></div></div><span>${metric==='target'?num(x.target):Math.round(x[metric]||0)} · ${num(x.target)} target</span></div>`).join(''):'<div class="helper">No residential ZIPs match the current filters.</div>';
 }
 function colorForScore(v){return v>=90?'#0d5f58':v>=75?'#2d8c80':v>=60?'#75b7a7':v>=40?'#f0b75b':'#9aa7b4'}
 function initMap(){
@@ -421,12 +428,13 @@ function renderMap(){
 function renderTable(){
   const q=$('tableSearch').value.trim().toLowerCase();
   let rows=filtered.filter(x=>!q||`${x.zip} ${x.city} ${x.state} ${x.r[I.county]||''}`.toLowerCase().includes(q));
-  const getter={zip:x=>x.zip,city:x=>x.city,state:x=>x.state,population:x=>x.population,households:x=>x.households,target:x=>x.target,share:x=>x.share,index:x=>x.index,hhi:x=>x.hhi,homeValue:x=>x.homeValue,ownerPct:x=>x.ownerPct,bachelors:x=>x.bachelors,poverty:x=>x.poverty,businesses:x=>x.businesses,targetGroupScore:x=>x.targetGroupScore}[sortKey]|| (x=>x.target);
+  const getter={rank:x=>x.rank,zip:x=>x.zip,city:x=>x.city,state:x=>x.state,population:x=>x.population,households:x=>x.households,target:x=>x.target,share:x=>x.share,index:x=>x.index,demoFit:x=>x.demoFit,hhiFit:x=>x.hhiFit,housingFit:x=>x.housingFit,audienceScale:x=>x.audienceScale,hhi:x=>x.hhi,homeValue:x=>x.homeValue,ownerPct:x=>x.ownerPct,bachelors:x=>x.bachelors,poverty:x=>x.poverty,businesses:x=>x.businesses,targetGroupScore:x=>x.targetGroupScore}[sortKey]|| (x=>x.target);
+  const ranked=[...filtered].sort((a,b)=>b.targetGroupScore-a.targetGroupScore); ranked.forEach((x,i)=>x.rank=i+1);
   rows.sort((a,b)=>{const aa=getter(a),bb=getter(b);return (typeof aa==='string'?aa.localeCompare(bb):aa-bb)*sortDir});
-  $('resultsTable').querySelector('tbody').innerHTML=rows.slice(0,500).map(x=>`<tr><td>${x.zip}</td><td>${x.city}</td><td>${x.state}</td><td>${num(x.population)}</td><td>${num(x.households)}</td><td><strong>${num(x.target)}</strong></td><td>${pct(x.share)}</td><td class="${x.index>=120?'idx-high':x.index<80?'idx-low':''}">${Math.round(x.index||0)}</td><td class="${x.targetGroupScore>=75?'idx-high':x.targetGroupScore<40?'idx-low':''}"><strong>${Math.round(x.targetGroupScore||0)}</strong></td><td>${x.hhi?money.format(x.hhi):'—'}</td><td>${x.homeValue?money.format(x.homeValue):'—'}</td><td>${x.ownerPct.toFixed(1)}%</td><td>${x.bachelors?x.bachelors.toFixed(1)+'%':'—'}</td><td>${x.poverty?x.poverty.toFixed(1)+'%':'—'}</td><td>${num(x.businesses)}</td></tr>`).join('');
-  $('rowCount').textContent=`${num(rows.length)} matching ZIPs`;
+  $('resultsTable').querySelector('tbody').innerHTML=rows.slice(0,500).map(x=>`<tr><td>${x.rank}</td><td>${x.zip}${x.target<500?' <span title="Small target audience">⚑</span>':''}</td><td>${x.city}</td><td>${x.state}</td><td>${num(x.population)}</td><td>${num(x.households)}</td><td><strong>${num(x.target)}</strong></td><td>${pct(x.share)}</td><td>${Math.round(x.index||0)}</td><td>${Math.round(x.demoFit||0)}</td><td>${Math.round(x.hhiFit||0)}</td><td>${Math.round(x.housingFit||0)}</td><td>${Math.round(x.audienceScale||0)}</td><td><strong>${Math.round(x.targetGroupScore||0)}</strong></td><td>${x.hhi?money.format(x.hhi):'—'}</td><td>${x.homeValue?money.format(x.homeValue):'—'}</td><td>${x.ownerPct.toFixed(1)}%</td><td>${x.bachelors?x.bachelors.toFixed(1)+'%':'—'}</td><td>${x.poverty?x.poverty.toFixed(1)+'%':'—'}</td><td>${num(x.businesses)}</td></tr>`).join('');
+  $('rowCount').textContent=`${num(rows.length)} matching residential ZIPs • ⚑ target audience under 500`;
 }
-function setGeography(rows,name,detail){geography=rows;$('geoName').textContent=name;$('geoDetail').textContent=detail;refresh();}
+function setGeography(rows,name,detail){geography=rows.filter(isResidential);$('geoName').textContent=name;$('geoDetail').textContent=detail;refresh();}
 function buildRadius(){
   const z=$('centerZip').value.trim().padStart(5,'0'), miles=+$('radiusMiles').value;
   const res=C.radiusRows(DATA,z,miles,$('sameState').checked);
@@ -445,21 +453,23 @@ async function readUpload(file){
   throw new Error('Unsupported file type.');
 }
 function exportCsv(){
-  const cfg=audienceLabel(); const hhiBands=selectedHHIBands().join(' | '); const header=['ZIP','City','State','County','CBSA','MSA','Population','Households','Target Audience','Target Share','Audience Index','Target Group Score','Demographic Fit Score','HHI Fit Score','Audience Scale Score','Median HHI','Median Home Value','Owner %','Bachelor\'s %','Poverty %','Businesses','Employees','Audience Definition','Selected HHI Bands'];
-  const rows=filtered.map(x=>[x.zip,x.city,x.state,x.r[I.county],x.r[I.cbsa],x.r[I.msa],x.population,x.households,Math.round(x.target),(100*x.share).toFixed(2),Math.round(x.index||0),Math.round(x.targetGroupScore||0),Math.round(x.demoFit||0),Math.round(x.hhiFit||0),Math.round(x.audienceScale||0),x.hhi||'',x.homeValue||'',x.ownerPct.toFixed(2),x.bachelors||'',x.poverty||'',x.businesses,x.r[I.employees]||0,cfg,hhiBands]);
+  const cfg=audienceLabel(), selected=selectedHHIBands(), hhiBands=selected.join(' | '), housing=$('housingTarget').value;
+  const ranked=[...filtered].sort((a,b)=>b.targetGroupScore-a.targetGroupScore); ranked.forEach((x,i)=>x.rank=i+1);
+  const header=['Rank','ZIP','City','State','County','CBSA','MSA','Population','Households','Target Audience','Target Share','Audience Index','Demographic Fit','HHI Fit','Housing Fit','Audience Scale','Target Group Score','Median HHI','Median Home Value','Owner %','Renter %','Small Audience Flag','Businesses','Employees','Audience Definition','Selected HHI Bands','Housing Target','Residential Eligible'];
+  const rows=filtered.map(x=>[x.rank,x.zip,x.city,x.state,x.r[I.county],x.r[I.cbsa],x.r[I.msa],x.population,x.households,Math.round(x.target),(100*x.share).toFixed(2),Math.round(x.index||0),Math.round(x.demoFit||0),Math.round(x.hhiFit||0),Math.round(x.housingFit||0),Math.round(x.audienceScale||0),Math.round(x.targetGroupScore||0),x.hhi||'',x.homeValue||'',x.ownerPct.toFixed(2),(100-x.ownerPct).toFixed(2),x.target<500?'Small Audience':'',x.businesses,x.r[I.employees]||0,cfg,hhiBands,housing,'Yes']);
   const csv=[header,...rows].map(r=>r.map(C.csvEscape).join(',')).join('\n'); const blob=new Blob([csv],{type:'text/csv;charset=utf-8'}); const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='zip_audience_analysis.csv';a.click();URL.revokeObjectURL(a.href);
 }
 function wire(){
   buildAgeBands(); initMap();
   $('dataPill').textContent=`${num(META.rowCount)} national ZIP records loaded`;
   $('geoTabs').addEventListener('click',e=>{if(!e.target.dataset.tab)return;document.querySelectorAll('#geoTabs button').forEach(b=>b.classList.toggle('active',b===e.target));document.querySelectorAll('.geo-pane').forEach(p=>p.classList.toggle('active',p.dataset.pane===e.target.dataset.tab))});
-  $('buildRadius').onclick=buildRadius;$('buildManual').onclick=()=>useZips(C.parseZipText($('manualZips').value),'Manual ZIP list');$('useAll').onclick=()=>setGeography(DATA.slice(),'All supplied ZIPs','National source universe');
+  $('buildRadius').onclick=buildRadius;$('buildManual').onclick=()=>useZips(C.parseZipText($('manualZips').value),'Manual ZIP list');$('useAll').onclick=()=>setGeography(RES_DATA.slice(),'All residential ZIPs','Residential source universe');
   $('zipFile').onchange=async e=>{const f=e.target.files[0];uploadedZips=[];$('buildUpload').disabled=true;if(!f)return;try{uploadedZips=await readUpload(f);$('fileStatus').textContent=`${num(uploadedZips.length)} ZIP codes found in ${f.name}`;$('buildUpload').disabled=!uploadedZips.length}catch(err){$('fileStatus').textContent=err.message}};
   $('buildUpload').onclick=()=>useZips(uploadedZips,'Uploaded ZIP list');
   $('audienceType').onchange=()=>{const t=$('audienceType').value;$('ageControls').classList.toggle('hidden',t!=='age');$('raceControls').classList.toggle('hidden',t!=='race');$('householdControls').classList.toggle('hidden',t!=='household');refresh()};
-  ['gender','raceMetric','householdMetric','rankBy'].forEach(id=>$(id).onchange=refresh);
+  ['gender','raceMetric','householdMetric','housingTarget','rankBy'].forEach(id=>$(id).onchange=refresh);
   $('hhiBands').addEventListener('change',refresh);
-  ['weightDemo','weightHHI','weightScale'].forEach(id=>$(id).addEventListener('input',refresh));
+  ['weightDemo','weightHHI','weightHousing','weightScale'].forEach(id=>$(id).addEventListener('input',refresh));
   ['minHHI','minHomeValue','minOwnerPct','minBachelorsPct','maxPovertyPct','minPopulation','minBusinesses'].forEach(id=>$(id).addEventListener('input',refresh));
   $('clearFilters').onclick=()=>{['minHHI','minHomeValue','minOwnerPct','minBachelorsPct','maxPovertyPct','minPopulation','minBusinesses'].forEach(id=>$(id).value='');refresh()};
   $('tableSearch').addEventListener('input',renderTable); document.querySelectorAll('#resultsTable th[data-key]').forEach(th=>th.onclick=()=>{if(sortKey===th.dataset.key)sortDir*=-1;else{sortKey=th.dataset.key;sortDir=th.dataset.key==='zip'||th.dataset.key==='city'||th.dataset.key==='state'?1:-1}renderTable()});
