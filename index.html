@@ -150,18 +150,6 @@
         </details>
       </section>
 
-      <section class="panel">
-        <div class="panel-title"><span>3</span> Market Filters</div>
-        <div class="two-col">
-          <label>Min Median HHI<input id="minHHI" type="number" step="5000" placeholder="e.g. 75000" /></label>
-          <label>Min Home Value<input id="minHomeValue" type="number" step="25000" placeholder="e.g. 350000" /></label>
-          <label>Min Bachelor's %<input id="minBachelorsPct" type="number" step="5" min="0" max="100" placeholder="e.g. 35" /></label>
-          <label>Max Poverty %<input id="maxPovertyPct" type="number" step="1" min="0" max="100" placeholder="e.g. 15" /></label>
-          <label>Min Population<input id="minPopulation" type="number" step="1000" placeholder="e.g. 5000" /></label>
-          <label>Min Businesses<input id="minBusinesses" type="number" step="25" placeholder="e.g. 100" /></label>
-        </div>
-        <button id="clearFilters" class="btn ghost full">Clear Filters</button>
-      </section>
     </aside>
 
     <section class="content">
@@ -212,7 +200,7 @@
             <tbody></tbody>
           </table>
         </div>
-        <div class="table-foot"><span id="rowCount"></span><span>Showing up to 500 rows on screen; export includes the full filtered geography.</span></div>
+        <div class="table-foot"><span id="rowCount"></span><span>Showing up to 500 rows on screen; export includes every ranked residential ZIP in the selected geography.</span></div>
       </section>
     </section>
   </main>
@@ -224,15 +212,13 @@
       <p>ZIP + radius currently includes ZIP codes whose supplied latitude/longitude centroid falls within the selected straight-line radius. This is not the same as a drive-time area or a true ZIP/ZCTA boundary-intersection calculation.</p>
       <h3>Residential ZIP eligibility</h3><p>Audience rankings default to residential ZIPs with population, households, and usable coordinates greater than zero. PO Box, unique, military, and other non-residential records without meaningful residential population/households are excluded from rankings.</p><h3>Audience counts</h3>
       <p>Age/gender counts are derived from the supplied 5-year bands and 18+ totals. Race/ethnicity counts and household counts are used directly from the supplied fields. Target percentages use population as the denominator for person audiences and total households for household audiences.</p>
-      <h3>Market filters</h3>
-      <p>Median HHI, median home value, education, poverty, and businesses are ZIP-level characteristics. Filtering on them does not create an estimated person-level intersection. For example, “Age 35–54 + ZIP median HHI ≥ $100K” means people age 35–54 who live in ZIPs with a median HHI of at least $100K—not a count of age 35–54 people personally earning $100K+.</p>
       <h3>Target Group Score (0–100)</h3>
-      <p>The Target Group Score is a 0–100 ZIP-ranking score combining active normalized components using the weights selected in Target Group: Demographic Fit (the percentile rank of the unchanged national Audience Index within the selected geography), HHI Fit (continuous closeness of ZIP median household income to the selected income band or bands), Housing Fit (the percentile strength of homeowner or renter concentration when selected), and Audience Scale (the percentile rank of Target Audience count within the selected geography). Percentile components are calculated across the selected geography before optional Market Filters are applied, so filtering does not redefine the scoring benchmark. Default weights are 40% Demographic Fit, 25% HHI Fit, 20% Housing Fit, and 15% Audience Scale. Nonrestrictive criteria are removed and remaining weights renormalized. HHI and Housing selections affect ranking only and never change the underlying Target Audience count.</p>
+      <p>The Target Group Score is a 0–100 ZIP-ranking score combining active normalized components using the weights selected in Target Group: Demographic Fit (the percentile rank of the unchanged national Audience Index within the selected geography), HHI Fit (continuous closeness of ZIP median household income to the selected income band or bands), Housing Fit (the percentile strength of homeowner or renter concentration when selected), and Audience Scale (the percentile rank of Target Audience count within the selected geography). Percentile components are calculated across all residential ZIPs in the selected geography, and every residential ZIP remains in the ranked list. Default weights are 40% Demographic Fit, 25% HHI Fit, 20% Housing Fit, and 15% Audience Scale. Nonrestrictive criteria are removed and remaining weights renormalized. HHI and Housing selections affect ranking only and never change the underlying Target Audience count.</p>
       <h3>Audience Index</h3>
       <p>Audience Index = each ZIP or selected geography's target share ÷ national target share × 100. An index of 125 means the audience is 25% more concentrated than the national benchmark in the supplied ZIP universe. This national concentration measure is unchanged and is not replaced by the Target Group Score.</p>
       <h3>Residential status</h3><p>Residential Status is a simple All / Homeowners / Renters ranking choice. Homeowners uses owner-occupied household concentration; Renters uses renter-occupied household concentration. It changes Housing Fit and Target Group Score, not Target Audience, Target Share, or Audience Index.</p>
       <h3>Small residential base flag</h3><p>ZIPs with fewer than 1,000 residents or fewer than 400 households are flagged as a small residential base. The flag is a planning caution only; it is not a statistical sample-size test and does not exclude the ZIP.</p>
-      <h3>Selected ZIP planning</h3><p>ZIP checkboxes allow planners to build a working media geography. The selected summary reports the cumulative Target Audience and its share of Target Audience across the current filtered geography.</p>
+      <h3>Selected ZIP planning</h3><p>ZIP checkboxes allow planners to build a working media geography. The selected summary reports the cumulative Target Audience and its share of Target Audience across all ranked residential ZIPs in the current geography.</p>
       <h3>Source-vintage caution</h3>
       <p>The application preserves values supplied in the ten source workbooks. Several source families appear in the schema, and a common vintage is not asserted here. Confirm the vintage/licensing of the source data before external publication.</p>
     </div>
@@ -345,10 +331,6 @@ function audienceCfg(){
   if(type==='race') return {type,metric:$('raceMetric').value};
   return {type,metric:$('householdMetric').value};
 }
-function filters(){
-  const fields=['minHHI','minHomeValue','minBachelorsPct','maxPovertyPct','minPopulation','minBusinesses'];
-  const o={}; fields.forEach(k=>{const v=$(k).value.trim(); if(v!=='')o[k]=+v;}); return o;
-}
 function audienceLabel(){
   const c=audienceCfg();
   if(c.type==='age'){
@@ -399,12 +381,12 @@ function rowMetrics(r, natShare){
   const ownerHH=+r[I.ownerHH]||0, renterHH=+r[I.renterHH]||0; const distance=centerPoint?C.haversineMiles(centerPoint.lat,centerPoint.lon,+r[I.lat],+r[I.lon]):null; const lowBase=(+r[I.population]||0)<1000||(+r[I.households]||0)<400; return {r,target:a.target,base:a.base,share,index:natShare?100*share/natShare:0,zip:r[I.zip],city:r[I.city],state:r[I.state],population:r[I.population]||0,households:r[I.households]||0,hhi:r[I.medianHHI]||0,homeValue:r[I.medianHomeValue]||0,ownerPct:C.ownerPct(r),ownerHH,renterHH,distance,lowBase,bachelors:r[I.bachelorsPct]||0,poverty:r[I.povertyPct]||0,businesses:r[I.businesses]||0};
 }
 function refresh(){
-  const cfg=audienceCfg(), nat=C.nationalShare(RES_DATA,cfg), f=filters();
+  const cfg=audienceCfg(), nat=C.nationalShare(RES_DATA,cfg);
   const allMetrics=geography.filter(isResidential).map(r=>rowMetrics(r,nat)), selected=selectedHHIBands(), housing=$('housingTarget').value;
   const demoFits=percentileScores(allMetrics,x=>x.index), scaleScores=percentileScores(allMetrics,x=>x.target), housingFits=housingFitValues(allMetrics,housing);
   const active={demo:demographicCriterionActive(cfg),hhi:selected.length>0&&selected.length<HHI_BANDS.length,housing:housing!=='all',scale:true};
   allMetrics.forEach((x,i)=>{x.demoFit=demoFits[i];x.hhiFit=hhiFitScore(x.hhi,selected);x.housingFit=housingFits[i];x.audienceScale=scaleScores[i];x.targetGroupScore=compositeScore(x.demoFit,x.hhiFit,x.housingFit,x.audienceScale,active)});
-  filtered=allMetrics.filter(x=>C.passesFilters(x.r,f));
+  filtered=allMetrics;
   const rows=filtered.map(x=>x.r); sortKey=$('rankBy').value; sortDir=-1;
   const summary=C.summarize(rows,cfg,nat); renderTargetSummary(); renderKpis(summary); renderProfile(summary); renderTopBars(); renderTable(); renderMap(); updateSelectedSummary();
   const hhiLabel=selected.length===HHI_BANDS.length?'All HHI':selected.join(', '), houseLabel=housing==='all'?'All housing':housing==='owner'?'Homeowners':'Renters';
@@ -457,7 +439,7 @@ function renderTable(){
   $('resultsTable').querySelector('tbody').innerHTML=rows.slice(0,500).map(x=>`<tr><td><input class="zip-select" type="checkbox" data-zip="${x.zip}" ${selectedZips.has(x.zip)?'checked':''}></td><td>${x.rank}</td><td>${x.zip} ${x.lowBase?'<span class="low-base" title="Population under 1,000 or households under 400">LOW BASE</span>':''}</td><td>${x.city}</td><td>${x.state}</td><td class="distance-muted">${x.distance==null?'—':x.distance.toFixed(1)+' mi'}</td><td>${num(x.population)}</td><td>${num(x.households)}</td><td><strong>${num(x.target)}</strong></td><td>${pct(x.share)}</td><td>${Math.round(x.index||0)}</td><td class="score-detail">${Math.round(x.demoFit||0)}</td><td class="score-detail">${Math.round(x.hhiFit||0)}</td><td class="score-detail">${housing==='all'?'—':Math.round(x.housingFit||0)}</td><td class="score-detail">${Math.round(x.audienceScale||0)}</td><td><strong>${Math.round(x.targetGroupScore||0)}</strong></td><td>${x.hhi?money.format(x.hhi):'—'}</td><td>${x.homeValue?money.format(x.homeValue):'—'}</td><td>${x.ownerPct.toFixed(1)}%</td><td>${housing==='renter'?'—':num(x.ownerHH)}</td><td>${housing==='owner'?'—':num(x.renterHH)}</td><td>${x.bachelors?x.bachelors.toFixed(1)+'%':'—'}</td><td>${x.poverty?x.poverty.toFixed(1)+'%':'—'}</td><td>${num(x.businesses)}</td></tr>`).join('');
   document.querySelectorAll('.zip-select').forEach(cb=>cb.onchange=()=>{cb.checked?selectedZips.add(cb.dataset.zip):selectedZips.delete(cb.dataset.zip);updateSelectedSummary();});
   $('resultsTable').classList.toggle('show-score-details',$('scoreDetailsToggle').checked);
-  $('rowCount').textContent=`${num(rows.length)} matching residential ZIPs • LOW BASE = population <1,000 or households <400`;
+  $('rowCount').textContent=`${num(rows.length)} residential ZIPs ranked • LOW BASE = population <1,000 or households <400`;
 }
 function setGeography(rows,name,detail){excludedResidentialCount=rows.filter(r=>!isResidential(r)).length;geography=rows.filter(isResidential);selectedZips.clear();$('geoName').textContent=name;$('geoDetail').dataset.base=detail;$('geoDetail').textContent=detail;refresh();}
 function buildRadius(){
@@ -497,8 +479,6 @@ function wire(){
   $('scoreDetailsToggle').onchange=renderTable;
   $('hhiBands').addEventListener('change',refresh);
   ['weightDemo','weightHHI','weightHousing','weightScale'].forEach(id=>$(id).addEventListener('input',refresh));
-  ['minHHI','minHomeValue','minOwnerPct','minBachelorsPct','maxPovertyPct','minPopulation','minBusinesses'].forEach(id=>$(id).addEventListener('input',refresh));
-  $('clearFilters').onclick=()=>{['minHHI','minHomeValue','minOwnerPct','minBachelorsPct','maxPovertyPct','minPopulation','minBusinesses'].forEach(id=>$(id).value='');refresh()};
   $('tableSearch').addEventListener('input',renderTable); document.querySelectorAll('#resultsTable th[data-key]').forEach(th=>th.onclick=()=>{if(sortKey===th.dataset.key)sortDir*=-1;else{sortKey=th.dataset.key;sortDir=th.dataset.key==='zip'||th.dataset.key==='city'||th.dataset.key==='state'?1:-1}renderTable()});
   $('exportBtn').onclick=exportCsv;$('methodBtn').onclick=()=>$('methodDialog').showModal();$('closeMethod').onclick=()=>$('methodDialog').close();
   buildRadius();
