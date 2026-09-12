@@ -23,7 +23,7 @@ function scoreVal(r){
 }
 function filtered(){
  const data=DB[$('geo').value];
- const q=$('search').value.trim().toLowerCase();
+ const q=$('marketSearchBox').textContent.trim().toLowerCase();
  const st=$('state').value;
  let arr=data.filter(r=>(!q||String(r.Market).toLowerCase().includes(q)) && (!st||marketStates(r).includes(st)));
  arr=arr.map(r=>Object.assign({},r,{_objective:scoreVal(r)}));
@@ -137,7 +137,8 @@ function renderDetail(){
  const btn=$('addCompare'); if(btn) btn.addEventListener('click',addSelectedToCompare);
 }
 ['geo','objective','state','topn'].forEach(id=>$(id).addEventListener('change',()=>{selected=null;render()}));
-$('search').addEventListener('input',()=>{selected=null;render()});
+$('marketSearchBox').addEventListener('input',()=>{selected=null;render()});
+$('marketSearchBox').addEventListener('keydown',e=>{if(e.key==='Enter')e.preventDefault();});
 $('exportCsv').addEventListener('click',exportCsv);
 $('clearCompare').addEventListener('click',()=>{compare=[];renderCompare();});
 document.querySelectorAll('th[data-key]').forEach(th=>th.addEventListener('click',()=>{

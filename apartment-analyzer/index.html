@@ -13,7 +13,10 @@ header h1{margin:0 0 6px;font-size:28px} header p{margin:0;opacity:.9;max-width:
 .controls,.summary,.detail{background:var(--card);border:1px solid var(--line);border-radius:12px}
 .controls{padding:16px;display:grid;grid-template-columns:repeat(6,minmax(140px,1fr));gap:12px;align-items:end}
 label{display:block;font-size:12px;font-weight:700;color:#475467;margin-bottom:5px}
-select,input,button{width:100%;min-height:42px;border-radius:8px;border:1px solid #b9c2cf;padding:9px 10px;font-size:14px;background:white}
+select,input,button,.text-searchbox{width:100%;min-height:42px;border-radius:8px;border:1px solid #b9c2cf;padding:9px 10px;font-size:14px;background:white;box-sizing:border-box}
+.text-searchbox{white-space:nowrap;overflow:hidden;line-height:22px;cursor:text}
+.text-searchbox:empty::before{content:attr(data-placeholder);color:#6b7280;pointer-events:none}
+.text-searchbox:focus{outline:2px solid #111827;outline-offset:0}
 button{cursor:pointer;background:var(--navy);color:white;border-color:var(--navy);font-weight:700}
 button.secondary{background:white;color:var(--navy)} .note{grid-column:1/-1;font-size:12px;color:var(--muted);line-height:1.4}
 .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:16px 0}
@@ -68,7 +71,7 @@ footer{max-width:1500px;margin:auto;padding:0 20px 28px;font-size:12px;color:var
 <option value="Portfolio_Snapshot">Market Strength</option>
 <option value="Marketing_Need">Marketing Opportunity</option>
 <option value="Risk">Market Risk</option></select></div>
-<div><label for="search">Search market</label><input id="search" name="market-search" type="search" placeholder="Denver, Fairfax, etc." autocomplete="off" aria-autocomplete="none" spellcheck="false" autocapitalize="off" autocorrect="off"></div>
+<div><label id="marketSearchLabel">Search market</label><div id="marketSearchBox" class="text-searchbox" role="searchbox" aria-labelledby="marketSearchLabel" aria-placeholder="Denver, Fairfax, etc." data-placeholder="Denver, Fairfax, etc." contenteditable="plaintext-only" spellcheck="false" tabindex="0"></div></div>
 <div><label for="state">State</label><select id="state"><option value="">All states</option></select></div>
 
 <div><label for="topn">Show</label><select id="topn"><option>25</option><option selected>50</option><option>100</option><option>250</option><option value="99999">All</option></select></div>
