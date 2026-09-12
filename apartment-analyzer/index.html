@@ -50,7 +50,7 @@ footer{max-width:1500px;margin:auto;padding:0 20px 28px;font-size:12px;color:var
 <body>
 <header>
 <h1>Apartment Management Market Analyzer</h1>
-<p>National screening tool for acquisition, disposition review, portfolio fundamentals, marketing need and B2B opportunity. Built as a standalone application; it does not depend on or modify the existing Panda or ZIP Radius sites.</p>
+<p>Explore apartment markets, compare local fundamentals and identify areas that may offer expansion or marketing opportunities. Use the national rankings for market-level screening and the ZIP-radius tool for property-level media planning.</p>
 </header>
 
 <div class="modebar">
@@ -60,32 +60,29 @@ footer{max-width:1500px;margin:auto;padding:0 20px 28px;font-size:12px;color:var
 
 <div id="nationalView" class="wrap">
 <section class="controls">
-<div><label for="geo">Geography</label><select id="geo"><option value="metros">Metros / CBSAs</option><option value="counties">Counties</option></select></div>
+<div><label for="geo">Geography</label><select id="geo"><option value="metros">Metro Areas</option><option value="counties">Counties</option></select></div>
 <div><label for="objective">Ranking objective</label><select id="objective">
-<option value="Acquisition_Enhanced">Acquisition screening — enhanced</option>
-<option value="Disposition_Enhanced">Disposition review — enhanced</option>
-<option value="Acquisition_Screen">Acquisition screening — baseline</option>
-<option value="Disposition_Screen">Disposition review — baseline</option>
-<option value="Overall_Opportunity">Overall opportunity</option>
-<option value="Portfolio_Snapshot">Portfolio fundamentals</option>
-<option value="Marketing_Need">Marketing need</option>
-<option value="B2B_Proxy">B2B sales opportunity</option>
-<option value="Risk">Risk</option></select></div>
+<option value="Acquisition_Enhanced">Markets to Consider for Expansion</option>
+<option value="Disposition_Enhanced">Markets That May Need Attention</option>
+<option value="Overall_Opportunity">Overall Market Opportunity</option>
+<option value="Portfolio_Snapshot">Market Strength</option>
+<option value="Marketing_Need">Marketing Opportunity</option>
+<option value="Risk">Market Risk</option></select></div>
 <div><label for="search">Search market</label><input id="search" placeholder="Denver, Fairfax, etc."></div>
-<div><label for="state">State (counties)</label><select id="state"><option value="">All states</option></select></div>
-<div><label for="minpop">Minimum population</label><select id="minpop"><option value="0">No minimum</option><option value="50000">50,000+</option><option value="100000">100,000+</option><option value="250000">250,000+</option><option value="500000">500,000+</option><option value="1000000">1,000,000+</option></select></div>
+<div><label for="state">State</label><select id="state"><option value="">All states</option></select></div>
+
 <div><label for="topn">Show</label><select id="topn"><option>25</option><option selected>50</option><option>100</option><option>250</option><option value="99999">All</option></select></div>
 <div><label>Export ranked view</label><button id="exportCsv" type="button">Download CSV</button></div>
 <div><label>Compare markets</label><button id="clearCompare" type="button" class="secondary">Clear comparison</button></div>
-<div class="note"><strong>Screening-score note:</strong> The enhanced Acquisition and Disposition scores add a renter-demand-depth proxy and a supply-pressure proxy using recent construction (units built 2020+) plus vacancy. These improve directional screening but are still not property valuations, cap-rate forecasts or transaction recommendations. True historical rent/vacancy trends and active multifamily pipeline data remain desirable for final underwriting.</div>
+<div class="note"><strong>How to use the rankings:</strong> Scores combine renter-market depth, apartment-market fundamentals, vacancy, recent construction and other current conditions. They are designed to help prioritize markets for discussion and further research—not to replace property-level financial analysis or investment underwriting.</div>
 </section>
 
 <div class="kpis">
 <div class="kpi"><div class="v" id="kMarkets">–</div><div class="l">Markets in current view</div></div>
 <div class="kpi"><div class="v" id="kRenters">–</div><div class="l">Renter households represented</div></div>
 <div class="kpi"><div class="v" id="kVacancy">–</div><div class="l">Avg. vacancy rate</div></div>
-<div class="kpi"><div class="v" id="kRent">–</div><div class="l">Avg. weighted median rent</div></div>
-<div class="kpi"><div class="v" id="kScore">–</div><div class="l">Avg. selected score</div></div>
+<div class="kpi"><div class="v" id="kRent">–</div><div class="l">Avg. median monthly rent</div></div>
+<div class="kpi"><div class="v" id="kScore">–</div><div class="l">Avg. opportunity score</div></div>
 </div>
 
 <div class="grid">
@@ -94,17 +91,17 @@ footer{max-width:1500px;margin:auto;padding:0 20px 28px;font-size:12px;color:var
 <table>
 <thead><tr>
 <th data-key="_rank">#</th><th data-key="Market">Market</th><th data-key="Population">Population</th>
-<th data-key="Renter_HH">Renter HH</th><th data-key="Vacancy_Rate">Vacancy</th><th data-key="Median_Rent_Wtd">Median Rent</th>
-<th data-key="Property_Score">Property</th><th data-key="Portfolio_Snapshot">Portfolio</th><th data-key="Risk">Risk</th>
-<th data-key="_objective">Selected Score</th><th data-key="Strategic_Snapshot">Snapshot</th>
+<th data-key="Renter_HH">Renter Households</th><th data-key="Vacancy_Rate">Vacancy Rate</th><th data-key="Median_Rent_Wtd">Median Monthly Rent</th>
+<th data-key="Property_Score">Property Strength</th><th data-key="Portfolio_Snapshot">Market Strength</th><th data-key="Risk">Market Risk</th>
+<th data-key="_objective">Opportunity Score</th><th data-key="Strategic_Snapshot">Market Outlook</th>
 </tr></thead>
 <tbody id="tbody"></tbody>
 </table>
 </div>
 </section>
 <aside class="detail" id="detail">
-<h2>Select a market</h2><div class="sub">Click a row to inspect its underlying metrics.</div>
-<div class="legend">Use <strong>Acquisition screening</strong> to identify relatively strong current-condition markets for further underwriting. Use <strong>Disposition review</strong> to surface markets with elevated risk/marketing need and weaker portfolio/property fundamentals.</div>
+<h2>Select a market</h2><div class="sub">Click a row to see why the market ranks where it does.</div>
+<div class="legend">Choose a ranking goal above, then select a market to see the factors supporting its score. The rankings are directional screening tools intended to support sales conversations and deeper client analysis.</div>
 </aside>
 
 </div>
@@ -117,7 +114,7 @@ footer{max-width:1500px;margin:auto;padding:0 20px 28px;font-size:12px;color:var
 
 <section id="radiusView" class="radius-section hidden">
 <div class="radius-card">
-<h2 style="margin-top:0">Property ZIP Radius Analysis</h2>
+<h2 style="margin-top:0">Property ZIP Radius Planning</h2>
 <p style="color:#667085;margin-top:-4px">Enter a property ZIP and radius. Every ZIP whose centroid falls within the radius is included and ranked; no minimum-score exclusion is applied.</p>
 <div class="radius-controls">
 <div><label for="centerZip">Property ZIP</label><input id="centerZip" maxlength="5" placeholder="e.g., 80202"></div>
@@ -137,28 +134,27 @@ footer{max-width:1500px;margin:auto;padding:0 20px 28px;font-size:12px;color:var
 <div id="radiusResults" class="radius-table hidden">
 <table>
 <thead><tr>
-<th>Rank</th><th>ZIP</th><th>City / State</th><th>Distance</th><th>Renter HH</th><th>Renter Share</th>
-<th>20+ Unit Inventory</th><th>Median Rent</th><th>Property Ad Score</th><th>Marketing Need</th>
-<th>Property Marketing Score</th><th>Overall Opportunity</th><th>Budget Share</th><th>Suggested $</th>
+<th>Rank</th><th>ZIP</th><th>City / State</th><th>Distance</th><th>Renter Households</th><th>Renter Share</th>
+<th>Large-Apartment Units (20+)</th><th>Median Monthly Rent</th><th>Advertising Opportunity</th><th>Marketing Opportunity</th>
+<th>ZIP Marketing Score</th><th>Overall Opportunity</th><th>Budget Share</th><th>Suggested $</th>
 </tr></thead>
 <tbody id="radiusBody"></tbody>
 </table>
 </div>
 <div id="radiusExportWrap" class="hidden" style="margin-top:12px;max-width:220px"><button id="exportRadius" type="button">Download Radius CSV</button></div>
-<div class="radius-note"><strong>Property marketing methodology:</strong> every ZIP in the selected radius remains in the ranking. The Property Marketing Score blends Property Advertising Score, renter-household scale within the selected radius, Marketing Need, and proximity to the property. The campaign-objective selector changes those weights. Suggested budget then applies an additional distance-decay factor so closer ZIPs receive more weight when otherwise similar. This is a media-planning aid, not a required spend prescription.</div>
+<div class="radius-note"><strong>How the ZIP ranking works:</strong> every ZIP in the selected radius remains in the list. The ZIP Marketing Score combines advertising opportunity, renter-household scale, marketing opportunity and proximity to the property. The campaign objective changes the weighting. Suggested budget shares give somewhat more weight to nearby ZIPs when other factors are similar. Use this as a media-planning guide rather than a required spending formula.</div>
 </div>
 </section>
 
 <footer>
-<strong>Current data source:</strong> Apartment Management Market Opportunity workbook. Nationwide results currently include 939 metros/CBSAs and 3,199 counties. This build includes national metro/county rankings, market comparison, export, and the property ZIP-radius advertising module with campaign-objective scoring and distance-decayed budget allocation. Enhanced screening now incorporates demand-depth and recent-construction/vacancy supply-pressure proxies. True historical rent/vacancy series and active multifamily pipeline data remain the next major underwriting enhancement.
+<strong>About the data:</strong> Nationwide results currently include 939 metro areas and 3,199 counties. Rankings use current renter, housing, vacancy, rent, recent-construction and related market indicators to support directional market screening. Property ZIP-radius planning includes all ZIPs in the chosen radius and can suggest relative advertising allocations. Historical rent/vacancy trends, active construction pipelines and property-level financials should be reviewed separately for investment decisions.
 </footer>
 
-<script><script src="zip-data-1.js"></script>
+<script src="zip-data-1.js"></script>
 <script src="zip-data-2.js"></script>
 <script src="zip-data-3.js"></script>
 <script src="zip-data-4.js"></script>
 <script src="zip-data-5.js"></script>
 <script src="zip-data-6.js"></script>
 <script src="app.js"></script>
-</script>
 </body></html>

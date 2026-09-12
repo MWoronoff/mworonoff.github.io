@@ -6,7 +6,12 @@ const pct=n=>(Number(n||0)*100).toFixed(1)+'%';
 const money=n=>'$'+fmtInt(n);
 let sortKey='_objective', sortDir=-1, selected=null, compare=[];
 
-const states=[...new Set(DB.counties.map(r=>r.State).filter(Boolean))].sort();
+function marketStates(r){
+ if(r.State) return [r.State];
+ const m=String(r.Market||'').match(/\s([A-Z]{2}(?:-[A-Z]{2})*)$/);
+ return m ? m[1].split('-') : [];
+}
+const states=[...new Set([...DB.counties,...DB.metros].flatMap(marketStates).filter(Boolean))].sort();
 states.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;$('state').appendChild(o)});
 
 function objectiveLabel(){
@@ -20,8 +25,7 @@ function filtered(){
  const data=DB[$('geo').value];
  const q=$('search').value.trim().toLowerCase();
  const st=$('state').value;
- const min=+$('minpop').value;
- let arr=data.filter(r=>(!q||String(r.Market).toLowerCase().includes(q)) && (!st||r.State===st) && Number(r.Population||0)>=min);
+ let arr=data.filter(r=>(!q||String(r.Market).toLowerCase().includes(q)) && (!st||marketStates(r).includes(st)));
  arr=arr.map(r=>Object.assign({},r,{_objective:scoreVal(r)}));
  arr.sort((a,b)=>{
    let av=sortKey==='_rank'?0:a[sortKey], bv=sortKey==='_rank'?0:b[sortKey];
@@ -40,7 +44,7 @@ function csvEscape(v){
 }
 function exportCsv(){
  const rows=filtered();
- const cols=['_rank','Market','State','Population','Households','Renter_HH','Renter_Share','Vacancy_Rate','Median_Rent_Wtd','Median_HHI_Wtd','Property_Score','Marketing_Need','B2B_Proxy','Portfolio_Snapshot','Risk','Overall_Opportunity','Acquisition_Screen','Disposition_Screen','Strategic_Snapshot'];
+ const cols=['_rank','Market','State','Population','Households','Renter_HH','Renter_Share','Vacancy_Rate','Median_Rent_Wtd','Median_HHI_Wtd','Property_Score','Marketing_Need','Portfolio_Snapshot','Risk','Overall_Opportunity','Acquisition_Screen','Disposition_Screen','Strategic_Snapshot'];
  const header=cols.map(c=>c==='_rank'?'Current Rank':c).join(',');
  const body=rows.map(r=>cols.map(c=>csvEscape(r[c])).join(',')).join('\n');
  const blob=new Blob([header+'\n'+body],{type:'text/csv;charset=utf-8'});
@@ -60,16 +64,14 @@ function renderCompare(){
   ['Renter households',r=>fmtInt(r.Renter_HH)],
   ['Renter share',r=>pct(r.Renter_Share)],
   ['Vacancy rate',r=>pct(r.Vacancy_Rate)],
-  ['Median rent',r=>money(r.Median_Rent_Wtd)],
+  ['Median monthly rent',r=>money(r.Median_Rent_Wtd)],
   ['Median HHI',r=>money(r.Median_HHI_Wtd)],
-  ['Property score',r=>fmt1(r.Property_Score)],
-  ['Marketing need',r=>fmt1(r.Marketing_Need)],
-  ['B2B proxy',r=>fmt1(r.B2B_Proxy)],
-  ['Portfolio snapshot',r=>fmt1(r.Portfolio_Snapshot)],
-  ['Risk',r=>fmt1(r.Risk)],
-  ['Overall opportunity',r=>fmt1(r.Overall_Opportunity)],
-  ['Acquisition screen',r=>fmt1(r.Acquisition_Screen)],
-  ['Demand depth proxy',r=>fmt1(r.Demand_Depth_Proxy)],['Supply pressure proxy',r=>fmt1(r.Supply_Pressure_Proxy)],['Acquisition enhanced',r=>fmt1(r.Acquisition_Enhanced)],['Disposition enhanced',r=>fmt1(r.Disposition_Enhanced)],['Disposition review baseline',r=>fmt1(r.Disposition_Screen)]
+  ['Property strength',r=>fmt1(r.Property_Score)],
+  ['Marketing opportunity',r=>fmt1(r.Marketing_Need)],
+  ['Market strength',r=>fmt1(r.Portfolio_Snapshot)],
+  ['Market risk',r=>fmt1(r.Risk)],
+  ['Overall market opportunity',r=>fmt1(r.Overall_Opportunity)],
+  ['Renter market depth',r=>fmt1(r.Demand_Depth_Proxy)],['New-supply pressure',r=>fmt1(r.Supply_Pressure_Proxy)],['Expansion opportunity',r=>fmt1(r.Acquisition_Enhanced)],['Attention priority',r=>fmt1(r.Disposition_Enhanced)]
  ];
  table.innerHTML='<thead><tr><th>Metric</th>'+compare.map(r=>'<th>'+r.Market+'</th>').join('')+'</tr></thead><tbody>'+
  metrics.map(m=>'<tr><td><strong>'+m[0]+'</strong></td>'+compare.map(r=>'<td class="num">'+m[1](r)+'</td>').join('')+'</tr>').join('')+'</tbody>';
@@ -83,7 +85,6 @@ function addSelectedToCompare(){
 }
 
 function render(){
- $('state').disabled=$('geo').value!=='counties';
  let all=filtered();
  const show=all.slice(0,+$('topn').value);
  $('tbody').innerHTML=show.map(r=>`<tr data-id="${encodeURIComponent(r.Market)}" class="${selected&&selected.Market===r.Market?'selected':''}">
@@ -100,30 +101,42 @@ function render(){
  $('kVacancy').textContent=pct(avg('Vacancy_Rate')); $('kRent').textContent=money(avg('Median_Rent_Wtd'));
  $('kScore').textContent=fmt1(all.length?all.reduce((s,r)=>s+r._objective,0)/all.length:0);
 }
+function marketExplanation(r){
+ const positives=[], cautions=[];
+ if(Number(r.Demand_Depth_Proxy||0)>=65) positives.push('a comparatively deep renter market');
+ if(Number(r.Property_Score||0)>=65) positives.push('favorable property-market fundamentals');
+ if(Number(r.Portfolio_Snapshot||0)>=65) positives.push('solid overall market strength');
+ if(Number(r.Marketing_Need||0)>=65) positives.push('meaningful marketing opportunity');
+ if(Number(r.Vacancy_Rate||0)>=0.12) cautions.push('vacancy is relatively elevated');
+ if(Number(r.Supply_Pressure_Proxy||0)>=65) cautions.push('new-supply/vacancy pressure is higher');
+ if(Number(r.Risk||0)>=65) cautions.push('the market-risk score is elevated');
+ const pos=positives.length ? 'The score is supported by '+positives.slice(0,2).join(' and ')+'.' : 'The market shows a mixed set of current-condition indicators.';
+ const caution=cautions.length ? ' Keep in mind that '+cautions.slice(0,2).join(' and ')+'.' : ' No major caution flag stands out in the current screening metrics.';
+ return pos+caution+' Use these results to prioritize follow-up analysis rather than as a stand-alone investment recommendation.';
+}
+
 function renderDetail(){
  if(!selected)return;
  const r=selected, obj=$('objective').value;
- $('detail').innerHTML=`<h2>${r.Market}</h2><div class="sub">${objectiveLabel()} · workbook rank ${fmtInt(r.Rank)}</div>
+ $('detail').innerHTML=`<h2>${r.Market}</h2><div class="sub">${objectiveLabel()} · current source rank ${fmtInt(r.Rank)}</div><div class="legend" style="margin-top:0;padding-top:0;border-top:0;margin-bottom:14px"><strong>What the data suggests:</strong> ${marketExplanation(r)}</div>
  <div class="scorebox">
  <div class="score"><b>${fmt1(r[obj])}</b><span>${objectiveLabel()}</span></div>
- <div class="score"><b>${fmt1(r.Overall_Opportunity)}</b><span>Overall opportunity</span></div>
- <div class="score"><b>${fmt1(r.Acquisition_Enhanced)}</b><span>Acquisition enhanced</span></div>
- <div class="score"><b>${fmt1(r.Disposition_Enhanced)}</b><span>Disposition enhanced</span></div>
+ <div class="score"><b>${fmt1(r.Overall_Opportunity)}</b><span>Overall market opportunity</span></div>
+ <div class="score"><b>${fmt1(r.Acquisition_Enhanced)}</b><span>Expansion opportunity</span></div>
+ <div class="score"><b>${fmt1(r.Disposition_Enhanced)}</b><span>Attention priority</span></div>
  </div>
  ${[
  ['Population',fmtInt(r.Population)],['Households',fmtInt(r.Households)],['Renter households',fmtInt(r.Renter_HH)],
- ['Renter share',pct(r.Renter_Share)],['Vacancy rate',pct(r.Vacancy_Rate)],['Weighted median rent',money(r.Median_Rent_Wtd)],
- ['Weighted median HHI',money(r.Median_HHI_Wtd)],['Rent-to-income',pct(r.Rent_to_Income_Wtd)],['Businesses',fmtInt(r.Businesses)],
- ['Employees',fmtInt(r.Employees)],['Property score',fmt1(r.Property_Score)],['Marketing need',fmt1(r.Marketing_Need)],
- ['B2B proxy',fmt1(r.B2B_Proxy)],['Portfolio snapshot',fmt1(r.Portfolio_Snapshot)],['Risk',fmt1(r.Risk)],
- ['Demand depth proxy',fmt1(r.Demand_Depth_Proxy)],['Supply pressure proxy',fmt1(r.Supply_Pressure_Proxy)],['Recent construction share',r.Recent_Build_Share==null?'—':pct(r.Recent_Build_Share)],['Data quality',fmt1(r.Data_Quality)]
+ ['Renter share',pct(r.Renter_Share)],['Vacancy rate',pct(r.Vacancy_Rate)],['Median monthly rent',money(r.Median_Rent_Wtd)],
+ ['Median household income',money(r.Median_HHI_Wtd)],['Rent-to-income ratio',pct(r.Rent_to_Income_Wtd)],['Property strength',fmt1(r.Property_Score)],['Marketing opportunity',fmt1(r.Marketing_Need)],
+ ['Market strength',fmt1(r.Portfolio_Snapshot)],['Market risk',fmt1(r.Risk)],
+ ['Renter market depth',fmt1(r.Demand_Depth_Proxy)],['New-supply pressure',fmt1(r.Supply_Pressure_Proxy)],['Recent construction share',r.Recent_Build_Share==null?'—':pct(r.Recent_Build_Share)],['Data coverage',fmt1(r.Data_Quality)]
  ].map(x=>`<div class="metric"><span>${x[0]}</span><strong>${x[1]}</strong></div>`).join('')}
- <div class="legend"><strong>Strategic snapshot:</strong> ${r.Strategic_Snapshot||'—'}<br><br>
- <strong>Enhanced acquisition:</strong> 25% Property + 20% Portfolio + 20% Demand Depth + 15% inverse Supply Pressure + 10% inverse Risk + 10% Overall Opportunity.<br>
- <strong>Enhanced disposition:</strong> 30% Risk + 25% Supply Pressure + 20% Marketing Need + 15% inverse Portfolio + 10% inverse Demand Depth.<br><br><strong>Proxy definitions:</strong> Demand Depth blends renter share, age 21–34 concentration and renter-household scale. Supply Pressure blends recent construction share and vacancy.</div>`;
+ <div class="legend"><strong>Market outlook:</strong> ${r.Strategic_Snapshot||'—'}<br><br>
+ <strong>How the scores work:</strong> Expansion Opportunity emphasizes property strength, market strength and renter-market depth while accounting for supply pressure and risk. Attention Priority emphasizes higher risk, supply pressure and marketing opportunity. Renter Market Depth reflects renter concentration, age 21–34 concentration and renter-household scale. New-Supply Pressure reflects recent construction and vacancy.</div>`;
  const btn=$('addCompare'); if(btn) btn.addEventListener('click',addSelectedToCompare);
 }
-['geo','objective','state','minpop','topn'].forEach(id=>$(id).addEventListener('change',()=>{selected=null;render()}));
+['geo','objective','state','topn'].forEach(id=>$(id).addEventListener('change',()=>{selected=null;render()}));
 $('search').addEventListener('input',()=>{selected=null;render()});
 $('exportCsv').addEventListener('click',exportCsv);
 $('clearCompare').addEventListener('click',()=>{compare=[];renderCompare();});
@@ -224,8 +237,8 @@ function exportRadiusCsv(){
   ['Rank',r=>r._rank],['ZIP',r=>r.ZIP],['City',r=>r.City],['State',r=>r.State],['County',r=>r.County],
   ['Distance_Miles',r=>r.Distance.toFixed(2)],['Population',r=>r.Population],['Households',r=>r.Households],
   ['Renter_HH',r=>r.Renter_HH],['Renter_Share',r=>r.Renter_Share],['Multifamily_20plus_Units',r=>r.Multifamily_20plus_Units],
-  ['Median_Rent',r=>r.Median_Rent],['Property_Advertising_Score',r=>r.Property_Advertising_Score],
-  ['Marketing_Need_Score',r=>r.Marketing_Need_Score],['Property_Marketing_Score',r=>r._marketingScore],['Renter_Scale_Percentile',r=>r._renterScale],['Distance_Score',r=>r._distanceScore],['Distance_Decay',r=>r._distanceDecay],['Overall_Adtaxi_Opportunity',r=>r.Overall_Adtaxi_Opportunity],
+  ['Median_Rent',r=>r.Median_Rent],['Advertising_Opportunity',r=>r.Property_Advertising_Score],
+  ['Marketing_Opportunity',r=>r.Marketing_Need_Score],['ZIP_Marketing_Score',r=>r._marketingScore],['Renter_Scale_Percentile',r=>r._renterScale],['Distance_Score',r=>r._distanceScore],['Distance_Decay',r=>r._distanceDecay],['Overall_Adtaxi_Opportunity',r=>r.Overall_Adtaxi_Opportunity],
   ['Budget_Share',r=>r._share],['Suggested_Dollars',r=>budget?r._dollars:'']
  ];
  const lines=[cols.map(c=>c[0]).join(',')];

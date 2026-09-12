@@ -1,5 +1,3 @@
-Apartment Management Market Analyzer — Build 5
+Apartment Management Market Analyzer — Build 6
 
-Upload ALL files in this folder directly into /apartment-analyzer/ on GitHub.
-Do not upload the ZIP itself.
-The live page will be https://mworonoff.github.io/apartment-analyzer/
+Client-facing revision with simplified terminology, working State filters for metro and county views, no minimum-population control, and no visible B2B option. Upload all files in this folder directly into /apartment-analyzer/ on GitHub Pages.
