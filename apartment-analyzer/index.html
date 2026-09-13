@@ -6,9 +6,9 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="application-version" content="7.0">
+<meta name="application-version" content="7.2">
 <title>Apartment Management Market Analyzer</title>
-<!-- Apartment Analyzer V7.0: market health, metro drill-down, and property ZIP radius -->
+<!-- Apartment Analyzer V7.2: resilient tab navigation + market health, metro drill-down, property ZIP radius -->
 <style>
 :root{--navy:#17365d;--blue:#2d6ca2;--ink:#172033;--muted:#667085;--line:#d8dee8;--bg:#f5f7fa;--card:#fff;--good:#1e6f5c;--warn:#946200;--bad:#a33a3a}
 *{box-sizing:border-box} body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--ink)}
@@ -171,11 +171,37 @@ footer{max-width:1500px;margin:auto;padding:0 20px 28px;font-size:12px;color:var
 <strong>Current data source:</strong> Apartment Management Market Opportunity workbook. Nationwide results currently include 939 metros/CBSAs and 3,199 counties. This build uses one national Market Health ranking for metro comparison and expansion screening, a metro drill-down that ranks counties or ZIPs inside the selected market, market comparison/export, and the property ZIP-radius advertising module with a single Property Marketing Priority score and distance-decayed budget allocation. True historical rent/vacancy series and active multifamily pipeline data remain the next major underwriting enhancement.
 </footer>
 
+<script>
+// V7.2 resilient top-level navigation. This controller is intentionally inline so
+// the three primary views remain selectable even if a downstream data script fails.
+(function(){
+  function byId(id){ return document.getElementById(id); }
+  function showMode(mode){
+    var national = mode === 'national';
+    var drill = mode === 'drilldown';
+    var radius = mode === 'radius';
+    var nv=byId('nationalView'), dv=byId('drilldownView'), rv=byId('radiusView');
+    var nb=byId('modeNational'), db=byId('modeDrilldown'), rb=byId('modeRadius');
+    if(nv) nv.classList.toggle('hidden', !national);
+    if(dv) dv.classList.toggle('hidden', !drill);
+    if(rv) rv.classList.toggle('hidden', !radius);
+    if(nb){ nb.classList.toggle('active', national); nb.classList.toggle('secondary', !national); }
+    if(db){ db.classList.toggle('active', drill); db.classList.toggle('secondary', !drill); }
+    if(rb){ rb.classList.toggle('active', radius); rb.classList.toggle('secondary', !radius); }
+  }
+  window.apartmentAnalyzerShowMode = showMode;
+  var nb=byId('modeNational'), db=byId('modeDrilldown'), rb=byId('modeRadius');
+  if(nb) nb.addEventListener('click', function(){ showMode('national'); });
+  if(db) db.addEventListener('click', function(){ showMode('drilldown'); });
+  if(rb) rb.addEventListener('click', function(){ showMode('radius'); });
+})();
+</script>
+
 <script src="zip-data-1.js"></script>
 <script src="zip-data-2.js"></script>
 <script src="zip-data-3.js"></script>
 <script src="zip-data-4.js"></script>
 <script src="zip-data-5.js"></script>
 <script src="zip-data-6.js"></script>
-<script src="app.js"></script>
+<script src="app.js?v=7.2-20260913"></script>
 </body></html>
