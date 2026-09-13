@@ -5,142 +5,89 @@ const fmtInt=n=>Number(n||0).toLocaleString('en-US',{maximumFractionDigits:0});
 const fmt1=n=>Number(n||0).toLocaleString('en-US',{maximumFractionDigits:1});
 const pct=n=>(Number(n||0)*100).toFixed(1)+'%';
 const money=n=>'$'+fmtInt(n);
-let sortKey='_objective', sortDir=-1, selected=null, compare=[];
+let sortKey='_objective', sortDir=-1, selected=null, compare=[], drillRows=[];
 
-const states=[...new Set(DB.counties.map(r=>r.State).filter(Boolean))].sort();
-states.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;$('state').appendChild(o)});
-
-function objectiveLabel(){
- return $('objective').options[$('objective').selectedIndex].text;
-}
-function scoreVal(r){
- const k=$('objective').value;
- return Number(r[k]||0);
+function healthScore(r){return Number(r.Acquisition_Enhanced||0)}
+function healthTier(score){
+ score=Number(score||0); if(score>=65)return 'Strong'; if(score>=55)return 'Above Average'; if(score>=45)return 'Balanced'; if(score>0)return 'Watch'; return 'Insufficient Data';
 }
 function filtered(){
- const data=DB[$('geo').value];
  const q=$('marketSearchBox').textContent.trim().toLowerCase();
- const st=$('state').value;
  const min=+$('minpop').value;
- let arr=data.filter(r=>(!q||String(r.Market).toLowerCase().includes(q)) && (!st||r.State===st) && Number(r.Population||0)>=min);
- arr=arr.map(r=>Object.assign({},r,{_objective:scoreVal(r)}));
+ let arr=DB.metros.filter(r=>(!q||String(r.Market).toLowerCase().includes(q)) && Number(r.Population||0)>=min)
+   .map(r=>Object.assign({},r,{_objective:healthScore(r),_tier:healthTier(healthScore(r))}));
  arr.sort((a,b)=>{
-   let av=sortKey==='_rank'?0:a[sortKey], bv=sortKey==='_rank'?0:b[sortKey];
-   if(sortKey==='_rank') return 0;
+   if(sortKey==='_rank') return b._objective-a._objective;
+   let av=a[sortKey],bv=b[sortKey];
    if(typeof av==='string') return sortDir*String(av).localeCompare(String(bv));
    return sortDir*(Number(av||0)-Number(bv||0));
  });
- if(sortKey==='_rank') arr.sort((a,b)=>b._objective-a._objective);
- arr.forEach((r,i)=>r._rank=i+1);
- return arr;
+ arr.forEach((r,i)=>r._rank=i+1); return arr;
 }
-
-function csvEscape(v){
- const s=String(v??'');
- return /[",\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s;
-}
+function csvEscape(v){const s=String(v??'');return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s}
 function exportCsv(){
- const rows=filtered();
- const cols=['_rank','Market','State','Population','Households','Renter_HH','Renter_Share','Vacancy_Rate','Median_Rent_Wtd','Median_HHI_Wtd','Demand_Depth_Proxy','Supply_Pressure_Proxy','Acquisition_Enhanced','Disposition_Enhanced','Marketing_Need','Strategic_Snapshot'];
- const header=cols.map(c=>c==='_rank'?'Current Rank':c).join(',');
- const body=rows.map(r=>cols.map(c=>csvEscape(r[c])).join(',')).join('\n');
- const blob=new Blob([header+'\n'+body],{type:'text/csv;charset=utf-8'});
- const a=document.createElement('a');
- a.href=URL.createObjectURL(blob);
- a.download='apartment-market-ranking.csv';
- document.body.appendChild(a); a.click(); a.remove();
- setTimeout(()=>URL.revokeObjectURL(a.href),500);
+ const rows=filtered(), cols=['_rank','Market','Population','Households','Renter_HH','Renter_Share','Vacancy_Rate','Median_Rent_Wtd','Median_HHI_Wtd','Demand_Depth_Proxy','Supply_Pressure_Proxy','Recent_Build_Share','Acquisition_Enhanced','Data_Quality'];
+ const lines=[cols.map(c=>c==='_rank'?'Current Rank':c==='Acquisition_Enhanced'?'Market Health Score':c).join(',')];
+ rows.forEach(r=>lines.push(cols.map(c=>csvEscape(r[c])).join(',')));
+ const blob=new Blob([lines.join('\n')],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='apartment-metro-market-health-ranking.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),500);
 }
 function renderCompare(){
- const panel=$('comparePanel'), table=$('compareTable');
- if(!compare.length){ panel.style.display='none'; table.innerHTML=''; return; }
- panel.style.display='block';
- const metrics=[
-  ['Population',r=>fmtInt(r.Population)],
-  ['Households',r=>fmtInt(r.Households)],
-  ['Renter households',r=>fmtInt(r.Renter_HH)],
-  ['Renter share',r=>pct(r.Renter_Share)],
-  ['Vacancy rate',r=>pct(r.Vacancy_Rate)],
-  ['Median rent',r=>money(r.Median_Rent_Wtd)],
-  ['Median HHI',r=>money(r.Median_HHI_Wtd)],
-  ['Demand depth',r=>fmt1(r.Demand_Depth_Proxy)],['Supply pressure',r=>fmt1(r.Supply_Pressure_Proxy)],['Expansion / Acquisition',r=>fmt1(r.Acquisition_Enhanced)],['Disposition / Review',r=>fmt1(r.Disposition_Enhanced)],['Leasing / Marketing Need',r=>fmt1(r.Marketing_Need)]
- ];
- table.innerHTML='<thead><tr><th>Metric</th>'+compare.map(r=>'<th>'+r.Market+'</th>').join('')+'</tr></thead><tbody>'+
- metrics.map(m=>'<tr><td><strong>'+m[0]+'</strong></td>'+compare.map(r=>'<td class="num">'+m[1](r)+'</td>').join('')+'</tr>').join('')+'</tbody>';
+ const panel=$('comparePanel'),table=$('compareTable'); if(!compare.length){panel.style.display='none';table.innerHTML='';return} panel.style.display='block';
+ const metrics=[['Market Health Score',r=>fmt1(healthScore(r))],['Health tier',r=>healthTier(healthScore(r))],['Population',r=>fmtInt(r.Population)],['Renter households',r=>fmtInt(r.Renter_HH)],['Renter share',r=>pct(r.Renter_Share)],['Vacancy rate',r=>pct(r.Vacancy_Rate)],['Median rent',r=>money(r.Median_Rent_Wtd)],['Median HHI',r=>money(r.Median_HHI_Wtd)],['Demand depth',r=>fmt1(r.Demand_Depth_Proxy)],['Supply pressure',r=>fmt1(r.Supply_Pressure_Proxy)],['Recent construction share',r=>r.Recent_Build_Share==null?'—':pct(r.Recent_Build_Share)]];
+ table.innerHTML='<thead><tr><th>Metric</th>'+compare.map(r=>'<th>'+r.Market+'</th>').join('')+'</tr></thead><tbody>'+metrics.map(m=>'<tr><td><strong>'+m[0]+'</strong></td>'+compare.map(r=>'<td class="num">'+m[1](r)+'</td>').join('')+'</tr>').join('')+'</tbody>';
 }
-function addSelectedToCompare(){
- if(!selected) return;
- if(compare.some(r=>r.Kind===selected.Kind && r.Market===selected.Market)) return;
- if(compare.length>=4) compare.shift();
- compare.push(selected);
- renderCompare();
-}
-
-function recommendationLabel(raw){
- const s=String(raw||'').toUpperCase();
- if(s.includes('INSUFFICIENT')) return 'Insufficient Data';
- if(s.includes('EXPAND')||s.includes('ACQUIRE')) return 'Expand';
- if(s.includes('REVIEW')||s.includes('RISK')||s.includes('DEFEND')) return 'Review';
- if(s.includes('INVEST')) return 'Hold / Invest';
- return 'Monitor';
-}
+function addSelectedToCompare(){if(!selected)return;if(compare.some(r=>r.Market===selected.Market))return;if(compare.length>=4)compare.shift();compare.push(selected);renderCompare()}
 function render(){
- $('state').disabled=$('geo').value!=='counties';
- let all=filtered();
- const show=all.slice(0,+$('topn').value);
- $('tbody').innerHTML=show.map(r=>`<tr data-id="${encodeURIComponent(r.Market)}" class="${selected&&selected.Market===r.Market?'selected':''}">
- <td class="rank">${r._rank}</td><td><strong>${r.Market}</strong></td><td class="num">${fmtInt(r.Population)}</td>
- <td class="num">${fmtInt(r.Renter_HH)}</td><td class="num">${pct(r.Vacancy_Rate)}</td><td class="num">${money(r.Median_Rent_Wtd)}</td>
- <td class="num">${fmt1(r.Demand_Depth_Proxy)}</td><td class="num">${fmt1(r.Supply_Pressure_Proxy)}</td>
- <td class="num"><strong>${fmt1(r._objective)}</strong></td><td><span class="badge">${recommendationLabel(r.Strategic_Snapshot)}</span></td></tr>`).join('');
- document.querySelectorAll('#tbody tr').forEach(tr=>tr.addEventListener('click',()=>{
-   const market=decodeURIComponent(tr.dataset.id); selected=all.find(r=>r.Market===market); renderDetail(); render();
- }));
- const renters=all.reduce((s,r)=>s+Number(r.Renter_HH||0),0);
- const avg=(key)=>all.length?all.reduce((s,r)=>s+Number(r[key]||0),0)/all.length:0;
- $('kMarkets').textContent=fmtInt(all.length); $('kRenters').textContent=fmtInt(renters);
- $('kVacancy').textContent=pct(avg('Vacancy_Rate')); $('kRent').textContent=money(avg('Median_Rent_Wtd'));
- $('kScore').textContent=fmt1(all.length?all.reduce((s,r)=>s+r._objective,0)/all.length:0);
+ const all=filtered(),show=all.slice(0,+$('topn').value);
+ $('tbody').innerHTML=show.map(r=>`<tr data-id="${encodeURIComponent(r.Market)}" class="${selected&&selected.Market===r.Market?'selected':''}"><td class="rank">${r._rank}</td><td><strong>${r.Market}</strong></td><td class="num">${fmtInt(r.Population)}</td><td class="num">${fmtInt(r.Renter_HH)}</td><td class="num">${pct(r.Vacancy_Rate)}</td><td class="num">${money(r.Median_Rent_Wtd)}</td><td class="num">${fmt1(r.Demand_Depth_Proxy)}</td><td class="num">${fmt1(r.Supply_Pressure_Proxy)}</td><td class="num"><strong>${fmt1(r._objective)}</strong></td><td><span class="badge">${r._tier}</span></td></tr>`).join('');
+ document.querySelectorAll('#tbody tr').forEach(tr=>tr.addEventListener('click',()=>{const market=decodeURIComponent(tr.dataset.id);selected=all.find(r=>r.Market===market);renderDetail();render()}));
+ const renters=all.reduce((s,r)=>s+Number(r.Renter_HH||0),0),avg=k=>all.length?all.reduce((s,r)=>s+Number(r[k]||0),0)/all.length:0;
+ $('kMarkets').textContent=fmtInt(all.length);$('kRenters').textContent=fmtInt(renters);$('kVacancy').textContent=pct(avg('Vacancy_Rate'));$('kRent').textContent=money(avg('Median_Rent_Wtd'));$('kScore').textContent=fmt1(all.length?all.reduce((s,r)=>s+r._objective,0)/all.length:0);
 }
 function renderDetail(){
- if(!selected)return;
- const r=selected, obj=$('objective').value;
- $('detail').innerHTML=`<h2>${r.Market}</h2><div class="sub">${objectiveLabel()} · workbook rank ${fmtInt(r.Rank)}</div>
- <div class="scorebox">
- <div class="score"><b>${fmt1(r[obj])}</b><span>${objectiveLabel()}</span></div>
- <div class="score"><b>${fmt1(r.Acquisition_Enhanced)}</b><span>Expansion / Acquisition</span></div>
- <div class="score"><b>${fmt1(r.Disposition_Enhanced)}</b><span>Disposition / Review</span></div>
- <div class="score"><b>${fmt1(r.Marketing_Need)}</b><span>Leasing / Marketing Need</span></div>
- </div>
- ${[
- ['Population',fmtInt(r.Population)],['Households',fmtInt(r.Households)],['Renter households',fmtInt(r.Renter_HH)],
- ['Renter share',pct(r.Renter_Share)],['Vacancy rate',pct(r.Vacancy_Rate)],['Weighted median rent',money(r.Median_Rent_Wtd)],
- ['Weighted median HHI',money(r.Median_HHI_Wtd)],['Rent-to-income',pct(r.Rent_to_Income_Wtd)],['Businesses',fmtInt(r.Businesses)],
- ['Demand depth',fmt1(r.Demand_Depth_Proxy)],['Supply pressure',fmt1(r.Supply_Pressure_Proxy)],['Recent construction share',r.Recent_Build_Share==null?'—':pct(r.Recent_Build_Share)],['Data quality',fmt1(r.Data_Quality)]
- ].map(x=>`<div class="metric"><span>${x[0]}</span><strong>${x[1]}</strong></div>`).join('')}
- <div class="legend"><strong>Market recommendation:</strong> ${recommendationLabel(r.Strategic_Snapshot)}<br><br>
- <strong>Expansion / Acquisition Potential:</strong> 25% Property + 20% Portfolio + 20% Demand Depth + 15% inverse Supply Pressure + 10% inverse Risk + 10% Overall Opportunity.<br>
- <strong>Disposition / Review Priority:</strong> 30% Risk + 25% Supply Pressure + 20% Marketing Need + 15% inverse Portfolio + 10% inverse Demand Depth.<br><br><strong>Proxy definitions:</strong> Demand Depth blends renter share, age 21–34 concentration and renter-household scale. Supply Pressure blends recent construction share and vacancy.</div>`;
- const btn=$('addCompare'); if(btn) btn.addEventListener('click',addSelectedToCompare);
+ if(!selected)return;const r=selected;
+ $('detail').innerHTML=`<h2>${r.Market}</h2><div class="sub">National metro health & expansion screening</div><div class="scorebox"><div class="score"><b>${fmt1(healthScore(r))}</b><span>Market Health Score</span></div><div class="score"><b>${healthTier(healthScore(r))}</b><span>Health Tier</span></div><div class="score"><b>${fmt1(r.Demand_Depth_Proxy)}</b><span>Demand Depth</span></div><div class="score"><b>${fmt1(r.Supply_Pressure_Proxy)}</b><span>Supply Pressure</span></div></div>
+ ${[['Population',fmtInt(r.Population)],['Households',fmtInt(r.Households)],['Renter households',fmtInt(r.Renter_HH)],['Renter share',pct(r.Renter_Share)],['Vacancy rate',pct(r.Vacancy_Rate)],['Weighted median rent',money(r.Median_Rent_Wtd)],['Weighted median HHI',money(r.Median_HHI_Wtd)],['Rent-to-income',pct(r.Rent_to_Income_Wtd)],['Recent construction share',r.Recent_Build_Share==null?'—':pct(r.Recent_Build_Share)],['Data quality',fmt1(r.Data_Quality)]].map(x=>`<div class="metric"><span>${x[0]}</span><strong>${x[1]}</strong></div>`).join('')}
+ <button id="addCompare" type="button" style="margin-top:14px">Add to comparison</button><button id="detailDrill" class="secondary" type="button" style="margin-top:8px">Explore counties & ZIPs</button>
+ <div class="legend"><strong>Why this market ranks here:</strong> the Market Health Score uses the enhanced expansion screen already validated in the nationwide dataset. It rewards stronger renter demand and portfolio fundamentals while accounting for supply pressure, risk and overall opportunity. Higher is stronger for expansion screening; underlying metrics remain visible so the score is never a black box.</div>`;
+ $('addCompare').addEventListener('click',addSelectedToCompare);$('detailDrill').addEventListener('click',()=>openDrilldownForSelected());
 }
-['geo','objective','state','minpop','topn'].forEach(id=>$(id).addEventListener('change',()=>{selected=null;render()}));
-$('marketSearchBox').addEventListener('input',()=>{selected=null;render()});
-$('marketSearchBox').addEventListener('keydown',e=>{if(e.key==='Enter')e.preventDefault();});
-$('exportCsv').addEventListener('click',exportCsv);
-$('clearCompare').addEventListener('click',()=>{compare=[];renderCompare();});
-document.querySelectorAll('th[data-key]').forEach(th=>th.addEventListener('click',()=>{
- const k=th.dataset.key; if(sortKey===k)sortDir*=-1; else{sortKey=k;sortDir=-1} render();
-}));
+$('minpop').addEventListener('change',()=>{selected=null;render()});$('topn').addEventListener('change',render);
+$('marketSearchBox').addEventListener('input',()=>{selected=null;render()});$('marketSearchBox').addEventListener('keydown',e=>{if(e.key==='Enter')e.preventDefault()});$('exportCsv').addEventListener('click',exportCsv);$('clearCompare').addEventListener('click',()=>{compare=[];renderCompare()});
+document.querySelectorAll('#nationalView th[data-key]').forEach(th=>th.addEventListener('click',()=>{const k=th.dataset.key;if(sortKey===k)sortDir*=-1;else{sortKey=k;sortDir=-1}render()}));
+
+function normMetro(s){return String(s||'').toLowerCase().replace(/\bmetropolitan statistical area\b/g,'').replace(/\bmsa\b/g,'').replace(/[^a-z0-9]+/g,' ').trim()}
+const zipMetros=[...new Set(ZIPDB.map(r=>r.CBSA).filter(Boolean))].sort();
+zipMetros.forEach(m=>{const o=document.createElement('option');o.value=m;o.textContent=m;$('drillMetro').appendChild(o)});
+function bestZipMetroForMarket(market){
+ const n=normMetro(market);let exact=zipMetros.find(x=>normMetro(x)===n);if(exact)return exact;
+ const first=n.split(' ')[0];return zipMetros.find(x=>normMetro(x).startsWith(first+' ')||normMetro(x)===first)||'';
+}
+function openDrilldownForSelected(){if(selected){const m=bestZipMetroForMarket(selected.Market);if(m)$('drillMetro').value=m}setMode('drilldown');renderDrilldown()}
+$('exploreSelected').addEventListener('click',openDrilldownForSelected);
+function percentileScaleRaw(rows,key){const vals=rows.map(r=>Math.max(0,Number(r[key]||0))).sort((a,b)=>a-b);return v=>{v=Math.max(0,Number(v||0));let lo=0,hi=vals.length;while(lo<hi){const mid=(lo+hi)>>1;if(vals[mid]<=v)lo=mid+1;else hi=mid}return vals.length<=1?100:100*Math.max(0,lo-1)/(vals.length-1)}}
+function scoreMetroZips(rows){
+ const renterScale=percentileScaleRaw(rows,'Renter_HH'),renterShare=percentileScaleRaw(rows,'Renter_Share');
+ return rows.map(r=>{const vacancy=r.Vacancy_Rate==null?50:Math.max(0,100-Number(r.Vacancy_Rate)*200);const score=.45*Number(r.Property_Advertising_Score||0)+.25*renterScale(r.Renter_HH)+.20*renterShare(r.Renter_Share)+.10*vacancy;return Object.assign({},r,{_opportunity:score})});
+}
+function zipOpportunityScore(r){return Number(r._opportunity||0)}
+function aggregateCountyRows(rows){
+ const groups=new Map();rows.forEach(r=>{const key=(r.County||'Unknown')+'|'+(r.State||'');if(!groups.has(key))groups.set(key,[]);groups.get(key).push(r)});
+ return [...groups.entries()].map(([key,zs])=>{const [county,state]=key.split('|'),w=zs.reduce((s,z)=>s+Math.max(1,Number(z.Renter_HH||0)),0);const wav=k=>zs.reduce((s,z)=>s+Number(z[k]||0)*Math.max(1,Number(z.Renter_HH||0)),0)/w;return {Area:county+', '+state,ZIP_Count:zs.length,Population:zs.reduce((s,z)=>s+Number(z.Population||0),0),Renter_HH:zs.reduce((s,z)=>s+Number(z.Renter_HH||0),0),Renter_Share:wav('Renter_Share'),Vacancy_Rate:wav('Vacancy_Rate'),Median_Rent:wav('Median_Rent'),_opportunity:zs.reduce((s,z)=>s+zipOpportunityScore(z)*Math.max(1,Number(z.Renter_HH||0)),0)/w}}).sort((a,b)=>b._opportunity-a._opportunity)
+}
+function renderDrilldown(){
+ const metro=$('drillMetro').value;if(!metro)return;const base=scoreMetroZips(ZIPDB.filter(r=>r.CBSA===metro));const county=$('drillGeo').value==='counties';let rows=county?aggregateCountyRows(base):base.slice().sort((a,b)=>b._opportunity-a._opportunity);rows.forEach((r,i)=>r._rank=i+1);drillRows=rows;const show=rows.slice(0,+$('drillTopn').value);
+ $('drillMessage').innerHTML=`<strong>${metro}</strong> · ranking ${county?'counties':'ZIP codes'} by internal market opportunity.`;$('dkAreas').textContent=fmtInt(rows.length);$('dkPop').textContent=fmtInt(base.reduce((s,r)=>s+Number(r.Population||0),0));$('dkRenters').textContent=fmtInt(base.reduce((s,r)=>s+Number(r.Renter_HH||0),0));const totalHH=base.reduce((s,r)=>s+Number(r.Households||0),0)||1;$('dkVacancy').textContent=pct(base.reduce((s,r)=>s+Number(r.Vacancy_Rate||0)*Number(r.Households||0),0)/totalHH);$('dkScore').textContent=fmt1(rows.length?rows.reduce((s,r)=>s+Number(r._opportunity||0),0)/rows.length:0);
+ if(county){$('drillHead').innerHTML='<th>#</th><th>County</th><th>ZIPs</th><th>Population</th><th>Renter HH</th><th>Renter Share</th><th>Vacancy</th><th>Median Rent</th><th>Opportunity Score</th>';$('drillBody').innerHTML=show.map(r=>`<tr><td class="rank">${r._rank}</td><td><strong>${r.Area}</strong></td><td class="num">${fmtInt(r.ZIP_Count)}</td><td class="num">${fmtInt(r.Population)}</td><td class="num">${fmtInt(r.Renter_HH)}</td><td class="num">${pct(r.Renter_Share)}</td><td class="num">${pct(r.Vacancy_Rate)}</td><td class="num">${money(r.Median_Rent)}</td><td class="num"><strong>${fmt1(r._opportunity)}</strong></td></tr>`).join('')}
+ else{$('drillHead').innerHTML='<th>#</th><th>ZIP</th><th>City</th><th>County</th><th>Population</th><th>Renter HH</th><th>Renter Share</th><th>Vacancy</th><th>Median Rent</th><th>Opportunity Score</th>';$('drillBody').innerHTML=show.map(r=>`<tr><td class="rank">${r._rank}</td><td><strong>${r.ZIP}</strong></td><td>${r.City||''}, ${r.State||''}</td><td>${r.County||''}</td><td class="num">${fmtInt(r.Population)}</td><td class="num">${fmtInt(r.Renter_HH)}</td><td class="num">${pct(r.Renter_Share)}</td><td class="num">${pct(r.Vacancy_Rate)}</td><td class="num">${r.Median_Rent?money(r.Median_Rent):'—'}</td><td class="num"><strong>${fmt1(r._opportunity)}</strong></td></tr>`).join('')}
+}
+$('drillMetro').addEventListener('change',renderDrilldown);$('drillGeo').addEventListener('change',renderDrilldown);$('drillTopn').addEventListener('change',renderDrilldown);
+$('exportDrill').addEventListener('click',()=>{if(!drillRows.length)return;const county=$('drillGeo').value==='counties';const cols=county?[['Rank',r=>r._rank],['County',r=>r.Area],['ZIP_Count',r=>r.ZIP_Count],['Population',r=>r.Population],['Renter_HH',r=>r.Renter_HH],['Renter_Share',r=>r.Renter_Share],['Vacancy_Rate',r=>r.Vacancy_Rate],['Median_Rent',r=>r.Median_Rent],['Opportunity_Score',r=>r._opportunity]]:[['Rank',r=>r._rank],['ZIP',r=>r.ZIP],['City',r=>r.City],['State',r=>r.State],['County',r=>r.County],['Population',r=>r.Population],['Renter_HH',r=>r.Renter_HH],['Renter_Share',r=>r.Renter_Share],['Vacancy_Rate',r=>r.Vacancy_Rate],['Median_Rent',r=>r.Median_Rent],['Opportunity_Score',r=>r._opportunity]];const lines=[cols.map(c=>c[0]).join(',')];drillRows.forEach(r=>lines.push(cols.map(c=>csvEscape(c[1](r))).join(',')));const blob=new Blob([lines.join('\n')],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='apartment-metro-opportunity-drilldown.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),500)});
 
 function setMode(mode){
- const national=mode==='national';
- $('nationalView').classList.toggle('hidden',!national);
- $('radiusView').classList.toggle('hidden',national);
- $('modeNational').classList.toggle('active',national);
- $('modeRadius').classList.toggle('active',!national);
+ const national=mode==='national',drill=mode==='drilldown',radius=mode==='radius';$('nationalView').classList.toggle('hidden',!national);$('drilldownView').classList.toggle('hidden',!drill);$('radiusView').classList.toggle('hidden',!radius);$('modeNational').classList.toggle('active',national);$('modeDrilldown').classList.toggle('active',drill);$('modeRadius').classList.toggle('active',radius);if(drill)renderDrilldown();
 }
-$('modeNational').addEventListener('click',()=>setMode('national'));
-$('modeRadius').addEventListener('click',()=>setMode('radius'));
+$('modeNational').addEventListener('click',()=>setMode('national'));$('modeDrilldown').addEventListener('click',()=>setMode('drilldown'));$('modeRadius').addEventListener('click',()=>setMode('radius'));
 
 function haversineMiles(lat1,lon1,lat2,lon2){
  const R=3958.7613, toRad=x=>x*Math.PI/180;
