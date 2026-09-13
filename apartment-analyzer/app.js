@@ -55,6 +55,14 @@ function fitMapToMarkers(map,markers,maxZoom){
  const bounds=L.latLngBounds(markers.map(m=>m.getLatLng()));
  if(bounds.isValid())map.fitBounds(bounds.pad(.12),{maxZoom:maxZoom||9});
 }
+function fitNationalMapToMarkers(map,markers){
+ if(!map||!markers.length)return;
+ const conus=markers.filter(m=>{const p=m.getLatLng(),lat=Number(p.lat),lon=Number(p.lng);return lat>=24&&lat<=50.5&&lon>=-125.5&&lon<=-66.5});
+ const focus=conus.length>=2?conus:markers;
+ if(focus.length===1){map.setView(focus[0].getLatLng(),6);return}
+ const bounds=L.latLngBounds(focus.map(m=>m.getLatLng()));
+ if(bounds.isValid())map.fitBounds(bounds.pad(.08),{maxZoom:5});
+}
 function highlightMappedRow(scope,id){
  document.querySelectorAll(`${scope} tr[data-map-id]`).forEach(tr=>tr.classList.toggle('map-selected-row',tr.dataset.mapId===String(id)));
 }
@@ -174,7 +182,7 @@ function renderNationalMap(rows){
    marker.bindPopup(`<strong>${r.Market}</strong><br>Expansion rank: <strong>#${rr}</strong> of ${rows.length}<br>Expansion Opportunity: <strong>${fmt1(r._objective)}</strong> · ${opportunityLevel(r._objective)}<br>Rent Momentum: ${r._rentMomentum}<br>Forward Supply Risk: ${r._supplyRisk}<br>Enhanced Outlook: ${r._enhancedOutlook}`);
    marker.on('click',()=>{selected=r;renderDetail();highlightMappedRow('#tbody',r.Market)});MAP_MARKERS.national.set(String(r.Market),marker);markers.push(marker);mapped++;
  }
- fitMapToMarkers(map,markers,5);
+ fitNationalMapToMarkers(map,markers);
  const status=$('nationalMapStatus');if(status)status.innerHTML=`Mapped <strong>${mapped}</strong> of <strong>${rows.length}</strong> filtered markets. ${rankEmphasisText('nationalRankEmphasis',rows.length)}`;
 }
 function updateDrillCountyFilter(raw){
