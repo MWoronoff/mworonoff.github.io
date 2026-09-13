@@ -7,16 +7,13 @@
 <style>
 :root{--navy:#17365d;--blue:#2d6ca2;--ink:#172033;--muted:#667085;--line:#d8dee8;--bg:#f5f7fa;--card:#fff;--good:#1e6f5c;--warn:#946200;--bad:#a33a3a}
 *{box-sizing:border-box} body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--ink)}
-header{background:linear-gradient(135deg,#17365d,#285d8e);color:white;padding:24px 28px}
+header{background:linear-gradient(135deg,#17365d,#285d8e);color:white;padding:22px 28px}.header-inner{max-width:1500px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:24px}.brand-copy{min-width:0}.adtaxi-logo{display:flex;align-items:center;gap:9px;flex:0 0 auto;font-size:29px;font-weight:800;letter-spacing:-1.4px;color:#fff}.adtaxi-mark{display:grid;grid-template-columns:repeat(3,5px);grid-template-rows:repeat(3,5px);gap:2px;transform:skewX(-12deg)}.adtaxi-mark i{display:block;background:#7ac143}.adtaxi-mark i:nth-child(2),.adtaxi-mark i:nth-child(4),.adtaxi-mark i:nth-child(8){opacity:.35}.adtaxi-logo small{font-size:9px;letter-spacing:.6px;font-weight:700;opacity:.8;display:block;margin-top:2px;text-transform:uppercase}
 header h1{margin:0 0 6px;font-size:28px} header p{margin:0;opacity:.9;max-width:900px;line-height:1.4}
 .wrap{max-width:1500px;margin:auto;padding:20px}
 .controls,.summary,.detail{background:var(--card);border:1px solid var(--line);border-radius:12px}
 .controls{padding:16px;display:grid;grid-template-columns:repeat(6,minmax(140px,1fr));gap:12px;align-items:end}
 label{display:block;font-size:12px;font-weight:700;color:#475467;margin-bottom:5px}
-select,input,button,.text-searchbox{width:100%;min-height:42px;border-radius:8px;border:1px solid #b9c2cf;padding:9px 10px;font-size:14px;background:white;box-sizing:border-box}
-.text-searchbox{white-space:nowrap;overflow:hidden;line-height:22px;cursor:text}
-.text-searchbox:empty::before{content:attr(data-placeholder);color:#6b7280;pointer-events:none}
-.text-searchbox:focus{outline:2px solid #111827;outline-offset:0}
+select,input,button,.text-searchbox{width:100%;min-height:42px;border-radius:8px;border:1px solid #b9c2cf;padding:9px 10px;font-size:14px;background:white;box-sizing:border-box}.text-searchbox{white-space:nowrap;overflow:hidden;line-height:22px;cursor:text}.text-searchbox:empty::before{content:attr(data-placeholder);color:#6b7280;pointer-events:none}.text-searchbox:focus{outline:2px solid #111827;outline-offset:0}
 button{cursor:pointer;background:var(--navy);color:white;border-color:var(--navy);font-weight:700}
 button.secondary{background:white;color:var(--navy)} .note{grid-column:1/-1;font-size:12px;color:var(--muted);line-height:1.4}
 .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:16px 0}
@@ -32,7 +29,7 @@ td{padding:9px 8px;border-bottom:1px solid #eef1f5;white-space:nowrap} tr:hover{
 .legend{font-size:12px;color:var(--muted);line-height:1.5;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
 footer{max-width:1500px;margin:auto;padding:0 20px 28px;font-size:12px;color:var(--muted);line-height:1.5}
 @media(max-width:1050px){.controls{grid-template-columns:repeat(3,1fr)}.grid{grid-template-columns:1fr}.detail{position:static}}
-@media(max-width:650px){header{padding:18px}.wrap{padding:12px}.controls{grid-template-columns:1fr 1fr}.kpis{grid-template-columns:1fr 1fr}}
+@media(max-width:650px){header{padding:18px}.header-inner{align-items:flex-start;flex-direction:column}.adtaxi-logo{font-size:24px}.wrap{padding:12px}.controls{grid-template-columns:1fr 1fr}.kpis{grid-template-columns:1fr 1fr}}
 </style>
 
 <style>
@@ -41,7 +38,7 @@ footer{max-width:1500px;margin:auto;padding:0 20px 28px;font-size:12px;color:var
 .modebar button.active{background:#17365d;color:#fff}
 .radius-section{max-width:1500px;margin:18px auto;padding:0 20px 22px}
 .radius-card{background:#fff;border:1px solid #d8dee8;border-radius:12px;padding:18px}
-.radius-controls{display:grid;grid-template-columns:repeat(5,minmax(150px,1fr));gap:12px;align-items:end}
+.radius-controls{display:grid;grid-template-columns:repeat(4,minmax(150px,1fr));gap:12px;align-items:end}
 .radius-summary{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:16px 0}
 .radius-table{overflow:auto;max-height:650px;border:1px solid #d8dee8;border-radius:10px}
 .radius-note{font-size:12px;color:#667085;line-height:1.5;margin-top:12px}
@@ -51,10 +48,10 @@ footer{max-width:1500px;margin:auto;padding:0 20px 28px;font-size:12px;color:var
 
 </head>
 <body>
-<header>
+<header><div class="header-inner"><div class="brand-copy">
 <h1>Apartment Management Market Analyzer</h1>
-<p>Explore apartment markets, compare local fundamentals and identify areas that may offer expansion or marketing opportunities. Use the national rankings for market-level screening and the ZIP-radius tool for property-level media planning.</p>
-</header>
+<p>National screening tool for expansion/acquisition, disposition review and leasing/marketing need, plus property-level ZIP marketing prioritization.</p></div>
+<div class="adtaxi-logo" aria-label="Adtaxi"><span class="adtaxi-mark"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span>adtaxi<small>marketing intelligence</small></span></div></div></header>
 
 <div class="modebar">
 <button id="modeNational" class="active" type="button">National Market Rankings</button>
@@ -63,29 +60,26 @@ footer{max-width:1500px;margin:auto;padding:0 20px 28px;font-size:12px;color:var
 
 <div id="nationalView" class="wrap">
 <section class="controls">
-<div><label for="geo">Geography</label><select id="geo"><option value="metros">Metro Areas</option><option value="counties">Counties</option></select></div>
+<div><label for="geo">Geography</label><select id="geo"><option value="metros">Metros / CBSAs</option><option value="counties">Counties</option></select></div>
 <div><label for="objective">Ranking objective</label><select id="objective">
-<option value="Acquisition_Enhanced">Markets to Consider for Expansion</option>
-<option value="Disposition_Enhanced">Markets That May Need Attention</option>
-<option value="Overall_Opportunity">Overall Market Opportunity</option>
-<option value="Portfolio_Snapshot">Market Strength</option>
-<option value="Marketing_Need">Marketing Opportunity</option>
-<option value="Risk">Market Risk</option></select></div>
+<option value="Acquisition_Enhanced">Expansion / Acquisition Potential</option>
+<option value="Disposition_Enhanced">Disposition / Review Priority</option>
+<option value="Marketing_Need">Leasing / Marketing Need</option></select></div>
 <div><label id="marketSearchLabel">Search market</label><div id="marketSearchBox" class="text-searchbox" role="searchbox" aria-labelledby="marketSearchLabel" aria-placeholder="Denver, Fairfax, etc." data-placeholder="Denver, Fairfax, etc." contenteditable="plaintext-only" spellcheck="false" tabindex="0"></div></div>
-<div><label for="state">State</label><select id="state"><option value="">All states</option></select></div>
-
+<div><label for="state">State (counties)</label><select id="state"><option value="">All states</option></select></div>
+<div><label for="minpop">Minimum population</label><select id="minpop"><option value="0">No minimum</option><option value="50000">50,000+</option><option value="100000">100,000+</option><option value="250000">250,000+</option><option value="500000">500,000+</option><option value="1000000">1,000,000+</option></select></div>
 <div><label for="topn">Show</label><select id="topn"><option>25</option><option selected>50</option><option>100</option><option>250</option><option value="99999">All</option></select></div>
 <div><label>Export ranked view</label><button id="exportCsv" type="button">Download CSV</button></div>
 <div><label>Compare markets</label><button id="clearCompare" type="button" class="secondary">Clear comparison</button></div>
-<div class="note"><strong>How to use the rankings:</strong> Scores combine renter-market depth, apartment-market fundamentals, vacancy, recent construction and other current conditions. They are designed to help prioritize markets for discussion and further research—not to replace property-level financial analysis or investment underwriting.</div>
+<div class="note"><strong>How to use the rankings:</strong> <b>Expansion / Acquisition Potential</b> screens for markets with stronger renter demand and portfolio fundamentals. <b>Disposition / Review Priority</b> surfaces markets that merit closer portfolio review because of supply pressure, vacancy and weaker fundamentals. <b>Leasing / Marketing Need</b> identifies markets where competitive or leasing pressure may justify greater marketing support. These are directional screening tools, not property valuations or transaction recommendations.</div>
 </section>
 
 <div class="kpis">
 <div class="kpi"><div class="v" id="kMarkets">–</div><div class="l">Markets in current view</div></div>
 <div class="kpi"><div class="v" id="kRenters">–</div><div class="l">Renter households represented</div></div>
 <div class="kpi"><div class="v" id="kVacancy">–</div><div class="l">Avg. vacancy rate</div></div>
-<div class="kpi"><div class="v" id="kRent">–</div><div class="l">Avg. median monthly rent</div></div>
-<div class="kpi"><div class="v" id="kScore">–</div><div class="l">Avg. opportunity score</div></div>
+<div class="kpi"><div class="v" id="kRent">–</div><div class="l">Avg. weighted median rent</div></div>
+<div class="kpi"><div class="v" id="kScore">–</div><div class="l">Avg. selected score</div></div>
 </div>
 
 <div class="grid">
@@ -94,17 +88,17 @@ footer{max-width:1500px;margin:auto;padding:0 20px 28px;font-size:12px;color:var
 <table>
 <thead><tr>
 <th data-key="_rank">#</th><th data-key="Market">Market</th><th data-key="Population">Population</th>
-<th data-key="Renter_HH">Renter Households</th><th data-key="Vacancy_Rate">Vacancy Rate</th><th data-key="Median_Rent_Wtd">Median Monthly Rent</th>
-<th data-key="Property_Score">Property Strength</th><th data-key="Portfolio_Snapshot">Market Strength</th><th data-key="Risk">Market Risk</th>
-<th data-key="_objective">Opportunity Score</th><th data-key="Strategic_Snapshot">Market Outlook</th>
+<th data-key="Renter_HH">Renter HH</th><th data-key="Vacancy_Rate">Vacancy</th><th data-key="Median_Rent_Wtd">Median Rent</th>
+<th data-key="Demand_Depth_Proxy">Demand Depth</th><th data-key="Supply_Pressure_Proxy">Supply Pressure</th>
+<th data-key="_objective">Selected Score</th><th data-key="Strategic_Snapshot">Market Recommendation</th>
 </tr></thead>
 <tbody id="tbody"></tbody>
 </table>
 </div>
 </section>
 <aside class="detail" id="detail">
-<h2>Select a market</h2><div class="sub">Click a row to see why the market ranks where it does.</div>
-<div class="legend">Choose a ranking goal above, then select a market to see the factors supporting its score. The rankings are directional screening tools intended to support sales conversations and deeper client analysis.</div>
+<h2>Select a market</h2><div class="sub">Click a row to inspect its underlying metrics.</div>
+<div class="legend"><strong>Three clear objectives:</strong> Expansion / Acquisition, Disposition / Review, and Leasing / Marketing Need. Supporting measures remain available in market details without becoming separate competing rankings.</div>
 </aside>
 
 </div>
@@ -117,12 +111,12 @@ footer{max-width:1500px;margin:auto;padding:0 20px 28px;font-size:12px;color:var
 
 <section id="radiusView" class="radius-section hidden">
 <div class="radius-card">
-<h2 style="margin-top:0">Property ZIP Radius Planning</h2>
+<h2 style="margin-top:0">Property ZIP Radius Analysis</h2>
 <p style="color:#667085;margin-top:-4px">Enter a property ZIP and radius. Every ZIP whose centroid falls within the radius is included and ranked; no minimum-score exclusion is applied.</p>
 <div class="radius-controls">
-<div><label for="centerZip">Property ZIP</label><input id="centerZip" name="property-zip" maxlength="5" inputmode="numeric" placeholder="e.g., 80202" autocomplete="off" aria-autocomplete="none" spellcheck="false" autocapitalize="off" autocorrect="off"></div>
+<div><label for="centerZip">Property ZIP</label><input id="centerZip" maxlength="5" placeholder="e.g., 80202"></div>
 <div><label for="radiusMiles">Radius</label><select id="radiusMiles"><option>3</option><option>5</option><option selected>10</option><option>15</option><option>20</option><option>25</option><option>30</option><option>50</option></select></div>
-<div><label for="radiusObjective">Campaign objective</label><select id="radiusObjective"><option value="balanced" selected>Balanced leasing</option><option value="leaseup">Lease-up / vacancy pressure</option><option value="audience">Maximize renter reach</option></select></div>
+
 <div><label for="radiusBudget">Optional ad budget</label><input id="radiusBudget" type="number" min="0" step="100" placeholder="e.g., 10000"></div>
 <div><label>Run analysis</label><button id="runRadius" type="button">Rank ZIPs</button></div>
 </div>
@@ -137,20 +131,20 @@ footer{max-width:1500px;margin:auto;padding:0 20px 28px;font-size:12px;color:var
 <div id="radiusResults" class="radius-table hidden">
 <table>
 <thead><tr>
-<th>Rank</th><th>ZIP</th><th>City / State</th><th>Distance</th><th>Renter Households</th><th>Renter Share</th>
-<th>Large-Apartment Units (20+)</th><th>Median Monthly Rent</th><th>Advertising Opportunity</th><th>Marketing Opportunity</th>
-<th>ZIP Marketing Score</th><th>Overall Opportunity</th><th>Budget Share</th><th>Suggested $</th>
+<th>Rank</th><th>ZIP</th><th>City / State</th><th>Distance</th><th>Renter HH</th><th>Renter Share</th>
+<th>20+ Unit Inventory</th><th>Median Rent</th><th>Property Ad Score</th><th>Marketing Need</th>
+<th>Property Marketing Priority</th><th>Overall Opportunity</th><th>Budget Share</th><th>Suggested $</th>
 </tr></thead>
 <tbody id="radiusBody"></tbody>
 </table>
 </div>
 <div id="radiusExportWrap" class="hidden" style="margin-top:12px;max-width:220px"><button id="exportRadius" type="button">Download Radius CSV</button></div>
-<div class="radius-note"><strong>How the ZIP ranking works:</strong> every ZIP in the selected radius remains in the list. The ZIP Marketing Score combines advertising opportunity, renter-household scale, marketing opportunity and proximity to the property. The campaign objective changes the weighting. Suggested budget shares give somewhat more weight to nearby ZIPs when other factors are similar. Use this as a media-planning guide rather than a required spending formula.</div>
+<div class="radius-note"><strong>Property marketing methodology:</strong> every ZIP in the selected radius remains in the ranking. The Property Marketing Score blends Property Advertising Score, renter-household scale within the selected radius, Marketing Need, and proximity to the property. The ranking uses one evidence-based weighting because the former campaign-objective variants produced essentially the same ZIP rankings in nationwide testing. Suggested budget then applies an additional distance-decay factor so closer ZIPs receive more weight when otherwise similar. This is a media-planning aid, not a required spend prescription.</div>
 </div>
 </section>
 
 <footer>
-<strong>About the data:</strong> Nationwide results currently include 939 metro areas and 3,199 counties. Rankings use current renter, housing, vacancy, rent, recent-construction and related market indicators to support directional market screening. Property ZIP-radius planning includes all ZIPs in the chosen radius and can suggest relative advertising allocations. Historical rent/vacancy trends, active construction pipelines and property-level financials should be reviewed separately for investment decisions.
+<strong>Current data source:</strong> Apartment Management Market Opportunity workbook. Nationwide results currently include 939 metros/CBSAs and 3,199 counties. This build includes national metro/county rankings, market comparison, export, and the property ZIP-radius advertising module with a single Property Marketing Priority score and distance-decayed budget allocation. National rankings have been simplified to three evidence-supported objectives; ZIP analysis uses one Property Marketing Priority ranking after nationwide overlap testing showed the former campaign variants were effectively redundant. True historical rent/vacancy series and active multifamily pipeline data remain the next major underwriting enhancement.
 </footer>
 
 <script src="zip-data-1.js"></script>
