@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="application-version" content="7.3">
+<meta name="application-version" content="7.4">
 <title>Apartment Management Market Analyzer</title>
 <!-- Apartment Analyzer V7.2: resilient tab navigation + market health, metro drill-down, property ZIP radius -->
 <style>
@@ -129,7 +129,7 @@ footer{max-width:1500px;margin:auto;padding:0 20px 28px;font-size:12px;color:var
 <div class="kpi"><div class="v" id="dkScore">–</div><div class="l">Avg. opportunity score</div></div>
 </div>
 <div class="radius-table"><table><thead><tr id="drillHead"></tr></thead><tbody id="drillBody"></tbody></table></div>
-<div class="radius-note"><strong>Opportunity methodology:</strong> ZIP Opportunity Score combines Property Advertising Score, renter-household scale within the selected metro, renter concentration and inverse vacancy. County scores aggregate the underlying ZIP opportunity using renter households as the primary weight. All ZIPs with a matching metro designation remain available; low- or zero-data records are retained and should be interpreted cautiously.</div>
+<div class="radius-note"><strong>Opportunity methodology:</strong> Opportunity Score = <strong>35% Apartment Market Scale</strong> + <strong>30% Apartment Concentration</strong> + <strong>20% Occupancy Strength</strong> + <strong>15% Property Marketing Opportunity</strong>. Market Scale blends renter-household scale (60% of the component) with 20+ unit multifamily inventory (40%). Apartment Concentration blends renter share (60%) with 20+ unit inventory as a share of households (40%). Occupancy Strength inversely scores vacancy, while Property Marketing Opportunity preserves the existing advertising signal at a deliberately smaller weight. ZIP components are normalized within the selected metro. County totals and rates are first aggregated from their ZIPs, then counties are independently normalized and scored against other counties in that metro rather than averaging ZIP scores. All matching ZIPs remain available; low- or zero-data records should be interpreted cautiously.</div>
 </div>
 </section>
 
@@ -203,5 +203,5 @@ footer{max-width:1500px;margin:auto;padding:0 20px 28px;font-size:12px;color:var
 <script src="zip-data-4.js"></script>
 <script src="zip-data-5.js"></script>
 <script src="zip-data-6.js"></script>
-<script src="app.js?v=7.3-20260913"></script>
+<script src="app.js?v=7.4-20260913"></script>
 </body></html>
