@@ -216,7 +216,7 @@ function renderDrilldown(){
  document.querySelectorAll('#drillBody tr[data-map-id]').forEach(tr=>tr.addEventListener('click',()=>{highlightMappedRow('#drillBody',tr.dataset.mapId);focusMapMarker('drill',tr.dataset.mapId,county?8:10)}));renderDrillMap(mapRows,county);
 }
 
-$('drillMetro').addEventListener('change',renderDrilldown);$('drillGeo').addEventListener('change',renderDrilldown);$('drillCountyFilter').addEventListener('change',renderDrilldown);$('drillTopn').addEventListener('change',renderDrilldown);
+$('drillMetro').addEventListener('change',renderDrilldown);$('drillGeo').addEventListener('change',renderDrilldown);$('drillCountyFilter')?.addEventListener('change',renderDrilldown);$('drillTopn').addEventListener('change',renderDrilldown);
 $('exportDrill').addEventListener('click',()=>{if(!drillRows.length)return;const county=$('drillGeo').value==='counties';const cols=county?[['Rank',r=>r._rank],['County',r=>r.Area],['ZIP_Count',r=>r.ZIP_Count],['Population',r=>r.Population],['Renter_HH',r=>r.Renter_HH],['Renter_Share',r=>r.Renter_Share],['Vacancy_Rate',r=>r.Vacancy_Rate],['Median_Rent',r=>r.Median_Rent],['Multifamily_20plus_Units',r=>r.Multifamily_20plus_Units],['Market_Scale',r=>r._marketScale],['Apartment_Concentration',r=>r._concentration],['Occupancy_Strength',r=>r._occupancy],['Property_Marketing_Opportunity',r=>r._marketing],['Opportunity_Score',r=>r._opportunity]]:[['Rank',r=>r._rank],['ZIP',r=>r.ZIP],['City',r=>r.City],['State',r=>r.State],['County',r=>r.County],['Population',r=>r.Population],['Renter_HH',r=>r.Renter_HH],['Renter_Share',r=>r.Renter_Share],['Vacancy_Rate',r=>r.Vacancy_Rate],['Median_Rent',r=>r.Median_Rent],['Multifamily_20plus_Units',r=>r.Multifamily_20plus_Units],['Market_Scale',r=>r._marketScale],['Apartment_Concentration',r=>r._concentration],['Occupancy_Strength',r=>r._occupancy],['Property_Marketing_Opportunity',r=>r._marketing],['Opportunity_Score',r=>r._opportunity]];const lines=[cols.map(c=>c[0]).join(',')];drillRows.forEach(r=>lines.push(cols.map(c=>csvEscape(c[1](r))).join(',')));const blob=new Blob([lines.join('\n')],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='apartment-metro-opportunity-drilldown.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),500)});
 
 function setMode(mode){
@@ -302,7 +302,7 @@ function runRadius(){
  radiusRows=rows;
 
  $('radiusMessage').innerHTML=`Centered on <strong>${center.ZIP} ${center.City||''}, ${center.State||''}</strong>. Showing every ZIP centroid within <strong>${miles} miles</strong>. Ranking: <strong>Property Marketing Opportunity</strong>. Distance affects allocation, not opportunity ranking.${rows.length?`<div class="interpretation"><strong>Top ZIP: ${opportunityLevel(rows[0]._marketingScore)} Opportunity.</strong> ${radiusInterpretation(rows[0]._marketingScore)}</div>`:''}`;
- $('radiusKpis').classList.remove('hidden'); $('radiusResults').classList.remove('hidden'); $('radiusExportWrap').classList.remove('hidden'); $('radiusMapPanel').classList.remove('hidden');
+ $('radiusKpis').classList.remove('hidden'); $('radiusResults').classList.remove('hidden'); $('radiusExportWrap').classList.remove('hidden'); $('radiusMapPanel')?.classList.remove('hidden');
  $('rzCount').textContent=fmtInt(rows.length);
  $('rzRenters').textContent=fmtInt(rows.reduce((s,r)=>s+Number(r.Renter_HH||0),0));
  $('rzMF').textContent=fmtInt(rows.reduce((s,r)=>s+Number(r.Multifamily_20plus_Units||0),0));
