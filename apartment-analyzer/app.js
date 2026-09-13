@@ -7,6 +7,49 @@ const fmt1=n=>Number(n||0).toLocaleString('en-US',{maximumFractionDigits:1});
 const pct=n=>(Number(n||0)*100).toFixed(1)+'%';
 const money=n=>'$'+fmtInt(n);
 let sortKey='_objective', sortDir=-1, selected=null, compare=[], drillRows=[];
+const MAPS={national:null,drill:null,radius:null};
+const MAP_LAYERS={national:null,drill:null,radius:null};
+const MAP_MARKERS={national:new Map(),drill:new Map(),radius:new Map()};
+
+function weightedCentroid(rows){
+ let lat=0,lon=0,w=0;
+ for(const r of rows||[]){
+   const la=Number(r.Latitude),lo=Number(r.Longitude);
+   if(!Number.isFinite(la)||!Number.isFinite(lo))continue;
+   const wt=Math.max(1,Number(r.Population||0)); lat+=la*wt;lon+=lo*wt;w+=wt;
+ }
+ return w?{lat:lat/w,lon:lon/w}:null;
+}
+function mapTierColor(score){const l=opportunityLevel(score);return l==='Very High'?'#1f7a63':l==='High'?'#4d9f79':l==='Moderate'?'#d2a93b':l==='Low'?'#d47a35':'#b84a4a'}
+function scoreMarkerStyle(score,rank,total){
+ const top=rank<=Math.min(10,total),bottom=rank>Math.max(0,total-10);
+ return {radius:top||bottom?8:6,color:top?'#17365d':bottom?'#7a2430':'#ffffff',weight:top?3:bottom?2:1,fillColor:mapTierColor(score),fillOpacity:.82,dashArray:bottom?'4 3':null};
+}
+function ensureLeafletMap(key,elementId,statusId,defaultView=[39,-98,4]){
+ const status=$(statusId);
+ if(!window.L){if(status)status.textContent='Map library unavailable. Rankings and tables remain fully functional.';return null}
+ if(!MAPS[key]){
+   const el=$(elementId);if(!el)return null;
+   MAPS[key]=L.map(el,{zoomControl:true,scrollWheelZoom:false}).setView([defaultView[0],defaultView[1]],defaultView[2]);
+   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:'&copy; OpenStreetMap contributors'}).addTo(MAPS[key]);
+   MAP_LAYERS[key]=L.layerGroup().addTo(MAPS[key]);
+ }
+ MAP_LAYERS[key].clearLayers();MAP_MARKERS[key].clear();
+ setTimeout(()=>MAPS[key]&&MAPS[key].invalidateSize(),0);
+ return MAPS[key];
+}
+function fitMapToMarkers(map,markers,maxZoom){
+ if(!map||!markers.length)return;
+ const bounds=L.latLngBounds(markers.map(m=>m.getLatLng()));
+ if(bounds.isValid())map.fitBounds(bounds.pad(.12),{maxZoom:maxZoom||9});
+}
+function highlightMappedRow(scope,id){
+ document.querySelectorAll(`${scope} tr[data-map-id]`).forEach(tr=>tr.classList.toggle('map-selected-row',tr.dataset.mapId===String(id)));
+}
+function focusMapMarker(key,id,zoom){
+ const marker=MAP_MARKERS[key].get(String(id));const map=MAPS[key];if(!marker||!map)return;
+ if(zoom)map.setView(marker.getLatLng(),Math.max(map.getZoom(),zoom));marker.openPopup();
+}
 
 function healthScore(r){return Number(r.Acquisition_Enhanced||0)}
 const metroScaleValues=DB.metros.map(r=>Math.max(0,Number(r.Renter_HH||0))).sort((a,b)=>a-b);
@@ -76,10 +119,11 @@ function renderCompare(){
 function addSelectedToCompare(){if(!selected)return;if(compare.some(r=>r.Market===selected.Market))return;if(compare.length>=4)compare.shift();compare.push(selected);renderCompare()}
 function render(){
  const all=filtered(),show=all.slice(0,+$('topn').value);
- $('tbody').innerHTML=show.map(r=>`<tr data-id="${encodeURIComponent(r.Market)}" class="${selected&&selected.Market===r.Market?'selected':''}"><td class="rank">${r._rank}</td><td><strong>${r.Market}</strong></td><td class="num">${fmtInt(r.Population)}</td><td class="num">${fmtInt(r.Renter_HH)}</td><td class="num">${pct(r.Vacancy_Rate)}</td><td class="num">${money(r.Median_Rent_Wtd)}</td><td class="num diagnostic-col">${fmt1(r.Demand_Depth_Proxy)}</td><td class="num diagnostic-col">${fmt1(r.Supply_Pressure_Proxy)}</td><td class="num diagnostic-col">${fmt1(r._fundamentals)}</td><td class="num diagnostic-col">${fmt1(r._scale)}</td><td class="num decision-col primary-score"><strong>${fmt1(r._objective)}</strong>${levelBadge(r._objective)}</td><td>${enhancedBadge(r._rentMomentum)}</td><td>${enhancedBadge(r._supplyRisk)}</td><td class="enhanced-outlook"><strong>${r._enhancedOutlook}</strong></td><td class="diagnostic-col"><span class="badge">${r._tier}</span></td></tr>`).join('');
- document.querySelectorAll('#tbody tr').forEach(tr=>tr.addEventListener('click',()=>{const market=decodeURIComponent(tr.dataset.id);selected=all.find(r=>r.Market===market);renderDetail();render()}));
+ $('tbody').innerHTML=show.map(r=>`<tr data-id="${encodeURIComponent(r.Market)}" data-map-id="${String(r.Market).replace(/"/g,'&quot;')}" class="${selected&&selected.Market===r.Market?'selected':''}"><td class="rank">${r._rank}</td><td><strong>${r.Market}</strong></td><td class="num">${fmtInt(r.Population)}</td><td class="num">${fmtInt(r.Renter_HH)}</td><td class="num">${pct(r.Vacancy_Rate)}</td><td class="num">${money(r.Median_Rent_Wtd)}</td><td class="num diagnostic-col">${fmt1(r.Demand_Depth_Proxy)}</td><td class="num diagnostic-col">${fmt1(r.Supply_Pressure_Proxy)}</td><td class="num diagnostic-col">${fmt1(r._fundamentals)}</td><td class="num diagnostic-col">${fmt1(r._scale)}</td><td class="num decision-col primary-score"><strong>${fmt1(r._objective)}</strong>${levelBadge(r._objective)}</td><td>${enhancedBadge(r._rentMomentum)}</td><td>${enhancedBadge(r._supplyRisk)}</td><td class="enhanced-outlook"><strong>${r._enhancedOutlook}</strong></td><td class="diagnostic-col"><span class="badge">${r._tier}</span></td></tr>`).join('');
+ document.querySelectorAll('#tbody tr').forEach(tr=>tr.addEventListener('click',()=>{const market=decodeURIComponent(tr.dataset.id);selected=all.find(r=>r.Market===market);renderDetail();render();setTimeout(()=>focusMapMarker('national',market,5),0)}));
  const renters=all.reduce((s,r)=>s+Number(r.Renter_HH||0),0),avg=k=>all.length?all.reduce((s,r)=>s+Number(r[k]||0),0)/all.length:0;
  $('kMarkets').textContent=fmtInt(all.length);$('kRenters').textContent=fmtInt(renters);$('kVacancy').textContent=pct(avg('Vacancy_Rate'));$('kRent').textContent=money(avg('Median_Rent_Wtd'));$('kScore').textContent=fmt1(all.length?all.reduce((s,r)=>s+r._objective,0)/all.length:0);
+ renderNationalMap(all);
 }
 function renderDetail(){
  if(!selected)return;const r=selected;
@@ -101,6 +145,50 @@ function bestZipMetroForMarket(market){
  const n=normMetro(market);let exact=zipMetros.find(x=>normMetro(x)===n);if(exact)return exact;
  const first=n.split(' ')[0];return zipMetros.find(x=>normMetro(x).startsWith(first+' ')||normMetro(x)===first)||'';
 }
+const zipRowsByMetro=new Map();
+for(const z of ZIPDB){if(!z.CBSA)continue;if(!zipRowsByMetro.has(z.CBSA))zipRowsByMetro.set(z.CBSA,[]);zipRowsByMetro.get(z.CBSA).push(z)}
+const metroCentroidCache=new Map();
+function metroCentroidForMarket(market){
+ if(metroCentroidCache.has(market))return metroCentroidCache.get(market);
+ const zipMetro=bestZipMetroForMarket(market);const c=weightedCentroid(zipRowsByMetro.get(zipMetro)||[]);metroCentroidCache.set(market,c);return c;
+}
+function renderNationalMap(rows){
+ const map=ensureLeafletMap('national','nationalMap','nationalMapStatus',[39,-98,4]);if(!map)return;
+ const byOpp=rows.slice().sort((a,b)=>b._objective-a._objective),rank=new Map(byOpp.map((r,i)=>[r.Market,i+1]));
+ const markers=[];let mapped=0;
+ for(const r of rows){
+   const c=metroCentroidForMarket(r.Market);if(!c)continue;const rr=rank.get(r.Market),style=scoreMarkerStyle(r._objective,rr,rows.length);
+   const marker=L.circleMarker([c.lat,c.lon],style).addTo(MAP_LAYERS.national);
+   marker.bindPopup(`<strong>${r.Market}</strong><br>Expansion rank: <strong>#${rr}</strong> of ${rows.length}<br>Expansion Opportunity: <strong>${fmt1(r._objective)}</strong> · ${opportunityLevel(r._objective)}<br>Rent Momentum: ${r._rentMomentum}<br>Forward Supply Risk: ${r._supplyRisk}`);
+   marker.on('click',()=>{selected=r;renderDetail();highlightMappedRow('#tbody',r.Market)});MAP_MARKERS.national.set(String(r.Market),marker);markers.push(marker);mapped++;
+ }
+ fitMapToMarkers(map,markers,5);
+ const status=$('nationalMapStatus');if(status)status.innerHTML=`Mapped <strong>${mapped}</strong> of <strong>${rows.length}</strong> filtered markets. Thick outlines identify the top 10 Expansion Opportunity ranks; dashed outlines identify the bottom 10.`;
+}
+function updateDrillCountyFilter(raw){
+ const ctl=$('drillCountyControl'),sel=$('drillCountyFilter');if(!ctl||!sel)return;
+ const isZip=$('drillGeo').value==='zips';ctl.classList.toggle('hidden',!isZip);
+ const current=sel.value;const vals=[...new Set(raw.map(r=>`${r.County||'Unknown'}|${r.State||''}`))].sort();
+ sel.innerHTML='<option value="All">All counties</option>'+vals.map(v=>{const [c,st]=v.split('|');return `<option value="${v.replace(/"/g,'&quot;')}">${c}, ${st}</option>`}).join('');
+ if(vals.includes(current))sel.value=current;else sel.value='All';
+}
+function renderDrillMap(rows,isCounty){
+ const map=ensureLeafletMap('drill','drillMap','drillMapStatus',[39,-98,4]);if(!map)return;const markers=[];
+ for(const r of rows){
+   const lat=Number(r.Latitude),lon=Number(r.Longitude);if(!Number.isFinite(lat)||!Number.isFinite(lon))continue;const id=isCounty?`${r.County}|${r.State}`:String(r.ZIP);
+   const marker=L.circleMarker([lat,lon],scoreMarkerStyle(r._opportunity,r._rank,rows.length)).addTo(MAP_LAYERS.drill);
+   const name=isCounty?r.Area:`${r.ZIP} ${r.City||''}, ${r.State||''}`;marker.bindPopup(`<strong>${name}</strong><br>Current rank: <strong>#${r._rank}</strong> of ${rows.length}<br>Opportunity Score: <strong>${fmt1(r._opportunity)}</strong> · ${opportunityLevel(r._opportunity)}`);
+   marker.on('click',()=>highlightMappedRow('#drillBody',id));MAP_MARKERS.drill.set(id,marker);markers.push(marker);
+ }
+ fitMapToMarkers(map,markers,isCounty?9:11);const status=$('drillMapStatus');if(status)status.innerHTML=`Mapped <strong>${markers.length}</strong> ranked ${isCounty?'counties':'ZIP codes'}. Click a marker or table row to connect the map and ranking.`;
+}
+function renderRadiusMap(center,rows,miles){
+ const panel=$('radiusMapPanel');if(panel)panel.classList.remove('hidden');const map=ensureLeafletMap('radius','radiusMap','radiusMapStatus',[Number(center.Latitude),Number(center.Longitude),10]);if(!map)return;const markers=[];
+ L.circle([Number(center.Latitude),Number(center.Longitude)],{radius:Number(miles)*1609.344,color:'#17365d',weight:2,fillColor:'#2d6ca2',fillOpacity:.04,dashArray:'6 4'}).addTo(MAP_LAYERS.radius);
+ const centerMarker=L.circleMarker([Number(center.Latitude),Number(center.Longitude)],{radius:9,color:'#ffffff',weight:3,fillColor:'#17365d',fillOpacity:1}).addTo(MAP_LAYERS.radius).bindPopup(`<strong>Property ZIP ${center.ZIP}</strong><br>${center.City||''}, ${center.State||''}<br>Selected radius: ${miles} miles`);markers.push(centerMarker);
+ for(const r of rows){const lat=Number(r.Latitude),lon=Number(r.Longitude);if(!Number.isFinite(lat)||!Number.isFinite(lon))continue;const marker=L.circleMarker([lat,lon],scoreMarkerStyle(r._marketingScore,r._rank,rows.length)).addTo(MAP_LAYERS.radius);marker.bindPopup(`<strong>${r.ZIP} ${r.City||''}, ${r.State||''}</strong><br>Opportunity rank: <strong>#${r._rank}</strong> of ${rows.length}<br>Property Marketing Opportunity: <strong>${fmt1(r._marketingScore)}</strong> · ${opportunityLevel(r._marketingScore)}<br>Distance: ${r.Distance.toFixed(1)} mi<br>Recommended Budget Share: ${(r._share*100).toFixed(1)}%`);marker.on('click',()=>highlightMappedRow('#radiusBody',r.ZIP));MAP_MARKERS.radius.set(String(r.ZIP),marker);markers.push(marker)}
+ fitMapToMarkers(map,markers,13);const status=$('radiusMapStatus');if(status)status.innerHTML=`Mapped <strong>${rows.length}</strong> ZIPs within <strong>${miles} miles</strong> of ${center.ZIP}. Opportunity color is independent of distance; the circle shows the selected radius.`;
+}
 function openDrilldownForSelected(){if(selected){const m=bestZipMetroForMarket(selected.Market);if(m)$('drillMetro').value=m}setMode('drilldown');renderDrilldown()}
 $('exploreSelected').addEventListener('click',openDrilldownForSelected);
 function percentileScaleRaw(rows,key){const vals=rows.map(r=>Math.max(0,Number(r[key]||0))).sort((a,b)=>a-b);return v=>{v=Math.max(0,Number(v||0));let lo=0,hi=vals.length;while(lo<hi){const mid=(lo+hi)>>1;if(vals[mid]<=v)lo=mid+1;else hi=mid}return vals.length<=1?100:100*Math.max(0,lo-1)/(vals.length-1)}}
@@ -113,20 +201,26 @@ function scoreMetroZips(rows){return scoreOpportunityRows(rows)}
 function zipOpportunityScore(r){return Number(r._opportunity||0)}
 function aggregateCountyRows(rows){
  const groups=new Map();rows.forEach(r=>{const key=(r.County||'Unknown')+'|'+(r.State||'');if(!groups.has(key))groups.set(key,[]);groups.get(key).push(r)});
- const counties=[...groups.entries()].map(([key,zs])=>{const [county,state]=key.split('|'),hh=zs.reduce((s,z)=>s+Math.max(0,Number(z.Households||0)),0),rhh=zs.reduce((s,z)=>s+Math.max(0,Number(z.Renter_HH||0)),0),w=Math.max(1,hh),wav=k=>zs.reduce((s,z)=>s+Number(z[k]||0)*Math.max(0,Number(z.Households||0)),0)/w,marketingW=Math.max(1,rhh),marketing=zs.reduce((s,z)=>s+Number(z.Property_Advertising_Score||0)*Math.max(0,Number(z.Renter_HH||0)),0)/marketingW;return {Area:county+', '+state,County:county,State:state,ZIP_Count:zs.length,Population:zs.reduce((s,z)=>s+Number(z.Population||0),0),Households:hh,Renter_HH:rhh,Renter_Share:hh?rhh/hh:0,Vacancy_Rate:wav('Vacancy_Rate'),Median_Rent:wav('Median_Rent'),Multifamily_20plus_Units:zs.reduce((s,z)=>s+Number(z.Multifamily_20plus_Units||0),0),Property_Advertising_Score:marketing}});
+ const counties=[...groups.entries()].map(([key,zs])=>{const [county,state]=key.split('|'),hh=zs.reduce((s,z)=>s+Math.max(0,Number(z.Households||0)),0),rhh=zs.reduce((s,z)=>s+Math.max(0,Number(z.Renter_HH||0)),0),w=Math.max(1,hh),wav=k=>zs.reduce((s,z)=>s+Number(z[k]||0)*Math.max(0,Number(z.Households||0)),0)/w,marketingW=Math.max(1,rhh),marketing=zs.reduce((s,z)=>s+Number(z.Property_Advertising_Score||0)*Math.max(0,Number(z.Renter_HH||0)),0)/marketingW,centroid=weightedCentroid(zs)||{lat:null,lon:null};return {Area:county+', '+state,County:county,State:state,ZIP_Count:zs.length,Population:zs.reduce((s,z)=>s+Number(z.Population||0),0),Households:hh,Renter_HH:rhh,Renter_Share:hh?rhh/hh:0,Vacancy_Rate:wav('Vacancy_Rate'),Median_Rent:wav('Median_Rent'),Multifamily_20plus_Units:zs.reduce((s,z)=>s+Number(z.Multifamily_20plus_Units||0),0),Property_Advertising_Score:marketing,Latitude:centroid.lat,Longitude:centroid.lon}});
  return scoreOpportunityRows(counties).sort((a,b)=>b._opportunity-a._opportunity)
 }
+
 function renderDrilldown(){
- const metro=$('drillMetro').value;if(!metro)return;const raw=ZIPDB.filter(r=>r.CBSA===metro),base=scoreMetroZips(raw);const county=$('drillGeo').value==='counties';let rows=county?aggregateCountyRows(raw):base.slice().sort((a,b)=>b._opportunity-a._opportunity);rows.forEach((r,i)=>r._rank=i+1);drillRows=rows;const show=rows.slice(0,+$('drillTopn').value);
- $('drillMessage').innerHTML=`<strong>${metro}</strong> · ranking ${county?'counties':'ZIP codes'} by internal market opportunity.${rows.length?` <span class="score-level">Top area: ${opportunityLevel(rows[0]._opportunity)}</span><div class="interpretation"><strong>How to read the ranking:</strong> ${drillInterpretation(rows[0]._opportunity)}</div>`:''}`;$('dkAreas').textContent=fmtInt(rows.length);$('dkPop').textContent=fmtInt(base.reduce((s,r)=>s+Number(r.Population||0),0));$('dkRenters').textContent=fmtInt(base.reduce((s,r)=>s+Number(r.Renter_HH||0),0));const totalHH=base.reduce((s,r)=>s+Number(r.Households||0),0)||1;$('dkVacancy').textContent=pct(base.reduce((s,r)=>s+Number(r.Vacancy_Rate||0)*Number(r.Households||0),0)/totalHH);$('dkScore').textContent=fmt1(rows.length?rows.reduce((s,r)=>s+Number(r._opportunity||0),0)/rows.length:0);
- if(county){$('drillHead').innerHTML='<th>#</th><th>County</th><th>ZIPs</th><th>Population</th><th>Renter HH</th><th>20+ Unit Inventory</th><th>Renter Share</th><th>Vacancy</th><th class="diagnostic-col">Market Scale</th><th class="diagnostic-col">Concentration</th><th class="decision-col">Opportunity Score</th>';$('drillBody').innerHTML=show.map(r=>`<tr><td class="rank">${r._rank}</td><td><strong>${r.Area}</strong></td><td class="num">${fmtInt(r.ZIP_Count)}</td><td class="num">${fmtInt(r.Population)}</td><td class="num">${fmtInt(r.Renter_HH)}</td><td class="num">${fmtInt(r.Multifamily_20plus_Units)}</td><td class="num">${pct(r.Renter_Share)}</td><td class="num">${pct(r.Vacancy_Rate)}</td><td class="num diagnostic-col">${fmt1(r._marketScale)}</td><td class="num diagnostic-col">${fmt1(r._concentration)}</td><td class="num decision-col primary-score"><strong>${fmt1(r._opportunity)}</strong>${levelBadge(r._opportunity)}</td></tr>`).join('')}
- else{$('drillHead').innerHTML='<th>#</th><th>ZIP</th><th>City</th><th>County</th><th>Population</th><th>Renter HH</th><th>20+ Unit Inventory</th><th>Renter Share</th><th>Vacancy</th><th class="diagnostic-col">Market Scale</th><th class="diagnostic-col">Concentration</th><th class="decision-col">Opportunity Score</th>';$('drillBody').innerHTML=show.map(r=>`<tr><td class="rank">${r._rank}</td><td><strong>${r.ZIP}</strong></td><td>${r.City||''}, ${r.State||''}</td><td>${r.County||''}</td><td class="num">${fmtInt(r.Population)}</td><td class="num">${fmtInt(r.Renter_HH)}</td><td class="num">${fmtInt(r.Multifamily_20plus_Units)}</td><td class="num">${pct(r.Renter_Share)}</td><td class="num">${pct(r.Vacancy_Rate)}</td><td class="num diagnostic-col">${fmt1(r._marketScale)}</td><td class="num diagnostic-col">${fmt1(r._concentration)}</td><td class="num decision-col primary-score"><strong>${fmt1(r._opportunity)}</strong>${levelBadge(r._opportunity)}</td></tr>`).join('')}
+ const metro=$('drillMetro').value;if(!metro)return;const raw=ZIPDB.filter(r=>r.CBSA===metro),base=scoreMetroZips(raw);const county=$('drillGeo').value==='counties';updateDrillCountyFilter(raw);let rows;
+ if(county)rows=aggregateCountyRows(raw);else{rows=base.slice().sort((a,b)=>b._opportunity-a._opportunity);const cf=$('drillCountyFilter')?.value||'All';if(cf!=='All')rows=rows.filter(r=>`${r.County||'Unknown'}|${r.State||''}`===cf)}
+ rows.forEach((r,i)=>r._rank=i+1);drillRows=rows;const show=rows.slice(0,+$('drillTopn').value),mapRows=rows;
+ $('drillMessage').innerHTML=`<strong>${metro}</strong> · ranking ${county?'counties':'ZIP codes'} by internal market opportunity.${!county&&$('drillCountyFilter')?.value!=='All'?' ZIP scores remain normalized to the full metro while this county view is filtered.':''}${rows.length?` <span class="score-level">Top area: ${opportunityLevel(rows[0]._opportunity)}</span><div class="interpretation"><strong>How to read the ranking:</strong> ${drillInterpretation(rows[0]._opportunity)}</div>`:''}`;
+ const kpiRows=county?base:rows;$('dkAreas').textContent=fmtInt(rows.length);$('dkPop').textContent=fmtInt(kpiRows.reduce((s,r)=>s+Number(r.Population||0),0));$('dkRenters').textContent=fmtInt(kpiRows.reduce((s,r)=>s+Number(r.Renter_HH||0),0));const totalHH=kpiRows.reduce((s,r)=>s+Number(r.Households||0),0)||1;$('dkVacancy').textContent=pct(kpiRows.reduce((s,r)=>s+Number(r.Vacancy_Rate||0)*Number(r.Households||0),0)/totalHH);$('dkScore').textContent=fmt1(rows.length?rows.reduce((s,r)=>s+Number(r._opportunity||0),0)/rows.length:0);
+ if(county){$('drillHead').innerHTML='<th>#</th><th>County</th><th>ZIPs</th><th>Population</th><th><span class="header-2line">Renter<br>HH</span></th><th><span class="header-2line">20+ Unit<br>Inventory</span></th><th><span class="header-2line">Renter<br>Share</span></th><th>Vacancy</th><th class="diagnostic-col"><span class="header-2line">Market<br>Scale</span></th><th class="diagnostic-col">Concentration</th><th class="decision-col"><span class="header-2line">Opportunity<br>Score</span></th>';$('drillBody').innerHTML=show.map(r=>`<tr data-map-id="${r.County}|${r.State}"><td class="rank">${r._rank}</td><td><strong>${r.Area}</strong></td><td class="num">${fmtInt(r.ZIP_Count)}</td><td class="num">${fmtInt(r.Population)}</td><td class="num">${fmtInt(r.Renter_HH)}</td><td class="num">${fmtInt(r.Multifamily_20plus_Units)}</td><td class="num">${pct(r.Renter_Share)}</td><td class="num">${pct(r.Vacancy_Rate)}</td><td class="num diagnostic-col">${fmt1(r._marketScale)}</td><td class="num diagnostic-col">${fmt1(r._concentration)}</td><td class="num decision-col primary-score"><strong>${fmt1(r._opportunity)}</strong>${levelBadge(r._opportunity)}</td></tr>`).join('')}
+ else{$('drillHead').innerHTML='<th>#</th><th>ZIP</th><th>City</th><th>County</th><th>Population</th><th><span class="header-2line">Renter<br>HH</span></th><th><span class="header-2line">20+ Unit<br>Inventory</span></th><th><span class="header-2line">Renter<br>Share</span></th><th>Vacancy</th><th class="diagnostic-col"><span class="header-2line">Market<br>Scale</span></th><th class="diagnostic-col">Concentration</th><th class="decision-col"><span class="header-2line">Opportunity<br>Score</span></th>';$('drillBody').innerHTML=show.map(r=>`<tr data-map-id="${r.ZIP}"><td class="rank">${r._rank}</td><td><strong>${r.ZIP}</strong></td><td>${r.City||''}, ${r.State||''}</td><td>${r.County||''}</td><td class="num">${fmtInt(r.Population)}</td><td class="num">${fmtInt(r.Renter_HH)}</td><td class="num">${fmtInt(r.Multifamily_20plus_Units)}</td><td class="num">${pct(r.Renter_Share)}</td><td class="num">${pct(r.Vacancy_Rate)}</td><td class="num diagnostic-col">${fmt1(r._marketScale)}</td><td class="num diagnostic-col">${fmt1(r._concentration)}</td><td class="num decision-col primary-score"><strong>${fmt1(r._opportunity)}</strong>${levelBadge(r._opportunity)}</td></tr>`).join('')}
+ document.querySelectorAll('#drillBody tr[data-map-id]').forEach(tr=>tr.addEventListener('click',()=>{highlightMappedRow('#drillBody',tr.dataset.mapId);focusMapMarker('drill',tr.dataset.mapId,county?8:10)}));renderDrillMap(mapRows,county);
 }
-$('drillMetro').addEventListener('change',renderDrilldown);$('drillGeo').addEventListener('change',renderDrilldown);$('drillTopn').addEventListener('change',renderDrilldown);
+
+$('drillMetro').addEventListener('change',renderDrilldown);$('drillGeo').addEventListener('change',renderDrilldown);$('drillCountyFilter').addEventListener('change',renderDrilldown);$('drillTopn').addEventListener('change',renderDrilldown);
 $('exportDrill').addEventListener('click',()=>{if(!drillRows.length)return;const county=$('drillGeo').value==='counties';const cols=county?[['Rank',r=>r._rank],['County',r=>r.Area],['ZIP_Count',r=>r.ZIP_Count],['Population',r=>r.Population],['Renter_HH',r=>r.Renter_HH],['Renter_Share',r=>r.Renter_Share],['Vacancy_Rate',r=>r.Vacancy_Rate],['Median_Rent',r=>r.Median_Rent],['Multifamily_20plus_Units',r=>r.Multifamily_20plus_Units],['Market_Scale',r=>r._marketScale],['Apartment_Concentration',r=>r._concentration],['Occupancy_Strength',r=>r._occupancy],['Property_Marketing_Opportunity',r=>r._marketing],['Opportunity_Score',r=>r._opportunity]]:[['Rank',r=>r._rank],['ZIP',r=>r.ZIP],['City',r=>r.City],['State',r=>r.State],['County',r=>r.County],['Population',r=>r.Population],['Renter_HH',r=>r.Renter_HH],['Renter_Share',r=>r.Renter_Share],['Vacancy_Rate',r=>r.Vacancy_Rate],['Median_Rent',r=>r.Median_Rent],['Multifamily_20plus_Units',r=>r.Multifamily_20plus_Units],['Market_Scale',r=>r._marketScale],['Apartment_Concentration',r=>r._concentration],['Occupancy_Strength',r=>r._occupancy],['Property_Marketing_Opportunity',r=>r._marketing],['Opportunity_Score',r=>r._opportunity]];const lines=[cols.map(c=>c[0]).join(',')];drillRows.forEach(r=>lines.push(cols.map(c=>csvEscape(c[1](r))).join(',')));const blob=new Blob([lines.join('\n')],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='apartment-metro-opportunity-drilldown.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),500)});
 
 function setMode(mode){
- const national=mode==='national',drill=mode==='drilldown',radius=mode==='radius';$('nationalView').classList.toggle('hidden',!national);$('drilldownView').classList.toggle('hidden',!drill);$('radiusView').classList.toggle('hidden',!radius);$('modeNational').classList.toggle('active',national);$('modeDrilldown').classList.toggle('active',drill);$('modeRadius').classList.toggle('active',radius);if(drill)renderDrilldown();
+ const national=mode==='national',drill=mode==='drilldown',radius=mode==='radius';$('nationalView').classList.toggle('hidden',!national);$('drilldownView').classList.toggle('hidden',!drill);$('radiusView').classList.toggle('hidden',!radius);$('modeNational').classList.toggle('active',national);$('modeDrilldown').classList.toggle('active',drill);$('modeRadius').classList.toggle('active',radius);if(drill)renderDrilldown();setTimeout(()=>Object.values(MAPS).forEach(m=>m&&m.invalidateSize()),0);
 }
 $('modeNational').addEventListener('click',()=>setMode('national'));$('modeDrilldown').addEventListener('click',()=>setMode('drilldown'));$('modeRadius').addEventListener('click',()=>setMode('radius'));
 
@@ -173,7 +267,7 @@ function runRadius(){
  const center=ZIPDB.find(r=>r.ZIP===zip);
  if(!center){
    $('radiusMessage').innerHTML='<strong>ZIP not found.</strong> Enter a valid five-digit ZIP from the national ZIP database.';
-   $('radiusKpis').classList.add('hidden'); $('radiusResults').classList.add('hidden'); $('radiusExportWrap').classList.add('hidden');
+   $('radiusKpis').classList.add('hidden'); $('radiusResults').classList.add('hidden'); $('radiusExportWrap').classList.add('hidden'); $('radiusMapPanel')?.classList.add('hidden');
    return;
  }
  const miles=Number($('radiusMiles').value||10);
@@ -208,19 +302,21 @@ function runRadius(){
  radiusRows=rows;
 
  $('radiusMessage').innerHTML=`Centered on <strong>${center.ZIP} ${center.City||''}, ${center.State||''}</strong>. Showing every ZIP centroid within <strong>${miles} miles</strong>. Ranking: <strong>Property Marketing Opportunity</strong>. Distance affects allocation, not opportunity ranking.${rows.length?`<div class="interpretation"><strong>Top ZIP: ${opportunityLevel(rows[0]._marketingScore)} Opportunity.</strong> ${radiusInterpretation(rows[0]._marketingScore)}</div>`:''}`;
- $('radiusKpis').classList.remove('hidden'); $('radiusResults').classList.remove('hidden'); $('radiusExportWrap').classList.remove('hidden');
+ $('radiusKpis').classList.remove('hidden'); $('radiusResults').classList.remove('hidden'); $('radiusExportWrap').classList.remove('hidden'); $('radiusMapPanel').classList.remove('hidden');
  $('rzCount').textContent=fmtInt(rows.length);
  $('rzRenters').textContent=fmtInt(rows.reduce((s,r)=>s+Number(r.Renter_HH||0),0));
  $('rzMF').textContent=fmtInt(rows.reduce((s,r)=>s+Number(r.Multifamily_20plus_Units||0),0));
  $('rzScore').textContent=fmt1(rows.length?rows.reduce((s,r)=>s+Number(r._marketingScore||0),0)/rows.length:0);
  $('rzBudget').textContent=budget?('$'+fmtInt(budget)):'Not entered';
- $('radiusBody').innerHTML=rows.map(r=>`<tr>
+ $('radiusBody').innerHTML=rows.map(r=>`<tr data-map-id="${r.ZIP}">
  <td class="rank">${r._rank}</td><td><strong>${r.ZIP}</strong></td><td>${r.City||''}, ${r.State||''}</td>
  <td class="num">${r.Distance.toFixed(1)} mi</td><td class="num">${fmtInt(r.Renter_HH)}</td><td class="num">${pct(r.Renter_Share)}</td>
  <td class="num">${fmtInt(r.Multifamily_20plus_Units)}</td><td class="num">${r.Median_Rent?money(r.Median_Rent):'—'}</td>
  <td class="num diagnostic-col">${fmt1(r.Property_Advertising_Score)}</td><td class="num diagnostic-col">${fmt1(r._renterScale)}</td><td class="num diagnostic-col">${fmt1(r.Marketing_Need_Score)}</td>
  <td class="num decision-col primary-score"><strong>${fmt1(r._marketingScore)}</strong>${levelBadge(r._marketingScore)}</td><td class="num allocation-col"><strong>${(r._share*100).toFixed(1)}%</strong></td>
  <td class="num allocation-col">${budget?money(Math.round(r._dollars)):'—'}</td></tr>`).join('');
+ document.querySelectorAll('#radiusBody tr[data-map-id]').forEach(tr=>tr.addEventListener('click',()=>{highlightMappedRow('#radiusBody',tr.dataset.mapId);focusMapMarker('radius',tr.dataset.mapId,11)}));
+ renderRadiusMap(center,rows,miles);
 }
 $('runRadius').addEventListener('click',runRadius);
 $('centerZip').addEventListener('keydown',e=>{if(e.key==='Enter')runRadius();});
@@ -248,5 +344,6 @@ function exportRadiusCsv(){
  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),500);
 }
 $('exportRadius').addEventListener('click',exportRadiusCsv);
+document.querySelectorAll('.map-panel').forEach(d=>d.addEventListener('toggle',()=>{if(d.open)setTimeout(()=>Object.values(MAPS).forEach(m=>m&&m.invalidateSize()),0)}));
 
 render();
