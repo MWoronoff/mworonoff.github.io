@@ -21,9 +21,21 @@ function weightedCentroid(rows){
  return w?{lat:lat/w,lon:lon/w}:null;
 }
 function mapTierColor(score){const l=opportunityLevel(score);return l==='Very High'?'#1f7a63':l==='High'?'#4d9f79':l==='Moderate'?'#d2a93b':l==='Low'?'#d47a35':'#b84a4a'}
-function scoreMarkerStyle(score,rank,total){
- const top=rank<=Math.min(10,total),bottom=rank>Math.max(0,total-10);
- return {radius:top||bottom?8:6,color:top?'#17365d':bottom?'#7a2430':'#ffffff',weight:top?3:bottom?2:1,fillColor:mapTierColor(score),fillOpacity:.82,dashArray:bottom?'4 3':null};
+function getRankEmphasisCount(controlId,total){
+ const requested=Math.max(0,Number($(controlId)?.value||0));
+ if(!requested||total<2)return 0;
+ return Math.min(requested,Math.floor(total/2));
+}
+function scoreMarkerStyle(score,rank,total,emphasisCount){
+ const count=Math.max(0,Math.min(Number(emphasisCount||0),Math.floor(total/2)));
+ const top=count>0&&rank<=count,bottom=count>0&&rank>total-count,emphasized=top||bottom;
+ return {radius:emphasized?9:5,color:top?'#17365d':bottom?'#7a2430':'#ffffff',weight:top?4:bottom?3:1,fillColor:mapTierColor(score),fillOpacity:emphasized?.92:.58,dashArray:bottom?'5 3':null};
+}
+function rankEmphasisText(controlId,total){
+ const selected=Math.max(0,Number($(controlId)?.value||0)),actual=getRankEmphasisCount(controlId,total);
+ if(!selected||!actual)return 'Rank emphasis is off.';
+ if(actual===selected)return `Top/Bottom ${actual} are emphasized.`;
+ return `Top/Bottom ${actual} are emphasized (limited by the ${total} mapped areas).`;
 }
 function ensureLeafletMap(key,elementId,statusId,defaultView=[39,-98,4]){
  const status=$(statusId);
@@ -134,7 +146,7 @@ function renderDetail(){
  <div class="legend"><strong>Why this market ranks here:</strong> Expansion Opportunity combines <b>75% Market Fundamentals</b> with <b>25% Market Scale</b>. Fundamentals reflect renter demand, portfolio conditions, supply pressure and risk. Market Scale is the nationwide percentile of renter households, so meaningful addressable markets receive credit without allowing the largest metros to dominate the ranking.</div>`;
  $('addCompare').addEventListener('click',addSelectedToCompare);$('detailDrill').addEventListener('click',()=>openDrilldownForSelected());
 }
-$('minpop').addEventListener('change',()=>{selected=null;render()});$('topn').addEventListener('change',render);$('enhancedOutlook').addEventListener('change',()=>{selected=null;render()});
+$('minpop').addEventListener('change',()=>{selected=null;render()});$('topn').addEventListener('change',render);$('enhancedOutlook').addEventListener('change',()=>{selected=null;render()});$('nationalRankEmphasis')?.addEventListener('change',render);
 $('marketSearchBox').addEventListener('input',()=>{selected=null;render()});$('marketSearchBox').addEventListener('keydown',e=>{if(e.key==='Enter')e.preventDefault()});$('exportCsv').addEventListener('click',exportCsv);$('clearCompare').addEventListener('click',()=>{compare=[];renderCompare()});
 document.querySelectorAll('#nationalView th[data-key]').forEach(th=>th.addEventListener('click',()=>{const k=th.dataset.key;if(sortKey===k)sortDir*=-1;else{sortKey=k;sortDir=-1}render()}));
 
@@ -157,13 +169,13 @@ function renderNationalMap(rows){
  const byOpp=rows.slice().sort((a,b)=>b._objective-a._objective),rank=new Map(byOpp.map((r,i)=>[r.Market,i+1]));
  const markers=[];let mapped=0;
  for(const r of rows){
-   const c=metroCentroidForMarket(r.Market);if(!c)continue;const rr=rank.get(r.Market),style=scoreMarkerStyle(r._objective,rr,rows.length);
+   const c=metroCentroidForMarket(r.Market);if(!c)continue;const rr=rank.get(r.Market),emphasis=getRankEmphasisCount('nationalRankEmphasis',rows.length),style=scoreMarkerStyle(r._objective,rr,rows.length,emphasis);
    const marker=L.circleMarker([c.lat,c.lon],style).addTo(MAP_LAYERS.national);
-   marker.bindPopup(`<strong>${r.Market}</strong><br>Expansion rank: <strong>#${rr}</strong> of ${rows.length}<br>Expansion Opportunity: <strong>${fmt1(r._objective)}</strong> · ${opportunityLevel(r._objective)}<br>Rent Momentum: ${r._rentMomentum}<br>Forward Supply Risk: ${r._supplyRisk}`);
+   marker.bindPopup(`<strong>${r.Market}</strong><br>Expansion rank: <strong>#${rr}</strong> of ${rows.length}<br>Expansion Opportunity: <strong>${fmt1(r._objective)}</strong> · ${opportunityLevel(r._objective)}<br>Rent Momentum: ${r._rentMomentum}<br>Forward Supply Risk: ${r._supplyRisk}<br>Enhanced Outlook: ${r._enhancedOutlook}`);
    marker.on('click',()=>{selected=r;renderDetail();highlightMappedRow('#tbody',r.Market)});MAP_MARKERS.national.set(String(r.Market),marker);markers.push(marker);mapped++;
  }
  fitMapToMarkers(map,markers,5);
- const status=$('nationalMapStatus');if(status)status.innerHTML=`Mapped <strong>${mapped}</strong> of <strong>${rows.length}</strong> filtered markets. Thick outlines identify the top 10 Expansion Opportunity ranks; dashed outlines identify the bottom 10.`;
+ const status=$('nationalMapStatus');if(status)status.innerHTML=`Mapped <strong>${mapped}</strong> of <strong>${rows.length}</strong> filtered markets. ${rankEmphasisText('nationalRankEmphasis',rows.length)}`;
 }
 function updateDrillCountyFilter(raw){
  const ctl=$('drillCountyControl'),sel=$('drillCountyFilter');if(!ctl||!sel)return;
@@ -173,21 +185,21 @@ function updateDrillCountyFilter(raw){
  if(vals.includes(current))sel.value=current;else sel.value='All';
 }
 function renderDrillMap(rows,isCounty){
- const map=ensureLeafletMap('drill','drillMap','drillMapStatus',[39,-98,4]);if(!map)return;const markers=[];
+ const map=ensureLeafletMap('drill','drillMap','drillMapStatus',[39,-98,4]);if(!map)return;const markers=[],emphasis=getRankEmphasisCount('drillRankEmphasis',rows.length);
  for(const r of rows){
    const lat=Number(r.Latitude),lon=Number(r.Longitude);if(!Number.isFinite(lat)||!Number.isFinite(lon))continue;const id=isCounty?`${r.County}|${r.State}`:String(r.ZIP);
-   const marker=L.circleMarker([lat,lon],scoreMarkerStyle(r._opportunity,r._rank,rows.length)).addTo(MAP_LAYERS.drill);
+   const marker=L.circleMarker([lat,lon],scoreMarkerStyle(r._opportunity,r._rank,rows.length,emphasis)).addTo(MAP_LAYERS.drill);
    const name=isCounty?r.Area:`${r.ZIP} ${r.City||''}, ${r.State||''}`;marker.bindPopup(`<strong>${name}</strong><br>Current rank: <strong>#${r._rank}</strong> of ${rows.length}<br>Opportunity Score: <strong>${fmt1(r._opportunity)}</strong> · ${opportunityLevel(r._opportunity)}`);
    marker.on('click',()=>highlightMappedRow('#drillBody',id));MAP_MARKERS.drill.set(id,marker);markers.push(marker);
  }
- fitMapToMarkers(map,markers,isCounty?9:11);const status=$('drillMapStatus');if(status)status.innerHTML=`Mapped <strong>${markers.length}</strong> ranked ${isCounty?'counties':'ZIP codes'}. Click a marker or table row to connect the map and ranking.`;
+ fitMapToMarkers(map,markers,isCounty?9:11);const status=$('drillMapStatus');if(status)status.innerHTML=`Mapped <strong>${markers.length}</strong> ranked ${isCounty?'counties':'ZIP codes'}. ${rankEmphasisText('drillRankEmphasis',rows.length)} Click a marker or table row to connect the map and ranking.`;
 }
 function renderRadiusMap(center,rows,miles){
- const panel=$('radiusMapPanel');if(panel)panel.classList.remove('hidden');const map=ensureLeafletMap('radius','radiusMap','radiusMapStatus',[Number(center.Latitude),Number(center.Longitude),10]);if(!map)return;const markers=[];
+ const panel=$('radiusMapPanel');if(panel)panel.classList.remove('hidden');const map=ensureLeafletMap('radius','radiusMap','radiusMapStatus',[Number(center.Latitude),Number(center.Longitude),10]);if(!map)return;const markers=[],emphasis=getRankEmphasisCount('radiusRankEmphasis',rows.length);
  L.circle([Number(center.Latitude),Number(center.Longitude)],{radius:Number(miles)*1609.344,color:'#17365d',weight:2,fillColor:'#2d6ca2',fillOpacity:.04,dashArray:'6 4'}).addTo(MAP_LAYERS.radius);
  const centerMarker=L.circleMarker([Number(center.Latitude),Number(center.Longitude)],{radius:9,color:'#ffffff',weight:3,fillColor:'#17365d',fillOpacity:1}).addTo(MAP_LAYERS.radius).bindPopup(`<strong>Property ZIP ${center.ZIP}</strong><br>${center.City||''}, ${center.State||''}<br>Selected radius: ${miles} miles`);markers.push(centerMarker);
- for(const r of rows){const lat=Number(r.Latitude),lon=Number(r.Longitude);if(!Number.isFinite(lat)||!Number.isFinite(lon))continue;const marker=L.circleMarker([lat,lon],scoreMarkerStyle(r._marketingScore,r._rank,rows.length)).addTo(MAP_LAYERS.radius);marker.bindPopup(`<strong>${r.ZIP} ${r.City||''}, ${r.State||''}</strong><br>Opportunity rank: <strong>#${r._rank}</strong> of ${rows.length}<br>Property Marketing Opportunity: <strong>${fmt1(r._marketingScore)}</strong> · ${opportunityLevel(r._marketingScore)}<br>Distance: ${r.Distance.toFixed(1)} mi<br>Recommended Budget Share: ${(r._share*100).toFixed(1)}%`);marker.on('click',()=>highlightMappedRow('#radiusBody',r.ZIP));MAP_MARKERS.radius.set(String(r.ZIP),marker);markers.push(marker)}
- fitMapToMarkers(map,markers,13);const status=$('radiusMapStatus');if(status)status.innerHTML=`Mapped <strong>${rows.length}</strong> ZIPs within <strong>${miles} miles</strong> of ${center.ZIP}. Opportunity color is independent of distance; the circle shows the selected radius.`;
+ for(const r of rows){const lat=Number(r.Latitude),lon=Number(r.Longitude);if(!Number.isFinite(lat)||!Number.isFinite(lon))continue;const marker=L.circleMarker([lat,lon],scoreMarkerStyle(r._marketingScore,r._rank,rows.length,emphasis)).addTo(MAP_LAYERS.radius);marker.bindPopup(`<strong>${r.ZIP} ${r.City||''}, ${r.State||''}</strong><br>Opportunity rank: <strong>#${r._rank}</strong> of ${rows.length}<br>Property Marketing Opportunity: <strong>${fmt1(r._marketingScore)}</strong> · ${opportunityLevel(r._marketingScore)}<br>Distance: ${r.Distance.toFixed(1)} mi<br>Recommended Budget Share: ${(r._share*100).toFixed(1)}%`);marker.on('click',()=>highlightMappedRow('#radiusBody',r.ZIP));MAP_MARKERS.radius.set(String(r.ZIP),marker);markers.push(marker)}
+ fitMapToMarkers(map,markers,13);const status=$('radiusMapStatus');if(status)status.innerHTML=`Mapped <strong>${rows.length}</strong> ZIPs within <strong>${miles} miles</strong> of ${center.ZIP}. ${rankEmphasisText('radiusRankEmphasis',rows.length)} Opportunity color is independent of distance; the circle shows the selected radius.`;
 }
 function openDrilldownForSelected(){if(selected){const m=bestZipMetroForMarket(selected.Market);if(m)$('drillMetro').value=m}setMode('drilldown');renderDrilldown()}
 $('exploreSelected').addEventListener('click',openDrilldownForSelected);
@@ -216,7 +228,7 @@ function renderDrilldown(){
  document.querySelectorAll('#drillBody tr[data-map-id]').forEach(tr=>tr.addEventListener('click',()=>{highlightMappedRow('#drillBody',tr.dataset.mapId);focusMapMarker('drill',tr.dataset.mapId,county?8:10)}));renderDrillMap(mapRows,county);
 }
 
-$('drillMetro').addEventListener('change',renderDrilldown);$('drillGeo').addEventListener('change',renderDrilldown);$('drillCountyFilter')?.addEventListener('change',renderDrilldown);$('drillTopn').addEventListener('change',renderDrilldown);
+$('drillMetro').addEventListener('change',renderDrilldown);$('drillGeo').addEventListener('change',renderDrilldown);$('drillRankEmphasis')?.addEventListener('change',renderDrilldown);$('drillCountyFilter')?.addEventListener('change',renderDrilldown);$('drillTopn').addEventListener('change',renderDrilldown);
 $('exportDrill').addEventListener('click',()=>{if(!drillRows.length)return;const county=$('drillGeo').value==='counties';const cols=county?[['Rank',r=>r._rank],['County',r=>r.Area],['ZIP_Count',r=>r.ZIP_Count],['Population',r=>r.Population],['Renter_HH',r=>r.Renter_HH],['Renter_Share',r=>r.Renter_Share],['Vacancy_Rate',r=>r.Vacancy_Rate],['Median_Rent',r=>r.Median_Rent],['Multifamily_20plus_Units',r=>r.Multifamily_20plus_Units],['Market_Scale',r=>r._marketScale],['Apartment_Concentration',r=>r._concentration],['Occupancy_Strength',r=>r._occupancy],['Property_Marketing_Opportunity',r=>r._marketing],['Opportunity_Score',r=>r._opportunity]]:[['Rank',r=>r._rank],['ZIP',r=>r.ZIP],['City',r=>r.City],['State',r=>r.State],['County',r=>r.County],['Population',r=>r.Population],['Renter_HH',r=>r.Renter_HH],['Renter_Share',r=>r.Renter_Share],['Vacancy_Rate',r=>r.Vacancy_Rate],['Median_Rent',r=>r.Median_Rent],['Multifamily_20plus_Units',r=>r.Multifamily_20plus_Units],['Market_Scale',r=>r._marketScale],['Apartment_Concentration',r=>r._concentration],['Occupancy_Strength',r=>r._occupancy],['Property_Marketing_Opportunity',r=>r._marketing],['Opportunity_Score',r=>r._opportunity]];const lines=[cols.map(c=>c[0]).join(',')];drillRows.forEach(r=>lines.push(cols.map(c=>csvEscape(c[1](r))).join(',')));const blob=new Blob([lines.join('\n')],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='apartment-metro-opportunity-drilldown.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),500)});
 
 function setMode(mode){
@@ -230,7 +242,7 @@ function haversineMiles(lat1,lon1,lat2,lon2){
  const a=Math.sin(dLat/2)**2+Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
  return 2*R*Math.asin(Math.sqrt(a));
 }
-let radiusRows=[];
+let radiusRows=[],lastRadiusCenter=null,lastRadiusMiles=null;
 const RECOMMENDED_RADIUS_WEIGHTS={audience:45,scale:30,need:25};
 function radiusWeights(){
  const audience=Math.max(0,Math.min(100,Number($('weightAudience')?.value||0)));
@@ -299,7 +311,7 @@ function runRadius(){
  });
  const totalWeight=rows.reduce((s,r)=>s+r._weight,0)||1;
  rows.forEach((r,i)=>{r._rank=i+1;r._share=r._weight/totalWeight;r._dollars=budget*r._share});
- radiusRows=rows;
+ radiusRows=rows;lastRadiusCenter=center;lastRadiusMiles=miles;
 
  $('radiusMessage').innerHTML=`Centered on <strong>${center.ZIP} ${center.City||''}, ${center.State||''}</strong>. Showing every ZIP centroid within <strong>${miles} miles</strong>. Ranking: <strong>Property Marketing Opportunity</strong>. Distance affects allocation, not opportunity ranking.${rows.length?`<div class="interpretation"><strong>Top ZIP: ${opportunityLevel(rows[0]._marketingScore)} Opportunity.</strong> ${radiusInterpretation(rows[0]._marketingScore)}</div>`:''}`;
  $('radiusKpis').classList.remove('hidden'); $('radiusResults').classList.remove('hidden'); $('radiusExportWrap').classList.remove('hidden'); $('radiusMapPanel')?.classList.remove('hidden');
@@ -319,6 +331,7 @@ function runRadius(){
  renderRadiusMap(center,rows,miles);
 }
 $('runRadius').addEventListener('click',runRadius);
+$('radiusRankEmphasis')?.addEventListener('change',()=>{if(lastRadiusCenter&&radiusRows.length)renderRadiusMap(lastRadiusCenter,radiusRows,lastRadiusMiles)});
 $('centerZip').addEventListener('keydown',e=>{if(e.key==='Enter')runRadius();});
 ['weightAudience','weightScale','weightNeed'].forEach(id=>$(id).addEventListener('input',()=>updateRadiusWeightUi(true)));
 $('weightReset').addEventListener('click',()=>{
