@@ -124,9 +124,11 @@ function radiusWeights(){
 }
 function updateRadiusWeightUi(rerun=true){
  const w=radiusWeights();
- const formula=$('weightFormula'),status=$('weightStatus');
+ const formula=$('weightFormula'),status=$('weightStatus'),customIndicator=$('customWeightIndicator');
  const recommended=w.audience===45&&w.scale===30&&w.need===25;
- if(formula) formula.innerHTML=`<strong>Property Marketing Opportunity:</strong> ${w.audience}% Target Apartment Audience + ${w.scale}% Renter Scale + ${w.need}% Marketing Need${recommended?' <span style="color:#1e6f5c">(Recommended)</span>':' <span style="color:#946200">(Custom)</span>'}`;
+ if(formula) formula.innerHTML=`<strong>Property Marketing Opportunity:</strong> ${w.audience}% Target Apartment Audience + ${w.scale}% Renter Scale + ${w.need}% Marketing Need${recommended?' <span style="color:#1e6f5c">(Recommended)</span>':' <span style="color:#946200">(Custom)</span>'} <span id="customWeightIndicator" class="custom-weight-indicator${recommended?' hidden':''}">Custom weighting active</span>`;
+ const liveIndicator=$('customWeightIndicator');
+ if(liveIndicator) liveIndicator.classList.toggle('hidden',recommended);
  if(status){
    const valid=Math.abs(w.total-100)<0.001;
    status.textContent=`Total: ${w.total.toFixed(0)}%. ${valid?'Weights are valid.':'Weights must total 100% before ranking.'}`;
