@@ -8,6 +8,13 @@ const money=n=>'$'+fmtInt(n);
 let sortKey='_objective', sortDir=-1, selected=null, compare=[], drillRows=[];
 
 function healthScore(r){return Number(r.Acquisition_Enhanced||0)}
+const metroScaleValues=DB.metros.map(r=>Math.max(0,Number(r.Renter_HH||0))).sort((a,b)=>a-b);
+function marketScale(r){
+ const v=Math.max(0,Number(r.Renter_HH||0)); let lo=0,hi=metroScaleValues.length;
+ while(lo<hi){const mid=(lo+hi)>>1;if(metroScaleValues[mid]<=v)lo=mid+1;else hi=mid}
+ return metroScaleValues.length<=1?100:100*Math.max(0,lo-1)/(metroScaleValues.length-1);
+}
+function expansionScore(r){return .75*healthScore(r)+.25*marketScale(r)}
 function healthTier(score){
  score=Number(score||0); if(score>=65)return 'Strong'; if(score>=55)return 'Above Average'; if(score>=45)return 'Balanced'; if(score>0)return 'Watch'; return 'Insufficient Data';
 }
@@ -15,7 +22,7 @@ function filtered(){
  const q=$('marketSearchBox').textContent.trim().toLowerCase();
  const min=+$('minpop').value;
  let arr=DB.metros.filter(r=>(!q||String(r.Market).toLowerCase().includes(q)) && Number(r.Population||0)>=min)
-   .map(r=>Object.assign({},r,{_objective:healthScore(r),_tier:healthTier(healthScore(r))}));
+   .map(r=>Object.assign({},r,{_fundamentals:healthScore(r),_scale:marketScale(r),_objective:expansionScore(r),_tier:healthTier(healthScore(r))}));
  arr.sort((a,b)=>{
    if(sortKey==='_rank') return b._objective-a._objective;
    let av=a[sortKey],bv=b[sortKey];
@@ -26,30 +33,31 @@ function filtered(){
 }
 function csvEscape(v){const s=String(v??'');return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s}
 function exportCsv(){
- const rows=filtered(), cols=['_rank','Market','Population','Households','Renter_HH','Renter_Share','Vacancy_Rate','Median_Rent_Wtd','Median_HHI_Wtd','Demand_Depth_Proxy','Supply_Pressure_Proxy','Recent_Build_Share','Acquisition_Enhanced','Data_Quality'];
- const lines=[cols.map(c=>c==='_rank'?'Current Rank':c==='Acquisition_Enhanced'?'Market Health Score':c).join(',')];
+ const rows=filtered(), cols=['_rank','Market','Population','Households','Renter_HH','Renter_Share','Vacancy_Rate','Median_Rent_Wtd','Median_HHI_Wtd','Demand_Depth_Proxy','Supply_Pressure_Proxy','Recent_Build_Share','_fundamentals','_scale','_objective','Data_Quality'];
+ const labels={_rank:'Current Rank',_fundamentals:'Market Fundamentals Score',_scale:'Market Scale Score',_objective:'Expansion Opportunity Score'};
+ const lines=[cols.map(c=>labels[c]||c).join(',')];
  rows.forEach(r=>lines.push(cols.map(c=>csvEscape(r[c])).join(',')));
- const blob=new Blob([lines.join('\n')],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='apartment-metro-market-health-ranking.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),500);
+ const blob=new Blob([lines.join('\n')],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='apartment-metro-expansion-opportunity-ranking.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),500);
 }
 function renderCompare(){
  const panel=$('comparePanel'),table=$('compareTable'); if(!compare.length){panel.style.display='none';table.innerHTML='';return} panel.style.display='block';
- const metrics=[['Market Health Score',r=>fmt1(healthScore(r))],['Health tier',r=>healthTier(healthScore(r))],['Population',r=>fmtInt(r.Population)],['Renter households',r=>fmtInt(r.Renter_HH)],['Renter share',r=>pct(r.Renter_Share)],['Vacancy rate',r=>pct(r.Vacancy_Rate)],['Median rent',r=>money(r.Median_Rent_Wtd)],['Median HHI',r=>money(r.Median_HHI_Wtd)],['Demand depth',r=>fmt1(r.Demand_Depth_Proxy)],['Supply pressure',r=>fmt1(r.Supply_Pressure_Proxy)],['Recent construction share',r=>r.Recent_Build_Share==null?'—':pct(r.Recent_Build_Share)]];
+ const metrics=[['Expansion Opportunity Score',r=>fmt1(expansionScore(r))],['Market Fundamentals Score',r=>fmt1(healthScore(r))],['Market Scale Score',r=>fmt1(marketScale(r))],['Fundamentals tier',r=>healthTier(healthScore(r))],['Population',r=>fmtInt(r.Population)],['Renter households',r=>fmtInt(r.Renter_HH)],['Renter share',r=>pct(r.Renter_Share)],['Vacancy rate',r=>pct(r.Vacancy_Rate)],['Median rent',r=>money(r.Median_Rent_Wtd)],['Median HHI',r=>money(r.Median_HHI_Wtd)],['Demand depth',r=>fmt1(r.Demand_Depth_Proxy)],['Supply pressure',r=>fmt1(r.Supply_Pressure_Proxy)],['Recent construction share',r=>r.Recent_Build_Share==null?'—':pct(r.Recent_Build_Share)]];
  table.innerHTML='<thead><tr><th>Metric</th>'+compare.map(r=>'<th>'+r.Market+'</th>').join('')+'</tr></thead><tbody>'+metrics.map(m=>'<tr><td><strong>'+m[0]+'</strong></td>'+compare.map(r=>'<td class="num">'+m[1](r)+'</td>').join('')+'</tr>').join('')+'</tbody>';
 }
 function addSelectedToCompare(){if(!selected)return;if(compare.some(r=>r.Market===selected.Market))return;if(compare.length>=4)compare.shift();compare.push(selected);renderCompare()}
 function render(){
  const all=filtered(),show=all.slice(0,+$('topn').value);
- $('tbody').innerHTML=show.map(r=>`<tr data-id="${encodeURIComponent(r.Market)}" class="${selected&&selected.Market===r.Market?'selected':''}"><td class="rank">${r._rank}</td><td><strong>${r.Market}</strong></td><td class="num">${fmtInt(r.Population)}</td><td class="num">${fmtInt(r.Renter_HH)}</td><td class="num">${pct(r.Vacancy_Rate)}</td><td class="num">${money(r.Median_Rent_Wtd)}</td><td class="num">${fmt1(r.Demand_Depth_Proxy)}</td><td class="num">${fmt1(r.Supply_Pressure_Proxy)}</td><td class="num"><strong>${fmt1(r._objective)}</strong></td><td><span class="badge">${r._tier}</span></td></tr>`).join('');
+ $('tbody').innerHTML=show.map(r=>`<tr data-id="${encodeURIComponent(r.Market)}" class="${selected&&selected.Market===r.Market?'selected':''}"><td class="rank">${r._rank}</td><td><strong>${r.Market}</strong></td><td class="num">${fmtInt(r.Population)}</td><td class="num">${fmtInt(r.Renter_HH)}</td><td class="num">${pct(r.Vacancy_Rate)}</td><td class="num">${money(r.Median_Rent_Wtd)}</td><td class="num">${fmt1(r.Demand_Depth_Proxy)}</td><td class="num">${fmt1(r.Supply_Pressure_Proxy)}</td><td class="num">${fmt1(r._fundamentals)}</td><td class="num">${fmt1(r._scale)}</td><td class="num"><strong>${fmt1(r._objective)}</strong></td><td><span class="badge">${r._tier}</span></td></tr>`).join('');
  document.querySelectorAll('#tbody tr').forEach(tr=>tr.addEventListener('click',()=>{const market=decodeURIComponent(tr.dataset.id);selected=all.find(r=>r.Market===market);renderDetail();render()}));
  const renters=all.reduce((s,r)=>s+Number(r.Renter_HH||0),0),avg=k=>all.length?all.reduce((s,r)=>s+Number(r[k]||0),0)/all.length:0;
  $('kMarkets').textContent=fmtInt(all.length);$('kRenters').textContent=fmtInt(renters);$('kVacancy').textContent=pct(avg('Vacancy_Rate'));$('kRent').textContent=money(avg('Median_Rent_Wtd'));$('kScore').textContent=fmt1(all.length?all.reduce((s,r)=>s+r._objective,0)/all.length:0);
 }
 function renderDetail(){
  if(!selected)return;const r=selected;
- $('detail').innerHTML=`<h2>${r.Market}</h2><div class="sub">National metro health & expansion screening</div><div class="scorebox"><div class="score"><b>${fmt1(healthScore(r))}</b><span>Market Health Score</span></div><div class="score"><b>${healthTier(healthScore(r))}</b><span>Health Tier</span></div><div class="score"><b>${fmt1(r.Demand_Depth_Proxy)}</b><span>Demand Depth</span></div><div class="score"><b>${fmt1(r.Supply_Pressure_Proxy)}</b><span>Supply Pressure</span></div></div>
+ $('detail').innerHTML=`<h2>${r.Market}</h2><div class="sub">National metro health & expansion screening</div><div class="scorebox"><div class="score"><b>${fmt1(expansionScore(r))}</b><span>Expansion Opportunity</span></div><div class="score"><b>${fmt1(healthScore(r))}</b><span>Market Fundamentals</span></div><div class="score"><b>${fmt1(marketScale(r))}</b><span>Market Scale</span></div><div class="score"><b>${healthTier(healthScore(r))}</b><span>Fundamentals Tier</span></div></div>
  ${[['Population',fmtInt(r.Population)],['Households',fmtInt(r.Households)],['Renter households',fmtInt(r.Renter_HH)],['Renter share',pct(r.Renter_Share)],['Vacancy rate',pct(r.Vacancy_Rate)],['Weighted median rent',money(r.Median_Rent_Wtd)],['Weighted median HHI',money(r.Median_HHI_Wtd)],['Rent-to-income',pct(r.Rent_to_Income_Wtd)],['Recent construction share',r.Recent_Build_Share==null?'—':pct(r.Recent_Build_Share)],['Data quality',fmt1(r.Data_Quality)]].map(x=>`<div class="metric"><span>${x[0]}</span><strong>${x[1]}</strong></div>`).join('')}
  <button id="addCompare" type="button" style="margin-top:14px">Add to comparison</button><button id="detailDrill" class="secondary" type="button" style="margin-top:8px">Explore counties & ZIPs</button>
- <div class="legend"><strong>Why this market ranks here:</strong> the Market Health Score uses the enhanced expansion screen already validated in the nationwide dataset. It rewards stronger renter demand and portfolio fundamentals while accounting for supply pressure, risk and overall opportunity. Higher is stronger for expansion screening; underlying metrics remain visible so the score is never a black box.</div>`;
+ <div class="legend"><strong>Why this market ranks here:</strong> Expansion Opportunity combines <b>75% Market Fundamentals</b> with <b>25% Market Scale</b>. Fundamentals reflect renter demand, portfolio conditions, supply pressure and risk. Market Scale is the nationwide percentile of renter households, so meaningful addressable markets receive credit without allowing the largest metros to dominate the ranking.</div>`;
  $('addCompare').addEventListener('click',addSelectedToCompare);$('detailDrill').addEventListener('click',()=>openDrilldownForSelected());
 }
 $('minpop').addEventListener('change',()=>{selected=null;render()});$('topn').addEventListener('change',render);

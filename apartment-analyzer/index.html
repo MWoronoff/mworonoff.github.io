@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="application-version" content="7.2">
+<meta name="application-version" content="7.3">
 <title>Apartment Management Market Analyzer</title>
 <!-- Apartment Analyzer V7.2: resilient tab navigation + market health, metro drill-down, property ZIP radius -->
 <style>
@@ -67,12 +67,12 @@ footer{max-width:1500px;margin:auto;padding:0 20px 28px;font-size:12px;color:var
 <div id="nationalView" class="wrap">
 <section class="controls">
 <div><label id="marketSearchLabel">Search metro</label><div id="marketSearchBox" class="text-searchbox" role="searchbox" aria-labelledby="marketSearchLabel" aria-placeholder="Denver, Phoenix, Tampa, etc." data-placeholder="Denver, Phoenix, Tampa, etc." contenteditable="plaintext-only" spellcheck="false" tabindex="0"></div></div>
-<div><label for="minpop">Minimum population</label><select id="minpop"><option value="0">No minimum</option><option value="50000">50,000+</option><option value="100000">100,000+</option><option value="250000">250,000+</option><option value="500000">500,000+</option><option value="1000000">1,000,000+</option></select></div>
+<div><label for="minpop">Minimum population</label><select id="minpop"><option value="0">No minimum</option><option value="50000">50,000+</option><option value="100000" selected>100,000+</option><option value="250000">250,000+</option><option value="500000">500,000+</option><option value="1000000">1,000,000+</option></select></div>
 <div><label for="topn">Show</label><select id="topn"><option>25</option><option selected>50</option><option>100</option><option>250</option><option value="99999">All</option></select></div>
 <div><label>Export ranked view</label><button id="exportCsv" type="button">Download CSV</button></div>
 <div><label>Compare metros</label><button id="clearCompare" type="button" class="secondary">Clear comparison</button></div>
 <div><label>Explore selected metro</label><button id="exploreSelected" type="button" class="secondary">Open Drill-Down</button></div>
-<div class="note"><strong>Purpose:</strong> rank U.S. metros on a single <b>Market Health Score</b> to compare overall apartment-market fundamentals and support expansion screening. Select a metro to inspect the drivers, compare up to four markets side-by-side, or open the drill-down to see where opportunity is concentrated by county or ZIP. This is a directional screening tool, not property-level investment underwriting.</div>
+<div class="note"><strong>Purpose:</strong> rank U.S. metros for expansion using a separate <b>Market Fundamentals Score</b> and <b>Expansion Opportunity Score</b>. Select a metro to inspect the drivers, compare up to four markets side-by-side, or open the drill-down to see where opportunity is concentrated by county or ZIP. This is a directional screening tool, not property-level investment underwriting.</div>
 </section>
 
 <div class="kpis">
@@ -80,7 +80,7 @@ footer{max-width:1500px;margin:auto;padding:0 20px 28px;font-size:12px;color:var
 <div class="kpi"><div class="v" id="kRenters">–</div><div class="l">Renter households represented</div></div>
 <div class="kpi"><div class="v" id="kVacancy">–</div><div class="l">Avg. vacancy rate</div></div>
 <div class="kpi"><div class="v" id="kRent">–</div><div class="l">Avg. weighted median rent</div></div>
-<div class="kpi"><div class="v" id="kScore">–</div><div class="l">Avg. Market Health Score</div></div>
+<div class="kpi"><div class="v" id="kScore">–</div><div class="l">Avg. Expansion Opportunity</div></div>
 </div>
 
 <div class="grid">
@@ -91,7 +91,7 @@ footer{max-width:1500px;margin:auto;padding:0 20px 28px;font-size:12px;color:var
 <th data-key="_rank">#</th><th data-key="Market">Market</th><th data-key="Population">Population</th>
 <th data-key="Renter_HH">Renter HH</th><th data-key="Vacancy_Rate">Vacancy</th><th data-key="Median_Rent_Wtd">Median Rent</th>
 <th data-key="Demand_Depth_Proxy">Demand Depth</th><th data-key="Supply_Pressure_Proxy">Supply Pressure</th>
-<th data-key="_objective">Market Health Score</th><th data-key="_tier">Health Tier</th>
+<th data-key="_fundamentals">Market Fundamentals</th><th data-key="_scale">Market Scale</th><th data-key="_objective">Expansion Opportunity</th><th data-key="_tier">Fundamentals Tier</th>
 </tr></thead>
 <tbody id="tbody"></tbody>
 </table>
@@ -99,7 +99,7 @@ footer{max-width:1500px;margin:auto;padding:0 20px 28px;font-size:12px;color:var
 </section>
 <aside class="detail" id="detail">
 <h2>Select a market</h2><div class="sub">Click a row to inspect its underlying metrics.</div>
-<div class="legend"><strong>Market Health Score:</strong> a single screening score built from the enhanced expansion model, combining renter demand, portfolio fundamentals, supply pressure, risk and overall opportunity. Higher scores indicate stronger conditions for expansion screening.</div>
+<div class="legend"><strong>Expansion Opportunity Score:</strong> 75% Market Fundamentals + 25% Market Scale. <strong>Market Fundamentals</strong> reflects renter demand, portfolio conditions, supply pressure and risk. <strong>Market Scale</strong> is based on the nationwide percentile of renter households. This keeps fundamentals central while recognizing the size of the addressable apartment-management market.</div>
 </aside>
 
 </div>
@@ -203,5 +203,5 @@ footer{max-width:1500px;margin:auto;padding:0 20px 28px;font-size:12px;color:var
 <script src="zip-data-4.js"></script>
 <script src="zip-data-5.js"></script>
 <script src="zip-data-6.js"></script>
-<script src="app.js?v=7.2-20260913"></script>
+<script src="app.js?v=7.3-20260913"></script>
 </body></html>
