@@ -107,6 +107,26 @@ function haversineMiles(lat1,lon1,lat2,lon2){
  return 2*R*Math.asin(Math.sqrt(a));
 }
 let radiusRows=[];
+const RECOMMENDED_RADIUS_WEIGHTS={audience:45,scale:30,need:25};
+function radiusWeights(){
+ const audience=Math.max(0,Math.min(100,Number($('weightAudience')?.value||0)));
+ const scale=Math.max(0,Math.min(100,Number($('weightScale')?.value||0)));
+ const need=Math.max(0,Math.min(100,Number($('weightNeed')?.value||0)));
+ return {audience,scale,need,total:audience+scale+need};
+}
+function updateRadiusWeightUi(rerun=true){
+ const w=radiusWeights();
+ const formula=$('weightFormula'),status=$('weightStatus');
+ const recommended=w.audience===45&&w.scale===30&&w.need===25;
+ if(formula) formula.innerHTML=`<strong>Property Marketing Opportunity:</strong> ${w.audience}% Target Apartment Audience + ${w.scale}% Renter Scale + ${w.need}% Marketing Need${recommended?' <span style="color:#1e6f5c">(Recommended)</span>':' <span style="color:#946200">(Custom)</span>'}`;
+ if(status){
+   const valid=Math.abs(w.total-100)<0.001;
+   status.textContent=`Total: ${w.total.toFixed(0)}%. ${valid?'Weights are valid.':'Weights must total 100% before ranking.'}`;
+   status.classList.toggle('good',valid); status.classList.toggle('error',!valid);
+ }
+ if(rerun && radiusRows.length && Math.abs(w.total-100)<0.001) runRadius();
+ return w;
+}
 function percentileScale(rows,key){
  const vals=rows.map(r=>Math.max(0,Number(r[key]||0))).sort((a,b)=>a-b);
  return function(v){
@@ -126,6 +146,11 @@ function runRadius(){
  }
  const miles=Number($('radiusMiles').value||10);
  const budget=Math.max(0,Number($('radiusBudget').value||0));
+ const weights=updateRadiusWeightUi(false);
+ if(Math.abs(weights.total-100)>=0.001){
+   $('radiusMessage').innerHTML='<strong>Weights must total 100%.</strong> Adjust the three Property Marketing Opportunity weights or reset to the recommended 45 / 30 / 25 before ranking.';
+   return;
+ }
  let rows=[];
  for(const r of ZIPDB){
    const d=haversineMiles(Number(center.Latitude),Number(center.Longitude),Number(r.Latitude),Number(r.Longitude));
@@ -133,12 +158,11 @@ function runRadius(){
  }
  const renterPct=percentileScale(rows,'Renter_HH');
  for(const r of rows){
-   const property=Math.max(0,Math.min(100,Number(r.Property_Advertising_Score||0)));
+   const audience=Math.max(0,Math.min(100,Number(r.Property_Advertising_Score||0)));
    const need=Math.max(0,Math.min(100,Number(r.Marketing_Need_Score||0)));
    const scale=renterPct(r.Renter_HH);
-   const distance=Math.max(0,100*(1-r.Distance/Math.max(miles,0.01)));
-   r._renterScale=scale; r._distanceScore=distance;
-   r._marketingScore=0.40*property+0.25*scale+0.20*need+0.15*distance;
+   r._renterScale=scale;
+   r._marketingScore=(weights.audience/100)*audience+(weights.scale/100)*scale+(weights.need/100)*need;
    const distanceDecay=Math.exp(-1.6*r.Distance/Math.max(miles,0.01));
    r._distanceDecay=distanceDecay;
    r._weight=Math.pow(Math.max(r._marketingScore,1),1.35)*distanceDecay;
@@ -151,23 +175,28 @@ function runRadius(){
  rows.forEach((r,i)=>{r._rank=i+1;r._share=r._weight/totalWeight;r._dollars=budget*r._share});
  radiusRows=rows;
 
- $('radiusMessage').innerHTML=`Centered on <strong>${center.ZIP} ${center.City||''}, ${center.State||''}</strong>. Showing every ZIP centroid within <strong>${miles} miles</strong>. Ranking: <strong>Property Marketing Priority</strong>.`;
+ $('radiusMessage').innerHTML=`Centered on <strong>${center.ZIP} ${center.City||''}, ${center.State||''}</strong>. Showing every ZIP centroid within <strong>${miles} miles</strong>. Ranking: <strong>Property Marketing Opportunity</strong>. Distance affects allocation, not opportunity ranking.`;
  $('radiusKpis').classList.remove('hidden'); $('radiusResults').classList.remove('hidden'); $('radiusExportWrap').classList.remove('hidden');
  $('rzCount').textContent=fmtInt(rows.length);
  $('rzRenters').textContent=fmtInt(rows.reduce((s,r)=>s+Number(r.Renter_HH||0),0));
  $('rzMF').textContent=fmtInt(rows.reduce((s,r)=>s+Number(r.Multifamily_20plus_Units||0),0));
- $('rzScore').textContent=fmt1(rows.length?rows.reduce((s,r)=>s+Number(r.Property_Advertising_Score||0),0)/rows.length:0);
+ $('rzScore').textContent=fmt1(rows.length?rows.reduce((s,r)=>s+Number(r._marketingScore||0),0)/rows.length:0);
  $('rzBudget').textContent=budget?('$'+fmtInt(budget)):'Not entered';
  $('radiusBody').innerHTML=rows.map(r=>`<tr>
  <td class="rank">${r._rank}</td><td><strong>${r.ZIP}</strong></td><td>${r.City||''}, ${r.State||''}</td>
  <td class="num">${r.Distance.toFixed(1)} mi</td><td class="num">${fmtInt(r.Renter_HH)}</td><td class="num">${pct(r.Renter_Share)}</td>
  <td class="num">${fmtInt(r.Multifamily_20plus_Units)}</td><td class="num">${r.Median_Rent?money(r.Median_Rent):'—'}</td>
- <td class="num">${fmt1(r.Property_Advertising_Score)}</td><td class="num">${fmt1(r.Marketing_Need_Score)}</td>
- <td class="num"><strong>${fmt1(r._marketingScore)}</strong></td><td class="num">${fmt1(r.Overall_Adtaxi_Opportunity)}</td><td class="num">${(r._share*100).toFixed(1)}%</td>
+ <td class="num">${fmt1(r.Property_Advertising_Score)}</td><td class="num">${fmt1(r._renterScale)}</td><td class="num">${fmt1(r.Marketing_Need_Score)}</td>
+ <td class="num"><strong>${fmt1(r._marketingScore)}</strong></td><td class="num"><strong>${(r._share*100).toFixed(1)}%</strong></td>
  <td class="num">${budget?money(Math.round(r._dollars)):'—'}</td></tr>`).join('');
 }
 $('runRadius').addEventListener('click',runRadius);
 $('centerZip').addEventListener('keydown',e=>{if(e.key==='Enter')runRadius();});
+['weightAudience','weightScale','weightNeed'].forEach(id=>$(id).addEventListener('input',()=>updateRadiusWeightUi(true)));
+$('weightReset').addEventListener('click',()=>{
+ $('weightAudience').value=RECOMMENDED_RADIUS_WEIGHTS.audience; $('weightScale').value=RECOMMENDED_RADIUS_WEIGHTS.scale; $('weightNeed').value=RECOMMENDED_RADIUS_WEIGHTS.need; updateRadiusWeightUi(true);
+});
+updateRadiusWeightUi(false);
 
 function exportRadiusCsv(){
  if(!radiusRows.length)return;
@@ -177,8 +206,8 @@ function exportRadiusCsv(){
   ['Distance_Miles',r=>r.Distance.toFixed(2)],['Population',r=>r.Population],['Households',r=>r.Households],
   ['Renter_HH',r=>r.Renter_HH],['Renter_Share',r=>r.Renter_Share],['Multifamily_20plus_Units',r=>r.Multifamily_20plus_Units],
   ['Median_Rent',r=>r.Median_Rent],['Property_Advertising_Score',r=>r.Property_Advertising_Score],
-  ['Marketing_Need_Score',r=>r.Marketing_Need_Score],['Property_Marketing_Score',r=>r._marketingScore],['Renter_Scale_Percentile',r=>r._renterScale],['Distance_Score',r=>r._distanceScore],['Distance_Decay',r=>r._distanceDecay],['Overall_Adtaxi_Opportunity',r=>r.Overall_Adtaxi_Opportunity],
-  ['Budget_Share',r=>r._share],['Suggested_Dollars',r=>budget?r._dollars:'']
+  ['Marketing_Need_Score',r=>r.Marketing_Need_Score],['Weight_Target_Apartment_Audience',r=>radiusWeights().audience],['Weight_Renter_Scale',r=>radiusWeights().scale],['Weight_Marketing_Need',r=>radiusWeights().need],['Property_Marketing_Opportunity',r=>r._marketingScore],['Renter_Scale_Percentile',r=>r._renterScale],['Distance_Decay',r=>r._distanceDecay],
+  ['Recommended_Budget_Share',r=>r._share],['Suggested_Dollars',r=>budget?r._dollars:'']
  ];
  const lines=[cols.map(c=>c[0]).join(',')];
  radiusRows.forEach(r=>lines.push(cols.map(c=>csvEscape(c[1](r))).join(',')));

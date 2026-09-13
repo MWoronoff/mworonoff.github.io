@@ -6,9 +6,9 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="application-version" content="7.4">
+<meta name="application-version" content="7.5">
 <title>Apartment Management Market Analyzer</title>
-<!-- Apartment Analyzer V7.2: resilient tab navigation + market health, metro drill-down, property ZIP radius -->
+<!-- Apartment Analyzer V7.5: resilient navigation + validated market health, metro drill-down, and configurable property ZIP radius -->
 <style>
 :root{--navy:#17365d;--blue:#2d6ca2;--ink:#172033;--muted:#667085;--line:#d8dee8;--bg:#f5f7fa;--card:#fff;--good:#1e6f5c;--warn:#946200;--bad:#a33a3a}
 *{box-sizing:border-box} body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--ink)}
@@ -47,8 +47,9 @@ footer{max-width:1500px;margin:auto;padding:0 20px 28px;font-size:12px;color:var
 .radius-summary{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:16px 0}
 .radius-table{overflow:auto;max-height:650px;border:1px solid #d8dee8;border-radius:10px}
 .radius-note{font-size:12px;color:#667085;line-height:1.5;margin-top:12px}
+.weight-panel{margin-top:14px;border:1px solid #d8dee8;border-radius:10px;background:#f8fafc;padding:12px}.weight-panel summary{cursor:pointer;font-weight:700;color:#17365d}.weight-formula{font-size:13px;line-height:1.5;margin-top:8px;color:#344054}.weight-grid{display:grid;grid-template-columns:repeat(4,minmax(140px,1fr));gap:10px;align-items:end;margin-top:12px}.weight-status{font-size:12px;margin-top:8px;color:#667085}.weight-status.error{color:#a33a3a;font-weight:700}.weight-status.good{color:#1e6f5c;font-weight:700}
 .hidden{display:none!important}
-@media(max-width:900px){.radius-controls{grid-template-columns:1fr 1fr}.radius-summary{grid-template-columns:1fr 1fr}}
+@media(max-width:900px){.radius-controls{grid-template-columns:1fr 1fr}.radius-summary{grid-template-columns:1fr 1fr}.weight-grid{grid-template-columns:1fr 1fr}}
 </style>
 
 </head>
@@ -145,30 +146,42 @@ footer{max-width:1500px;margin:auto;padding:0 20px 28px;font-size:12px;color:var
 <div><label>Run analysis</label><button id="runRadius" type="button">Rank ZIPs</button></div>
 </div>
 <div id="radiusMessage" class="radius-note"></div>
+<details class="weight-panel">
+<summary>Scoring weights: Recommended (45 / 30 / 25) · Adjust</summary>
+<div class="weight-formula" id="weightFormula"><strong>Property Marketing Opportunity:</strong> 45% Target Apartment Audience + 30% Renter Scale + 25% Marketing Need</div>
+<div class="weight-grid">
+<div><label for="weightAudience">Target Apartment Audience</label><input id="weightAudience" type="number" min="0" max="100" step="5" value="45"></div>
+<div><label for="weightScale">Renter Scale</label><input id="weightScale" type="number" min="0" max="100" step="5" value="30"></div>
+<div><label for="weightNeed">Marketing Need</label><input id="weightNeed" type="number" min="0" max="100" step="5" value="25"></div>
+<div><label>Recommended defaults</label><button id="weightReset" type="button" class="secondary">Reset to 45 / 30 / 25</button></div>
+</div>
+<div id="weightStatus" class="weight-status good">Total: 100%. Custom weights must total 100%.</div>
+<div class="radius-note"><strong>How to read this score:</strong> Target Apartment Audience reflects the ZIP's apartment-oriented advertising signal; Renter Scale measures renter-household size relative to the other ZIPs in the selected radius; Marketing Need identifies ZIPs where additional advertising may have greater value. <strong>Distance does not affect opportunity ranking.</strong> It is applied separately to Recommended Budget Share.</div>
+</details>
 <div id="radiusKpis" class="radius-summary hidden">
 <div class="kpi"><div class="v" id="rzCount">–</div><div class="l">ZIPs in radius</div></div>
 <div class="kpi"><div class="v" id="rzRenters">–</div><div class="l">Renter households</div></div>
 <div class="kpi"><div class="v" id="rzMF">–</div><div class="l">20+ unit inventory</div></div>
-<div class="kpi"><div class="v" id="rzScore">–</div><div class="l">Average property ad score</div></div>
+<div class="kpi"><div class="v" id="rzScore">–</div><div class="l">Avg. marketing opportunity</div></div>
 <div class="kpi"><div class="v" id="rzBudget">–</div><div class="l">Budget entered</div></div>
 </div>
 <div id="radiusResults" class="radius-table hidden">
 <table>
 <thead><tr>
 <th>Rank</th><th>ZIP</th><th>City / State</th><th>Distance</th><th>Renter HH</th><th>Renter Share</th>
-<th>20+ Unit Inventory</th><th>Median Rent</th><th>Property Ad Score</th><th>Marketing Need</th>
-<th>Property Marketing Priority</th><th>Overall Opportunity</th><th>Budget Share</th><th>Suggested $</th>
+<th>20+ Unit Inventory</th><th>Median Rent</th><th>Target Apartment Audience</th><th>Renter Scale</th><th>Marketing Need</th>
+<th>Property Marketing Opportunity</th><th>Recommended Budget Share</th><th>Suggested $</th>
 </tr></thead>
 <tbody id="radiusBody"></tbody>
 </table>
 </div>
 <div id="radiusExportWrap" class="hidden" style="margin-top:12px;max-width:220px"><button id="exportRadius" type="button">Download Radius CSV</button></div>
-<div class="radius-note"><strong>Property marketing methodology:</strong> every ZIP in the selected radius remains in the ranking. The Property Marketing Score blends Property Advertising Score, renter-household scale within the selected radius, Marketing Need, and proximity to the property. The ranking uses one evidence-based weighting because the former campaign-objective variants produced essentially the same ZIP rankings in nationwide testing. Suggested budget then applies an additional distance-decay factor so closer ZIPs receive more weight when otherwise similar. This is a media-planning aid, not a required spend prescription.</div>
+<div class="radius-note"><strong>Property marketing methodology:</strong> every ZIP in the selected radius remains in the ranking. The recommended <strong>Property Marketing Opportunity</strong> formula is <strong>45% Target Apartment Audience + 30% Renter Scale + 25% Marketing Need</strong>. Users may customize those three weights as long as they total 100%. Distance is intentionally excluded from the opportunity score so audience quality is measured independently of proximity. <strong>Recommended Budget Share</strong> then combines the opportunity score with a distance-decay factor, giving closer ZIPs more allocation weight when opportunity is otherwise similar. Budget Share is calculated even when no dollar budget is entered; Suggested $ appears only when a budget is supplied. This is a media-planning aid, not a required spend prescription.</div>
 </div>
 </section>
 
 <footer>
-<strong>Current data source:</strong> Apartment Management Market Opportunity workbook. Nationwide results currently include 939 metros/CBSAs and 3,199 counties. This build uses one national Market Health ranking for metro comparison and expansion screening, a metro drill-down that ranks counties or ZIPs inside the selected market, market comparison/export, and the property ZIP-radius advertising module with a single Property Marketing Priority score and distance-decayed budget allocation. True historical rent/vacancy series and active multifamily pipeline data remain the next major underwriting enhancement.
+<strong>Current data source:</strong> Apartment Management Market Opportunity workbook. Nationwide results currently include 939 metros/CBSAs and 3,199 counties. This build uses one national Market Health ranking for metro comparison and expansion screening, a metro drill-down that ranks counties or ZIPs inside the selected market, market comparison/export, and the property ZIP-radius advertising module with a configurable Property Marketing Opportunity score and separately distance-decayed budget allocation. True historical rent/vacancy series and active multifamily pipeline data remain the next major underwriting enhancement.
 </footer>
 
 <script>
@@ -203,5 +216,5 @@ footer{max-width:1500px;margin:auto;padding:0 20px 28px;font-size:12px;color:var
 <script src="zip-data-4.js"></script>
 <script src="zip-data-5.js"></script>
 <script src="zip-data-6.js"></script>
-<script src="app.js?v=7.4-20260913"></script>
+<script src="app.js?v=7.5-20260913"></script>
 </body></html>
