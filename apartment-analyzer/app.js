@@ -88,8 +88,7 @@ function enhancedLevel(score){if(score==null||!Number.isFinite(Number(score)))re
 function enhancedData(r){return ENHANCED_MARKETS[r.Market]||{}}
 function enhancedOutlook(r){
  const e=enhancedData(r), rent=e.rentScore, supply=e.supplyScore;
- if(rent==null&&supply==null)return 'Enhanced Data Unavailable';
- if(rent==null||supply==null)return 'Enhanced Data Partial';
+ if(rent==null||supply==null)return 'Limited Data';
  if(rent>=60&&supply<60)return 'Strong Expansion Opportunity';
  if(rent>=60&&supply>=60)return 'Good Opportunity — Watch New Supply';
  if(rent<40&&supply>=60)return 'Proceed with Caution';
@@ -100,8 +99,7 @@ function enhancedOutlook(r){
 function enhancedBadge(label){const cls=label==='N/A'?'na':'';return `<span class="score-level ${cls}">${label}</span>`}
 function enhancedExplanation(r){
  const e=enhancedData(r), rl=enhancedLevel(e.rentScore), sl=enhancedLevel(e.supplyScore), out=enhancedOutlook(r);
- if(out==='Enhanced Data Unavailable')return 'Enhanced rent and supply diagnostics are unavailable for this market; its Expansion Opportunity score and rank are unaffected.';
- if(out==='Enhanced Data Partial')return `Enhanced coverage is partial (${rl==='N/A'?'rent momentum unavailable':'rent momentum '+rl}; ${sl==='N/A'?'forward supply unavailable':'forward supply risk '+sl}). Expansion Opportunity is unaffected.`;
+ if(out==='Limited Data')return `Enhanced market diagnostics are limited (${rl==='N/A'?'rent momentum unavailable':'rent momentum '+rl}; ${sl==='N/A'?'forward supply unavailable':'forward supply risk '+sl}). Expansion Opportunity score and rank are unaffected.`;
  return `Rent Momentum is ${rl}${e.rentYoY!=null?` (${e.rentYoY.toFixed(1)}% latest YoY)`:''} and Forward Supply Risk is ${sl}. These diagnostics provide current-market context and do not alter Expansion Opportunity scoring or rank.`;
 }
 function drillInterpretation(score){const l=opportunityLevel(score);const m={"Very High":"Very strong concentration of apartment opportunity relative to other areas in this metro.","High":"Strong submarket opportunity with favorable scale, apartment concentration and occupancy characteristics.","Moderate":"Meaningful but more balanced submarket opportunity relative to the rest of this metro.","Low":"Lower-priority submarket within this metro based on the current opportunity components.","Very Low":"Limited relative opportunity within this metro; inspect the underlying scale and concentration measures."};return m[l]}
