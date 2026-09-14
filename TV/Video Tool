@@ -1,0 +1,483 @@
+HTML
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local TV & Digital Video Media Allocation Planner</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --accent-green-bg: #f0fdf4;
+            --accent-green-text: #166534;
+            --accent-green-border: #bbf7d0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 24px;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+        }
+
+        .analyzer-container {
+            max-width: 1080px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 32px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+            border: 1px solid var(--border-color);
+        }
+
+        .header-section {
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 16px;
+            margin-bottom: 28px;
+        }
+
+        .header-section h1 {
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 0 0 6px 0;
+        }
+
+        .header-section p {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 28px;
+        }
+
+        @media (max-width: 768px) {
+            .grid-layout { grid-template-columns: 1fr; }
+        }
+
+        .panel-box {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .panel-box h2 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin: 0 0 16px 0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 6px;
+        }
+
+        select, input[type="number"] {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 14px;
+            color: var(--text-main);
+            background-color: #fff;
+            transition: border-color 0.15s ease;
+        }
+
+        select:focus, input[type="number"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .range-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        input[type="range"] {
+            flex-grow: 1;
+            height: 6px;
+            border-radius: 3px;
+            accent-color: var(--primary-color);
+            cursor: pointer;
+        }
+
+        .range-display {
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--primary-color);
+            min-width: 50px;
+            text-align: right;
+        }
+
+        .info-badge {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f1f5f9;
+            padding: 10px 14px;
+            border-radius: 6px;
+            margin-top: 10px;
+            font-size: 13px;
+        }
+
+        .info-badge span:first-child {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .info-badge span:last-child {
+            color: var(--text-main);
+            font-weight: 700;
+        }
+
+        .results-section h2 {
+            font-size: 18px;
+            font-weight: 700;
+            margin: 0 0 16px 0;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            background: #ffffff;
+        }
+
+        th, td {
+            padding: 14px 16px;
+            text-align: right;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        th:first-child, td:first-child {
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .col-highlight {
+            background-color: var(--accent-green-bg) !important;
+        }
+
+        th.col-highlight {
+            color: var(--accent-green-text) !important;
+            border-bottom: 2px solid var(--accent-green-border);
+        }
+
+        tr.row-key-metric td {
+            font-weight: 700;
+            font-size: 15px;
+        }
+
+        tr.row-key-metric td.col-highlight {
+            color: var(--accent-green-text);
+        }
+
+        .footnote {
+            margin-top: 16px;
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+
+<div class="analyzer-container">
+    <div class="header-section">
+        <h1>Local TV & Digital Video Media Allocation Planner</h1>
+        <p>Scarborough DMA Market Data & Performance Tradeoff Analyzer</p>
+    </div>
+    
+    <div class="grid-layout">
+        <div class="panel-box">
+            <h2>1. Market & Budget Controls</h2>
+            
+            <div class="form-group">
+                <label for="dmaSelect">Select Local Market (DMA)</label>
+                <select id="dmaSelect" onchange="calculate()"></select>
+            </div>
+
+            <div class="form-group">
+                <label for="demoSelect">Target Demographic Demo</label>
+                <select id="demoSelect" onchange="calculate()">
+                    <option value="A18+">Adults 18+</option>
+                    <option value="A18-34">Adults 18-34</option>
+                    <option value="A18-49">Adults 18-49</option>
+                    <option value="A25-54" selected>Adults 25-54</option>
+                    <option value="A50+">Adults 50+</option>
+                    <option value="M18+">Males 18+</option>
+                    <option value="M18-49">Males 18-49</option>
+                    <option value="M25-54">Males 25-54</option>
+                    <option value="W18+">Females 18+</option>
+                    <option value="W18-49">Females 18-49</option>
+                    <option value="W25-54">Females 25-54</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="budgetInput">Monthly Campaign Budget ($)</label>
+                <input type="number" id="budgetInput" value="100000" step="5000" onchange="calculate()">
+            </div>
+
+            <div class="form-group">
+                <label>Digital Video Allocation Shift (%)</label>
+                <div class="range-wrapper">
+                    <input type="range" id="digitalPct" min="0" max="100" value="30" oninput="updateSliderLabel(); calculate();">
+                    <span id="digitalPctLabel" class="range-display">30%</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel-box">
+            <h2>2. Planning Benchmarks & Market Demographics</h2>
+            
+            <div class="form-group">
+                <label for="tvCpm">Local Broadcast TV Gross CPM ($)</label>
+                <input type="number" id="tvCpm" value="22.50" step="0.5" onchange="calculate()">
+            </div>
+
+            <div class="form-group">
+                <label for="digCpm">Digital Video Targeted CPM ($)</label>
+                <input type="number" id="digCpm" value="32.00" step="1" onchange="calculate()">
+            </div>
+
+            <div class="form-group">
+                <label for="digFreq">Digital Frequency Target</label>
+                <input type="number" id="digFreq" value="4.0" step="0.5" onchange="calculate()">
+            </div>
+
+            <div class="info-badge">
+                <span>Scarborough DMA Base Pop (A18+):</span>
+                <span id="basePopDisp">-</span>
+            </div>
+            <div class="info-badge">
+                <span>Target Demo Population:</span>
+                <span id="targetPopDisp">-</span>
+            </div>
+            <div class="info-badge">
+                <span>Target Composition %:</span>
+                <span id="targetCompDisp">-</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="results-section">
+        <h2>3. Allocation Performance Comparison</h2>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Performance Metric</th>
+                        <th>100% Broadcast TV</th>
+                        <th class="col-highlight">Selected Shift (<span id="tableDigitalPct">30%</span> Digital)</th>
+                        <th>100% Digital Video</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="footnote">
+        * <strong>Data Source:</strong> Population baseline and demo compositions are pulled directly from Scarborough USA+ 2026 Release 1 profiles. Broadcast efficiency incorporates target DMA composition percentages. Digital targeted reach is calculated as Targeted Impressions / Frequency. Mixed allocations apply a cross-media deduplication factor.
+    </div>
+</div>
+
+<script>
+const dmaData = {"AlbanySchenec": {"A18-34": {"base_pop": 1083431, "target_pop": 273618, "comp_pct": 0.2525}, "A18-49": {"base_pop": 1083431, "target_pop": 516393, "comp_pct": 0.4766}, "A25-54": {"base_pop": 1083431, "target_pop": 500582, "comp_pct": 0.462}, "A50+": {"base_pop": 1083431, "target_pop": 567038, "comp_pct": 0.5234}, "M18+": {"base_pop": 1083431, "target_pop": 530477, "comp_pct": 0.4896}, "M18-49": {"base_pop": 1083431, "target_pop": 260384, "comp_pct": 0.2403}, "M25-54": {"base_pop": 1083431, "target_pop": 252906, "comp_pct": 0.2334}, "W18+": {"base_pop": 1083431, "target_pop": 552954, "comp_pct": 0.5104}, "W18-49": {"base_pop": 1083431, "target_pop": 256009, "comp_pct": 0.2363}, "W25-54": {"base_pop": 1083431, "target_pop": 247676, "comp_pct": 0.2286}, "A18+": {"base_pop": 1083431, "target_pop": 1083431, "comp_pct": 1.0}}, "Boston DMA": {"A18-34": {"base_pop": 5608686, "target_pop": 1599615, "comp_pct": 0.2852}, "A18-49": {"base_pop": 5608686, "target_pop": 2911022, "comp_pct": 0.519}, "A25-54": {"base_pop": 5608686, "target_pop": 2690923, "comp_pct": 0.4798}, "A50+": {"base_pop": 5608686, "target_pop": 2697664, "comp_pct": 0.481}, "M18+": {"base_pop": 5608686, "target_pop": 2723739, "comp_pct": 0.4856}, "M18-49": {"base_pop": 5608686, "target_pop": 1457353, "comp_pct": 0.2598}, "M25-54": {"base_pop": 5608686, "target_pop": 1351648, "comp_pct": 0.241}, "W18+": {"base_pop": 5608686, "target_pop": 2884947, "comp_pct": 0.5144}, "W18-49": {"base_pop": 5608686, "target_pop": 1453669, "comp_pct": 0.2592}, "W25-54": {"base_pop": 5608686, "target_pop": 1339275, "comp_pct": 0.2388}, "A18+": {"base_pop": 5608686, "target_pop": 5608686, "comp_pct": 1.0}}, "Chicago DMA": {"A18-34": {"base_pop": 7824125, "target_pop": 2221051, "comp_pct": 0.2839}, "A18-49": {"base_pop": 7824125, "target_pop": 4123516, "comp_pct": 0.527}, "A25-54": {"base_pop": 7824125, "target_pop": 3931647, "comp_pct": 0.5025}, "A50+": {"base_pop": 7824125, "target_pop": 3700609, "comp_pct": 0.473}, "M18+": {"base_pop": 7824125, "target_pop": 3811559, "comp_pct": 0.4872}, "M18-49": {"base_pop": 7824125, "target_pop": 2088891, "comp_pct": 0.267}, "M25-54": {"base_pop": 7824125, "target_pop": 1980838, "comp_pct": 0.2532}, "W18+": {"base_pop": 7824125, "target_pop": 4012566, "comp_pct": 0.5128}, "W18-49": {"base_pop": 7824125, "target_pop": 2034625, "comp_pct": 0.2600}, "W25-54": {"base_pop": 7824125, "target_pop": 1950809, "comp_pct": 0.2493}, "A18+": {"base_pop": 7824125, "target_pop": 7824125, "comp_pct": 1.0}}, "New York DMA": {"A18-34": {"base_pop": 16738910, "target_pop": 4768392, "comp_pct": 0.2849}, "A18-49": {"base_pop": 16738910, "target_pop": 8812674, "comp_pct": 0.5265}, "A25-54": {"base_pop": 16738910, "target_pop": 8387063, "comp_pct": 0.501}, "A50+": {"base_pop": 16738910, "target_pop": 7926236, "comp_pct": 0.4735}, "M18+": {"base_pop": 16738910, "target_pop": 8092248, "comp_pct": 0.4834}, "M18-49": {"base_pop": 16738910, "target_pop": 4443171, "comp_pct": 0.2654}, "M25-54": {"base_pop": 16738910, "target_pop": 4217154, "comp_pct": 0.2519}, "W18+": {"base_pop": 16738910, "target_pop": 8646662, "comp_pct": 0.5166}, "W18-49": {"base_pop": 16738910, "target_pop": 4369503, "comp_pct": 0.261}, "W25-54": {"base_pop": 16738910, "target_pop": 4169909, "comp_pct": 0.2491}, "A18+": {"base_pop": 16738910, "target_pop": 16738910, "comp_pct": 1.0}}, "Los Angeles DM": {"A18-34": {"base_pop": 14190802, "target_pop": 4280590, "comp_pct": 0.3016}, "A18-49": {"base_pop": 14190802, "target_pop": 7780016, "comp_pct": 0.5482}, "A25-54": {"base_pop": 14190802, "target_pop": 7255146, "comp_pct": 0.5113}, "A50+": {"base_pop": 14190802, "target_pop": 6410786, "comp_pct": 0.4518}, "M18+": {"base_pop": 14190802, "target_pop": 7033481, "comp_pct": 0.4956}, "M18-49": {"base_pop": 14190802, "target_pop": 3959146, "comp_pct": 0.279}, "M25-54": {"base_pop": 14190802, "target_pop": 3694361, "comp_pct": 0.2603}, "W18+": {"base_pop": 14190802, "target_pop": 7157321, "comp_pct": 0.5044}, "W18-49": {"base_pop": 14190802, "target_pop": 3820870, "comp_pct": 0.2692}, "W25-54": {"base_pop": 14190802, "target_pop": 3560785, "comp_pct": 0.2509}, "A18+": {"base_pop": 14190802, "target_pop": 14190802, "comp_pct": 1.0}}};
+
+function init() {
+    const dmaSelect = document.getElementById('dmaSelect');
+    dmaSelect.innerHTML = '';
+    
+    const keys = Object.keys(dmaData).sort();
+    keys.forEach(dma => {
+        const opt = document.createElement('option');
+        opt.value = dma;
+        opt.textContent = dma;
+        if (dma === 'Boston DMA') opt.selected = true;
+        dmaSelect.appendChild(opt);
+    });
+
+    calculate();
+}
+
+function updateSliderLabel() {
+    const val = document.getElementById('digitalPct').value;
+    document.getElementById('digitalPctLabel').textContent = val + '%';
+    document.getElementById('tableDigitalPct').textContent = val + '%';
+}
+
+function calculate() {
+    const dma = document.getElementById('dmaSelect').value;
+    const demo = document.getElementById('demoSelect').value;
+    const budget = parseFloat(document.getElementById('budgetInput').value) || 0;
+    const shiftPct = parseFloat(document.getElementById('digitalPct').value) / 100;
+    
+    const tvCpm = parseFloat(document.getElementById('tvCpm').value) || 22.5;
+    const digCpm = parseFloat(document.getElementById('digCpm').value) || 32.0;
+    const digFreq = parseFloat(document.getElementById('digFreq').value) || 4.0;
+
+    if (!dmaData[dma] || !dmaData[dma][demo]) return;
+
+    const basePop = dmaData[dma][demo].base_pop;
+    const targetPop = dmaData[dma][demo].target_pop;
+    const compPct = dmaData[dma][demo].comp_pct;
+
+    document.getElementById('basePopDisp').textContent = basePop.toLocaleString();
+    document.getElementById('targetPopDisp').textContent = targetPop.toLocaleString();
+    document.getElementById('targetCompDisp').textContent = (compPct * 100).toFixed(1) + '%';
+
+    function calcScenario(tvAlloc, digAlloc) {
+        const tvSpend = budget * tvAlloc;
+        const digSpend = budget * digAlloc;
+
+        const tvGrossImps = (tvSpend / tvCpm) * 1000;
+        const tvTargetImps = tvGrossImps * compPct;
+        const tvTargetGRP = (tvTargetImps / targetPop) * 100;
+        
+        const tvTargetReachPct = Math.min(85, 85 * (1 - Math.exp(-0.015 * tvTargetGRP)));
+        const tvTargetReach = (tvTargetReachPct / 100) * targetPop;
+
+        const digTargetImps = (digSpend / digCpm) * 1000;
+        const digTargetReach = digFreq > 0 ? (digTargetImps / digFreq) : 0;
+        const digTargetReachPct = Math.min(95, (digTargetReach / targetPop) * 100);
+
+        let combinedTargetReach = 0;
+        if (tvAlloc === 1) combinedTargetReach = tvTargetReach;
+        else if (digAlloc === 1) combinedTargetReach = digTargetReach;
+        else {
+            const rA = tvTargetReachPct / 100;
+            const rB = digTargetReachPct / 100;
+            const combinedPct = (rA + rB - (rA * rB * 0.7));
+            combinedTargetReach = Math.min(targetPop * 0.92, combinedPct * targetPop);
+        }
+
+        const combinedTargetReachPct = (combinedTargetReach / targetPop) * 100;
+        const totalTargetImps = tvTargetImps + digTargetImps;
+        const totalGrossImps = tvGrossImps + digTargetImps;
+
+        const effectiveTargetCPM = totalTargetImps > 0 ? (budget / (totalTargetImps / 1000)) : 0;
+        const totalTargetGRP = (totalTargetImps / targetPop) * 100;
+        const effectiveTargetCPP = totalTargetGRP > 0 ? (budget / totalTargetGRP) : 0;
+        const effectiveGrossCPM = totalGrossImps > 0 ? (budget / (totalGrossImps / 1000)) : 0;
+
+        return {
+            tvSpend, digSpend, totalGrossImps, totalTargetImps,
+            combinedTargetReach, combinedTargetReachPct,
+            totalTargetGRP, effectiveTargetCPP, effectiveGrossCPM, effectiveTargetCPM
+        };
+    }
+
+    const s100TV = calcScenario(1.0, 0.0);
+    const sShift = calcScenario(1 - shiftPct, shiftPct);
+    const s100Dig = calcScenario(0.0, 1.0);
+
+    const fmtNum = num => Math.round(num).toLocaleString();
+    const fmtCurr = num => '$' + num.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    const fmtPct = num => num.toFixed(1) + '%';
+
+    document.getElementById('tableBody').innerHTML = `
+        <tr>
+            <td>Broadcast / Digital Budget Shift</td>
+            <td>${fmtCurr(s100TV.tvSpend)} / $0</td>
+            <td class="col-highlight">${fmtCurr(sShift.tvSpend)} / ${fmtCurr(sShift.digSpend)}</td>
+            <td>$0 / ${fmtCurr(s100Dig.digSpend)}</td>
+        </tr>
+        <tr>
+            <td>Targeted Net Reach (# People)</td>
+            <td>${fmtNum(s100TV.combinedTargetReach)}</td>
+            <td class="col-highlight">${fmtNum(sShift.combinedTargetReach)}</td>
+            <td>${fmtNum(s100Dig.combinedTargetReach)}</td>
+        </tr>
+        <tr class="row-key-metric">
+            <td>Targeted Net Reach (%)</td>
+            <td>${fmtPct(s100TV.combinedTargetReachPct)}</td>
+            <td class="col-highlight">${fmtPct(sShift.combinedTargetReachPct)}</td>
+            <td>${fmtPct(s100Dig.combinedTargetReachPct)}</td>
+        </tr>
+        <tr>
+            <td>Targeted Impressions Delivered</td>
+            <td>${fmtNum(s100TV.totalTargetImps)}</td>
+            <td class="col-highlight">${fmtNum(sShift.totalTargetImps)}</td>
+            <td>${fmtNum(s100Dig.totalTargetImps)}</td>
+        </tr>
+        <tr>
+            <td>Targeted GRPs Delivered</td>
+            <td>${s100TV.totalTargetGRP.toFixed(1)}</td>
+            <td class="col-highlight">${sShift.totalTargetGRP.toFixed(1)}</td>
+            <td>${s100Dig.totalTargetGRP.toFixed(1)}</td>
+        </tr>
+        <tr>
+            <td>Effective Targeted CPP ($)</td>
+            <td>${fmtCurr(s100TV.effectiveTargetCPP)}</td>
+            <td class="col-highlight">${fmtCurr(sShift.effectiveTargetCPP)}</td>
+            <td>${fmtCurr(s100Dig.effectiveTargetCPP)}</td>
+        </tr>
+        <tr>
+            <td>Effective Targeted CPM ($)</td>
+            <td>${fmtCurr(s100TV.effectiveTargetCPM)}</td>
+            <td class="col-highlight">${fmtCurr(sShift.effectiveTargetCPM)}</td>
+            <td>${fmtCurr(s100Dig.effectiveTargetCPM)}</td>
+        </tr>
+        <tr>
+            <td>Gross Market CPM ($)</td>
+            <td>${fmtCurr(s100TV.effectiveGrossCPM)}</td>
+            <td class="col-highlight">${fmtCurr(sShift.effectiveGrossCPM)}</td>
+            <td>${fmtCurr(s100Dig.effectiveGrossCPM)}</td>
+        </tr>
+    `;
+}
+
+window.onload = init;
+</script>
+</body>
+</html>
