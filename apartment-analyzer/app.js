@@ -90,12 +90,12 @@ function enhancedOutlook(r){
  const e=enhancedData(r), rent=e.rentScore, supply=e.supplyScore;
  if(rent==null&&supply==null)return 'Enhanced Data Unavailable';
  if(rent==null||supply==null)return 'Enhanced Data Partial';
- if(rent>=60&&supply<60)return 'Momentum Supports Expansion';
- if(rent>=60&&supply>=60)return 'Positive, Monitor Supply';
- if(rent<40&&supply>=60)return 'Near-Term Caution';
- if(rent<40)return 'Momentum Caution';
- if(supply>=80)return 'Supply Caution';
- return 'Balanced Outlook';
+ if(rent>=60&&supply<60)return 'Strong Expansion Opportunity';
+ if(rent>=60&&supply>=60)return 'Good Opportunity — Watch New Supply';
+ if(rent<40&&supply>=60)return 'Proceed with Caution';
+ if(rent<40)return 'Slowing Market';
+ if(supply>=80)return 'High New-Supply Risk';
+ return 'Stable Market';
 }
 function enhancedBadge(label){const cls=label==='N/A'?'na':'';return `<span class="score-level ${cls}">${label}</span>`}
 function enhancedExplanation(r){
@@ -126,14 +126,14 @@ function filtered(){
 function csvEscape(v){const s=String(v??'');return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s}
 function exportCsv(){
  const rows=filtered(), cols=['_rank','Market','Population','Households','Renter_HH','Renter_Share','Vacancy_Rate','Median_Rent_Wtd','Median_HHI_Wtd','Demand_Depth_Proxy','Supply_Pressure_Proxy','Recent_Build_Share','_fundamentals','_scale','_objective','_rentMomentum','_supplyRisk','_enhancedOutlook','Data_Quality'];
- const labels={_rank:'Current Rank',_fundamentals:'Market Fundamentals Score',_scale:'Market Scale Score',_objective:'Expansion Opportunity Score',_rentMomentum:'Rent Momentum',_supplyRisk:'Forward Supply Risk',_enhancedOutlook:'Enhanced Outlook'};
+ const labels={_rank:'Current Rank',_fundamentals:'Market Fundamentals Score',_scale:'Market Scale Score',_objective:'Expansion Opportunity Score',_rentMomentum:'Rent Momentum',_supplyRisk:'Forward Supply Risk',_enhancedOutlook:'Market Outlook'};
  const lines=[cols.map(c=>labels[c]||c).join(',')];
  rows.forEach(r=>lines.push(cols.map(c=>csvEscape(r[c])).join(',')));
  const blob=new Blob([lines.join('\n')],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='apartment-metro-expansion-opportunity-ranking.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),500);
 }
 function renderCompare(){
  const panel=$('comparePanel'),table=$('compareTable'); if(!compare.length){panel.style.display='none';table.innerHTML='';return} panel.style.display='block';
- const metrics=[['Expansion Opportunity Score',r=>fmt1(expansionScore(r))],['Market Fundamentals Score',r=>fmt1(healthScore(r))],['Market Scale Score',r=>fmt1(marketScale(r))],['Fundamentals tier',r=>healthTier(healthScore(r))],['Rent Momentum',r=>enhancedLevel(enhancedData(r).rentScore)],['Forward Supply Risk',r=>enhancedLevel(enhancedData(r).supplyScore)],['Enhanced Outlook',r=>enhancedOutlook(r)],['Population',r=>fmtInt(r.Population)],['Renter households',r=>fmtInt(r.Renter_HH)],['Renter share',r=>pct(r.Renter_Share)],['Vacancy rate',r=>pct(r.Vacancy_Rate)],['Median rent',r=>money(r.Median_Rent_Wtd)],['Median HHI',r=>money(r.Median_HHI_Wtd)],['Demand depth',r=>fmt1(r.Demand_Depth_Proxy)],['Supply pressure',r=>fmt1(r.Supply_Pressure_Proxy)],['Recent construction share',r=>r.Recent_Build_Share==null?'—':pct(r.Recent_Build_Share)]];
+ const metrics=[['Expansion Opportunity Score',r=>fmt1(expansionScore(r))],['Market Fundamentals Score',r=>fmt1(healthScore(r))],['Market Scale Score',r=>fmt1(marketScale(r))],['Fundamentals tier',r=>healthTier(healthScore(r))],['Rent Momentum',r=>enhancedLevel(enhancedData(r).rentScore)],['Forward Supply Risk',r=>enhancedLevel(enhancedData(r).supplyScore)],['Market Outlook',r=>enhancedOutlook(r)],['Population',r=>fmtInt(r.Population)],['Renter households',r=>fmtInt(r.Renter_HH)],['Renter share',r=>pct(r.Renter_Share)],['Vacancy rate',r=>pct(r.Vacancy_Rate)],['Median rent',r=>money(r.Median_Rent_Wtd)],['Median HHI',r=>money(r.Median_HHI_Wtd)],['Demand depth',r=>fmt1(r.Demand_Depth_Proxy)],['Supply pressure',r=>fmt1(r.Supply_Pressure_Proxy)],['Recent construction share',r=>r.Recent_Build_Share==null?'—':pct(r.Recent_Build_Share)]];
  table.innerHTML='<thead><tr><th>Metric</th>'+compare.map(r=>'<th>'+r.Market+'</th>').join('')+'</tr></thead><tbody>'+metrics.map(m=>'<tr><td><strong>'+m[0]+'</strong></td>'+compare.map(r=>'<td class="num">'+m[1](r)+'</td>').join('')+'</tr>').join('')+'</tbody>';
 }
 function addSelectedToCompare(){if(!selected)return;if(compare.some(r=>r.Market===selected.Market))return;if(compare.length>=4)compare.shift();compare.push(selected);renderCompare()}
@@ -154,7 +154,7 @@ function renderDetail(){
  <div class="legend"><strong>Why this market ranks here:</strong> Expansion Opportunity combines <b>75% Market Fundamentals</b> with <b>25% Market Scale</b>. Fundamentals reflect renter demand, portfolio conditions, supply pressure and risk. Market Scale is the nationwide percentile of renter households, so meaningful addressable markets receive credit without allowing the largest metros to dominate the ranking.</div>`;
  $('addCompare').addEventListener('click',addSelectedToCompare);$('detailDrill').addEventListener('click',()=>openDrilldownForSelected());
 }
-$('minpop').addEventListener('change',()=>{selected=null;render()});$('topn').addEventListener('change',render);$('enhancedOutlook').addEventListener('change',()=>{selected=null;render()});$('nationalRankEmphasis')?.addEventListener('change',render);
+$('minpop').addEventListener('change',()=>{selected=null;render()});$('topn').addEventListener('change',render);$('enhancedOutlook').addEventListener('change',()=>{selected=null;render()});$('nationalRankEmphasis')?.addEventListener('change',render);$('nationalMapMetric')?.addEventListener('change',render);
 $('marketSearchBox').addEventListener('input',()=>{selected=null;render()});$('marketSearchBox').addEventListener('keydown',e=>{if(e.key==='Enter')e.preventDefault()});$('exportCsv').addEventListener('click',exportCsv);$('clearCompare').addEventListener('click',()=>{compare=[];renderCompare()});
 document.querySelectorAll('#nationalView th[data-key]').forEach(th=>th.addEventListener('click',()=>{const k=th.dataset.key;if(sortKey===k)sortDir*=-1;else{sortKey=k;sortDir=-1}render()}));
 
@@ -168,22 +168,52 @@ function bestZipMetroForMarket(market){
 const zipRowsByMetro=new Map();
 for(const z of ZIPDB){if(!z.CBSA)continue;if(!zipRowsByMetro.has(z.CBSA))zipRowsByMetro.set(z.CBSA,[]);zipRowsByMetro.get(z.CBSA).push(z)}
 const metroCentroidCache=new Map();
+const METRO_COORD_OVERRIDES={
+ 'San Francisco-Oakland-Berkeley CA':{lat:37.7749,lon:-122.4194},
+ 'San Jose-Sunnyvale-Santa Clara CA':{lat:37.3382,lon:-121.8863},
+ 'Los Angeles-Long Beach-Anaheim CA':{lat:34.0522,lon:-118.2437},
+ 'San Diego-Chula Vista-Carlsbad CA':{lat:32.7157,lon:-117.1611},
+ 'Denver-Aurora-Lakewood CO':{lat:39.7392,lon:-104.9903},
+ 'Chicago-Naperville-Elgin IL-IN-WI':{lat:41.8781,lon:-87.6298},
+ 'Dallas-Fort Worth-Arlington TX':{lat:32.7767,lon:-96.7970},
+ 'Miami-Fort Lauderdale-Pompano Beach FL':{lat:25.7617,lon:-80.1918},
+ 'New York-Newark-Jersey City NY-NJ-PA':{lat:40.7128,lon:-74.0060},
+ 'Boston-Cambridge-Newton MA-NH':{lat:42.3601,lon:-71.0589},
+ 'Seattle-Tacoma-Bellevue WA':{lat:47.6062,lon:-122.3321}
+};
 function metroCentroidForMarket(market){
  if(metroCentroidCache.has(market))return metroCentroidCache.get(market);
- const zipMetro=bestZipMetroForMarket(market);const c=weightedCentroid(zipRowsByMetro.get(zipMetro)||[]);metroCentroidCache.set(market,c);return c;
+ if(METRO_COORD_OVERRIDES[market]){metroCentroidCache.set(market,METRO_COORD_OVERRIDES[market]);return METRO_COORD_OVERRIDES[market]}
+ const zipMetro=bestZipMetroForMarket(market),zs=zipRowsByMetro.get(zipMetro)||[];
+ // Prefer ZIPs in the lead city named by the market. This prevents a fuzzy CBSA-name match from
+ // silently plotting a metro at an unrelated area's centroid; otherwise use the CBSA ZIP centroid.
+ const lead=String(market||'').split('-')[0].trim().toLowerCase();
+ const leadRows=zs.filter(z=>String(z.City||'').trim().toLowerCase()===lead);
+ const c=weightedCentroid(leadRows.length?leadRows:zs);metroCentroidCache.set(market,c);return c;
 }
+
+function nationalMapMetric(r){
+ const v=$('nationalMapMetric')?.value||'_objective';
+ if(v==='_fundamentals')return r._fundamentals;
+ if(v==='_scale')return r._scale;
+ if(v==='_rentMomentum')return enhancedData(r).rentScore;
+ if(v==='_supplyRisk')return enhancedData(r).supplyScore;
+ return r._objective;
+}
+function nationalMapMetricLabel(){const o=$('nationalMapMetric')?.selectedOptions?.[0];return o?o.textContent:'Expansion Opportunity'}
+
 function renderNationalMap(rows){
  const map=ensureLeafletMap('national','nationalMap','nationalMapStatus',[39,-98,4]);if(!map)return;
- const byOpp=rows.slice().sort((a,b)=>b._objective-a._objective),rank=new Map(byOpp.map((r,i)=>[r.Market,i+1]));
+ const byOpp=rows.slice().sort((a,b)=>Number(nationalMapMetric(b)||-1)-Number(nationalMapMetric(a)||-1)),rank=new Map(byOpp.map((r,i)=>[r.Market,i+1]));
  const markers=[];let mapped=0;
  for(const r of rows){
-   const c=metroCentroidForMarket(r.Market);if(!c)continue;const rr=rank.get(r.Market),emphasis=getRankEmphasisCount('nationalRankEmphasis',rows.length),style=scoreMarkerStyle(r._objective,rr,rows.length,emphasis);
+   const c=metroCentroidForMarket(r.Market);if(!c)continue;const rr=rank.get(r.Market),metric=nationalMapMetric(r);if(metric==null||!Number.isFinite(Number(metric)))continue;const emphasis=getRankEmphasisCount('nationalRankEmphasis',rows.length),style=scoreMarkerStyle(metric,rr,rows.length,emphasis);
    const marker=L.circleMarker([c.lat,c.lon],style).addTo(MAP_LAYERS.national);
-   marker.bindPopup(`<strong>${r.Market}</strong><br>Expansion rank: <strong>#${rr}</strong> of ${rows.length}<br>Expansion Opportunity: <strong>${fmt1(r._objective)}</strong> · ${opportunityLevel(r._objective)}<br>Rent Momentum: ${r._rentMomentum}<br>Forward Supply Risk: ${r._supplyRisk}<br>Enhanced Outlook: ${r._enhancedOutlook}`);
+   marker.bindPopup(`<strong>${r.Market}</strong><br>${nationalMapMetricLabel()} rank: <strong>#${rr}</strong> of ${rows.length}<br>Expansion Opportunity: <strong>${fmt1(r._objective)}</strong><br>Market Fundamentals: ${fmt1(r._fundamentals)}<br>Market Scale: ${fmt1(r._scale)}<br>Rent Momentum: ${r._rentMomentum}<br>Forward Supply Risk: ${r._supplyRisk}`);
    marker.on('click',()=>{selected=r;renderDetail();highlightMappedRow('#tbody',r.Market)});MAP_MARKERS.national.set(String(r.Market),marker);markers.push(marker);mapped++;
  }
  fitNationalMapToMarkers(map,markers);
- const status=$('nationalMapStatus');if(status)status.innerHTML=`Mapped <strong>${mapped}</strong> of <strong>${rows.length}</strong> filtered markets. ${rankEmphasisText('nationalRankEmphasis',rows.length)}`;
+ const status=$('nationalMapStatus');if(status)status.innerHTML=`Mapped <strong>${mapped}</strong> of <strong>${rows.length}</strong> filtered markets by <strong>${nationalMapMetricLabel()}</strong>. ${rankEmphasisText('nationalRankEmphasis',rows.length)}`;
 }
 function updateDrillCountyFilter(raw){
  const ctl=$('drillCountyControl'),sel=$('drillCountyFilter');if(!ctl||!sel)return;
