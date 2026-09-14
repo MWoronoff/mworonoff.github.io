@@ -290,7 +290,7 @@ HTML
 
             <div class="form-group">
                 <label for="digFreq">Digital Frequency Target</label>
-                <input type="number" id="digFreq" value="4.0" step="0.5" onchange="calculate()">
+                <input type="number" id="digFreq" value="1.5" step="0.1" onchange="calculate()">
             </div>
 
             <div class="info-badge">
@@ -327,7 +327,7 @@ HTML
     </div>
 
     <div class="footnote">
-        * <strong>Data Source:</strong> Population baseline and demo compositions are pulled directly from Scarborough USA+ 2026 Release 1 profiles. Broadcast efficiency incorporates target DMA composition percentages. Digital targeted reach is calculated as Targeted Impressions / Frequency. Mixed allocations apply a cross-media deduplication factor.
+        * <strong>Data Source:</strong> Population baseline and demo compositions are pulled directly from Scarborough USA+ 2026 Release 1 profiles. Broadcast efficiency incorporates target DMA composition percentages. Digital targeted reach is calculated as Targeted Impressions / Frequency. Net combined reach utilizes standard probability union deduplication.
     </div>
 </div>
 
@@ -364,7 +364,7 @@ function calculate() {
     
     const tvCpm = parseFloat(document.getElementById('tvCpm').value) || 22.5;
     const digCpm = parseFloat(document.getElementById('digCpm').value) || 32.0;
-    const digFreq = parseFloat(document.getElementById('digFreq').value) || 4.0;
+    const digFreq = parseFloat(document.getElementById('digFreq').value) || 1.5;
 
     if (!dmaData[dma] || !dmaData[dma][demo]) return;
 
@@ -391,17 +391,17 @@ function calculate() {
         const digTargetReach = digFreq > 0 ? (digTargetImps / digFreq) : 0;
         const digTargetReachPct = Math.min(95, (digTargetReach / targetPop) * 100);
 
-        let combinedTargetReach = 0;
-        if (tvAlloc === 1) combinedTargetReach = tvTargetReach;
-        else if (digAlloc === 1) combinedTargetReach = digTargetReach;
+        let combinedTargetReachPct = 0;
+        if (tvAlloc === 1) combinedTargetReachPct = tvTargetReachPct;
+        else if (digAlloc === 1) combinedTargetReachPct = digTargetReachPct;
         else {
             const rA = tvTargetReachPct / 100;
             const rB = digTargetReachPct / 100;
-            const combinedPct = (rA + rB - (rA * rB * 0.7));
-            combinedTargetReach = Math.min(targetPop * 0.92, combinedPct * targetPop);
+            // Standard probability union: Reach(A U B) = A + B - (A * B)
+            combinedTargetReachPct = (rA + rB - (rA * rB)) * 100;
         }
 
-        const combinedTargetReachPct = (combinedTargetReach / targetPop) * 100;
+        const combinedTargetReach = (combinedTargetReachPct / 100) * targetPop;
         const totalTargetImps = tvTargetImps + digTargetImps;
         const totalGrossImps = tvGrossImps + digTargetImps;
 
