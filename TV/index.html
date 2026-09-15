@@ -16,7 +16,7 @@ h1{font-size:27px;margin:0 0 6px}.sub{color:var(--muted);font-size:14px;max-widt
 .badge{font-size:12px;background:#e9f7fb;color:#08799a;border:1px solid #b9e8f4;padding:7px 10px;border-radius:999px;white-space:nowrap}
 .grid{display:grid;grid-template-columns:1.05fr 1.45fr;gap:18px}.card{background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 1px 2px #00000008}
 .card h2{font-size:16px;margin:0;padding:16px 18px;border-bottom:1px solid var(--line)}
-.pad{padding:16px 18px}.controls{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.pad{padding:16px 18px}.controls{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px;align-items:start}.control-group{display:flex;flex-direction:column;gap:13px}.control-group-title{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding-bottom:7px;border-bottom:1px solid var(--line);margin-bottom:1px}.control-group .full{grid-column:auto}
 label{font-size:12px;font-weight:700;color:#475467;display:block;margin-bottom:5px}
 select,input{width:100%;padding:9px 10px;border:1px solid #cfd8e3;border-radius:7px;font-size:14px;background:white}
 .full{grid-column:1/-1}.sliderrow{display:flex;align-items:center;gap:12px}.sliderrow input{padding:0}.bigpct{font-weight:800;color:var(--blue);min-width:46px;text-align:right}
@@ -37,17 +37,23 @@ table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:10px 11px
 
 <div class="grid">
 <div class="card"><h2>Planning Controls</h2><div class="pad"><div class="controls">
-<div><label>DMA</label><select id="dma"></select></div>
-<div><label>Gender</label><select id="gender"><option value="A">Adults</option><option value="M">Men</option><option value="W">Women</option></select></div>
-<div><label>Age</label><select id="age"></select></div>
-<div><label>HHI Income <span class="tiny">(select one or more)</span></label><div id="hhi" class="hhi-checks"><label><input type="checkbox" value="under50" checked>Under $50K</label><label><input type="checkbox" value="50to99" checked>$50K–$99K</label><label><input type="checkbox" value="100plus" checked>$100K+</label></div><div class="tiny">Select one or more ranges. All three = All HHI. DMA-level Scarborough HHI share; combined with age/gender as a modeled estimate.</div></div>
+<div class="control-group audience-controls">
+<div class="control-group-title">Audience Selection</div>
+<div><label>Select Market</label><select id="dma"></select></div>
+<div><label>Select Gender</label><select id="gender"><option value="A">Adults</option><option value="M">Men</option><option value="W">Women</option></select></div>
+<div><label>Select Age</label><select id="age"></select></div>
+<div><label>Select HHI Range(s) <span class="tiny">(select one or more)</span></label><div id="hhi" class="hhi-checks"><label><input type="checkbox" value="under50" checked>Under $50K</label><label><input type="checkbox" value="50to99" checked>$50K–$99K</label><label><input type="checkbox" value="100plus" checked>$100K+</label></div><div class="tiny">Select one or more ranges. All three = All HHI. DMA-level Scarborough HHI share; combined with age/gender as a modeled estimate.</div></div>
+</div>
+<div class="control-group campaign-controls">
+<div class="control-group-title">Campaign Settings</div>
 <div><label>Campaign budget</label><input id="budget" type="number" value="100000" step="5000"></div>
-<div><label>Average Broadcast :30 spot price</label><input id="spot" type="number" step="5"><div class="tiny">Derived from a $7.00 A18+ Broadcast Planning CPM; edit the spot price for client-specific pricing.</div></div>
+<div class="full"><label>Budget shifted to Digital Video</label><div class="sliderrow"><input id="shift" type="range" min="0" max="100" step="5" value="30"><span class="bigpct" id="shiftlab">30%</span></div></div>
 <div><label>Campaign length (weeks)</label><input id="weeks" type="number" value="4" step="1" min="1"></div>
 <div><label>Broadcast weekly frequency</label><input id="bfreq" type="number" value="3" step=".1" min=".1"><div class="tiny">Editable. 3.0×/week = 12.0× over a 4-week campaign.</div></div>
-<div><label>Digital Video CPM</label><input id="dcpm" type="number" value="45" step="1"></div>
 <div><label>Digital weekly frequency</label><input id="dfreq" type="number" value="2" step=".1" min=".1"><div class="tiny">Editable. Campaign frequency = weekly frequency × campaign weeks.</div></div>
-<div class="full"><label>Budget shifted to Digital Video</label><div class="sliderrow"><input id="shift" type="range" min="0" max="100" step="5" value="30"><span class="bigpct" id="shiftlab">30%</span></div></div>
+<div><label>Average Broadcast :30 spot price</label><input id="spot" type="number" step="5"><div class="tiny">Derived from a $7.00 A18+ Broadcast Planning CPM; edit the spot price for client-specific pricing.</div></div>
+<div><label>Digital Video CPM</label><input id="dcpm" type="number" value="45" step="1"></div>
+</div>
 </div>
 <div class="note warn"><strong>Broadcast price benchmark:</strong> The market default is derived from the DMA's measured average A18+ station delivery at a <strong>$7.00 A18+ Broadcast Planning CPM</strong>. The resulting average :30 spot price does not change when the target demographic changes and is editable for client-specific pricing.</div>
 </div></div>
