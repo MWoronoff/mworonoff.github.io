@@ -51,11 +51,11 @@ table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:10px 11px
 <div><label>Campaign length (weeks)</label><input id="weeks" type="number" value="4" step="1" min="1"></div>
 <div><label>Broadcast weekly frequency</label><input id="bfreq" type="number" value="3" step=".1" min=".1"><div class="tiny">Editable. 3.0×/week = 12.0× over a 4-week campaign.</div></div>
 <div><label>Digital weekly frequency</label><input id="dfreq" type="number" value="2" step=".1" min=".1"><div class="tiny">Editable. Campaign frequency = weekly frequency × campaign weeks.</div></div>
-<div><label>Average Broadcast :30 spot price</label><input id="spot" type="number" step="5"><div class="tiny">Derived from a $7.00 A18+ Broadcast Planning CPM; edit the spot price for client-specific pricing.</div></div>
+<div><label>Broadcast Planning CPM</label><input id="bcpmInput" type="number" value="7" step="0.25" min="0.25"><div class="tiny">Defaults to $7.00 A18+ CPM; edit when a client-specific Broadcast CPM is available.</div></div>
 <div><label>Digital Video CPM</label><input id="dcpm" type="number" value="45" step="1"></div>
 </div>
 </div>
-<div class="note warn"><strong>Broadcast price benchmark:</strong> The market default is derived from the DMA's measured average A18+ station delivery at a <strong>$7.00 A18+ Broadcast Planning CPM</strong>. The resulting average :30 spot price does not change when the target demographic changes and is editable for client-specific pricing.</div>
+<div class="note warn"><strong>Broadcast pricing benchmark:</strong> Broadcast defaults to a <strong>$7.00 A18+ planning CPM</strong>. Edit the CPM when client-specific Broadcast pricing is available. The model applies the selected target composition to total Broadcast impressions to calculate target delivery and effective target CPM.</div>
 </div></div>
 
 <div class="card"><h2>Selected Market Benchmark</h2><div class="pad">
@@ -64,8 +64,8 @@ table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:10px 11px
 <div class="kpi"><div class="l">AVG TARGET AUDIENCE / SPOT</div><div class="v" id="targ"></div><div class="s" id="obs"></div></div>
 <div class="kpi"><div class="l">TARGET COMPOSITION</div><div class="v" id="comp"></div><div class="s">Measured target ÷ measured A18+</div></div>
 <div class="kpi"><div class="l">BROADCAST WASTE</div><div class="v" id="waste"></div><div class="s">Outside selected target</div></div>
-<div class="kpi"><div class="l">AVG :30 SPOT PRICE</div><div class="v" id="spotkpi"></div><div class="s">Market benchmark or client override</div></div>
-<div class="kpi"><div class="l">BROADCAST TARGET CPM</div><div class="v" id="bcpm"></div><div class="s">Same spot price ÷ target delivery</div></div>
+<div class="kpi"><div class="l">BROADCAST PLANNING CPM</div><div class="v" id="planningcpm"></div><div class="s">Editable campaign cost benchmark</div></div>
+<div class="kpi"><div class="l">BROADCAST TARGET CPM</div><div class="v" id="bcpm"></div><div class="s">Planning CPM adjusted for target composition</div></div>
 <div class="kpi"><div class="l">BROADCAST TARGET CPP</div><div class="v" id="bcpp"></div><div class="s" id="rating"></div></div>
 </div>
 <div><label>Target efficiency</label><div class="bar"><i id="compbar"></i></div></div>
@@ -77,7 +77,7 @@ table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:10px 11px
 
 <div class="two section">
 <div class="card"><h2>What the Model Measures</h2><div class="pad method">
-<strong>Broadcast:</strong> Scarborough's actual measured audience for ABC, CBS, CW, FOX and NBC across available half-hour periods. Each DMA's default average :30 spot price is its measured A18+ average audience × <strong>$7.00 A18+ Broadcast Planning CPM</strong> ÷ 1,000. That spot price remains constant across demographics and is editable. The selected demographic's measured audience and universe then determine its Broadcast rating, CPM and CPP.<br><br>
+<strong>Broadcast:</strong> Scarborough's actual measured audience for ABC, CBS, CW, FOX and NBC across available half-hour periods. Broadcast defaults to a <strong>$7.00 A18+ Broadcast Planning CPM</strong>, which is editable. Total Broadcast impressions are calculated from spend and that CPM; the selected demographic's measured composition determines target impressions, waste, effective target CPM, GRPs and CPP.<br><br>
 <strong>Frequency & campaign length:</strong> Broadcast defaults to <strong>3.0× per week</strong> and Digital Video defaults to 2.0× per week; both are editable. Campaign frequency = weekly frequency × campaign length (default 4 weeks), so 3.0× weekly Broadcast frequency equals 12.0× over a four-week campaign. Broadcast target reach = target impressions ÷ Broadcast campaign frequency; Digital target reach = Digital impressions ÷ Digital campaign frequency. Both are capped at the selected demographic universe.<br><br>
 <strong>Digital Video:</strong> CPM defaults to $45 and is editable. Digital impressions = spend ÷ CPM × 1,000.<br><br><strong>Combined campaign:</strong> Spend, target impressions, wasted impressions, target efficiency and effective target CPM are aggregated across the selected Broadcast and Digital Video allocations. Combined reach and frequency are intentionally not modeled because the available Scarborough streaming measures describe Broadcast delivery paths rather than duplication between Broadcast ad exposure and a separately purchased Digital Video campaign. No cross-platform duplication rate is assumed.<br><br>
 <strong>Targeting:</strong> Gender and age use Scarborough’s measured Broadcast audience and universe. HHI uses the uploaded DMA-level Scarborough distribution for Adults 18+. When HHI is selected, the model applies that DMA HHI share to the selected gender/age audience and universe. This is an <strong>estimated cross-target based on an independence assumption</strong>, not a measured Scarborough age × gender × HHI cross-tab.<br><br>
@@ -86,7 +86,7 @@ table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:10px 11px
 <div class="card"><h2>Build 3 Guardrails</h2><div class="pad method">
 <strong>HHI guardrail:</strong> HHI percentages are measured at the DMA A18+ level; combined age/gender/HHI delivery is modeled, not directly cross-tabbed. Use an actual Scarborough cross-tab if available for client-facing precision.<br><br>
 <strong>Combined TV + Digital deduplicated reach is intentionally not fabricated.</strong> The analyzer reports Digital reach independently and Broadcast GRPs/impressions. A cross-platform duplication model will be added only when we adopt a defensible assumption or source.<br><br>
-<strong>Pricing:</strong> the default Broadcast spot price is a planning benchmark based on a $7.00 A18+ Broadcast Planning CPM, not a quoted station rate. Replace it with an actual client average unit cost whenever available. Digital Video defaults to $45 CPM and is also editable. The application immediately recalculates CPM, CPP, spots and delivery.
+<strong>Pricing:</strong> Broadcast defaults to a $7.00 A18+ planning CPM and Digital Video defaults to $45 CPM; both are editable. Replace either benchmark with client-specific CPMs when available. The application immediately recalculates impressions, target efficiency, effective target CPM, GRPs and delivery.
 </div></div>
 </div>
 </main>
@@ -106,33 +106,33 @@ let lastDMA=null;
 function init(){
  Object.keys(DATA).sort().forEach(x=>$('dma').add(new Option(x,x)));
  $('gender').value='A'; syncAges('25-54');
- $('dma').value=Object.keys(DATA).find(x=>x==="Denver")||Object.keys(DATA)[0]; Array.from($('hhi').options).forEach(o=>o.selected=true);
+ $('dma').value=Object.keys(DATA).find(x=>x==="Denver")||Object.keys(DATA)[0]; document.querySelectorAll('#hhi input[type=checkbox]').forEach(cb=>cb.checked=true);
  $('gender').addEventListener('input',()=>{syncAges();calc(false)});
- ['dma','age','budget','spot','weeks','bfreq','dcpm','dfreq','shift'].forEach(id=>$(id).addEventListener('input',()=>calc(id==='dma'))); document.querySelectorAll('#hhi input[type=checkbox]').forEach(cb=>cb.addEventListener('change',()=>calc(false)));
+ ['dma','age','budget','bcpmInput','weeks','bfreq','dcpm','dfreq','shift'].forEach(id=>$(id).addEventListener('input',()=>calc(id==='dma'))); document.querySelectorAll('#hhi input[type=checkbox]').forEach(cb=>cb.addEventListener('change',()=>calc(false)));
  calc(true);
 }
 function scenario(digitalPct,d){
- const budget=+$('budget').value||0, spot=+$('spot').value||1, weeks=+$('weeks').value||4, bf=+$('bfreq').value||3, dcpm=+$('dcpm').value||45, df=+$('dfreq').value||2;
+ const budget=+$('budget').value||0, bcpmInput=+$('bcpmInput').value||7, weeks=+$('weeks').value||4, bf=+$('bfreq').value||3, dcpm=+$('dcpm').value||45, df=+$('dfreq').value||2;
  const bfCampaign=bf*weeks, dfCampaign=df*weeks;
- const ds=budget*digitalPct, ts=budget-ds, spots=ts/spot;
- const tvGross=spots*d.avg_total, tvTarget=spots*d.avg_target;
+ const ds=budget*digitalPct, ts=budget-ds;
+ const tvGross=bcpmInput?ts/bcpmInput*1000:0, tvTarget=tvGross*d.composition;
  const digImp=ds/dcpm*1000, tvReach=Math.min(d.universe, tvTarget/bfCampaign), digReach=Math.min(d.universe, digImp/dfCampaign);
  const totalTarget=tvTarget+digImp;
  const tvGRP=d.universe?tvTarget/d.universe*100:0;
  const targetCPM=totalTarget?budget/(totalTarget/1000):0;
  const tvCPP=tvGRP?ts/tvGRP:0;
- return {ds,ts,spots,tvGross,tvTarget,tvReach,digImp,digReach,totalTarget,tvGRP,targetCPM,tvCPP,bfCampaign,dfCampaign};
+ return {ds,ts,tvGross,tvTarget,tvReach,digImp,digReach,totalTarget,tvGRP,targetCPM,tvCPP,bfCampaign,dfCampaign};
 }
 function calc(dmaChanged=false){
  const dma=$('dma').value, demo=demoKey(), d=targetedData(dma), m=DATA[dma]._market, selectedHhiLabel=hhiLabel();
- if(dmaChanged||lastDMA!==dma){$('spot').value=(m.avg_a18*7/1000).toFixed(2); lastDMA=dma}
+ if(dmaChanged||lastDMA!==dma){lastDMA=dma}
  $('shiftlab').textContent=$('shift').value+'%';
  $('a18').textContent=fmt(m.avg_a18); $('targ').textContent=fmt(d.avg_target); $('obs').textContent=selectedHHI().length===0||selectedHHI().length===3?`${d.obs} measured network/time observations`:`Modeled ${demo} × ${selectedHhiLabel} using ${pct(d.hhi_share)} DMA HHI share`;
  $('comp').textContent=pct(d.composition); $('waste').textContent=pct(1-d.composition); $('compbar').style.width=Math.min(100,d.composition*100)+'%';
- const currentSpot=+$('spot').value||0, targetRating=d.universe?d.avg_target/d.universe*100:0, broadcastTargetCPM=d.avg_target?currentSpot/d.avg_target*1000:0, broadcastTargetCPP=targetRating?currentSpot/targetRating:0;
- $('spotkpi').textContent=money(currentSpot); $('bcpm').textContent=money(broadcastTargetCPM); $('bcpp').textContent=money(broadcastTargetCPP); $('rating').textContent=`${demo} avg rating ${targetRating.toFixed(3)}`;
+ const planningCPM=+$('bcpmInput').value||7, targetRating=d.universe?d.avg_target/d.universe*100:0, broadcastTargetCPM=d.composition?planningCPM/d.composition:0, broadcastTargetCPP=d.universe?broadcastTargetCPM*d.universe/100000:0;
+ $('planningcpm').textContent=money(planningCPM); $('bcpm').textContent=money(broadcastTargetCPM); $('bcpp').textContent=money(broadcastTargetCPP); $('rating').textContent=`${demo} avg rating ${targetRating.toFixed(3)}`;
  const p=+$('shift').value/100, a=scenario(0,d), b=scenario(p,d), c=scenario(1,d);
- $('storytitle').textContent=`SHIFTING ${$('shift').value}% OF BROADCAST TV BUDGET TO DIGITAL VIDEO`; $('marketbadge').textContent=`${dma} • ${demo} • ${selectedHhiLabel}`; const benchmarkSpot=m.avg_a18*7/1000; $('storysub').textContent=`Live comparison versus 100% Broadcast baseline • ${Math.abs(currentSpot-benchmarkSpot)<0.01?'Market benchmark':'Client-entered Broadcast price'}${selectedHHI().length===0||selectedHHI().length===3?'':' • HHI cross-target modeled'}`;
+ $('storytitle').textContent=`SHIFTING ${$('shift').value}% OF BROADCAST TV BUDGET TO DIGITAL VIDEO`; $('marketbadge').textContent=`${dma} • ${demo} • ${selectedHhiLabel}`; $('storysub').textContent=`Live comparison versus 100% Broadcast baseline • ${Math.abs(planningCPM-7)<0.001?'$7.00 Broadcast planning CPM':'Client-entered Broadcast CPM'}${selectedHHI().length===0||selectedHHI().length===3?'':' • HHI cross-target modeled'}`;
  const met=(l,v,cl='')=>`<div class="metric"><span>${l}</span><b class="${cl}">${v}</b></div>`;
  $('basecol').innerHTML=met('Spend',money(a.ts))+met('Target impressions',fmt(a.tvTarget))+met('Wasted impressions',fmt(a.tvGross-a.tvTarget),'loss')+met('% of Broadcast impressions wasted',pct(a.tvGross?(a.tvGross-a.tvTarget)/a.tvGross:0),'loss')+met('Target efficiency',pct(a.tvGross?a.tvTarget/a.tvGross:0))+met('Target GRPs',a.tvGRP.toFixed(1))+met('Weekly frequency',(+$('bfreq').value||3).toFixed(1)+'×')+met('Campaign frequency',a.bfCampaign.toFixed(1)+'×')+met('Target reach',fmt(a.tvReach))+met('Target reach %',pct(a.tvReach/d.universe))+met('Effective target CPM',money(a.targetCPM));
  $('tvcol').innerHTML=met('Spend',money(b.ts))+met('Target impressions',fmt(b.tvTarget))+met('Wasted impressions',fmt(b.tvGross-b.tvTarget),'loss')+met('% of Broadcast impressions wasted',pct(b.tvGross?(b.tvGross-b.tvTarget)/b.tvGross:0),'loss')+met('Target efficiency',pct(b.tvGross?b.tvTarget/b.tvGross:0))+met('Target GRPs',b.tvGRP.toFixed(1))+met('Weekly frequency',(+$('bfreq').value||3).toFixed(1)+'×')+met('Campaign frequency',b.bfCampaign.toFixed(1)+'×')+met('Target reach',fmt(b.tvReach))+met('Target reach %',pct(b.tvReach/d.universe))+met('Effective target CPM',b.tvTarget?money(b.ts/(b.tvTarget/1000)):'—');
