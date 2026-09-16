@@ -8,221 +8,96 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-/* Adtaxi Official Visual Style System */
-:root {
-  --adtaxi-navy-dark: #0a2240;
-  --adtaxi-navy-mid: #102c4d;
-  --adtaxi-blue-brand: #173f70;
-  --adtaxi-teal-accent: #00a887;
-  --adtaxi-cyan-bright: #2f80c9;
-  
-  --ink: #172b4d;
-  --muted: #667085;
-  --line: #d8e1ec;
-  --bg: #f4f7fb;
-  --card: #ffffff;
-  --green: #23856d;
-  --red: #b5473c;
-  
-  --font-sans: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
+:root{
+  --adtaxi-navy-dark:#0a2240;
+  --adtaxi-navy-mid:#102c4d;
+  --adtaxi-blue-brand:#173f70;
+  --adtaxi-teal-accent:#00a887;
+  --adtaxi-cyan-bright:#2f80c9;
+  --ink:#172b4d;
+  --muted:#667085;
+  --line:#d8e1ec;
+  --bg:#f4f7fb;
+  --card:#ffffff;
+  --green:#23856d;
+  --red:#b5473c;
+  --font-sans:'Montserrat',-apple-system,BlinkMacSystemFont,sans-serif;
 }
-
-* { box-sizing: border-box; }
-body {
-  margin: 0;
-  background-color: var(--bg);
-  font-family: var(--font-sans);
-  color: var(--ink);
-  -webkit-font-smoothing: antialiased;
-}
-
-header {
-  background: linear-gradient(110deg, var(--adtaxi-navy-dark) 0%, var(--adtaxi-blue-brand) 100%);
-  color: #ffffff;
-  padding: 20px 0;
-  border-bottom: 3px solid var(--adtaxi-teal-accent);
-}
-
-.head {
-  max-width: 1500px;
-  margin: auto;
-  padding: 0 32px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-}
-
-.header-title {
-  font-size: 26px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  color: #ffffff;
-}
-
-.header-sub {
-  font-size: 14px;
-  color: #d7e0ea;
-  margin-top: 6px;
-  max-width: 900px;
-  line-height: 1.4;
-}
-
-.header-badge {
-  display: inline-block;
-  font-size: 11px;
-  font-weight: 700;
-  color: #ffffff;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  padding: 4px 12px;
-  border-radius: 999px;
-  margin-top: 10px;
-}
-
-main {
-  max-width: 1500px;
-  margin: 24px auto;
-  padding: 0 24px 40px;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: 1.1fr 1.4fr;
-  gap: 20px;
-}
-
-.card {
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(10, 34, 64, 0.04);
-  overflow: hidden;
-}
-
-.card h2 {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--adtaxi-navy-dark);
-  margin: 0;
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--line);
-  background: #fafbfc;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
-
-.pad { padding: 20px; }
-
-.controls {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-}
-
-.control-group-title {
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--muted);
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--line);
-  margin-bottom: 12px;
-}
-
-label {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--ink);
-  display: block;
-  margin-bottom: 6px;
-}
-
-select, input {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  font-size: 14px;
-  font-family: var(--font-sans);
-  background: #ffffff;
-  color: var(--ink);
-}
-
-select:focus, input:focus {
-  outline: none;
-  border-color: var(--adtaxi-cyan-bright);
-  box-shadow: 0 0 0 3px rgba(47, 128, 201, 0.15);
-}
-
-.btn-primary {
-  background-color: var(--adtaxi-teal-accent);
-  color: #ffffff;
-  border: none;
-  border-radius: 6px;
-  padding: 10px 14px;
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.btn-primary:hover {
-  background-color: #008f73;
-}
-
-.kpis {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.kpi {
-  background: #ffffff;
-  border: 1px solid var(--line);
-  border-top: 4px solid var(--adtaxi-teal-accent);
-  border-radius: 8px;
-  padding: 14px;
-}
-
-.kpi .l {
-  font-size: 11px;
-  color: var(--muted);
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
-.kpi .v {
-  font-size: 22px;
-  font-weight: 800;
-  color: var(--adtaxi-navy-dark);
-  margin-top: 4px;
-}
-
-.kpi .s {
-  font-size: 11px;
-  color: var(--muted);
-  margin-top: 4px;
-}
-
-.note-box {
-  font-size: 12px;
-  line-height: 1.5;
-  color: #8a4b0f;
-  background: #fff8eb;
-  border: 1px solid #fedf89;
-  padding: 12px;
-  border-radius: 6px;
-  margin-top: 16px;
-}
-
-@media (max-width: 900px) {
-  .grid { grid-template-columns: 1fr; }
-  .controls { grid-template-columns: 1fr; }
-  .kpis { grid-template-columns: 1fr 1fr; }
-}
+*{box-sizing:border-box}
+body{margin:0;background-color:var(--bg);font-family:var(--font-sans);color:var(--ink);-webkit-font-smoothing:antialiased}
+header{background:linear-gradient(110deg,var(--adtaxi-navy-dark) 0%,var(--adtaxi-blue-brand) 100%);color:#fff;padding:20px 0;border-bottom:3px solid var(--adtaxi-teal-accent);box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.head{max-width:1500px;margin:auto;padding:0 32px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.header-title{font-size:26px;font-weight:800;letter-spacing:-.02em;color:#fff}
+.header-sub{font-size:14px;color:#d7e0ea;margin-top:6px;max-width:900px;line-height:1.4}
+.header-badge{display:inline-block;font-size:11px;font-weight:700;color:#fff;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.35);padding:4px 12px;border-radius:999px;margin-top:10px}
+main{max-width:1500px;margin:24px auto;padding:0 24px 40px}
+.grid{display:grid;grid-template-columns:1.15fr 1.35fr;gap:20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 2px 6px rgba(10,34,64,.04);overflow:hidden}
+.card h2{font-size:15px;font-weight:800;color:var(--adtaxi-navy-dark);margin:0;padding:16px 20px;border-bottom:1px solid var(--line);background:#fafbfc;text-transform:uppercase;letter-spacing:.04em}
+.pad{padding:20px}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.control-group-title{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding-bottom:8px;border-bottom:1px solid var(--line);margin-bottom:12px}
+label{font-size:12px;font-weight:700;color:var(--ink);display:block;margin-bottom:6px}
+select,input[type=number],input[type=text]{width:100%;padding:10px 12px;border:1px solid #cbd5e1;border-radius:6px;font-size:14px;font-family:var(--font-sans);background:#fff;color:var(--ink)}
+select:focus,input:focus{outline:none;border-color:var(--adtaxi-cyan-bright);box-shadow:0 0 0 3px rgba(47,128,201,.15)}
+.cpp-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
+.reset-cpp{padding:10px 12px;border:1px solid var(--adtaxi-blue-brand);border-radius:6px;background:#fff;color:var(--adtaxi-blue-brand);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .2s ease}
+.reset-cpp:hover{background:var(--bg);border-color:var(--adtaxi-navy-dark)}
+.tiny{font-size:11px;font-weight:500;color:var(--muted);line-height:1.35;margin-top:5px}
+.hhi-checks{display:flex;gap:10px;flex-wrap:wrap;padding:4px 0}
+.hhi-checks label{display:flex;align-items:center;gap:6px;margin:0;font-size:12px;font-weight:600;color:#475467;cursor:pointer}
+.hhi-checks input{width:auto;margin:0;accent-color:var(--adtaxi-teal-accent)}
+.note-box{font-size:12px;line-height:1.5;color:#8a4b0f;background:#fff8eb;border:1px solid #fedf89;padding:12px;border-radius:6px;margin-top:16px}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.kpi{background:#fff;border:1px solid var(--line);border-top:4px solid var(--adtaxi-teal-accent);border-radius:8px;padding:14px}
+.kpi .l{font-size:10px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.03em}
+.kpi .v{font-size:22px;font-weight:800;color:var(--adtaxi-navy-dark);margin-top:4px}
+.kpi .s{font-size:11px;color:var(--muted);margin-top:4px}
+.bar{height:10px;background:#edf1f5;border-radius:99px;overflow:hidden;margin-top:8px}
+.bar>i{display:block;height:100%;background:var(--adtaxi-teal-accent);border-radius:99px;transition:width .3s ease}
+.story{margin-top:24px;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:0 2px 6px rgba(10,34,64,.04)}
+.storyhead{padding:22px 24px;background:linear-gradient(110deg,var(--adtaxi-navy-dark),var(--adtaxi-blue-brand));color:#fff;display:flex;justify-content:space-between;gap:20px;align-items:center;border-bottom:3px solid var(--adtaxi-teal-accent)}
+.storyhead h2{margin:0;font-size:20px;font-weight:800;line-height:1.2;letter-spacing:-.01em}
+.storyhead .mini{font-size:12px;color:#d7e0ea;margin-top:6px}
+.badge{font-size:12px;font-weight:700;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.35);padding:6px 14px;border-radius:999px;white-space:nowrap}
+.tradegrid{display:grid;grid-template-columns:1fr 1fr 1fr 1.15fr}
+.tradecol{padding:18px;border-right:1px solid var(--line)}
+.tradecol:last-child{border-right:0}
+.tradecol h3{margin:0 0 14px;font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.tradecol.feature{background:#f0f9f6;border-left:2px solid var(--adtaxi-teal-accent)}
+.tradecol.feature h3{color:var(--adtaxi-navy-dark)}
+.metric{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid #edf1f5;font-size:12px}
+.metric:last-child{border-bottom:0}
+.metric b{font-size:13px;font-weight:700}
+.gain{color:var(--green);font-weight:700}
+.loss{color:var(--red);font-weight:700}
+.insights{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:16px 20px;background:#f8fafc;border-top:1px solid var(--line)}
+.insight{background:#fff;border:1px solid var(--line);border-radius:8px;padding:14px;border-top:3px solid var(--adtaxi-cyan-bright)}
+.insight .x{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase}
+.insight .y{font-size:18px;font-weight:800;color:var(--adtaxi-navy-dark);margin-top:4px}
+.insight .z{font-size:11px;color:var(--muted);margin-top:3px}
+.section{margin-top:24px}
+.impact-slider{margin-bottom:20px;padding:18px 20px;border:1px solid var(--line);border-radius:10px;background:#f8fbff}
+.sliderrow{display:flex;align-items:center;gap:16px}
+.sliderrow input{flex:1;accent-color:var(--adtaxi-teal-accent);cursor:pointer}
+.bigpct{font-size:20px;font-weight:800;color:var(--adtaxi-navy-dark);min-width:60px;text-align:right}
+.allocation-dollars{font-size:20px;font-weight:800;margin-bottom:16px;color:var(--adtaxi-navy-dark)}
+.impact-wrap{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:20px}
+.impact-bars{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.bar-card{border:1px solid var(--line);border-radius:10px;padding:14px;background:#fff}
+.bar-card h3{font-size:11px;font-weight:800;letter-spacing:.04em;margin:0 0 12px;color:var(--adtaxi-navy-dark);text-transform:uppercase}
+.bar-row{display:grid;grid-template-columns:85px 1fr 90px;gap:8px;align-items:center;margin:10px 0;font-size:11px;font-weight:600}
+.bar-track{height:16px;background:#edf2f7;border-radius:5px;overflow:hidden}
+.bar-fill{height:100%;background:var(--adtaxi-blue-brand);border-radius:5px;transition:width .3s ease}
+.bar-fill.selected{background:var(--adtaxi-teal-accent)}
+.bar-value{text-align:right;font-weight:700;color:var(--ink)}
+.gainbox{border:1px solid var(--line);border-radius:10px;padding:16px;background:#fff;border-top:4px solid var(--green)}
+.gainbox h3{font-size:12px;font-weight:800;letter-spacing:.06em;margin:0 0 12px;color:var(--green);text-transform:uppercase}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.method{font-size:12px;line-height:1.6;color:#475467}
+.method strong{color:var(--ink)}
+@media(max-width:1100px){.grid,.two,.impact-wrap{grid-template-columns:1fr}.tradegrid{grid-template-columns:1fr 1fr}.insights,.impact-bars{grid-template-columns:1fr 1fr}.kpis{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:650px){.controls,.kpis,.tradegrid,.insights,.impact-bars{grid-template-columns:1fr}.head{flex-direction:column;align-items:flex-start}.cpp-row{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -239,7 +114,6 @@ select:focus, input:focus {
 
 <main>
   <div class="grid">
-    <!-- Left Column: Controls -->
     <div class="card">
       <h2>Planning Controls</h2>
       <div class="pad">
@@ -248,12 +122,7 @@ select:focus, input:focus {
             <div class="control-group-title">Audience Selection</div>
             <div style="margin-bottom:12px;">
               <label for="dma">Select Market</label>
-              <select id="dma">
-                <option value="Denver">Denver</option>
-                <option value="Chicago">Chicago</option>
-                <option value="Los Angeles">Los Angeles</option>
-                <option value="New York">New York</option>
-              </select>
+              <select id="dma"></select>
             </div>
             <div style="margin-bottom:12px;">
               <label for="gender">Select Gender</label>
@@ -263,14 +132,18 @@ select:focus, input:focus {
                 <option value="W">Women</option>
               </select>
             </div>
-            <div>
+            <div style="margin-bottom:12px;">
               <label for="age">Select Age</label>
-              <select id="age">
-                <option value="25-54">25-54</option>
-                <option value="18-34">18-34</option>
-                <option value="18-49">18-49</option>
-                <option value="50+">50+</option>
-              </select>
+              <select id="age"></select>
+            </div>
+            <div>
+              <label>Select HHI Range(s) <span class="tiny">(one or more)</span></label>
+              <div id="hhi" class="hhi-checks">
+                <label><input type="checkbox" value="under50" checked>Under $50K</label>
+                <label><input type="checkbox" value="50to99" checked>$50K–$99K</label>
+                <label><input type="checkbox" value="100plus" checked>$100K+</label>
+              </div>
+              <div class="tiny">Selecting all 3 = All HHI. Modeled cross-target estimate using DMA-level Scarborough HHI share.</div>
             </div>
           </div>
 
@@ -284,60 +157,289 @@ select:focus, input:focus {
               <label for="weeks">Campaign Length (Weeks)</label>
               <input id="weeks" type="number" value="4" min="1">
             </div>
-            <div>
+            <div style="margin-bottom:12px;">
+              <label for="bfreq">Broadcast Weekly Freq</label>
+              <input id="bfreq" type="number" value="3" step="0.1" min="0.1">
+              <div class="tiny">3.0×/wk = 12.0× total over 4 weeks.</div>
+            </div>
+            <div style="margin-bottom:12px;">
+              <label for="dfreq">Digital Weekly Freq</label>
+              <input id="dfreq" type="number" value="2" step="0.1" min="0.1">
+              <div class="tiny">Campaign Freq = Weekly Freq × Weeks.</div>
+            </div>
+            <div style="margin-bottom:12px;">
               <label for="cppInput">Target Demo CPP ($)</label>
-              <input id="cppInput" type="number" value="250" min="1">
+              <div class="cpp-row">
+                <input id="cppInput" type="number" step="1" min="1">
+                <button id="resetCpp" class="reset-cpp" type="button">Reset Estimate</button>
+              </div>
+              <div class="tiny" id="cppEstimateNote">Estimated from A18+ benchmark and selected target universe.</div>
+            </div>
+            <div>
+              <label for="dcpm">Digital Video CPM ($)</label>
+              <input id="dcpm" type="number" value="45" step="1" min="1">
             </div>
           </div>
         </div>
-
         <div class="note-box">
-          <strong>Broadcast Pricing Note:</strong> Target Demo CPP is estimated automatically based on the selected market and demographic universe. You can override this value directly at any time.
+          <strong>Broadcast Pricing Note:</strong> Target Demo CPP is estimated automatically from a generic A18+ planning CPP and the selected Gender/Age universe. The estimate updates with demographic changes and remains editable at any time.
         </div>
       </div>
     </div>
 
-    <!-- Right Column: Benchmark KPIs -->
     <div class="card">
       <h2>Selected Market Benchmark</h2>
       <div class="pad">
         <div class="kpis">
           <div class="kpi">
-            <div class="l">Avg A18+ Audience</div>
-            <div class="v" id="kpi-a18">44,306</div>
-            <div class="s">ABC / CBS / FOX / NBC avg</div>
+            <div class="l">Avg A18+ Audience / Spot</div>
+            <div class="v" id="a18">-</div>
+            <div class="s">ABC/CBS/CW/FOX/NBC average</div>
           </div>
           <div class="kpi">
-            <div class="l">Target Audience</div>
-            <div class="v" id="kpi-target">8,348</div>
-            <div class="s">Selected demographic</div>
+            <div class="l">Avg Target Audience / Spot</div>
+            <div class="v" id="targ">-</div>
+            <div class="s" id="obs">-</div>
           </div>
           <div class="kpi">
             <div class="l">Target Composition</div>
-            <div class="v" id="kpi-comp">18.8%</div>
-            <div class="s">Target ÷ Total A18+</div>
+            <div class="v" id="comp">-</div>
+            <div class="s">Measured target ÷ measured A18+</div>
           </div>
           <div class="kpi">
             <div class="l">Broadcast Waste</div>
-            <div class="v" id="kpi-waste">81.2%</div>
+            <div class="v" id="waste">-</div>
             <div class="s">Outside selected target</div>
           </div>
           <div class="kpi">
-            <div class="l">Target CPM</div>
-            <div class="v" id="kpi-cpm">$151.35</div>
-            <div class="s">Effective broadcast cost</div>
+            <div class="l">Broadcast Target CPM</div>
+            <div class="v" id="bcpm">-</div>
+            <div class="s">Derived from Target CPP + universe</div>
           </div>
           <div class="kpi">
-            <div class="l">Target CPP</div>
-            <div class="v" id="kpi-cpp">$310.14</div>
-            <div class="s">Demo cost per point</div>
+            <div class="l">Broadcast Target CPP</div>
+            <div class="v" id="bcpp">-</div>
+            <div class="s" id="rating">-</div>
           </div>
         </div>
-        <button class="btn-primary" style="width: 100%;">Recalculate Scenario</button>
+        <div>
+          <label>Target Efficiency Rating</label>
+          <div class="bar"><i id="compbar" style="width:0%"></i></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="story">
+    <div class="storyhead">
+      <div>
+        <h2 id="storytitle">SHIFTING 30% OF BROADCAST TV BUDGET TO DIGITAL VIDEO</h2>
+        <div class="mini" id="storysub">Live comparison versus the 100% Broadcast baseline</div>
+      </div>
+      <div class="badge" id="marketbadge">Denver • A25-54 • All HHI</div>
+    </div>
+    <div class="tradegrid">
+      <div class="tradecol">
+        <h3>100% BROADCAST</h3>
+        <div id="basecol"></div>
+      </div>
+      <div class="tradecol">
+        <h3 id="tvhead">70% BROADCAST</h3>
+        <div id="tvcol"></div>
+      </div>
+      <div class="tradecol">
+        <h3 id="dighead">30% DIGITAL VIDEO</h3>
+        <div id="digcol"></div>
+      </div>
+      <div class="tradecol feature">
+        <h3>COMBINED CAMPAIGN</h3>
+        <div id="changecol"></div>
+      </div>
+    </div>
+    <div class="insights" id="insights"></div>
+  </div>
+
+  <div class="card section">
+    <h2>Impact of the Shift</h2>
+    <div class="pad">
+      <div class="impact-slider">
+        <label for="shift">Budget Shifted to Digital Video</label>
+        <div class="sliderrow">
+          <input id="shift" type="range" min="0" max="100" step="5" value="30">
+          <span class="bigpct" id="shiftlab">30%</span>
+        </div>
+      </div>
+      <div class="allocation-dollars" id="allocationDollars"></div>
+      <div class="impact-wrap">
+        <div class="impact-bars" id="impactBars"></div>
+        <div class="gainbox">
+          <h3>YOU GAIN</h3>
+          <div id="gainBox"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="two section">
+    <div class="card">
+      <h2>What the Model Measures</h2>
+      <div class="pad method">
+        <strong>Broadcast:</strong> Scarborough's measured audience and universe define the selected target. Target Demo CPP is estimated from a generic A18+ planning CPP and the selected Gender/Age universe; the advertiser can override that estimate. Broadcast GRPs = Broadcast spend ÷ Target Demo CPP; target impressions = GRPs × target universe ÷ 100; effective target CPM is then derived from Broadcast spend and target impressions.<br><br>
+        <strong>Frequency & Reach:</strong> Broadcast defaults to 3.0×/week and Digital Video to 2.0×/week. Campaign frequency = weekly frequency × campaign length. Reach incorporates standard diminishing returns scaling and is capped at the selected demographic universe.<br><br>
+        <strong>Digital Video:</strong> CPM defaults to $45 and is editable. Digital impressions = spend ÷ CPM × 1,000.<br><br>
+        <strong>Combined Campaign:</strong> Spend, target impressions, wasted impressions, target efficiency, and effective target CPM are aggregated across channels. Combined reach/frequency are intentionally not modeled due to lack of standard cross-platform duplication assumptions.<br><br>
+        <strong>HHI & Targeting:</strong> Gender/age use measured Scarborough audience. HHI applies DMA-level distribution as a modeled cross-target estimate based on an independence assumption.
+      </div>
+    </div>
+    <div class="card">
+      <h2>Planning Guardrails</h2>
+      <div class="pad method">
+        <strong>HHI Guardrail:</strong> HHI percentages are measured at the DMA A18+ level; combined age/gender/HHI delivery is modeled, not directly cross-tabbed. Use a direct Scarborough cross-tab when available for client-facing precision.<br><br>
+        <strong>Deduplicated Reach:</strong> Combined TV + Digital deduplicated reach is intentionally not fabricated. The analyzer reports Digital reach and Broadcast reach independently.<br><br>
+        <strong>Pricing Logic:</strong> Broadcast uses an automatically estimated, editable Target Demo CPP rather than a raw CPM input. Digital Video defaults to $45 CPM and remains editable.
       </div>
     </div>
   </div>
 </main>
 
+<script>
+const DATA={"Albany-Schenectady-Troy":{"A18-34":{"base":1161560,"universe":309340,"avg_target":477.61,"avg_total_in_report":13134.69,"obs":635,"stations":5,"avg_total":13134.69,"composition":0.036362},"A50+":{"base":1161560,"universe":592209,"avg_target":11286.35,"avg_total_in_report":13134.69,"obs":635,"stations":5,"avg_total":13134.69,"composition":0.859278},"M18-49":{"base":1161560,"universe":288817,"avg_target":911.42,"avg_total_in_report":13134.69,"obs":635,"stations":5,"avg_total":13134.69,"composition":0.06939},"W18+":{"base":1161560,"universe":591869,"avg_target":6669.14,"avg_total_in_report":13134.69,"obs":635,"stations":5,"avg_total":13134.69,"composition":0.50775},"A25-54":{"base":1161560,"universe":509933,"avg_target":2005.67,"avg_total_in_report":13134.69,"obs":635,"stations":5,"avg_total":13134.69,"composition":0.1527},"M18+":{"base":1161560,"universe":569691,"avg_target":6465.55,"avg_total_in_report":13134.69,"obs":635,"stations":5,"avg_total":13134.69,"composition":0.49225},"M25-54":{"base":1161560,"universe":257246,"avg_target":867.49,"avg_total_in_report":13134.69,"obs":635,"stations":5,"avg_total":13134.69,"composition":0.066046},"W18-49":{"base":1161560,"universe":280534,"avg_target":936.91,"avg_total_in_report":13134.69,"obs":635,"stations":5,"avg_total":13134.69,"composition":0.071331},"A18-49":{"base":1161560,"universe":569351,"avg_target":1848.33,"avg_total_in_report":13134.69,"obs":635,"stations":5,"avg_total":13134.69,"composition":0.140721},"W25-54":{"base":1161560,"universe":252687,"avg_target":1138.17,"avg_total_in_report":13134.69,"obs":635,"stations":5,"avg_total":13134.69,"composition":0.086654},"A18+":{"base":1161560,"universe":1161560,"avg_target":13134.69,"avg_total_in_report":13134.69,"obs":635,"stations":5,"avg_total":13134.69,"composition":1.0},"_market":{"avg_a18":13134.69,"default_spot":91.94}},"Boston":{"A18-34":{"base":5608686,"universe":1599615,"avg_target":2595.49,"avg_total_in_report":63105.54,"obs":635,"stations":5,"avg_total":63105.54,"composition":0.041129},"A50+":{"base":5608686,"universe":2697664,"avg_target":55299.62,"avg_total_in_report":63105.54,"obs":635,"stations":5,"avg_total":63105.54,"composition":0.876304},"M18-49":{"base":5608686,"universe":1457353,"avg_target":3943.82,"avg_total_in_report":63105.54,"obs":635,"stations":5,"avg_total":63105.54,"composition":0.062496},"W18+":{"base":5608686,"universe":2884947,"avg_target":37838.26,"avg_total_in_report":63105.54,"obs":635,"stations":5,"avg_total":63105.54,"composition":0.599603},"A25-54":{"base":5608686,"universe":2690923,"avg_target":10846.04,"avg_total_in_report":63105.54,"obs":635,"stations":5,"avg_total":63105.54,"composition":0.171871},"M18+":{"base":5608686,"universe":2723739,"avg_target":25267.28,"avg_total_in_report":63105.54,"obs":635,"stations":5,"avg_total":63105.54,"composition":0.400397},"M25-54":{"base":5608686,"universe":1351648,"avg_target":5628.32,"avg_total_in_report":63105.54,"obs":635,"stations":5,"avg_total":63105.54,"composition":0.089189},"W18-49":{"base":5608686,"universe":1453669,"avg_target":3862.09,"avg_total_in_report":63105.54,"obs":635,"stations":5,"avg_total":63105.54,"composition":0.0612},"A18-49":{"base":5608686,"universe":2911022,"avg_target":7805.91,"avg_total_in_report":63105.54,"obs":635,"stations":5,"avg_total":63105.54,"composition":0.123696},"W25-54":{"base":5608686,"universe":1339275,"avg_target":5217.72,"avg_total_in_report":63105.54,"obs":635,"stations":5,"avg_total":63105.54,"composition":0.082682},"A18+":{"base":5608686,"universe":5608686,"avg_target":63105.54,"avg_total_in_report":63105.54,"obs":635,"stations":5,"avg_total":63105.54,"composition":1.0},"_market":{"avg_a18":63105.54,"default_spot":441.74}},"Chicago":{"A18-34":{"base":7644101,"universe":2184211,"avg_target":3389.26,"avg_total_in_report":99852.97,"obs":635,"stations":5,"avg_total":99852.97,"composition":0.033943},"A50+":{"base":7644101,"universe":3627204,"avg_target":87071.52,"avg_total_in_report":99852.97,"obs":635,"stations":5,"avg_total":99852.97,"composition":0.871997},"M18-49":{"base":7644101,"universe":2010810,"avg_target":6038.83,"avg_total_in_report":99852.97,"obs":635,"stations":5,"avg_total":99852.97,"composition":0.060477},"W18+":{"base":7644101,"universe":3917219,"avg_target":56439.34,"avg_total_in_report":99852.97,"obs":635,"stations":5,"avg_total":99852.97,"composition":0.565224},"A25-54":{"base":7644101,"universe":3846837,"avg_target":15683.26,"avg_total_in_report":99852.97,"obs":635,"stations":5,"avg_total":99852.97,"composition":0.157064},"M18+":{"base":7644101,"universe":3726882,"avg_target":43413.63,"avg_total_in_report":99852.97,"obs":635,"stations":5,"avg_total":99852.97,"composition":0.434776},"M25-54":{"base":7644101,"universe":1918733,"avg_target":6707.29,"avg_total_in_report":99852.97,"obs":635,"stations":5,"avg_total":99852.97,"composition":0.067172},"W18-49":{"base":7644101,"universe":2006087,"avg_target":6742.62,"avg_total_in_report":99852.97,"obs":635,"stations":5,"avg_total":99852.97,"composition":0.067525},"A18-49":{"base":7644101,"universe":4016897,"avg_target":12781.46,"avg_total_in_report":99852.97,"obs":635,"stations":5,"avg_total":99852.97,"composition":0.128003},"W25-54":{"base":7644101,"universe":1928104,"avg_target":8975.97,"avg_total_in_report":99852.97,"obs":635,"stations":5,"avg_total":99852.97,"composition":0.089892},"A18+":{"base":7644101,"universe":7644101,"avg_target":99852.97,"avg_total_in_report":99852.97,"obs":635,"stations":5,"avg_total":99852.97,"composition":1.0},"_market":{"avg_a18":99852.97,"default_spot":698.97}},"Columbus":{"A18-34":{"base":2116333,"universe":641265,"avg_target":1242.29,"avg_total_in_report":28322.85,"obs":635,"stations":5,"avg_total":28322.85,"composition":0.043862},"A50+":{"base":2116333,"universe":963458,"avg_target":24261.36,"avg_total_in_report":28322.85,"obs":635,"stations":5,"avg_total":28322.85,"composition":0.8566},"M18-49":{"base":2116333,"universe":574528,"avg_target":1748.4,"avg_total_in_report":28322.85,"obs":635,"stations":5,"avg_total":28322.85,"composition":0.061731},"W18+":{"base":2116333,"universe":1071864,"avg_target":14732.08,"avg_total_in_report":28322.85,"obs":635,"stations":5,"avg_total":28322.85,"composition":0.520148},"A25-54":{"base":2116333,"universe":1080654,"avg_target":6037.59,"avg_total_in_report":28322.85,"obs":635,"stations":5,"avg_total":28322.85,"composition":0.21317},"M18+":{"base":2116333,"universe":1044469,"avg_target":13590.78,"avg_total_in_report":28322.85,"obs":635,"stations":5,"avg_total":28322.85,"composition":0.479852},"M25-54":{"base":2116333,"universe":547695,"avg_target":2995.48,"avg_total_in_report":28322.85,"obs":635,"stations":5,"avg_total":28322.85,"composition":0.105762},"W18-49":{"base":2116333,"universe":578347,"avg_target":2313.09,"avg_total_in_report":28322.85,"obs":635,"stations":5,"avg_total":28322.85,"composition":0.081669},"A18-49":{"base":2116333,"universe":1152875,"avg_target":4061.49,"avg_total_in_report":28322.85,"obs":635,"stations":5,"avg_total":28322.85,"composition":0.1434},"W25-54":{"base":2116333,"universe":532959,"avg_target":3042.11,"avg_total_in_report":28322.85,"obs":635,"stations":5,"avg_total":28322.85,"composition":0.107408},"A18+":{"base":2116333,"universe":2116333,"avg_target":28322.85,"avg_total_in_report":28322.85,"obs":635,"stations":5,"avg_total":28322.85,"composition":1.0},"_market":{"avg_a18":28322.85,"default_spot":198.26}},"Denver":{"A18-34":{"base":3844556,"universe":1178829,"avg_target":2256.53,"avg_total_in_report":44306.21,"obs":635,"stations":5,"avg_total":44306.21,"composition":0.05093},"A50+":{"base":3844556,"universe":1633508,"avg_target":37213.27,"avg_total_in_report":44306.21,"obs":635,"stations":5,"avg_total":44306.21,"composition":0.839911},"M18-49":{"base":3844556,"universe":1155266,"avg_target":3356.91,"avg_total_in_report":44306.21,"obs":635,"stations":5,"avg_total":44306.21,"composition":0.075766},"W18+":{"base":3844556,"universe":1904867,"avg_target":23979.58,"avg_total_in_report":44306.21,"obs":635,"stations":5,"avg_total":44306.21,"composition":0.541224},"A25-54":{"base":3844556,"universe":2048967,"avg_target":8347.85,"avg_total_in_report":44306.21,"obs":635,"stations":5,"avg_total":44306.21,"composition":0.188413},"M18+":{"base":3844556,"universe":1939689,"avg_target":20326.64,"avg_total_in_report":44306.21,"obs":635,"stations":5,"avg_total":44306.21,"composition":0.458776},"M25-54":{"base":3844556,"universe":1060789,"avg_target":4230.81,"avg_total_in_report":44306.21,"obs":635,"stations":5,"avg_total":44306.21,"composition":0.09549},"W18-49":{"base":3844556,"universe":1055782,"avg_target":3736.03,"avg_total_in_report":44306.21,"obs":635,"stations":5,"avg_total":44306.21,"composition":0.084323},"A18-49":{"base":3844556,"universe":2211048,"avg_target":7092.94,"avg_total_in_report":44306.21,"obs":635,"stations":5,"avg_total":44306.21,"composition":0.160089},"W25-54":{"base":3844556,"universe":988178,"avg_target":4117.04,"avg_total_in_report":44306.21,"obs":635,"stations":5,"avg_total":44306.21,"composition":0.092922},"A18+":{"base":3844556,"universe":3844556,"avg_target":44306.21,"avg_total_in_report":44306.21,"obs":635,"stations":5,"avg_total":44306.21,"composition":1.0},"_market":{"avg_a18":44306.21,"default_spot":310.14}},"Detroit":{"A18-34":{"base":3922650,"universe":1090893,"avg_target":3302.88,"avg_total_in_report":60698.91,"obs":635,"stations":5,"avg_total":60698.91,"composition":0.054414},"A50+":{"base":3922650,"universe":1915422,"avg_target":51249.41,"avg_total_in_report":60698.91,"obs":635,"stations":5,"avg_total":60698.91,"composition":0.844322},"M18-49":{"base":3922650,"universe":1017539,"avg_target":4650.71,"avg_total_in_report":60698.91,"obs":635,"stations":5,"avg_total":60698.91,"composition":0.076619},"W18+":{"base":3922650,"universe":2015696,"avg_target":32869.57,"avg_total_in_report":60698.91,"obs":635,"stations":5,"avg_total":60698.91,"composition":0.541518},"A25-54":{"base":3922650,"universe":1865343,"avg_target":11275.96,"avg_total_in_report":60698.91,"obs":635,"stations":5,"avg_total":60698.91,"composition":0.185769},"M18+":{"base":3922650,"universe":1906954,"avg_target":27829.34,"avg_total_in_report":60698.91,"obs":635,"stations":5,"avg_total":60698.91,"composition":0.458482},"M25-54":{"base":3922650,"universe":930900,"avg_target":5699.74,"avg_total_in_report":60698.91,"obs":635,"stations":5,"avg_total":60698.91,"composition":0.093902},"W18-49":{"base":3922650,"universe":989689,"avg_target":4798.78,"avg_total_in_report":60698.91,"obs":635,"stations":5,"avg_total":60698.91,"composition":0.079059},"A18-49":{"base":3922650,"universe":2007228,"avg_target":9449.5,"avg_total_in_report":60698.91,"obs":635,"stations":5,"avg_total":60698.91,"composition":0.155678},"W25-54":{"base":3922650,"universe":934443,"avg_target":5576.22,"avg_total_in_report":60698.91,"obs":635,"stations":5,"avg_total":60698.91,"composition":0.091867},"A18+":{"base":3922650,"universe":3922650,"avg_target":60698.91,"avg_total_in_report":60698.91,"obs":635,"stations":5,"avg_total":60698.91,"composition":1.0},"_market":{"avg_a18":60698.91,"default_spot":424.89}},"Flint-Saginaw-Bay City":{"A18-34":{"base":896238,"universe":241829,"avg_target":1003.45,"avg_total_in_report":13075.84,"obs":635,"stations":5,"avg_total":13075.84,"composition":0.076741},"A50+":{"base":896238,"universe":467956,"avg_target":11121.45,"avg_total_in_report":13075.84,"obs":635,"stations":5,"avg_total":13075.84,"composition":0.850534},"M18-49":{"base":896238,"universe":213803,"avg_target":946.65,"avg_total_in_report":13075.84,"obs":635,"stations":5,"avg_total":13075.84,"composition":0.072397},"W18+":{"base":896238,"universe":458047,"avg_target":7301.72,"avg_total_in_report":13075.84,"obs":635,"stations":5,"avg_total":13075.84,"composition":0.558413},"A25-54":{"base":896238,"universe":394698,"avg_target":2085.07,"avg_total_in_report":13075.84,"obs":635,"stations":5,"avg_total":13075.84,"composition":0.15946},"M18+":{"base":896238,"universe":438191,"avg_target":5774.12,"avg_total_in_report":13075.84,"obs":635,"stations":5,"avg_total":13075.84,"composition":0.441587},"M25-54":{"base":896238,"universe":199103,"avg_target":1239.52,"avg_total_in_report":13075.84,"obs":635,"stations":5,"avg_total":13075.84,"composition":0.094795},"W18-49":{"base":896238,"universe":214479,"avg_target":1007.74,"avg_total_in_report":13075.84,"obs":635,"stations":5,"avg_total":13075.84,"composition":0.077069},"A18-49":{"base":896238,"universe":428282,"avg_target":1954.4,"avg_total_in_report":13075.84,"obs":635,"stations":5,"avg_total":13075.84,"composition":0.149466},"W25-54":{"base":896238,"universe":195595,"avg_target":845.55,"avg_total_in_report":13075.84,"obs":635,"stations":5,"avg_total":13075.84,"composition":0.064665},"A18+":{"base":896238,"universe":896238,"avg_target":13075.84,"avg_total_in_report":13075.84,"obs":635,"stations":5,"avg_total":13075.84,"composition":1.0},"_market":{"avg_a18":13075.84,"default_spot":91.53}},"Hartford-New Haven":{"A18-34":{"base":2186994,"universe":600476,"avg_target":1065.11,"avg_total_in_report":28097.52,"obs":635,"stations":5,"avg_total":28097.52,"composition":0.037908},"A50+":{"base":2186994,"universe":1082687,"avg_target":23763.51,"avg_total_in_report":28097.52,"obs":635,"stations":5,"avg_total":28097.52,"composition":0.845751},"M18-49":{"base":2186994,"universe":561649,"avg_target":2191.53,"avg_total_in_report":28097.52,"obs":635,"stations":5,"avg_total":28097.52,"composition":0.077997},"W18+":{"base":2186994,"universe":1126834,"avg_target":16974.19,"avg_total_in_report":28097.52,"obs":635,"stations":5,"avg_total":28097.52,"composition":0.604117},"A25-54":{"base":2186994,"universe":1003395,"avg_target":5062.58,"avg_total_in_report":28097.52,"obs":635,"stations":5,"avg_total":28097.52,"composition":0.180179},"M18+":{"base":2186994,"universe":1060160,"avg_target":11123.33,"avg_total_in_report":28097.52,"obs":635,"stations":5,"avg_total":28097.52,"composition":0.395883},"M25-54":{"base":2186994,"universe":501230,"avg_target":2322.25,"avg_total_in_report":28097.52,"obs":635,"stations":5,"avg_total":28097.52,"composition":0.08265},"W18-49":{"base":2186994,"universe":542658,"avg_target":2142.48,"avg_total_in_report":28097.52,"obs":635,"stations":5,"avg_total":28097.52,"composition":0.076252},"A18-49":{"base":2186994,"universe":1104307,"avg_target":4334.0,"avg_total_in_report":28097.52,"obs":635,"stations":5,"avg_total":28097.52,"composition":0.154248},"W25-54":{"base":2186994,"universe":502165,"avg_target":2740.34,"avg_total_in_report":28097.52,"obs":635,"stations":5,"avg_total":28097.52,"composition":0.09753},"A18+":{"base":2186994,"universe":2186994,"avg_target":28097.52,"avg_total_in_report":28097.52,"obs":635,"stations":5,"avg_total":28097.52,"composition":1.0},"_market":{"avg_a18":28097.52,"default_spot":196.68}},"Los Angeles":{"A18-34":{"base":14592764,"universe":4334300,"avg_target":3817.78,"avg_total_in_report":100378.15,"obs":635,"stations":5,"avg_total":100378.15,"composition":0.038034},"A50+":{"base":14592764,"universe":6613332,"avg_target":85858.19,"avg_total_in_report":100378.15,"obs":635,"stations":5,"avg_total":100378.15,"composition":0.855347},"M18-49":{"base":14592764,"universe":4081430,"avg_target":7847.43,"avg_total_in_report":100378.15,"obs":635,"stations":5,"avg_total":100378.15,"composition":0.078179},"W18+":{"base":14592764,"universe":7395195,"avg_target":53667.41,"avg_total_in_report":100378.15,"obs":635,"stations":5,"avg_total":100378.15,"composition":0.534652},"A25-54":{"base":14592764,"universe":7563142,"avg_target":19472.66,"avg_total_in_report":100378.15,"obs":635,"stations":5,"avg_total":100378.15,"composition":0.193993},"M18+":{"base":14592764,"universe":7197569,"avg_target":46710.74,"avg_total_in_report":100378.15,"obs":635,"stations":5,"avg_total":100378.15,"composition":0.465348},"M25-54":{"base":14592764,"universe":3831085,"avg_target":10534.98,"avg_total_in_report":100378.15,"obs":635,"stations":5,"avg_total":100378.15,"composition":0.104953},"W18-49":{"base":14592764,"universe":3898002,"avg_target":6672.52,"avg_total_in_report":100378.15,"obs":635,"stations":5,"avg_total":100378.15,"composition":0.066474},"A18-49":{"base":14592764,"universe":7979432,"avg_target":14519.96,"avg_total_in_report":100378.15,"obs":635,"stations":5,"avg_total":100378.15,"composition":0.144653},"W25-54":{"base":14592764,"universe":3732057,"avg_target":8937.67,"avg_total_in_report":100378.15,"obs":635,"stations":5,"avg_total":100378.15,"composition":0.08904},"A18+":{"base":14592764,"universe":14592764,"avg_target":100378.15,"avg_total_in_report":100378.15,"obs":635,"stations":5,"avg_total":100378.15,"composition":1.0},"_market":{"avg_a18":100378.15,"default_spot":702.65}},"Miami-Ft. Lauderdale":{"A18-34":{"base":3969587,"universe":1014078,"avg_target":564.32,"avg_total_in_report":19187.21,"obs":635,"stations":5,"avg_total":19187.21,"composition":0.029411},"A50+":{"base":3969587,"universe":1946820,"avg_target":16474.79,"avg_total_in_report":19187.21,"obs":635,"stations":5,"avg_total":19187.21,"composition":0.858634},"M18-49":{"base":3969587,"universe":1018684,"avg_target":1356.18,"avg_total_in_report":19187.21,"obs":635,"stations":5,"avg_total":19187.21,"composition":0.070681},"W18+":{"base":3969587,"universe":2035273,"avg_target":11940.31,"avg_total_in_report":19187.21,"obs":635,"stations":5,"avg_total":19187.21,"composition":0.622306},"A25-54":{"base":3969587,"universe":1957844,"avg_target":3319.34,"avg_total_in_report":19187.21,"obs":635,"stations":5,"avg_total":19187.21,"composition":0.172998},"M18+":{"base":3969587,"universe":1934314,"avg_target":7246.89,"avg_total_in_report":19187.21,"obs":635,"stations":5,"avg_total":19187.21,"composition":0.377694},"M25-54":{"base":3969587,"universe":988523,"avg_target":1540.56,"avg_total_in_report":19187.21,"obs":635,"stations":5,"avg_total":19187.21,"composition":0.080291},"W18-49":{"base":3969587,"universe":1004083,"avg_target":1356.24,"avg_total_in_report":19187.21,"obs":635,"stations":5,"avg_total":19187.21,"composition":0.070685},"A18-49":{"base":3969587,"universe":2022767,"avg_target":2712.42,"avg_total_in_report":19187.21,"obs":635,"stations":5,"avg_total":19187.21,"composition":0.141366},"W25-54":{"base":3969587,"universe":969321,"avg_target":1778.78,"avg_total_in_report":19187.21,"obs":635,"stations":5,"avg_total":19187.21,"composition":0.092707},"A18+":{"base":3969587,"universe":3969587,"avg_target":19187.21,"avg_total_in_report":19187.21,"obs":635,"stations":5,"avg_total":19187.21,"composition":1.0},"_market":{"avg_a18":19187.21,"default_spot":134.31}},"Minneapolis-St. Paul":{"A18-34":{"base":3909963,"universe":1088238,"avg_target":2593.94,"avg_total_in_report":63652.35,"obs":635,"stations":5,"avg_total":63652.35,"composition":0.040752},"A50+":{"base":3909963,"universe":1827040,"avg_target":53864.48,"avg_total_in_report":63652.35,"obs":635,"stations":5,"avg_total":63652.35,"composition":0.846229},"M18-49":{"base":3909963,"universe":1068783,"avg_target":4799.28,"avg_total_in_report":63652.35,"obs":635,"stations":5,"avg_total":63652.35,"composition":0.075398},"W18+":{"base":3909963,"universe":1961911,"avg_target":34451.77,"avg_total_in_report":63652.35,"obs":635,"stations":5,"avg_total":63652.35,"composition":0.541249},"A25-54":{"base":3909963,"universe":1902821,"avg_target":12176.13,"avg_total_in_report":63652.35,"obs":635,"stations":5,"avg_total":63652.35,"composition":0.191291},"M18+":{"base":3909963,"universe":1948052,"avg_target":29200.58,"avg_total_in_report":63652.35,"obs":635,"stations":5,"avg_total":63652.35,"composition":0.458751},"M25-54":{"base":3909963,"universe":971620,"avg_target":6240.39,"avg_total_in_report":63652.35,"obs":635,"stations":5,"avg_total":63652.35,"composition":0.098039},"W18-49":{"base":3909963,"universe":1014140,"avg_target":4988.6,"avg_total_in_report":63652.35,"obs":635,"stations":5,"avg_total":63652.35,"composition":0.078373},"A18-49":{"base":3909963,"universe":2082923,"avg_target":9787.87,"avg_total_in_report":63652.35,"obs":635,"stations":5,"avg_total":63652.35,"composition":0.153771},"W25-54":{"base":3909963,"universe":931201,"avg_target":5935.74,"avg_total_in_report":63652.35,"obs":635,"stations":5,"avg_total":63652.35,"composition":0.093252},"A18+":{"base":3909963,"universe":3909963,"avg_target":63652.35,"avg_total_in_report":63652.35,"obs":635,"stations":5,"avg_total":63652.35,"composition":1.0},"_market":{"avg_a18":63652.35,"default_spot":445.57}},"New York":{"A18-34":{"base":17383661,"universe":4844137,"avg_target":7249.79,"avg_total_in_report":163702.17,"obs":635,"stations":5,"avg_total":163702.17,"composition":0.044286},"A50+":{"base":17383661,"universe":8278890,"avg_target":139758.26,"avg_total_in_report":163702.17,"obs":635,"stations":5,"avg_total":163702.17,"composition":0.853735},"M18-49":{"base":17383661,"universe":4547810,"avg_target":11173.67,"avg_total_in_report":163702.17,"obs":635,"stations":5,"avg_total":163702.17,"composition":0.068256},"W18+":{"base":17383661,"universe":8994571,"avg_target":100454.26,"avg_total_in_report":163702.17,"obs":635,"stations":5,"avg_total":163702.17,"composition":0.61364},"A25-54":{"base":17383661,"universe":8559263,"avg_target":29058.09,"avg_total_in_report":163702.17,"obs":635,"stations":5,"avg_total":163702.17,"composition":0.177506},"M18+":{"base":17383661,"universe":8389090,"avg_target":63247.91,"avg_total_in_report":163702.17,"obs":635,"stations":5,"avg_total":163702.17,"composition":0.38636},"M25-54":{"base":17383661,"universe":4266567,"avg_target":13335.31,"avg_total_in_report":163702.17,"obs":635,"stations":5,"avg_total":163702.17,"composition":0.081461},"W18-49":{"base":17383661,"universe":4556961,"avg_target":12770.24,"avg_total_in_report":163702.17,"obs":635,"stations":5,"avg_total":163702.17,"composition":0.078009},"A18-49":{"base":17383661,"universe":9104771,"avg_target":23943.91,"avg_total_in_report":163702.17,"obs":635,"stations":5,"avg_total":163702.17,"composition":0.146265},"W25-54":{"base":17383661,"universe":4292696,"avg_target":15722.78,"avg_total_in_report":163702.17,"obs":635,"stations":5,"avg_total":163702.17,"composition":0.096045},"A18+":{"base":17383661,"universe":17383661,"avg_target":163702.17,"avg_total_in_report":163702.17,"obs":635,"stations":5,"avg_total":163702.17,"composition":1.0},"_market":{"avg_a18":163702.17,"default_spot":1145.92}},"Orlando-Daytona Beach-Melbourne":{"A18-34":{"base":4057214,"universe":1043454,"avg_target":874.04,"avg_total_in_report":37850.11,"obs":635,"stations":5,"avg_total":37850.11,"composition":0.023092},"A50+":{"base":4057214,"universe":2105027,"avg_target":34495.18,"avg_total_in_report":37850.11,"obs":635,"stations":5,"avg_total":37850.11,"composition":0.911363},"M18-49":{"base":4057214,"universe":966673,"avg_target":1369.24,"avg_total_in_report":37850.11,"obs":635,"stations":5,"avg_total":37850.11,"composition":0.036175},"W18+":{"base":4057214,"universe":2088383,"avg_target":19949.56,"avg_total_in_report":37850.11,"obs":635,"stations":5,"avg_total":37850.11,"composition":0.527067},"A25-54":{"base":4057214,"universe":1870422,"avg_target":4633.89,"avg_total_in_report":37850.11,"obs":635,"stations":5,"avg_total":37850.11,"composition":0.122427},"M18+":{"base":4057214,"universe":1968831,"avg_target":17900.55,"avg_total_in_report":37850.11,"obs":635,"stations":5,"avg_total":37850.11,"composition":0.472933},"M25-54":{"base":4057214,"universe":934875,"avg_target":2055.88,"avg_total_in_report":37850.11,"obs":635,"stations":5,"avg_total":37850.11,"composition":0.054316},"W18-49":{"base":4057214,"universe":985514,"avg_target":1985.68,"avg_total_in_report":37850.11,"obs":635,"stations":5,"avg_total":37850.11,"composition":0.052462},"A18-49":{"base":4057214,"universe":1952187,"avg_target":3354.92,"avg_total_in_report":37850.11,"obs":635,"stations":5,"avg_total":37850.11,"composition":0.088637},"W25-54":{"base":4057214,"universe":935547,"avg_target":2578.01,"avg_total_in_report":37850.11,"obs":635,"stations":5,"avg_total":37850.11,"composition":0.068111},"A18+":{"base":4057214,"universe":4057214,"avg_target":37850.11,"avg_total_in_report":37850.11,"obs":635,"stations":5,"avg_total":37850.11,"composition":1.0},"_market":{"avg_a18":37850.11,"default_spot":264.95}},"Philadelphia":{"A18-34":{"base":6723685,"universe":1902805,"avg_target":2871.96,"avg_total_in_report":76641.24,"obs":635,"stations":5,"avg_total":76641.24,"composition":0.037473},"A50+":{"base":6723685,"universe":3202773,"avg_target":65976.94,"avg_total_in_report":76641.24,"obs":635,"stations":5,"avg_total":76641.24,"composition":0.860854},"M18-49":{"base":6723685,"universe":1773530,"avg_target":5805.32,"avg_total_in_report":76641.24,"obs":635,"stations":5,"avg_total":76641.24,"composition":0.075747},"W18+":{"base":6723685,"universe":3480751,"avg_target":42398.3,"avg_total_in_report":76641.24,"obs":635,"stations":5,"avg_total":76641.24,"composition":0.553205},"A25-54":{"base":6723685,"universe":3209333,"avg_target":13631.44,"avg_total_in_report":76641.24,"obs":635,"stations":5,"avg_total":76641.24,"composition":0.17786},"M18+":{"base":6723685,"universe":3242934,"avg_target":34242.94,"avg_total_in_report":76641.24,"obs":635,"stations":5,"avg_total":76641.24,"composition":0.446795},"M25-54":{"base":6723685,"universe":1597580,"avg_target":7461.54,"avg_total_in_report":76641.24,"obs":635,"stations":5,"avg_total":76641.24,"composition":0.097357},"W18-49":{"base":6723685,"universe":1747382,"avg_target":4858.97,"avg_total_in_report":76641.24,"obs":635,"stations":5,"avg_total":76641.24,"composition":0.063399},"A18-49":{"base":6723685,"universe":3520912,"avg_target":10664.3,"avg_total_in_report":76641.24,"obs":635,"stations":5,"avg_total":76641.24,"composition":0.139146},"W25-54":{"base":6723685,"universe":1611753,"avg_target":6169.9,"avg_total_in_report":76641.24,"obs":635,"stations":5,"avg_total":76641.24,"composition":0.080504},"A18+":{"base":6723685,"universe":6723685,"avg_target":76641.24,"avg_total_in_report":76641.24,"obs":635,"stations":5,"avg_total":76641.24,"composition":1.0},"_market":{"avg_a18":76641.24,"default_spot":536.49}},"Sacramento-Stockton-Modesto":{"A18-34":{"base":3677873,"universe":1060574,"avg_target":1283.23,"avg_total_in_report":32698.74,"obs":635,"stations":5,"avg_total":32698.74,"composition":0.039244},"A50+":{"base":3677873,"universe":1754535,"avg_target":28925.46,"avg_total_in_report":32698.74,"obs":635,"stations":5,"avg_total":32698.74,"composition":0.884605},"M18-49":{"base":3677873,"universe":967091,"avg_target":1840.13,"avg_total_in_report":32698.74,"obs":635,"stations":5,"avg_total":32698.74,"composition":0.056275},"W18+":{"base":3677873,"universe":1868582,"avg_target":17908.86,"avg_total_in_report":32698.74,"obs":635,"stations":5,"avg_total":32698.74,"composition":0.547693},"A25-54":{"base":3677873,"universe":1835059,"avg_target":5032.14,"avg_total_in_report":32698.74,"obs":635,"stations":5,"avg_total":32698.74,"composition":0.153894},"M18+":{"base":3677873,"universe":1809291,"avg_target":14789.89,"avg_total_in_report":32698.74,"obs":635,"stations":5,"avg_total":32698.74,"composition":0.452308},"M25-54":{"base":3677873,"universe":929642,"avg_target":2593.89,"avg_total_in_report":32698.74,"obs":635,"stations":5,"avg_total":32698.74,"composition":0.079327},"W18-49":{"base":3677873,"universe":956247,"avg_target":1933.14,"avg_total_in_report":32698.74,"obs":635,"stations":5,"avg_total":32698.74,"composition":0.05912},"A18-49":{"base":3677873,"universe":1923338,"avg_target":3773.28,"avg_total_in_report":32698.74,"obs":635,"stations":5,"avg_total":32698.74,"composition":0.115395},"W25-54":{"base":3677873,"universe":905417,"avg_target":2438.25,"avg_total_in_report":32698.74,"obs":635,"stations":5,"avg_total":32698.74,"composition":0.074567},"A18+":{"base":3677873,"universe":3677873,"avg_target":32698.74,"avg_total_in_report":32698.74,"obs":635,"stations":5,"avg_total":32698.74,"composition":1.0},"_market":{"avg_a18":32698.74,"default_spot":228.89}},"San Diego":{"A18-34":{"base":2624585,"universe":810284,"avg_target":668.13,"avg_total_in_report":19247.43,"obs":635,"stations":5,"avg_total":19247.43,"composition":0.034713},"A50+":{"base":2624585,"universe":1137592,"avg_target":17243.75,"avg_total_in_report":19247.43,"obs":635,"stations":5,"avg_total":19247.43,"composition":0.895899},"M18-49":{"base":2624585,"universe":790796,"avg_target":989.83,"avg_total_in_report":19247.43,"obs":635,"stations":5,"avg_total":19247.43,"composition":0.051427},"W18+":{"base":2624585,"universe":1301476,"avg_target":10883.45,"avg_total_in_report":19247.43,"obs":635,"stations":5,"avg_total":19247.43,"composition":0.56545},"A25-54":{"base":2624585,"universe":1375245,"avg_target":2815.16,"avg_total_in_report":19247.43,"obs":635,"stations":5,"avg_total":19247.43,"composition":0.146262},"M18+":{"base":2624585,"universe":1323109,"avg_target":8363.98,"avg_total_in_report":19247.43,"obs":635,"stations":5,"avg_total":19247.43,"composition":0.43455},"M25-54":{"base":2624585,"universe":711037,"avg_target":1323.81,"avg_total_in_report":19247.43,"obs":635,"stations":5,"avg_total":19247.43,"composition":0.068779},"W18-49":{"base":2624585,"universe":696197,"avg_target":1013.86,"avg_total_in_report":19247.43,"obs":635,"stations":5,"avg_total":19247.43,"composition":0.052675},"A18-49":{"base":2624585,"universe":1486993,"avg_target":2003.68,"avg_total_in_report":19247.43,"obs":635,"stations":5,"avg_total":19247.43,"composition":0.104101},"W25-54":{"base":2624585,"universe":664208,"avg_target":1491.35,"avg_total_in_report":19247.43,"obs":635,"stations":5,"avg_total":19247.43,"composition":0.077483},"A18+":{"base":2624585,"universe":2624585,"avg_target":19247.43,"avg_total_in_report":19247.43,"obs":635,"stations":5,"avg_total":19247.43,"composition":1.0},"_market":{"avg_a18":19247.43,"default_spot":134.73}},"San Francisco-Oakland-San Jose":{"A18-34":{"base":5907381,"universe":1593417,"avg_target":1508.55,"avg_total_in_report":41878.52,"obs":635,"stations":5,"avg_total":41878.52,"composition":0.036022},"A50+":{"base":5907381,"universe":2746986,"avg_target":37663.81,"avg_total_in_report":41878.52,"obs":635,"stations":5,"avg_total":41878.52,"composition":0.899359},"M18-49":{"base":5907381,"universe":1627828,"avg_target":2172.27,"avg_total_in_report":41878.52,"obs":635,"stations":5,"avg_total":41878.52,"composition":0.051871},"W18+":{"base":5907381,"universe":2975188,"avg_target":22454.11,"avg_total_in_report":41878.52,"obs":635,"stations":5,"avg_total":41878.52,"composition":0.536172},"A25-54":{"base":5907381,"universe":3042397,"avg_target":5784.79,"avg_total_in_report":41878.52,"obs":635,"stations":5,"avg_total":41878.52,"composition":0.138133},"M18+":{"base":5907381,"universe":2932193,"avg_target":19424.41,"avg_total_in_report":41878.52,"obs":635,"stations":5,"avg_total":41878.52,"composition":0.463828},"M25-54":{"base":5907381,"universe":1559564,"avg_target":2823.75,"avg_total_in_report":41878.52,"obs":635,"stations":5,"avg_total":41878.52,"composition":0.067427},"W18-49":{"base":5907381,"universe":1532567,"avg_target":2042.44,"avg_total_in_report":41878.52,"obs":635,"stations":5,"avg_total":41878.52,"composition":0.048771},"A18-49":{"base":5907381,"universe":3160395,"avg_target":4214.71,"avg_total_in_report":41878.52,"obs":635,"stations":5,"avg_total":41878.52,"composition":0.100641},"W25-54":{"base":5907381,"universe":1482833,"avg_target":2961.04,"avg_total_in_report":41878.52,"obs":635,"stations":5,"avg_total":41878.52,"composition":0.070705},"A18+":{"base":5907381,"universe":5907381,"avg_target":41878.52,"avg_total_in_report":41878.52,"obs":635,"stations":5,"avg_total":41878.52,"composition":1.0},"_market":{"avg_a18":41878.52,"default_spot":293.15}},"Syracuse":{"A18-34":{"base":735759,"universe":223995,"avg_target":1763.32,"avg_total_in_report":14223.66,"obs":635,"stations":5,"avg_total":14223.66,"composition":0.123971},"A50+":{"base":735759,"universe":358487,"avg_target":10390.2,"avg_total_in_report":14223.66,"obs":635,"stations":5,"avg_total":14223.66,"composition":0.730487},"M18-49":{"base":735759,"universe":189225,"avg_target":2016.01,"avg_total_in_report":14223.66,"obs":635,"stations":5,"avg_total":14223.66,"composition":0.141736},"W18+":{"base":735759,"universe":376505,"avg_target":7426.67,"avg_total_in_report":14223.66,"obs":635,"stations":5,"avg_total":14223.66,"composition":0.522135},"A25-54":{"base":735759,"universe":317732,"avg_target":3874.94,"avg_total_in_report":14223.66,"obs":635,"stations":5,"avg_total":14223.66,"composition":0.272429},"M18+":{"base":735759,"universe":359254,"avg_target":6796.99,"avg_total_in_report":14223.66,"obs":635,"stations":5,"avg_total":14223.66,"composition":0.477865},"M25-54":{"base":735759,"universe":159372,"avg_target":2113.97,"avg_total_in_report":14223.66,"obs":635,"stations":5,"avg_total":14223.66,"composition":0.148623},"W18-49":{"base":735759,"universe":188047,"avg_target":1817.45,"avg_total_in_report":14223.66,"obs":635,"stations":5,"avg_total":14223.66,"composition":0.127777},"A18-49":{"base":735759,"universe":377272,"avg_target":3833.46,"avg_total_in_report":14223.66,"obs":635,"stations":5,"avg_total":14223.66,"composition":0.269513},"W25-54":{"base":735759,"universe":158360,"avg_target":1760.98,"avg_total_in_report":14223.66,"obs":635,"stations":5,"avg_total":14223.66,"composition":0.123806},"A18+":{"base":735759,"universe":735759,"avg_target":14223.66,"avg_total_in_report":14223.66,"obs":635,"stations":5,"avg_total":14223.66,"composition":1.0},"_market":{"avg_a18":14223.66,"default_spot":99.57}},"Tampa-St. Petersburg":{"A18-34":{"base":4571522,"universe":1099311,"avg_target":665.38,"avg_total_in_report":43466.62,"obs":635,"stations":5,"avg_total":43466.62,"composition":0.015308},"A50+":{"base":4571522,"universe":2471001,"avg_target":35557.02,"avg_total_in_report":43466.62,"obs":635,"stations":5,"avg_total":43466.62,"composition":0.81803},"M18-49":{"base":4571522,"universe":1036909,"avg_target":6088.96,"avg_total_in_report":43466.62,"obs":635,"stations":5,"avg_total":43466.62,"composition":0.140084},"W18+":{"base":4571522,"universe":2361065,"avg_target":20693.28,"avg_total_in_report":43466.62,"obs":635,"stations":5,"avg_total":43466.62,"composition":0.476073},"A25-54":{"base":4571522,"universe":2017628,"avg_target":9351.43,"avg_total_in_report":43466.62,"obs":635,"stations":5,"avg_total":43466.62,"composition":0.21514},"M18+":{"base":4571522,"universe":2210457,"avg_target":22773.34,"avg_total_in_report":43466.62,"obs":635,"stations":5,"avg_total":43466.62,"composition":0.523927},"M25-54":{"base":4571522,"universe":1002811,"avg_target":6831.62,"avg_total_in_report":43466.62,"obs":635,"stations":5,"avg_total":43466.62,"composition":0.157169},"W18-49":{"base":4571522,"universe":1063612,"avg_target":1820.65,"avg_total_in_report":43466.62,"obs":635,"stations":5,"avg_total":43466.62,"composition":0.041886},"A18-49":{"base":4571522,"universe":2100521,"avg_target":7909.61,"avg_total_in_report":43466.62,"obs":635,"stations":5,"avg_total":43466.62,"composition":0.18197},"W25-54":{"base":4571522,"universe":1014817,"avg_target":2519.81,"avg_total_in_report":43466.62,"obs":635,"stations":5,"avg_total":43466.62,"composition":0.057971},"A18+":{"base":4571522,"universe":4571522,"avg_target":43466.62,"avg_total_in_report":43466.62,"obs":635,"stations":5,"avg_total":43466.62,"composition":1.0},"_market":{"avg_a18":43466.62,"default_spot":304.27}},"West Palm Beach-Ft. Pierce":{"A18-34":{"base":1943998,"universe":430877,"avg_target":803.28,"avg_total_in_report":24782.33,"obs":635,"stations":5,"avg_total":24782.33,"composition":0.032413},"A50+":{"base":1943998,"universe":1137395,"avg_target":22176.82,"avg_total_in_report":24782.33,"obs":635,"stations":5,"avg_total":24782.33,"composition":0.894864},"M18-49":{"base":1943998,"universe":402292,"avg_target":1129.34,"avg_total_in_report":24782.33,"obs":635,"stations":5,"avg_total":24782.33,"composition":0.04557},"W18+":{"base":1943998,"universe":1002088,"avg_target":14288.88,"avg_total_in_report":24782.33,"obs":635,"stations":5,"avg_total":24782.33,"composition":0.576575},"A25-54":{"base":1943998,"universe":797399,"avg_target":3483.63,"avg_total_in_report":24782.33,"obs":635,"stations":5,"avg_total":24782.33,"composition":0.140569},"M18+":{"base":1943998,"universe":941910,"avg_target":10493.46,"avg_total_in_report":24782.33,"obs":635,"stations":5,"avg_total":24782.33,"composition":0.423425},"M25-54":{"base":1943998,"universe":401812,"avg_target":1481.72,"avg_total_in_report":24782.33,"obs":635,"stations":5,"avg_total":24782.33,"composition":0.059789},"W18-49":{"base":1943998,"universe":404311,"avg_target":1476.17,"avg_total_in_report":24782.33,"obs":635,"stations":5,"avg_total":24782.33,"composition":0.059565},"A18-49":{"base":1943998,"universe":806603,"avg_target":2605.52,"avg_total_in_report":24782.33,"obs":635,"stations":5,"avg_total":24782.33,"composition":0.105136},"W25-54":{"base":1943998,"universe":395587,"avg_target":2001.9,"avg_total_in_report":24782.33,"obs":635,"stations":5,"avg_total":24782.33,"composition":0.080779},"A18+":{"base":1943998,"universe":1943998,"avg_target":24782.33,"avg_total_in_report":24782.33,"obs":635,"stations":5,"avg_total":24782.33,"composition":1.0},"_market":{"avg_a18":24782.33,"default_spot":173.48}},"Wilkes-Barre-Scranton":{"A18-34":{"base":1221617,"universe":315809,"avg_target":1600.78,"avg_total_in_report":27490.9,"obs":635,"stations":5,"avg_total":27490.9,"composition":0.058229},"A50+":{"base":1221617,"universe":645521,"avg_target":22149.68,"avg_total_in_report":27490.9,"obs":635,"stations":5,"avg_total":27490.9,"composition":0.80571},"M18-49":{"base":1221617,"universe":299791,"avg_target":3038.02,"avg_total_in_report":27490.9,"obs":635,"stations":5,"avg_total":27490.9,"composition":0.11051},"W18+":{"base":1221617,"universe":612665,"avg_target":14549.87,"avg_total_in_report":27490.9,"obs":635,"stations":5,"avg_total":27490.9,"composition":0.529261},"A25-54":{"base":1221617,"universe":542300,"avg_target":5896.86,"avg_total_in_report":27490.9,"obs":635,"stations":5,"avg_total":27490.9,"composition":0.214502},"M18+":{"base":1221617,"universe":608952,"avg_target":12941.03,"avg_total_in_report":27490.9,"obs":635,"stations":5,"avg_total":27490.9,"composition":0.470739},"M25-54":{"base":1221617,"universe":287158,"avg_target":2938.86,"avg_total_in_report":27490.9,"obs":635,"stations":5,"avg_total":27490.9,"composition":0.106903},"W18-49":{"base":1221617,"universe":276305,"avg_target":2303.2,"avg_total_in_report":27490.9,"obs":635,"stations":5,"avg_total":27490.9,"composition":0.08378},"A18-49":{"base":1221617,"universe":576096,"avg_target":5341.22,"avg_total_in_report":27490.9,"obs":635,"stations":5,"avg_total":27490.9,"composition":0.19429},"W25-54":{"base":1221617,"universe":255142,"avg_target":2958.0,"avg_total_in_report":27490.9,"obs":635,"stations":5,"avg_total":27490.9,"composition":0.107599},"A18+":{"base":1221617,"universe":1221617,"avg_target":27490.9,"avg_total_in_report":27490.9,"obs":635,"stations":5,"avg_total":27490.9,"composition":1.0},"_market":{"avg_a18":27490.9,"default_spot":192.44}}};
+const HHI_DATA={"Albany-Schenectady-Troy":{"under50":0.297,"50to99":0.283,"100plus":0.42},"Boston":{"under50":0.25,"50to99":0.214,"100plus":0.536},"Chicago":{"under50":0.286,"50to99":0.26,"100plus":0.454},"Columbus":{"under50":0.345,"50to99":0.262,"100plus":0.393},"Denver":{"under50":0.25,"50to99":0.238,"100plus":0.513},"Detroit":{"under50":0.347,"50to99":0.267,"100plus":0.387},"Flint-Saginaw-Bay City":{"under50":0.417,"50to99":0.292,"100plus":0.29},"Hartford-New Haven":{"under50":0.273,"50to99":0.257,"100plus":0.471},"Los Angeles":{"under50":0.283,"50to99":0.237,"100plus":0.48},"Miami-Ft. Lauderdale":{"under50":0.355,"50to99":0.255,"100plus":0.389},"Minneapolis-St. Paul":{"under50":0.256,"50to99":0.272,"100plus":0.472},"New York":{"under50":0.284,"50to99":0.218,"100plus":0.498},"Orlando-Daytona Beach-Melbourne":{"under50":0.32,"50to99":0.305,"100plus":0.375},"Philadelphia":{"under50":0.295,"50to99":0.255,"100plus":0.45},"Sacramento-Stockton-Modesto":{"under50":0.28,"50to99":0.245,"100plus":0.475},"San Diego":{"under50":0.233,"50to99":0.228,"100plus":0.54},"San Francisco-Oakland-San Jose":{"under50":0.207,"50to99":0.173,"100plus":0.62},"Syracuse":{"under50":0.355,"50to99":0.28,"100plus":0.365},"Tampa-St. Petersburg":{"under50":0.341,"50to99":0.287,"100plus":0.371},"West Palm Beach-Ft. Pierce":{"under50":0.312,"50to99":0.266,"100plus":0.422},"Wilkes-Barre-Scranton":{"under50":0.396,"50to99":0.282,"100plus":0.321}};
+
+const AGE_BY_GENDER={A:["18+","18-34","18-49","25-54","50+"],M:["18+","18-49","25-54"],W:["18+","18-49","25-54"]};
+const HHI_LABEL={under50:"Under $50K","50to99":"$50K–$99K","100plus":"$100K+"};
+const GENERIC_A18_CPM=7;
+
+const $ = id => document.getElementById(id);
+const fmt = n => isFinite(n)?Math.round(n).toLocaleString():'0';
+const money = n => isFinite(n)?'$'+Number(n).toLocaleString(undefined,{maximumFractionDigits:2,minimumFractionDigits:2}):'$0.00';
+const pct = n => isFinite(n)?(n*100).toFixed(1)+'%':'0.0%';
+
+function signed(n,dec=0){if(!isFinite(n)||Math.abs(n)<0.0001)return (0).toFixed(dec);return (n>0?'+':'')+Number(n).toLocaleString(undefined,{maximumFractionDigits:dec,minimumFractionDigits:dec})}
+function signedMoney(n){if(!isFinite(n)||Math.abs(n)<0.01)return '$0.00';return (n<0?'-':'+')+money(Math.abs(n))}
+
+function selectedHHI(){return Array.from(document.querySelectorAll('#hhi input[type=checkbox]:checked')).map(o=>o.value)}
+function hhiLabel(){const a=selectedHHI();if(a.length===0||a.length===3)return "All HHI";if(a.length===2&&a.includes("50to99")&&a.includes("100plus"))return "HHI $50K+";if(a.length===2&&a.includes("under50")&&a.includes("50to99"))return "HHI Under $100K";return "HHI "+a.map(x=>HHI_LABEL[x]).join(" + ")}
+function demoKey(){return $('gender').value+$('age').value}
+
+function syncAges(preferred){
+  const g=$('gender').value, ages=AGE_BY_GENDER[g], a=$('age');
+  const keep=preferred||a.value;
+  a.innerHTML='';
+  ages.forEach(x=>a.add(new Option(x,x)));
+  a.value=ages.includes(keep)?keep:'25-54';
+}
+
+function targetedData(dma){
+  const key=demoKey(), raw=DATA[dma]?.[key];
+  if(!raw)return null;
+  const hs=selectedHHI();
+  const share=(hs.length===0||hs.length===3)?1:hs.reduce((t,k)=>t+(HHI_DATA[dma]?.[k]||0),0);
+  return {...raw, universe:raw.universe*share, avg_target:raw.avg_target*share, composition:raw.composition*share, hhi_share:share, demo:key};
+}
+
+function estimatedCpp(){
+  const dma=$('dma').value, demo=demoKey(), market=DATA[dma];
+  if(!market||!market['A18+']||!market[demo])return 0;
+  const d=market[demo], spot=(market._market?.avg_a18||market['A18+'].avg_target||0)*GENERIC_A18_CPM/1000, targetRating=d.universe?d.avg_target/d.universe*100:0;
+  return targetRating?spot/targetRating:0;
+}
+
+function setEstimatedCpp(){
+  const est=estimatedCpp();
+  if(est>0)$('cppInput').value=Math.round(est);
+  const dma=$('dma').value, market=DATA[dma], a18u=market&&market['A18+']?market['A18+'].universe:0, a18cpp=GENERIC_A18_CPM*a18u/100000;
+  if($('cppEstimateNote'))$('cppEstimateNote').textContent=`Planning estimate: ${money(est)} for ${demoKey()} • A18+ planning CPP ${money(a18cpp)} • editable`;
+}
+
+function calcReach(impressions, universe, avgFreq) {
+  if (!universe || universe <= 0 || impressions <= 0) return 0;
+  const grp = (impressions / universe) * 100;
+  const reachPct = 1 - Math.exp(-0.015 * (grp / Math.max(0.1, avgFreq)));
+  return Math.min(universe, universe * reachPct);
+}
+
+function scenario(digitalPct,d){
+  const budget=Math.max(0,+$('budget').value||0), cppInput=Math.max(0.01,+$('cppInput').value||0.01), weeks=Math.max(1,+$('weeks').value||4), bf=Math.max(0.1,+$('bfreq').value||3), dcpm=Math.max(0.01,+$('dcpm').value||45), df=Math.max(0.1,+$('dfreq').value||2);
+  const bfCampaign=bf*weeks, dfCampaign=df*weeks;
+  const ds=budget*digitalPct, ts=budget-ds;
+  const tvGRP=ts/cppInput, tvTarget=(tvGRP*(d.universe||0))/100, tvGross=d.composition?tvTarget/d.composition:0;
+  const digImp=(ds/dcpm)*1000, tvReach=calcReach(tvTarget,d.universe,bfCampaign), digReach=calcReach(digImp,d.universe,dfCampaign);
+  const totalTarget=tvTarget+digImp, targetCPM=totalTarget>0?budget/(totalTarget/1000):0;
+  return {ds,ts,tvGross,tvTarget,tvReach,digImp,digReach,totalTarget,tvGRP,targetCPM,tvCPP:cppInput,bfCampaign,dfCampaign};
+}
+
+function calc(){
+  const dma=$('dma').value, demo=demoKey(), d=targetedData(dma), m=DATA[dma]._market, selectedHhiLabel=hhiLabel();
+  $('shiftlab').textContent=$('shift').value+'%';
+  $('a18').textContent=fmt(m.avg_a18);
+  $('targ').textContent=fmt(d.avg_target);
+  $('obs').textContent=selectedHHI().length===0||selectedHHI().length===3?`${d.obs} measured observations`:`Modeled ${demo} × ${selectedHhiLabel} (${pct(d.hhi_share)} DMA share)`;
+  $('comp').textContent=pct(d.composition);
+  $('waste').textContent=pct(1-d.composition);
+  $('compbar').style.width=Math.min(100,d.composition*100)+'%';
+
+  const broadcastTargetCPP=+$('cppInput').value||0, targetRating=d.universe?d.avg_target/d.universe*100:0, broadcastTargetCPM=d.universe?broadcastTargetCPP*100000/d.universe:0;
+  $('bcpm').textContent=money(broadcastTargetCPM);
+  $('bcpp').textContent=money(broadcastTargetCPP);
+  $('rating').textContent=`${demo} avg rating ${targetRating.toFixed(3)}`;
+
+  const p=+$('shift').value/100, a=scenario(0,d), b=scenario(p,d);
+  $('storytitle').textContent=`SHIFTING ${$('shift').value}% OF BROADCAST TV BUDGET TO DIGITAL VIDEO`;
+  $('marketbadge').textContent=`${dma} • ${demo} • ${selectedHhiLabel}`;
+  $('storysub').textContent=`Live comparison versus 100% Broadcast baseline • Target Demo CPP ${money(broadcastTargetCPP)}`;
+
+  const met=(l,v,cl='')=>`<div class="metric"><span>${l}</span><b class="${cl}">${v}</b></div>`;
+
+  $('basecol').innerHTML=met('Spend',money(a.ts))+met('Target impressions',fmt(a.tvTarget))+met('Wasted impressions',fmt(a.tvGross-a.tvTarget),'loss')+met('% Wasted',pct(a.tvGross?(a.tvGross-a.tvTarget)/a.tvGross:0),'loss')+met('Target efficiency',pct(a.tvGross?a.tvTarget/a.tvGross:0))+met('Target GRPs',a.tvGRP.toFixed(1))+met('Campaign frequency',a.bfCampaign.toFixed(1)+'×')+met('Target reach',fmt(a.tvReach))+met('Target reach %',pct(a.tvReach/d.universe))+met('Effective target CPM',money(a.targetCPM));
+  $('tvcol').innerHTML=met('Spend',money(b.ts))+met('Target impressions',fmt(b.tvTarget))+met('Wasted impressions',fmt(b.tvGross-b.tvTarget),'loss')+met('% Wasted',pct(b.tvGross?(b.tvGross-b.tvTarget)/b.tvGross:0),'loss')+met('Target efficiency',pct(b.tvGross?b.tvTarget/b.tvGross:0))+met('Target GRPs',b.tvGRP.toFixed(1))+met('Campaign frequency',b.bfCampaign.toFixed(1)+'×')+met('Target reach',fmt(b.tvReach))+met('Target reach %',pct(b.tvReach/d.universe))+met('Effective target CPM',b.tvTarget?money(b.ts/(b.tvTarget/1000)):'—');
+  $('digcol').innerHTML=met('Spend',money(b.ds))+met('Target impressions',fmt(b.digImp))+met('Target efficiency','100.0%','gain')+met('Campaign frequency',b.dfCampaign.toFixed(1)+'×')+met('Target reach',fmt(b.digReach))+met('Target reach %',pct(b.digReach/d.universe))+met('Digital CPM',money(+$('dcpm').value||45));
+
+  const di=b.totalTarget-a.totalTarget, dcpm=b.targetCPM-a.targetCPM;
+  const combinedWaste=b.tvGross-b.tvTarget, combinedGross=b.tvGross+b.digImp, combinedEfficiency=combinedGross?b.totalTarget/combinedGross:0;
+
+  $('tvhead').textContent=`${Math.round((1-p)*100)}% BROADCAST`;
+  $('dighead').textContent=`${Math.round(p*100)}% DIGITAL VIDEO`;
+
+  $('changecol').innerHTML=met('Spend',money(b.ts+b.ds))+met('Target impressions',fmt(b.totalTarget))+met('Wasted impressions',fmt(combinedWaste),'loss')+met('Target efficiency',pct(combinedEfficiency))+met('Effective target CPM',money(b.targetCPM))+met('Combined target reach','Not modeled')+met('Combined frequency','Not modeled')+met('Cross-platform duplication','Not modeled');
+
+  const cards=[['DIGITAL SHARE',$('shift').value+'%','of campaign budget'],['WASTE AVOIDED',fmt((a.tvGross-a.tvTarget)-(b.tvGross-b.tvTarget)),'fewer wasted impressions'],['IMPRESSIONS CHANGE',signed(di)+(a.totalTarget?' ('+signed(di/a.totalTarget*100,1)+'%)':''),di>=0?'more vs. 100% TV':'fewer vs. 100% TV'],['EFFECTIVE CPM CHANGE',signedMoney(dcpm),dcpm<=0?'improvement vs. baseline':'increase vs. baseline']];
+  $('insights').innerHTML=cards.map(x=>`<div class="insight"><div class="x">${x[0]}</div><div class="y">${x[1]}</div><div class="z">${x[2]}</div></div>`).join('');
+
+  $('allocationDollars').textContent=`${money(b.ts)} Broadcast  /  ${money(b.ds)} Digital Video`;
+  $('gainBox').innerHTML=met('Digital target impressions','+'+fmt(b.digImp),'gain')+met('Digital target reach','+'+fmt(b.digReach),'gain')+met('Broadcast waste avoided',fmt((a.tvGross-a.tvTarget)-(b.tvGross-b.tvTarget)),'gain');
+  renderImpactBars(a,b);
+}
+
+function renderImpactBars(base,sel){
+  const rows=[
+    {title:'TARGET IMPRESSIONS',base:base.totalTarget,sel:sel.totalTarget,fmt:fmt},
+    {title:'WASTED IMPRESSIONS',base:base.tvGross-base.tvTarget,sel:sel.tvGross-sel.tvTarget,fmt:fmt},
+    {title:'EFFECTIVE TARGET CPM',base:base.targetCPM,sel:sel.targetCPM,fmt:money}
+  ];
+  $('impactBars').innerHTML=rows.map(r=>{
+    const max=Math.max(r.base,r.sel,1),bw=Math.max(2,r.base/max*100),sw=Math.max(2,r.sel/max*100);
+    return `<div class="bar-card"><h3>${r.title}</h3><div class="bar-row"><span>100% TV</span><div class="bar-track"><div class="bar-fill" style="width:${bw}%"></div></div><span class="bar-value">${r.fmt(r.base)}</span></div><div class="bar-row"><span>Selected mix</span><div class="bar-track"><div class="bar-fill selected" style="width:${sw}%"></div></div><span class="bar-value">${r.fmt(r.sel)}</span></div></div>`
+  }).join('');
+}
+
+function init(){
+  Object.keys(DATA).sort().forEach(x=>$('dma').add(new Option(x,x)));
+  $('gender').value='A';
+  syncAges('25-54');
+  $('dma').value=Object.keys(DATA).find(x=>x==="Denver")||Object.keys(DATA)[0];
+  setEstimatedCpp();
+
+  $('gender').addEventListener('input',()=>{syncAges();setEstimatedCpp();calc()});
+  $('dma').addEventListener('input',()=>{setEstimatedCpp();calc()});
+  $('age').addEventListener('input',()=>{setEstimatedCpp();calc()});
+  ['budget','cppInput','weeks','bfreq','dcpm','dfreq','shift'].forEach(id=>$(id).addEventListener('input',calc));
+  document.querySelectorAll('#hhi input[type=checkbox]').forEach(cb=>cb.addEventListener('change',calc));
+  $('resetCpp').addEventListener('click',()=>{setEstimatedCpp();calc()});
+  calc();
+}
+
+document.addEventListener('DOMContentLoaded',init);
+</script>
 </body>
 </html>
