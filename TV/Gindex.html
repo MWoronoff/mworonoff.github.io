@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Adtaxi TV + Digital Video Allocation Analyzer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* Adtaxi Official Visual Style System */
+:root {
+  --adtaxi-navy-dark: #0a2240;
+  --adtaxi-navy-mid: #102c4d;
+  --adtaxi-blue-brand: #173f70;
+  --adtaxi-teal-accent: #00a887;
+  --adtaxi-cyan-bright: #2f80c9;
+  
+  --ink: #172b4d;
+  --muted: #667085;
+  --line: #d8e1ec;
+  --bg: #f4f7fb;
+  --card: #ffffff;
+  --green: #23856d;
+  --red: #b5473c;
+  
+  --font-sans: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background-color: var(--bg);
+  font-family: var(--font-sans);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+header {
+  background: linear-gradient(110deg, var(--adtaxi-navy-dark) 0%, var(--adtaxi-blue-brand) 100%);
+  color: #ffffff;
+  padding: 20px 0;
+  border-bottom: 3px solid var(--adtaxi-teal-accent);
+}
+
+.head {
+  max-width: 1500px;
+  margin: auto;
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.header-title {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+}
+
+.header-sub {
+  font-size: 14px;
+  color: #d7e0ea;
+  margin-top: 6px;
+  max-width: 900px;
+  line-height: 1.4;
+}
+
+.header-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  padding: 4px 12px;
+  border-radius: 999px;
+  margin-top: 10px;
+}
+
+main {
+  max-width: 1500px;
+  margin: 24px auto;
+  padding: 0 24px 40px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1.1fr 1.4fr;
+  gap: 20px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(10, 34, 64, 0.04);
+  overflow: hidden;
+}
+
+.card h2 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--adtaxi-navy-dark);
+  margin: 0;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--line);
+  background: #fafbfc;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.pad { padding: 20px; }
+
+.controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.control-group-title {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 12px;
+}
+
+label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  display: block;
+  margin-bottom: 6px;
+}
+
+select, input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: var(--font-sans);
+  background: #ffffff;
+  color: var(--ink);
+}
+
+select:focus, input:focus {
+  outline: none;
+  border-color: var(--adtaxi-cyan-bright);
+  box-shadow: 0 0 0 3px rgba(47, 128, 201, 0.15);
+}
+
+.btn-primary {
+  background-color: var(--adtaxi-teal-accent);
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-primary:hover {
+  background-color: #008f73;
+}
+
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.kpi {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-top: 4px solid var(--adtaxi-teal-accent);
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.kpi .l {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.kpi .v {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--adtaxi-navy-dark);
+  margin-top: 4px;
+}
+
+.kpi .s {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.note-box {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #8a4b0f;
+  background: #fff8eb;
+  border: 1px solid #fedf89;
+  padding: 12px;
+  border-radius: 6px;
+  margin-top: 16px;
+}
+
+@media (max-width: 900px) {
+  .grid { grid-template-columns: 1fr; }
+  .controls { grid-template-columns: 1fr; }
+  .kpis { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="head">
+    <div>
+      <div class="header-title">Adtaxi TV + Digital Video Allocation Analyzer</div>
+      <div class="header-sub">Compare Broadcast TV and targeted Digital Video delivery, efficiency, waste, and cost as campaign budget shifts across channels.</div>
+      <div class="header-badge">Scarborough USA+ 2026 Release 1</div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="grid">
+    <!-- Left Column: Controls -->
+    <div class="card">
+      <h2>Planning Controls</h2>
+      <div class="pad">
+        <div class="controls">
+          <div>
+            <div class="control-group-title">Audience Selection</div>
+            <div style="margin-bottom:12px;">
+              <label for="dma">Select Market</label>
+              <select id="dma">
+                <option value="Denver">Denver</option>
+                <option value="Chicago">Chicago</option>
+                <option value="Los Angeles">Los Angeles</option>
+                <option value="New York">New York</option>
+              </select>
+            </div>
+            <div style="margin-bottom:12px;">
+              <label for="gender">Select Gender</label>
+              <select id="gender">
+                <option value="A">Adults</option>
+                <option value="M">Men</option>
+                <option value="W">Women</option>
+              </select>
+            </div>
+            <div>
+              <label for="age">Select Age</label>
+              <select id="age">
+                <option value="25-54">25-54</option>
+                <option value="18-34">18-34</option>
+                <option value="18-49">18-49</option>
+                <option value="50+">50+</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <div class="control-group-title">Campaign Settings</div>
+            <div style="margin-bottom:12px;">
+              <label for="budget">Campaign Budget ($)</label>
+              <input id="budget" type="number" value="100000" step="5000" min="0">
+            </div>
+            <div style="margin-bottom:12px;">
+              <label for="weeks">Campaign Length (Weeks)</label>
+              <input id="weeks" type="number" value="4" min="1">
+            </div>
+            <div>
+              <label for="cppInput">Target Demo CPP ($)</label>
+              <input id="cppInput" type="number" value="250" min="1">
+            </div>
+          </div>
+        </div>
+
+        <div class="note-box">
+          <strong>Broadcast Pricing Note:</strong> Target Demo CPP is estimated automatically based on the selected market and demographic universe. You can override this value directly at any time.
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Benchmark KPIs -->
+    <div class="card">
+      <h2>Selected Market Benchmark</h2>
+      <div class="pad">
+        <div class="kpis">
+          <div class="kpi">
+            <div class="l">Avg A18+ Audience</div>
+            <div class="v" id="kpi-a18">44,306</div>
+            <div class="s">ABC / CBS / FOX / NBC avg</div>
+          </div>
+          <div class="kpi">
+            <div class="l">Target Audience</div>
+            <div class="v" id="kpi-target">8,348</div>
+            <div class="s">Selected demographic</div>
+          </div>
+          <div class="kpi">
+            <div class="l">Target Composition</div>
+            <div class="v" id="kpi-comp">18.8%</div>
+            <div class="s">Target ÷ Total A18+</div>
+          </div>
+          <div class="kpi">
+            <div class="l">Broadcast Waste</div>
+            <div class="v" id="kpi-waste">81.2%</div>
+            <div class="s">Outside selected target</div>
+          </div>
+          <div class="kpi">
+            <div class="l">Target CPM</div>
+            <div class="v" id="kpi-cpm">$151.35</div>
+            <div class="s">Effective broadcast cost</div>
+          </div>
+          <div class="kpi">
+            <div class="l">Target CPP</div>
+            <div class="v" id="kpi-cpp">$310.14</div>
+            <div class="s">Demo cost per point</div>
+          </div>
+        </div>
+        <button class="btn-primary" style="width: 100%;">Recalculate Scenario</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+</body>
+</html>
