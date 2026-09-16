@@ -103,7 +103,7 @@ function targetedData(dma){const key=demoKey(), raw=DATA[dma][key]; if(!raw)retu
 const $=id=>document.getElementById(id), fmt=n=>Math.round(n).toLocaleString(), money=n=>'$'+Number(n).toLocaleString(undefined,{maximumFractionDigits:2,minimumFractionDigits:2}), pct=n=>(n*100).toFixed(1)+'%';
 let lastDMA=null;
 const GENERIC_A18_CPM=7;
-function estimatedCpp(){const dma=$('dma').value, demo=demoKey(), market=DATA[dma]; if(!market||!market['A18+']||!market[demo])return 0; const a18u=market['A18+'].universe||0, du=market[demo].universe||0; const a18cpp=GENERIC_A18_CPM*a18u/100000; return a18u? a18cpp*(du/a18u):0;}
+function estimatedCpp(){const dma=$('dma').value, demo=demoKey(), market=DATA[dma]; if(!market||!market['A18+']||!market[demo])return 0; const d=market[demo], spot=(market._market?.avg_a18||market['A18+'].avg_target||0)*GENERIC_A18_CPM/1000, targetRating=d.universe?d.avg_target/d.universe*100:0; return targetRating?spot/targetRating:0;}
 function setEstimatedCpp(){const est=estimatedCpp(); if(est>0)$('cppInput').value=Math.round(est); const dma=$('dma').value, market=DATA[dma], a18u=market&&market['A18+']?market['A18+'].universe:0, a18cpp=GENERIC_A18_CPM*a18u/100000; if($('cppEstimateNote'))$('cppEstimateNote').textContent=`Planning estimate: ${money(est)} for ${demoKey()} • A18+ planning CPP ${money(a18cpp)} • editable`; }
 function init(){
  Object.keys(DATA).sort().forEach(x=>$('dma').add(new Option(x,x)));
