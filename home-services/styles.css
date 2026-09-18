@@ -19,3 +19,13 @@ input{display:block;margin-top:7px;min-width:160px;padding:10px;border:1px solid
 #map .leaflet-container{font:inherit}
 .map-popup{min-width:150px}.map-popup b{font-size:14px}.map-popup span{display:block;margin-top:4px}
 .radius-summary{font-weight:700;margin-top:4px}
+
+/* v1.2 locked Adtaxi analyzer header */
+header{background:linear-gradient(135deg,#17365d,#285d8e);color:#fff;padding:22px 28px;border-bottom:0}
+.header-inner{max-width:1500px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:24px}
+.brand-copy h1{margin:0 0 6px;font-size:28px;line-height:1.1;font-weight:700;letter-spacing:0}
+.brand-copy p{margin:0;opacity:.9;max-width:900px;line-height:1.4;font-size:14px}
+.adtaxi-logo-wrap{display:flex;align-items:center;justify-content:flex-end;flex:0 0 auto}.adtaxi-logo-image{display:block;width:168px;max-width:28vw;height:auto;filter:brightness(0) invert(1)}
+.weather-btn{border:1px solid #cbd4d9;background:#fff;border-radius:7px;padding:9px 12px;font-weight:700;cursor:pointer;color:#18242c;text-decoration:none;font-size:13px}.weather-btn:hover{background:#f3f6f7}
+.intelligence{margin-bottom:18px}.intel-head{display:flex;justify-content:space-between;gap:20px;align-items:flex-start}.intel-badge{font-size:11px;font-weight:700;background:#edf4fa;border:1px solid #c9dbea;border-radius:999px;padding:6px 9px;white-space:nowrap}.intel-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:12px}.intel-card{border:1px solid #dfe3e8;border-radius:10px;padding:12px;background:#fff}.intel-card span{display:block;font-size:12px;color:#68717d;margin-bottom:5px}.intel-card b{font-size:21px}.intel-card small{display:block;color:#68717d;font-size:10px;margin-top:4px}.takeaways{margin-top:12px;background:#f4f6f8;border-radius:10px;padding:13px 15px;font-size:13px;line-height:1.55}.takeaways strong{display:block;margin-bottom:4px}.takeaways ul{margin:5px 0 0;padding-left:18px}
+@media(max-width:900px){header{padding:18px}.header-inner{align-items:flex-start;flex-direction:column}.adtaxi-logo-image{width:148px;max-width:60vw}}
