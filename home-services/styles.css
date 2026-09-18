@@ -15,3 +15,10 @@
 .seasonal-summary{margin-top:16px;padding:16px;border:1px solid #d7e3ec;border-radius:10px;background:#f6fafc;display:flex;gap:14px;align-items:baseline}
 .seasonal-summary strong{white-space:nowrap}
 @media(max-width:760px){.seasonal-controls{grid-template-columns:1fr}.seasonal-summary{display:block}.seasonal-summary span{display:block;margin-top:6px}}
+
+/* v6 simplification */
+.whycard{margin-top:14px}.whygrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.whygrid>div{padding:14px;border:1px solid #dbe5ec;border-radius:10px;background:#f8fbfd}.whygrid span,.whygrid small{display:block}.whygrid b{display:block;font-size:24px;color:#0d4f83;margin:5px 0}
+.seasonal-controls.compact{display:flex;gap:8px}.seasonal-controls.compact select{padding:9px 12px;border:1px solid #c9d7e3;border-radius:8px;background:white}
+.seasonvisual{display:grid;grid-template-columns:minmax(0,2fr) minmax(240px,1fr);gap:18px;margin-top:14px}.seasonmapframe{min-height:390px;border:1px solid #d8e2e9;border-radius:12px;background:#f6f9fb;display:flex;align-items:center;justify-content:center;overflow:hidden}.seasonmapframe img{width:100%;height:100%;max-height:440px;object-fit:contain;display:none}.seasonfallback{min-height:390px;align-items:center;justify-content:center;color:#617382}.seasonlegend{padding:16px;border-radius:12px;background:#f6fafc}.seasonlegend h3{margin-top:0}.legendrow{display:flex;align-items:center;gap:9px;margin:10px 0}.legendrow span{width:20px;height:12px;border-radius:3px;border:1px solid #b8c4cc}.warm{background:#efb07c}.neutral{background:#eee}.cool{background:#8eb5d2}
+.methodology details summary{cursor:pointer;font-weight:800;font-size:16px}
+@media(max-width:850px){.whygrid{grid-template-columns:1fr 1fr}.seasonvisual{grid-template-columns:1fr}}
