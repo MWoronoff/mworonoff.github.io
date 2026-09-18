@@ -19,3 +19,9 @@ Do not replace, redraw, recolor, box, or otherwise alter the approved Adtaxi log
 - Refines map marker hierarchy and visual treatment.
 - Adds a secondary basemap provider if the primary OpenStreetMap tile request fails.
 - No scoring formulas, data, analysis labels, or other approved interface elements were changed.
+
+
+## v1.5 corrective patch
+- Removed the legacy global SVG sizing rule from Leaflet overlay behavior so circle markers render at their intended geographic positions and scale.
+- Cropped the existing approved Adtaxi asset to the round green mark only, removing the visible white crescent/background artifact.
+- No scoring, data, ranking, or analysis logic changed.

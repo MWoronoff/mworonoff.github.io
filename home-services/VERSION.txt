@@ -1,2 +1,1 @@
-Home Services Market Analyzer v1.4 — Map Polish + Tile Fallback
-2026-09-18
+v1.5 — Leaflet SVG sizing + Adtaxi round-logo crop fix
