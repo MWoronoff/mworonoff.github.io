@@ -1,4 +1,4 @@
-# Home Services Market Analyzer v1.3
+# Home Services Market Analyzer v1.4
 
 Upload these files to `/home-services/` in the GitHub Pages repository.
 
@@ -13,3 +13,9 @@ Upload these files to `/home-services/` in the GitHub Pages repository.
 - Working Leaflet/OpenStreetMap geography retained.
 
 Do not replace, redraw, recolor, box, or otherwise alter the approved Adtaxi logo treatment in future revisions.
+
+## v1.4 map update
+- Preserves the approved v1.3 branding and analyzer logic.
+- Refines map marker hierarchy and visual treatment.
+- Adds a secondary basemap provider if the primary OpenStreetMap tile request fails.
+- No scoring formulas, data, analysis labels, or other approved interface elements were changed.

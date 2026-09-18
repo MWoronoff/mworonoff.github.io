@@ -1,2 +1,2 @@
-Home Services Market Analyzer v1.3 — Locked Adtaxi Branding + Index Framework
+Home Services Market Analyzer v1.4 — Map Polish + Tile Fallback
 2026-09-18
