@@ -1,12 +1,15 @@
-# Adtaxi Home Services Market Analyzer
+# Home Services Market Analyzer v1.3
 
-Clean GitHub Pages deployment. Upload the contents of this folder into `/home-services/`.
+Upload these files to `/home-services/` in the GitHub Pages repository.
 
-Production files:
-- `index.html`
-- `styles.css`
-- `app.js` (contains the validated data required by the app; no separate data folder is required)
-- `VERSION.txt`
-- `README.md`
+## Locked changes
+- Uses one approved Adtaxi logo treatment only: round green circle with white knockout letters and transparent outside background.
+- Blue/navy branded analyzer banner.
+- Approved analysis labels: Media Market - DMA; Market Expansion - Metro; Local Opportunity - County; Neighborhood Targeting - ZIP.
+- Opportunity/Expansion scores remain 0–100 ranking measures.
+- Replacement Potential and Service Need are displayed as national benchmark indexes (U.S. = 100) where applicable.
+- Category Demand Index remains U.S. = 100 at DMA level.
+- Adtaxi Market Intelligence and Weather Outlook retained.
+- Working Leaflet/OpenStreetMap geography retained.
 
-Geography labels: DMA — The Ad Shop; Metro — The Operator; County — The Branch; ZIP — The Local Pro.
+Do not replace, redraw, recolor, box, or otherwise alter the approved Adtaxi logo treatment in future revisions.
