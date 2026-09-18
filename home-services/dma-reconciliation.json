@@ -1,0 +1,500 @@
+[
+  {
+    "scarborough": "Albany/Schenectady/Troy",
+    "dma_code": "532",
+    "dma": "Albany-Schenectady-Troy",
+    "method": "exact"
+  },
+  {
+    "scarborough": "Albuquerque/Santa Fe",
+    "dma_code": "790",
+    "dma": "Albuquerque-Santa Fe",
+    "method": "exact"
+  },
+  {
+    "scarborough": "Atlanta",
+    "dma_code": "524",
+    "dma": "Atlanta",
+    "method": "exact"
+  },
+  {
+    "scarborough": "Austin",
+    "dma_code": "635",
+    "dma": "Austin",
+    "method": "exact"
+  },
+  {
+    "scarborough": "Bakersfield",
+    "dma_code": "800",
+    "dma": "Bakersfield",
+    "method": "exact"
+  },
+  {
+    "scarborough": "Baltimore",
+    "dma_code": "512",
+    "dma": "Baltimore",
+    "method": "exact"
+  },
+  {
+    "scarborough": "Birmingham",
+    "dma_code": "630",
+    "dma": "Birmingham (Ann And Tusc)",
+    "method": "normalized"
+  },
+  {
+    "scarborough": "Boston",
+    "dma_code": "506",
+    "dma": "Boston (Manchester)",
+    "method": "alias"
+  },
+  {
+    "scarborough": "Buffalo",
+    "dma_code": "514",
+    "dma": "Buffalo",
+    "method": "exact"
+  },
+  {
+    "scarborough": "Charleston/Huntington",
+    "dma_code": "564",
+    "dma": "Charleston-Huntington",
+    "method": "exact"
+  },
+  {
+    "scarborough": "Charlotte",
+    "dma_code": "517",
+    "dma": "Charlotte",
+    "method": "exact"
+  },
+  {
+    "scarborough": "Chattanooga",
+    "dma_code": "575",
+    "dma": "Chattanooga",
+    "method": "exact"
+  },
+  {
+    "scarborough": "Chicago",
+    "dma_code": "602",
+    "dma": "Chicago",
+    "method": "exact"
+  },
+  {
+    "scarborough": "Cincinnati",
+    "dma_code": "515",
+    "dma": "Cincinnati",
+    "method": "exact"
+  },
+  {
+    "scarborough": "Cleveland/Akron",
+    "dma_code": "510",
+    "dma": "Cleveland-Akron (Canton)",
+    "method": "normalized"
+  },
+  {
+    "scarborough": "Colorado Springs/Pueblo",
+    "dma_code": "752",
+    "dma": "Colorado Springs-Pueblo",
+    "method": "exact"
+  },
+  {
+    "scarborough": "Columbus",
+    "dma_code": "535",
+    "dma": "Columbus, OH",
+    "method": "alias"
+  },
+  {
+    "scarborough": "Dallas/Fort Worth",
+    "dma_code": "623",
+    "dma": "Dallas-Ft. Worth",
+    "method": "alias"
+  },
+  {
+    "scarborough": "Dayton",
+    "dma_code": "542",
+    "dma": "Dayton",
+    "method": "exact"
+  },
+  {
+    "scarborough": "Denver",
+    "dma_code": "751",
+    "dma": "Denver",
+    "method": "exact"
+  },
+  {
+    "scarborough": "Des Moines/Ames",
+    "dma_code": "679",
+    "dma": "Des Moines-Ames",
+    "method": "exact"
+  },
+  {
+    "scarborough": "Detroit",
+    "dma_code": "505",
+    "dma": "Detroit",
+    "method": "exact"
+  },
+  {
+    "scarborough": "El Paso",
+    "dma_code": "765",
+    "dma": "El Paso (Las Cruces)",
+    "method": "normalized"
+  },
+  {
+    "scarborough": "Flint/Saginaw/Bay City",
+    "dma_code": "513",
+    "dma": "Flint-Saginaw-Bay City",
+    "method": "exact"
+  },
+  {
+    "scarborough": "Fort Myers/Naples",
+    "dma_code": "571",
+    "dma": "Ft. Myers-Naples",
+    "method": "alias"
+  },
+  {
+    "scarborough": "Fresno/Visalia",
+    "dma_code": "866",
+    "dma": "Fresno-Visalia",
+    "method": "exact"
+  },
+  {
+    "scarborough": "Grand Rapids/Kalamazoo/Battle Creek",
+    "dma_code": "563",
+    "dma": "Grand Rapids-Kalmzoo-B.Crk",
+    "method": "alias"
+  },
+  {
+    "scarborough": "Green Bay/Appleton",
+    "dma_code": "658",
+    "dma": "Green Bay-Appleton",
+    "method": "exact"
+  },
+  {
+    "scarborough": "Greensboro/High Point/Winston-Salem",
+    "dma_code": "518",
+    "dma": "Greensboro-H.Point-W.Salem",
+    "method": "alias"
+  },
+  {
+    "scarborough": "Greenville/Spartanburg/Asheville/Anderson",
+    "dma_code": "567",
+    "dma": "Greenvll-Spart-Ashevll-And",
+    "method": "alias"
+  },
+  {
+    "scarborough": "Harlingen/Weslaco/Brownsville/McAllen",
+    "dma_code": "636",
+    "dma": "Harlingen-Wslco-Brnsvl-Mca",
+    "method": "alias"
+  },
+  {
+    "scarborough": "Harrisburg/Lancaster/Lebanon/York",
+    "dma_code": "566",
+    "dma": "Harrisburg-Lncstr-Leb-York",
+    "method": "alias"
+  },
+  {
+    "scarborough": "Hartford/New Haven",
+    "dma_code": "533",
+    "dma": "Hartford & New Haven",
+    "method": "alias"
+  },
+  {
+    "scarborough": "Honolulu",
+    "dma_code": "744",
+    "dma": "Honolulu",
+    "method": "exact"
+  },
+  {
+    "scarborough": "Houston",
+    "dma_code": "618",
+    "dma": "Houston",
+    "method": "exact"
+  },
+  {
+    "scarborough": "Indianapolis",
+    "dma_code": "527",
+    "dma": "Indianapolis",
+    "method": "exact"
+  },
+  {
+    "scarborough": "Jacksonville",
+    "dma_code": "561",
+    "dma": "Jacksonville",
+    "method": "exact"
+  },
+  {
+    "scarborough": "Kansas City",
+    "dma_code": "616",
+    "dma": "Kansas City",
+    "method": "exact"
+  },
+  {
+    "scarborough": "Knoxville",
+    "dma_code": "557",
+    "dma": "Knoxville",
+    "method": "exact"
+  },
+  {
+    "scarborough": "Las Vegas",
+    "dma_code": "839",
+    "dma": "Las Vegas",
+    "method": "exact"
+  },
+  {
+    "scarborough": "Lexington",
+    "dma_code": "541",
+    "dma": "Lexington",
+    "method": "exact"
+  },
+  {
+    "scarborough": "Little Rock/Pine Bluff",
+    "dma_code": "693",
+    "dma": "Little Rock-Pine Bluff",
+    "method": "exact"
+  },
+  {
+    "scarborough": "Los Angeles",
+    "dma_code": "803",
+    "dma": "Los Angeles",
+    "method": "exact"
+  },
+  {
+    "scarborough": "Louisville",
+    "dma_code": "529",
+    "dma": "Louisville",
+    "method": "exact"
+  },
+  {
+    "scarborough": "Memphis",
+    "dma_code": "640",
+    "dma": "Memphis",
+    "method": "exact"
+  },
+  {
+    "scarborough": "Miami/Ft.Lauderdale",
+    "dma_code": "528",
+    "dma": "Miami-Ft. Lauderdale",
+    "method": "exact"
+  },
+  {
+    "scarborough": "Milwaukee",
+    "dma_code": "617",
+    "dma": "Milwaukee",
+    "method": "exact"
+  },
+  {
+    "scarborough": "Minneapolis/St. Paul",
+    "dma_code": "613",
+    "dma": "Minneapolis-St. Paul",
+    "method": "exact"
+  },
+  {
+    "scarborough": "Mobile/Pensacola",
+    "dma_code": "686",
+    "dma": "Mobile-Pensacola (Ft Walt)",
+    "method": "normalized"
+  },
+  {
+    "scarborough": "Nashville",
+    "dma_code": "659",
+    "dma": "Nashville",
+    "method": "exact"
+  },
+  {
+    "scarborough": "New Orleans",
+    "dma_code": "622",
+    "dma": "New Orleans",
+    "method": "exact"
+  },
+  {
+    "scarborough": "New York",
+    "dma_code": "501",
+    "dma": "New York",
+    "method": "exact"
+  },
+  {
+    "scarborough": "Norfolk/Portsmouth/Newport News",
+    "dma_code": "544",
+    "dma": "Norfolk-Portsmth-Newpt Nws",
+    "method": "alias"
+  },
+  {
+    "scarborough": "Oklahoma City",
+    "dma_code": "650",
+    "dma": "Oklahoma City",
+    "method": "exact"
+  },
+  {
+    "scarborough": "Omaha",
+    "dma_code": "652",
+    "dma": "Omaha",
+    "method": "exact"
+  },
+  {
+    "scarborough": "Orlando/Daytona Beach/Melbourne",
+    "dma_code": "534",
+    "dma": "Orlando-Daytona Bch-Melbrn",
+    "method": "alias"
+  },
+  {
+    "scarborough": "Palm Springs",
+    "dma_code": "804",
+    "dma": "Palm Springs",
+    "method": "exact"
+  },
+  {
+    "scarborough": "Philadelphia",
+    "dma_code": "504",
+    "dma": "Philadelphia",
+    "method": "exact"
+  },
+  {
+    "scarborough": "Phoenix",
+    "dma_code": "753",
+    "dma": "Phoenix (Prescott)",
+    "method": "alias"
+  },
+  {
+    "scarborough": "Pittsburgh",
+    "dma_code": "508",
+    "dma": "Pittsburgh",
+    "method": "exact"
+  },
+  {
+    "scarborough": "Portland",
+    "dma_code": "820",
+    "dma": "Portland, OR",
+    "method": "alias"
+  },
+  {
+    "scarborough": "Providence/New Bedford",
+    "dma_code": "521",
+    "dma": "Providence-New Bedford",
+    "method": "exact"
+  },
+  {
+    "scarborough": "Raleigh/Durham",
+    "dma_code": "560",
+    "dma": "Raleigh-Durham (Fayetvlle)",
+    "method": "normalized"
+  },
+  {
+    "scarborough": "Richmond/Petersburg",
+    "dma_code": "556",
+    "dma": "Richmond-Petersburg",
+    "method": "exact"
+  },
+  {
+    "scarborough": "Roanoke/Lynchburg",
+    "dma_code": "573",
+    "dma": "Roanoke-Lynchburg",
+    "method": "exact"
+  },
+  {
+    "scarborough": "Rochester",
+    "dma_code": "538",
+    "dma": "Rochester, NY",
+    "method": "alias"
+  },
+  {
+    "scarborough": "Sacramento/Stockton/Modesto",
+    "dma_code": "862",
+    "dma": "Sacramnto-Stkton-Modesto",
+    "method": "alias"
+  },
+  {
+    "scarborough": "Salt Lake City",
+    "dma_code": "770",
+    "dma": "Salt Lake City",
+    "method": "exact"
+  },
+  {
+    "scarborough": "San Antonio",
+    "dma_code": "641",
+    "dma": "San Antonio",
+    "method": "exact"
+  },
+  {
+    "scarborough": "San Diego",
+    "dma_code": "825",
+    "dma": "San Diego",
+    "method": "exact"
+  },
+  {
+    "scarborough": "San Francisco/Oakland/San Jose",
+    "dma_code": "807",
+    "dma": "San Francisco-Oak-San Jose",
+    "method": "alias"
+  },
+  {
+    "scarborough": "Seattle/Tacoma",
+    "dma_code": "819",
+    "dma": "Seattle-Tacoma",
+    "method": "exact"
+  },
+  {
+    "scarborough": "Spokane",
+    "dma_code": "881",
+    "dma": "Spokane",
+    "method": "exact"
+  },
+  {
+    "scarborough": "St. Louis",
+    "dma_code": "609",
+    "dma": "St. Louis",
+    "method": "exact"
+  },
+  {
+    "scarborough": "Syracuse",
+    "dma_code": "555",
+    "dma": "Syracuse",
+    "method": "exact"
+  },
+  {
+    "scarborough": "Tampa/St.Petersburg",
+    "dma_code": "539",
+    "dma": "Tampa-St. Pete (Sarasota)",
+    "method": "alias"
+  },
+  {
+    "scarborough": "Toledo",
+    "dma_code": "547",
+    "dma": "Toledo",
+    "method": "exact"
+  },
+  {
+    "scarborough": "Tucson",
+    "dma_code": "789",
+    "dma": "Tucson (Sierra Vista)",
+    "method": "alias"
+  },
+  {
+    "scarborough": "Tulsa",
+    "dma_code": "671",
+    "dma": "Tulsa",
+    "method": "exact"
+  },
+  {
+    "scarborough": "Washington, D.C.",
+    "dma_code": "511",
+    "dma": "Washington, DC (Hagrstwn)",
+    "method": "alias"
+  },
+  {
+    "scarborough": "West Palm Beach/Fort Pierce",
+    "dma_code": "548",
+    "dma": "West Palm Beach-Ft. Pierce",
+    "method": "alias"
+  },
+  {
+    "scarborough": "Wichita/Hutchinson",
+    "dma_code": "678",
+    "dma": "Wichita-Hutchinson Plus",
+    "method": "normalized"
+  },
+  {
+    "scarborough": "Wilkes-Barre/Scranton",
+    "dma_code": "577",
+    "dma": "Wilkes Barre-Scranton-Hztn",
+    "method": "normalized"
+  }
+]
