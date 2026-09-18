@@ -92,3 +92,61 @@ function updateSeasonal(){
  img.src=url+'?v='+Date.now();
 }
 $('seasonHorizon').onchange=updateSeasonal;$('seasonType').onchange=updateSeasonal;updateSeasonal();
+
+async function fetchJSON(url,label){
+  const r=await fetch(url,{cache:'no-store'});
+  if(!r.ok) throw new Error(`${label} failed (${r.status})`);
+  return r.json();
+}
+function loadError(msg){
+  $('marketSelect').innerHTML='<option value="">Data unavailable</option>';
+  $('mapSub').textContent=msg;
+  $('tableSub').textContent='Refresh the page. If the problem continues, verify the GitHub Pages data files.';
+  console.error(msg);
+}
+async function init(){
+  initMap();
+  $('marketSelect').innerHTML='<option value="">Loading market data…</option>';
+  try{
+    const core=await Promise.all([
+      fetchJSON('zips.json','ZIP data'),
+      fetchJSON('dma.json','DMA data')
+    ]);
+    zips=core[0]; dmas=core[1];
+    for(const z of zips){
+      z.zip=zip5(z.zip);
+      z.fips=String(z.fips??'').padStart(5,'0');
+    }
+    if(!zips.length||!dmas.length) throw new Error('Core market data is empty');
+    try{ metroMap=await fetchJSON('metro-map.json','Metro data'); }
+    catch(e){ metroMap={}; console.warn(e.message); }
+    attachMetro();
+    updateControls();
+    syncAnalysisUI();
+  }catch(e){
+    loadError('Unable to load core market data: '+e.message);
+    return;
+  }
+
+  try{
+    dmaGeo=await fetchJSON(
+      'https://raw.githubusercontent.com/Mrk-Nguyen/dmamap/master/nielsengeo.json',
+      'DMA boundaries'
+    );
+    renderCurrent();
+  }catch(e){
+    console.warn('DMA boundary unavailable',e);
+    $('mapSub').textContent='Market data loaded. DMA boundary map is temporarily unavailable.';
+  }
+
+  $('geo').onchange=()=>{ updateControls(); syncAnalysisUI(); };
+  $('parentType').onchange=()=>{ populateMarkets(); renderCurrent(); };
+  $('marketSelect').onchange=renderCurrent;
+  $('countySelect').onchange=()=>{$('geo').value==='county'?renderCountySelection():renderZIP();};
+  $('zipMode').onchange=updateControls;
+  $('centerZip').onchange=renderRadius;
+  $('radius').onchange=renderRadius;
+  $('category').onchange=()=>{ attachMetro(); populateMarkets(); renderCurrent(); };
+  $('topN').onchange=renderCurrent;
+}
+init();
