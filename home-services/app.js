@@ -41,10 +41,96 @@ function aggregate(name,a){return{name,zips:a,owner_hh:a.reduce((s,z)=>s+z.owner
 function counties(a){let m=new Map;for(const z of a){let k=z.fips;if(!m.has(k))m.set(k,{fips:k,name:`${z.county}, ${z.state}`,zips:[]});m.get(k).zips.push(z)}return[...m.values()].map(x=>({...aggregate(x.name,x.zips),fips:x.fips})).sort((a,b)=>b.score[$('category').value]-a.score[$('category').value])}
 function setKpis(a,scar='—'){let c=$('category').value;if(!a.length){$('kScore').textContent=$('kRR').textContent=$('kHH').textContent='—'}else{$('kScore').textContent=wavgN(a,'score',c).toFixed(1);$('kRR').textContent=wavg(a,'replacement_ready').toFixed(1);$('kHH').textContent=fmt(a.reduce((s,z)=>s+z.owner_hh,0))}$('kScar').textContent=scar}
 function populateMarkets(){let g=$('geo').value,p=$('parentType').value,c=$('category').value,opts=[];if(g==='dma'||(g!=='metro'&&p==='dma'))opts=dmas.map(d=>d.dma);else opts=metros.slice().sort((a,b)=>b.score[c]-a.score[c]).map(m=>m.name);$('marketLabel').textContent=(g==='dma'||(g!=='metro'&&p==='dma'))?'DMA':'Metro';$('marketSelect').innerHTML=opts.map(x=>`<option>${x}</option>`).join('');}
-function renderDMA(){let c=$('category').value,rows=dmas.map(d=>({...d,index:d[c]?.index||0,planned:d[c]?.planned||0,base:d[c]?.base||0})).sort((a,b)=>b.index-a.index);$('tableTitle').textContent='U.S. Media Market Rankings';$('tableSub').textContent='National DMA comparison. Click a market to inspect its opportunity drivers.';$('thead').innerHTML='<tr><th>DMA</th><th>Intent Index</th><th>Planned HH</th><th>Base HH</th></tr>';$('tbody').innerHTML=rows.slice(0,+$('topN').value).map(r=>`<tr data-name="${r.dma}"><td>${r.dma}</td><td class="score">${r.index}</td><td>${fmt(r.planned)}</td><td>${fmt(r.base)}</td></tr>`).join('');$('tbody').querySelectorAll('tr').forEach(tr=>tr.onclick=()=>{renderDMASelection(tr.dataset.name)});drawDMAs();$('kScore').textContent=$('kRR').textContent=$('kHH').textContent='—';$('kScar').textContent='—'}
-function drawDMAs(){layerGroup.clearLayers();if(!dmaGeo)return;let c=$('category').value,lookup=new Map(dmas.map(d=>[norm(d.dma),d[c]?.index||0]));L.geoJSON(dmaGeo,{style:f=>{let v=lookup.get(norm(dmaFeatureName(f)))||0;return{color:'#fff',weight:1,fillColor:color(Math.min(100,v/1.6)),fillOpacity:v?.65:.08}},onEachFeature:(f,l)=>{let match=dmas.find(d=>{let a=aliases[norm(d.dma)]||norm(d.dma),b=norm(dmaFeatureName(f));return a===b||b.includes(a)||a.includes(b)});if(match){let x=match[c];l.bindTooltip(`<b>${match.dma}</b><br>Scarborough intent: ${x.index}`);l.on('click',()=>{renderDMASelection(match.dma)})}}}).addTo(layerGroup);map.setView([39,-98],4)}
+
+let dmaOpportunityCache=new Map;
+function pctRank(values,v){
+  const a=values.filter(Number.isFinite).slice().sort((x,y)=>x-y);
+  if(!a.length)return 0;
+  let n=0;for(const x of a)if(x<=v)n++;
+  return 100*n/a.length;
+}
+async function buildDMAOpportunity(){
+  const c=$('category').value,key=c;
+  if(dmaOpportunityCache.has(key))return dmaOpportunityCache.get(key);
+  const prelim=[];
+  for(const d of dmas){
+    const a=await dmaZips(d.dma);
+    if(!a.length)continue;
+    prelim.push({
+      dma:d.dma,zips:a,
+      rr:wavg(a,'replacement_ready'),
+      need:wavgN(a,'need',c),
+      owner:a.reduce((s,z)=>s+(+z.owner_hh||0),0),
+      intent:+(d[c]?.index||0),
+      planned:+(d[c]?.planned||0),
+      base:+(d[c]?.base||0)
+    });
+  }
+  const owners=prelim.map(x=>x.owner), intents=prelim.map(x=>x.intent);
+  for(const x of prelim){
+    x.scale=pctRank(owners,x.owner);
+    x.demand=pctRank(intents,x.intent);
+    // Approved DMA methodology:
+    // 30% Replacement-Ready + 25% Category Demand + 25% Structural Need + 20% Market Scale.
+    x.opportunity=.30*x.rr+.25*x.demand+.25*x.need+.20*x.scale;
+  }
+  prelim.sort((a,b)=>b.opportunity-a.opportunity);
+  dmaOpportunityCache.set(key,prelim);
+  return prelim;
+}
+async function renderDMA(){
+  $('tableTitle').textContent='U.S. Media Market Rankings';
+  $('tableSub').textContent='Ranked by Home Services Opportunity Score. Click a market to inspect its drivers.';
+  $('thead').innerHTML='<tr><th>DMA</th><th>Opportunity</th><th>Replacement</th><th>Service Need</th><th>Demand</th><th>Scale</th></tr>';
+  $('tbody').innerHTML='<tr><td colspan="6">Calculating U.S. market opportunity…</td></tr>';
+  $('kScore').textContent=$('kRR').textContent=$('kHH').textContent=$('kScar').textContent='—';
+  const rows=await buildDMAOpportunity();
+  $('tbody').innerHTML=rows.slice(0,+$('topN').value).map(r=>`<tr data-name="${r.dma}"><td>${r.dma}</td><td class="score">${r.opportunity.toFixed(1)}</td><td>${r.rr.toFixed(1)}</td><td>${r.need.toFixed(1)}</td><td>${r.demand.toFixed(0)}</td><td>${r.scale.toFixed(0)}</td></tr>`).join('');
+  $('tbody').querySelectorAll('tr[data-name]').forEach(tr=>tr.onclick=()=>renderDMASelection(tr.dataset.name));
+  drawDMAs(rows);
+}
+function drawDMAs(rows){
+  layerGroup.clearLayers();if(!dmaGeo)return;
+  let lookup=new Map(rows.map(r=>[norm(r.dma),r]));
+  L.geoJSON(dmaGeo,{
+    style:f=>{
+      let n=norm(dmaFeatureName(f)),r=lookup.get(n);
+      if(!r){for(const [k,v] of lookup){if(k.includes(n)||n.includes(k)){r=v;break}}}
+      let v=r?.opportunity||0;
+      return{color:'#fff',weight:1,fillColor:color(v),fillOpacity:r?.68:.08};
+    },
+    onEachFeature:(f,l)=>{
+      let n=norm(dmaFeatureName(f)),r=lookup.get(n);
+      if(!r){for(const [k,v] of lookup){if(k.includes(n)||n.includes(k)){r=v;break}}}
+      if(r){
+        l.bindTooltip(`<b>${r.dma}</b><br>Opportunity ${r.opportunity.toFixed(1)}<br>Replacement ${r.rr.toFixed(1)}<br>Service Need ${r.need.toFixed(1)}`);
+        l.on('click',()=>renderDMASelection(r.dma));
+      }
+    }
+  }).addTo(layerGroup);
+  map.setView([39,-98],4);
+}
+
 async function dmaZips(name){if(dmaZipCache.has(name))return dmaZipCache.get(name);let g=geoForDMA(name);if(!g){console.warn('No DMA boundary match for',name);return[];}await new Promise(r=>setTimeout(r,0));let a=zips.filter(z=>pointInGeom(z,g.geometry));dmaZipCache.set(name,a);return a}
-async function renderDMASelection(name){let d=dmas.find(x=>x.dma===name),a=await dmaZips(name),c=$('category').value;currentZips=a;setKpis(a,d?.[c]?.index||'—');$('mapTitle').textContent=name+' Opportunity';$('mapSub').textContent=`${fmt(a.length)} residential ZIPs in mapped DMA boundary.`;drawPoints(a);if(a.length){$('whySub').textContent=`${name} · ${catLabel[c]}`;$('whyRR').textContent=wavg(a,'replacement_ready').toFixed(1);$('whyNeed').textContent=wavgN(a,'need',c).toFixed(1);$('whyScale').textContent=fmt(a.reduce((s,z)=>s+z.owner_hh,0));$('whyDemand').textContent=d?.[c]?.index||'—';}}
+async function renderDMASelection(name){
+  let d=dmas.find(x=>x.dma===name),a=await dmaZips(name),c=$('category').value;
+  currentZips=a;
+  const rows=await buildDMAOpportunity(),r=rows.find(x=>x.dma===name);
+  $('kScore').textContent=r?r.opportunity.toFixed(1):'—';
+  $('kRR').textContent=r?r.rr.toFixed(1):'—';
+  $('kHH').textContent=r?fmt(r.owner):'—';
+  $('kScar').textContent=d?.[c]?.index||'—';
+  $('mapTitle').textContent=name+' Opportunity';
+  $('mapSub').textContent=`${fmt(a.length)} residential ZIPs in mapped DMA boundary.`;
+  drawPoints(a);
+  if(r){
+    $('whySub').textContent=`${name} · ${catLabel[c]}`;
+    $('whyRR').textContent=r.rr.toFixed(1);
+    $('whyNeed').textContent=r.need.toFixed(1);
+    $('whyScale').textContent=r.scale.toFixed(0);
+    $('whyDemand').textContent=r.demand.toFixed(0);
+  }
+}
 function renderMetroList(){let c=$('category').value,rows=metros.slice().sort((a,b)=>b.score[c]-a.score[c]);$('tableTitle').textContent='Market Expansion Rankings';$('tableSub').textContent='CBSA/metro opportunity aggregated from supplied residential ZIP housing data.';$('thead').innerHTML='<tr><th>Metro</th><th>Opportunity</th><th>Replacement-Ready</th><th>Need</th><th>Owner HH</th></tr>';$('tbody').innerHTML=rows.slice(0,+$('topN').value).map(r=>`<tr data-name="${r.name}"><td>${r.name}</td><td class="score">${r.score[c].toFixed(1)}</td><td>${r.replacement_ready.toFixed(1)}</td><td>${r.need[c].toFixed(1)}</td><td>${fmt(r.owner_hh)}</td></tr>`).join('');$('tbody').querySelectorAll('tr').forEach(tr=>tr.onclick=()=>{$('marketSelect').value=tr.dataset.name;renderMetroSelection(tr.dataset.name)});drawAggregates(rows.slice(0,100));setKpis(rows.flatMap(r=>r.zips),'—')}
 function renderMetroSelection(name){let m=metros.find(x=>x.name===name);if(!m)return;currentZips=m.zips;setKpis(m.zips,'—');$('mapTitle').textContent=name+' Opportunity';$('mapSub').textContent=`${fmt(m.zips.length)} residential ZIPs in metro crosswalk.`;drawPoints(m.zips);}
 async function parentZips(){let p=$('parentType').value,n=$('marketSelect').value;if(p==='metro')return metros.find(x=>x.name===n)?.zips||[];return await dmaZips(n)}
@@ -59,7 +145,7 @@ function updateControls(){let g=$('geo').value,isSub=g==='county'||g==='zip';$('
 async function renderCurrent(){
   let g=$('geo').value;
   if(g==='dma'){
-    renderDMA();
+    await renderDMA();
     $('mapTitle').textContent='U.S. Media Market Opportunity';
     $('mapSub').textContent='Click a market on the map or ranking to inspect it.';
   }else if(g==='metro'){
