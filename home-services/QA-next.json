@@ -1,0 +1,32 @@
+{
+  "metro_source_model_rows": 920,
+  "metro_only_matched": 387,
+  "metro_unique_codes": 387,
+  "metro_names_missing": 0,
+  "county_records": 1258,
+  "metros_with_counties": 393,
+  "denver_metro": {
+    "cbsa": "19740",
+    "metro": "Denver-Aurora-Centennial, CO",
+    "overall": 96.0,
+    "hvac": 98.0,
+    "roofing": 98.1,
+    "windows": 98.2,
+    "employer_estab": 2140,
+    "estab_10plus": 334,
+    "estab_50plus": 59,
+    "contractor_ecosystem": 98.3
+  },
+  "denver_counties": [
+    "Adams",
+    "Arapahoe",
+    "Broomfield",
+    "Clear Creek",
+    "Denver",
+    "Douglas",
+    "Elbert",
+    "Gilpin",
+    "Jefferson",
+    "Park"
+  ]
+}

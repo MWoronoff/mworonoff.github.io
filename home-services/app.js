@@ -1,238 +1,76 @@
-const $=id=>document.getElementById(id);let zips=[],dmas=[],metroMap={},metros=[],dmaGeo=null,map,layerGroup,currentZips=[],forecastMap=null,forecastOverlay=null;const dmaZipCache=new Map();
-const catLabel={hvac:'HVAC',roofing:'Roofing',windows:'Windows & Doors'};
-function zip5(v){let s=String(v??'').trim();return /^\d{1,5}$/.test(s)?s.padStart(5,'0'):s}function norm(s){return(s||'').toLowerCase().replace(/dma/g,'').replace(/fort /g,'ft ').replace(/saint /g,'st ').replace(/[^a-z0-9]/g,'')}
-const aliases={
-'miamiftlauderdale':'miamiftlauderdale',
-'tampastpetersburg':'tampastpetesarasota',
-'tampastpetersburgclearwater':'tampastpetesarasota',
-'orlandodaytonabeachmelbourne':'orlandodaytonabchmelbrn',
-'hartfordnewhaven':'hartfordnewhaven',
-'hartfordnewbritainmiddletown':'hartfordnewhaven',
-'washingtondc':'washingtondchagrstwn',
-'clevelandakron':'clevelandakroncanton',
-'wilkesbarrescranton':'wilkesbarrescrantonhztn',
-'denverboulder':'denver',
-'denver':'denver',
-'dallasftworth':'dallasftworth',
-'dallasfortworth':'dallasftworth',
-'minneapolisstpaul':'minneapolisstpaul',
-'seattletacoma':'seattletacoma',
-'greensborowinstonsalemhighpoint':'greensborohpointwsalem',
-'greenvillespartanburg':'greenvillespartanburgashevilleanderson',
-'raleighdurham':'raleighdurhamfayetteville',
-'saltlakecityogdenprovo':'saltlakecity',
-'mcallenbrownsvilleharlingen':'harlingenweslacobrownsvillemcallen',
-'norfolkvirginiabeachnewportnews':'norfolkportsmouthnewportnews',
-'providencewarwickpawtucket':'providencenewbedford',
-'roanokelynchburg':'roanokelynchburg',
-'fortmyersnaples':'ftmyersnaples',
-'fortpiercestuartverobeach':'westpalmbeachftpierce',
-'westpalmbeachbocaraton':'westpalmbeachftpierce'
+let DMA=[],METRO=[],COUNTY=[],ZIP=[];const $=id=>document.getElementById(id);const fmt=n=>Math.round(n||0).toLocaleString();const score=n=>Number(n||0).toFixed(1);
+async function init(){[DMA,METRO,COUNTY,ZIP]=await Promise.all(['dma-opportunity','metro-expansion','county-opportunity','zip-opportunity'].map(f=>fetch('data/'+f+'.json').then(r=>r.json())));$('analysis').onchange=setup;$('category').onchange=render;$('market').onchange=marketChanged;$('county').onchange=render;$('radius').onchange=render;setup();}
+function mode(){return $('analysis').value}function marketChanged(){if(mode()==='Neighborhood Targeting')setupCounty();else render()}
+function setup(){const m=mode(),s=$('market');$('stageNotice').classList.add('hidden');$('view').style.display='block';$('marketWrap').style.display='block';$('countyWrap').style.display='none';$('radiusWrap').style.display='none';
+ if(m==='Media Market'){s.innerHTML=DMA.slice().sort((a,b)=>a.dma.localeCompare(b.dma)).map(x=>`<option value="${x.dma_code}">${x.dma}</option>`).join('');if(DMA.some(x=>x.dma_code===751))s.value='751';}
+ else{s.innerHTML=METRO.map(x=>`<option value="${x.cbsa}">${x.metro}</option>`).join('');if(METRO.some(x=>x.cbsa==='19740'))s.value='19740';if(m==='Neighborhood Targeting'){ $('countyWrap').style.display='block';$('radiusWrap').style.display='block';setupCounty();return;}}
+ render();}
+function setupCounty(){const cb=$('market').value,cs=COUNTY.filter(x=>x.cbsa===cb).sort((a,b)=>a.county.localeCompare(b.county));$('county').innerHTML=cs.map(x=>`<option value="${x.fips}">${x.county} County</option>`).join('');if(cb==='19740'&&cs.some(x=>x.fips==='08031'))$('county').value='08031';render();}
+function cards(items){$('kpis').innerHTML=items.map(x=>`<div><b>${x[1]}</b><span>${x[0]}</span></div>`).join('')}function bars(rows,label,val){$('bars').innerHTML=rows.slice(0,12).map((r,i)=>`<div class="barrow"><span>${i+1}. ${label(r)}</span><div class="track"><div class="fill" style="width:${Math.max(0,Math.min(100,val(r)))}%"></div></div><b>${score(val(r))}</b></div>`).join('')}function metrics(items){$('why').innerHTML=items.map(m=>`<div class="metric"><span>${m[0]}</span><b>${m[1]}</b></div>`).join('')}
+function render(){const cat=$('category').value,m=mode();if(m==='Media Market')return renderDMA(cat);if(m==='Market Expansion')return renderMetro(cat);if(m==='Local Opportunity')return renderCounty(cat);return renderZIP(cat)}
+function renderDMA(cat){const code=+$('market').value,sorted=DMA.slice().sort((a,b)=>b[cat+'_opportunity']-a[cat+'_opportunity']),x=DMA.find(r=>r.dma_code===code)||sorted[0];updateConditions(cat,'Media Market',x,sorted);cards([['Opportunity Score',score(x[cat+'_opportunity'])],['Replacement Potential',score(x.replacement_ready)],['Service Need',score(x[cat+'_need'])],['Homeowner Scale',score(x.market_scale)],['Category Demand',score(x[cat+'_demand_score'])]]);$('chartTitle').textContent='U.S. Media Market Opportunity';$('chartNote').textContent='Validated Scarborough-based opportunity across 83 matched DMAs.';$('marketName').textContent=x.dma;$('whyTitle').textContent='Why this media market?';metrics([['Replacement Potential',score(x.replacement_ready)],['Service Need',score(x[cat+'_need'])],['Homeowner Scale',score(x.market_scale)],['Category Demand',score(x[cat+'_demand_score'])]]);$('method').textContent='Opportunity = 30% Replacement-Ready Households + 25% Category Demand + 25% Structural Category Need + 20% Market Scale.';bars(sorted,r=>r.dma,r=>r[cat+'_opportunity']);$('tableTitle').textContent='Media Market Rankings';$('thead').innerHTML='<tr><th>Rank</th><th>DMA</th><th>Opportunity</th><th>Owner HH</th><th>ZIPs</th></tr>';$('rankings').innerHTML=sorted.map((r,i)=>`<tr data-code="${r.dma_code}"><td>${i+1}</td><td>${r.dma}</td><td><b>${score(r[cat+'_opportunity'])}</b></td><td>${fmt(r.owner_hh)}</td><td>${r.zip_count}</td></tr>`).join('');rowClicks()}
+function renderMetro(cat){const code=$('market').value,sorted=METRO.slice().sort((a,b)=>b[cat]-a[cat]),x=METRO.find(r=>r.cbsa===code)||sorted[0];updateConditions(cat,'Market Expansion',x,sorted);cards([['Expansion Score',score(x[cat])],['Employer Establishments',fmt(x.employer_estab)],['10+ Employee Establishments',fmt(x.estab_10plus)],['50+ Employee Establishments',fmt(x.estab_50plus)],['Contractor Ecosystem',score(x.contractor_ecosystem)]]);$('chartTitle').textContent='U.S. Market Expansion Opportunity';$('chartNote').textContent='387 metropolitan statistical areas only — micropolitan areas are excluded from this view.';$('marketName').textContent=x.metro;$('whyTitle').textContent='Why this expansion market?';metrics([['Category Expansion Score',score(x[cat])],['Employer Establishments',fmt(x.employer_estab)],['10+ Employee Establishments',fmt(x.estab_10plus)],['Contractor Ecosystem',score(x.contractor_ecosystem)]]);$('method').textContent='Market Expansion uses the CBSA employer/contractor model. Scarborough DMA data is not forced into Metro geography.';bars(sorted,r=>r.metro,r=>r[cat]);$('tableTitle').textContent='Metro Rankings — The Operator';$('thead').innerHTML='<tr><th>Rank</th><th>Metro</th><th>Expansion</th><th>Employer Estab.</th><th>10+ Emp.</th><th>50+ Emp.</th></tr>';$('rankings').innerHTML=sorted.map((r,i)=>`<tr data-code="${r.cbsa}"><td>${i+1}</td><td>${r.metro}</td><td><b>${score(r[cat])}</b></td><td>${fmt(r.employer_estab)}</td><td>${fmt(r.estab_10plus)}</td><td>${fmt(r.estab_50plus)}</td></tr>`).join('');rowClicks()}
+function renderCounty(cat){const code=$('market').value,sorted=COUNTY.filter(r=>r.cbsa===code).sort((a,b)=>b[cat+'_score']-a[cat+'_score']),x=sorted[0],metro=METRO.find(r=>r.cbsa===code);if(!x)return;updateConditions(cat,'Local Opportunity',x,sorted);cards([['Top County Score',score(x[cat+'_score'])],['Replacement-Ready HH',fmt(x.replacement_ready_hh)],['Owner Households',fmt(x.owner_hh)],['Structural Need',score(x[cat+'_need'])],['Addressable Scale',score(x.addressable_scale)]]);$('chartTitle').textContent=(metro?metro.metro:'Selected Metro')+' — County Opportunity';$('chartNote').textContent='Counties are ranked only within the selected Metro. Scores are rebuilt from residential ZIP housing inputs.';$('marketName').textContent=x.county+' County';$('whyTitle').textContent='Top local opportunity';metrics([['Replacement Potential',score(x.replacement_ready)],['Structural Need',score(x[cat+'_need'])],['Addressable Scale',score(x.addressable_scale)],['Residential ZIPs',x.zip_count]]);$('method').textContent='Local Opportunity = 40% Replacement-Ready Households + 35% Structural Category Need + 25% Addressable Scale. DMA Scarborough is not represented as county-level measurement.';bars(sorted,r=>r.county,r=>r[cat+'_score']);$('tableTitle').textContent='County Rankings — The Branch';$('thead').innerHTML='<tr><th>Rank</th><th>County</th><th>Opportunity</th><th>Replacement-Ready HH</th><th>Owner HH</th><th>ZIPs</th></tr>';$('rankings').innerHTML=sorted.map((r,i)=>`<tr><td>${i+1}</td><td>${r.county}</td><td><b>${score(r[cat+'_score'])}</b></td><td>${fmt(r.replacement_ready_hh)}</td><td>${fmt(r.owner_hh)}</td><td>${r.zip_count}</td></tr>`).join('')}
+function miles(a,b,c,d){const R=3958.8,p=Math.PI/180,x=(c-a)*p,y=(d-b)*p,q=Math.sin(x/2)**2+Math.cos(a*p)*Math.cos(c*p)*Math.sin(y/2)**2;return 2*R*Math.asin(Math.sqrt(q))}
+function renderZIP(cat){const cb=$('market').value,fips=$('county').value,rad=+$('radius').value;let base=ZIP.filter(r=>r.cbsa===cb&&r.fips===fips),rows=base;if(rad>0&&base.length){const center=base.slice().sort((a,b)=>b.households-a.households)[0];rows=ZIP.filter(r=>r.cbsa===cb&&miles(center.lat,center.lon,r.lat,r.lon)<=rad)}const sorted=rows.slice().sort((a,b)=>b[cat+'_score']-a[cat+'_score']),x=sorted[0],metro=METRO.find(r=>r.cbsa===cb);if(!x)return;updateConditions(cat,'Neighborhood Targeting',x,sorted);cards([['Top ZIP Score',score(x[cat+'_score'])],['Replacement-Ready HH',fmt(x.replacement_ready_hh)],['Owner Households',fmt(x.owner_hh)],['Structural Need',score(x[cat+'_need'])],['ZIPs in View',sorted.length]]);$('chartTitle').textContent=(metro?metro.metro:'Selected Metro')+' — Neighborhood Targeting';$('chartNote').textContent=rad?`Residential ZIPs within ${rad} miles of the selected county's household center ZIP.`:'Residential ZIPs in the selected county.';$('marketName').textContent='ZIP '+x.zip+' · '+x.county+' County';$('whyTitle').textContent='Top neighborhood opportunity';metrics([['Replacement Potential',score(x.replacement_ready)],['Structural Need',score(x[cat+'_need'])],['Addressable Scale',score(x.addressable_scale)],['Owner Rate',score(x.owner_rate)+'%'],['Single-Family Rate',score(x.sf_rate)+'%']]);$('method').textContent='ZIP Opportunity = 40% Replacement-Ready Households + 35% Structural Category Need + 25% Addressable Scale. No Scarborough propensity is represented as ZIP-level measurement.';bars(sorted,r=>'ZIP '+r.zip,r=>r[cat+'_score']);$('tableTitle').textContent='ZIP Rankings — The Local Pro';$('thead').innerHTML='<tr><th>Rank</th><th>ZIP</th><th>County</th><th>Opportunity</th><th>Replacement-Ready HH</th><th>Owner HH</th><th>Owner %</th><th>SF %</th></tr>';$('rankings').innerHTML=sorted.map((r,i)=>`<tr><td>${i+1}</td><td>${r.zip}</td><td>${r.county}</td><td><b>${score(r[cat+'_score'])}</b></td><td>${fmt(r.replacement_ready_hh)}</td><td>${fmt(r.owner_hh)}</td><td>${score(r.owner_rate)}%</td><td>${score(r.sf_rate)}%</td></tr>`).join('')}
+function rowClicks(){document.querySelectorAll('#rankings tr[data-code]').forEach(tr=>tr.onclick=()=>{$('market').value=tr.dataset.code;if(mode()==='Neighborhood Targeting')setupCounty();else render();window.scrollTo({top:0,behavior:'smooth'})})}init();
+
+// Market Conditions layer: descriptive statistics are intentionally separate from scoring.
+const INDUSTRY={
+ hvac:{title:'HVAC industry pulse',text:"AHRI's July 2026 U.S. heating and cooling equipment shipment release provides the latest national manufacturer-shipment context. It is national context, not a local demand estimate.",source:'AHRI · July 2026 U.S. Heating and Cooling Equipment Shipments'},
+ roofing:{title:'Home improvement & repair pulse',text:'Harvard JCHS projects owner-occupied home improvement and repair spending of about $519B through mid-2027, with year-over-year growth slowing to 0.5% by 2027 Q2.',source:'Harvard Joint Center for Housing Studies · LIRA · July 23, 2026'},
+ windows:{title:'Home improvement & repair pulse',text:'Harvard JCHS projects owner-occupied home improvement and repair spending of about $519B through mid-2027, with year-over-year growth slowing to 0.5% by 2027 Q2.',source:'Harvard Joint Center for Housing Studies · LIRA · July 23, 2026'}
 };
-function fmt(n){return Math.round(n||0).toLocaleString()}function avg(a,k){return a.length?a.reduce((s,x)=>s+(+x[k]||0),0)/a.length:0}function wavg(a,k){let d=a.reduce((s,x)=>s+(+x.owner_hh||0),0);return d?a.reduce((s,x)=>s+(+x[k]||0)*(+x.owner_hh||0),0)/d:0}function wavgN(a,o,k){let d=a.reduce((s,x)=>s+(+x.owner_hh||0),0);return d?a.reduce((s,x)=>s+(+x[o]?.[k]||0)*(+x.owner_hh||0),0)/d:0}
-function hav(a,b){const R=3958.8,r=x=>x*Math.PI/180,dlat=r(b.lat-a.lat),dlon=r(b.lon-a.lon),q=Math.sin(dlat/2)**2+Math.cos(r(a.lat))*Math.cos(r(b.lat))*Math.sin(dlon/2)**2;return 2*R*Math.asin(Math.sqrt(q))}
-function pointInRing(x,y,ring){let inside=false;for(let i=0,j=ring.length-1;i<ring.length;j=i++){let xi=ring[i][0],yi=ring[i][1],xj=ring[j][0],yj=ring[j][1];if(((yi>y)!=(yj>y))&&(x<(xj-xi)*(y-yi)/(yj-yi+1e-12)+xi))inside=!inside}return inside}function pointInGeom(z,g){const ps=g.type==='Polygon'?[g.coordinates]:g.coordinates;return ps.some(p=>pointInRing(z.lon,z.lat,p[0]))}
-function dmaFeatureName(f){return f?.properties?.dma1||f?.properties?.NAME||f?.properties?.name||''}
-function geoForDMA(name){if(!dmaGeo)return null;let n=aliases[norm(name)]||norm(name);return dmaGeo.features.find(f=>norm(dmaFeatureName(f))===n)||dmaGeo.features.find(f=>{let x=norm(dmaFeatureName(f));return x.includes(n)||n.includes(x)})}
-function color(v){return v>=75?'#17324d':v>=60?'#315c7d':v>=45?'#6f91aa':v>=30?'#a8bbc8':'#d9e2e7'}function mapVal(x){let c=$('category').value;return x.score?.[c]??x.score??0}
-function initMap(){map=L.map('map').setView([39,-98],4);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap'}).addTo(map);layerGroup=L.layerGroup().addTo(map)}
-function attachMetro(){for(const z of zips){z.zip=zip5(z.zip);z.fips=String(z.fips??'').padStart(5,'0');z.metro=metroMap[z.zip]?.metro||metroMap[String(+z.zip)]?.metro||'';}let m=new Map;for(const z of zips){if(!z.metro)continue;if(!m.has(z.metro))m.set(z.metro,[]);m.get(z.metro).push(z)}metros=[...m].map(([name,a])=>aggregate(name,a)).sort((a,b)=>b.score[$('category')?.value||'hvac']-a.score[$('category')?.value||'hvac'])}
-function aggregate(name,a){return{name,zips:a,owner_hh:a.reduce((s,z)=>s+z.owner_hh,0),replacement_ready:wavg(a,'replacement_ready'),need:{hvac:wavgN(a,'need','hvac'),roofing:wavgN(a,'need','roofing'),windows:wavgN(a,'need','windows')},score:{hvac:wavgN(a,'score','hvac'),roofing:wavgN(a,'score','roofing'),windows:wavgN(a,'score','windows')},lat:avg(a,'lat'),lon:avg(a,'lon')}}
-function counties(a){let m=new Map;for(const z of a){let k=z.fips;if(!m.has(k))m.set(k,{fips:k,name:`${z.county}, ${z.state}`,zips:[]});m.get(k).zips.push(z)}return[...m.values()].map(x=>({...aggregate(x.name,x.zips),fips:x.fips})).sort((a,b)=>b.score[$('category').value]-a.score[$('category').value])}
-function setKpis(a,scar='—'){let c=$('category').value;if(!a.length){$('kScore').textContent=$('kRR').textContent=$('kHH').textContent='—'}else{$('kScore').textContent=wavgN(a,'score',c).toFixed(1);$('kRR').textContent=wavg(a,'replacement_ready').toFixed(1);$('kHH').textContent=fmt(a.reduce((s,z)=>s+z.owner_hh,0))}$('kScar').textContent=scar}
-function populateMarkets(){let g=$('geo').value,p=$('parentType').value,c=$('category').value,opts=[];if(g==='dma'||(g!=='metro'&&p==='dma'))opts=dmas.map(d=>d.dma);else opts=metros.slice().sort((a,b)=>b.score[c]-a.score[c]).map(m=>m.name);$('marketLabel').textContent=(g==='dma'||(g!=='metro'&&p==='dma'))?'DMA':'Metro';$('marketSelect').innerHTML=opts.map(x=>`<option>${x}</option>`).join('');}
-
-let dmaOpportunityCache=new Map;
-function pctRank(values,v){
-  const a=values.filter(Number.isFinite).slice().sort((x,y)=>x-y);
-  if(!a.length)return 0;
-  let n=0;for(const x of a)if(x<=v)n++;
-  return 100*n/a.length;
-}
-async function buildDMAOpportunity(){
-  const c=$('category').value,key=c;
-  if(dmaOpportunityCache.has(key))return dmaOpportunityCache.get(key);
-  const prelim=[];
-  for(const d of dmas){
-    const a=await dmaZips(d.dma);
-    if(!a.length)continue;
-    prelim.push({
-      dma:d.dma,zips:a,
-      rr:wavg(a,'replacement_ready'),
-      need:wavgN(a,'need',c),
-      owner:a.reduce((s,z)=>s+(+z.owner_hh||0),0),
-      intent:+(d[c]?.index||0),
-      planned:+(d[c]?.planned||0),
-      base:+(d[c]?.base||0)
-    });
-  }
-  const owners=prelim.map(x=>x.owner), intents=prelim.map(x=>x.intent);
-  for(const x of prelim){
-    x.scale=pctRank(owners,x.owner);
-    x.demand=pctRank(intents,x.intent);
-    // Approved DMA methodology:
-    // 30% Replacement-Ready + 25% Category Demand + 25% Structural Need + 20% Market Scale.
-    x.opportunity=.30*x.rr+.25*x.demand+.25*x.need+.20*x.scale;
-  }
-  prelim.sort((a,b)=>b.opportunity-a.opportunity);
-  dmaOpportunityCache.set(key,prelim);
-  return prelim;
-}
-async function renderDMA(){
-  $('tableTitle').textContent='U.S. Media Market Rankings';
-  $('tableSub').textContent='Ranked by Home Services Opportunity Score. Click a market to inspect its drivers.';
-  $('thead').innerHTML='<tr><th>DMA</th><th>Opportunity</th><th>Replacement</th><th>Service Need</th><th>Demand</th><th>Scale</th></tr>';
-  $('tbody').innerHTML='<tr><td colspan="6">Calculating U.S. market opportunity…</td></tr>';
-  $('kScore').textContent=$('kRR').textContent=$('kHH').textContent=$('kScar').textContent='—';
-  const rows=await buildDMAOpportunity();
-  $('tbody').innerHTML=rows.slice(0,+$('topN').value).map(r=>`<tr data-name="${r.dma}"><td>${r.dma}</td><td class="score">${r.opportunity.toFixed(1)}</td><td>${r.rr.toFixed(1)}</td><td>${r.need.toFixed(1)}</td><td>${r.demand.toFixed(0)}</td><td>${r.scale.toFixed(0)}</td></tr>`).join('');
-  $('tbody').querySelectorAll('tr[data-name]').forEach(tr=>tr.onclick=()=>renderDMASelection(tr.dataset.name));
-  drawDMAs(rows);
-}
-function drawDMAs(rows){
-  layerGroup.clearLayers();if(!dmaGeo)return;
-  let lookup=new Map(rows.map(r=>[norm(r.dma),r]));
-  L.geoJSON(dmaGeo,{
-    style:f=>{
-      let n=norm(dmaFeatureName(f)),r=lookup.get(n);
-      if(!r){for(const [k,v] of lookup){if(k.includes(n)||n.includes(k)){r=v;break}}}
-      let v=r?.opportunity||0;
-      return{color:'#fff',weight:1,fillColor:color(v),fillOpacity:r?.68:.08};
-    },
-    onEachFeature:(f,l)=>{
-      let n=norm(dmaFeatureName(f)),r=lookup.get(n);
-      if(!r){for(const [k,v] of lookup){if(k.includes(n)||n.includes(k)){r=v;break}}}
-      if(r){
-        l.bindTooltip(`<b>${r.dma}</b><br>Opportunity ${r.opportunity.toFixed(1)}<br>Replacement ${r.rr.toFixed(1)}<br>Service Need ${r.need.toFixed(1)}`);
-        l.on('click',()=>renderDMASelection(r.dma));
-      }
-    }
-  }).addTo(layerGroup);
-  map.setView([39,-98],4);
+function pct(n){return Number(n||0).toFixed(1)+'%'}
+function money(n){return n?('$'+Math.round(n).toLocaleString()):'—'}
+function weighted(rows,key,weight='households'){const den=rows.reduce((s,r)=>s+(+r[weight]||0),0);return den?rows.reduce((s,r)=>s+(+r[key]||0)*(+r[weight]||0),0)/den:0}
+function conditionCards(items,cat){$('conditions').innerHTML=items.map(x=>`<div class="condition-card"><span>${x[0]}</span><b>${x[1]}</b></div>`).join('');const i=INDUSTRY[cat];$('industry').innerHTML=`<strong>${i.title}</strong>${i.text}<div class="source-note">Source: ${i.source}. Local housing statistics come from the analyzer's validated housing/ZIP source layer. These statistics do not alter the Opportunity Score.</div>`}
+function updateConditions(cat,m,x,rows){let items=[];
+ if(m==='Media Market'){items=[['Households',fmt(x.households)],['Owner households',fmt(x.owner_hh)],['Homeownership',pct(100*x.owner_hh/Math.max(1,x.households))],['Residential ZIPs',fmt(x.zip_count)],['Category demand index',score(x[cat+'_demand_index'])]];}
+ else if(m==='Market Expansion'){const z=ZIP.filter(r=>r.cbsa===x.cbsa);items=[['Households',fmt(z.reduce((s,r)=>s+r.households,0))],['Owner households',fmt(z.reduce((s,r)=>s+r.owner_hh,0))],['Homeownership',pct(weighted(z,'owner_rate'))],['Single-family homes',pct(weighted(z,'sf_rate'))],['Older housing stock',pct(weighted(z,'old_rate'))],['Median HH income',money(weighted(z,'income'))]];}
+ else if(m==='Local Opportunity'){const z=ZIP.filter(r=>r.fips===x.fips);items=[['Households',fmt(x.households)],['Owner households',fmt(x.owner_hh)],['Homeownership',pct(weighted(z,'owner_rate'))],['Single-family homes',pct(weighted(z,'sf_rate'))],['Older housing stock',pct(weighted(z,'old_rate'))],['Long-tenure households',pct(weighted(z,'tenure_rate'))]];}
+ else {items=[['Households',fmt(x.households)],['Owner households',fmt(x.owner_hh)],['Homeownership',pct(x.owner_rate)],['Single-family homes',pct(x.sf_rate)],['Older housing stock',pct(x.old_rate)],['Long-tenure households',pct(x.tenure_rate)],['Median HH income',money(x.income)],['Median home value',money(x.home_value)]];}
+ conditionCards(items,cat);
 }
 
-async function dmaZips(name){if(dmaZipCache.has(name))return dmaZipCache.get(name);let g=geoForDMA(name);if(!g){console.warn('No DMA boundary match for',name);return[];}await new Promise(r=>setTimeout(r,0));let a=zips.filter(z=>pointInGeom(z,g.geometry));dmaZipCache.set(name,a);return a}
-async function renderDMASelection(name){
-  let d=dmas.find(x=>x.dma===name),a=await dmaZips(name),c=$('category').value;
-  currentZips=a;
-  const rows=await buildDMAOpportunity(),r=rows.find(x=>x.dma===name);
-  $('kScore').textContent=r?r.opportunity.toFixed(1):'—';
-  $('kRR').textContent=r?r.rr.toFixed(1):'—';
-  $('kHH').textContent=r?fmt(r.owner):'—';
-  $('kScar').textContent=d?.[c]?.index||'—';
-  $('mapTitle').textContent=name+' Opportunity';
-  $('mapSub').textContent=`${fmt(a.length)} residential ZIPs in mapped DMA boundary.`;
-  drawPoints(a);
-  if(r){
-    $('whySub').textContent=`${name} · ${catLabel[c]}`;
-    $('whyRR').textContent=r.rr.toFixed(1);
-    $('whyNeed').textContent=r.need.toFixed(1);
-    $('whyScale').textContent=r.scale.toFixed(0);
-    $('whyDemand').textContent=r.demand.toFixed(0);
-  }
-}
-function renderMetroList(){let c=$('category').value,rows=metros.slice().sort((a,b)=>b.score[c]-a.score[c]);$('tableTitle').textContent='Market Expansion Rankings';$('tableSub').textContent='CBSA/metro opportunity aggregated from supplied residential ZIP housing data.';$('thead').innerHTML='<tr><th>Metro</th><th>Opportunity</th><th>Replacement-Ready</th><th>Need</th><th>Owner HH</th></tr>';$('tbody').innerHTML=rows.slice(0,+$('topN').value).map(r=>`<tr data-name="${r.name}"><td>${r.name}</td><td class="score">${r.score[c].toFixed(1)}</td><td>${r.replacement_ready.toFixed(1)}</td><td>${r.need[c].toFixed(1)}</td><td>${fmt(r.owner_hh)}</td></tr>`).join('');$('tbody').querySelectorAll('tr').forEach(tr=>tr.onclick=()=>{$('marketSelect').value=tr.dataset.name;renderMetroSelection(tr.dataset.name)});drawAggregates(rows.slice(0,100));setKpis(rows.flatMap(r=>r.zips),'—')}
-function renderMetroSelection(name){let m=metros.find(x=>x.name===name);if(!m)return;currentZips=m.zips;setKpis(m.zips,'—');$('mapTitle').textContent=name+' Opportunity';$('mapSub').textContent=`${fmt(m.zips.length)} residential ZIPs in metro crosswalk.`;drawPoints(m.zips);}
-async function parentZips(){let p=$('parentType').value,n=$('marketSelect').value;if(p==='metro')return metros.find(x=>x.name===n)?.zips||[];return await dmaZips(n)}
-async function renderCounty(){let a=await parentZips(),cs=counties(a),c=$('category').value;currentZips=a;$('countySelect').innerHTML='<option value="all">All counties</option>'+cs.map(x=>`<option value="${x.fips}">${x.name}</option>`).join('');$('tableTitle').textContent='Local Opportunity Rankings';$('tableSub').textContent='Counties inside the selected parent market.';$('thead').innerHTML='<tr><th>County</th><th>Opportunity</th><th>Replacement-Ready</th><th>Need</th><th>Owner HH</th></tr>';$('tbody').innerHTML=cs.slice(0,+$('topN').value).map(x=>`<tr data-fips="${x.fips}"><td>${x.name}</td><td class="score">${x.score[c].toFixed(1)}</td><td>${x.replacement_ready.toFixed(1)}</td><td>${x.need[c].toFixed(1)}</td><td>${fmt(x.owner_hh)}</td></tr>`).join('');$('tbody').querySelectorAll('tr').forEach(tr=>tr.onclick=()=>{$('countySelect').value=tr.dataset.fips;renderCountySelection()});drawAggregates(cs);let scar=$('parentType').value==='dma'?dmas.find(d=>d.dma===$('marketSelect').value)?.[c]?.index||'—':'—';setKpis(a,scar)}
-function renderCountySelection(){let f=$('countySelect').value,a=f==='all'?currentZips:currentZips.filter(z=>z.fips===f);drawPoints(a);setKpis(a,$('kScar').textContent)}
-async function renderZIP(){if($('zipMode').value==='radius')return renderRadius();let a=await parentZips(),cs=counties(a),prior=$('countySelect').value;$('countySelect').innerHTML='<option value="all">All counties</option>'+cs.map(x=>`<option value="${x.fips}">${x.name}</option>`).join('');if([...$('countySelect').options].some(o=>o.value===prior))$('countySelect').value=prior;let f=$('countySelect').value;if(f&&f!=='all')a=a.filter(z=>z.fips===f);currentZips=a;renderZipTable(a);drawPoints(a);let c=$('category').value,scar=$('parentType').value==='dma'?dmas.find(d=>d.dma===$('marketSelect').value)?.[c]?.index||'—':'—';setKpis(a,scar)}
-function renderZipTable(a){let c=$('category').value,rows=a.slice().sort((x,y)=>y.score[c]-x.score[c]);$('tableTitle').textContent='Neighborhood Targeting Rankings';$('tableSub').textContent='Actionable residential ZIP opportunity within the selected market.';$('thead').innerHTML='<tr><th>ZIP</th><th>Opportunity</th><th>Replacement-Ready</th><th>Need</th><th>Owner HH</th><th>Older Homes</th><th>Long Residence</th></tr>';$('tbody').innerHTML=rows.slice(0,+$('topN').value).map(z=>`<tr><td>${z.zip}</td><td class="score">${z.score[c].toFixed(1)}</td><td>${z.replacement_ready.toFixed(1)}</td><td>${z.need[c].toFixed(1)}</td><td>${fmt(z.owner_hh)}</td><td>${z.old_rate.toFixed(1)}%</td><td>${z.tenure_rate.toFixed(1)}%</td></tr>`).join('')}
-function renderRadius(){let center=zips.find(z=>z.zip===zip5($('centerZip').value));if(!center){$('tableTitle').textContent='Neighborhood Targeting — Radius';$('tableSub').textContent='Enter a valid residential center ZIP.';return}let miles=+$('radius').value,a=zips.filter(z=>hav(center,z)<=miles),c=$('category').value;a.sort((x,y)=>y.score[c]-x.score[c]);currentZips=a;$('tableTitle').textContent=`ZIPs within ${miles} miles of ${center.zip}`;$('tableSub').textContent='All residential ZIP centroids within the selected radius.';$('thead').innerHTML='<tr><th>ZIP</th><th>Opportunity</th><th>Replacement-Ready</th><th>Need</th><th>Owner HH</th><th>Miles</th></tr>';$('tbody').innerHTML=a.slice(0,+$('topN').value).map(z=>`<tr><td>${z.zip}</td><td class="score">${z.score[c].toFixed(1)}</td><td>${z.replacement_ready.toFixed(1)}</td><td>${z.need[c].toFixed(1)}</td><td>${fmt(z.owner_hh)}</td><td>${hav(center,z).toFixed(1)}</td></tr>`).join('');drawPoints(a);L.circle([center.lat,center.lon],{radius:miles*1609.344,color:'#0d5f9c',weight:2,fill:false,dashArray:'5 5'}).addTo(layerGroup);setKpis(a,'—')}
-function drawAggregates(a){layerGroup.clearLayers();let b=[];for(const x of a){L.circleMarker([x.lat,x.lon],{radius:Math.max(5,Math.min(18,4+Math.sqrt(x.owner_hh)/25)),color:'#fff',weight:1,fillColor:color(mapVal(x)),fillOpacity:.85}).bindTooltip(`<b>${x.name}</b><br>Opportunity ${x.score[$('category').value].toFixed(1)}<br>Owner HH ${fmt(x.owner_hh)}`).addTo(layerGroup);b.push([x.lat,x.lon])}if(b.length)map.fitBounds(b,{padding:[20,20]})}
-function drawPoints(a){layerGroup.clearLayers();let b=[];for(const z of a.slice(0,2000)){let v=mapVal(z);L.circleMarker([z.lat,z.lon],{radius:4.5,color:'#fff',weight:.5,fillColor:color(v),fillOpacity:.82}).bindTooltip(`<b>${z.zip}</b><br>Opportunity ${z.score[$('category').value].toFixed(1)}<br>Replacement-Ready ${z.replacement_ready.toFixed(1)}<br>Owner HH ${fmt(z.owner_hh)}`).addTo(layerGroup);b.push([z.lat,z.lon])}if(b.length)map.fitBounds(b,{padding:[15,15]})}
-function updateControls(){let g=$('geo').value,isSub=g==='county'||g==='zip';$('parentCtl').classList.toggle('hidden',!isSub);$('countyCtl').classList.toggle('hidden',g!=='county'&&(g!=='zip'||$('zipMode').value==='radius'));$('zipModeCtl').classList.toggle('hidden',g!=='zip');$('radiusCtl').classList.toggle('hidden',!(g==='zip'&&$('zipMode').value==='radius'));$('marketCtl').classList.toggle('hidden',g==='zip'&&$('zipMode').value==='radius');if(g==='dma')$('marketLabel').textContent='DMA';if(g==='metro')$('marketLabel').textContent='Metro';populateMarkets();renderCurrent()}
-async function renderCurrent(){
-  let g=$('geo').value;
-  if(g==='dma'){
-    await renderDMA();
-    $('mapTitle').textContent='U.S. Media Market Opportunity';
-    $('mapSub').textContent='Click a market on the map or ranking to inspect it.';
-  }else if(g==='metro'){
-    renderMetroList();
-    if($('marketSelect').value) renderMetroSelection($('marketSelect').value);
-  }else if(g==='county'){
-    await renderCounty();
-  }else{
-    await renderZIP();
-  }
-}
-function syncAnalysisUI(){
- const media=$('geo').value==='dma';
- $('where').style.display=media?'none':'';
- if(media){$('mapTitle').textContent='U.S. Media Market Opportunity';$('mapSub').textContent='Click a market on the map or ranking to inspect it.';}
-}
-$('geo').addEventListener('change',syncAnalysisUI);syncAnalysisUI();
+const METHOD={
+ 'Media Market':{label:'DMA — The Ad Shop',purpose:'Media-market demand and propensity. This layer answers where category demand and replacement-ready homeowner opportunity are strongest at the DMA level.',formula:'Opportunity Score = 30% Replacement-Ready Households + 25% Category Demand + 25% Structural Category Need + 20% Market Scale.',data:'Scarborough category-demand measures are reconciled to validated DMAs and combined with the analyzer housing/household source layer.',caution:'DMA scores are relative 0–100 opportunity measures. Scarborough DMA observations are not represented as Metro, County or ZIP measurements.'},
+ 'Market Expansion':{label:'Metro — The Operator',purpose:'Business/market expansion opportunity. This layer answers which metropolitan areas have the strongest contractor/employer ecosystem for category expansion.',formula:'Expansion Score uses the validated CBSA employer/contractor model, including employer establishments, larger establishments and contractor ecosystem measures.',data:'CBSA is the authoritative market identifier. The view is restricted to metropolitan statistical areas; micropolitan areas are excluded.',caution:'Scarborough DMA data is not forced into Metro geography. Market Conditions are descriptive and do not alter the Expansion Score.'},
+ 'Local Opportunity':{label:'County — The Branch',purpose:'Local branch opportunity inside the selected Metro. This layer identifies where replacement-ready households and structural service need are concentrated.',formula:'Local Opportunity Score = 40% Replacement-Ready Households + 35% Structural Category Need + 25% Addressable Scale.',data:'County values are rebuilt from the validated residential ZIP housing layer for counties belonging to the selected Metro.',caution:'DMA Scarborough propensity may provide market context, but it is not represented as county-level measurement. Scores rank counties within the selected Metro.'},
+ 'Neighborhood Targeting':{label:'ZIP — The Local Pro',purpose:'Neighborhood targeting and service-area prioritization. This layer identifies residential ZIPs with the strongest local opportunity.',formula:'ZIP Opportunity Score = 40% Replacement-Ready Households + 35% Structural Category Need + 25% Addressable Scale.',data:'Residential ZIP inputs include homeownership, single-family concentration, housing age, residence tenure, household economics and addressable household scale. Radius views include qualifying residential ZIPs around the selected county center ZIP.',caution:'No Scarborough propensity is represented as ZIP-level measurement. ZIP scores are relative opportunity measures, not forecasts of leads, sales, revenue or market share.'}
+};
+function methodologyHTML(){const x=METHOD[mode()];return `<p><b>${x.label}</b></p><div class="method-section"><h3>What this layer answers</h3><p>${x.purpose}</p></div><div class="method-section"><h3>Score construction</h3><div class="method-formula">${x.formula}</div></div><div class="method-section"><h3>Data treatment</h3><p>${x.data}</p></div><div class="method-section"><h3>How to read Market Conditions</h3><p><b>Opportunity Score</b> determines ranking. <b>Market Conditions</b> are reported/observed statistics that help explain the selected geography. <b>Industry Pulse</b> provides broader category context. Market Conditions and Industry Pulse do not change the score unless explicitly identified as score inputs.</p></div><div class="method-section"><h3>Interpretation</h3><div class="method-caution">${x.caution} All 0–100 scores are relative measures for prioritization and are not forecasts of leads, sales, revenue or market share.</div></div>`}
+function openMethod(){ $('methodModalTitle').textContent='Methodology · '+METHOD[mode()].label; $('methodBody').innerHTML=methodologyHTML(); $('methodModal').classList.remove('hidden') }
+function csvEscape(v){v=String(v??'');return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}
+function exportCSV(){const table=document.querySelector('table'),rows=[...table.querySelectorAll('tr')].map(tr=>[...tr.children].map(td=>csvEscape(td.innerText.trim())).join(','));const blob=new Blob([rows.join('\n')],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='home-services-'+mode().toLowerCase().replace(/\s+/g,'-')+'-'+$('category').value+'-rankings.csv';a.click();URL.revokeObjectURL(a.href)}
+window.addEventListener('DOMContentLoaded',()=>{$('methodBtn').onclick=openMethod;$('methodClose').onclick=()=> $('methodModal').classList.add('hidden');$('methodModal').onclick=e=>{if(e.target===$('methodModal'))$('methodModal').classList.add('hidden')};$('csvBtn').onclick=exportCSV});
 
-function updateSeasonal(){
- const lead=$('seasonHorizon').value, type=$('seasonType').value;
- const h=lead==='01'?'Next 3 Months':'Next 6 Months';
- const label=type==='temp'?'Temperature':'Precipitation';
- $('seasonTitle').textContent=h+' · '+label;
- // CPC's official seasonal image endpoint. The six-month planning view uses the later overlapping 3-month outlook.
- const url=`https://www.cpc.ncep.noaa.gov/products/predictions/long_range/lead${lead}/off${lead}_${type}.gif`;
- const img=$('seasonImg'), fb=$('seasonFallback');
- fb.style.display='flex'; img.style.display='none';
- img.onload=()=>{fb.style.display='none';img.style.display='block'};
- img.onerror=()=>{fb.textContent='NOAA outlook is temporarily unavailable. Please try again later.'};
- img.src=url+'?v='+Date.now();
-}
-$('seasonHorizon').onchange=updateSeasonal;$('seasonType').onchange=updateSeasonal;updateSeasonal();
+// Production controls and geographic QA enhancements.
+function rankRows(rows,key){const dir=$('rankDir')?.value||'top';return rows.slice().sort((a,b)=>dir==='bottom'?(a[key]-b[key]):(b[key]-a[key]))}
+function visibleRows(rows){return rows.slice(0,+($('topN')?.value||25))}
+function safeCenterZip(){return String($('centerZip')?.value||'').replace(/\D/g,'').slice(0,5)}
+function zipRecord(z){return ZIP.find(r=>r.zip===z)}
+function centroidFor(rows){const ok=rows.filter(r=>Number.isFinite(+r.lat)&&Number.isFinite(+r.lon));if(!ok.length)return null;const w=ok.reduce((s,r)=>s+(+r.households||1),0);return {lat:ok.reduce((s,r)=>s+(+r.lat)*(+r.households||1),0)/w,lon:ok.reduce((s,r)=>s+(+r.lon)*(+r.households||1),0)/w}}
+function renderGeoMap(rows,labelFn,scoreFn,selectedLabel){const el=$('map');if(!el)return;let pts=[];for(const r of visibleRows(rows)){let c;if(r.lat!=null)c={lat:+r.lat,lon:+r.lon};else if(r.fips)c=centroidFor(ZIP.filter(z=>z.fips===r.fips));else if(r.cbsa)c=centroidFor(ZIP.filter(z=>z.cbsa===r.cbsa));else if(r.dma_code)c=centroidFor(ZIP.filter(z=>String(z.dma_code)===String(r.dma_code)));if(c&&Number.isFinite(c.lat)&&Number.isFinite(c.lon))pts.push({...c,label:labelFn(r),score:+scoreFn(r),selected:labelFn(r)===selectedLabel})}
+ if(!pts.length){el.innerHTML='<div style="padding:20px;color:#68767e">Geographic coordinates are not available for this view.</div>';return}
+ const minLat=Math.min(...pts.map(p=>p.lat)),maxLat=Math.max(...pts.map(p=>p.lat)),minLon=Math.min(...pts.map(p=>p.lon)),maxLon=Math.max(...pts.map(p=>p.lon));const W=900,H=340,pad=24;const dx=Math.max(.01,maxLon-minLon),dy=Math.max(.01,maxLat-minLat);const dots=pts.map(p=>{const x=pad+(p.lon-minLon)/dx*(W-2*pad),y=H-pad-(p.lat-minLat)/dy*(H-2*pad),rr=5+Math.max(0,Math.min(100,p.score))/18;return `<circle class="map-dot${p.selected?' selected':''}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${rr.toFixed(1)}"><title>${p.label}: ${score(p.score)}</title></circle>`}).join('');el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Relative geographic opportunity positions">${dots}</svg><div class="legend">Dot size = opportunity score · hover for value</div>`}
+function rowsToTable(rows,html){return visibleRows(rows).map(html).join('')}
 
-async function fetchJSON(url,label){
-  const r=await fetch(url,{cache:'no-store'});
-  if(!r.ok) throw new Error(`${label} failed (${r.status})`);
-  return r.json();
-}
-function loadError(msg){
-  $('marketSelect').innerHTML='<option value="">Data unavailable</option>';
-  $('mapSub').textContent=msg;
-  $('tableSub').textContent='Refresh the page. If the problem continues, verify the GitHub Pages data files.';
-  console.error(msg);
-}
-async function init(){
-  initMap();
-  $('marketSelect').innerHTML='<option value="">Loading market data…</option>';
-  try{
-    const core=await Promise.all([
-      fetchJSON('zips.json','ZIP data'),
-      fetchJSON('dma.json','DMA data')
-    ]);
-    zips=core[0]; dmas=core[1];
-    for(const z of zips){
-      z.zip=zip5(z.zip);
-      z.fips=String(z.fips??'').padStart(5,'0');
-    }
-    if(!zips.length||!dmas.length) throw new Error('Core market data is empty');
-    try{ metroMap=await fetchJSON('metro-map.json','Metro data'); }
-    catch(e){ metroMap={}; console.warn(e.message); }
-    attachMetro();
-    updateControls();
-    syncAnalysisUI();
-  }catch(e){
-    loadError('Unable to load core market data: '+e.message);
-    return;
-  }
+// Override setup to support independent service-area radius.
+function setup(){const m=mode(),s=$('market');$('stageNotice').classList.add('hidden');$('view').style.display='block';$('marketWrap').style.display='block';$('countyWrap').style.display='none';$('radiusWrap').style.display='none';if($('centerZipWrap'))$('centerZipWrap').style.display='none';
+ if(m==='Media Market'){s.innerHTML=DMA.slice().sort((a,b)=>a.dma.localeCompare(b.dma)).map(x=>`<option value="${x.dma_code}">${x.dma}</option>`).join('');if(DMA.some(x=>x.dma_code===751))s.value='751';}
+ else{s.innerHTML=METRO.slice().sort((a,b)=>a.metro.localeCompare(b.metro)).map(x=>`<option value="${x.cbsa}">${x.metro}</option>`).join('');if(METRO.some(x=>x.cbsa==='19740'))s.value='19740';if(m==='Neighborhood Targeting'){$('countyWrap').style.display='block';$('radiusWrap').style.display='block';if($('centerZipWrap'))$('centerZipWrap').style.display='block';setupCounty();return;}}
+ render()}
+function setupCounty(){const cb=$('market').value,cs=COUNTY.filter(x=>x.cbsa===cb).sort((a,b)=>a.county.localeCompare(b.county));$('county').innerHTML=cs.map(x=>`<option value="${x.fips}">${x.county} County</option>`).join('');if(cb==='19740'&&cs.some(x=>x.fips==='08031'))$('county').value='08031';const base=ZIP.filter(r=>r.cbsa===cb&&r.fips===$('county').value).sort((a,b)=>b.households-a.households);if($('centerZip')&&!safeCenterZip()&&base[0])$('centerZip').value=base[0].zip;render()}
+function marketChanged(){if(mode()==='Neighborhood Targeting')setupCounty();else render()}
 
-  try{
-    dmaGeo=await fetchJSON(
-      'https://raw.githubusercontent.com/Mrk-Nguyen/dmamap/master/nielsengeo.json',
-      'DMA boundaries'
-    );
-    renderCurrent();
-  }catch(e){
-    console.warn('DMA boundary unavailable',e);
-    $('mapSub').textContent='Market data loaded. DMA boundary map is temporarily unavailable.';
-  }
+function renderDMA(cat){const code=+$('market').value,key=cat+'_opportunity',sorted=rankRows(DMA,key),x=DMA.find(r=>r.dma_code===code)||sorted[0];updateConditions(cat,'Media Market',x,sorted);cards([['Opportunity Score',score(x[key])],['Replacement Potential',score(x.replacement_ready)],['Service Need',score(x[cat+'_need'])],['Homeowner Scale',score(x.market_scale)],['Category Demand',score(x[cat+'_demand_score'])]]);$('chartTitle').textContent='U.S. Media Market Opportunity';$('chartNote').textContent='Validated Scarborough-based opportunity across 83 matched DMAs.';$('marketName').textContent=x.dma;$('whyTitle').textContent='Why this media market?';metrics([['Replacement Potential',score(x.replacement_ready)],['Service Need',score(x[cat+'_need'])],['Homeowner Scale',score(x.market_scale)],['Category Demand',score(x[cat+'_demand_score'])]]);$('method').textContent='Opportunity = 30% Replacement-Ready Households + 25% Category Demand + 25% Structural Category Need + 20% Market Scale.';bars(visibleRows(sorted),r=>r.dma,r=>r[key]);renderGeoMap(sorted,r=>r.dma,r=>r[key],x.dma);$('mapNote').textContent='Relative positions of the displayed DMA opportunity centroids.';$('tableTitle').textContent='Media Market Rankings — The Ad Shop';$('thead').innerHTML='<tr><th>Rank</th><th>DMA</th><th>Opportunity</th><th>Owner HH</th><th>ZIPs</th></tr>';$('rankings').innerHTML=rowsToTable(sorted,(r,i)=>`<tr data-code="${r.dma_code}"><td>${i+1}</td><td>${r.dma}</td><td><b>${score(r[key])}</b></td><td>${fmt(r.owner_hh)}</td><td>${r.zip_count}</td></tr>`);rowClicks()}
+function renderMetro(cat){const code=$('market').value,key=cat,sorted=rankRows(METRO,key),x=METRO.find(r=>r.cbsa===code)||sorted[0];updateConditions(cat,'Market Expansion',x,sorted);cards([['Expansion Score',score(x[key])],['Employer Establishments',fmt(x.employer_estab)],['10+ Employee Establishments',fmt(x.estab_10plus)],['50+ Employee Establishments',fmt(x.estab_50plus)],['Contractor Ecosystem',score(x.contractor_ecosystem)]]);$('chartTitle').textContent='U.S. Market Expansion Opportunity';$('chartNote').textContent='387 metropolitan statistical areas only — micropolitan areas are excluded.';$('marketName').textContent=x.metro;$('whyTitle').textContent='Why this expansion market?';metrics([['Category Expansion Score',score(x[key])],['Employer Establishments',fmt(x.employer_estab)],['10+ Employee Establishments',fmt(x.estab_10plus)],['Contractor Ecosystem',score(x.contractor_ecosystem)]]);$('method').textContent='Market Expansion uses the CBSA employer/contractor model. Scarborough DMA data is not forced into Metro geography.';bars(visibleRows(sorted),r=>r.metro,r=>r[key]);renderGeoMap(sorted,r=>r.metro,r=>r[key],x.metro);$('mapNote').textContent='Relative positions of the displayed metropolitan opportunity centroids.';$('tableTitle').textContent='Metro Rankings — The Operator';$('thead').innerHTML='<tr><th>Rank</th><th>Metro</th><th>Expansion</th><th>Employer Estab.</th><th>10+ Emp.</th><th>50+ Emp.</th></tr>';$('rankings').innerHTML=rowsToTable(sorted,(r,i)=>`<tr data-code="${r.cbsa}"><td>${i+1}</td><td>${r.metro}</td><td><b>${score(r[key])}</b></td><td>${fmt(r.employer_estab)}</td><td>${fmt(r.estab_10plus)}</td><td>${fmt(r.estab_50plus)}</td></tr>`);rowClicks()}
+function renderCounty(cat){const code=$('market').value,key=cat+'_score',sorted=rankRows(COUNTY.filter(r=>r.cbsa===code),key),x=sorted[0],metro=METRO.find(r=>r.cbsa===code);if(!x)return;updateConditions(cat,'Local Opportunity',x,sorted);cards([['Top County Score',score(x[key])],['Replacement-Ready HH',fmt(x.replacement_ready_hh)],['Owner Households',fmt(x.owner_hh)],['Structural Need',score(x[cat+'_need'])],['Addressable Scale',score(x.addressable_scale)]]);$('chartTitle').textContent=(metro?metro.metro:'Selected Metro')+' — County Opportunity';$('chartNote').textContent='Counties are ranked within the selected Metro from residential ZIP housing inputs.';$('marketName').textContent=x.county+' County';$('whyTitle').textContent='Leading local opportunity in this view';metrics([['Replacement Potential',score(x.replacement_ready)],['Structural Need',score(x[cat+'_need'])],['Addressable Scale',score(x.addressable_scale)],['Residential ZIPs',x.zip_count]]);$('method').textContent='Local Opportunity = 40% Replacement-Ready Households + 35% Structural Category Need + 25% Addressable Scale.';bars(visibleRows(sorted),r=>r.county,r=>r[key]);renderGeoMap(sorted,r=>r.county+' County',r=>r[key],x.county+' County');$('mapNote').textContent='Relative positions of county residential centroids within the selected Metro.';$('tableTitle').textContent='County Rankings — The Branch';$('thead').innerHTML='<tr><th>Rank</th><th>County</th><th>Opportunity</th><th>Replacement-Ready HH</th><th>Owner HH</th><th>ZIPs</th></tr>';$('rankings').innerHTML=rowsToTable(sorted,(r,i)=>`<tr><td>${i+1}</td><td>${r.county}</td><td><b>${score(r[key])}</b></td><td>${fmt(r.replacement_ready_hh)}</td><td>${fmt(r.owner_hh)}</td><td>${r.zip_count}</td></tr>`)}
+function renderZIP(cat){const cb=$('market').value,fips=$('county').value,rad=+$('radius').value,key=cat+'_score';let rows,center=null,centerZip=safeCenterZip();if(rad>0){center=zipRecord(centerZip);if(!center){const fallback=ZIP.filter(r=>r.cbsa===cb&&r.fips===fips).sort((a,b)=>b.households-a.households)[0];center=fallback;if(center&&$('centerZip'))$('centerZip').value=center.zip}rows=center?ZIP.filter(r=>miles(center.lat,center.lon,r.lat,r.lon)<=rad):[]}else rows=ZIP.filter(r=>r.cbsa===cb&&r.fips===fips);const sorted=rankRows(rows,key),x=sorted[0],metro=METRO.find(r=>r.cbsa===cb);if(!x){$('rankings').innerHTML='';return}updateConditions(cat,'Neighborhood Targeting',x,sorted);cards([['Leading ZIP Score',score(x[key])],['Replacement-Ready HH',fmt(x.replacement_ready_hh)],['Owner Households',fmt(x.owner_hh)],['Structural Need',score(x[cat+'_need'])],['ZIPs in View',sorted.length]]);$('chartTitle').textContent=rad?`Service Area · ZIP ${center.zip} · ${rad} miles`:(metro?metro.metro:'Selected Metro')+' — Neighborhood Targeting';$('chartNote').textContent=rad?`All residential ZIPs whose centroids fall within ${rad} straight-line miles of ZIP ${center.zip}; County, Metro and DMA boundaries do not constrain the service area.`:'Residential ZIPs in the selected county.';$('marketName').textContent='ZIP '+x.zip+' · '+x.county+' County';$('whyTitle').textContent='Leading neighborhood opportunity in this view';metrics([['Replacement Potential',score(x.replacement_ready)],['Structural Need',score(x[cat+'_need'])],['Addressable Scale',score(x.addressable_scale)],['Owner Rate',score(x.owner_rate)+'%'],['Single-Family Rate',score(x.sf_rate)+'%']]);$('method').textContent='ZIP Opportunity = 40% Replacement-Ready Households + 35% Structural Category Need + 25% Addressable Scale. Radius uses great-circle distance between ZIP centroids and can cross County, Metro and DMA boundaries.';bars(visibleRows(sorted),r=>'ZIP '+r.zip,r=>r[key]);renderGeoMap(sorted,r=>'ZIP '+r.zip,r=>r[key],'ZIP '+x.zip);$('mapNote').textContent=rad?`Residential ZIP centroids within ${rad} miles of ZIP ${center.zip}.`:'Residential ZIP centroids in the selected county.';$('tableTitle').textContent='ZIP Rankings — The Local Pro';$('thead').innerHTML='<tr><th>Rank</th><th>ZIP</th><th>County</th><th>Metro</th><th>Opportunity</th><th>Replacement-Ready HH</th><th>Owner HH</th><th>Owner %</th><th>SF %</th></tr>';$('rankings').innerHTML=rowsToTable(sorted,(r,i)=>`<tr><td>${i+1}</td><td>${r.zip}</td><td>${r.county}</td><td>${r.metro||'—'}</td><td><b>${score(r[key])}</b></td><td>${fmt(r.replacement_ready_hh)}</td><td>${fmt(r.owner_hh)}</td><td>${score(r.owner_rate)}%</td><td>${score(r.sf_rate)}%</td></tr>`)}
 
-  $('geo').onchange=()=>{ updateControls(); syncAnalysisUI(); };
-  $('parentType').onchange=()=>{ populateMarkets(); renderCurrent(); };
-  $('marketSelect').onchange=renderCurrent;
-  $('countySelect').onchange=()=>{$('geo').value==='county'?renderCountySelection():renderZIP();};
-  $('zipMode').onchange=updateControls;
-  $('centerZip').onchange=renderRadius;
-  $('radius').onchange=renderRadius;
-  $('category').onchange=()=>{ attachMetro(); populateMarkets(); renderCurrent(); };
-  $('topN').onchange=renderCurrent;
-}
-init();
+// Replace the earlier ZIP methodology text with the locked independent service-area definition.
+METHOD['Neighborhood Targeting'].data='Residential ZIP inputs include homeownership, single-family concentration, housing age, residence tenure, household economics and addressable household scale. Service Area Radius starts from the user-entered center ZIP and includes all residential ZIP centroids within the selected straight-line distance, regardless of County, Metro or DMA boundaries.';
+METHOD['Neighborhood Targeting'].caution='No Scarborough propensity is represented as ZIP-level measurement. Radius uses ZIP centroid coordinates for targeting; Census ZCTA polygons, when used for display, are statistical approximations and not USPS delivery boundaries.';
+
+window.addEventListener('DOMContentLoaded',()=>{if($('rankDir'))$('rankDir').onchange=render;if($('topN'))$('topN').onchange=render;if($('centerZip')){$('centerZip').oninput=e=>e.target.value=e.target.value.replace(/\D/g,'').slice(0,5);$('centerZip').onchange=()=>{if(+$('radius').value>0)render()}};$('county').onchange=()=>{if(mode()==='Neighborhood Targeting'){const base=ZIP.filter(r=>r.cbsa===$('market').value&&r.fips===$('county').value).sort((a,b)=>b.households-a.households);if(base[0]&&+$('radius').value===0)$('centerZip').value=base[0].zip}render()};$('radius').onchange=render});

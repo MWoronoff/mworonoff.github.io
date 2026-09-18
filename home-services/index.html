@@ -1,47 +1,10 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Adtaxi Home Services Market Analyzer</title>
-<link rel="preconnect" href="https://unpkg.com"><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><link rel="stylesheet" href="styles.css"></head>
-<body><header><div><h1>Home Services Market Analyzer</h1><p>Find replacement-ready households and local opportunity for HVAC, Roofing, and Windows & Doors.</p></div><div class="brand">adtaxi</div></header>
-<main>
-<section class="selector card">
- <div class="step"><div class="stepnum">1</div><div class="stepcopy"><b>What are we analyzing?</b><small>Select the service category and analysis.</small></div></div>
- <div class="field"><label>CATEGORY</label><select id="category"><option value="hvac">HVAC</option><option value="roofing">Roofing</option><option value="windows">Windows & Doors</option></select></div>
- <div class="field geo"><label>ANALYSIS</label><select id="geo"><option value="dma">Media Market</option><option value="metro">Market Expansion</option><option value="county">Local Opportunity</option><option value="zip">Neighborhood Targeting</option></select></div>
-</section>
-<section id="where" class="selector card">
- <div class="step"><div class="stepnum">2</div><div class="stepcopy"><b>Where are we analyzing?</b><small>Controls adapt to the analysis selected.</small></div></div>
- <div id="parentCtl" class="field hidden"><label>MARKET TYPE</label><select id="parentType"><option value="dma">DMA</option><option value="metro">Metro</option></select></div>
- <div id="marketCtl" class="field"><label id="marketLabel">SELECT MARKET</label><select id="marketSelect"><option>Loading…</option></select></div>
- <div id="countyCtl" class="field hidden"><label>COUNTY</label><select id="countySelect"><option value="all">All counties</option></select></div>
- <div id="zipModeCtl" class="field hidden"><label>ZIP ANALYSIS</label><select id="zipMode"><option value="market">Market ZIPs</option><option value="radius">ZIP Radius</option></select></div>
- <div id="radiusCtl" class="radiusFields hidden"><div class="field"><label>CENTER ZIP</label><input id="centerZip" maxlength="5" inputmode="numeric" placeholder="80202"></div><div class="field"><label>RADIUS</label><select id="radius"><option>5</option><option>10</option><option>15</option><option selected>25</option><option>50</option><option>75</option><option>100</option></select></div></div>
-</section>
-
-<section class="kpis"><div class="card"><span>Opportunity Score</span><b id="kScore">—</b><small>Relative 0–100</small></div><div class="card"><span>Replacement Potential</span><b id="kRR">—</b><small>Replacement-ready concentration</small></div><div class="card"><span>Owner Households</span><b id="kHH">—</b><small>Addressable scale</small></div><div class="card"><span>Scarborough Intent</span><b id="kScar">—</b><small id="scarNote">DMA context</small></div></section>
-
-<section class="grid">
- <div class="card mapcard"><div class="sectionhead"><div><h2 id="mapTitle">U.S. Media Market Opportunity</h2><p id="mapSub">Click a market on the map or ranking to inspect it.</p></div></div><div id="map"></div><div class="mapsource">Base map © OpenStreetMap · Overall Opportunity is the primary market view.</div></div>
- <div class="card tablecard"><div class="sectionhead"><div><h2 id="tableTitle">U.S. Media Market Rankings</h2><p id="tableSub">Click a market to inspect it.</p></div><select id="topN"><option value="10">Top 10</option><option value="25" selected>Top 25</option><option value="50">Top 50</option><option value="99999">All</option></select></div><div class="tablewrap"><table><thead id="thead"></thead><tbody id="tbody"></tbody></table></div></div>
-</section>
-
-<section id="whyPanel" class="card whycard">
- <div class="sectionhead"><div><h2>Why this market?</h2><p id="whySub">Select a market from the U.S. map or ranking to see what is driving the opportunity.</p></div></div>
- <div class="whygrid">
-  <div><span>Replacement Potential</span><b id="whyRR">—</b><small>Housing and household readiness</small></div>
-  <div><span>Service Need</span><b id="whyNeed">—</b><small>Category-specific structural need</small></div>
-  <div><span>Homeowner Scale</span><b id="whyScale">—</b><small>Addressable owner households</small></div>
-  <div><span>Category Demand</span><b id="whyDemand">—</b><small>Scarborough intent context</small></div>
- </div>
-</section>
-
-<section class="card forecastcard">
- <div class="sectionhead"><div><h2>Seasonal Outlook</h2><p>What could affect home-services demand over the coming months?</p></div>
- <div class="seasonal-controls compact"><select id="seasonHorizon"><option value="01">Next 3 Months</option><option value="04">Next 6 Months</option></select><select id="seasonType"><option value="temp">Temperature</option><option value="prcp">Precipitation</option></select></div></div>
- <div class="seasonvisual"><div class="seasonmapframe"><img id="seasonImg" alt="NOAA CPC seasonal outlook"><div id="seasonFallback" class="seasonfallback">Loading NOAA seasonal outlook…</div></div>
- <div class="seasonlegend"><h3 id="seasonTitle">Next 3 Months · Temperature</h3><p id="seasonText">Areas with elevated probability of above- or below-normal conditions can provide planning context for seasonal home-services demand.</p><div class="legendrow"><span class="warm"></span>Above normal</div><div class="legendrow"><span class="neutral"></span>Equal chances / near normal</div><div class="legendrow"><span class="cool"></span>Below normal</div><small>NOAA CPC outlook probabilities. Planning context only; not part of Opportunity Score.</small></div></div>
- <div class="source">Source: NOAA Climate Prediction Center seasonal outlooks.</div>
-</section>
-
-<section class="card methodology"><details><summary>How is Opportunity calculated?</summary><div class="methodgrid"><div><h3>Media Market</h3><p>30% Replacement-Ready Households + 25% Category Demand Signal + 25% Structural Category Need + 20% Market Scale.</p></div><div><h3>Local Opportunity</h3><p>40% Replacement-Ready + 35% category structural need + 25% addressable household scale.</p></div><div><h3>Interpretation</h3><p>Scores are relative 0–100 opportunity measures, not forecasts of leads, sales, or revenue.</p></div></div></details></section>
-</main><footer>Adtaxi · Home Services Market Analyzer</footer>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script src="app.js?v=20260918-v6-3-opportunity"></script></body></html>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Adtaxi Home Services Market Analyzer</title><link rel="stylesheet" href="styles.css"></head><body>
+<header><div class="brand"><span class="adtaxi">adtaxi</span><span class="product">Home Services Market Analyzer</span></div><div class="sub">Find replacement-ready homeowner opportunity across U.S. markets.</div></header>
+<main><section class="controls">
+<label>Analysis<select id="analysis"><option>Media Market</option><option>Market Expansion</option><option>Local Opportunity</option><option>Neighborhood Targeting</option></select></label>
+<label>Category<select id="category"><option value="hvac">HVAC</option><option value="roofing">Roofing</option><option value="windows">Windows & Doors</option></select></label>
+<label id="marketWrap">Market<select id="market"></select></label><label id="countyWrap" style="display:none">County<select id="county"></select></label><label id="centerZipWrap" style="display:none">Center ZIP<input id="centerZip" inputmode="numeric" maxlength="5" placeholder="e.g. 80202"></label><label id="radiusWrap" style="display:none">Service Area<select id="radius"><option value="0">Selected County</option><option value="10">10 miles</option><option value="25">25 miles</option><option value="50">50 miles</option></select></label><label>Rank View<select id="rankDir"><option value="top">Top</option><option value="bottom">Bottom</option></select></label><label>Show<select id="topN"><option value="10">10</option><option value="25" selected>25</option><option value="50">50</option></select></label></section>
+<section id="stageNotice" class="notice hidden"></section>
+<section id="view"><div class="kpis" id="kpis"></div><div class="toolbar"><button id="methodBtn" type="button">Methodology for this layer</button><button id="csvBtn" type="button">Export current rankings CSV</button></div><div class="panel conditions"><h2>Market Conditions</h2><p class="muted" id="conditionsNote">Reported and observed market statistics are shown separately from the Opportunity Score.</p><div class="condition-grid" id="conditions"></div><div class="industry-strip" id="industry"></div></div><div class="grid"><div class="panel"><h2 id="chartTitle"></h2><p class="muted" id="chartNote"></p><div id="bars"></div></div><div class="panel"><h2 id="whyTitle">Why this market?</h2><h3 id="marketName">—</h3><div id="why"></div><p class="method" id="method"></p></div></div><div class="panel map-panel"><h2>Geographic Opportunity View</h2><p class="muted" id="mapNote">Relative geographic positions of the currently displayed markets.</p><div id="map"></div></div><div class="panel"><h2 id="tableTitle"></h2><div class="tablewrap"><table><thead id="thead"></thead><tbody id="rankings"></tbody></table></div></div><div class="panel sources"><h2>Sources & Data Notes</h2><p class="muted">Housing and geography statistics come from the analyzer’s validated ZIP/housing source layer. Scarborough category demand is used only at the DMA level. Market Conditions and Industry Pulse are descriptive and do not alter scores unless explicitly identified as a score input.</p><div class="source-links"><a href="https://www.census.gov/construction/bps/index.html" target="_blank" rel="noopener">U.S. Census Building Permits Survey</a><a href="https://www.ahrinet.org/analytics/statistics" target="_blank" rel="noopener">AHRI HVAC Statistics</a><a href="https://www.jchs.harvard.edu/research-areas/remodeling/lira" target="_blank" rel="noopener">Harvard JCHS LIRA</a><a href="https://www.spc.noaa.gov/wcm/" target="_blank" rel="noopener">NOAA/SPC Severe Weather Data</a></div><p class="source-note">Census BPS measures new privately owned residential construction; it is contextual and is not treated as a direct measure of replacement HVAC, roofing, or window/door jobs. NOAA/SPC hail/wind history is a contextual roofing-risk source and is not currently part of the Opportunity Score.</p></div></section>
+<div id="methodModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="methodModalTitle"><div class="modal-card"><button id="methodClose" class="modal-close" aria-label="Close">×</button><h2 id="methodModalTitle">Methodology</h2><div id="methodBody"></div></div></div>
+</main><script src="app.js"></script></body></html>

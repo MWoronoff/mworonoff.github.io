@@ -1,0 +1,15 @@
+{
+  "home_service_zip_records": 29413,
+  "crosswalk_zip_records": 41015,
+  "dma_universe": 210,
+  "scarborough_records": 83,
+  "scarborough_matched": 83,
+  "scarborough_unresolved": 0,
+  "match_methods": {
+    "exact": 55,
+    "normalized": 7,
+    "alias": 21
+  },
+  "browser_architecture": "precomputed JSON",
+  "production_status": "TEST - Media Market only"
+}
