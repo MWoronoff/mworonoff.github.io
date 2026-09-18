@@ -6,10 +6,7 @@
  <div class="step"><div class="stepnum">1</div><div class="stepcopy"><b>What are we analyzing?</b><small>Select the service category and perspective.</small></div></div>
  <div class="field"><label>Category</label><select id="category"><option value="hvac">HVAC</option><option value="roofing">Roofing</option><option value="windows">Windows & Doors</option></select></div>
  <div class="field geo"><label>Geography</label><select id="geo"><option value="dma">DMA</option><option value="metro">Metro</option><option value="county">County</option><option value="zip">ZIP</option></select></div>
- <div class="audience"><b>Who’s using this?</b><span><strong>DMA</strong> — The Ad Shop</span><span><strong>Metro</strong> — The Operator</span><span><strong>County</strong> — The Branch</span><span><strong>ZIP</strong> — The Local Pro</span></div>
-</section>
-<section class="selector where card">
- <div class="step"><div class="stepnum">2</div><div class="stepcopy"><b>Where are we analyzing?</b><small>Controls adapt to the geography selected.</small></div></div>
+ </div>
  <div id="parentCtl" class="field hidden"><label>Market Type</label><select id="parentType"><option value="dma">DMA</option><option value="metro">Metro</option></select></div>
  <div id="marketCtl" class="field"><label id="marketLabel">DMA</label><select id="marketSelect"><option>Loading…</option></select></div>
  <div id="countyCtl" class="field hidden"><label>County</label><select id="countySelect"><option value="all">All counties</option></select></div>
@@ -21,24 +18,25 @@
 <div class="card tablecard"><div class="sectionhead"><div><h2 id="tableTitle">DMA Rankings</h2><p id="tableSub">Scarborough planned demand at DMA level.</p></div><select id="topN"><option value="10">Top 10</option><option value="25" selected>Top 25</option><option value="50">Top 50</option><option value="99999">All</option></select></div><div class="tablewrap"><table><thead id="thead"></thead><tbody id="tbody"></tbody></table></div></div></section>
 
 <section class="card forecastcard">
-  <div class="sectionhead">
+  <div class="forecasthead">
     <div>
-      <h2>Weather Outlook</h2>
-      <p>Forward-looking U.S. temperature and precipitation outlooks for planning context. This panel is separate from the Opportunity Score and loads only when opened.</p>
+      <h2>Seasonal Outlook</h2>
+      <p>Longer-range NOAA climate guidance for home-services planning. Forecast context is separate from the Opportunity Score.</p>
     </div>
-    <button id="forecastToggle" class="forecastbtn" type="button" aria-expanded="false">Open Forecast Map</button>
   </div>
-  <div id="forecastPanel" class="forecastpanel hidden">
-    <div class="forecastcontrols">
-      <div class="field"><label>Outlook Period</label><select id="forecastPeriod"><option value="610">6–10 Day</option><option value="814">8–14 Day</option></select></div>
-      <div class="field"><label>Forecast</label><select id="forecastType"><option value="temp">Temperature</option><option value="prcp">Precipitation</option></select></div>
-      <div class="forecastnote"><b>Planning use:</b> identify near-term heat/cold or wet/dry patterns that may influence service demand. It does not change market rankings.</div>
-    </div>
-    <div id="forecastMap" class="forecastmap"></div>
-    <div class="mapsource">Forecast outlook: NOAA Climate Prediction Center · Base map © OpenStreetMap. Outlooks express probabilities, not guaranteed local weather.</div>
+  <div class="seasonal-controls">
+    <div><label>PLANNING HORIZON</label><select id="seasonHorizon"><option value="3">Next 3 Months</option><option value="6">Next 6 Months</option></select></div>
+    <div><label>OUTLOOK</label><select id="seasonType"><option value="temp">Temperature</option><option value="prcp">Precipitation</option></select></div>
+    <button id="seasonOpen" class="primarybtn">View NOAA Outlook</button>
   </div>
+  <div class="seasonal-summary" id="seasonSummary">
+    <strong>Next 3 Months</strong>
+    <span>Use NOAA's official seasonal probability outlook to identify markets leaning above normal, near normal/equal chances, or below normal.</span>
+  </div>
+  <div class="forecastnote">The 6-month planning view uses NOAA's successive overlapping 3-month seasonal outlooks rather than implying a single six-month forecast.</div>
+  <div class="source">Source: NOAA Climate Prediction Center seasonal temperature and precipitation outlooks.</div>
 </section>
 
 <section class="card methodology"><h2>Methodology</h2><div class="methodgrid"><div><h3>Replacement-Ready Household</h3><p>30% owner occupancy + 25% single-family detached + 20% home age + 15% length of residence + 10% economic capacity.</p></div><div><h3>Local Opportunity</h3><p>40% Replacement-Ready + 35% category structural need + 25% addressable household scale.</p></div><div><h3>Weather Outlook</h3><p>NOAA Climate Prediction Center 6–10 day and 8–14 day temperature/precipitation outlooks are available in a separate on-demand map. Forecasts are planning context only and do not alter Opportunity Scores.</p></div><div><h3>Geography</h3><p>DMA = The Ad Shop · Metro = The Operator · County = The Branch · ZIP = The Local Pro. ZIP Radius includes residential ZIP centroids inside the selected distance.</p></div></div></section>
 </main><footer>Adtaxi · Home Services Market Analyzer</footer>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script src="app.js?v=20260918-dma-fix-v4"></script></body></html>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script src="app.js?v=20260918-v5-analysis-seasonal"></script></body></html>

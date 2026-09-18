@@ -7,3 +7,11 @@
 .forecastnote{font-size:13px;line-height:1.45;padding:10px 12px;background:#f3f6f8;border-radius:8px}
 .forecastmap{height:430px;border-radius:10px;overflow:hidden;background:#eef2f4}
 @media(max-width:800px){.forecastcontrols{grid-template-columns:1fr}.forecastmap{height:360px}}
+
+.seasonal-controls{display:grid;grid-template-columns:minmax(180px,260px) minmax(180px,260px) auto;gap:14px;align-items:end;margin-top:14px}
+.seasonal-controls label{display:block;font-size:11px;font-weight:800;letter-spacing:.05em;margin-bottom:6px}
+.seasonal-controls select{width:100%;padding:10px 12px;border:1px solid #c9d7e3;border-radius:8px;background:#fff}
+.primarybtn{padding:11px 18px;border:0;border-radius:8px;background:#164f7d;color:#fff;font-weight:700;cursor:pointer}
+.seasonal-summary{margin-top:16px;padding:16px;border:1px solid #d7e3ec;border-radius:10px;background:#f6fafc;display:flex;gap:14px;align-items:baseline}
+.seasonal-summary strong{white-space:nowrap}
+@media(max-width:760px){.seasonal-controls{grid-template-columns:1fr}.seasonal-summary{display:block}.seasonal-summary span{display:block;margin-top:6px}}
