@@ -56,13 +56,21 @@ function renderRadius(){let center=zips.find(z=>z.zip===zip5($('centerZip').valu
 function drawAggregates(a){layerGroup.clearLayers();let b=[];for(const x of a){L.circleMarker([x.lat,x.lon],{radius:Math.max(5,Math.min(18,4+Math.sqrt(x.owner_hh)/25)),color:'#fff',weight:1,fillColor:color(mapVal(x)),fillOpacity:.85}).bindTooltip(`<b>${x.name}</b><br>Opportunity ${x.score[$('category').value].toFixed(1)}<br>Owner HH ${fmt(x.owner_hh)}`).addTo(layerGroup);b.push([x.lat,x.lon])}if(b.length)map.fitBounds(b,{padding:[20,20]})}
 function drawPoints(a){layerGroup.clearLayers();let b=[];for(const z of a.slice(0,2000)){let v=mapVal(z);L.circleMarker([z.lat,z.lon],{radius:4.5,color:'#fff',weight:.5,fillColor:color(v),fillOpacity:.82}).bindTooltip(`<b>${z.zip}</b><br>Opportunity ${z.score[$('category').value].toFixed(1)}<br>Replacement-Ready ${z.replacement_ready.toFixed(1)}<br>Owner HH ${fmt(z.owner_hh)}`).addTo(layerGroup);b.push([z.lat,z.lon])}if(b.length)map.fitBounds(b,{padding:[15,15]})}
 function updateControls(){let g=$('geo').value,isSub=g==='county'||g==='zip';$('parentCtl').classList.toggle('hidden',!isSub);$('countyCtl').classList.toggle('hidden',g!=='county'&&(g!=='zip'||$('zipMode').value==='radius'));$('zipModeCtl').classList.toggle('hidden',g!=='zip');$('radiusCtl').classList.toggle('hidden',!(g==='zip'&&$('zipMode').value==='radius'));$('marketCtl').classList.toggle('hidden',g==='zip'&&$('zipMode').value==='radius');if(g==='dma')$('marketLabel').textContent='DMA';if(g==='metro')$('marketLabel').textContent='Metro';populateMarkets();renderCurrent()}
-async function renderCurrent(){let g=$('geo').value;if(g==='dma'){renderDMA();$('mapTitle').textContent='U.S. Media Market Opportunity';$('mapSub').textContent='Click a market on the map or ranking to inspect it.';else if(g==='metro'){renderMetroList();if($('marketSelect').value)renderMetroSelection($('marketSelect').value)}else if(g==='county')await renderCounty();else await renderZIP()}
-
-
-
-async function fetchJSON(url,label){const r=await fetch(url,{cache:'no-store'});if(!r.ok)throw new Error(`${label} failed (${r.status})`);return r.json()}function loadError(msg){$('marketSelect').innerHTML='<option value="">Data unavailable</option>';$('mapSub').textContent=msg;$('tableSub').textContent='Refresh the page. If the problem continues, verify the GitHub Pages data files.';console.error(msg)}async function init(){initMap();$('marketSelect').innerHTML='<option value="">Loading market data…</option>';try{const core=await Promise.all([fetchJSON('zips.json','ZIP data'),fetchJSON('dma.json','DMA data')]);zips=core[0];dmas=core[1];for(const z of zips){z.zip=zip5(z.zip);z.fips=String(z.fips??'').padStart(5,'0')}if(!zips.length||!dmas.length)throw new Error('Core market data is empty');try{metroMap=await fetchJSON('metro-map.json','Metro data')}catch(e){metroMap={};console.warn(e.message)}attachMetro();updateControls()}catch(e){loadError('Unable to load core market data: '+e.message);return}try{dmaGeo=await fetchJSON('https://raw.githubusercontent.com/Mrk-Nguyen/dmamap/master/nielsengeo.json','DMA boundaries');renderCurrent()}catch(e){console.warn('DMA boundary unavailable',e);$('mapSub').textContent='Market data loaded. DMA boundary map is temporarily unavailable.'}$('geo').onchange=updateControls;$('parentType').onchange=()=>{populateMarkets();renderCurrent()};$('marketSelect').onchange=renderCurrent;$('countySelect').onchange=()=>{$('geo').value==='county'?renderCountySelection():renderZIP()};$('zipMode').onchange=updateControls;$('centerZip').onchange=renderRadius;$('radius').onchange=renderRadius;$('category').onchange=()=>{attachMetro();populateMarkets();renderCurrent()};$('topN').onchange=renderCurrent}init();
-
-
+async function renderCurrent(){
+  let g=$('geo').value;
+  if(g==='dma'){
+    renderDMA();
+    $('mapTitle').textContent='U.S. Media Market Opportunity';
+    $('mapSub').textContent='Click a market on the map or ranking to inspect it.';
+  }else if(g==='metro'){
+    renderMetroList();
+    if($('marketSelect').value) renderMetroSelection($('marketSelect').value);
+  }else if(g==='county'){
+    await renderCounty();
+  }else{
+    await renderZIP();
+  }
+}
 function syncAnalysisUI(){
  const media=$('geo').value==='dma';
  $('where').style.display=media?'none':'';
