@@ -49,3 +49,10 @@ header{background:linear-gradient(135deg,#17365d,#285d8e);color:#fff;padding:22p
 .adtaxi-logo-wrap{width:168px!important;height:116px!important}
 .adtaxi-logo-image{width:148px!important;height:108px!important;max-width:148px!important}
 @media(max-width:900px){.adtaxi-logo-wrap{width:120px!important;height:86px!important}.adtaxi-logo-image{width:108px!important;height:78px!important;max-width:108px!important}}
+
+/* v1.6.3 final map framing + branding polish */
+#map .dma-dot{min-width:14px;min-height:14px}
+#map .dma-dot.selected{min-width:22px;min-height:22px;border-width:4px;box-shadow:0 0 0 4px rgba(255,255,255,.95),0 3px 8px rgba(0,0,0,.5)}
+.adtaxi-logo-wrap{width:196px!important;height:132px!important}
+.adtaxi-logo-image{width:176px!important;height:124px!important;max-width:176px!important}
+@media(max-width:900px){.adtaxi-logo-wrap{width:132px!important;height:94px!important}.adtaxi-logo-image{width:118px!important;height:86px!important;max-width:118px!important}}

@@ -24,3 +24,13 @@ Upload all runtime files (`index.html`, `app.js`, `styles.css`, `logo.png`) toge
 - All 83 DMA coordinate mappings retained; selected DMA is visually emphasized.
 - Approved Adtaxi logo enlarged in the header.
 - No scoring, data, ranking, Metro/County/ZIP, or radius logic changed.
+
+## v1.6.3
+- Freezes the working DMA DOM-marker architecture.
+- Strengthens DMA marker visibility and selected-market emphasis.
+- Tightens Metro framing around the selected metro.
+- Tightens County framing around the selected county/metro context.
+- Preserves the approved ZIP/service-area map behavior.
+- Enlarges the approved Adtaxi logo treatment without changing the asset.
+- Standardizes user-facing score labels across DMA, Metro, County and ZIP.
+- No source data, scoring formulas, rankings, or ZIP-radius calculations changed.
