@@ -1,12 +1,9 @@
-v1.7.0 · Production Freeze
+v1.8.0 · Radius Tool Integration
 2026-09-19
 
-Validated production baseline:
-- DMA: national U.S. opportunity view with working market markers.
-- Metro: selected-market regional viewport.
-- County: selected-market local county viewport.
-- ZIP: localized neighborhood/service-area viewport.
-- Approved Adtaxi header/logo treatment retained.
-- Existing data, scoring formulas, rankings, terminology, and ZIP-radius logic retained.
+Baseline: v1.7.0 Production Freeze.
 
-Core application frozen. Future performance/accessibility work should branch from this baseline without altering production behavior.
+Change:
+- Added navigation from Home Services to the approved/frozen ZIP Radius Audience Tool.
+- Radius Tool included as radius-tool.html.
+- No changes to Home Services data, scoring formulas, rankings, terminology, map behavior, or existing calculations.
