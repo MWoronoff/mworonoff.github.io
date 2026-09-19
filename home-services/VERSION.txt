@@ -1,1 +1,9 @@
-Home Services Market Analyzer v1.6.3 — Final Map Framing & Branding Polish
+v1.6.4 · Metro/County Viewport Lock
+2026-09-19
+
+Production stabilization follow-up:
+- Metro map now locks to the selected metro at a regional zoom after Leaflet/container sizing settles.
+- County map now locks more tightly to the selected county/metro context.
+- DMA map behavior unchanged.
+- ZIP map behavior unchanged.
+- Data, calculations, rankings, terminology, and branding unchanged.

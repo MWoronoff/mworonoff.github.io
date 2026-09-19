@@ -34,3 +34,7 @@ Upload all runtime files (`index.html`, `app.js`, `styles.css`, `logo.png`) toge
 - Enlarges the approved Adtaxi logo treatment without changing the asset.
 - Standardizes user-facing score labels across DMA, Metro, County and ZIP.
 - No source data, scoring formulas, rankings, or ZIP-radius calculations changed.
+
+
+## v1.6.4 viewport correction
+Metro and County views now re-apply their selected-geography viewport after Leaflet container sizing settles. DMA and ZIP map behavior are unchanged. No data or scoring changes.
