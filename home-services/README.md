@@ -1,15 +1,19 @@
-# Home Services Market Analyzer v1.7 Release Candidate
+# Home Services Market Analyzer v1.6.0
 
-Upload these files directly to `/home-services/` in the GitHub Pages repository.
+Production-stabilized GitHub Pages build.
 
-## Locked in this release candidate
-- No scoring formulas or source data changed.
-- Customer-facing terminology simplified and standardized across KPI cards, explanation panels, rankings, methodology and CSV output.
-- Category-specific labels are used for HVAC Upgrade Potential / Roofing Upgrade Potential / Window & Door Upgrade Potential and corresponding Service Need measures.
-- Scarborough is labeled Consumer Demand and remains identified as DMA-level research.
-- The outdated toolbar Weather Outlook link is removed; source/weather context remains in the Sources & Data Notes area.
-- Approved Adtaxi logo is loaded from `logo.png` and displayed whole. No clipping, masking or CSS cropping is used.
-- Leaflet map behavior and existing fallback basemap are retained.
+## Locked interface
+- Media Market - DMA — The Ad Shop
+- Market Expansion - Metro — The Operator
+- Local Opportunity - County — The Branch
+- Neighborhood Targeting - ZIP — The Local Pro
+- Categories: HVAC, Roofing, Windows & Doors
 
-## Do not change
-Do not redraw, recolor, crop, clip, mask or box the approved Adtaxi logo. Do not change formulas, source data, geography logic, or analysis-level labels without a separate approved revision.
+## Stabilization fixes
+- DMA national map uses a deterministic 83-market representative-centroid crosswalk instead of fuzzy name matching.
+- DMA map plots the complete validated DMA universe; Top/Bottom and Show controls continue to govern rankings/charts.
+- Metro, County and ZIP maps retain their progressive local focus and ZIP-radius behavior.
+- Approved Adtaxi logo is a standalone transparent PNG: round green circle, white knockout letters, no black/white box or crescent.
+- Existing scoring formulas, source data, rankings and analysis labels are preserved.
+
+Upload all runtime files (`index.html`, `app.js`, `styles.css`, `logo.png`) together. `README.md` and `VERSION.txt` document the release.

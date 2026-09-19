@@ -37,17 +37,7 @@ header{background:linear-gradient(135deg,#17365d,#285d8e);color:#fff;padding:22p
 #map .leaflet-popup-content{margin:10px 12px}
 .map-popup{display:grid;gap:3px}.map-popup b{font-size:13px}.map-popup span{font-size:12px;color:#596970}
 
-/* v1.5 corrective patch: preserve Leaflet's own SVG sizing and show only approved round Adtaxi mark */
-#map .leaflet-overlay-pane svg,
-#map .leaflet-zoom-animated svg{width:auto;height:auto;display:block}
-.adtaxi-logo-wrap{width:78px;height:78px;overflow:hidden;border-radius:50%;justify-content:center;position:relative}
-.adtaxi-logo-image{width:92px;height:92px;max-width:none;position:absolute;left:50%;top:50%;transform:translate(-50%,-55%);clip-path:circle(38px at 46px 46px)}
 
-
-/* v1.7 locked logo display: complete approved asset, no crop/clip/mask */
-.adtaxi-logo-wrap{width:92px;height:92px;overflow:visible;border-radius:0;justify-content:center;position:relative;background:transparent;border:0;box-shadow:none}
-.adtaxi-logo-image{display:block;width:92px;height:92px;max-width:92px;object-fit:contain;position:static;left:auto;top:auto;transform:none;clip-path:none;background:transparent;filter:none}
-@media(max-width:900px){.adtaxi-logo-wrap{width:72px;height:72px}.adtaxi-logo-image{width:72px;height:72px;max-width:72px}}
-
-/* v1.8 controlled finishing pass: improve ranking readability without changing calculations */
-@media(min-width:1100px){.barrow{grid-template-columns:minmax(230px,300px) 1fr 48px}.barrow>span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}
+/* Production logo: one approved round green mark, transparent outside. */
+.adtaxi-logo-wrap{width:82px;height:82px;overflow:visible;border-radius:0;justify-content:center;position:relative;background:transparent!important}
+.adtaxi-logo-image{display:block;width:76px;height:76px;max-width:76px;object-fit:contain;position:static;transform:none;clip-path:none;background:transparent!important}

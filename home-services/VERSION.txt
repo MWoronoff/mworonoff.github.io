@@ -1,1 +1,1 @@
-v1.7 Release Candidate — terminology, weather-link removal, logo display QA
+Home Services Market Analyzer v1.6.0 — Production Stabilization
