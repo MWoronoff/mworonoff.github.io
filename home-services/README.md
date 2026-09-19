@@ -1,32 +1,15 @@
-# Home Services Market Analyzer v1.6
+# Home Services Market Analyzer v1.7 Release Candidate
 
-Upload these files to `/home-services/` in the GitHub Pages repository.
+Upload these files directly to `/home-services/` in the GitHub Pages repository.
 
-## Locked changes
-- Uses one approved Adtaxi logo treatment only: round green circle with white knockout letters and transparent outside background.
-- Blue/navy branded analyzer banner.
-- Approved analysis labels: Media Market - DMA; Market Expansion - Metro; Local Opportunity - County; Neighborhood Targeting - ZIP.
-- Opportunity/Expansion scores remain 0–100 ranking measures.
-- Replacement Potential and Service Need are displayed as national benchmark indexes (U.S. = 100) where applicable.
-- Category Demand Index remains U.S. = 100 at DMA level.
-- Adtaxi Market Intelligence and Weather Outlook retained.
-- Working Leaflet/OpenStreetMap geography retained.
+## Locked in this release candidate
+- No scoring formulas or source data changed.
+- Customer-facing terminology simplified and standardized across KPI cards, explanation panels, rankings, methodology and CSV output.
+- Category-specific labels are used for HVAC Upgrade Potential / Roofing Upgrade Potential / Window & Door Upgrade Potential and corresponding Service Need measures.
+- Scarborough is labeled Consumer Demand and remains identified as DMA-level research.
+- The outdated toolbar Weather Outlook link is removed; source/weather context remains in the Sources & Data Notes area.
+- Approved Adtaxi logo is loaded from `logo.png` and displayed whole. No clipping, masking or CSS cropping is used.
+- Leaflet map behavior and existing fallback basemap are retained.
 
-Do not replace, redraw, recolor, box, or otherwise alter the approved Adtaxi logo treatment in future revisions.
-
-## v1.4 map update
-- Preserves the approved v1.3 branding and analyzer logic.
-- Refines map marker hierarchy and visual treatment.
-- Adds a secondary basemap provider if the primary OpenStreetMap tile request fails.
-- No scoring formulas, data, analysis labels, or other approved interface elements were changed.
-
-
-## v1.5 corrective patch
-- Removed the legacy global SVG sizing rule from Leaflet overlay behavior so circle markers render at their intended geographic positions and scale.
-- Cropped the existing approved Adtaxi asset to the round green mark only, removing the visible white crescent/background artifact.
-- No scoring, data, ranking, or analysis logic changed.
-
-## v1.6 final corrective patch
-- Replaced the embedded source logo with a clean transparent round green Adtaxi asset; no white crescent/background remains.
-- Removed the legacy generic `#map svg` sizing rule so Leaflet controls its own overlay SVG dimensions.
-- Preserved scoring, data, rankings, analysis labels, Market Intelligence, Weather Outlook, and interface structure.
+## Do not change
+Do not redraw, recolor, crop, clip, mask or box the approved Adtaxi logo. Do not change formulas, source data, geography logic, or analysis-level labels without a separate approved revision.
