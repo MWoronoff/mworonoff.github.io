@@ -1,1 +1,1 @@
-Home Services Market Analyzer v1.6.0 — Production Stabilization
+v1.6.1 · Leaflet Marker Rendering + Logo Stabilization
