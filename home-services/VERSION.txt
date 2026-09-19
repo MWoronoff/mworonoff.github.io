@@ -1,9 +1,12 @@
-v1.6.4 · Metro/County Viewport Lock
+v1.7.0 · Production Freeze
 2026-09-19
 
-Production stabilization follow-up:
-- Metro map now locks to the selected metro at a regional zoom after Leaflet/container sizing settles.
-- County map now locks more tightly to the selected county/metro context.
-- DMA map behavior unchanged.
-- ZIP map behavior unchanged.
-- Data, calculations, rankings, terminology, and branding unchanged.
+Validated production baseline:
+- DMA: national U.S. opportunity view with working market markers.
+- Metro: selected-market regional viewport.
+- County: selected-market local county viewport.
+- ZIP: localized neighborhood/service-area viewport.
+- Approved Adtaxi header/logo treatment retained.
+- Existing data, scoring formulas, rankings, terminology, and ZIP-radius logic retained.
+
+Core application frozen. Future performance/accessibility work should branch from this baseline without altering production behavior.
