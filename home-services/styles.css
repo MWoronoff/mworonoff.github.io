@@ -48,3 +48,6 @@ header{background:linear-gradient(135deg,#17365d,#285d8e);color:#fff;padding:22p
 .adtaxi-logo-wrap{width:92px;height:92px;overflow:visible;border-radius:0;justify-content:center;position:relative;background:transparent;border:0;box-shadow:none}
 .adtaxi-logo-image{display:block;width:92px;height:92px;max-width:92px;object-fit:contain;position:static;left:auto;top:auto;transform:none;clip-path:none;background:transparent;filter:none}
 @media(max-width:900px){.adtaxi-logo-wrap{width:72px;height:72px}.adtaxi-logo-image{width:72px;height:72px;max-width:72px}}
+
+/* v1.8 controlled finishing pass: improve ranking readability without changing calculations */
+@media(min-width:1100px){.barrow{grid-template-columns:minmax(230px,300px) 1fr 48px}.barrow>span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}
