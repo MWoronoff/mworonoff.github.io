@@ -1,1 +1,1 @@
-v1.5 — Leaflet SVG sizing + Adtaxi round-logo crop fix
+v1.6 — Final map SVG isolation + clean approved Adtaxi logo asset

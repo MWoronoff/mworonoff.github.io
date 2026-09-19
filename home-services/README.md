@@ -1,4 +1,4 @@
-# Home Services Market Analyzer v1.4
+# Home Services Market Analyzer v1.6
 
 Upload these files to `/home-services/` in the GitHub Pages repository.
 
@@ -25,3 +25,8 @@ Do not replace, redraw, recolor, box, or otherwise alter the approved Adtaxi log
 - Removed the legacy global SVG sizing rule from Leaflet overlay behavior so circle markers render at their intended geographic positions and scale.
 - Cropped the existing approved Adtaxi asset to the round green mark only, removing the visible white crescent/background artifact.
 - No scoring, data, ranking, or analysis logic changed.
+
+## v1.6 final corrective patch
+- Replaced the embedded source logo with a clean transparent round green Adtaxi asset; no white crescent/background remains.
+- Removed the legacy generic `#map svg` sizing rule so Leaflet controls its own overlay SVG dimensions.
+- Preserved scoring, data, rankings, analysis labels, Market Intelligence, Weather Outlook, and interface structure.
