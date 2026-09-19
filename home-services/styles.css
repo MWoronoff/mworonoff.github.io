@@ -41,3 +41,11 @@ header{background:linear-gradient(135deg,#17365d,#285d8e);color:#fff;padding:22p
 /* Production logo: one approved round green mark, transparent outside. */
 .adtaxi-logo-wrap{width:112px;height:112px;overflow:visible;border-radius:0;justify-content:center;position:relative;background:transparent!important}
 .adtaxi-logo-image{display:block;width:104px;height:104px;max-width:104px;object-fit:contain;position:static;transform:none;clip-path:none;background:transparent!important}
+
+/* v1.6.2 DMA DOM-marker stabilization */
+#map .dma-div-icon{background:transparent!important;border:0!important;box-shadow:none!important}
+#map .dma-dot{display:block;border-radius:50%;background:#4f9e68;border:2px solid #315c6a;box-shadow:0 1px 4px rgba(0,0,0,.38)}
+#map .dma-dot.selected{background:#8fcf46;border:3px solid #17242b;box-shadow:0 0 0 3px rgba(255,255,255,.9),0 2px 6px rgba(0,0,0,.45)}
+.adtaxi-logo-wrap{width:168px!important;height:116px!important}
+.adtaxi-logo-image{width:148px!important;height:108px!important;max-width:148px!important}
+@media(max-width:900px){.adtaxi-logo-wrap{width:120px!important;height:86px!important}.adtaxi-logo-image{width:108px!important;height:78px!important;max-width:108px!important}}

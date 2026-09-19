@@ -17,3 +17,10 @@ Production-stabilized GitHub Pages build.
 - Existing scoring formulas, source data, rankings and analysis labels are preserved.
 
 Upload all runtime files (`index.html`, `app.js`, `styles.css`, `logo.png`) together. `README.md` and `VERSION.txt` document the release.
+
+
+## v1.6.2
+- DMA national map uses Leaflet HTML divIcon markers in the standard marker pane, bypassing SVG/Canvas overlay issues.
+- All 83 DMA coordinate mappings retained; selected DMA is visually emphasized.
+- Approved Adtaxi logo enlarged in the header.
+- No scoring, data, ranking, Metro/County/ZIP, or radius logic changed.
