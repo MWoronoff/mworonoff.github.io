@@ -1,9 +1,11 @@
-v1.8.0 · Radius Tool Integration
+v1.8.1 · Final Production
 2026-09-19
 
-Baseline: v1.7.0 Production Freeze.
+Built from v1.8.0 / v1.7.0 frozen analytics baseline.
 
-Change:
-- Added navigation from Home Services to the approved/frozen ZIP Radius Audience Tool.
-- Radius Tool included as radius-tool.html.
-- No changes to Home Services data, scoring formulas, rankings, terminology, map behavior, or existing calculations.
+Final changes:
+- Home Services presentation layer restyled to match the approved ZIP Radius Tool visual system.
+- Added “Back to Home Services Analyzer” navigation to the Radius Tool.
+- No changes to source data, scoring formulas, rankings, map logic, geography behavior, terminology, or analytical calculations.
+
+Project completion baseline.

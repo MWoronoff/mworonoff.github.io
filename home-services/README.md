@@ -1,12 +1,13 @@
-# Home Services Market Analyzer v1.8.0
+# Home Services Market Analyzer v1.8.1 — Final Production
 
-Built from the validated v1.7.0 Production Freeze.
+Final integrated Home Services Analyzer and ZIP Radius Audience Tool.
 
-## Change in this release
-- Adds a **ZIP Radius Audience Tool** navigation button to the Home Services Analyzer toolbar.
-- The button opens `radius-tool.html`, which is the approved/frozen Radius Tool.
-- No Home Services source data, scoring formulas, rankings, map logic, terminology, or existing ZIP-radius calculations were changed.
-- The approved Home Services Adtaxi header/logo treatment is retained.
+## Final release
+- DMA, Metro, County and ZIP analyzer functionality preserved from the frozen production baseline.
+- Analyzer presentation updated to use the approved Radius Tool design language: navy/teal visual system, cards, controls, typography, spacing and hierarchy.
+- ZIP Radius Audience Tool remains the approved frozen analytical component.
+- Radius Tool now includes a clear **Back to Home Services Analyzer** control.
+- No source data, scoring formulas, rankings, map logic, geography behavior, terminology or analytical calculations were changed.
 
-## Files to upload together
-`index.html`, `app.js`, `styles.css`, `logo.png`, `radius-tool.html`, `README.md`, and `VERSION.txt`.
+## Upload together
+`index.html`, `app.js`, `styles.css`, `logo.png`, `radius-tool.html`, `README.md`, `VERSION.txt`

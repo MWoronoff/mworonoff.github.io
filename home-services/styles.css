@@ -63,3 +63,58 @@ header{background:linear-gradient(135deg,#17365d,#285d8e);color:#fff;padding:22p
   padding:9px 12px;font-weight:700;cursor:pointer;text-decoration:none;font-size:13px
 }
 .radius-tool-btn:hover{background:#285d8e}
+
+/* v1.8.1 FINAL — presentation layer aligned to approved Radius Tool */
+:root{
+  --navy:#0f2742;--navy2:#173c63;--ink:#182432;--muted:#66788b;
+  --line:#dce4ec;--bg:#f4f7fa;--card:#fff;--teal:#0f8f86;--teal2:#15aaa0;
+  --shadow:0 8px 24px rgba(15,39,66,.08)
+}
+body{font-family:Inter,"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--ink)}
+header{background:linear-gradient(110deg,var(--navy),var(--navy2));padding:22px 28px}
+.header-inner{max-width:1500px}
+.brand-copy h1{font-size:28px;margin:2px 0 5px}
+.brand-copy p{color:#d6e3ef;opacity:1}
+main{max-width:1500px;margin:auto;padding:22px 28px 34px}
+.controls{
+  border:1px solid var(--line);border-radius:12px;padding:16px 18px;
+  box-shadow:0 2px 10px rgba(15,39,66,.03);gap:14px;background:var(--card)
+}
+.controls label{color:#4b5f72;font-size:11px;letter-spacing:.07em}
+select,input{border:1px solid #cbd6e1;border-radius:7px;padding:9px;background:#fff;color:var(--ink)}
+.panel,.kpis div{
+  border:1px solid var(--line);border-radius:12px;background:var(--card);
+  box-shadow:var(--shadow)
+}
+.panel{padding:16px 18px}
+.kpis{gap:10px}
+.kpis div{padding:14px;border-top:3px solid var(--teal)}
+.kpis b{color:var(--navy);font-size:25px}
+.kpis span{color:var(--muted);font-weight:700}
+h2{color:var(--navy);font-size:16px}
+h3{color:var(--navy)}
+.muted,.method{color:var(--muted)}
+.toolbar{margin:0 0 18px;gap:9px;flex-wrap:wrap}
+.toolbar button,.weather-btn,.radius-tool-btn{
+  border-radius:8px;padding:10px 14px;font-weight:700;font-size:12px;
+  box-shadow:none
+}
+.radius-tool-btn{background:var(--teal);border-color:var(--teal);color:#fff}
+.radius-tool-btn:hover{background:#0b7972}
+.toolbar button,.weather-btn{border:1px solid var(--line);background:#fff;color:var(--navy)}
+.toolbar button:hover,.weather-btn:hover{background:#f7f9fb}
+.condition-card,.intel-card{
+  border:1px solid var(--line);border-radius:11px;background:#fff;padding:13px
+}
+.intel-badge{background:#e4f4f2;color:#0b6f68;border-color:#b9ddd9}
+.takeaways,.industry-strip{background:#f7f9fb;border:1px solid #e7edf2}
+#map{border:1px solid var(--line);border-radius:11px;background:#e9eef2}
+table{border-collapse:separate;border-spacing:0}
+thead{background:#f3f6f9}
+th{color:#42566a;font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+th,td{padding:10px 9px}
+tbody tr:hover{background:#f8fbfc}
+.modal-card{border-radius:13px;border:1px solid var(--line);box-shadow:0 24px 80px rgba(0,0,0,.3)}
+.source-links a{border-color:var(--line);border-radius:8px;color:var(--navy)}
+.notice{border-radius:10px}
+@media(max-width:900px){main{padding:14px}.controls{padding:14px}}
