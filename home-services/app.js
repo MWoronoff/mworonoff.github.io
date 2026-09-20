@@ -198,50 +198,7 @@ if($('category')) $('category').addEventListener('change',resetMarketAfterSelect
 resetMarketToPrompt();
 
 
-/* FINAL CONTROL WIRING: one authoritative selector path. */
-(function(){
-  const oldA=$('analysis'), oldC=$('category'), oldM=$('market');
-  if(!oldA||!oldC||!oldM) return;
-
-  const a=oldA.cloneNode(true), c=oldC.cloneNode(true), m=oldM.cloneNode(true);
-  oldA.replaceWith(a); oldC.replaceWith(c); oldM.replaceWith(m);
-
-  function marketPrompt(){
-    m.innerHTML='<option value="">Select market...</option>';
-    m.value='';
-  }
-  function fillMarkets(){
-    marketPrompt();
-    if(!a.value || !c.value) return;
-    let rows=[], valueKey='', labelKey='';
-    if(a.value==='dma'){ rows=DMA; valueKey='dma_code'; labelKey='dma'; }
-    else if(a.value==='metro'){ rows=METRO; valueKey='cbsa'; labelKey='metro'; }
-    else if(a.value==='county'){
-      rows=METRO; valueKey='cbsa'; labelKey='metro';
-    } else if(a.value==='zip'){
-      rows=METRO; valueKey='cbsa'; labelKey='metro';
-    }
-    const seen=new Set();
-    rows.forEach(r=>{
-      const value=String(r[valueKey]??'');
-      const label=String(r[labelKey]??'');
-      if(!value||!label||seen.has(value)) return;
-      seen.add(value);
-      const o=document.createElement('option'); o.value=value; o.textContent=label; m.appendChild(o);
-    });
-  }
-  function blankResultsUntilMarket(){
-    // Keep the approved template visible; render only after an explicit market choice.
-    if(!m.value) return;
-    render();
-  }
-  a.addEventListener('change',()=>{ fillMarkets(); });
-  c.addEventListener('change',()=>{ fillMarkets(); });
-  m.addEventListener('change',blankResultsUntilMarket);
-  const rv=$('rankView'); if(rv) rv.addEventListener('change',()=>{if(m.value)render();});
-  const sh=$('showN'); if(sh) sh.addEventListener('change',()=>{if(m.value)render();});
-  marketPrompt();
-})();
+;
 
 
 /* FINAL WHAT-THE-NUMBERS-TELL-US OUTPUT: definitions only, no duplicated KPI values. */
@@ -281,4 +238,30 @@ resetMarketToPrompt();
       `<div class="metric"><div><b>Homeowner Market Size</b><div class="sub">Measures the relative size of the addressable homeowner audience.<br><b>This market:</b> ${pos(size)} on the analyzer's market-size benchmark.</div></div></div>`+
       `<div class="sub" style="margin-top:14px"><b>Index guide:</b> 100 = U.S. average for Replacement Potential and Need.</div>`;
   };
+})();
+
+
+/* MARKET PROMPT FIX — preserves all original analyzer event listeners. */
+(function(){
+  const a=$('analysis'), c=$('category'), m=$('market');
+  if(!a||!c||!m) return;
+  let userChoosingMarket=false;
+  function ensurePrompt(){
+    let o=m.querySelector('option[value=""]');
+    if(!o){o=document.createElement('option');o.value='';o.textContent='Select market...';m.insertBefore(o,m.firstChild);}
+    if(!userChoosingMarket)m.value='';
+  }
+  m.addEventListener('pointerdown',()=>{userChoosingMarket=true;});
+  m.addEventListener('keydown',()=>{userChoosingMarket=true;});
+  m.addEventListener('change',()=>{userChoosingMarket=true;});
+  function selectorChanged(){
+    userChoosingMarket=false;
+    ensurePrompt();
+    setTimeout(ensurePrompt,0);
+    setTimeout(ensurePrompt,25);
+    setTimeout(ensurePrompt,100);
+  }
+  a.addEventListener('change',selectorChanged);
+  c.addEventListener('change',selectorChanged);
+  ensurePrompt();
 })();
