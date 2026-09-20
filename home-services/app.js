@@ -180,15 +180,16 @@ function marketIndexPosition(v){
   return 'well below the U.S. average';
 }
 function renderWhatNumbersTellUs(cat,replacement,need,marketSize,geoName='This market'){
- const c=cat==='hvac'?'HVAC':cat==='roofing'?'Roofing':'Windows & Doors';
- const position=v=>{v=Number(v);if(!Number.isFinite(v))return 'not available';if(v>=110)return 'well above the U.S. average';if(v>=102)return 'above the U.S. average';if(v>=98)return 'approximately in line with the U.S. average';if(v>=90)return 'below the U.S. average';return 'well below the U.S. average';};
  const needLabel=serviceNeedLabel(cat);
+ const position=v=>{v=Number(v);if(!Number.isFinite(v))return 'not available';if(v>=110)return 'well above the U.S. average';if(v>=102)return 'above the U.S. average';if(v>=98)return 'approximately in line with the U.S. average';if(v>=90)return 'below the U.S. average';return 'well below the U.S. average';};
  const needDef=cat==='hvac'?'Measures housing and environmental characteristics associated with physical need for HVAC repair or replacement.':cat==='roofing'?'Measures housing and environmental characteristics associated with physical need for roof repair or replacement.':'Measures housing characteristics associated with physical need for window and door replacement.';
- $('why').innerHTML=
- `<div class="metric"><div><b>Replacement Potential</b><div class="sub">Measures how strongly the area's housing stock and ownership characteristics indicate homes are entering the replacement cycle.<br><b>${geoName}:</b> ${position(replacement)}.</div></div></div>`+
- `<div class="metric"><div><b>${needLabel}</b><div class="sub">${needDef}<br><b>${geoName}:</b> ${position(need)}.</div></div></div>`+
- `<div class="metric"><div><b>Homeowner Market Size</b><div class="sub">Measures the relative size of the addressable homeowner audience.<br><b>${geoName}:</b> ${position(marketSize)} on the analyzer's market-size benchmark.</div></div></div>`+
+ const sizeText=Number(marketSize)>=90?'represents a large homeowner market':Number(marketSize)>=60?'represents a substantial homeowner market':'represents a smaller homeowner market on the analyzer benchmark';
+ const html=
+ `<div class="metric"><div><b>Replacement Potential</b><div class="sub">Measures how strongly the area's housing stock and ownership characteristics indicate homes are entering the replacement cycle.<br><b>${geoName}:</b> Replacement potential is ${position(replacement)}.</div></div></div>`+
+ `<div class="metric"><div><b>${needLabel}</b><div class="sub">${needDef}<br><b>${geoName}:</b> ${needLabel} is ${position(need)}.</div></div></div>`+
+ `<div class="metric"><div><b>Homeowner Market Size</b><div class="sub">Measures the relative size of the addressable homeowner audience.<br><b>${geoName}:</b> ${sizeText}.</div></div></div>`+
  `<div class="sub" style="margin-top:14px"><b>Index guide:</b> 100 = U.S. average for Replacement Potential and Need.</div>`;
+ if($('why')) $('why').innerHTML=html;
 }
 
 function renderDMA(cat){
@@ -202,6 +203,7 @@ function renderDMA(cat){
  $('rankings').innerHTML=rowsToTable(sorted,(r,i)=>`<tr data-code="${r.dma_code}"><td>${i+1}</td><td>${r.dma}</td><td><b>${score(r[key])}</b></td><td>${index100(r.replacement_ready,DMA,'replacement_ready')}</td><td>${index100(r[cat+'_need'],DMA,cat+'_need')}</td><td>${score(r.market_scale)}</td></tr>`);rowClicks();
  try{renderGeoMap(sorted,r=>r.dma,r=>r[key],x.dma,{usView:true});$('mapNote').textContent='U.S. media-market opportunity view.';}catch(e){$('map').innerHTML='<div class="map-empty">Map unavailable. Rankings remain available below.</div>';}
  try{bars(visibleRows(sorted),r=>r.dma,r=>r[key]);}catch(e){}
+ 
  renderWhatNumbersTellUs(cat,index100(x.replacement_ready,DMA,'replacement_ready'),index100(x[cat+'_need'],DMA,cat+'_need'),score(x.market_scale),x.dma);
 }
 function renderMetro(cat){
@@ -232,6 +234,7 @@ function renderCounty(cat){
  $('rankings').innerHTML=rowsToTable(zips,(r,i)=>`<tr><td>${i+1}</td><td><b>${r.zip}</b></td><td><b>${score(r[key])}</b></td><td>${fmt(r.replacement_ready_hh)}</td><td>${fmt(r.owner_hh)}</td><td>${fmt(r.households)}</td></tr>`);
  try{renderGeoMap(zips,r=>'ZIP '+r.zip,r=>r[key],null,{allRows:true,maxZoom:10});$('mapNote').textContent='Residential ZIP opportunity within '+x.county+' County.';}catch(e){$('map').innerHTML='<div class="map-empty">Map unavailable. ZIP rankings remain available below.</div>';}
  try{bars(visibleRows(zips),r=>'ZIP '+r.zip,r=>r[key]);}catch(e){}
+ 
  renderWhatNumbersTellUs(cat,index100(x.replacement_ready,COUNTY,'replacement_ready'),index100(x[cat+'_need'],COUNTY,cat+'_need'),score(x.market_scale),x.county+' County');
 }
 function renderZIP(cat){
@@ -248,6 +251,7 @@ function renderZIP(cat){
  $('rankings').innerHTML=rowsToTable(sorted,(r,i)=>`<tr><td>${i+1}</td><td>${r.zip}</td><td>${r.county}</td><td>${r.metro||'—'}</td><td><b>${score(r[key])}</b></td><td>${fmt(r.replacement_ready_hh)}</td><td>${fmt(r.owner_hh)}</td><td>${score(r.owner_rate)}%</td><td>${score(r.sf_rate)}%</td></tr>`);
  try{renderGeoMap(sorted,r=>'ZIP '+r.zip,r=>r[key],'ZIP '+x.zip,{center:rad?center:null,radiusMiles:rad,maxZoom:10,allRows:true});$('mapNote').textContent=rad?`${sorted.length} residential ZIPs within ${rad} miles of ZIP ${center.zip}.`:'Residential ZIP centroids in the selected county.';}catch(e){$('map').innerHTML='<div class="map-empty">Map unavailable. ZIP rankings remain available below.</div>';}
  try{bars(visibleRows(sorted),r=>'ZIP '+r.zip,r=>r[key]);}catch(e){}
+ 
  renderWhatNumbersTellUs(cat,index100(x.replacement_ready,ZIP,'replacement_ready'),index100(x[cat+'_need'],ZIP,cat+'_need'),score(x.addressable_scale),'ZIP '+x.zip);
 }
 
