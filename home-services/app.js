@@ -222,11 +222,12 @@ function setup(){
  const m=mode(),market=$('market');
  $('stageNotice').classList.add('hidden');$('view').style.display='block';
  const national=(m==='Media Market'||m==='Market Expansion');
- const needsCounty=(m==='Local Opportunity'||m==='Neighborhood Targeting');
+ const countyMode=(m==='Local Opportunity');
+ const zipMode=(m==='Neighborhood Targeting');
  $('marketWrap').style.display=national?'none':'block';
- $('countyWrap').style.display=needsCounty?'block':'none';
- $('radiusWrap').style.display=m==='Neighborhood Targeting'?'block':'none';
- if($('centerZipWrap'))$('centerZipWrap').style.display=m==='Neighborhood Targeting'?'block':'none';
+ $('countyWrap').style.display=zipMode?'block':'none';
+ $('radiusWrap').style.display=zipMode?'block':'none';
+ if($('centerZipWrap'))$('centerZipWrap').style.display=zipMode?'block':'none';
  market.innerHTML='<option value="">Select market...</option>';
  $('county').innerHTML='<option value="">Select county...</option>';
  if($('centerZip'))$('centerZip').value='';
@@ -249,14 +250,9 @@ function setupCounty(){
 function marketChanged(){
  if(!$('market').value)return;
  const m=mode();
- if(m==='Local Opportunity'||m==='Neighborhood Targeting'){
-   setupCounty();
-   clearResultsForSelection();
-   const metro=METRO.find(r=>String(r.cbsa)===String($('market').value));
-   if($('chartTitle'))$('chartTitle').textContent=(metro?metro.metro:'Selected Metro')+' — Select a County';
-   if($('chartNote'))$('chartNote').textContent='Choose a county above to view local opportunity, ZIP-level geography and ZIP rankings.';
-   return;
- }
+ clearResultsForSelection();
+ if(m==='Neighborhood Targeting'){setupCounty();return}
+ if(m==='Local Opportunity'){render();return}
  render();
 }
 
@@ -320,11 +316,11 @@ function renderWhatNumbersTellUs(cat,replacement,need,marketSize,geoName='This m
 function renderDMA(cat){
  const key=cat+'_score',sorted=rankRows(DMA,key),x=sorted[0];if(!x)return;
  updateConditions(cat,'Media Market',x,sorted);renderIntelligence(cat,'Media Market',x,sorted);
- cards([['Media Market Opportunity',score(x[key])],[upgradeLabel(cat),index100(x.replacement_ready,DMA,'replacement_ready')],[serviceNeedLabel(cat),index100(x[cat+'_need'],DMA,cat+'_need')],['Homeowner Market Size',score(x.market_scale)]]);
+ cards([['Media Market Opportunity',score(x[key])],['Replacement Potential Index',index100(x.replacement_ready,DMA,'replacement_ready')],[serviceNeedLabel(cat)+' Index',index100(x[cat+'_need'],DMA,cat+'_need')],['Homeowner Market Size',score(x.market_scale)]]);
  $('chartTitle').textContent='U.S. Media Market Opportunity';
  $('chartNote').textContent='National DMA comparison. Select a market from the rankings or map to inspect it.';
  $('marketName').textContent=x.dma;$('whyTitle').textContent='What the Numbers Tell Us';
- $('method').textContent='Media Market Opportunity = 40% Replacement Potential + 35% Need + 25% Homeowner Market Size.';
+ $('method').textContent='Media Market Opportunity = 40% Replacement Potential Index + 35% Need Index + 25% Homeowner Market Size.';
  $('tableTitle').textContent='DMA Rankings — The Ad Shop';
  $('thead').innerHTML='<tr><th>Rank</th><th>DMA</th><th>Media Market Opportunity</th><th>Replacement Potential</th><th>Need</th><th>Homeowner Market Size</th></tr>';
  $('rankings').innerHTML=rowsToTable(sorted,(r,i)=>`<tr data-code="${r.dma_code}"><td>${i+1}</td><td>${r.dma}</td><td><b>${score(r[key])}</b></td><td>${index100(r.replacement_ready,DMA,'replacement_ready')}</td><td>${index100(r[cat+'_need'],DMA,cat+'_need')}</td><td>${score(r.market_scale)}</td></tr>`);
@@ -349,20 +345,20 @@ function renderMetro(cat){
  try{bars(visibleRows(sorted),r=>r.metro,r=>r[key]);}catch(e){}
 }
 function renderCounty(cat){
- const cb=$('market').value,fips=$('county').value,key=cat+'_score';if(!cb||!fips)return;
- const countyRows=COUNTY.filter(r=>String(r.cbsa)===String(cb)),x=countyRows.find(r=>String(r.fips)===String(fips));if(!x)return;
- const zips=rankRows(ZIP.filter(r=>String(r.fips)===String(fips)),key);
- updateConditions(cat,'Local Opportunity',x,countyRows);renderIntelligence(cat,'Local Opportunity',x,countyRows);
- cards([['Local Opportunity Score',score(x[key])],[upgradeLabel(cat),index100(x.replacement_ready,COUNTY,'replacement_ready')],[serviceNeedLabel(cat),index100(x[cat+'_need'],COUNTY,cat+'_need')],['Replacement Potential Households',fmt(x.replacement_ready_hh)],['Homeowner Households',fmt(x.owner_hh)]]);
- $('chartTitle').textContent=x.county+' County — ZIP Opportunity';
- $('chartNote').textContent='Residential ZIP Codes in the selected county, ranked using replacement potential, category need and homeowner market size.';
+ const cb=$('market').value,key=cat+'_score';if(!cb)return;
+ const sorted=rankRows(COUNTY.filter(r=>String(r.cbsa)===String(cb)),key),x=sorted[0];
+ const metro=METRO.find(r=>String(r.cbsa)===String(cb));if(!x)return;
+ updateConditions(cat,'Local Opportunity',x,sorted);renderIntelligence(cat,'Local Opportunity',x,sorted);
+ cards([['Local Opportunity Score',score(x[key])],['Replacement Potential Index',index100(x.replacement_ready,COUNTY,'replacement_ready')],[serviceNeedLabel(cat)+' Index',index100(x[cat+'_need'],COUNTY,cat+'_need')],['Replacement Potential Households',fmt(x.replacement_ready_hh)],['Homeowner Households',fmt(x.owner_hh)]]);
+ $('chartTitle').textContent=(metro?metro.metro:'Selected Metro')+' — County Opportunity';
+ $('chartNote').textContent='Counties are ranked within the selected Metro using replacement potential, category need and homeowner market size.';
  $('marketName').textContent=x.county+' County';$('whyTitle').textContent='What the Numbers Tell Us';
- $('method').textContent='Local Opportunity = 40% Replacement Potential + 35% Need + 25% Homeowner Market Size.';
- try{bars(visibleRows(zips),r=>'ZIP '+r.zip,r=>r[key]);}catch(e){}
- $('tableTitle').textContent='ZIP Rankings — '+x.county+' County';
- $('thead').innerHTML='<tr><th>Rank</th><th>ZIP</th><th>ZIP Opportunity</th><th>Replacement Potential Households</th><th>Homeowner Households</th><th>Households</th></tr>';
- $('rankings').innerHTML=rowsToTable(zips,(r,i)=>`<tr><td>${i+1}</td><td><b>${r.zip}</b></td><td><b>${score(r[key])}</b></td><td>${fmt(r.replacement_ready_hh)}</td><td>${fmt(r.owner_hh)}</td><td>${fmt(r.households)}</td></tr>`);
- try{renderGeoMap(zips,r=>'ZIP '+r.zip,r=>r[key],null,{allRows:true,maxZoom:10});$('mapNote').textContent='Residential ZIP opportunity within '+x.county+' County.';}catch(e){$('map').innerHTML='<div class="map-empty">Map unavailable. ZIP rankings remain available below.</div>';}
+ $('method').textContent='Local Opportunity = 40% Replacement Potential Index + 35% Need Index + 25% Homeowner Market Size.';
+ try{bars(visibleRows(sorted),r=>r.county+' County',r=>r[key]);}catch(e){}
+ $('tableTitle').textContent='County Rankings — The Branch';
+ $('thead').innerHTML='<tr><th>Rank</th><th>County</th><th>Local Opportunity</th><th>Replacement Potential Index</th><th>Need Index</th><th>Replacement Potential Households</th><th>Homeowner Households</th><th>ZIP Codes</th></tr>';
+ $('rankings').innerHTML=rowsToTable(sorted,(r,i)=>`<tr><td>${i+1}</td><td><b>${r.county} County</b></td><td><b>${score(r[key])}</b></td><td>${index100(r.replacement_ready,COUNTY,'replacement_ready')}</td><td>${index100(r[cat+'_need'],COUNTY,cat+'_need')}</td><td>${fmt(r.replacement_ready_hh)}</td><td>${fmt(r.owner_hh)}</td><td>${fmt(r.zip_count)}</td></tr>`);
+ try{renderGeoMap(sorted,r=>r.county+' County',r=>r[key],x.county+' County',{allRows:true,focusSelected:false,maxZoom:8});$('mapNote').textContent='County opportunity within '+(metro?metro.metro:'the selected Metro')+'.';}catch(e){}
  renderWhatNumbersTellUs(cat,index100(x.replacement_ready,COUNTY,'replacement_ready'),index100(x[cat+'_need'],COUNTY,cat+'_need'),score(x.market_scale),x.county+' County');
 }
 function renderZIP(cat){
@@ -372,9 +368,9 @@ function renderZIP(cat){
  else rows=ZIP.filter(r=>String(r.cbsa)===String(cb)&&String(r.fips)===String(fips));
  const sorted=rankRows(rows,key),x=sorted[0],metro=METRO.find(r=>String(r.cbsa)===String(cb));if(!x){$('rankings').innerHTML='';return}
  updateConditions(cat,'Neighborhood Targeting',x,sorted);renderIntelligence(cat,'Neighborhood Targeting',x,sorted);
- cards([['Neighborhood Opportunity Score',score(x[key])],[upgradeLabel(cat),index100(x.replacement_ready,ZIP,'replacement_ready')],[serviceNeedLabel(cat),index100(x[cat+'_need'],ZIP,cat+'_need')],['Homeowner Households',fmt(x.owner_hh)],['ZIP Codes in View',sorted.length]]);
+ cards([['Neighborhood Opportunity Score',score(x[key])],['Replacement Potential Index',index100(x.replacement_ready,ZIP,'replacement_ready')],[serviceNeedLabel(cat)+' Index',index100(x[cat+'_need'],ZIP,cat+'_need')],['Homeowner Households',fmt(x.owner_hh)],['ZIP Codes in View',sorted.length]]);
  $('chartTitle').textContent=rad?`Service Area · ZIP ${center.zip} · ${rad} miles`:(metro?metro.metro:'Selected Metro')+' — Neighborhood Targeting';$('chartNote').textContent=rad?`All residential ZIPs whose centroids fall within ${rad} straight-line miles of ZIP ${center.zip}.`:'Residential ZIP Codes in the selected county.';
- $('marketName').textContent='ZIP '+x.zip+' · '+x.county+' County';$('whyTitle').textContent='What the Numbers Tell Us';$('method').textContent='ZIP Opportunity = 40% Replacement Potential + 35% Need + 25% Homeowner Market Size.';
+ $('marketName').textContent='ZIP '+x.zip+' · '+x.county+' County';$('whyTitle').textContent='What the Numbers Tell Us';$('method').textContent='ZIP Opportunity = 40% Replacement Potential Index + 35% Need Index + 25% Homeowner Market Size.';
  $('tableTitle').textContent='ZIP Rankings — The Local Pro';$('thead').innerHTML='<tr><th>Rank</th><th>ZIP</th><th>County</th><th>Metro</th><th>Neighborhood Opportunity</th><th>Replacement Potential Households</th><th>Homeowner Households</th><th>Homeowner %</th><th>Single-Family %</th></tr>';
  $('rankings').innerHTML=rowsToTable(sorted,(r,i)=>`<tr><td>${i+1}</td><td>${r.zip}</td><td>${r.county}</td><td>${r.metro||'—'}</td><td><b>${score(r[key])}</b></td><td>${fmt(r.replacement_ready_hh)}</td><td>${fmt(r.owner_hh)}</td><td>${score(r.owner_rate)}%</td><td>${score(r.sf_rate)}%</td></tr>`);
  try{renderGeoMap(sorted,r=>'ZIP '+r.zip,r=>r[key],'ZIP '+x.zip,{center:rad?center:null,radiusMiles:rad,maxZoom:10,allRows:true});$('mapNote').textContent=rad?`${sorted.length} residential ZIPs within ${rad} miles of ZIP ${center.zip}.`:'Residential ZIP centroids in the selected county.';}catch(e){$('map').innerHTML='<div class="map-empty">Map unavailable. ZIP rankings remain available below.</div>';}
