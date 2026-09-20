@@ -4,7 +4,7 @@ const COUNTY=[{"cbsa":"10180","metro":"Abilene, TX","fips":"48059","county":"Cal
 // Consistent housing-based DMA opportunity methodology; Consumer Demand is not a score input.
 DMA.forEach(r=>{['hvac','roofing','windows'].forEach(cat=>{r[cat+'_opportunity']=Math.round((0.40*(+r.replacement_ready||0)+0.35*(+r[cat+'_need']||0)+0.25*(+r.market_scale||0))*10)/10})});
 function init(){$('analysis').onchange=setup;$('category').onchange=render;$('market').onchange=marketChanged;$('county').onchange=render;$('radius').onchange=render;setup();}
-function mode(){return $('analysis').value}function marketChanged(){if(!$('market').value){$('view').style.display='none';return;}if(mode()==='Neighborhood Targeting')setupCounty();else render()}
+function mode(){return $('analysis').value}function marketChanged(){if(!$('market').value){blankTemplate();return;}if(mode()==='Neighborhood Targeting')setupCounty();else render()}
 function setup(){const m=mode(),s=$('market');$('stageNotice').classList.add('hidden');$('view').style.display='block';$('marketWrap').style.display='block';$('countyWrap').style.display='none';$('radiusWrap').style.display='none';
  if(m==='Media Market'){s.innerHTML=DMA.slice().sort((a,b)=>a.dma.localeCompare(b.dma)).map(x=>`<option value="${x.dma_code}">${x.dma}</option>`).join('');if(DMA.some(x=>x.dma_code===751))s.value='751';}
  else{s.innerHTML=METRO.map(x=>`<option value="${x.cbsa}">${x.metro}</option>`).join('');if(METRO.some(x=>x.cbsa==='19740'))s.value='19740';if(m==='Neighborhood Targeting'){ $('countyWrap').style.display='block';$('radiusWrap').style.display='block';setupCounty();return;}}
@@ -108,10 +108,21 @@ METHOD['Neighborhood Targeting'].caution='Core opportunity measures remain housi
 window.addEventListener('DOMContentLoaded',()=>{if($('rankDir'))$('rankDir').onchange=render;if($('topN'))$('topN').onchange=render;if($('centerZip')){$('centerZip').oninput=e=>e.target.value=e.target.value.replace(/\D/g,'').slice(0,5);$('centerZip').onchange=()=>{if(+$('radius').value>0)render()}};$('county').onchange=()=>{if(mode()==='Neighborhood Targeting'){const base=ZIP.filter(r=>r.cbsa===$('market').value&&r.fips===$('county').value).sort((a,b)=>b.households-a.households);if(base[0]&&+$('radius').value===0)$('centerZip').value=base[0].zip}render()};$('radius').onchange=render});
 
 
-// Blank-start behavior: no market statistics are shown until the user makes selections.
+// Blank-start behavior: keep the full page template visible, but show no market statistics until required selections are made.
+function blankTemplate(){
+ $('view').style.display='block';
+ $('kpis').innerHTML=['Market Opportunity','Replacement Potential','Need','Homeowner Market Size'].map(x=>`<div><b>&nbsp;</b><span>${x}</span></div>`).join('');
+ $('conditions').innerHTML=['Households','Owner households','Homeownership','Residential ZIP Codes'].map(x=>`<div><span>${x}</span><b>&nbsp;</b></div>`).join('');
+ $('industry').innerHTML='';
+ $('chartTitle').textContent='Market Opportunity'; $('chartNote').textContent='Complete the selections above to view market rankings.'; $('bars').innerHTML='';
+ $('whyTitle').textContent='What the Numbers Tell Us'; $('marketName').textContent='—'; $('why').innerHTML=''; $('method').textContent='';
+ if($('intelGrid'))$('intelGrid').innerHTML=''; if($('intelTakeaways'))$('intelTakeaways').innerHTML='';
+ $('mapNote').textContent='Complete the selections above to view geographic opportunity.'; if($('map'))$('map').innerHTML='';
+ $('tableTitle').textContent='Market Rankings'; $('thead').innerHTML=''; $('rankings').innerHTML='';
+}
 setup=function(){
  const m=mode(),s=$('market');
- $('view').style.display='none';
+ blankTemplate();
  $('stageNotice').classList.add('hidden');
  $('marketWrap').style.display=m?'block':'none';
  $('countyWrap').style.display='none';
@@ -130,8 +141,8 @@ setup=function(){
 };
 render=function(){
  const cat=$('category').value,m=mode(),market=$('market').value;
- if(!cat||!m||!market){$('view').style.display='none';return;}
- if(m==='Neighborhood Targeting'&&!$('county').value){$('view').style.display='none';return;}
+ if(!cat||!m||!market){blankTemplate();return;}
+ if(m==='Neighborhood Targeting'&&!$('county').value){blankTemplate();return;}
  $('view').style.display='block';
  if(m==='Media Market')return renderDMA(cat);
  if(m==='Market Expansion')return renderMetro(cat);
@@ -143,6 +154,6 @@ marketChanged=function(){
  if(mode()==='Neighborhood Targeting'){
    const cb=$('market').value,cs=COUNTY.filter(x=>x.cbsa===cb).sort((a,b)=>a.county.localeCompare(b.county));
    $('county').innerHTML='<option value="" selected>Select county...</option>'+cs.map(x=>`<option value="${x.fips}">${x.county} County</option>`).join('');
-   $('view').style.display='none';
+   blankTemplate();
  } else render();
 };
