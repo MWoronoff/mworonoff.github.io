@@ -196,3 +196,89 @@ function resetMarketAfterSelectorChange(){
 if($('analysis')) $('analysis').addEventListener('change',resetMarketAfterSelectorChange);
 if($('category')) $('category').addEventListener('change',resetMarketAfterSelectorChange);
 resetMarketToPrompt();
+
+
+/* FINAL CONTROL WIRING: one authoritative selector path. */
+(function(){
+  const oldA=$('analysis'), oldC=$('category'), oldM=$('market');
+  if(!oldA||!oldC||!oldM) return;
+
+  const a=oldA.cloneNode(true), c=oldC.cloneNode(true), m=oldM.cloneNode(true);
+  oldA.replaceWith(a); oldC.replaceWith(c); oldM.replaceWith(m);
+
+  function marketPrompt(){
+    m.innerHTML='<option value="">Select market...</option>';
+    m.value='';
+  }
+  function fillMarkets(){
+    marketPrompt();
+    if(!a.value || !c.value) return;
+    let rows=[], valueKey='', labelKey='';
+    if(a.value==='dma'){ rows=DMA; valueKey='dma_code'; labelKey='dma'; }
+    else if(a.value==='metro'){ rows=METRO; valueKey='cbsa'; labelKey='metro'; }
+    else if(a.value==='county'){
+      rows=METRO; valueKey='cbsa'; labelKey='metro';
+    } else if(a.value==='zip'){
+      rows=METRO; valueKey='cbsa'; labelKey='metro';
+    }
+    const seen=new Set();
+    rows.forEach(r=>{
+      const value=String(r[valueKey]??'');
+      const label=String(r[labelKey]??'');
+      if(!value||!label||seen.has(value)) return;
+      seen.add(value);
+      const o=document.createElement('option'); o.value=value; o.textContent=label; m.appendChild(o);
+    });
+  }
+  function blankResultsUntilMarket(){
+    // Keep the approved template visible; render only after an explicit market choice.
+    if(!m.value) return;
+    render();
+  }
+  a.addEventListener('change',()=>{ fillMarkets(); });
+  c.addEventListener('change',()=>{ fillMarkets(); });
+  m.addEventListener('change',blankResultsUntilMarket);
+  const rv=$('rankView'); if(rv) rv.addEventListener('change',()=>{if(m.value)render();});
+  const sh=$('showN'); if(sh) sh.addEventListener('change',()=>{if(m.value)render();});
+  marketPrompt();
+})();
+
+
+/* FINAL WHAT-THE-NUMBERS-TELL-US OUTPUT: definitions only, no duplicated KPI values. */
+(function(){
+  const coreRender=render;
+  render=function(){
+    coreRender();
+    const a=$('analysis'), c=$('category'), m=$('market');
+    if(!a||!c||!m||!a.value||!c.value||!m.value) return;
+    if(a.value==='metro'){
+      $('metrics').innerHTML=
+        `<div class="metric"><div><b>Market Expansion</b><div class="sub">Measures the strength of this metro as a business-development market for the selected home-services category.</div></div></div>`+
+        `<div class="metric"><div><b>Business Establishments</b><div class="sub">Counts employer establishments in the selected category within this metro. The 10+ and 50+ employee measures identify progressively larger potential business prospects.</div></div></div>`+
+        `<div class="metric"><div><b>Contractor Market Strength</b><div class="sub">Measures the depth and economic strength of the metro's contractor ecosystem. It is a market-context signal, not a count of prospective advertisers.</div></div></div>`;
+      return;
+    }
+    let x=null, universe=null;
+    if(a.value==='dma'){x=DMA.find(r=>String(r.dma_code)===String(m.value)); universe=DMA;}
+    else if(a.value==='county'){
+      const rows=COUNTY.filter(r=>String(r.cbsa)===String(m.value));
+      x=rows[0]||null; universe=COUNTY;
+    }
+    if(!x||!universe) return;
+    const replacement=index100(x.replacement_ready,universe,'replacement_ready');
+    const need=index100(x[c.value+'_need'],universe,c.value+'_need');
+    const size=score(x.market_scale);
+    const cat=categoryName(c.value);
+    const pos=v=>{v=Number(v);return v>=110?'well above the U.S. average':v>=102?'above the U.S. average':v>=98?'approximately in line with the U.S. average':v>=90?'below the U.S. average':'well below the U.S. average';};
+    const needDef=c.value==='hvac'
+      ? 'Measures housing and environmental characteristics associated with physical need for HVAC repair or replacement.'
+      : c.value==='roofing'
+        ? 'Measures housing and environmental characteristics associated with physical need for roof repair or replacement.'
+        : 'Measures housing characteristics associated with physical need for window and door replacement.';
+    $('metrics').innerHTML=
+      `<div class="metric"><div><b>Replacement Potential</b><div class="sub">Measures how strongly the market's housing stock and ownership characteristics indicate homes are entering the replacement cycle.<br><b>This market:</b> ${pos(replacement)}.</div></div></div>`+
+      `<div class="metric"><div><b>${serviceNeedLabel(c.value)}</b><div class="sub">${needDef}<br><b>This market:</b> ${pos(need)}.</div></div></div>`+
+      `<div class="metric"><div><b>Homeowner Market Size</b><div class="sub">Measures the relative size of the addressable homeowner audience.<br><b>This market:</b> ${pos(size)} on the analyzer's market-size benchmark.</div></div></div>`+
+      `<div class="sub" style="margin-top:14px"><b>Index guide:</b> 100 = U.S. average for Replacement Potential and Need.</div>`;
+  };
+})();
