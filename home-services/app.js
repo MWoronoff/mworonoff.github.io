@@ -94,25 +94,97 @@ function dmaCentroid(r){
  return null
 }
 let GEO_MAP=null,GEO_LAYER=null,GEO_RADIUS=null,GEO_RENDERER=null;
-function ensureLeafletMap(){const el=$('map');if(!el||typeof L==='undefined')return null;if(!GEO_MAP){el.innerHTML='';GEO_MAP=L.map(el,{scrollWheelZoom:false,zoomControl:true,attributionControl:true});GEO_MAP.createPane('opportunityMarkers');GEO_MAP.getPane('opportunityMarkers').style.zIndex='650';GEO_MAP.getPane('opportunityMarkers').style.pointerEvents='auto';GEO_RENDERER=L.canvas({pane:'opportunityMarkers',padding:0.5});const primary=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:'&copy; OpenStreetMap contributors'});let switched=false;primary.on('tileerror',()=>{if(switched)return;switched=true;try{GEO_MAP.removeLayer(primary)}catch(e){}L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{maxZoom:19,subdomains:'abcd',attribution:'&copy; OpenStreetMap contributors &copy; CARTO'}).addTo(GEO_MAP)});primary.addTo(GEO_MAP);GEO_MAP.setView([39.5,-98.35],4)}if(GEO_LAYER)GEO_LAYER.clearLayers();else GEO_LAYER=L.layerGroup().addTo(GEO_MAP);if(GEO_RADIUS){GEO_MAP.removeLayer(GEO_RADIUS);GEO_RADIUS=null}return GEO_MAP}
-function renderGeoMap(rows,labelFn,scoreFn,selectedLabel,opts={}){const el=$('map');if(!el)return;const map=ensureLeafletMap();if(!map){el.innerHTML='<div class="map-empty">Map tiles could not be loaded. Rankings and calculations remain available.</div>';return}let mapRows=opts.allRows?rows.slice():visibleRows(rows);const selectedRow=rows.find(r=>labelFn(r)===selectedLabel);if(selectedRow&&!mapRows.includes(selectedRow))mapRows=mapRows.concat([selectedRow]);let pts=[];for(const r of mapRows){let c;if(r.lat!=null)c={lat:+r.lat,lon:+r.lon};else if(r.fips)c=centroidFor(ZIP.filter(z=>z.fips===r.fips));else if(r.cbsa)c=centroidFor(ZIP.filter(z=>z.cbsa===r.cbsa));else if(r.dma_code!=null)c=dmaCentroid(r);if(c&&Number.isFinite(c.lat)&&Number.isFinite(c.lon))pts.push({...c,label:labelFn(r),score:+scoreFn(r),selected:labelFn(r)===selectedLabel,row:r})}
- const bounds=[];for(const p of pts){let marker;if(opts.usView){const size=p.selected?18:12;const icon=L.divIcon({className:'dma-div-icon',html:`<span class="dma-dot${p.selected?' selected':''}" style="width:${size}px;height:${size}px"></span>`,iconSize:[size,size],iconAnchor:[size/2,size/2]});marker=L.marker([p.lat,p.lon],{icon,pane:'markerPane',keyboard:true,title:p.label,zIndexOffset:p.selected?1000:0})}else{const radius=4+Math.max(0,Math.min(100,p.score))/22;marker=L.circleMarker([p.lat,p.lon],{radius:p.selected?Math.max(9,radius+3):Math.max(6,radius),weight:p.selected?4:2,opacity:1,fillOpacity:p.selected?1:.72,color:p.selected?'#17242b':'#315c6a',fillColor:p.selected?'#8fcf46':'#4f9e68',renderer:GEO_RENDERER,pane:'opportunityMarkers'})}marker.bindPopup(`<div class="map-popup"><b>${p.label}</b><span>Market Opportunity: ${score(p.score)}</span></div>`);marker.addTo(GEO_LAYER);bounds.push([p.lat,p.lon])}
- if(opts.center&&Number.isFinite(+opts.center.lat)&&Number.isFinite(+opts.center.lon)){const c=[+opts.center.lat,+opts.center.lon];L.circleMarker(c,{radius:7,weight:3,fillOpacity:1,renderer:GEO_RENDERER,pane:'opportunityMarkers'}).bindTooltip('Center ZIP '+opts.center.zip).addTo(GEO_LAYER);bounds.push(c);if(opts.radiusMiles>0){GEO_RADIUS=L.circle(c,{radius:+opts.radiusMiles*1609.344,weight:2,fillOpacity:0.05}).addTo(map)}}
- if(opts.usView){const usBounds=L.latLngBounds([[24.4,-125.0],[49.5,-66.5]]),usCenter=usBounds.getCenter();const frameUS=()=>{map.invalidateSize();map.setMaxBounds(null);const z=map.getBoundsZoom(usBounds,true,[18,18]);map.setView(usCenter,Math.min(7,Math.max(5,z)),{animate:false});map.setMaxBounds(usBounds.pad(0.04))};frameUS();setTimeout(frameUS,120)}
- else if(opts.focusSelected){map.setMaxBounds(null);const sp=pts.find(p=>p.selected);if(sp){const target=[sp.lat,sp.lon],targetZoom=opts.focusZoom||7;const lockFocus=()=>{map.invalidateSize({pan:false});map.setView(target,targetZoom,{animate:false,reset:true})};lockFocus();setTimeout(lockFocus,80);setTimeout(lockFocus,300)}else if(bounds.length){map.setMaxBounds(null);map.fitBounds(bounds,{padding:[28,28],maxZoom:opts.maxZoom||7});setTimeout(()=>map.invalidateSize(),0)}else{map.setView([39.5,-98.35],4);setTimeout(()=>map.invalidateSize(),0)}}
- else if(bounds.length){map.fitBounds(bounds,{padding:[28,28],maxZoom:opts.radiusMiles?10:opts.maxZoom||7});setTimeout(()=>map.invalidateSize(),0)}else{map.setView([39.5,-98.35],4);setTimeout(()=>map.invalidateSize(),0)}
+function ensureLeafletMap(){
+ const el=$('map');if(!el||typeof L==='undefined')return null;
+ const broken=GEO_MAP&&(GEO_MAP._container!==el||!el.querySelector('.leaflet-map-pane')||!el.classList.contains('leaflet-container'));
+ if(broken){
+   try{GEO_MAP.remove()}catch(e){}
+   GEO_MAP=null;GEO_LAYER=null;GEO_RADIUS=null;GEO_RENDERER=null;
+   el.innerHTML='';el.removeAttribute('tabindex');
+ }
+ if(!GEO_MAP){
+   el.innerHTML='';
+   GEO_MAP=L.map(el,{scrollWheelZoom:false,zoomControl:true,attributionControl:true});
+   GEO_MAP.createPane('opportunityMarkers');
+   GEO_MAP.getPane('opportunityMarkers').style.zIndex='650';
+   GEO_MAP.getPane('opportunityMarkers').style.pointerEvents='auto';
+   GEO_RENDERER=L.canvas({pane:'opportunityMarkers',padding:0.5});
+   const primary=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:'&copy; OpenStreetMap contributors'});
+   let switched=false;
+   primary.on('tileerror',()=>{if(switched)return;switched=true;try{GEO_MAP.removeLayer(primary)}catch(e){}L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{maxZoom:19,subdomains:'abcd',attribution:'&copy; OpenStreetMap contributors &copy; CARTO'}).addTo(GEO_MAP)});
+   primary.addTo(GEO_MAP);GEO_MAP.setView([39.5,-98.35],4);
+ }
+ if(GEO_LAYER)GEO_LAYER.clearLayers();else GEO_LAYER=L.layerGroup().addTo(GEO_MAP);
+ if(GEO_RADIUS){try{GEO_MAP.removeLayer(GEO_RADIUS)}catch(e){}GEO_RADIUS=null}
+ requestAnimationFrame(()=>{try{GEO_MAP.invalidateSize({pan:false})}catch(e){}});
+ return GEO_MAP;
+}
+function renderGeoMap(rows,labelFn,scoreFn,selectedLabel,opts={}){
+ const el=$('map');if(!el)return;
+ const map=ensureLeafletMap();
+ if(!map){el.innerHTML='<div class="map-empty">Map tiles could not be loaded. Rankings and calculations remain available.</div>';return}
+ let mapRows=opts.allRows?rows.slice():visibleRows(rows);
+ const selectedRow=selectedLabel?rows.find(r=>labelFn(r)===selectedLabel):null;
+ if(selectedRow&&!mapRows.includes(selectedRow))mapRows=mapRows.concat([selectedRow]);
+ const pts=[];
+ for(const r of mapRows){
+   let c=null;
+   if(Number.isFinite(+r.lat)&&Number.isFinite(+r.lon))c={lat:+r.lat,lon:+r.lon};
+   else if(r.fips)c=centroidFor(ZIP.filter(z=>String(z.fips)===String(r.fips)));
+   else if(r.cbsa)c=centroidFor(ZIP.filter(z=>String(z.cbsa)===String(r.cbsa)));
+   else if(r.dma_code!=null)c=dmaCentroid(r);
+   if(c&&Number.isFinite(+c.lat)&&Number.isFinite(+c.lon)&&Math.abs(+c.lat)<=90&&Math.abs(+c.lon)<=180)
+     pts.push({lat:+c.lat,lon:+c.lon,label:labelFn(r),score:+scoreFn(r),selected:!!selectedLabel&&labelFn(r)===selectedLabel,row:r});
+ }
+ const bounds=[];
+ for(const p of pts){
+   let marker;
+   if(opts.usView){
+     const size=p.selected?18:12;
+     const icon=L.divIcon({className:'dma-div-icon',html:`<span class="dma-dot${p.selected?' selected':''}" style="width:${size}px;height:${size}px"></span>`,iconSize:[size,size],iconAnchor:[size/2,size/2]});
+     marker=L.marker([p.lat,p.lon],{icon,pane:'markerPane',keyboard:true,title:p.label,zIndexOffset:p.selected?1000:0});
+   }else{
+     const radius=4+Math.max(0,Math.min(100,p.score))/22;
+     marker=L.circleMarker([p.lat,p.lon],{radius:p.selected?Math.max(9,radius+3):Math.max(6,radius),weight:p.selected?4:2,opacity:1,fillOpacity:p.selected?1:.72,color:p.selected?'#17242b':'#315c6a',fillColor:p.selected?'#8fcf46':'#4f9e68',renderer:GEO_RENDERER,pane:'opportunityMarkers'});
+   }
+   marker.bindPopup(`<div class="map-popup"><b>${p.label}</b><span>Market Opportunity: ${score(p.score)}</span></div>`);
+   marker.addTo(GEO_LAYER);bounds.push([p.lat,p.lon]);
+ }
+ if(opts.center&&Number.isFinite(+opts.center.lat)&&Number.isFinite(+opts.center.lon)){
+   const c=[+opts.center.lat,+opts.center.lon];
+   L.circleMarker(c,{radius:7,weight:3,fillOpacity:1,renderer:GEO_RENDERER,pane:'opportunityMarkers'}).bindTooltip('Center ZIP '+opts.center.zip).addTo(GEO_LAYER);
+   bounds.push(c);
+   if(opts.radiusMiles>0)GEO_RADIUS=L.circle(c,{radius:+opts.radiusMiles*1609.344,weight:2,fillOpacity:0.05}).addTo(map);
+ }
+ const frame=()=>{
+   try{
+     map.invalidateSize({pan:false});map.setMaxBounds(null);
+     if(opts.usView){
+       const b=L.latLngBounds([[24.4,-125],[49.5,-66.5]]);
+       map.fitBounds(b,{padding:[18,18],maxZoom:5});map.setMaxBounds(b.pad(.04));
+     }else if(opts.focusSelected){
+       const sp=pts.find(p=>p.selected);
+       if(sp)map.setView([sp.lat,sp.lon],opts.focusZoom||7,{animate:false});
+       else if(bounds.length)map.fitBounds(bounds,{padding:[28,28],maxZoom:opts.maxZoom||8});
+     }else if(bounds.length===1)map.setView(bounds[0],opts.maxZoom||10,{animate:false});
+     else if(bounds.length>1)map.fitBounds(bounds,{padding:[28,28],maxZoom:opts.radiusMiles?10:(opts.maxZoom||10)});
+     else map.setView([39.5,-98.35],4,{animate:false});
+   }catch(e){}
+ };
+ frame();setTimeout(frame,80);setTimeout(frame,300);
 }
 function rowsToTable(rows,html){return visibleRows(rows).map(html).join('')}
 
 // Override setup to support independent service-area radius.
 function clearResultsForSelection(){
- const ids=['cards','conditions','chart','why','intelligence','map','rankings'];
  if($('cards'))$('cards').innerHTML='';
  if($('conditions'))$('conditions').innerHTML='';
  if($('chart'))$('chart').innerHTML='';
  if($('marketName'))$('marketName').textContent='';
  if($('why'))$('why').innerHTML='<div class="sub">Complete the selections above to view an interpretation of the selected geography.</div>';
- if($('map'))$('map').innerHTML='';
+ if(GEO_LAYER)try{GEO_LAYER.clearLayers()}catch(e){}
+ if(GEO_RADIUS&&GEO_MAP)try{GEO_MAP.removeLayer(GEO_RADIUS)}catch(e){}
+ GEO_RADIUS=null;
  if($('mapNote'))$('mapNote').textContent='Complete the selections above to view geographic opportunity.';
  if($('rankings'))$('rankings').innerHTML='';
  if($('thead'))$('thead').innerHTML='';
