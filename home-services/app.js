@@ -95,29 +95,40 @@ function dmaCentroid(r){
 }
 let GEO_MAP=null,GEO_LAYER=null,GEO_RADIUS=null,GEO_RENDERER=null;
 function ensureLeafletMap(){
- const el=$('map');if(!el||typeof L==='undefined')return null;
- const broken=GEO_MAP&&(GEO_MAP._container!==el||!el.querySelector('.leaflet-map-pane')||!el.classList.contains('leaflet-container'));
- if(broken){
-   try{GEO_MAP.remove()}catch(e){}
-   GEO_MAP=null;GEO_LAYER=null;GEO_RADIUS=null;GEO_RENDERER=null;
-   el.innerHTML='';el.removeAttribute('tabindex');
+ const el=$('map');if(!el)return null;
+ if(typeof L==='undefined'){
+   el.innerHTML='<div class="map-empty">Map library did not load. Refresh the page to retry.</div>';
+   return null;
  }
- if(!GEO_MAP){
-   el.innerHTML='';
+ if(GEO_MAP){
+   try{GEO_MAP.off();GEO_MAP.remove()}catch(e){}
+ }
+ GEO_MAP=null;GEO_LAYER=null;GEO_RADIUS=null;GEO_RENDERER=null;
+ el.innerHTML='';
+ try{delete el._leaflet_id}catch(e){}
+ try{
    GEO_MAP=L.map(el,{scrollWheelZoom:false,zoomControl:true,attributionControl:true});
    GEO_MAP.createPane('opportunityMarkers');
    GEO_MAP.getPane('opportunityMarkers').style.zIndex='650';
    GEO_MAP.getPane('opportunityMarkers').style.pointerEvents='auto';
    GEO_RENDERER=L.canvas({pane:'opportunityMarkers',padding:0.5});
+   GEO_LAYER=L.layerGroup().addTo(GEO_MAP);
    const primary=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:'&copy; OpenStreetMap contributors'});
    let switched=false;
-   primary.on('tileerror',()=>{if(switched)return;switched=true;try{GEO_MAP.removeLayer(primary)}catch(e){}L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{maxZoom:19,subdomains:'abcd',attribution:'&copy; OpenStreetMap contributors &copy; CARTO'}).addTo(GEO_MAP)});
-   primary.addTo(GEO_MAP);GEO_MAP.setView([39.5,-98.35],4);
+   primary.on('tileerror',()=>{
+     if(switched||!GEO_MAP)return;switched=true;
+     try{GEO_MAP.removeLayer(primary)}catch(e){}
+     try{L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{maxZoom:19,subdomains:'abcd',attribution:'&copy; OpenStreetMap contributors &copy; CARTO'}).addTo(GEO_MAP)}catch(e){}
+   });
+   primary.addTo(GEO_MAP);
+   GEO_MAP.setView([39.5,-98.35],4);
+   setTimeout(()=>{try{GEO_MAP.invalidateSize({pan:false})}catch(e){}},0);
+   return GEO_MAP;
+ }catch(e){
+   GEO_MAP=null;GEO_LAYER=null;GEO_RENDERER=null;
+   el.innerHTML='<div class="map-empty">Map could not initialize. Rankings and calculations remain available.</div>';
+   return null;
  }
- if(GEO_LAYER)GEO_LAYER.clearLayers();else GEO_LAYER=L.layerGroup().addTo(GEO_MAP);
- if(GEO_RADIUS){try{GEO_MAP.removeLayer(GEO_RADIUS)}catch(e){}GEO_RADIUS=null}
- requestAnimationFrame(()=>{try{GEO_MAP.invalidateSize({pan:false})}catch(e){}});
- return GEO_MAP;
 }
 function renderGeoMap(rows,labelFn,scoreFn,selectedLabel,opts={}){
  const el=$('map');if(!el)return;
@@ -182,9 +193,9 @@ function clearResultsForSelection(){
  if($('chart'))$('chart').innerHTML='';
  if($('marketName'))$('marketName').textContent='';
  if($('why'))$('why').innerHTML='<div class="sub">Complete the selections above to view an interpretation of the selected geography.</div>';
- if(GEO_LAYER)try{GEO_LAYER.clearLayers()}catch(e){}
- if(GEO_RADIUS&&GEO_MAP)try{GEO_MAP.removeLayer(GEO_RADIUS)}catch(e){}
- GEO_RADIUS=null;
+ if(GEO_MAP){try{GEO_MAP.off();GEO_MAP.remove()}catch(e){}}
+ GEO_MAP=null;GEO_LAYER=null;GEO_RADIUS=null;GEO_RENDERER=null;
+ const mapEl=$('map');if(mapEl){mapEl.innerHTML='';try{delete mapEl._leaflet_id}catch(e){}}
  if($('mapNote'))$('mapNote').textContent='Complete the selections above to view geographic opportunity.';
  if($('rankings'))$('rankings').innerHTML='';
  if($('thead'))$('thead').innerHTML='';
