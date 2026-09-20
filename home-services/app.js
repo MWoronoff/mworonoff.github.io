@@ -205,3 +205,95 @@ function init(){
 }
 window.addEventListener('load',init);
 
+
+
+/* ===== FINAL RANK-BY + SCORE REPAIR — 2026-09-21 ===== */
+function hsIndex(row,field,rows){
+ const vals=rows.map(r=>+r[field]||0).filter(v=>v>0);
+ const avg=vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:0;
+ return avg?100*(+row[field]||0)/avg:0;
+}
+function hsOpportunity(row,cat,rows){
+ const replacement=hsIndex(row,'replacement_ready',rows);
+ const need=hsIndex(row,cat+'_need',rows);
+ const scale=Number(row.market_scale||row.addressable_scale||0);
+ return .40*replacement+.35*need+.25*scale;
+}
+function hsRankOptions(cat,m){
+ const need=serviceNeedLabel(cat)+' Index';
+ if(m==='Market Expansion')return [
+   ['opportunity','Market Expansion Score'],['contractor','Contractor Market Strength'],
+   ['establishments',categoryName(cat)+' Business Establishments'],['tenplus',categoryName(cat)+' Businesses with 10+ Employees'],
+   ['fiftyplus',categoryName(cat)+' Businesses with 50+ Employees']
+ ];
+ return [['opportunity',m==='Media Market'?'Media Market Opportunity Score':m==='Local Opportunity'?'Local Opportunity Score':'Neighborhood Opportunity Score'],
+         ['replacement','Replacement Potential Index'],['need',need],['scale','Homeowner Market Size']];
+}
+function hsEnsureRankBy(cat,m){
+ let wrap=$('hsRankByWrap'),el=$('hsRankBy');
+ if(!wrap){
+   const rankWrap=$('rankDir')&&$('rankDir').parentElement;
+   if(!rankWrap)return null;
+   wrap=document.createElement('label');wrap.id='hsRankByWrap';
+   wrap.innerHTML='<span>RANK BY</span><select id="hsRankBy"></select>';
+   rankWrap.parentElement.insertBefore(wrap,rankWrap);
+   el=$('hsRankBy'); el.onchange=render;
+ }
+ const old=el.value,opts=hsRankOptions(cat,m);
+ el.innerHTML=opts.map(o=>`<option value="${o[0]}">${o[1]}</option>`).join('');
+ if(opts.some(o=>o[0]===old))el.value=old; else el.value='opportunity';
+ return el.value;
+}
+function hsSort(rows,valueFn){
+ const dir=$('rankDir')&&$('rankDir').value==='Bottom'?1:-1;
+ return rows.slice().sort((a,b)=>dir*(valueFn(a)-valueFn(b)));
+}
+function hsTop(rows){const n=+$('topN').value||25;return rows.slice(0,n)}
+function hsDMA(cat){
+ const universe=DMA,rank=hsEnsureRankBy(cat,'Media Market');
+ const value=r=>rank==='replacement'?hsIndex(r,'replacement_ready',universe):
+   rank==='need'?hsIndex(r,cat+'_need',universe):
+   rank==='scale'?Number(r.market_scale||0):hsOpportunity(r,cat,universe);
+ const sorted=hsSort(universe,value),x=sorted[0];if(!x)return;
+ const opp=hsOpportunity(x,cat,universe),rep=hsIndex(x,'replacement_ready',universe),need=hsIndex(x,cat+'_need',universe);
+ updateConditions(cat,'Media Market',x,sorted);renderIntelligence(cat,'Media Market',x,sorted);
+ cards([['Media Market Opportunity Score',score(opp)],['Replacement Potential Index',score(rep)],[serviceNeedLabel(cat)+' Index',score(need)],['Homeowner Market Size',score(x.market_scale)]]);
+ $('chartTitle').textContent='U.S. Media Market Opportunity';
+ $('chartNote').textContent='National DMA comparison. Select a Rank By measure to reorder the chart and rankings.';
+ $('marketName').textContent=x.dma;$('whyTitle').textContent='What the Numbers Tell Us';
+ $('method').textContent='Media Market Opportunity = 40% Replacement Potential Index + 35% Need Index + 25% Homeowner Market Size.';
+ const shown=hsTop(sorted);
+ try{bars(shown,r=>r.dma,value)}catch(e){}
+ $('tableTitle').textContent='DMA Rankings — The Ad Shop';
+ $('thead').innerHTML='<tr><th>Rank</th><th>DMA</th><th>Media Market Opportunity Score</th><th>Replacement Potential Index</th><th>'+serviceNeedLabel(cat)+' Index</th><th>Homeowner Market Size</th></tr>';
+ $('rankings').innerHTML=shown.map((r,i)=>`<tr data-code="${r.dma_code}"><td>${i+1}</td><td><b>${r.dma}</b></td><td><b>${score(hsOpportunity(r,cat,universe))}</b></td><td>${score(hsIndex(r,'replacement_ready',universe))}</td><td>${score(hsIndex(r,cat+'_need',universe))}</td><td>${score(r.market_scale)}</td></tr>`).join('');
+ try{renderGeoMap(universe,r=>r.dma,value,x.dma,{usView:true,allRows:true})}catch(e){}
+ renderWhatNumbersTellUs(cat,rep,need,score(x.market_scale),x.dma);rowClicks();
+}
+function hsCounty(cat){
+ const cb=$('market').value;if(!cb)return;
+ const universe=COUNTY.filter(r=>String(r.cbsa)===String(cb)),rank=hsEnsureRankBy(cat,'Local Opportunity');
+ const value=r=>rank==='replacement'?hsIndex(r,'replacement_ready',COUNTY):
+   rank==='need'?hsIndex(r,cat+'_need',COUNTY):
+   rank==='scale'?Number(r.market_scale||r.addressable_scale||0):hsOpportunity(r,cat,COUNTY);
+ const sorted=hsSort(universe,value),x=sorted[0],metro=METRO.find(r=>String(r.cbsa)===String(cb));if(!x)return;
+ updateConditions(cat,'Local Opportunity',x,sorted);renderIntelligence(cat,'Local Opportunity',x,sorted);
+ cards([['Local Opportunity Score',score(hsOpportunity(x,cat,COUNTY))],['Replacement Potential Index',score(hsIndex(x,'replacement_ready',COUNTY))],[serviceNeedLabel(cat)+' Index',score(hsIndex(x,cat+'_need',COUNTY))],['Replacement Potential Households',fmt(x.replacement_ready_hh)],['Homeowner Households',fmt(x.owner_hh)]]);
+ $('chartTitle').textContent=(metro?metro.metro:'Selected Metro')+' — County Opportunity';
+ $('chartNote').textContent='Counties in the selected Metro. Select a Rank By measure to reorder the chart and rankings.';
+ const shown=hsTop(sorted);try{bars(shown,r=>r.county+' County',value)}catch(e){}
+ $('tableTitle').textContent='County Rankings — The Branch';
+ $('thead').innerHTML='<tr><th>Rank</th><th>County</th><th>Local Opportunity Score</th><th>Replacement Potential Index</th><th>'+serviceNeedLabel(cat)+' Index</th><th>Replacement Potential Households</th><th>Homeowner Households</th></tr>';
+ $('rankings').innerHTML=shown.map((r,i)=>`<tr><td>${i+1}</td><td><b>${r.county} County</b></td><td><b>${score(hsOpportunity(r,cat,COUNTY))}</b></td><td>${score(hsIndex(r,'replacement_ready',COUNTY))}</td><td>${score(hsIndex(r,cat+'_need',COUNTY))}</td><td>${fmt(r.replacement_ready_hh)}</td><td>${fmt(r.owner_hh)}</td></tr>`).join('');
+ try{renderGeoMap(universe,r=>r.county+' County',value,x.county+' County',{allRows:true,maxZoom:8})}catch(e){}
+ renderWhatNumbersTellUs(cat,hsIndex(x,'replacement_ready',COUNTY),hsIndex(x,cat+'_need',COUNTY),score(x.market_scale||x.addressable_scale),x.county+' County');
+}
+const hsLegacyRender=render;
+render=function(){
+ const cat=$('category').value,m=mode();if(!cat||!m)return;
+ hsEnsureRankBy(cat,m);
+ if(m==='Media Market')return hsDMA(cat);
+ if(m==='Local Opportunity')return hsCounty(cat);
+ return hsLegacyRender();
+};
+
