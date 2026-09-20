@@ -105,6 +105,19 @@ function renderGeoMap(rows,labelFn,scoreFn,selectedLabel,opts={}){const el=$('ma
 function rowsToTable(rows,html){return visibleRows(rows).map(html).join('')}
 
 // Override setup to support independent service-area radius.
+function clearResultsForSelection(){
+ const ids=['cards','conditions','chart','why','intelligence','map','rankings'];
+ if($('cards'))$('cards').innerHTML='';
+ if($('conditions'))$('conditions').innerHTML='';
+ if($('chart'))$('chart').innerHTML='';
+ if($('marketName'))$('marketName').textContent='';
+ if($('why'))$('why').innerHTML='<div class="sub">Complete the selections above to view an interpretation of the selected geography.</div>';
+ if($('map'))$('map').innerHTML='';
+ if($('mapNote'))$('mapNote').textContent='Complete the selections above to view geographic opportunity.';
+ if($('rankings'))$('rankings').innerHTML='';
+ if($('thead'))$('thead').innerHTML='';
+ if($('tableTitle'))$('tableTitle').textContent='Market Rankings';
+}
 function setup(){
  const m=mode(),market=$('market');
  $('stageNotice').classList.add('hidden');$('view').style.display='block';$('marketWrap').style.display='block';
@@ -115,6 +128,7 @@ function setup(){
  market.innerHTML='<option value="">Select market...</option>';
  $('county').innerHTML='<option value="">Select county...</option>';
  if($('centerZip'))$('centerZip').value='';
+ clearResultsForSelection();
  if(!$('analysis').value||!$('category').value)return;
  const rows=m==='Media Market'?DMA.slice().sort((a,b)=>a.dma.localeCompare(b.dma)):METRO.slice().sort((a,b)=>a.metro.localeCompare(b.metro));
  market.insertAdjacentHTML('beforeend',rows.map(x=>m==='Media Market'?`<option value="${x.dma_code}">${x.dma}</option>`:`<option value="${x.cbsa}">${x.metro}</option>`).join(''));
@@ -132,7 +146,14 @@ function setupCounty(){
 function marketChanged(){
  if(!$('market').value)return;
  const m=mode();
- if(m==='Local Opportunity'||m==='Neighborhood Targeting'){setupCounty();return;}
+ if(m==='Local Opportunity'||m==='Neighborhood Targeting'){
+   setupCounty();
+   clearResultsForSelection();
+   const metro=METRO.find(r=>String(r.cbsa)===String($('market').value));
+   if($('chartTitle'))$('chartTitle').textContent=(metro?metro.metro:'Selected Metro')+' — Select a County';
+   if($('chartNote'))$('chartNote').textContent='Choose a county above to view local opportunity, ZIP-level geography and ZIP rankings.';
+   return;
+ }
  render();
 }
 
@@ -181,15 +202,16 @@ function marketIndexPosition(v){
 }
 function renderWhatNumbersTellUs(cat,replacement,need,marketSize,geoName='This market'){
  const needLabel=serviceNeedLabel(cat);
- const position=v=>{v=Number(v);if(!Number.isFinite(v))return 'not available';if(v>=110)return 'well above the U.S. average';if(v>=102)return 'above the U.S. average';if(v>=98)return 'approximately in line with the U.S. average';if(v>=90)return 'below the U.S. average';return 'well below the U.S. average';};
- const needDef=cat==='hvac'?'Measures housing and environmental characteristics associated with physical need for HVAC repair or replacement.':cat==='roofing'?'Measures housing and environmental characteristics associated with physical need for roof repair or replacement.':'Measures housing characteristics associated with physical need for window and door replacement.';
- const sizeText=Number(marketSize)>=90?'represents a large homeowner market':Number(marketSize)>=60?'represents a substantial homeowner market':'represents a smaller homeowner market on the analyzer benchmark';
- const html=
- `<div class="metric"><div><b>Replacement Potential</b><div class="sub">Measures how strongly the area's housing stock and ownership characteristics indicate homes are entering the replacement cycle.<br><b>${geoName}:</b> Replacement potential is ${position(replacement)}.</div></div></div>`+
- `<div class="metric"><div><b>${needLabel}</b><div class="sub">${needDef}<br><b>${geoName}:</b> ${needLabel} is ${position(need)}.</div></div></div>`+
- `<div class="metric"><div><b>Homeowner Market Size</b><div class="sub">Measures the relative size of the addressable homeowner audience.<br><b>${geoName}:</b> ${sizeText}.</div></div></div>`+
- `<div class="sub" style="margin-top:14px"><b>Index guide:</b> 100 = U.S. average for Replacement Potential and Need.</div>`;
- if($('why')) $('why').innerHTML=html;
+ const rel=v=>{v=Number(v);if(v>=110)return 'well above';if(v>=102)return 'above';if(v>=98)return 'about in line with';if(v>=90)return 'below';return 'well below';};
+ const needPhrase=cat==='hvac'?'HVAC system need':cat==='roofing'?'roofing need':'window and door need';
+ const rep=rel(replacement), nd=rel(need);
+ let synthesis='';
+ if(Number(replacement)>=102 && Number(need)>=102) synthesis=`${geoName} shows a favorable combination: replacement-cycle potential and ${needPhrase} are both above the U.S. benchmark. That means housing characteristics and category-specific physical need are pointing in the same direction.`;
+ else if(Number(replacement)>=102 && Number(need)<98) synthesis=`${geoName} has above-benchmark replacement-cycle potential, but ${needPhrase} is ${nd} the U.S. benchmark. The market therefore has replacement-age opportunity without equally strong category-specific need.`;
+ else if(Number(replacement)<98 && Number(need)>=102) synthesis=`${geoName} has ${rep} benchmark replacement-cycle potential, while ${needPhrase} is above benchmark. Category-specific need is the stronger opportunity signal here.`;
+ else synthesis=`${geoName} is ${rep} the U.S. benchmark for replacement-cycle potential and ${nd} the benchmark for ${needPhrase}. Neither measure should be interpreted alone; the opportunity score combines these signals with homeowner market size.`;
+ const size=Number(marketSize)>=90?'The homeowner base is comparatively large, adding meaningful audience scale.':Number(marketSize)>=60?'The homeowner base provides moderate audience scale.':'The homeowner base is comparatively smaller, so scale is a limiting factor even where propensity is favorable.';
+ $('why').innerHTML=`<div class="metric"><div><b>What stands out</b><div class="sub">${synthesis}</div></div></div><div class="metric"><div><b>Market scale</b><div class="sub">${size}</div></div></div><div class="sub" style="margin-top:12px"><b>How to read it:</b> Replacement Potential identifies homes moving into the replacement cycle; ${needLabel} reflects category-specific physical need. Index 100 = U.S. average.</div>`;
 }
 
 function renderDMA(cat){
@@ -203,7 +225,6 @@ function renderDMA(cat){
  $('rankings').innerHTML=rowsToTable(sorted,(r,i)=>`<tr data-code="${r.dma_code}"><td>${i+1}</td><td>${r.dma}</td><td><b>${score(r[key])}</b></td><td>${index100(r.replacement_ready,DMA,'replacement_ready')}</td><td>${index100(r[cat+'_need'],DMA,cat+'_need')}</td><td>${score(r.market_scale)}</td></tr>`);rowClicks();
  try{renderGeoMap(sorted,r=>r.dma,r=>r[key],x.dma,{usView:true});$('mapNote').textContent='U.S. media-market opportunity view.';}catch(e){$('map').innerHTML='<div class="map-empty">Map unavailable. Rankings remain available below.</div>';}
  try{bars(visibleRows(sorted),r=>r.dma,r=>r[key]);}catch(e){}
- 
  renderWhatNumbersTellUs(cat,index100(x.replacement_ready,DMA,'replacement_ready'),index100(x[cat+'_need'],DMA,cat+'_need'),score(x.market_scale),x.dma);
 }
 function renderMetro(cat){
@@ -227,14 +248,15 @@ function renderCounty(cat){
  const zips=rankRows(ZIP.filter(r=>String(r.fips)===String(fips)),key);
  updateConditions(cat,'Local Opportunity',x,countyRows);renderIntelligence(cat,'Local Opportunity',x,countyRows);
  cards([['Local Opportunity Score',score(x[key])],[upgradeLabel(cat),index100(x.replacement_ready,COUNTY,'replacement_ready')],[serviceNeedLabel(cat),index100(x[cat+'_need'],COUNTY,cat+'_need')],['Replacement Potential Households',fmt(x.replacement_ready_hh)],['Homeowner Households',fmt(x.owner_hh)]]);
- $('chartTitle').textContent=x.county+' County — ZIP Opportunity';$('chartNote').textContent='Residential ZIP Codes in the selected county, ranked using the same housing-based opportunity inputs.';
- $('marketName').textContent=x.county+' County';$('whyTitle').textContent='What the Numbers Tell Us';$('method').textContent='Local Opportunity = 40% Replacement Potential + 35% Need + 25% Homeowner Market Size.';
+ $('chartTitle').textContent=x.county+' County — ZIP Opportunity';
+ $('chartNote').textContent='Residential ZIP Codes in the selected county, ranked using replacement potential, category need and homeowner market size.';
+ $('marketName').textContent=x.county+' County';$('whyTitle').textContent='What the Numbers Tell Us';
+ $('method').textContent='Local Opportunity = 40% Replacement Potential + 35% Need + 25% Homeowner Market Size.';
+ try{bars(visibleRows(zips),r=>'ZIP '+r.zip,r=>r[key]);}catch(e){}
  $('tableTitle').textContent='ZIP Rankings — '+x.county+' County';
  $('thead').innerHTML='<tr><th>Rank</th><th>ZIP</th><th>ZIP Opportunity</th><th>Replacement Potential Households</th><th>Homeowner Households</th><th>Households</th></tr>';
  $('rankings').innerHTML=rowsToTable(zips,(r,i)=>`<tr><td>${i+1}</td><td><b>${r.zip}</b></td><td><b>${score(r[key])}</b></td><td>${fmt(r.replacement_ready_hh)}</td><td>${fmt(r.owner_hh)}</td><td>${fmt(r.households)}</td></tr>`);
  try{renderGeoMap(zips,r=>'ZIP '+r.zip,r=>r[key],null,{allRows:true,maxZoom:10});$('mapNote').textContent='Residential ZIP opportunity within '+x.county+' County.';}catch(e){$('map').innerHTML='<div class="map-empty">Map unavailable. ZIP rankings remain available below.</div>';}
- try{bars(visibleRows(zips),r=>'ZIP '+r.zip,r=>r[key]);}catch(e){}
- 
  renderWhatNumbersTellUs(cat,index100(x.replacement_ready,COUNTY,'replacement_ready'),index100(x[cat+'_need'],COUNTY,cat+'_need'),score(x.market_scale),x.county+' County');
 }
 function renderZIP(cat){
@@ -251,7 +273,6 @@ function renderZIP(cat){
  $('rankings').innerHTML=rowsToTable(sorted,(r,i)=>`<tr><td>${i+1}</td><td>${r.zip}</td><td>${r.county}</td><td>${r.metro||'—'}</td><td><b>${score(r[key])}</b></td><td>${fmt(r.replacement_ready_hh)}</td><td>${fmt(r.owner_hh)}</td><td>${score(r.owner_rate)}%</td><td>${score(r.sf_rate)}%</td></tr>`);
  try{renderGeoMap(sorted,r=>'ZIP '+r.zip,r=>r[key],'ZIP '+x.zip,{center:rad?center:null,radiusMiles:rad,maxZoom:10,allRows:true});$('mapNote').textContent=rad?`${sorted.length} residential ZIPs within ${rad} miles of ZIP ${center.zip}.`:'Residential ZIP centroids in the selected county.';}catch(e){$('map').innerHTML='<div class="map-empty">Map unavailable. ZIP rankings remain available below.</div>';}
  try{bars(visibleRows(sorted),r=>'ZIP '+r.zip,r=>r[key]);}catch(e){}
- 
  renderWhatNumbersTellUs(cat,index100(x.replacement_ready,ZIP,'replacement_ready'),index100(x[cat+'_need'],ZIP,cat+'_need'),score(x.addressable_scale),'ZIP '+x.zip);
 }
 
