@@ -241,27 +241,38 @@ resetMarketToPrompt();
 })();
 
 
-/* MARKET PROMPT FIX — preserves all original analyzer event listeners. */
+;
+
+
+/* MARKET SELECTION POLICY: keep populated options; never auto-select a market. */
 (function(){
   const a=$('analysis'), c=$('category'), m=$('market');
   if(!a||!c||!m) return;
-  let userChoosingMarket=false;
-  function ensurePrompt(){
+  let explicitMarket=false, internal=false;
+  function selectPrompt(){
+    if(internal||explicitMarket) return;
+    internal=true;
     let o=m.querySelector('option[value=""]');
-    if(!o){o=document.createElement('option');o.value='';o.textContent='Select market...';m.insertBefore(o,m.firstChild);}
-    if(!userChoosingMarket)m.value='';
+    if(!o){
+      o=document.createElement('option');
+      o.value='';
+      o.textContent='Select market...';
+      m.insertBefore(o,m.firstChild);
+    }
+    m.value='';
+    internal=false;
   }
-  m.addEventListener('pointerdown',()=>{userChoosingMarket=true;});
-  m.addEventListener('keydown',()=>{userChoosingMarket=true;});
-  m.addEventListener('change',()=>{userChoosingMarket=true;});
+  const obs=new MutationObserver(()=>{ if(!explicitMarket) queueMicrotask(selectPrompt); });
+  obs.observe(m,{childList:true});
+  m.addEventListener('change',()=>{
+    if(internal) return;
+    explicitMarket=!!m.value;
+  });
   function selectorChanged(){
-    userChoosingMarket=false;
-    ensurePrompt();
-    setTimeout(ensurePrompt,0);
-    setTimeout(ensurePrompt,25);
-    setTimeout(ensurePrompt,100);
+    explicitMarket=false;
+    selectPrompt();
   }
   a.addEventListener('change',selectorChanged);
   c.addEventListener('change',selectorChanged);
-  ensurePrompt();
+  selectPrompt();
 })();
