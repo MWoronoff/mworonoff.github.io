@@ -1,12 +1,14 @@
 name: Build geography boundaries
 
 # Run manually from the Actions tab. Downloads Census boundary files (no key needed), builds the DMA, metro,
-# state and per-market ZIP shapes for the maps, builds the engine test page data, and commits the results.
+# state and per-market ZIP shapes for the maps, builds the engine test page data, commits the results,
+# and republishes the site.
 on:
   workflow_dispatch:
 
 permissions:
   contents: write
+  pages: write
 
 jobs:
   boundaries:
@@ -32,3 +34,7 @@ jobs:
           git add shared/geo engine-test/data
           git diff --cached --quiet || git commit -m "Build geography boundaries and test data"
           git push
+      - name: Republish the site
+        run: gh api -X POST "repos/${{ github.repository }}/pages/builds"
+        env:
+          GH_TOKEN: ${{ github.token }}
