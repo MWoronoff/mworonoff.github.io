@@ -39,9 +39,36 @@ met = met[met.cbsa_type == "Metro"]
 json.dump({"level": "metro", "built": built, "rows": rows_for(met, "cbsa_code", "cbsa_name", title=False)},
           open(os.path.join(OUT, "metro.json"), "w"), separators=(",", ":"))
 
-z = pd.read_csv(os.path.join(GEO, "zip_geo.csv"), dtype={"zip": str})
+z = pd.read_csv(os.path.join(GEO, "zip_geo.csv"), dtype={"zip": str, "dma_code": str, "cbsa_code": str})
 us = {"id": "us", "name": "United States", "f": [], "v": {
     "population": int(z.population.sum()), "households": int(z.households.sum()),
     "hh_size": round(z.population.sum() / z.households.sum(), 2), "zips": int(len(z)), "counties": int(z.county_fips.nunique())}}
 json.dump({"level": "us", "built": built, "rows": [us]}, open(os.path.join(OUT, "us.json"), "w"), separators=(",", ":"))
 print("dma", len(dma), "metro", len(met))
+
+# ---- ZIP drill-down test data: one file per DMA and per metro, ZIPs ranked within their market ----
+MIN_POP = 500
+for level, col, keep in (("dma", "dma_code", lambda d: d.dma_code != "0"), ("metro", "cbsa_code", lambda d: d.cbsa_type == "Metro")):
+    zz = z[keep(z)].copy()
+    zz[col] = zz[col].astype(str)
+    folder = os.path.join(OUT, "zip", level)
+    os.makedirs(folder, exist_ok=True)
+    for code, g in zz.groupby(col):
+        g = g.copy()
+        g["hh_size"] = (g.population / g.households).where(g.households > 0)
+        ok = g.population >= MIN_POP
+        g["p_hh"] = None; g["p_pop"] = None
+        g.loc[ok, "p_hh"] = pct(g.loc[ok, "households"]); g.loc[ok, "p_pop"] = pct(g.loc[ok, "population"])
+        rows = []
+        for r in g.itertuples():
+            v = {"population": int(r.population), "households": int(r.households),
+                 "hh_size": round(r.hh_size, 2) if r.hh_size == r.hh_size else None,
+                 "p_hh": r.p_hh, "p_pop": r.p_pop, "score@size": r.p_hh, "score@zips": r.p_hh}
+            row = {"id": r.zip, "name": f"{r.zip} {r.city}".strip(), "v": v, "f": []}
+            if r.population < MIN_POP:
+                row["u"] = 1
+                row["f"].append(f"Fewer than {MIN_POP} residents, so this ZIP isn't ranked.")
+            rows.append(row)
+        json.dump({"level": "zip", "parent": {"level": level, "id": code}, "built": built, "rows": rows},
+                  open(os.path.join(folder, f"{code}.json"), "w"), separators=(",", ":"))
+print("zip files", len(os.listdir(os.path.join(OUT, "zip", "dma"))), len(os.listdir(os.path.join(OUT, "zip", "metro"))))

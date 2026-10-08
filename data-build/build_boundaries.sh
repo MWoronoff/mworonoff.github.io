@@ -52,11 +52,23 @@ $MS -i "$WORK/dma_whole.json" "$WORK/dma_split_parts.json" "$WORK/split_rest.jso
 $MS "$CBSA_SHP" -filter "LSAD == 'M1' && !/, PR$/.test(NAME)" -each "cbsa_code=String(CBSAFP)" \
   -simplify 6% keep-shapes -rename-layers metro -o "$OUT/metro.topo.json" format=topojson quantization=1e5
 
-# 4. State outlines for context
+# 4. ZIP (ZCTA) boundaries, one file per DMA and per metro, loaded only when a market is opened
+rm -rf "$OUT/zip"; mkdir -p "$OUT/zip/dma" "$OUT/zip/metro"
+$MS "$ZCTA_SHP" -each "zip=String($ZCTA_FIELD)" \
+  -join data-build/geo/zip_geo.csv keys=zip,zip string-fields=zip,dma_code,cbsa_code \
+  -filter "dma_code != null" -filter-fields zip,dma_code,cbsa_code,cbsa_type \
+  -simplify 8% keep-shapes -o "$WORK/zcta_joined.json" format=geojson
+$MS "$WORK/zcta_joined.json" -filter "dma_code != '0'" -split dma_code \
+  -o "$OUT/zip/dma/" format=topojson singles quantization=1e5
+$MS "$WORK/zcta_joined.json" -filter "cbsa_type == 'Metro'" -split cbsa_code \
+  -o "$OUT/zip/metro/" format=topojson singles quantization=1e5
+echo "ZIP boundary files: $(ls "$OUT/zip/dma" | wc -l) DMAs, $(ls "$OUT/zip/metro" | wc -l) metros"
+
+# 5. State outlines for context
 $MS "$WORK/counties.json" -each "st=fips.slice(0,2)" -dissolve st -simplify 6% keep-shapes \
   -rename-layers states -o "$OUT/states.topo.json" format=topojson quantization=1e5
 
-# 5. Map join check: every DMA and metro in the tables has a shape
+# 6. Map join check: every DMA and metro in the tables has a shape
 node -e '
 const fs=require("fs");
 const csv=f=>{const [h,...r]=fs.readFileSync(f,"utf8").trim().split("\n");return r};

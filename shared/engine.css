@@ -181,3 +181,14 @@ button, input, select { font: inherit; color: inherit; }
   .az-legend-row { gap: 5px; margin: 1px 0; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+/* ZIP drill-down */
+.az-seg button:disabled { color: #9aa8b5; cursor: not-allowed; }
+.az-table-title { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.az-table-title .az-btn[hidden] { display: none; }
+.az-drill { align-self: flex-start; }
+.az-map-msg {
+  position: absolute; inset: 50% auto auto 50%; transform: translate(-50%, -50%); z-index: 460;
+  background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; max-width: 320px; text-align: center; box-shadow: var(--shadow);
+}
+.az-map-msg[hidden] { display: none; }

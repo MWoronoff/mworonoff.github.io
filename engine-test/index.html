@@ -32,21 +32,22 @@ AdtaxiAnalyzer.start({
   levels: {
     us:    { label: "U.S.",  data: "data/us.json" },
     dma:   { label: "DMA",   data: "data/dma.json",   geo: "../shared/geo/dma.topo.json",   idField: "dma_code" },
-    metro: { label: "Metro", data: "data/metro.json", geo: "../shared/geo/metro.topo.json", idField: "cbsa_code" }
+    metro: { label: "Metro", data: "data/metro.json", geo: "../shared/geo/metro.topo.json", idField: "cbsa_code" },
+    zip:   { label: "ZIPs in market", data: "data/zip/{level}/{id}.json", geo: "../shared/geo/zip/{level}/{id}.json", idField: "zip" }
   },
   statesGeo: "../shared/geo/states.topo.json",
   subcategoryLabel: "Test category",
   subcategories: [ { id: "size", label: "Market size" }, { id: "zips", label: "ZIP coverage" } ],
   measures: [
-    { key: "score",      label: "Test score",            short: "Score",       format: "score", perSub: true, levels: ["dma", "metro"], help: "Percentile rank within the level, 0 to 100." },
-    { key: "p_hh",       label: "Households percentile", short: "HH pctl",     format: "score", levels: ["dma", "metro"] },
-    { key: "p_pop",      label: "Population percentile", short: "Pop pctl",    format: "score", levels: ["dma", "metro"] },
+    { key: "score",      label: "Test score",            short: "Score",       format: "score", perSub: true, levels: ["dma", "metro", "zip"], help: "Percentile rank within the level, 0 to 100. ZIPs rank against the other ZIPs in the same market." },
+    { key: "p_hh",       label: "Households percentile", short: "HH pctl",     format: "score", levels: ["dma", "metro", "zip"] },
+    { key: "p_pop",      label: "Population percentile", short: "Pop pctl",    format: "score", levels: ["dma", "metro", "zip"] },
     { key: "p_zips",     label: "ZIP count percentile",  short: "ZIP pctl",    format: "score", levels: ["dma", "metro"] },
     { key: "population", label: "Population",            format: "int" },
     { key: "households", label: "Households",            format: "int" },
     { key: "hh_size",    label: "People per household",  short: "Per HH",      format: "dec2" },
-    { key: "zips",       label: "ZIP codes",             format: "int" },
-    { key: "counties",   label: "Counties",              format: "int", levels: ["us", "dma"], help: "Metros are made of whole counties, so this is shown for DMAs only." }
+    { key: "zips",       label: "ZIP codes",             format: "int", levels: ["us", "dma", "metro"], hideWhenUnavailable: true },
+    { key: "counties",   label: "Counties",              format: "int", levels: ["us", "dma"], hideWhenUnavailable: true, help: "Metros are made of whole counties, so this is shown for DMAs only." }
   ],
   rankBy: ["score", "households", "population", "hh_size"],
   defaultRank: "score",
@@ -56,6 +57,7 @@ AdtaxiAnalyzer.start({
   methodology: [
     { title: "What this page is for", body: "It checks the shared engine (map, rankings, filters, export and this panel) with real geography before Healthcare and Legal data is built." },
     { title: "Test score", body: ["Each market's percentile rank, from 0 to 100, against all markets at the same level: DMAs against DMAs, metros against metros.", "Market size ranks by households. ZIP coverage ranks by the number of ZIP codes."] },
+    { title: "ZIPs in a market", body: "Pick a DMA or metro, then choose ZIPs in market. Each ZIP is ranked against the other ZIPs in the same market. ZIPs with fewer than 500 residents are shown but not ranked." },
     { title: "Geography", body: "DMAs come from a public ZIP-level DMA list (March 2026) applied to Adtaxi's Deluxe ZIP file. Metros follow the OMB 2023 definitions." }
   ],
   sources: [

@@ -17,7 +17,7 @@ from openpyxl import load_workbook
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "geo")
 EXCLUDE_STATES = {"PR", "VI", "GU", "AS", "MP", "FM", "MH", "PW", "AA", "AE", "AP"}
-COLS = ["ZipCode", "State", "County", "CountyFIPS", "StateFIPS", "CBSA", "CBSA_Name", "CBSA_Type",
+COLS = ["ZipCode", "City", "State", "County", "CountyFIPS", "StateFIPS", "CBSA", "CBSA_Name", "CBSA_Type",
         "MultiCounty", "Population", "HouseholdsPerZipCode", "Latitude", "Longitude"]
 
 
@@ -168,9 +168,10 @@ def main():
                     f"({dis.population.sum()/tot_pop:.2%}). The 2026 list is used; all are in dma_disagreements.csv"))
 
     # --- write
-    zout = z[["zip", "State", "County", "county_fips", "cbsa_code", "cbsa_name", "cbsa_type", "dma_code", "dma_name",
+    z["city"] = z.City.fillna("").astype(str).str.title()
+    zout = z[["zip", "city", "State", "County", "county_fips", "cbsa_code", "cbsa_name", "cbsa_type", "dma_code", "dma_name",
               "dma_source", "multi_county", "population", "households", "Latitude", "Longitude"]]
-    zout.columns = ["zip", "state", "county", "county_fips", "cbsa_code", "cbsa_name", "cbsa_type", "dma_code",
+    zout.columns = ["zip", "city", "state", "county", "county_fips", "cbsa_code", "cbsa_name", "cbsa_type", "dma_code",
                     "dma_name", "dma_source", "multi_county", "population", "households", "lat", "lon"]
     zout.to_csv(os.path.join(OUT, "zip_geo.csv"), index=False)
     cty.sort_values("county_fips").to_csv(os.path.join(OUT, "county_geo.csv"), index=False)

@@ -11,7 +11,7 @@
 (function () {
   "use strict";
 
-  var LEVEL_LABELS = { us: "U.S.", dma: "DMA", metro: "Metro" };
+  var LEVEL_LABELS = { us: "U.S.", dma: "DMA", metro: "Metro", zip: "ZIP" };
   var RAMP = ["--ramp-1", "--ramp-2", "--ramp-3", "--ramp-4", "--ramp-5"];
 
   function el(tag, attrs, children) {
@@ -57,7 +57,7 @@
       sub: (cfg.subcategories && cfg.subcategories[0] && cfg.subcategories[0].id) || "",
       rank: cfg.defaultRank || (cfg.rankBy && cfg.rankBy[0]),
       sortKey: null, sortDir: "desc",
-      show: cfg.defaultShow || 25, query: "", area: null
+      show: cfg.defaultShow || 25, query: "", area: null, parent: null
     };
     this.readHash();
   }
@@ -78,6 +78,33 @@
     return s ? s.label : "";
   };
 
+  /* ---------- Levels: U.S., DMA, Metro, and ZIPs inside one DMA or metro ---------- */
+  Analyzer.prototype.key = function (level) {
+    var p = this.state.parent;
+    return level === "zip" ? (p ? "zip:" + p.level + ":" + p.id : null) : level;
+  };
+  Analyzer.prototype.d = function (level) { var k = this.key(level); return k ? this.data[k] : null; };
+  Analyzer.prototype.url = function (template) {
+    var p = this.state.parent || {};
+    return template.replace("{level}", p.level).replace("{id}", encodeURIComponent(p.id));
+  };
+  Analyzer.prototype.levelLabel = function (level) { return (this.cfg.levels[level] && this.cfg.levels[level].label) || LEVEL_LABELS[level]; };
+  Analyzer.prototype.parentName = function () {
+    var p = this.state.parent, pd = p && this.data[p.level], row = pd && pd.byId[p.id];
+    return row ? row.name + " " + LEVEL_LABELS[p.level] : "";
+  };
+  Analyzer.prototype.canDrill = function () {
+    var s = this.state;
+    return !!this.cfg.levels.zip && ((s.level === "dma" || s.level === "metro") && !!s.area || s.level === "zip");
+  };
+  Analyzer.prototype.drill = function () {
+    var s = this.state;
+    if (!this.cfg.levels.zip || !(s.level === "dma" || s.level === "metro") || !s.area) return;
+    s.parent = { level: s.level, id: s.area };
+    s.level = "zip"; s.area = null; s.sortKey = null; s.query = ""; if (this.search) this.search.value = "";
+    this.refresh();
+  };
+
   /* ---------- URL state ---------- */
   Analyzer.prototype.readHash = function () {
     var h = (location.hash || "").replace(/^#/, "");
@@ -86,6 +113,10 @@
     h.split("&").forEach(function (kv) { var a = kv.split("="); if (a[0]) p[a[0]] = decodeURIComponent(a[1] || ""); });
     var cfg = this.cfg;
     if (cfg.levels[p.level]) this.state.level = p.level;
+    if (p.level === "zip") {
+      var m = /^(dma|metro):(.+)$/.exec(p["in"] || "");
+      if (m && cfg.levels.zip) this.state.parent = { level: m[1], id: m[2] }; else this.state.level = "dma";
+    }
     if ((cfg.subcategories || []).some(function (s) { return s.id === p.sub; })) this.state.sub = p.sub;
     if ((cfg.rankBy || []).indexOf(p.rank) >= 0) this.state.rank = p.rank;
     if (p.area) this.state.area = p.area;
@@ -94,6 +125,7 @@
     var s = this.state, parts = ["level=" + s.level];
     if (s.sub) parts.push("sub=" + encodeURIComponent(s.sub));
     if (s.rank) parts.push("rank=" + encodeURIComponent(s.rank));
+    if (s.level === "zip" && s.parent) parts.push("in=" + s.parent.level + ":" + encodeURIComponent(s.parent.id));
     if (s.area && s.level !== "us") parts.push("area=" + encodeURIComponent(s.area));
     var h = "#" + parts.join("&");
     if (location.hash !== h) history.replaceState(null, "", h);
@@ -107,15 +139,19 @@
     });
   };
   Analyzer.prototype.ensureLevel = function (level) {
-    var self = this, L = this.cfg.levels[level], jobs = [];
-    if (!this.data[level]) jobs.push(this.loadJSON(L.data).then(function (d) {
+    var self = this, L = this.cfg.levels[level], jobs = [], key = this.key(level);
+    if (level === "zip") jobs.push(this.ensureLevel(this.state.parent.level));  // parent names and outline
+    if (key && !this.data[key]) jobs.push(this.loadJSON(level === "zip" ? this.url(L.data) : L.data).then(function (d) {
       var byId = {};
       d.rows.forEach(function (r) { byId[r.id] = r; });
-      self.data[level] = { rows: d.rows, byId: byId, meta: d };
+      self.data[key] = { rows: d.rows, byId: byId, meta: d };
     }));
-    var geoKey = L.geo;
-    if (geoKey && !this.geo[geoKey]) jobs.push(this.loadJSON(geoKey).then(function (t) {
-      self.geo[geoKey] = topojson.feature(t, t.objects[Object.keys(t.objects)[0]]);
+    var geoUrl = L.geo && (level === "zip" ? this.url(L.geo) : L.geo);
+    if (geoUrl && !(geoUrl in this.geo)) jobs.push(this.loadJSON(geoUrl).then(function (t) {
+      self.geo[geoUrl] = topojson.feature(t, t.objects[Object.keys(t.objects)[0]]);
+    }, function (e) {
+      if (level !== "zip") throw e;
+      self.geo[geoUrl] = null;  // ZIP boundaries missing for this market: the table still works
     }));
     var states = this.cfg.statesGeo;
     if (states && !this.geo[states]) jobs.push(this.loadJSON(states).then(function (t) {
@@ -143,6 +179,8 @@
     // Controls
     this.levelSeg = el("div", { class: "az-seg", role: "group", "aria-label": "Geography level" },
       Object.keys(cfg.levels).map(function (lv) {
+        if (lv === "zip") return el("button", { type: "button", "data-level": "zip", text: cfg.levels.zip.label || "ZIPs in market",
+          title: "Pick a DMA or metro first, then see the ZIPs inside it", onclick: function () { if (self.state.level !== "zip") self.drill(); } });
         return el("button", { type: "button", "data-level": lv, text: cfg.levels[lv].label || LEVEL_LABELS[lv],
           onclick: function () { self.setLevel(lv); } });
       }));
@@ -172,21 +210,23 @@
 
     // Map + detail
     this.mapHead = el("div", { class: "az-map-head" });
+    this.mapMsg = el("div", { class: "az-map-msg", hidden: true });
     this.legend = el("div", { class: "az-legend", "aria-label": "Map legend" });
     this.mapEl = el("div", { class: "az-map", role: "region", "aria-label": "Map of markets" });
     this.detail = el("aside", { class: "az-panel az-detail", "aria-live": "polite" });
     var stage = el("section", { class: "az-stage" }, [
-      el("div", { class: "az-panel az-map-panel" }, [this.mapEl, this.mapHead, this.legend]),
+      el("div", { class: "az-panel az-map-panel" }, [this.mapEl, this.mapHead, this.legend, this.mapMsg]),
       this.detail
     ]);
 
     // Table
     this.tableTitle = el("h2");
+    this.backBtn = el("button", { type: "button", class: "az-btn", hidden: true, onclick: function () { self.setLevel(self.state.parent.level); } });
     this.tableNote = el("span");
     this.thead = el("thead");
     this.tbody = el("tbody");
     this.tablePanel = el("section", { class: "az-panel az-table-panel" }, [
-      el("div", { class: "az-table-head" }, [this.tableTitle, this.tableNote]),
+      el("div", { class: "az-table-head" }, [el("div", { class: "az-table-title" }, [this.tableTitle, this.backBtn]), this.tableNote]),
       el("div", { class: "az-tablewrap" }, [el("table", { class: "az-table" }, [this.thead, this.tbody])])
     ]);
 
@@ -218,8 +258,12 @@
 
   /* ---------- State changes ---------- */
   Analyzer.prototype.setLevel = function (lv) {
-    if (this.state.level === lv) return;
-    this.state.level = lv; this.state.area = null; this.state.sortKey = null;
+    var s = this.state;
+    if (s.level === lv) return;
+    var from = s.level;
+    s.area = from === "zip" && s.parent && s.parent.level === lv ? s.parent.id : null;
+    s.level = lv; s.sortKey = null;
+    if (from === "zip") { s.query = ""; if (this.search) this.search.value = ""; this.resetView = true; }
     this.refresh();
   };
   Analyzer.prototype.select = function (id, opts) {
@@ -235,7 +279,12 @@
 
   Analyzer.prototype.refresh = function () {
     var self = this, s = this.state;
-    Array.prototype.forEach.call(this.levelSeg.children, function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-level") === s.level); });
+    var drill = this.canDrill();
+    Array.prototype.forEach.call(this.levelSeg.children, function (b) {
+      var lv = b.getAttribute("data-level");
+      b.setAttribute("aria-pressed", lv === s.level);
+      if (lv === "zip") { b.disabled = !drill; b.setAttribute("aria-disabled", !drill); }
+    });
     if (this.subSel) this.subSel.value = s.sub;
     this.rankSel.value = s.rank;
     this.errorBox.hidden = true;
@@ -245,7 +294,10 @@
     Promise.all(needed).then(function () {
       self.mapLevel = mapLevel;
       if (s.level === "us") s.area = (self.data.us.rows[0] || {}).id;
-      else if (!self.data[s.level].byId[s.area]) s.area = (self.sortedRows()[0] || {}).id || null;  // open on the top-ranked market
+      else if (!self.d(s.level).byId[s.area]) s.area = (self.sortedRows()[0] || {}).id || null;  // open on the top-ranked market
+      Array.prototype.forEach.call(self.levelSeg.children, function (b) {
+        if (b.getAttribute("data-level") === "zip") { var ok = self.canDrill(); b.disabled = !ok; b.setAttribute("aria-disabled", !ok); }
+      });
       self.renderMap();
       self.renderTable();
       self.renderDetail();
@@ -271,8 +323,8 @@
   };
   Analyzer.prototype.renderMap = function () {
     var self = this, s = this.state, lv = this.mapLevel, L0 = this.cfg.levels[lv];
-    var m = this.measure(s.rank), d = this.data[lv];
-    var fc = this.geo[L0.geo];
+    var m = this.measure(s.rank), d = this.d(lv);
+    var fc = this.geo[lv === "zip" ? this.url(L0.geo) : L0.geo];
     var idField = L0.idField;
     var values = d.rows.map(function (r) { return self.val(r, m); });
     var br = this.breaks(values);
@@ -280,8 +332,15 @@
     var colors = RAMP.map(cssVar);
     if (this.areaLayer) this.map.removeLayer(this.areaLayer);
     if (this.stateLayer) this.map.removeLayer(this.stateLayer);
+    if (this.parentLayer) { this.map.removeLayer(this.parentLayer); this.parentLayer = null; }
     this.layerById = {};
-    this.areaLayer = L.geoJSON(fc, {
+    this.mapMsg.hidden = true;
+    if (!fc) {
+      this.areaLayer = null;
+      this.mapMsg.hidden = false;
+      this.mapMsg.textContent = "ZIP boundaries for this market aren't available yet. The rankings below still work.";
+    }
+    this.areaLayer = fc && L.geoJSON(fc, {
       style: function (f) {
         var row = d.byId[String(f.properties[idField])];
         var c = self.classOf(row ? self.val(row, m) : null, br);
@@ -291,6 +350,7 @@
         var id = String(f.properties[idField]), row = d.byId[id];
         self.layerById[id] = layer;
         var name = row ? row.name : (f.properties.dma_name || f.properties.NAME || id);
+        if (!row && lv === "zip") name = "ZIP " + id;
         var v = row ? fmt(self.val(row, m), m.format) : null;
         layer.bindTooltip(function () {
           return '<div class="az-tip"><b>' + name + "</b><br>" + (m ? m.label : "") + ": " + (v == null ? "No data" : v) + "</div>";
@@ -301,14 +361,26 @@
           self.select(id);
         });
       }
-    }).addTo(this.map);
+    });
+    if (this.areaLayer) this.areaLayer.addTo(this.map);
+    if (lv === "zip") {
+      var P = this.cfg.levels[s.parent.level], pfc = this.geo[P.geo];
+      var pf = pfc && pfc.features.filter(function (f) { return String(f.properties[P.idField]) === String(s.parent.id); })[0];
+      if (pf) this.parentLayer = L.geoJSON(pf, { interactive: false, style: { color: "#0f2742", weight: 2.5, dashArray: "6 5", fill: false } }).addTo(this.map);
+      var b = (this.areaLayer && this.areaLayer.getBounds().isValid()) ? this.areaLayer.getBounds() : (this.parentLayer && this.parentLayer.getBounds());
+      if (b && b.isValid()) this.map.fitBounds(b, { padding: [24, 24] });
+    } else if (this.resetView) {
+      this.map.fitBounds([[24.4, -125], [49.5, -66.9]]);
+    }
+    this.resetView = false;
     var mesh = this.cfg.statesGeo && this.geo[this.cfg.statesGeo];
     if (mesh) this.stateLayer = L.geoJSON(mesh, { interactive: false, style: { color: "#0f2742", weight: 1.1, opacity: 0.55, fill: false } }).addTo(this.map);
     this.highlight();
     // Header and legend
     this.mapHead.innerHTML = "";
     this.mapHead.appendChild(el("b", { text: (m ? m.label : "") + (m && m.perSub && this.subLabel() ? ": " + this.subLabel() : "") }));
-    this.mapHead.appendChild(el("span", { text: "By " + (this.cfg.levels[lv].label || LEVEL_LABELS[lv]) + (s.level === "us" ? ". Click a market to rank at that level." : ". Click a market for details.") }));
+    this.mapHead.appendChild(el("span", { text: lv === "zip" ? "ZIPs in " + this.parentName() + ", ranked within this market." :
+      "By " + this.levelLabel(lv) + (s.level === "us" ? ". Click a market to rank at that level." : ". Click a market for details.") }));
     this.legend.innerHTML = "";
     if (br.length) {
       var lo = values.filter(function (x) { return typeof x === "number"; });
@@ -320,7 +392,7 @@
         ]));
       }
     }
-    this.legend.appendChild(el("div", { class: "az-legend-row" }, [el("span", { class: "az-swatch nodata" }), el("span", { text: "No data" })]));
+    this.legend.appendChild(el("div", { class: "az-legend-row" }, [el("span", { class: "az-swatch nodata" }), el("span", { text: lv === "zip" ? "Not ranked or no data" : "No data" })]));
   };
   Analyzer.prototype.highlight = function () {
     var self = this;
@@ -341,7 +413,7 @@
     return keys.map(function (k) { return self.measure(k); }).filter(function (m) { return m && self.availableAt(m, lv); });
   };
   Analyzer.prototype.sortedRows = function () {
-    var self = this, s = this.state, d = this.data[s.level];
+    var self = this, s = this.state, d = this.d(s.level);
     var key = s.sortKey || s.rank, m = this.measure(key), dir = s.sortKey ? s.sortDir : (m && m.lowerIsBetter ? "asc" : "desc");
     var rows = d.rows.slice();
     rows.sort(function (a, b) {
@@ -368,9 +440,12 @@
     rankOrder.forEach(function (r) { if (typeof self.val(r, rankM) === "number") rankOf[r.id] = ++n; });
     var rows = all.filter(function (r) { return !s.query || r.name.toLowerCase().indexOf(s.query) >= 0; });
     var shown = s.show && !s.query ? rows.slice(0, s.show) : rows;
-    var lvLabel = this.cfg.levels[s.level].label || LEVEL_LABELS[s.level];
-    this.tableTitle.textContent = lvLabel + " rankings" + (this.subLabel() ? ": " + this.subLabel() : "");
-    this.tableNote.textContent = "Showing " + NF0.format(shown.length) + " of " + NF0.format(all.length) + " markets, ranked by " + (rankM ? rankM.label.toLowerCase() : "") + ". Click a column to sort.";
+    var isZip = s.level === "zip", lvLabel = isZip ? "ZIP" : this.levelLabel(s.level);
+    this.tableTitle.textContent = (isZip ? "ZIPs in " + this.parentName() : lvLabel + " rankings") + (this.subLabel() ? ": " + this.subLabel() : "");
+    this.backBtn.hidden = !isZip;
+    this.search.placeholder = isZip ? "Find a ZIP or town" : "Find a market";
+    if (isZip) this.backBtn.textContent = "Back to " + LEVEL_LABELS[s.parent.level] + " rankings";
+    this.tableNote.textContent = "Showing " + NF0.format(shown.length) + " of " + NF0.format(all.length) + (isZip ? " ZIPs" : " markets") + ", ranked by " + (rankM ? rankM.label.toLowerCase() : "") + ". Click a column to sort.";
 
     this.thead.innerHTML = "";
     var hr = el("tr", null, [el("th", { scope: "col", text: "Rank" }), el("th", { scope: "col", text: lvLabel })]);
@@ -397,7 +472,8 @@
       ]);
       cols.forEach(function (m) {
         var v = fmt(self.val(r, m), m.format);
-        tr.appendChild(v == null ? el("td", { class: "az-na", title: "No data for this market", text: "No data" }) : el("td", { class: "num", text: v }));
+        if (v == null && r.u && (m.key === s.rank || m.key.indexOf("score") === 0 || m.key.indexOf("p_") === 0)) tr.appendChild(el("td", { class: "az-na", title: (r.f && r.f[0]) || "Not ranked", text: "Not ranked" }));
+        else tr.appendChild(v == null ? el("td", { class: "az-na", title: "No data for this area", text: "No data" }) : el("td", { class: "num", text: v }));
       });
       frag.appendChild(tr);
     });
@@ -417,14 +493,14 @@
   Analyzer.prototype.renderDetail = function () {
     var self = this, s = this.state, cfg = this.cfg, box = this.detail;
     box.innerHTML = "";
-    var d = this.data[s.level], row = d && d.byId[s.area];
+    var d = this.d(s.level), row = d && d.byId[s.area];
     if (!row) {
       box.appendChild(el("h2", { text: "Pick a market" }));
       box.appendChild(el("p", { class: "az-empty", text: "Click a market on the map or in the rankings to see its score and the numbers behind it." }));
       return;
     }
-    var lvLabel = cfg.levels[s.level].label || LEVEL_LABELS[s.level];
-    box.appendChild(el("div", null, [el("h2", { text: row.name }), el("div", { class: "az-sub", text: lvLabel + (this.subLabel() ? " · " + this.subLabel() : "") })]));
+    var lvLabel = s.level === "zip" ? "ZIP in " + this.parentName() : this.levelLabel(s.level);
+    box.appendChild(el("div", null, [el("h2", { text: s.level === "zip" ? "ZIP " + row.name : row.name }), el("div", { class: "az-sub", text: lvLabel + (this.subLabel() ? " · " + this.subLabel() : "") })]));
 
     var head = this.measure(cfg.headlineMeasure || s.rank);
     if (head && this.availableAt(head, s.level)) {
@@ -436,7 +512,7 @@
       }
       box.appendChild(el("div", { class: "az-score" }, [
         el("b", { class: "num", text: fmt(hv, head.format) == null ? "—" : fmt(hv, head.format) }),
-        el("span", { text: head.label + (rank ? ", ranked " + rank + " of " + total : "") })
+        el("span", { text: hv == null && row.u ? "Not ranked" : head.label + (rank ? ", ranked " + rank + " of " + total + (s.level === "zip" ? " ZIPs in this market" : "") : "") })
       ]));
     }
 
@@ -454,10 +530,17 @@
     var details = (cfg.detailMeasures || []).map(function (k) { return self.measure(k); }).filter(Boolean);
     if (details.length) {
       box.appendChild(el("div", { class: "az-measures" }, details.map(function (m) {
+        if (!self.availableAt(m, s.level) && m.hideWhenUnavailable) return null;
         if (!self.availableAt(m, s.level)) return el("div", { class: "az-measure", title: m.help || null }, [el("span", { text: m.label }), el("b", { class: "az-na", text: "Not available at this level" })]);
         var v = fmt(self.val(row, m), m.format);
         return el("div", { class: "az-measure", title: m.help || null }, [el("span", { text: m.label }), el("b", { class: "num" + (v == null ? " az-na" : ""), text: v == null ? "No data" : v })]);
       })));
+    }
+    if (this.cfg.levels.zip && (s.level === "dma" || s.level === "metro")) {
+      box.appendChild(el("button", { type: "button", class: "az-btn primary az-drill", text: "See ZIPs in this market", onclick: function () { self.drill(); } }));
+    }
+    if (s.level === "zip") {
+      box.appendChild(el("button", { type: "button", class: "az-btn az-drill", text: "Back to " + this.parentName(), onclick: function () { self.setLevel(s.parent.level); } }));
     }
     if (row.f && row.f.length) box.appendChild(el("div", { class: "az-flags" }, [el("b", { text: "Data notes" }), el("ul", null, row.f.map(function (t) { return el("li", { text: t }); }))]));
   };
@@ -472,24 +555,24 @@
       b.appendChild(el("h3", { text: sec.title }));
       (Array.isArray(sec.body) ? sec.body : [sec.body]).forEach(function (p) { b.appendChild(el("p", { text: p })); });
     });
-    var meta = this.data[this.state.level] && this.data[this.state.level].meta;
+    var dd = this.d(this.state.level), meta = dd && dd.meta;
     if (meta && meta.built) b.appendChild(el("p", { class: "az-empty", text: "Data built " + meta.built + "." }));
     if (this.modal.showModal) this.modal.showModal(); else this.modal.setAttribute("open", "");
   };
   Analyzer.prototype.exportCSV = function () {
     var self = this, s = this.state;
-    var level = s.level, d = this.data[level];
+    var level = s.level, d = this.d(level);
     if (!d) return;
     var cols = this.cfg.measures.filter(function (m) { return self.availableAt(m, level); });
     var rows = level === "us" ? d.rows : this.sortedRows().filter(function (r) { return !s.query || r.name.toLowerCase().indexOf(s.query) >= 0; });
-    var lines = [["Level", "ID", "Name"].concat(this.subLabel() ? ["Category"] : []).concat(cols.map(function (m) { return m.label; })).map(csvCell).join(",")];
+    var lines = [["Level", level === "zip" ? "ZIP" : "ID", "Name"].concat(this.subLabel() ? ["Category"] : []).concat(cols.map(function (m) { return m.label; })).map(csvCell).join(",")];
     rows.forEach(function (r) {
       lines.push([LEVEL_LABELS[level], r.id, r.name].concat(self.subLabel() ? [self.subLabel()] : []).concat(cols.map(function (m) {
         var v = self.val(r, m); return v == null ? "" : v;
       })).map(csvCell).join(","));
     });
     var blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
-    var a = el("a", { href: URL.createObjectURL(blob), download: (this.cfg.exportName || "adtaxi-analyzer") + "-" + level + (s.sub ? "-" + s.sub : "") + ".csv" });
+    var a = el("a", { href: URL.createObjectURL(blob), download: (this.cfg.exportName || "adtaxi-analyzer") + "-" + (level === "zip" ? "zips-in-" + s.parent.level + "-" + s.parent.id : level) + (s.sub ? "-" + s.sub : "") + ".csv" });
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
   };
