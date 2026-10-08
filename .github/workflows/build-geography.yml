@@ -1,7 +1,7 @@
 name: Build geography boundaries
 
-# Run manually from the Actions tab. Downloads Census boundary files (no key needed),
-# builds DMA, metro and state shapes for the map, checks every DMA has a shape, and commits them.
+# Run manually from the Actions tab. Downloads Census boundary files (no key needed), builds the DMA, metro,
+# state and per-market ZIP shapes for the maps, builds the engine test page data, and commits the results.
 on:
   workflow_dispatch:
 
@@ -16,12 +16,19 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Python packages
+        run: pip install pandas
       - name: Build boundary files
         run: bash data-build/build_boundaries.sh
+      - name: Build engine test page data
+        run: python3 data-build/build_engine_test.py
       - name: Commit results
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@users.noreply.github.com"
-          git add shared/geo
-          git diff --cached --quiet || git commit -m "Build geography boundaries"
+          git add shared/geo engine-test/data
+          git diff --cached --quiet || git commit -m "Build geography boundaries and test data"
           git push
