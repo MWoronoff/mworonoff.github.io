@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Adtaxi Analyzer Engine Test</title>
+<link rel="icon" href="../shared/adtaxi-logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<link rel="stylesheet" href="../shared/engine.css">
+</head>
+<body>
+<div id="app"><p class="az-loading">Loading the analyzer…</p></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js" crossorigin=""></script>
+<script src="../shared/engine.js"></script>
+<script>
+AdtaxiAnalyzer.start({
+  title: "Analyzer Engine Test",
+  subtitle: "A test page for the shared engine behind the Healthcare and Legal analyzers, built on real DMA and metro geography. Scores here are placeholders, not Prospect Scores.",
+  logo: "../shared/adtaxi-logo.svg",
+  exportName: "engine-test",
+  notice: "Test page: the test score is each market's percentile rank on household count (or ZIP count). Healthcare and Legal will use the Prospect Score instead.",
+  links: [
+    { label: "All analyzers", url: "../analyzers/" },
+    { label: "ZIP Audience Builder", url: "../zip-analyzer/" }
+  ],
+  defaultLevel: "dma",
+  usMapLevel: "dma",
+  levels: {
+    us:    { label: "U.S.",  data: "data/us.json" },
+    dma:   { label: "DMA",   data: "data/dma.json",   geo: "../shared/geo/dma.topo.json",   idField: "dma_code" },
+    metro: { label: "Metro", data: "data/metro.json", geo: "../shared/geo/metro.topo.json", idField: "cbsa_code" }
+  },
+  statesGeo: "../shared/geo/states.topo.json",
+  subcategoryLabel: "Test category",
+  subcategories: [ { id: "size", label: "Market size" }, { id: "zips", label: "ZIP coverage" } ],
+  measures: [
+    { key: "score",      label: "Test score",            short: "Score",       format: "score", perSub: true, levels: ["dma", "metro"], help: "Percentile rank within the level, 0 to 100." },
+    { key: "p_hh",       label: "Households percentile", short: "HH pctl",     format: "score", levels: ["dma", "metro"] },
+    { key: "p_pop",      label: "Population percentile", short: "Pop pctl",    format: "score", levels: ["dma", "metro"] },
+    { key: "p_zips",     label: "ZIP count percentile",  short: "ZIP pctl",    format: "score", levels: ["dma", "metro"] },
+    { key: "population", label: "Population",            format: "int" },
+    { key: "households", label: "Households",            format: "int" },
+    { key: "hh_size",    label: "People per household",  short: "Per HH",      format: "dec2" },
+    { key: "zips",       label: "ZIP codes",             format: "int" },
+    { key: "counties",   label: "Counties",              format: "int", levels: ["us", "dma"], help: "Metros are made of whole counties, so this is shown for DMAs only." }
+  ],
+  rankBy: ["score", "households", "population", "hh_size"],
+  defaultRank: "score",
+  components: ["p_hh", "p_pop", "p_zips"],
+  detailMeasures: ["population", "households", "hh_size", "zips", "counties"],
+  tableColumns: ["score", "p_hh", "p_pop", "p_zips", "population", "households", "hh_size", "zips", "counties"],
+  methodology: [
+    { title: "What this page is for", body: "It checks the shared engine (map, rankings, filters, export and this panel) with real geography before Healthcare and Legal data is built." },
+    { title: "Test score", body: ["Each market's percentile rank, from 0 to 100, against all markets at the same level: DMAs against DMAs, metros against metros.", "Market size ranks by households. ZIP coverage ranks by the number of ZIP codes."] },
+    { title: "Geography", body: "DMAs come from a public ZIP-level DMA list (March 2026) applied to Adtaxi's Deluxe ZIP file. Metros follow the OMB 2023 definitions." }
+  ],
+  sources: [
+    { label: "Deluxe ZIP file (Q4 2025)" },
+    { label: "ZIP-level DMA list", url: "https://github.com/BritCrit/dma_county_zip" },
+    { label: "Census cartographic boundaries", url: "https://www.census.gov/geographies/mapping-files/time-series/geo/cartographic-boundary.html" }
+  ],
+  sourcesNote: "Population and household counts are from the Deluxe ZIP file, summed to DMAs and metros."
+});
+</script>
+</body>
+</html>
