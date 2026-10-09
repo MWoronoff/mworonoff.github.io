@@ -13,7 +13,8 @@
   var FILTERS = {
     gender:   { label: "Gender", type: "multi", options: [["m", "Male"], ["f", "Female"]] },
     age:      { label: "Age", type: "multi", options: AGE },
-    income:   { label: "Household income", type: "multi", options: [["lt35", "Under $35K"], ["35_75", "$35K–$75K"], ["75_150", "$75K–$150K"], ["150p", "$150K+"]],
+    income:   { label: "Household income", type: "multi", options: [["lt35", "Under $35K"], ["35_50", "$35K–$49K"], ["50_75", "$50K–$74K"], ["75_100", "$75K–$99K"],
+                           ["100_150", "$100K–$149K"], ["150_200", "$150K–$199K"], ["200p", "$200K+"]],
                 share: function (c, i, sel) { return ratio(sum(sel, function (b) { return c["inc_" + b][i]; }), c.inc_tot[i]); } },
     parented: { label: "Parents' education (head of household)", type: "multi",
                 options: [["nocol", "No college"], ["some", "Some college or associate's"], ["ba", "Bachelor's or higher"]],
