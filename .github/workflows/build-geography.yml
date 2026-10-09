@@ -1,8 +1,7 @@
 name: Build geography boundaries
 
-# Run manually from the Actions tab. Downloads Census boundary files (no key needed), builds the DMA, metro,
-# state and per-market ZIP shapes for the maps, builds the engine test page data, commits the results,
-# and republishes the site.
+# Run manually from the Actions tab. Downloads Census boundary files and tables (no key needed), builds the map
+# shapes, the radius tool's audience data and the engine test data, commits the results, and republishes the site.
 on:
   workflow_dispatch:
 
@@ -25,14 +24,16 @@ jobs:
         run: pip install pandas
       - name: Build boundary files
         run: bash data-build/build_boundaries.sh
+      - name: Build radius audience data
+        run: python3 data-build/build_audience.py
       - name: Build engine test page data
         run: python3 data-build/build_engine_test.py
       - name: Commit results
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@users.noreply.github.com"
-          git add shared/geo engine-test/data
-          git diff --cached --quiet || git commit -m "Build geography boundaries and test data"
+          git add shared/geo shared/audience engine-test/data
+          git diff --cached --quiet || git commit -m "Build geography, audience and test data"
           git push
       - name: Republish the site
         run: gh api -X POST "repos/${{ github.repository }}/pages/builds"
