@@ -279,6 +279,9 @@
 
   Analyzer.prototype.refresh = function (keepError) {
     var self = this, s = this.state;
+    // A ranking measure that isn't published at this level (e.g. a Metro-only layer) falls back to the default ranking.
+    var rm = this.measure(s.rank), dm = this.measure(this.cfg.defaultRank);
+    if (rm && dm && !this.availableAt(rm, s.level === "us" ? (this.cfg.usMapLevel || "dma") : s.level)) s.rank = this.cfg.defaultRank;
     var drill = this.canDrill();
     Array.prototype.forEach.call(this.levelSeg.children, function (b) {
       var lv = b.getAttribute("data-level");
