@@ -10,6 +10,7 @@ Result: **PASSED**
 | ZCTAs returned by Census | PASS | 33,772 (expected about 33,000) |
 | Income bands add up | PASS | 0 ZIPs where the parts don't add up to the total |
 | Head-of-household education adds up | PASS | 0 ZIPs where the parts don't add up to the total |
+| Healthcare age groups nest correctly (75+ within 65+ within 45+) | PASS | 0 ZIPs out of order |
 | Age bands never exceed population | PASS | 0 ZIPs over |
 | Households with children never exceeds its total | PASS | 0 ZIPs over |
 | College enrollment never exceeds its total | PASS | 0 ZIPs over |
@@ -19,6 +20,7 @@ Result: **PASSED**
 | Some college, no degree never exceeds its total | PASS | 0 ZIPs over |
 | Homeowners never exceeds its total | PASS | 0 ZIPs over |
 | ZIPs with Census data | INFO | 33,632 of 40,745 ZIPs, holding 100.0% of Deluxe population; the rest are PO box or business ZIPs |
+| Published benchmark: share age 65+ | PASS | 17.2% (expected 15–20) |
 | National totals | INFO | population 334,834,098; households 129,206,758; college enrolled 21,410,409; households with children 38,161,116 |
 | Published benchmark: national population | PASS | 334.8 million (expected 320–345) |
 | Published benchmark: Hispanic share | PASS | 19.3% (expected 16–22) |
