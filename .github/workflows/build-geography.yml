@@ -1,14 +1,15 @@
 name: Build geography boundaries
-
-# Run manually from the Actions tab. Downloads Census boundary files and tables (no key needed), builds the map
-# shapes, the radius tool's audience data and the engine test data, commits the results, and republishes the site.
+ 
+# Run manually from the Actions tab. Downloads Census boundary files and tables, builds the map shapes, the radius
+# tool's audience data and the engine test data, commits the results, and republishes the site.
+# The Census API key is read from the repository secret CENSUS_API_KEY.
 on:
   workflow_dispatch:
-
+ 
 permissions:
   contents: write
   pages: write
-
+ 
 jobs:
   boundaries:
     runs-on: ubuntu-latest
@@ -26,6 +27,8 @@ jobs:
         run: bash data-build/build_boundaries.sh
       - name: Build radius audience data
         run: python3 data-build/build_audience.py
+        env:
+          CENSUS_API_KEY: ${{ secrets.CENSUS_API_KEY }}
       - name: Build engine test page data
         run: python3 data-build/build_engine_test.py
       - name: Commit results
