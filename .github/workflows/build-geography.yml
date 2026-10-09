@@ -1,24 +1,25 @@
 name: Build geography boundaries
- 
+
 # Run manually from the Actions tab. Downloads Census boundary files and tables, builds the map shapes, the radius
-# tool's audience data and the engine test data, commits the results, and republishes the site.
-# The Census API key is read from the repository secret CENSUS_API_KEY.
+# tool's audience data, the Healthcare analyzer data and the engine test data, commits the results, and republishes
+# the site. No API keys are needed.
 on:
   workflow_dispatch:
- 
+
 permissions:
   contents: write
   pages: write
- 
+
 jobs:
   boundaries:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
-          node-version: "20"
-      - uses: actions/setup-python@v5
+          node-version: "22"
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
       - name: Install Python packages
@@ -27,16 +28,16 @@ jobs:
         run: bash data-build/build_boundaries.sh
       - name: Build radius audience data
         run: python3 data-build/build_audience.py
-        env:
-          CENSUS_API_KEY: ${{ secrets.CENSUS_API_KEY }}
+      - name: Build Healthcare data
+        run: python3 data-build/build_healthcare.py
       - name: Build engine test page data
         run: python3 data-build/build_engine_test.py
       - name: Commit results
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@users.noreply.github.com"
-          git add shared/geo shared/audience engine-test/data
-          git diff --cached --quiet || git commit -m "Build geography, audience and test data"
+          git add shared/geo shared/audience engine-test/data healthcare/data
+          git diff --cached --quiet || git commit -m "Build geography, audience, Healthcare and test data"
           git push
       - name: Republish the site
         run: gh api -X POST "repos/${{ github.repository }}/pages/builds"
