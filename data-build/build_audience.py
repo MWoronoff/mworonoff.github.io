@@ -58,14 +58,28 @@ LABEL_CHECKS = [(v("B01001", 2), ["Male"]), (v("B01001", 26), ["Female"])] + \
      (v("B15003", 19), ["Some college", "less than 1 year"]), (v("B15003", 20), ["Some college", "no degree"])]
 
 
+KEY = os.environ.get("CENSUS_API_KEY", "").strip()
+
+
 def fetch(url, tries=4):
+    if KEY: url += ("&" if "?" in url else "?") + "key=" + KEY
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (Adtaxi analyzer data build; github.com/MWoronoff)",
+                                              "Accept": "application/json"})
     for i in range(tries):
         try:
-            with urllib.request.urlopen(url, timeout=180) as r:
-                return json.loads(r.read().decode("utf-8"))
-        except (urllib.error.URLError, TimeoutError, json.JSONDecodeError):
-            if i == tries - 1: raise
-            time.sleep(5 * (i + 1))
+            with urllib.request.urlopen(req, timeout=180) as r:
+                body = r.read().decode("utf-8", "replace")
+            try:
+                return json.loads(body)
+            except json.JSONDecodeError:
+                raise RuntimeError("Census sent a non-data reply: " + " ".join(body.split())[:300])
+        except urllib.error.HTTPError as e:
+            msg = " ".join(e.read().decode("utf-8", "replace").split())[:300]
+            err = RuntimeError(f"HTTP {e.code} from Census: {msg}")
+            if e.code in (400, 404) or i == tries - 1: raise err   # not worth retrying
+        except (urllib.error.URLError, TimeoutError, RuntimeError) as e:
+            if i == tries - 1: raise RuntimeError(f"{type(e).__name__}: {e}")
+        time.sleep(5 * (i + 1))
 
 
 def load(name, url, cache):
@@ -76,16 +90,18 @@ def load(name, url, cache):
 
 
 def pick_year(cache):
+    print("Census API key:", "yes (CENSUS_API_KEY secret)" if KEY else "none (public access)")
     for y in YEARS:
-        try:
-            if cache:
-                if os.path.exists(os.path.join(cache, f"{y}_B11005.json")): return y
-                continue
-            fetch(API.format(year=y) + f"?get={v('B11005', 1)}&for={ZCTA.replace(' ', '%20')}:00601", tries=2)
-            return y
-        except Exception:
+        if cache:
+            if os.path.exists(os.path.join(cache, f"{y}_B11005.json")): return y
             continue
-    sys.exit("No ACS 5-year release could be reached at api.census.gov")
+        try:
+            fetch(API.format(year=y) + f"?get={v('B11005', 1)}&for={ZCTA.replace(' ', '%20')}:00601", tries=3)
+            print(f"ACS 5-year {y - 4}-{y}: available")
+            return y
+        except Exception as e:
+            print(f"ACS 5-year {y - 4}-{y}: not reachable -> {e}")
+    sys.exit("No ACS 5-year release could be reached at api.census.gov (reasons above)")
 
 
 def main():
