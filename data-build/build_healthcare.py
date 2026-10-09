@@ -246,7 +246,7 @@ def main():
     rep.append(("Business Patterns years", "INFO", f"{y} (growth measured from {y - 1})"))
     all_naics = sorted({n for s in SUBCATS for n in s["naics"]})
     zb, zb0 = zbp(y, a.cache), zbp(y - 1, a.cache)
-    co = cbp_county(y, a.cache)
+    co, co0 = cbp_county(y, a.cache), cbp_county(y - 1, a.cache)
     zips_known = set(z.zip)
     unmatched = zb[(zb.naics.isin(all_naics)) & (~zb.zip.isin(zips_known))]
     rep.append(("Business ZIPs matched to the ZIP geography", "PASS" if unmatched.est.sum() <= 0.01 * zb[zb.naics.isin(all_naics)].est.sum() else "FAIL",
@@ -256,11 +256,13 @@ def main():
         for tag, src in (("", zb), ("_prev", zb0)):
             cnt = src[src.naics.isin(s["naics"])].groupby("zip").est.sum()
             z[f"est{tag}_{s['id']}"] = z.zip.map(cnt).fillna(0)
-    # ZIP totals vs county totals (roll-up check)
+    # Census leaves out ZIP-industry cells with fewer than 3 businesses, so ZIP detail undercounts. Markets and the U.S.
+    # therefore use the complete county counts; ZIP detail is used only to rank ZIPs within a market.
+    cov = []
     for s in SUBCATS:
         zt = z[f"est_{s['id']}"].sum(); ct = co[co.naics.isin(s["naics"])].est.sum()
-        ok = ct > 0 and abs(zt - ct) / ct <= 0.03
-        rep.append((f"ZIP counts match county counts: {s['label']}", "PASS" if ok else "FAIL", f"ZIP {int(zt):,} vs county {int(ct):,}"))
+        cov.append(f"{s['label']} {zt / ct:.0%}" if ct else f"{s['label']} n/a")
+    rep.append(("ZIP detail coverage of county counts (cells under 3 businesses aren't published)", "INFO", "; ".join(cov)))
     # Published benchmarks (CBP national establishment counts, recent years)
     for nid, lo, hi, lab in (("621210", 110000, 150000, "dentist offices"), ("456110", 35000, 50000, "pharmacies")):
         n = co[co.naics == nid].est.sum()
@@ -269,11 +271,18 @@ def main():
     # County payroll and businesses -> spread to ZIPs by population share so DMAs (which split some counties) sum correctly
     cpop = z.groupby("county_fips").population.transform("sum")
     z["cshare"] = (z.population / cpop).where(cpop > 0, 0)
+    zc = set(z.county_fips)
     for s in SUBCATS:
         cs = co[co.naics.isin(s["naics"])].groupby("county_fips")[["est", "ap"]].sum(min_count=1)
         cs.loc[cs.ap <= 0, "ap"] = np.nan                       # zero payroll with businesses present = not usable
+        c0 = co0[co0.naics.isin(s["naics"])].groupby("county_fips").est.sum()
         z[f"cest_{s['id']}"] = z.county_fips.map(cs.est).fillna(0) * z.cshare
+        z[f"cprev_{s['id']}"] = z.county_fips.map(c0).fillna(0) * z.cshare
         z[f"cap_{s['id']}"] = z.county_fips.map(cs.ap) * z.cshare  # $1,000s
+    outside = co[co.naics.isin(all_naics) & ~co.county_fips.isin(zc)]
+    rep.append(("County businesses outside the ZIP geography", "INFO",
+                f"{int(outside.est.sum()):,} of {int(co[co.naics.isin(all_naics)].est.sum()):,} (mostly Census 'statewide' records with no county); counted in U.S. totals only"))
+    co_in = co[co.county_fips.isin(zc)]
 
     # CDC PLACES
     have = []
@@ -316,8 +325,8 @@ def main():
             r[k] = g.loc[ok, f"{k}_n"].sum() / covered if covered > 0 and covered >= 0.5 * g.adults18.sum() else np.nan
         for s in SUBCATS:
             i = s["id"]
-            r[f"est@{i}"] = g[f"est_{i}"].sum(); r[f"prev@{i}"] = g[f"est_prev_{i}"].sum()
             ce, cap = g[f"cest_{i}"].sum(), g[f"cap_{i}"].sum(min_count=1)
+            r[f"est@{i}"] = ce; r[f"prev@{i}"] = g[f"cprev_{i}"].sum()      # complete county counts
             r[f"pay@{i}"] = cap * 1000 / ce if ce >= 1 and cap == cap else np.nan
         return r
 
@@ -359,6 +368,8 @@ def main():
     us = frame([("us", z)])
     for s in SUBCATS:
         i = s["id"]
+        us[f"est@{i}"] = co[co.naics.isin(s["naics"])].est.sum()            # includes statewide records
+        us[f"prev@{i}"] = co0[co0.naics.isin(s["naics"])].est.sum()
         us[f"per10k@{i}"] = us[f"est@{i}"] / us.population * 1e4
         us[f"growth@{i}"] = (us[f"est@{i}"] - us[f"prev@{i}"]) / us[f"prev@{i}"]
 
@@ -386,9 +397,10 @@ def main():
         neg = int((df[[f"est@{s['id']}" for s in SUBCATS]] < 0).sum().sum())
         rep.append((f"{name} business counts never negative", "PASS" if neg == 0 else "FAIL", f"{neg}"))
     for s in SUBCATS:
-        tot_d, tot_u = dma[f"est@{s['id']}"].sum(), us[f"est@{s['id']}"].iloc[0]
-        ok = tot_u > 0 and abs(tot_d - tot_u) / tot_u <= 0.005 + (z[z.dma_code == "0"][f"est_{s['id']}"].sum() / tot_u)
-        rep.append((f"DMA roll-up matches U.S.: {s['label']}", "PASS" if ok else "FAIL", f"DMAs {int(tot_d):,} vs U.S. {int(tot_u):,}"))
+        tot_d = dma[f"est@{s['id']}"].sum()
+        tot_c = co_in[co_in.naics.isin(s["naics"])].est.sum() - z[z.dma_code == "0"][f"cest_{s['id']}"].sum()
+        ok = tot_c > 0 and abs(tot_d - tot_c) / tot_c <= 0.005
+        rep.append((f"DMA roll-up matches county totals: {s['label']}", "PASS" if ok else "FAIL", f"DMAs {int(round(tot_d)):,} vs counties {int(round(tot_c)):,}"))
     rep.append(("U.S. population (Deluxe)", "INFO", f"{int(us.population.iloc[0]):,}"))
 
     failed = [r for r in rep if r[1] == "FAIL"]
