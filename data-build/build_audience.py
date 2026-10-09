@@ -1,7 +1,8 @@
 """Builds shared/audience/zip_audience.json for the ZIP radius audience tool.
 
-All audience fields come from Census ACS 5-year tables, pulled by ZIP Code Tabulation Area from the public Census API
-(no key needed at this volume: nine table requests per run). Every ACS column used is checked against the Census
+All audience fields come from Census ACS 5-year tables by ZIP Code Tabulation Area. The build first tries the public
+Census API (no key needed). If the API refuses the request, it downloads the same tables as plain data files from the
+Census file server (www2.census.gov, the ACS "table-based summary file"), which needs no key either. Every ACS column used is checked against the Census
 variable labels before it is trusted, and the build stops without writing anything if a label doesn't match.
 Town names, coordinates, DMA and metro come from data-build/geo/zip_geo.csv (the step 2 geography table).
 
@@ -82,6 +83,60 @@ def fetch(url, tries=4):
         time.sleep(5 * (i + 1))
 
 
+BULK = "https://www2.census.gov/programs-surveys/acs/summary_file/{year}/table-based-SF/data/5YRData/acsdt5y{year}-{table}.dat"
+
+
+def bulk_col(var):   # API name B01001_006E -> summary file name B01001_E006
+    t, n = var[:-1].split("_")
+    return f"{t}_E{n}"
+
+
+def bulk_table(year, table, cols, cache):
+    """Reads one table from the ACS table-based summary file, keeping ZCTA rows only (GEO_ID 860Z200USxxxxx)."""
+    if cache:
+        path = os.path.join(cache, f"bulk_{year}_{table.lower()}.dat")
+        lines = open(path, encoding="utf-8")
+    else:
+        url = BULK.format(year=year, table=table.lower())
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (Adtaxi analyzer data build)"})
+        for i in range(4):
+            try:
+                resp = urllib.request.urlopen(req, timeout=600); break
+            except Exception as e:
+                if i == 3: raise RuntimeError(f"couldn't download {url}: {e}")
+                time.sleep(10 * (i + 1))
+        lines = (b.decode("utf-8", "replace") for b in resp)
+    it = iter(lines)
+    hdr = next(it).rstrip("\r\n").split("|")
+    want = [bulk_col(c) for c in cols]
+    missing = [w for w in want if w not in hdr]
+    if missing:
+        raise RuntimeError(f"{table} summary file is missing columns {missing}")
+    gi, idx = hdr.index("GEO_ID"), [hdr.index(w) for w in want]
+    rows = []
+    for line in it:
+        if not line.startswith("860Z200US"): continue
+        f = line.rstrip("\r\n").split("|")
+        rows.append([f[gi][9:]] + [f[k] for k in idx])
+    return pd.DataFrame(rows, columns=["zip"] + cols)
+
+
+def bulk_year(cache):
+    for y in YEARS:
+        if cache:
+            if os.path.exists(os.path.join(cache, f"bulk_{y}_b11005.dat")): return y
+            continue
+        url = BULK.format(year=y, table="b11005")
+        try:
+            req = urllib.request.Request(url, method="HEAD", headers={"User-Agent": "Mozilla/5.0 (Adtaxi analyzer data build)"})
+            urllib.request.urlopen(req, timeout=60)
+            print(f"Census file server: ACS 5-year {y - 4}-{y} available")
+            return y
+        except Exception as e:
+            print(f"Census file server: ACS 5-year {y - 4}-{y} not available -> {e}")
+    sys.exit("Neither the Census API nor the Census file server could be reached (reasons above).")
+
+
 def load(name, url, cache):
     if cache:
         p = os.path.join(cache, name + ".json")
@@ -91,27 +146,33 @@ def load(name, url, cache):
 
 def pick_year(cache):
     print("Census API key:", "yes (CENSUS_API_KEY secret)" if KEY else "none (public access)")
+    if cache and os.environ.get("ACS_SOURCE") == "files": return None
     for y in YEARS:
         if cache:
             if os.path.exists(os.path.join(cache, f"{y}_B11005.json")): return y
             continue
+        if os.environ.get("ACS_SOURCE") == "files": break
         try:
             fetch(API.format(year=y) + f"?get={v('B11005', 1)}&for={ZCTA.replace(' ', '%20')}:00601", tries=3)
             print(f"ACS 5-year {y - 4}-{y}: available")
             return y
         except Exception as e:
             print(f"ACS 5-year {y - 4}-{y}: not reachable -> {e}")
-    sys.exit("No ACS 5-year release could be reached at api.census.gov (reasons above)")
+    print("The Census API refused or couldn't be reached; switching to the Census file server.")
+    return None
 
 
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument("--cache"); a = ap.parse_args()
     year = pick_year(a.cache)
-    rep = [("ACS release", "INFO", f"ACS 5-year {year - 4}–{year}")]
+    source = "Census API"
+    if year is None:
+        year, source = bulk_year(a.cache), "Census file server (table-based summary file)"
+    rep = [("ACS release", "INFO", f"ACS 5-year {year - 4}–{year}"), ("Download source", "INFO", source)]
 
-    # 1. Label checks
+    # 1. Label checks (API only; the file server has no label lookup, so the add-up and benchmark checks below guard it)
     bad, checked = [], 0
-    for table in REQUESTS:
+    for table in (REQUESTS if source == "Census API" else []):
         g = load(f"{year}_{table}_groups", API.format(year=year) + f"/groups/{table}.json", a.cache)
         if g is None:
             rep.append((f"Labels {table}", "SKIP", "no saved labels in test mode")); continue
@@ -123,17 +184,24 @@ def main():
                 bad.append(f"{var}: expected {words}, Census says '{labels.get(var, 'missing')}'")
     if bad:
         print("\n".join(bad)); sys.exit("Census variable labels don't match what the tool expects; nothing was written.")
-    rep.append(("Census labels match the columns used", "PASS", f"{checked} variables checked"))
+    if source == "Census API":
+        rep.append(("Census labels match the columns used", "PASS", f"{checked} variables checked"))
+    else:
+        rep.append(("Census labels match the columns used", "SKIP", "file server has no label lookup; add-up and benchmark checks apply"))
 
     # 2. Tables
     acs = None
     for table, cols in REQUESTS.items():
-        url = API.format(year=year) + "?get=" + ",".join(cols) + "&for=" + ZCTA.replace(" ", "%20") + ":*"
-        data = load(f"{year}_{table}", url, a.cache)
-        df = pd.DataFrame(data[1:], columns=data[0]).rename(columns={ZCTA: "zip"})[["zip"] + cols]
+        if source == "Census API":
+            url = API.format(year=year) + "?get=" + ",".join(cols) + "&for=" + ZCTA.replace(" ", "%20") + ":*"
+            data = load(f"{year}_{table}", url, a.cache)
+            df = pd.DataFrame(data[1:], columns=data[0]).rename(columns={ZCTA: "zip"})[["zip"] + cols]
+        else:
+            print(f"Downloading {table} from the Census file server...", flush=True)
+            df = bulk_table(year, table, cols, a.cache)
         for c in cols: df[c] = pd.to_numeric(df[c], errors="coerce").clip(lower=0)   # negative = Census "not available"
         acs = df if acs is None else acs.merge(df, on="zip", how="outer")
-    rep.append(("ZCTAs returned by the Census API", "INFO", f"{len(acs):,}"))
+    rep.append(("ZCTAs returned by Census", "PASS" if len(acs) > 30000 else "FAIL", f"{len(acs):,} (expected about 33,000)"))
 
     out = pd.DataFrame({"zip": acs.zip})
     out["acs_pop"] = acs[v("B01001", 1)]
