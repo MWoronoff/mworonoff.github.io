@@ -25,7 +25,10 @@ def v(table, n): return f"{table}_{n:03d}E"
 AGE_LINES = {"15_17": [6], "18_24": [7, 8, 9, 10], "25_34": [11, 12], "35_44": [13, 14], "45_54": [15, 16],
              "55p": list(range(17, 26))}
 AGE_LABELS = {6: "15 to 17", 7: "18 and 19", 8: "20 years", 9: "21 years", 10: "22 to 24", 11: "25 to 29", 12: "30 to 34",
-              13: "35 to 39", 14: "40 to 44", 15: "45 to 49", 16: "50 to 54", 17: "55 to 59", 25: "85 years"}
+              13: "35 to 39", 14: "40 to 44", 15: "45 to 49", 16: "50 to 54", 17: "55 to 59", 19: "62 to 64", 20: "65 and 66",
+              23: "75 to 79", 25: "85 years"}
+# Extra age groups for the Healthcare analyzer (both sexes; B01001 lines for males, +24 for females)
+AGE_GROUPS = {"a25_64": range(11, 20), "a30_64": range(12, 20), "a45p": range(15, 26), "a65p": range(20, 26), "a75p": range(23, 26)}
 # Household income (B19001): line 2 is under $10K ... line 17 is $200K+ (the highest band Census publishes by ZIP).
 INC = {"lt35": range(2, 8), "35_50": range(8, 11), "50_75": range(11, 13), "75_100": [13], "100_150": [14, 15],
        "150_200": [16], "200p": [17]}
@@ -213,6 +216,8 @@ def main():
         for band, lines in AGE_LINES.items():
             out[f"{sex}{band}"] = sum(acs[v("B01001", n + off)] for n in lines)
     out["adults18"] = sum(out[f"{s}{b}"] for s in "mf" for b in ("18_24", "25_34", "35_44", "45_54", "55p"))
+    for g, lines in AGE_GROUPS.items():
+        out[g] = sum(acs[v("B01001", n)] + acs[v("B01001", n + 24)] for n in lines)
     for band, lines in INC.items():
         out[f"inc_{band}"] = sum(acs[v("B19001", n)] for n in lines)
     out["inc_tot"] = acs[v("B19001", 1)]
@@ -237,6 +242,8 @@ def main():
         rep.append((name, "PASS" if n == 0 else "FAIL", f"{n} ZIPs where the parts don't add up to the total"))
     chk("Income bands add up", [f"inc_{b}" for b in INC], "inc_tot")
     chk("Head-of-household education adds up", ["hhed_nocol", "hhed_some", "hhed_ba"], "hhed_tot")
+    nest = int(((out.a75p > out.a65p) | (out.a65p > out.a45p) | (out.a30_64 > out.a25_64) | (out.a25_64 > out.adults18)).sum())
+    rep.append(("Healthcare age groups nest correctly (75+ within 65+ within 45+)", "PASS" if nest == 0 else "FAIL", f"{nest} ZIPs out of order"))
     over = int((out[[f"{s}{b}" for s in "mf" for b in AGE_LINES]].sum(axis=1) > out.acs_pop + 12).sum())
     rep.append(("Age bands never exceed population", "PASS" if over == 0 else "FAIL", f"{over} ZIPs over"))
     for part, total, name in (("hh_kids", "hh_tot", "Households with children"), ("enr_college", "enr_tot", "College enrollment"),
@@ -254,6 +261,8 @@ def main():
     rep.append(("ZIPs with Census data", "INFO", f"{int(matched.sum()):,} of {len(m):,} ZIPs, holding "
                 f"{m.loc[matched, 'population'].sum() / m.population.sum():.1%} of Deluxe population; the rest are PO box or business ZIPs"))
     tot = lambda c: int(m[c].fillna(0).sum())
+    rep.append(("Published benchmark: share age 65+", "PASS" if 15 < tot("a65p") / max(tot("acs_pop"), 1) * 100 < 20 else "FAIL",
+                f"{tot('a65p') / max(tot('acs_pop'), 1) * 100:.1f}% (expected 15–20)"))
     rep.append(("National totals", "INFO", f"population {tot('acs_pop'):,}; households {tot('hh_tot'):,}; "
                 f"college enrolled {tot('enr_college'):,}; households with children {tot('hh_kids'):,}"))
     # Published national benchmarks (ACS 5-year): population ~332-336M; Hispanic ~19%; veterans ~6-7% of civilian adults;
@@ -276,7 +285,7 @@ def main():
         sys.exit("A check failed; the audience data was not updated. See shared/audience/audience_report.md.")
 
     # 5. Write compact column arrays
-    num = ["population", "households", "acs_pop", "adults18"] + [f"{s}{b}" for s in "mf" for b in AGE_LINES] + \
+    num = ["population", "households", "acs_pop", "adults18"] + list(AGE_GROUPS) + [f"{s}{b}" for s in "mf" for b in AGE_LINES] + \
           [f"inc_{b}" for b in INC] + ["inc_tot", "hhed_nocol", "hhed_some", "hhed_ba", "hhed_tot", "owners", "hh_kids", "hh_tot",
           "enr_college", "enr_tot", "hispanic", "hisp_tot", "lang_spanish", "pop5", "veterans", "vet_tot", "some_college", "adults25"]
     cols = {"zip": m.zip.tolist(), "city": m.city.fillna("").tolist(), "state": m.state.tolist(),
