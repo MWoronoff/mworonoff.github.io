@@ -22,9 +22,12 @@ AdtaxiAnalyzer.start({
   subtitle: "A test page for the shared engine behind the Healthcare and Legal analyzers, built on real DMA and metro geography. Scores here are placeholders, not Prospect Scores.",
   logo: "../shared/adtaxi-logo.svg",
   exportName: "engine-test",
+  radiusPage: "radius.html",
+  radiusDefault: 10,
   notice: "Test page: the test score is each market's percentile rank on household count (or ZIP count). Healthcare and Legal will use the Prospect Score instead.",
   links: [
     { label: "All analyzers", url: "../analyzers/" },
+    { label: "ZIP radius audience tool", url: "radius.html" },
     { label: "ZIP Audience Builder", url: "../zip-analyzer/" }
   ],
   defaultLevel: "dma",

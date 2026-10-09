@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ZIP Radius Audience Tool Test</title>
+<link rel="icon" href="../shared/adtaxi-logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<link rel="stylesheet" href="../shared/engine.css">
+</head>
+<body>
+<div id="app"><p class="az-loading">Loading the radius tool…</p></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js" crossorigin=""></script>
+<script src="../shared/radius.js"></script>
+<script>
+AdtaxiRadius.start({
+  title: "ZIP Radius Audience Tool",
+  subtitle: "Pick a center ZIP and a radius, then choose the audience. Test page, set up with the Higher Education filters.",
+  logo: "../shared/adtaxi-logo.svg",
+  exportName: "higher-ed-radius",
+  links: [ { label: "Back to the analyzer", url: "./" }, { label: "All analyzers", url: "../analyzers/" } ],
+  audienceData: "../shared/audience/zip_audience.json",
+  zipGeo: "../shared/geo/zip/{level}/{id}.json",
+  defaultZip: "80202",
+  defaultRadius: 25,
+  filters: ["gender", "age", "income", "parented", "kids", "enrolled", "hispanic", "spanish", "veterans", "somecollege"],
+  presets: [
+    { label: "College-age students", sel: { age: ["15_17", "18_24"] } },
+    { label: "First-generation families", sel: { parented: ["nocol"], kids: true } },
+    { label: "Adult degree completion", sel: { age: ["25_34", "35_44", "45_54"], somecollege: true } },
+    { label: "Hispanic students", sel: { age: ["15_17", "18_24"], hispanic: true } },
+    { label: "Veterans", sel: { veterans: true } }
+  ]
+});
+</script>
+</body>
+</html>

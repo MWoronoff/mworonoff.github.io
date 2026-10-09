@@ -277,7 +277,7 @@
     }
   };
 
-  Analyzer.prototype.refresh = function () {
+  Analyzer.prototype.refresh = function (keepError) {
     var self = this, s = this.state;
     var drill = this.canDrill();
     Array.prototype.forEach.call(this.levelSeg.children, function (b) {
@@ -287,7 +287,7 @@
     });
     if (this.subSel) this.subSel.value = s.sub;
     this.rankSel.value = s.rank;
-    this.errorBox.hidden = true;
+    if (!keepError) this.errorBox.hidden = true;
     var mapLevel = s.level === "us" ? (this.cfg.usMapLevel || "dma") : s.level;
     var needed = [this.ensureLevel(s.level)];
     if (mapLevel !== s.level) needed.push(this.ensureLevel(mapLevel));
@@ -304,6 +304,13 @@
       self.writeHash();
     }).catch(function (e) {
       self.errorBox.hidden = false;
+      if (s.level === "zip" && s.parent) {
+        // ZIP data for this market didn't load: step back to the market so the page stays usable.
+        self.errorBox.textContent = "The ZIPs for this market couldn't be loaded (" + e.message + "). Showing the market instead; try again in a minute.";
+        s.level = s.parent.level; s.area = s.parent.id;
+        self.refresh(true);
+        return;
+      }
       self.errorBox.textContent = e.message + ". Refresh the page; if it keeps happening, the data files for this view are missing.";
     });
   };
@@ -540,6 +547,7 @@
       box.appendChild(el("button", { type: "button", class: "az-btn primary az-drill", text: "See ZIPs in this market", onclick: function () { self.drill(); } }));
     }
     if (s.level === "zip") {
+      if (cfg.radiusPage) box.appendChild(el("a", { class: "az-btn primary az-drill", href: cfg.radiusPage + "#zip=" + encodeURIComponent(row.id) + "&r=" + (cfg.radiusDefault || 10), text: "Build a radius audience from this ZIP" }));
       box.appendChild(el("button", { type: "button", class: "az-btn az-drill", text: "Back to " + this.parentName(), onclick: function () { self.setLevel(s.parent.level); } }));
     }
     if (row.f && row.f.length) box.appendChild(el("div", { class: "az-flags" }, [el("b", { text: "Data notes" }), el("ul", null, row.f.map(function (t) { return el("li", { text: t }); }))]));
