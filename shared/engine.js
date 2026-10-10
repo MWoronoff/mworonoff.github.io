@@ -68,6 +68,14 @@
   };
   Analyzer.prototype.availableAt = function (m, level) { return !m.levels || m.levels.indexOf(level) >= 0; };
   // A measure with "subs" belongs only to those categories (e.g. "No dental visit" only with Dental).
+  // "*" marks a value filled in for this area (row.e lists measure keys) and the score and demand of any category whose
+  // demand inputs include such a value (row.es lists category ids). The area's data notes explain.
+  Analyzer.prototype.mark = function (row, m) {
+    if (!row || !m) return "";
+    if (row.e && row.e.indexOf(m.key) >= 0) return "*";
+    if (m.perSub && this.state.sub && row.es && row.es.indexOf(this.state.sub) >= 0 && (m.key === "score" || m.key === "demand")) return "*";
+    return "";
+  };
   Analyzer.prototype.relevant = function (m) { return !m.subs || !this.state.sub || m.subs.indexOf(this.state.sub) >= 0; };
   Analyzer.prototype.valueKey = function (m) { return m.perSub && this.state.sub ? m.key + "@" + this.state.sub : m.key; };
   Analyzer.prototype.val = function (row, m) {
@@ -371,6 +379,7 @@
         var name = row ? row.name : (f.properties.dma_name || f.properties.NAME || id);
         if (!row && lv === "zip") name = "ZIP " + id;
         var v = row ? fmt(self.val(row, m), m.format) : null;
+        if (v != null) v += self.mark(row, m);
         layer.bindTooltip(function () {
           return '<div class="az-tip"><b>' + name + "</b><br>" + (m ? m.label : "") + ": " + (v == null ? "No data" : v) + "</div>";
         }, { sticky: true, direction: "top", opacity: 0.97 });
@@ -481,7 +490,7 @@
     });
     this.thead.appendChild(hr);
 
-    var frag = document.createDocumentFragment();
+    var frag = document.createDocumentFragment(), anyMark = false;
     shown.forEach(function (r) {
       var tr = el("tr", { tabindex: "0", "data-id": r.id, "aria-selected": r.id === s.area ? "true" : "false",
         onclick: function () { self.select(r.id, { zoom: true }); },
@@ -492,13 +501,15 @@
       cols.forEach(function (m) {
         var v = fmt(self.val(r, m), m.format);
         if (v == null && r.u && (m.key === s.rank || m.key.indexOf("score") === 0 || m.key.indexOf("p_") === 0)) tr.appendChild(el("td", { class: "az-na", title: (r.f && r.f[0]) || "Not ranked", text: "Not ranked" }));
-        else tr.appendChild(v == null ? el("td", { class: "az-na", title: "No data for this area", text: "No data" }) : el("td", { class: "num", text: v }));
+        else if (v == null) tr.appendChild(el("td", { class: "az-na", title: "No data for this area", text: "No data" }));
+        else { var mk = self.mark(r, m); if (mk) anyMark = true; tr.appendChild(el("td", { class: "num", title: mk ? "Uses estimated values; see this market's Data notes" : null, text: v + mk })); }
       });
       frag.appendChild(tr);
     });
     this.tbody.innerHTML = "";
     if (!shown.length) this.tbody.appendChild(el("tr", null, [el("td", { colspan: String(cols.length + 2), class: "az-empty", text: "No markets match \u201c" + s.query + "\u201d. Clear the search to see all markets." })]));
     this.tbody.appendChild(frag);
+    if (anyMark) this.tableNote.textContent += " * Uses estimated health values; select the market and see its Data notes.";
   };
   Analyzer.prototype.markRow = function () {
     var id = this.state.area, sel = null;
@@ -530,7 +541,7 @@
         rank = 1 + d.rows.filter(function (r) { var x = self.val(r, head); return typeof x === "number" && (head.lowerIsBetter ? x < hv : x > hv); }).length;
       }
       box.appendChild(el("div", { class: "az-score" }, [
-        el("b", { class: "num", text: fmt(hv, head.format) == null ? "—" : fmt(hv, head.format) }),
+        el("b", { class: "num", text: fmt(hv, head.format) == null ? "—" : fmt(hv, head.format) + self.mark(row, head) }),
         el("span", { text: hv == null && row.u ? "Not ranked" : head.label + (rank ? ", ranked " + rank + " of " + total + (s.level === "zip" ? " ZIPs in this market" : "") : "") })
       ]));
     }
@@ -540,7 +551,7 @@
       box.appendChild(el("div", { class: "az-bars" }, comps.map(function (m) {
         var v = self.val(row, m), ok = typeof v === "number";
         return el("div", { title: m.help || null }, [
-          el("div", { class: "az-bar-label" }, [el("span", { text: m.label }), el("b", { class: "num" + (ok ? "" : " az-na"), text: ok ? fmt(v, m.format) : "No data" })]),
+          el("div", { class: "az-bar-label" }, [el("span", { text: m.label }), el("b", { class: "num" + (ok ? "" : " az-na"), text: ok ? fmt(v, m.format) + self.mark(row, m) : "No data" })]),
           el("div", { class: "az-track" }, [el("div", { class: "az-fill", style: "width:" + (ok ? Math.max(0, Math.min(100, v)) : 0) + "%" })])
         ]);
       })));
@@ -553,8 +564,8 @@
         if (!self.availableAt(m, s.level)) return el("div", { class: "az-measure", title: m.help || null }, [el("span", { text: m.label }), el("b", { class: "az-na", text: "Not available at this level" })]);
         var v = fmt(self.val(row, m), m.format);
         // "e" lists measures filled in for this area rather than taken from the current source release
-        var est = v != null && row.e && row.e.indexOf(m.key) >= 0;
-        return el("div", { class: "az-measure", title: (est ? "Estimated for this area; see Data notes. " : "") + (m.help || "") || null }, [el("span", { text: m.label }), el("b", { class: "num" + (v == null ? " az-na" : ""), text: v == null ? "No data" : v + (est ? " est." : "") })]);
+        var mk = v != null ? self.mark(row, m) : "";
+        return el("div", { class: "az-measure", title: (mk ? "Estimated for this area; see Data notes. " : "") + (m.help || "") || null }, [el("span", { text: m.label }), el("b", { class: "num" + (v == null ? " az-na" : ""), text: v == null ? "No data" : v + mk })]);
       })));
     }
     if (this.cfg.levels.zip && (s.level === "dma" || s.level === "metro")) {
