@@ -14,16 +14,19 @@ Built 2026-10-10. Result: **PASSED**
 | CDC PLACES release | INFO | 2025; measures found: fairpoor, diabetes, bphigh, nodental, hearing, vision, arthritis, obesity, depression, mhlth, indeplive |
 | CDC PLACES ZCTA gaps filled with county values | INFO | Fair or poor health 10,764 ZIPs; Diabetes 10,764 ZIPs; High blood pressure 10,764 ZIPs; No dental visit in past year 8,227 ZIPs; Hearing disability 10,764 ZIPs; Vision disability 10,764 ZIPs; Arthritis 10,764 ZIPs; Obesity 10,764 ZIPs; Depression 10,764 ZIPs; Frequent mental distress 10,764 ZIPs; Independent-living disability 10,764 ZIPs |
 | Adults covered by CDC PLACES | PASS | 94.7% |
-| Estimated where CDC doesn't publish: Fair or poor health | PASS | used; average county error 1.38 pts (Ohio 1.74, West Virginia 1.18, New York 1.83, Maryland 1.14, Tennessee 1.27, Indiana 1.10); 2,385 ZIPs |
-| Estimated where CDC doesn't publish: Diabetes | PASS | used; average county error 1.02 pts (Ohio 0.73, West Virginia 1.04, New York 1.11, Maryland 1.53, Tennessee 0.96, Indiana 0.72); 2,385 ZIPs |
-| Estimated where CDC doesn't publish: High blood pressure | WARN | not used (error above 1.5 pts); average county error 3.30 pts (Ohio 1.50, West Virginia 4.55, New York 2.40, Maryland 4.59, Tennessee 3.76, Indiana 2.98); 2,385 ZIPs |
-| Estimated where CDC doesn't publish: Hearing disability | PASS | used; average county error 0.69 pts (Ohio 0.48, West Virginia 0.78, New York 1.22, Maryland 0.59, Tennessee 0.75, Indiana 0.31); 2,385 ZIPs |
-| Estimated where CDC doesn't publish: Vision disability | PASS | used; average county error 0.80 pts (Ohio 0.94, West Virginia 1.42, New York 0.42, Maryland 0.40, Tennessee 0.71, Indiana 0.91); 2,385 ZIPs |
-| Estimated where CDC doesn't publish: Arthritis | WARN | not used (error above 1.5 pts); average county error 3.99 pts (Ohio 3.49, West Virginia 8.64, New York 1.89, Maryland 2.37, Tennessee 4.70, Indiana 2.84); 2,385 ZIPs |
+| CDC 2024 release used where 2025 is blank: Fair or poor health | PASS | used; average county error 0.99 pts (Ohio 1.69, West Virginia 1.08, New York 0.60, Maryland 1.33, Tennessee 0.68, Indiana 0.56); change factor 1.046; 3,104 ZIPs |
+| CDC 2024 release used where 2025 is blank: Diabetes | PASS | used; average county error 0.42 pts (Ohio 0.40, West Virginia 0.35, New York 0.38, Maryland 0.29, Tennessee 0.53, Indiana 0.57); change factor 1.002; 3,104 ZIPs |
+| CDC 2024 release used where 2025 is blank: High blood pressure | PASS | used; average county error 1.12 pts (Ohio 1.10, West Virginia 1.14, New York 0.94, Maryland 1.05, Tennessee 0.76, Indiana 1.70); change factor 1.034; 3,104 ZIPs |
+| CDC 2024 release used where 2025 is blank: No dental visit in past year | PASS | used; average county error 0.00 pts (Ohio 0.00, West Virginia 0.00, New York 0.00, Maryland 0.00, Tennessee 0.00, Indiana 0.00); change factor 1.000; 1 ZIPs |
+| CDC 2024 release used where 2025 is blank: Hearing disability | PASS | used; average county error 0.33 pts (Ohio 0.16, West Virginia 0.16, New York 0.44, Maryland 0.41, Tennessee 0.51, Indiana 0.29); change factor 0.954; 3,104 ZIPs |
+| CDC 2024 release used where 2025 is blank: Vision disability | PASS | used; average county error 0.18 pts (Ohio 0.28, West Virginia 0.16, New York 0.12, Maryland 0.09, Tennessee 0.11, Indiana 0.31); change factor 0.920; 3,104 ZIPs |
+| CDC 2024 release used where 2025 is blank: Arthritis | PASS | used; average county error 0.80 pts (Ohio 0.57, West Virginia 0.97, New York 0.67, Maryland 0.67, Tennessee 1.10, Indiana 0.81); change factor 0.968; 3,104 ZIPs |
+| CDC 2024 release used where 2025 is blank: Obesity | WARN | not used (error above 1.5 pts); average county error 2.32 pts (Ohio 2.45, West Virginia 2.34, New York 1.81, Maryland 2.83, Tennessee 2.37, Indiana 2.13); change factor 0.980; 3,104 ZIPs |
+| CDC 2024 release used where 2025 is blank: Depression | WARN | not used (error above 1.5 pts); average county error 1.56 pts (Ohio 0.96, West Virginia 3.26, New York 1.54, Maryland 0.81, Tennessee 0.86, Indiana 1.94); change factor 0.983; 3,104 ZIPs |
+| CDC 2024 release used where 2025 is blank: Frequent mental distress | PASS | used; average county error 0.63 pts (Ohio 0.80, West Virginia 1.10, New York 0.33, Maryland 0.46, Tennessee 0.36, Indiana 0.73); change factor 0.968; 3,104 ZIPs |
+| CDC 2024 release used where 2025 is blank: Independent-living disability | PASS | used; average county error 0.46 pts (Ohio 1.06, West Virginia 0.32, New York 0.13, Maryland 0.23, Tennessee 0.59, Indiana 0.46); change factor 0.991; 3,104 ZIPs |
 | Estimated where CDC doesn't publish: Obesity | WARN | not used (error above 1.5 pts); average county error 3.68 pts (Ohio 2.53, West Virginia 4.05, New York 4.10, Maryland 5.23, Tennessee 2.36, Indiana 3.78); 2,385 ZIPs |
 | Estimated where CDC doesn't publish: Depression | WARN | not used (error above 1.5 pts); average county error 4.65 pts (Ohio 3.58, West Virginia 8.87, New York 3.73, Maryland 1.82, Tennessee 6.52, Indiana 3.36); 2,385 ZIPs |
-| Estimated where CDC doesn't publish: Frequent mental distress | PASS | used; average county error 1.50 pts (Ohio 0.79, West Virginia 3.82, New York 0.99, Maryland 0.71, Tennessee 2.22, Indiana 0.47); 2,385 ZIPs |
-| Estimated where CDC doesn't publish: Independent-living disability | PASS | used; average county error 0.54 pts (Ohio 0.47, West Virginia 0.90, New York 0.31, Maryland 0.26, Tennessee 0.77, Indiana 0.56); 2,385 ZIPs |
 | Adults covered by CDC PLACES plus estimates | INFO | 100.0% |
 | EASI healthcare spending: Palm Springs | INFO | EASI includes Palm Springs in Los Angeles; the provisional Palm Springs DMA uses the Riverside–San Bernardino metro's per-household spending |
 | EASI U.S. healthcare spending per household | INFO | Medical services $1,215.73; Prescription drugs $215.68 |
@@ -31,8 +34,8 @@ Built 2026-10-10. Result: **PASSED**
 | EASI healthcare spending matched to metros | PASS | 387 of 387 |
 | EASI medical services total, DMAs vs. EASI's own total | PASS | 96.9% of EASI's $159.0B |
 | EASI prescription drugs total, DMAs vs. EASI's own total | PASS | 96.9% of EASI's $28.2B |
-| Cross-check vs. EASI: Hearing disability | INFO | correlation with EASI hearing trouble: 0.72 across 22 metros with estimated values; 0.71 across 365 metros with CDC values |
-| Cross-check vs. EASI: Vision disability | INFO | correlation with EASI vision trouble: 0.64 across 22 metros with estimated values; 0.52 across 365 metros with CDC values |
+| Cross-check vs. EASI: Hearing disability | INFO | correlation with EASI hearing trouble: 0.57 across 22 metros with estimated values; 0.71 across 365 metros with CDC values |
+| Cross-check vs. EASI: Vision disability | INFO | correlation with EASI vision trouble: 0.37 across 22 metros with estimated values; 0.52 across 365 metros with CDC values |
 | EASI layer matched to metros | PASS | 387 of 387 metros |
 | DMA scores within 0–100 | PASS | 0 out of range; 1,890 scores computed, 0 not computed (missing input) |
 | DMA business counts never negative | PASS | 0 |
