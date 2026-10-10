@@ -73,6 +73,9 @@ DEMAND_LABELS = {"population": "Population", "adults": "Adults 18+", "a65p": "Ag
                  "arthritis": "Arthritis", "obesity": "Obesity", "depression": "Depression",
                  "mhlth": "Frequent mental distress", "indeplive": "Independent-living disability"}
 RATES = ["kids_share", "inc75_share", "inc150_share"] + list(PLACES)
+EST_NOTE = ("CDC doesn't publish health measures here, so they're estimated from local age, income and education, "
+            "based on how those measures vary in the states CDC does cover. A measure that can't be estimated reliably "
+            "shows No data. See How scores work.")
 
 
 def log(*a): print(*a, flush=True)
@@ -203,6 +206,68 @@ def places_table(kind, did, cache):
     return out, have
 
 
+# ---------------- Estimating missing health measures ----------------
+# CDC doesn't publish most PLACES measures for some states (Pennsylvania and Kentucky). For those ZIPs the build
+# estimates each measure from local age, income and education, using how the measure moves with those factors in the
+# states CDC does publish. Each measure is first tested on neighbouring states with known values; it's only estimated
+# if the average county-level error stays within EST_MAX_ERR.
+EST_TEST_STATES = {"39": "Ohio", "54": "West Virginia", "36": "New York", "24": "Maryland", "47": "Tennessee", "18": "Indiana"}
+EST_MAX_ERR = 0.015          # 1.5 percentage points, average county error
+
+
+def est_features(z):
+    pop = z.acs_pop.where(z.acs_pop > 0); inc = z.inc_tot.where(z.inc_tot > 0); hh = z.hh_tot.where(z.hh_tot > 0)
+    X = pd.DataFrame({"a45": z.a45p / pop, "a65": z.a65p / pop, "a75": z.a75p / pop,
+                      "inc_lt35": z.inc_lt35 / inc, "inc75": z.inc75 / inc, "inc150": z.inc150 / inc,
+                      "kids": z.hh_kids / hh}, index=z.index)
+    if "hhed_tot" in z.columns:
+        et = z.hhed_tot.where(z.hhed_tot > 0)
+        X["ed_nocol"], X["ed_ba"] = z.hhed_nocol / et, z.hhed_ba / et
+    X.insert(0, "const", 1.0)
+    return X
+
+
+def wls_fit(X, y, w):
+    sw = np.sqrt(w.values)[:, None]
+    beta, *_ = np.linalg.lstsq(X.values * sw, y.values * sw[:, 0], rcond=None)
+    return beta
+
+
+def estimate_gaps(z, have, rep):
+    """Fills missing PLACES values in z with model estimates; returns the list of measures estimated."""
+    X = est_features(z)
+    okx = X.notna().all(axis=1) & (z.adults18 >= 100)
+    state = z.county_fips.fillna("").str[:2]
+    estimated, cols = [], []
+    for k in have:
+        known = z[k].notna() & okx
+        gap = z[k].isna() & okx
+        if gap.sum() == 0: continue
+        errs = {}
+        for st, name in EST_TEST_STATES.items():
+            tr, te = known & (state != st), known & (state == st)
+            if te.sum() < 50: continue
+            beta = wls_fit(X[tr], z.loc[tr, k], z.loc[tr, "adults18"])
+            pred = (X[te].values @ beta).clip(0, 1)
+            d = pd.DataFrame({"c": z.loc[te, "county_fips"], "w": z.loc[te, "adults18"], "p": pred * z.loc[te, "adults18"],
+                              "y": z.loc[te, k] * z.loc[te, "adults18"]}).groupby("c").sum()
+            cerr = ((d.p - d.y).abs() / d.w)
+            errs[name] = float(np.average(cerr, weights=d.w))
+        if not errs: continue
+        avg = float(np.mean(list(errs.values())))
+        detail = f"average county error {avg * 100:.2f} pts (" + ", ".join(f"{n} {e * 100:.2f}" for n, e in errs.items()) + f"); {int(gap.sum()):,} ZIPs"
+        if avg <= EST_MAX_ERR:
+            beta = wls_fit(X[known], z.loc[known, k], z.loc[known, "adults18"])
+            z.loc[gap, k] = (X[gap].values @ beta).clip(0, 1)
+            z[f"{k}_n"] = z[k] * z.adults18
+            z.loc[gap, "hm_est"] = True
+            estimated.append(k)
+            rep.append((f"Estimated where CDC doesn't publish: {DEMAND_LABELS[k]}", "PASS", "used; " + detail))
+        else:
+            rep.append((f"Estimated where CDC doesn't publish: {DEMAND_LABELS[k]}", "WARN", "not used (error above 1.5 pts); " + detail))
+    return estimated
+
+
 # ---------------- Scoring helpers ----------------
 def pct(s):
     """Percentile 0-100 within the group; missing stays missing."""
@@ -245,7 +310,8 @@ def main():
     need = ["a65p", "a75p", "a45p", "a25_64", "a30_64"]
     if any(c not in acs.columns for c in need):
         sys.exit("shared/audience/zip_audience.json has no Healthcare age groups; the audience step must run first with the new build_audience.py.")
-    acs = acs[["zip", "acs_pop", "adults18", "hh_kids", "hh_tot", "inc_tot", "inc_75_100", "inc_100_150", "inc_150_200", "inc_200p"] + need]
+    edu = [c for c in ("hhed_nocol", "hhed_ba", "hhed_tot") if c in acs.columns]
+    acs = acs[["zip", "acs_pop", "adults18", "hh_kids", "hh_tot", "inc_tot", "inc_lt35", "inc_75_100", "inc_100_150", "inc_150_200", "inc_200p"] + need + edu]
     acs["inc75"] = acs[["inc_75_100", "inc_100_150", "inc_150_200", "inc_200p"]].sum(axis=1, min_count=4)
     acs["inc150"] = acs[["inc_150_200", "inc_200p"]].sum(axis=1, min_count=2)
     z = z.merge(acs.drop(columns=["inc_75_100", "inc_100_150", "inc_150_200", "inc_200p"]), on="zip", how="left")
@@ -315,7 +381,13 @@ def main():
         rep.append(("CDC PLACES ZCTA gaps filled with county values", "INFO", "; ".join(f"{DEMAND_LABELS[k]} {v:,} ZIPs" for k, v in filled.items() if v)))
         cov = z.loc[z[have[0]].notna(), "adults18"].sum() / z.adults18.sum() if have else 0
         rep.append(("Adults covered by CDC PLACES", "PASS" if cov > 0.9 else "WARN", f"{cov:.1%}"))
+        z["hm_est"] = False
+        est_measures = estimate_gaps(z, have, rep)
+        if est_measures:
+            cov2 = z.loc[z[have[0]].notna(), "adults18"].sum() / z.adults18.sum()
+            rep.append(("Adults covered by CDC PLACES plus estimates", "INFO", f"{cov2:.1%}"))
     except Exception as e:
+        z["hm_est"] = False
         rep.append(("CDC PLACES download", "WARN", f"not available this run ({e}); Consumer Demand uses Census inputs only"))
         release = None
 
@@ -328,6 +400,7 @@ def main():
         r["kids_share"] = g.hh_kids.sum() / g.hh_tot.sum() if g.hh_tot.sum() > 0 else np.nan
         r["inc75_share"] = g.inc75.sum() / g.inc_tot.sum() if g.inc_tot.sum() > 0 else np.nan
         r["inc150_share"] = g.inc150.sum() / g.inc_tot.sum() if g.inc_tot.sum() > 0 else np.nan
+        r["hm_est_share"] = g.loc[g.hm_est.fillna(False).astype(bool), "adults18"].sum() / g.adults18.sum() if g.adults18.sum() > 0 else 0
         for k in have:
             ok = g[k].notna() & g.adults18.notna()
             covered = g.loc[ok, "adults18"].sum()
@@ -438,6 +511,14 @@ def main():
         met[f"easi_{c}_g"] = met.index.map(grow)
         met[f"easi_{c}_gidx"] = met.index.map(((1 + grow) / (1 + ugrow) * 100).round(0))
     miss = sorted(set(met.index) - set(easi.index))
+    # Cross-check: do estimated health measures line up with EASI's independent metro estimates?
+    for k, c in (("hearing", "hearing"), ("vision", "vision")):
+        if k in met.columns and f"easi_{c}_rate" in met.columns:
+            e_ = met[met.hm_est_share >= 0.5]; o_ = met[met.hm_est_share < 0.5]
+            if len(e_) >= 5:
+                ce, co_ = e_[k].corr(e_[f"easi_{c}_rate"]), o_[k].corr(o_[f"easi_{c}_rate"])
+                rep.append((f"Cross-check vs. EASI: {DEMAND_LABELS[k]}", "INFO",
+                            f"correlation with EASI {c} trouble: {ce:.2f} across {len(e_)} metros with estimated values; {co_:.2f} across {len(o_)} metros with CDC values"))
     rep.append(("EASI layer matched to metros", "PASS" if not miss else "WARN", f"{len(met) - len(miss)} of {len(met)} metros" + (f"; missing {miss[:5]}" if miss else "")))
 
     # ---------------- Checks ----------------
@@ -512,6 +593,7 @@ def main():
         f = []
         if str(idx) == "804": f.append("Palm Springs boundary is provisional: 28 Coachella Valley ZIPs assigned by Adtaxi, pending a Nielsen check.")
         if have and all(r.get(k) != r.get(k) for k in have): f.append("CDC health measures aren't published for this area, so Consumer Demand uses Census inputs only.")
+        elif r.get("hm_est_share", 0) >= 0.5: f.append(EST_NOTE)
         return f
 
     meta = {"built": built, "cbpYear": y, "placesRelease": release, "acsYears": aud["meta"]["acsYears"]}
@@ -532,6 +614,7 @@ def main():
             f["inc75_share"] = (df.inc75 / df.inc_tot).where(df.inc_tot > 0)
             f["inc150_share"] = (df.inc150 / df.inc_tot).where(df.inc_tot > 0)
             for k in have: f[k] = df[k]
+            f["hm_est_share"] = df.hm_est.fillna(False).astype(float)
             for s in SUBCATS:
                 f[f"est@{s['id']}"] = df[f"est_{s['id']}"]; f[f"prev@{s['id']}"] = df[f"est_prev_{s['id']}"]
             ok = f.population >= MIN_POP
@@ -539,6 +622,7 @@ def main():
             city = df.city.fillna("")
             out = rows(f, lambda i: f"{i} {city.get(i, '')}".strip())
             for row in out:
+                if f.loc[row["id"], "hm_est_share"] >= 0.5: row["f"].append(EST_NOTE)
                 if f.loc[row["id"], "population"] < MIN_POP:
                     row["u"] = 1; row["f"].append(f"Fewer than {MIN_POP} residents, so this ZIP isn't ranked.")
                 for s in SUBCATS: row["v"].pop(f"category@{s['id']}", None); row["v"].pop(f"comp@{s['id']}", None)
