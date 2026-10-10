@@ -1,0 +1,210 @@
+easi_market,dma_code,dma_name,match
+New York,501,NEW YORK,name
+Los Angeles,803,LOS ANGELES,name
+Chicago,602,CHICAGO,name
+Dallas-Ft.Worth,623,DALLAS-FORT WORTH,name
+Philadelphia,504,PHILADELPHIA,name
+San Francisco-Oakland-San Jose,807,SAN FRANCISCO-OAKLAND-SAN JOSE,name
+Boston,506,BOSTON,name
+"Washington, DC",511,"WASHINGTON, DC-HAGRSTWN",manual
+Houston,618,HOUSTON,name
+Atlanta,524,ATLANTA,name
+Seattle-Tacoma,819,SEATTLE-TACOMA,name
+"Tampa-St.Petersburg, Sarasota",539,TAMPA-ST PETERSBURG-SARASOTA,name
+Phoenix,753,PHOENIX,name
+Minneapolis-St. Paul,613,MINNEAPOLIS-SAINT PAUL,name
+Denver,751,DENVER,name
+Orlando-Daytona Beach-Melbourne,534,ORLANDO-DAYTONA BEACH-MELBOURNE,name
+Detroit,505,DETROIT,name
+Miami-Ft. Lauderdale,528,MIAMI-FORT LAUDERDALE,name
+Sacramento-Stockton-Modesto,862,SACRAMENTO-STOCKTON-MODESTO,name
+Cleveland,510,CLEVELAND-AKRON,manual
+"Portland, OR",820,"PORTLAND, OR",name
+Charlotte,517,CHARLOTTE,name
+Raleigh-Durham,560,RALEIGH-DURHAM,name
+Nashville,659,NASHVILLE,name
+St. Louis,609,SAINT LOUIS,name
+San Diego,825,SAN DIEGO,name
+Pittsburgh,508,PITTSBURGH,name
+Salt Lake City,770,SALT LAKE CITY,name
+Indianapolis,527,INDIANAPOLIS,name
+Baltimore,512,BALTIMORE,name
+San Antonio,641,SAN ANTONIO,name
+Hartford & New Haven,533,HARTFORD-NEW HAVEN,name
+Austin,635,AUSTIN,name
+Kansas City,616,KANSAS CITY,name
+"Columbus, OH",535,"COLUMBUS, OH",name
+Greenville-Spartanburg-Asheville-Anderson,567,GREENVILLE-SPARTANBURG-ASHEVILLE,manual
+West Palm Beach-Ft. Pierce,548,WEST PALM BEACH-FT PIERCE,name
+Cincinnati,515,CINCINNATI,name
+Milwaukee,617,MILWAUKEE,name
+Harrisburg-Lancaster-Lebanon-York,566,HARRISBURG-LANCASTER-LEBANON-YORK,name
+Las Vegas,839,LAS VEGAS,name
+"Jacksonville, Brunswick",561,JACKSONVILLE,manual
+Grand Rapids-Kalamazoo-Battle Creek,563,GRAND RAPIDS-KALAMAZOO-BATTLE CREEK,name
+Oklahoma City,650,OKLAHOMA CITY,name
+Albuquerque-Santa Fe,790,ALBUQUERQUE-SANTA FE,name
+Birmingham,630,BIRMINGHAM,name
+Ft. Myers-Naples,571,FORT MYERS-NAPLES,name
+Louisville,529,LOUISVILLE,name
+Greensbro-High Point-Winston-Salem,518,GREENSBORO-HIGH POINT-WINSTON SALEM,manual
+Norfolk-Portsmouth-Newport News,544,NORFOLK-PORTSMOUTH-NEWPORT NEWS,name
+Providence-New Bedford,521,PROVIDENCE-NEW BEDFORD,name
+Buffalo,514,BUFFALO,name
+Fresno-Visalia,866,FRESNO-VISALIA,name
+Wilkes Barre-Scranton,577,WILKES BARRE-SCRANTON,name
+New Orleans,622,NEW ORLEANS,name
+Richmond-Petersburg,556,RICHMOND-PETERSBURG,name
+Mobile-Penscola,686,MOBILE-PENSACOLA,manual
+Albany-Schenectady-Troy,532,ALBANY-SCHENECTADY-TROY,name
+Knoxville,557,KNOXVILLE,name
+Tulsa,671,TULSA,name
+Memphis,640,MEMPHIS,name
+Little Rock-Pine Bluff,693,LITTLE ROCK-PINE BLUFF,name
+Spokane,881,SPOKANE,name
+Lexington,541,LEXINGTON,name
+Dayton,542,DAYTON,name
+Green Bay-Appleton,658,GREEN BAY-APPLETON,name
+Honolulu,744,HONOLULU,name
+Des Moines-Ames,679,DES MOINES-AMES,name
+Tucson,789,TUCSON-SIERRA VISTA,manual
+Omaha,652,OMAHA,name
+"Springfield, MO",619,"SPRINGFIELD, MO",name
+"Wichta-Hutchinson, Plus",678,WICHITA-HUTCHINSON PLUS,manual
+Portland-Auburn,500,PORTLAND-AUBURN,name
+Charleston-Huntngton,564,CHARLESTON-HUNTINGTON,manual
+"Huntsville-Decater, Florence",691,HUNTSVILLE-DECATUR-FLORENCE,manual
+Roanoke-Lynchburg,573,ROANOKE-LYNCHBURG,name
+Flint-Saginaw-Bay City,513,FLINT-SAGINAW-BAY CITY,name
+Madison,669,MADISON,name
+Colorado Springs-Pueblo,752,COLORADO SPRINGS-PUEBLO,name
+Toledo,547,TOLEDO,name
+Chattanooga,575,CHATTANOOGA,name
+Waco-Temple-Bryan,625,WACO-TEMPLE-BRYAN,name
+Syracuse,555,SYRACUSE,name
+Harlingen-Weslaco-Brownsville-Mcallen,636,HARLINGEN-WESLACO-BROWNSVILLE,manual
+"Columbia, SC",546,"COLUMBIA, SC",name
+"Charleston, SC",519,"CHARLESTON, SC",name
+Cedar Rapids-Waterloo & Dubuque,637,CEDAR RAPIDS-WATERLOO-DUBUQUE,name
+Paducah-Cape Girardeau-Harris.-Mt Vernon,632,PADUCAH-CAPE GIRARDEAU-HARRISBURG,manual
+Boise,757,BOISE,name
+Savannah,507,SAVANNAH,name
+Burlington-Plattsburgh,523,BURLINGTON-PLATTSBURGH,name
+Champaign & Springfield-Decatur,648,CHAMPAIGN-SPRINGFIELD-DECATUR,name
+Ft. Smith,670,FORT SMITH-FAY-SPRNGDL,manual
+"Rochester, NY",538,"ROCHESTER, NY",name
+El Paso,765,EL PASO,name
+So. Bend-Elkhart,588,SOUTH BEND-ELKHART,manual
+"Tri-Cities, TN-VA",531,"TRI-CITIES, TN-VA",name
+Shreveport,612,SHREVEPORT,name
+Baton Rouge,716,BATON ROUGE,name
+Reno,811,RENO,name
+"Lincoln & Hastings-Kearney, Plus",722,LINCOLN-HASTINGS-KEARNEY PLUS,name
+Sioux Falls (Mitchell),725,SIOUX FALLS (MITCHELL),name
+Myrtle Beach-Florence,570,MYRTLE BEACH-FLORENCE,name
+Davenport-Rock Island-Moline,682,DAVENPORT-ROCK ISLAND-MOLINE,name
+Evansville,649,EVANSVILLE,name
+Johnstown-Altoona,574,JOHNSTOWN-ALTOONA,name
+Ft. Wayne,509,FORT WAYNE,name
+Bakersfield,800,BAKERSFIELD,name
+Greenville-New Bern-Washington,545,GREENVILLE-NEW BERN-WASHINGTON,name
+Tyler-Longview,709,TYLER-LONGVIEW (LFKN&NCGD),manual
+Fargo-Valley City,724,FARGO-VALLEY CITY,name
+Eugene,801,EUGENE,name
+Yakima-Pasco-Richland-Kennewick,810,YAKIMA-PASCO-RCHLND-KNNWCK,manual
+"Jackson, MS",718,"JACKSON, MS",name
+Traverse City-Cadillac,540,TRAVERSE CITY-CADILLAC,name
+Santa Barbara-Santa Maria-San Luis Obispo,855,SANTA BARBARA-SAN MAR-SAN LUIS OBISPO,manual
+Springfield-Holyoke,543,SPRINGFIELD-HOLYOKE,name
+Monterey-Salinas,828,MONTEREY-SALINAS,name
+Tallahassee-Thomasville,530,TALLAHASSEE-THOMASVILLE,name
+Lansing,551,LANSING,name
+Augusta,520,AUGUSTA,name
+Youngstown,536,YOUNGSTOWN,name
+Peoria-Bloomington,675,PEORIA-BLOOMINGTON,name
+Wilmington,550,WILMINGTON,name
+La Cross-Eau Claire,702,LA CROSSE-EAU CLAIRE,manual
+Macon,503,MACON,name
+"Lafayette, LA",642,"LAFAYETTE, LA",name
+Corpus Christi,600,CORPUS CHRISTI,name
+Montgomery,698,MONTGOMERY,name
+"Columbus, GA",522,"COLUMBUS, GA",name
+Odessa-Midland,633,ODESSA-MIDLAND,name
+Chico-Redding,868,CHICO-REDDING,name
+Wausau-Rhinelander,705,WAUSAU-RHINELANDER,name
+Salisbury,576,SALISBURY,name
+Amarillo,634,AMARILLO,name
+Medford-Klamath Falls,813,MEDFORD-KLAMATH FALLS,name
+Columbia-Jefferson City,604,COLUMBIA-JEFFERSON CITY,name
+Minot-Bismark-Dickenson,687,MINOT-BISMARCK-DICKINSON,manual
+Duluth-Superior,676,DULUTH-SUPERIOR,name
+Topeka,605,TOPEKA,name
+Anchorage,743,ANCHORAGE,name
+Rockford,610,ROCKFORD,name
+Panama City,656,PANAMA CITY,name
+Sioux City,624,SIOUX CITY,name
+Lubbock,651,LUBBOCK,name
+Columbus-Tupelo-West Point,673,COLUMBUS-TUPELO-WEST POINT,name
+Beaumont-Port Arthur,692,BEAUMONT-PORT ARTHUR,name
+Rochester-Mason City-Austin,611,ROCHESTER-MASON CITY-AUSTIN,name
+Joplin-Pittsburg,603,JOPLIN-PITTSBURG,name
+Idaho Falls-Pocatello,758,IDAHO FALLS-POCATELLO,name
+Wichta Falls & Lawton,627,WICHITA FALLS-LAWTON,manual
+Bangor,537,BANGOR,name
+Erie,516,ERIE,name
+Missoula,762,MISSOULA,name
+Monroe-El Dorado,628,MONROE-EL DORADO,name
+Sherman-Ada,657,SHERMAN-ADA,name
+Terre Haute,581,TERRE HAUTE,name
+Utica,526,UTICA,name
+Gainesville,592,GAINESVILLE,name
+Billings,756,BILLINGS,name
+Biloxi-Gulfport,746,BILOXI-GULFPORT,name
+Binghamton,502,BINGHAMTON,name
+"Albany, GA",525,"ALBANY, GA",name
+Wheeling-Steubenville.,554,WHEELING-STEUBENVILLE,name
+Bluefield-Beckley-Oak Hill,559,BLUEFIELD-BECKLEY-OAK HILL,name
+Abilene-Sweetwater,662,ABILENE-SWEETWATER,name
+Yuma-El Centro,771,YUMA-EL CENTRO,name
+Rapid City,764,RAPID CITY,name
+Dothan,606,DOTHAN,name
+Clarksburg-Weston,598,CLARKSBURG-WESTON,name
+Harrisonburg,569,HARRISONBURG,name
+Quincy-Hannibal-Keokuk,717,QUINCY-HANNIBAL-KEOKUK,name
+Hattiesburg-Laurel,710,HATTIESBURG-LAUREL,name
+Lake Charles,643,LAKE CHARLES,name
+Elmira,565,ELMIRA,name
+Bowling Green,736,BOWLING GREEN,name
+Marquette,553,MARQUETTE,name
+Butte-Bozeman,754,BUTTE-BOZEMAN,name
+"Bend, OR",821,"BEND, OR",name
+"Jackson, TN",639,"JACKSON, TN",name
+Watertown,549,WATERTOWN,name
+Charlottesville,584,CHARLOTTESVILLE,name
+Jonesboro,734,JONESBORO,name
+Grand.Junction-Montrose,773,GRAND JUNCTION-MONTROSE,name
+Twin Falls,760,TWIN FALLS,name
+"Alexandria, LA",644,"ALEXANDRIA, LA",name
+Laredo,749,LAREDO,name
+Great Falls,755,GREAT FALLS,name
+"Lafeyette, IN",582,"LAFAYETTE, IN",manual
+Eureka,802,EUREKA,name
+Parkersburg,597,PARKERSBURG,name
+Cheyenne-Scottsbluff-Sterling,759,CHEYENNE-SCOTTSBLUFF,manual
+Casper-Riverton,767,CASPER-RIVERTON,name
+San Angelo,661,SAN ANGELO,name
+Meridian,711,MERIDIAN,name
+Ottumwa-Kirksville,631,OTTUMWA-KIRKSVILLE,name
+Mankato,737,MANKATO,name
+St. Joseph,638,SAINT JOSEPH,name
+Greenwood-Greenville,647,GREENWOOD-GREENVILLE,name
+Fairbanks,745,FAIRBANKS,name
+Helena,766,HELENA,name
+Lima,558,LIMA,name
+Zanesville,596,ZANESVILLE,name
+Victoria,626,VICTORIA,name
+Juneau,747,JUNEAU,name
+Presque Isle,552,PRESQUE ISLE,name
+Alpena,583,ALPENA,name
+North Platte,740,NORTH PLATTE,name
+Glendive,798,GLENDIVE,name
