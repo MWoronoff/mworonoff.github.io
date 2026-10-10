@@ -1,0 +1,926 @@
+geo_level,rank,market,legal_fees_total,legal_fees_per_hh,households
+metro,1,"New York-Newark-Jersey City, NY-NJ",334662600,45.35,7379069
+metro,2,"Los Angeles-Long Beach-Anaheim, CA",205295100,48.44,4238112
+metro,3,"Chicago-Naperville-Elgin, IL-IN",172655800,49.8,3467036
+metro,4,"Dallas-Fort Worth-Arlington, TX",146765800,48.03,3056001
+metro,5,"Miami-Fort Lauderdale-West Palm Beach, FL",130720300,53.47,2444904
+metro,6,"Houston-Pasadena-The Woodlands, TX",127600700,46.45,2747209
+metro,7,"Philadelphia-Camden-Wilmington, PA-NJ-DE-MD",115789700,47.58,2433636
+metro,8,"Phoenix-Mesa-Chandler, AZ",114343100,60.06,1903859
+metro,9,"Boston-Cambridge-Newton, MA-NH",103986800,52.6,1976920
+metro,10,"Washington-Arlington-Alexandria, DC-VA-MD-WV",92860100,37.97,2445873
+metro,11,"Atlanta-Sandy Springs-Roswell, GA",91647700,38.13,2403482
+metro,12,"Detroit-Warren-Dearborn, MI",87722400,49.94,1756539
+metro,13,"Minneapolis-St. Paul-Bloomington, MN-WI",83951700,56.29,1491507
+metro,14,"Tampa-St. Petersburg-Clearwater, FL",82503700,57.48,1435228
+metro,15,"Riverside-San Bernardino-Ontario, CA",82291300,56.18,1464788
+metro,16,"Seattle-Tacoma-Bellevue, WA",81765500,48.27,1694065
+metro,17,"Denver-Aurora-Centennial, CO",71852500,57.77,1243857
+metro,18,"San Francisco-Oakland-Fremont, CA",69367500,38.86,1785224
+metro,19,"Pittsburgh, PA",64416300,60.99,1056252
+metro,20,"San Diego-Chula Vista-Carlsbad, CA",62715200,53.64,1169294
+metro,21,"St. Louis, MO-IL",61788700,54.4,1135862
+metro,22,"Orlando-Kissimmee-Sanford, FL",61273000,54.15,1131599
+metro,23,"San Antonio-New Braunfels, TX",60581200,59.19,1023427
+metro,24,"Portland-Vancouver-Hillsboro, OR-WA",60282100,59.45,1013913
+metro,25,"Charlotte-Concord-Gastonia, NC-SC",53944400,47.94,1125320
+metro,26,"Austin-Round Rock-San Marcos, TX",52792800,53.39,988742
+metro,27,"Kansas City, MO-KS",51667100,57.3,901710
+metro,28,"Cincinnati, OH-KY-IN",51216700,56.79,901890
+metro,29,"Cleveland, OH",48833600,53.98,904718
+metro,30,"Sacramento-Roseville-Folsom, CA",47799900,52.17,916226
+metro,31,"Nashville-Davidson--Murfreesboro--Franklin, TN",47005800,55.33,849509
+metro,32,"Columbus, OH",46816500,52.31,894943
+metro,33,"Indianapolis-Carmel-Greenwood, IN",45992000,54.2,848560
+metro,34,"Baltimore-Columbia-Towson, MD",45862300,41.33,1109588
+metro,35,"Las Vegas-Henderson-North Las Vegas, NV",44008900,49.63,886744
+metro,36,"Providence-Warwick, RI-MA",41682400,61.22,680834
+metro,37,"Jacksonville, FL",36427400,51.33,709651
+metro,38,"Milwaukee-Waukesha, WI",35586400,55.15,645264
+metro,39,"Oklahoma City, OK",35039400,58.15,602568
+metro,40,"Louisville/Jefferson County, KY-IN",32170600,57.16,562849
+metro,41,"Virginia Beach-Chesapeake-Norfolk, VA-NC",30123400,44.12,682768
+metro,42,"North Port-Bradenton-Sarasota, FL",28651200,67.41,425011
+metro,43,"Buffalo-Cheektowaga, NY",28616100,57.62,496657
+metro,44,"Grand Rapids-Wyoming-Kentwood, MI",28339300,63.85,443858
+metro,45,"Raleigh-Cary, NC",28007300,45.9,610246
+metro,46,"Tucson, AZ",27573200,63.45,434588
+metro,47,"Hartford-West Hartford-East Hartford, CT",25833000,54.35,475271
+metro,48,"Knoxville, TN",25676500,64.36,398970
+metro,49,"Salt Lake City-Murray, UT",25539200,61.57,414775
+metro,50,"Rochester, NY",25498300,59.37,429514
+metro,51,"Tulsa, OK",25421100,59.87,424610
+metro,52,"Cape Coral-Fort Myers, FL",24698000,66.64,370607
+metro,53,"Richmond, VA",24465300,45.07,542775
+metro,54,"Omaha, NE-IA",23467300,59.41,395039
+metro,55,"Albuquerque, NM",23357000,63.67,366833
+metro,56,"San Jose-Sunnyvale-Santa Clara, CA",23138200,33.94,681829
+metro,57,"Albany-Schenectady-Troy, NY",22377600,59.5,376124
+metro,58,"Greenville-Anderson-Greer, SC",22241900,55.58,400198
+metro,59,"Birmingham, AL",22230400,47.22,470803
+metro,60,"Boise City, ID",21751200,68.31,318428
+metro,61,"Allentown-Bethlehem-Easton, PA-NJ",21220600,62.14,341474
+metro,62,"Fresno, CA",20764300,56.33,368609
+metro,63,"Deltona-Daytona Beach-Ormond Beach, FL",20559400,65.17,315468
+metro,64,"Worcester, MA",19630200,58.11,337813
+metro,65,"Dayton-Kettering-Beavercreek, OH",19609100,56.86,344840
+metro,66,"Lakeland-Winter Haven, FL",19181600,58.14,329929
+metro,67,"Colorado Springs, CO",18652700,60.51,308252
+metro,68,"Des Moines-West Des Moines, IA",18341300,60.48,303276
+metro,69,"Madison, WI",18121200,60.63,298891
+metro,70,"Charleston-North Charleston, SC",17926800,50.48,355104
+metro,71,"Palm Bay-Melbourne-Titusville, FL",17913400,62.0,288948
+metro,72,"Memphis, TN-MS-AR",17472900,34.71,503370
+metro,73,"El Paso, TX",17213700,60.27,285589
+metro,74,"Bakersfield-Delano, CA",16776300,57.54,291543
+metro,75,"Bridgeport-Stamford-Danbury, CT",16742100,50.6,330866
+metro,76,"Akron, OH",16555400,57.53,287788
+metro,77,"Spokane-Spokane Valley, WA",16541400,65.65,251951
+metro,78,"Portland-South Portland, ME",16395800,67.42,243207
+metro,79,"Syracuse, NY",16211600,61.2,264899
+metro,80,"Oxnard-Thousand Oaks-Ventura, CA",16140100,59.69,270385
+metro,81,"Wichita, KS",15884700,61.65,257679
+metro,82,"New Orleans-Metairie, LA",15819600,40.72,388507
+metro,83,"Winston-Salem, NC",15785800,55.26,285665
+metro,84,"Scranton--Wilkes-Barre, PA",15710800,66.16,237450
+metro,85,"McAllen-Edinburg-Mission, TX",15605200,61.43,254047
+metro,86,"Little Rock-North Little Rock-Conway, AR",15572600,50.32,309501
+metro,87,"Harrisburg-Carlisle, PA",15416500,59.95,257159
+metro,88,"Columbia, SC",15175000,43.89,345726
+metro,89,"Greensboro-High Point, NC",14953000,46.41,322173
+metro,90,"Chattanooga, TN-GA",14517500,59.37,244539
+metro,91,"Reno, NV",14332700,63.51,225685
+metro,92,"Lancaster, PA",14301500,66.44,215257
+metro,93,"Fayetteville-Springdale-Rogers, AR",14287700,61.58,232011
+metro,94,"Port St. Lucie, FL",14102500,60.96,231346
+metro,95,"Baton Rouge, LA",13997000,42.08,332651
+metro,96,"Kiryas Joel-Poughkeepsie-Newburgh, NY",13952400,54.97,253817
+metro,97,"Ogden, UT",13820200,65.17,212054
+metro,98,"Toledo, OH",13759500,56.76,242411
+metro,99,"Springfield, MO",13506200,65.14,207339
+metro,100,"Wilmington, NC",13472600,64.28,209583
+metro,101,"Provo-Orem-Lehi, UT",12899200,63.97,201646
+metro,102,"Stockton-Lodi, CA",12828400,49.48,259267
+metro,103,"Santa Rosa-Petaluma, CA",12384800,64.12,193141
+metro,104,"Lexington-Fayette, KY",12355400,55.86,221196
+metro,105,"New Haven, CT",12277900,53.34,230202
+metro,106,"Asheville, NC",12212400,66.96,182387
+metro,107,"York-Hanover, PA",12072100,65.18,185202
+metro,108,"Pensacola-Ferry Pass-Brent, FL",12044200,57.8,208393
+metro,109,"Naples-Marco Island, FL",11723400,65.65,178582
+metro,110,"Myrtle Beach-Conway-North Myrtle Beach, SC",11626500,66.63,174499
+metro,111,"Lansing-East Lansing, MI",11614300,60.13,193151
+metro,112,"Durham-Chapel Hill, NC",11455700,46.11,248427
+metro,113,"Ocala, FL",11451400,62.22,184037
+metro,114,"Eugene-Springfield, OR",11195900,68.27,163995
+metro,115,"Modesto, CA",11170200,61.62,181264
+metro,116,"Huntsville, AL",11092600,49.51,224041
+metro,117,"Fort Wayne, IN",11056700,60.6,182459
+metro,118,"Youngstown-Warren, OH",11026100,62.0,177849
+metro,119,"Salem, OR",10945900,66.02,165792
+metro,120,"Reading, PA",10905700,65.25,167143
+metro,121,"Springfield, MA",10854600,59.7,181818
+metro,122,"Corpus Christi, TX",10780500,63.44,169936
+metro,123,"Canton-Massillon, OH",10769900,65.1,165438
+metro,124,"Waterbury-Shelton, CT",10748600,57.65,186439
+metro,125,"Augusta-Richmond County, GA-SC",10699900,43.26,247342
+metro,126,"Manchester-Nashua, NH",10506000,62.14,169073
+metro,127,"Fort Collins-Loveland, CO",10193300,65.61,155356
+metro,128,"Huntington-Ashland, WV-KY-OH",9897400,65.0,152261
+metro,129,"Urban Honolulu, HI",9891600,29.98,329972
+metro,130,"Davenport-Moline-Rock Island, IA-IL",9838100,61.71,159436
+metro,131,"Hickory-Lenoir-Morganton, NC",9766800,64.33,151829
+metro,132,"Green Bay, WI",9288000,67.58,137438
+metro,133,"Santa Maria-Santa Barbara, CA",9174100,61.71,148667
+metro,134,"Killeen-Temple, TX",9139300,48.8,187275
+metro,135,"Kingsport-Bristol, TN-VA",9116600,67.01,136051
+metro,136,"Peoria, IL",9100400,61.34,148360
+metro,137,"Visalia, CA",9045800,63.09,143381
+metro,138,"Flint, MI",9024200,55.67,162098
+metro,139,"Greeley, CO",8928300,63.94,139629
+metro,140,"Lincoln, NE",8896000,62.97,141280
+metro,141,"Gulfport-Biloxi, MS",8878900,54.03,164322
+metro,142,"Anchorage, AK",8876900,59.03,150379
+metro,143,"Salinas, CA",8590600,62.87,136642
+metro,144,"Jackson, MS",8408000,37.32,225284
+metro,145,"Lafayette, LA",8381600,49.98,167713
+metro,146,"Duluth, MN-WI",8322400,68.06,122282
+metro,147,"Spartanburg, SC",8308400,52.38,158605
+metro,148,"Prescott Valley-Prescott, AZ",8298000,74.96,110695
+metro,149,"Sioux Falls, SD-MN",8237400,65.98,124854
+metro,150,"Lubbock, TX",8232700,58.64,140383
+metro,151,"Crestview-Fort Walton Beach-Destin, FL",8229200,61.68,133411
+metro,152,"Atlantic City-Hammonton, NJ",8167200,57.1,143024
+metro,153,"Vallejo, CA",8019400,48.82,164273
+metro,154,"Roanoke, VA",7973900,59.7,133561
+metro,155,"Olympia-Lacey-Tumwater, WA",7968400,62.45,127592
+metro,156,"Brownsville-Harlingen, TX",7966700,62.79,126874
+metro,157,"Bend, OR",7902400,70.93,111409
+metro,158,"Boulder, CO",7865600,59.9,131323
+metro,159,"Seaford, DE",7842000,69.26,113224
+metro,160,"Utica-Rome, NY",7769800,65.94,117838
+metro,161,"Punta Gorda, FL",7655300,74.31,103013
+metro,162,"Ann Arbor, MI",7646800,51.71,147874
+metro,163,"Rockford, IL",7643300,59.13,129264
+metro,164,"Savannah, GA",7623600,45.47,167666
+metro,165,"Gainesville, FL",7614600,51.12,148941
+metro,166,"Hagerstown-Martinsburg, MD-WV",7604800,63.56,119643
+metro,167,"Cedar Rapids, IA",7536100,64.83,116249
+metro,168,"South Bend-Mishawaka, IN-MI",7465100,58.55,127495
+metro,169,"Norwich-New London-Willimantic, CT",7376000,62.74,117562
+metro,170,"Barnstable Town, MA",7355400,69.5,105836
+metro,171,"Daphne-Fairhope-Foley, AL",7323600,66.03,110909
+metro,172,"Beaumont-Port Arthur, TX",7291100,48.27,151063
+metro,173,"Bremerton-Silverdale-Port Orchard, WA",7203600,63.84,112840
+metro,174,"Kennewick-Richland, WA",7195400,63.89,112629
+metro,175,"San Luis Obispo-Paso Robles, CA",7088300,64.21,110391
+metro,176,"Evansville, IN",7069300,63.08,112065
+metro,177,"Tallahassee, FL",7001600,44.86,156083
+metro,178,"Fargo, ND-MN",6910200,60.4,114398
+metro,179,"Clarksville, TN-KY",6876800,51.81,132731
+metro,180,"Lebanon-Claremont, NH-VT",6872300,70.73,97161
+metro,181,"Appleton, WI",6860700,67.86,101095
+metro,182,"Erie, PA",6795800,64.16,105920
+metro,183,"Mobile, AL",6712200,42.34,158532
+metro,184,"Trenton-Princeton, NJ",6661500,45.17,147483
+metro,185,"Medford, OR",6578100,70.83,92872
+metro,186,"Waco, TX",6550600,55.6,117814
+metro,187,"Amarillo, TX",6495500,62.21,104405
+metro,188,"Bellingham, WA",6440900,65.58,98214
+metro,189,"Lake Havasu City-Kingman, AZ",6432500,71.47,90006
+metro,190,"Kalamazoo-Portage, MI",6307900,57.56,109582
+metro,191,"Topeka, KS",6271700,65.01,96476
+metro,192,"Wildwood-The Villages, FL",6270900,81.88,76588
+metro,193,"Johnson City, TN",6222000,65.23,95382
+metro,194,"Lynchburg, VA",6214900,57.08,108876
+metro,195,"Longview, TX",6184000,55.73,110964
+metro,196,"Slidell-Mandeville-Covington, LA",6148500,57.59,106755
+metro,197,"Shreveport-Bossier City, LA",6109000,39.81,153443
+metro,198,"Binghamton, NY",6041200,61.62,98034
+metro,199,"Burlington-South Burlington, VT",5962400,63.94,93253
+metro,200,"Panama City-Panama City Beach, FL",5948700,62.66,94930
+metro,201,"Hilton Head Island-Bluffton-Port Royal, SC",5920000,60.87,97256
+metro,202,"Yakima, WA",5866200,67.39,87043
+metro,203,"Fort Smith, AR-OK",5807000,63.02,92146
+metro,204,"Homosassa Springs, FL",5796700,73.34,79035
+metro,205,"Billings, MT",5790300,69.16,83723
+metro,206,"Santa Cruz-Watsonville, CA",5777600,63.24,91367
+metro,207,"Montgomery, AL",5701000,37.81,150798
+metro,208,"Charleston, WV",5675600,63.96,88739
+metro,209,"Rochester, MN",5674200,60.14,94351
+metro,210,"Fayetteville, NC",5625700,37.15,151439
+metro,211,"College Station-Bryan, TX",5511200,51.59,106817
+metro,212,"Joplin, MO-KS",5507700,67.3,81840
+metro,213,"Tyler, TX",5445600,57.28,95076
+metro,214,"Coeur d'Alene, ID",5442000,70.18,77542
+metro,215,"Chico, CA",5360700,63.31,84678
+metro,216,"Springfield, IL",5229500,59.87,87353
+metro,217,"Sebastian-Vero Beach-West Vero Corridor, FL",5199000,65.98,78798
+metro,218,"Merced, CA",5197700,61.11,85060
+metro,219,"Las Cruces, NM",5121100,60.46,84697
+metro,220,"Columbia, MO",5113000,57.57,88810
+metro,221,"Charlottesville, VA",5060600,55.64,90955
+metro,222,"Traverse City, MI",5060100,74.28,68126
+metro,223,"Oshkosh-Neenah, WI",5054400,67.56,74818
+metro,224,"St. Cloud, MN",5045900,62.39,80876
+metro,225,"Santa Fe, NM",5025500,71.29,70492
+metro,226,"Redding, CA",4924200,67.26,73215
+metro,227,"Champaign-Urbana, IL",4921600,49.9,98629
+metro,228,"Lafayette-West Lafayette, IN",4906300,56.62,86647
+metro,229,"Lake Charles, LA",4855100,50.72,95732
+metro,230,"St. George, UT",4846600,68.05,71222
+metro,231,"Elkhart-Goshen, IN",4827900,64.85,74448
+metro,232,"Racine-Mount Pleasant, WI",4817100,61.43,78410
+metro,233,"Eau Claire, WI",4785200,67.98,70389
+metro,234,"Columbus, GA-AL",4776900,37.29,128088
+metro,235,"La Crosse-Onalaska, WI-MN",4748900,67.87,69974
+metro,236,"Bowling Green, KY",4732400,60.1,78738
+metro,237,"Pueblo, CO",4708500,67.24,70021
+metro,238,"Gainesville, GA",4650800,61.55,75557
+metro,239,"Laredo, TX",4648100,64.05,72571
+metro,240,"Rapid City, SD",4646900,69.24,67117
+metro,241,"Janesville-Beloit, WI",4626300,70.42,65695
+metro,242,"Yuma, AZ",4547200,67.28,67582
+metro,243,"Waterloo-Cedar Falls, IA",4516500,63.01,71684
+metro,244,"Muskegon-Norton Shores, MI",4481400,62.92,71221
+metro,245,"Kingston, NY",4465000,61.94,72090
+metro,246,"Chambersburg, PA",4463500,69.65,64081
+metro,247,"Terre Haute, IN",4432100,66.54,66609
+metro,248,"Tuscaloosa, AL",4421400,42.45,104145
+metro,249,"Abilene, TX",4403600,61.41,71707
+metro,250,"Bangor, ME",4341400,66.35,65429
+metro,251,"Grand Junction, CO",4339200,69.27,62642
+metro,252,"Pottsville, PA",4257700,69.54,61223
+metro,253,"Blacksburg-Christiansburg-Radford, VA",4254000,61.3,69396
+metro,254,"Concord, NH",4233500,67.41,62802
+metro,255,"Iowa City, IA",4216600,55.13,76483
+metro,256,"Jefferson City, MO",4190800,67.97,61659
+metro,257,"Saginaw, MI",4183400,55.71,75086
+metro,258,"Idaho Falls, ID",4180200,69.39,60242
+metro,259,"Midland, TX",4177300,56.11,74453
+metro,260,"Cookeville, TN",4151600,66.54,62391
+metro,261,"Kenosha, WI",4133700,63.86,64731
+metro,262,"Jackson, MI",4114300,65.08,63221
+metro,263,"Monroe, MI",4113100,68.07,60422
+metro,264,"Ottawa, IL",4075200,70.12,58119
+metro,265,"Athens-Clarke County, GA",4075100,49.7,81988
+metro,266,"Houma-Bayou Cane-Thibodaux, LA",4052000,55.64,72823
+metro,267,"Jacksonville, NC",4026000,55.3,72798
+metro,268,"Lebanon, PA",4022100,68.27,58918
+metro,269,"Florence-Muscle Shoals, AL",4007100,61.66,64989
+metro,270,"Johnstown, PA",3959300,67.55,58616
+metro,271,"Wausau, WI",3939600,69.37,56795
+metro,272,"Wheeling, WV-OH",3927200,68.76,57111
+metro,273,"Sherman-Denison, TX",3918700,63.98,61251
+metro,274,"Corbin, KY",3906400,65.57,59572
+metro,275,"Burlington, NC",3895800,52.87,73691
+metro,276,"Missoula, MT",3871000,68.61,56424
+metro,277,"Bloomington, IN",3867600,59.07,65476
+metro,278,"Bloomington, IL",3842100,57.33,67013
+metro,279,"Lexington Park, MD",3840400,49.76,77184
+metro,280,"Decatur, AL",3827300,59.23,64617
+metro,281,"Albany, OR",3818000,71.45,53439
+metro,282,"Hilo-Kailua, HI",3814900,48.26,79043
+metro,283,"Augusta-Waterville, ME",3780200,69.6,54317
+metro,284,"Eureka-Arcata, CA",3765100,66.81,56356
+metro,285,"Bismarck, ND",3755900,64.41,58316
+metro,286,"Mount Vernon-Anacortes, WA",3734700,69.12,54032
+metro,287,"Pittsfield, MA",3729200,66.37,56191
+metro,288,"Glens Falls, NY",3709100,71.13,52144
+metro,289,"Morgantown, WV",3708400,59.65,62172
+metro,290,"Niles, MI",3699600,58.49,63254
+metro,291,"Odessa, TX",3681200,59.78,61576
+metro,292,"Yuba City, CA",3676400,57.42,64026
+metro,293,"Bozeman, MT",3669300,65.54,55982
+metro,294,"Amherst Town-Northampton, MA",3663400,63.02,58129
+metro,295,"Monroe, LA",3658600,42.49,86111
+metro,296,"Kalispell, MT",3619900,72.22,50121
+metro,297,"Dover, DE",3583600,48.67,73624
+metro,298,"Staunton-Stuarts Draft, VA",3548900,66.38,53463
+metro,299,"Winchester, VA-WV",3538800,62.74,56403
+metro,300,"Jackson, TN",3520600,49.48,71155
+metro,301,"Sioux City, IA-NE-SD",3520500,62.72,56132
+metro,302,"Wichita Falls, TX",3512600,61.39,57222
+metro,303,"Auburn-Opelika, AL",3509900,41.95,83676
+metro,304,"Macon-Bibb County, GA",3507500,37.79,92820
+metro,305,"Wenatchee-East Wenatchee, WA",3494400,70.94,49257
+metro,306,"East Stroudsburg, PA",3485900,57.94,60160
+metro,307,"Altoona, PA",3480800,69.54,50056
+metro,308,"Holland, MI",3462000,71.54,48394
+metro,309,"Sheboygan, WI",3461500,70.1,49377
+metro,310,"Jamestown-Dunkirk, NY",3455400,66.5,51961
+metro,311,"Cleveland, TN",3448400,65.31,52803
+metro,312,"Sierra Vista-Douglas, AZ",3421300,66.2,51679
+metro,313,"Warner Robins, GA",3411800,41.71,81799
+metro,314,"Roseburg, OR",3403700,69.8,48765
+metro,315,"Logan, UT-ID",3398600,66.31,51253
+metro,316,"El Centro, CA",3384600,62.48,54175
+metro,317,"Springfield, OH",3377900,62.87,53732
+metro,318,"Richmond-Berea, KY",3367600,64.66,52082
+metro,319,"Battle Creek, MI",3360700,60.8,55279
+metro,320,"Dalton, GA",3333300,66.5,50127
+metro,321,"Harrisonburg, VA",3331500,64.9,51332
+metro,322,"Morristown, TN",3327700,65.46,50837
+metro,323,"Longview-Kelso, WA",3308800,70.81,46729
+metro,324,"State College, PA",3303800,58.13,56838
+metro,325,"Weirton-Steubenville, WV-OH",3301900,68.47,48225
+metro,326,"Torrington, CT",3278000,66.35,49403
+metro,327,"Dothan, AL",3277700,51.67,63431
+metro,328,"Mansfield, OH",3246000,64.59,50259
+metro,329,"St. Joseph, MO-KS",3240200,67.82,47777
+metro,330,"Williamsport, PA",3196600,69.26,46155
+metro,331,"Sandusky, OH",3185300,66.74,47725
+metro,332,"Truckee-Grass Valley, CA",3180100,70.93,44836
+metro,333,"Wooster, OH",3157100,71.77,43987
+metro,334,"Sebring, FL",3141500,64.57,48652
+metro,335,"Twin Falls, ID",3139400,68.76,45659
+metro,336,"Florence, SC",3111100,39.35,79055
+metro,337,"Brainerd, MN",3103500,72.22,42974
+metro,338,"Sunbury, PA",3103400,67.73,45817
+metro,339,"Lewiston-Auburn, ME",3103300,66.81,46449
+metro,340,"Flagstaff, AZ",3083000,64.91,47495
+metro,341,"San Angelo, TX",3051800,64.68,47185
+metro,342,"Fond du Lac, WI",3036500,68.88,44086
+metro,343,"Beckley, WV",3023800,64.87,46612
+metro,344,"Pinehurst-Southern Pines, NC",3002300,61.61,48728
+metro,345,"Anderson Creek, NC",2998700,53.43,56126
+metro,346,"Greenville, NC",2989200,40.37,74050
+metro,347,"Bay City, MI",2986200,69.61,42898
+metro,348,"Owensboro, KY",2966100,62.94,47125
+metro,349,"Lawrence, KS",2957800,59.42,49779
+metro,350,"Ames, IA",2942700,62.42,47146
+metro,351,"Hermitage, PA",2924400,67.04,43623
+metro,352,"Napa, CA",2918700,61.01,47837
+metro,353,"Jonesboro, AR",2914300,52.52,55485
+metro,354,"Vineland, NJ",2909400,54.54,53349
+metro,355,"Texarkana, TX-AR",2906000,50.65,57370
+metro,356,"Whitewater-Elkhorn, WI",2887000,69.62,41468
+metro,357,"Helena, MT",2886600,67.7,42640
+metro,358,"Hot Springs, AR",2877100,65.64,43830
+metro,359,"Salem, OH",2869000,71.2,40296
+metro,360,"Manhattan, KS",2861200,57.53,49732
+metro,361,"Watertown-Fort Drum, NY",2846200,66.83,42587
+metro,362,"Grand Forks, ND-MN",2839200,62.74,45254
+metro,363,"Michigan City-La Porte, IN",2839200,65.46,43376
+metro,364,"Hanford-Corcoran, CA",2836500,62.76,45198
+metro,365,"Kahului-Wailuku, HI",2833900,47.21,60024
+metro,366,"Muncie, IN",2816100,61.76,45601
+metro,367,"Paducah, KY-IL",2804900,63.02,44508
+metro,368,"Elizabethtown, KY",2803100,58.14,48212
+metro,369,"Hattiesburg, MS",2798100,45.17,61952
+metro,370,"Gettysburg, PA",2797000,70.46,39698
+metro,371,"Sevierville, TN",2782600,69.77,39883
+metro,372,"Farmington, NM",2780100,65.47,42464
+metro,373,"Tupelo, MS",2770000,53.47,51801
+metro,374,"Alexandria, LA",2769100,48.45,57153
+metro,375,"Cheyenne, WY",2765300,66.42,41635
+metro,376,"Bluefield, WV-VA",2757600,66.96,41180
+metro,377,"New Philadelphia-Dover, OH",2750900,72.83,37774
+metro,378,"New Bern, NC",2750200,54.79,50193
+metro,379,"Grants Pass, OR",2732900,69.3,39436
+metro,380,"Cumberland, MD-WV",2728800,69.21,39426
+metro,381,"Dubuque, IA",2715200,66.52,40818
+metro,382,"Brunswick-St. Simons, GA",2707900,56.45,47973
+metro,383,"Port Angeles, WA",2690900,73.64,36540
+metro,384,"Mankato, MN",2687200,64.28,41805
+metro,385,"Albertville, AL",2681000,66.77,40151
+metro,386,"Adrian, MI",2676200,70.29,38073
+metro,387,"Cullman, AL",2632600,68.57,38393
+metro,388,"Ukiah, CA",2630500,70.57,37276
+metro,389,"Putnam, CT",2620500,67.59,38772
+metro,390,"Centralia, WA",2618500,72.08,36330
+metro,391,"Massena-Ogdensburg, NY",2600000,66.87,38881
+metro,392,"Show Low, AZ",2585700,67.71,38190
+metro,393,"Cape Girardeau, MO-IL",2571300,63.25,40650
+metro,394,"Corning, NY",2559000,67.7,37801
+metro,395,"Hammond, LA",2553900,47.43,53844
+metro,396,"Parkersburg-Vienna, WV",2542900,66.98,37966
+metro,397,"Beaver Dam, WI",2530300,71.58,35348
+metro,398,"Victoria, TX",2522800,66.32,38038
+metro,399,"Valdosta, GA",2505400,42.01,59645
+metro,400,"Great Falls, MT",2502500,68.24,36671
+metro,401,"Manitowoc, WI",2502100,71.16,35164
+metro,402,"Anniston-Oxford, AL",2477600,54.28,45648
+metro,403,"Lawton, OK",2475800,53.77,46041
+metro,404,"Corvallis, OR",2469700,61.41,40219
+metro,405,"Lima, OH",2465500,62.57,39405
+metro,406,"Oak Harbor, WA",2460200,68.13,36108
+metro,407,"Salisbury, MD",2449800,50.33,48674
+metro,408,"Clarksburg, WV",2445700,65.86,37136
+metro,409,"Moses Lake, WA",2434100,67.86,35870
+metro,410,"Gadsden, AL",2426500,57.63,42108
+metro,411,"Pikeville, KY",2402600,66.17,36309
+metro,412,"Key West-Key Largo, FL",2396400,64.09,37392
+metro,413,"Meadville, PA",2394600,71.51,33488
+metro,414,"Decatur, IL",2358500,55.91,42184
+metro,415,"Rocky Mount, NC",2357900,38.92,60577
+metro,416,"Watertown-Fort Atkinson, WI",2357200,69.34,33995
+metro,417,"Aberdeen, WA",2357200,73.37,32127
+metro,418,"Athens, TX",2345900,66.26,35406
+metro,419,"Hermiston-Pendleton, OR",2339800,69.68,33580
+metro,420,"Fairbanks-College, AK",2339100,65.83,35531
+metro,421,"Zanesville, OH",2320600,64.63,35905
+metro,422,"Wisconsin Rapids-Marshfield, WI",2315700,70.67,32767
+metro,423,"Kokomo, IN",2308600,64.92,35558
+metro,424,"Crossville, TN",2295400,79.32,28937
+metro,425,"Ithaca, NY",2279100,56.52,40327
+metro,426,"Midland, MI",2274600,65.78,34580
+metro,427,"Keene, NH",2270400,69.65,32598
+metro,428,"DuBois, PA",2260100,71.99,31396
+metro,429,"Warsaw, IN",2258800,72.85,31008
+metro,430,"Marquette, MI",2247000,75.9,29604
+metro,431,"Shelby-Kings Mountain, NC",2244000,54.82,40937
+metro,432,"Casper, WY",2241300,66.46,33722
+metro,433,"Elmira, NY",2237600,66.23,33783
+metro,434,"Marinette, WI-MI",2221800,73.08,30404
+metro,435,"Goldsboro, NC",2217700,46.04,48172
+metro,436,"Indiana, PA",2215000,66.69,33215
+metro,437,"Seneca, SC",2210200,63.2,34973
+metro,438,"Pocatello, ID",2205000,64.9,33975
+metro,439,"Plattsburgh, NY",2182000,67.09,32522
+metro,440,"Greenfield, MA",2170200,71.14,30508
+metro,441,"Morehead City, NC",2169200,68.91,31477
+metro,442,"Jefferson, GA",2167800,62.0,34966
+metro,443,"Greeneville, TN",2156200,70.15,30739
+metro,444,"Auburn, NY",2155400,68.9,31281
+metro,445,"Rifle, CO",2145000,68.34,31385
+metro,446,"Columbus, IN",2132800,63.72,33470
+metro,447,"Granbury, TX",2122600,71.18,29819
+metro,448,"Rome, GA",2121400,55.5,38223
+metro,449,"Russellville, AR",2120200,64.91,32664
+metro,450,"Olean, NY",2120200,68.81,30811
+metro,451,"Kankakee, IL",2116200,55.37,38217
+metro,452,"Somerset, PA",2112600,71.36,29603
+metro,453,"Frankfort, KY",2097900,64.13,32713
+metro,454,"Shelton, WA",2083400,72.91,28576
+metro,455,"Minot, ND",2078200,65.81,31580
+metro,456,"Quincy, IL-MO",2072400,66.94,30958
+metro,457,"Findlay, OH",2072100,65.91,31440
+metro,458,"Klamath Falls, OR",2071800,69.57,29779
+metro,459,"Grand Island, NE",2063400,66.85,30866
+metro,460,"Lumberton, NC",2040300,47.65,42822
+metro,461,"Coos Bay-North Bend, OR",2034400,72.76,27960
+metro,462,"Stevens Point-Plover, WI",2033500,69.29,29347
+metro,463,"Monticello, NY",2002200,61.63,32485
+metro,464,"Athens, TN",1998800,68.19,29313
+metro,465,"Chillicothe, OH",1987400,67.1,29617
+metro,466,"Owosso, MI",1980700,72.3,27394
+metro,467,"Stillwater, OK",1980500,58.74,33717
+metro,468,"Baraboo, WI",1962700,70.91,27680
+metro,469,"Searcy, AR",1960300,63.94,30657
+metro,470,"Mount Airy, NC",1959700,66.73,29368
+metro,471,"Lewiston, ID-WA",1951300,69.12,28232
+metro,472,"Danville, VA",1943500,45.35,42851
+metro,473,"Waynesville, NC",1940800,67.82,28617
+metro,474,"Fergus Falls, MN",1919600,71.55,26829
+metro,475,"North Wilkesboro, NC",1912200,68.71,27831
+metro,476,"Shawnee, OK",1902900,65.99,28838
+metro,477,"Clearlake, CA",1892900,66.19,28598
+metro,478,"Laconia, NH",1890600,69.22,27313
+metro,479,"Albany, GA",1887100,33.68,56027
+metro,480,"Somerset, KY",1876300,66.84,28073
+metro,481,"Portsmouth, OH",1842300,63.82,28866
+metro,482,"Greenwood, SC",1839400,47.71,38557
+metro,483,"Rutland, VT",1832800,70.27,26082
+metro,484,"Marion-Herrin, IL",1817800,65.41,27791
+metro,485,"Marietta, OH",1817400,71.81,25307
+metro,486,"Palatka, FL",1814200,57.71,31436
+metro,487,"Fort Payne, AL",1812200,64.76,27985
+metro,488,"Lufkin, TX",1809500,56.31,32132
+metro,489,"Tullahoma-Manchester, TN",1800900,64.76,27810
+metro,490,"Hutchinson, KS",1798600,72.25,24895
+metro,491,"Farmington, MO",1794800,67.07,26761
+metro,492,"Bloomsburg-Berwick, PA",1794200,66.37,27035
+metro,493,"Mount Vernon, OH",1790100,73.62,24317
+metro,494,"Richmond, IN",1784200,67.76,26332
+metro,495,"Sandpoint, ID",1771800,73.83,24000
+metro,496,"Barre, VT",1764500,69.48,25397
+metro,497,"Payson, AZ",1755400,75.23,23335
+metro,498,"Newport, OR",1753800,74.41,23569
+metro,499,"Alamogordo, NM",1751700,63.91,27410
+metro,500,"Heber, UT",1745600,62.05,28130
+metro,501,"Carson City, NV",1738900,69.25,25110
+metro,502,"Danville, IL",1737000,60.71,28612
+metro,503,"Sturgis, MI",1735800,72.9,23812
+metro,504,"Sayre, PA",1719800,69.08,24897
+metro,505,"Durango, CO",1717000,70.84,24238
+metro,506,"Albemarle, NC",1716800,61.94,27716
+metro,507,"Hudson, NY",1706500,67.65,25227
+metro,508,"Forest City, NC",1700100,62.73,27104
+metro,509,"Carlsbad-Artesia, NM",1700000,69.11,24599
+metro,510,"Red Bluff, CA",1697700,68.95,24622
+metro,511,"Talladega-Sylacauga, AL",1695900,46.99,36087
+metro,512,"Enid, OK",1689300,65.17,25923
+metro,513,"LaGrange, GA-AL",1688500,41.35,40837
+metro,514,"Marion, IN",1677300,63.9,26248
+metro,515,"Hemlock Farms, PA",1670800,69.19,24148
+metro,516,"Fairmont, WV",1661500,68.69,24189
+metro,517,"Kearney, NE",1641800,67.56,24302
+metro,518,"Kerrville, TX",1631100,69.89,23339
+metro,519,"Hobbs, NM",1625700,61.26,26537
+metro,520,"Mount Pleasant, MI",1624900,64.65,25133
+metro,521,"Faribault-Northfield, MN",1621400,64.87,24995
+metro,522,"Lake City, FL",1616600,58.49,27641
+metro,523,"Brigham City, UT-ID",1615100,68.94,23428
+metro,524,"Oneonta, NY",1614800,71.91,22455
+metro,525,"Statesboro, GA",1606300,46.7,34393
+metro,526,"Sonora, CA",1604600,70.25,22841
+metro,527,"Branson, MO",1601200,68.64,23326
+metro,528,"Fremont, OH",1595800,68.53,23286
+metro,529,"Murrells Inlet, SC",1593000,56.61,28141
+metro,530,"Walla Walla, WA",1581900,66.54,23775
+metro,531,"Mason City, IA",1579300,70.06,22541
+metro,532,"Salina, KS",1577000,65.31,24145
+metro,533,"Paris, TX",1576800,60.58,26027
+metro,534,"Sterling, IL",1559800,69.26,22521
+metro,535,"Batavia, NY",1558600,69.44,22444
+metro,536,"Norwalk, OH",1553300,72.05,21560
+metro,537,"Gardnerville Ranchos, NV-CA",1550400,71.02,21831
+metro,538,"Cedar City, UT",1544000,67.36,22922
+metro,539,"Gloversville, NY",1531700,68.74,22284
+metro,540,"Roswell, NM",1524400,65.61,23236
+metro,541,"Brattleboro, VT",1523400,74.22,20526
+metro,542,"Cadillac, MI",1523200,74.41,20471
+metro,543,"Ashland, OH",1521400,73.26,20767
+metro,544,"Oil City, PA",1520900,72.92,20857
+metro,545,"Greenville, OH",1515000,73.27,20678
+metro,546,"Ocean Pines, MD",1511900,62.63,24141
+metro,547,"Muskogee, OK",1507600,58.81,25633
+metro,548,"Tiffin, OH",1496000,69.26,21599
+metro,549,"Marion, OH",1494500,65.7,22748
+metro,550,"Clovis, NM",1485700,62.14,23909
+metro,551,"Sanford, NC",1477700,54.64,27045
+metro,552,"Glasgow, KY",1472900,62.54,23552
+metro,553,"Henderson, KY",1472600,63.2,23299
+metro,554,"Rochelle, IL",1469600,71.8,20467
+metro,555,"Laurel, MS",1468700,47.9,30661
+metro,556,"Pahrump, NV",1453000,67.31,21588
+metro,557,"Rice Lake, WI",1451100,70.18,20678
+metro,558,"Grand Rapids, MN",1449200,73.06,19837
+metro,559,"Shawano, WI",1433700,74.67,19200
+metro,560,"Ontario, OR-ID",1423200,65.85,21612
+metro,561,"Red Wing, MN",1422500,69.35,20513
+metro,562,"Bartlesville, OK",1414800,63.6,22244
+metro,563,"Scottsboro, AL",1414700,63.59,22247
+metro,564,"Astoria, OR",1411100,75.6,18665
+metro,565,"Nacogdoches, TX",1410100,56.28,25054
+metro,566,"Sumter, SC",1407400,35.29,39876
+metro,567,"Athens, OH",1401700,61.28,22875
+metro,568,"Gallup, NM",1398300,63.9,21884
+metro,569,"Bedford, IN",1394500,73.46,18984
+metro,570,"Platteville, WI",1393300,70.14,19865
+metro,571,"Harrison, AR",1378200,70.74,19483
+metro,572,"Durant, OK",1377200,65.04,21174
+metro,573,"Oxford, MS",1376900,49.74,27682
+metro,574,"Meridian, MS",1375000,40.49,33955
+metro,575,"Elko, NV",1375000,67.47,20379
+metro,576,"Norfolk, NE",1374600,68.32,20120
+metro,577,"Warrensburg, MO",1369200,64.91,21093
+metro,578,"Mountain Home, AR",1365300,67.97,20088
+metro,579,"Amsterdam, NY",1361900,67.19,20268
+metro,580,"Boone, NC",1359900,63.81,21313
+metro,581,"Martinsville, VA",1357800,48.69,27887
+metro,582,"Shelbyville, TN",1354500,66.49,20370
+metro,583,"Winona, MN",1354200,69.17,19579
+metro,584,"Clinton, IA",1351900,67.92,19904
+metro,585,"Wapakoneta, OH",1350500,72.67,18584
+metro,586,"Montrose, CO",1341400,72.62,18471
+metro,587,"Lewistown, PA",1341000,72.3,18547
+metro,588,"Calhoun, GA",1340600,61.12,21933
+metro,589,"Coldwater, MI",1336900,72.34,18481
+metro,590,"Effingham, IL",1329900,73.5,18094
+metro,591,"Mount Sterling, KY",1318400,67.82,19441
+metro,592,"Danville, KY",1313900,63.53,20682
+metro,593,"Kendallville, IN",1313600,74.24,17693
+metro,594,"Burlington, IA-IL",1311500,67.55,19414
+metro,595,"Port Townsend, WA",1309700,76.34,17157
+metro,596,"Thomasville, GA",1302800,45.15,28857
+metro,597,"Dickinson, ND",1298500,66.52,19521
+metro,598,"Hillsdale, MI",1297300,73.06,17757
+metro,599,"Picayune, MS",1296400,58.55,22143
+metro,600,"Galesburg, IL",1296000,65.03,19929
+metro,601,"Columbus, NE",1294800,71.08,18217
+metro,602,"Huntsville, TX",1290700,53.31,24212
+metro,603,"Bellefontaine, OH",1289800,70.48,18300
+metro,604,"Aberdeen, SD",1289000,68.55,18803
+metro,605,"New Castle, IN",1288600,70.55,18264
+metro,606,"Wilson, NC",1288100,40.38,31902
+metro,607,"Seymour, IN",1285100,68.07,18879
+metro,608,"Sparta, WI",1284700,68.65,18714
+metro,609,"Menomonie, WI",1283700,68.98,18609
+metro,610,"Ellensburg, WA",1274600,62.3,20459
+metro,611,"Bemidji, MN",1273500,68.24,18661
+metro,612,"Charleston-Mattoon, IL",1267900,64.46,19669
+metro,613,"Auburn, IN",1265900,73.6,17200
+metro,614,"Plymouth, IN",1260200,71.99,17506
+metro,615,"Alexandria, MN",1254200,71.31,17587
+metro,616,"Marion, NC",1251100,66.02,18951
+metro,617,"Kapaa, HI",1250600,46.53,26875
+metro,618,"Duncan, OK",1249800,68.97,18120
+metro,619,"Willmar, MN",1247500,67.35,18522
+metro,620,"Hinesville, GA",1244500,37.89,32841
+metro,621,"Tahlequah, OK",1243800,64.94,19154
+metro,622,"Waycross, GA",1243400,55.62,22357
+metro,623,"Paragould, AR",1241400,65.81,18864
+metro,624,"Jasper, IN",1238800,71.91,17228
+metro,625,"Hastings, NE",1236500,71.1,17392
+metro,626,"Lawrenceburg, TN",1236300,66.19,18678
+metro,627,"Canon City, CO",1231500,69.07,17830
+metro,628,"Opelousas, LA",1229800,39.05,31490
+metro,629,"Madisonville, KY",1228100,68.54,17919
+metro,630,"Gillette, WY",1228000,67.72,18134
+metro,631,"Cornelia, GA",1220200,66.03,18480
+metro,632,"Carbondale, IL",1219400,52.82,23086
+metro,633,"New Iberia, LA",1213000,47.91,25318
+metro,634,"Enterprise, AL",1212300,52.72,22995
+metro,635,"Kingsland, GA",1212200,55.49,21847
+metro,636,"Gaffney, SC",1211200,55.08,21991
+metro,637,"McMinnville, TN",1209900,67.16,18014
+metro,638,"Ardmore, OK",1206600,63.46,19015
+metro,639,"Sikeston, MO",1206400,58.75,20534
+metro,640,"Williston, ND",1203700,61.73,19501
+metro,641,"Kill Devil Hills, NC",1203400,73.33,16411
+metro,642,"Bucyrus, OH",1202400,68.74,17491
+metro,643,"Edwards, CO",1196100,62.3,19199
+metro,644,"Ponca City, OK",1194800,67.24,17768
+metro,645,"Sidney, OH",1192200,68.49,17408
+metro,646,"Warren, PA",1190300,71.98,16536
+metro,647,"Huntingdon, PA",1190200,72.19,16487
+metro,648,"Celina, OH",1187200,69.98,16964
+metro,649,"Clewiston, FL",1184900,53.42,22179
+metro,650,"Fremont, NE",1179400,74.59,15812
+metro,651,"Wilmington, OH",1178300,70.82,16637
+metro,652,"Hannibal, MO",1173500,73.03,16069
+metro,653,"Corsicana, TX",1165200,55.47,21005
+metro,654,"Mount Pleasant, TX",1162100,57.48,20217
+metro,655,"Escanaba, MI",1160600,70.37,16492
+metro,656,"Sedalia, MO",1157300,66.67,17358
+metro,657,"West Plains, MO",1153300,68.71,16784
+metro,658,"Poplar Bluff, MO",1152400,64.95,17744
+metro,659,"Blackfoot, ID",1151700,70.2,16406
+metro,660,"Moscow, ID",1143300,65.22,17530
+metro,661,"Cortland, NY",1141600,67.13,17005
+metro,662,"Muscatine, IA",1139400,69.38,16422
+metro,663,"Urbana, OH",1135200,74.85,15167
+metro,664,"Rolla, MO",1133000,63.45,17857
+metro,665,"Winchester, TN",1131100,65.54,17257
+metro,666,"Burley, ID",1130200,64.86,17425
+metro,667,"Taos, NM",1127700,69.05,16331
+metro,668,"Ozark, AL",1126000,54.52,20652
+metro,669,"Rexburg, ID",1125500,61.51,18299
+metro,670,"Jacksonville, TX",1124500,58.93,19081
+metro,671,"Austin, MN",1122700,66.57,16866
+metro,672,"Big Rapids, MI",1120400,68.48,16362
+metro,673,"Gainesville, TX",1119400,64.47,17363
+metro,674,"Bradford, PA",1117500,71.18,15700
+metro,675,"Pullman, WA",1117400,54.0,20694
+metro,676,"McAlester, OK",1115900,64.88,17200
+metro,677,"Butte-Silver Bow, MT",1115900,67.11,16627
+metro,678,"Defiance, OH",1112600,73.27,15185
+metro,679,"Newport, TN",1112200,69.84,15924
+metro,680,"Lock Haven, PA",1108700,70.58,15709
+metro,681,"Cambridge, OH",1108200,70.84,15644
+metro,682,"Freeport, IL",1101500,62.36,17663
+metro,683,"Brevard, NC",1099600,69.83,15746
+metro,684,"Bennington, VT",1098000,68.79,15961
+metro,685,"Riverton, WY",1095900,70.8,15478
+metro,686,"Lewisburg, TN",1089600,71.35,15272
+metro,687,"Weatherford, OK",1089400,67.25,16200
+metro,688,"Marshalltown, IA",1086000,68.04,15962
+metro,689,"Nogales, AZ",1083100,64.2,16872
+metro,690,"Steamboat Springs, CO",1082400,65.68,16480
+metro,691,"Petoskey, MI",1081300,74.34,14545
+metro,692,"Rio Grande City-Roma, TX",1077000,57.0,18896
+metro,693,"North Platte, NE",1073100,73.83,14535
+metro,694,"Detroit Lakes, MN",1072900,71.86,14931
+metro,695,"Espanola, NM",1072700,65.58,16357
+metro,696,"Selinsgrove, PA",1070000,72.12,14836
+metro,697,"Eagle Pass, TX",1067600,62.66,17038
+metro,698,"Cody, WY",1067500,73.79,14466
+metro,699,"Centralia, IL",1056100,69.14,15274
+metro,700,"Greencastle, IN",1054400,74.9,14077
+metro,701,"Hutchinson, MN",1052900,70.17,15004
+metro,702,"Crawfordsville, IN",1045400,66.69,15676
+metro,703,"Pontiac, IL",1044200,68.46,15253
+metro,704,"Murray, KY",1037900,63.74,16283
+metro,705,"Fort Madison, IA",1036200,71.44,14505
+metro,706,"St. Marys, PA",1034300,76.99,13435
+metro,707,"Breckenridge, CO",1031900,62.85,16418
+metro,708,"Scottsbluff, NE",1031800,68.35,15095
+metro,709,"Rock Springs, WY",1031500,66.83,15434
+metro,710,"Fort Dodge, IA",1029200,68.74,14973
+metro,711,"Coshocton, OH",1027900,69.21,14852
+metro,712,"Ada, OK",1024200,65.49,15638
+metro,713,"Alma, MI",1024000,69.34,14767
+metro,714,"Campbellsville, KY",1023800,67.55,15157
+metro,715,"Pittsburg, KS",1023700,64.01,15992
+metro,716,"Jacksonville, IL",1023200,69.19,14789
+metro,717,"Spearfish, SD",1020200,74.36,13719
+metro,718,"Jackson, WY-ID",1019600,68.53,14879
+metro,719,"Vincennes, IN",1016700,66.83,15213
+metro,720,"Washington, NC",1015900,53.33,19050
+metro,721,"Alice, TX",1015500,62.88,16150
+metro,722,"Huntington, IN",1014800,70.73,14347
+metro,723,"Laramie, WY",1010900,58.02,17422
+metro,724,"Houghton, MI",1010600,67.77,14913
+metro,725,"Lebanon, MO",1009100,67.56,14937
+metro,726,"Del Rio, TX",1005600,63.85,15749
+metro,727,"Hailey, ID",1005600,78.54,12803
+metro,728,"Mayfield, KY",997900,67.67,14747
+metro,729,"Iron Mountain, MI-WI",996100,71.93,13849
+metro,730,"Cedartown, GA",994700,61.44,16189
+metro,731,"Mount Vernon, IL",991700,66.42,14931
+metro,732,"Sault Ste. Marie, MI",987700,71.25,13862
+metro,733,"Easton, MD",986800,60.76,16240
+metro,734,"Fort Leonard Wood, MO",984800,59.6,16523
+metro,735,"Ottumwa, IA",982400,65.6,14975
+metro,736,"Pella, IA",981500,69.99,14024
+metro,737,"Sulphur Springs, TX",980500,65.38,14996
+metro,738,"Logansport, IN",979800,67.13,14596
+metro,739,"Ludington, MI",979500,77.96,12564
+metro,740,"Decatur, IN",978200,74.77,13082
+metro,741,"Owatonna, MN",978200,65.55,14923
+metro,742,"Seneca Falls, NY",977500,72.56,13472
+metro,743,"Palestine, TX",976400,60.85,16045
+metro,744,"Angola, IN",976300,69.82,13984
+metro,745,"Dublin, GA",974100,43.23,22533
+metro,746,"Batesville, AR",969200,65.04,14901
+metro,747,"Emporia, KS",962100,68.25,14097
+metro,748,"Lake of the Woods, VA",957400,61.4,15592
+metro,749,"Brownwood, TX",953400,64.77,14720
+metro,750,"Fayetteville, TN",952300,63.62,14968
+metro,751,"Peru, IN",952300,69.12,13778
+metro,752,"Starkville, MS",945100,39.18,24123
+metro,753,"Safford, AZ",943600,71.66,13167
+metro,754,"Lewisburg, PA",936300,68.43,13682
+metro,755,"Columbus, MS",933200,35.6,26214
+metro,756,"Watertown, SD",928400,72.2,12859
+metro,757,"Sheridan, WY",922900,64.2,14375
+metro,758,"Okeechobee, FL",920700,60.04,15336
+metro,759,"Bonham, TX",915800,64.33,14236
+metro,760,"Alpena, MI",911400,70.59,12911
+metro,761,"El Campo, TX",911300,57.84,15756
+metro,762,"Kinston, NC",910300,39.39,23109
+metro,763,"Brookings, SD",904300,61.13,14793
+metro,764,"Paris, TN",903700,62.98,14348
+metro,765,"Las Vegas, NM",903100,69.01,13086
+metro,766,"Taylorville, IL",902300,68.09,13252
+metro,767,"Pine Bluff, AR",902100,34.04,26505
+metro,768,"Orangeburg, SC",902000,27.87,32360
+metro,769,"Canton, IL",902000,69.59,12962
+metro,770,"Madison, IN",898700,68.89,13046
+metro,771,"Van Wert, OH",891900,74.99,11893
+metro,772,"Stephenville, TX",888800,65.5,13570
+metro,773,"Martin, TN",887200,63.88,13888
+metro,774,"Alexander City, AL",887100,53.13,16696
+metro,775,"Bay City, TX",885300,61.56,14382
+metro,776,"Wabash, IN",883700,72.38,12209
+metro,777,"Douglas, GA",883700,49.14,17984
+metro,778,"Dixon, IL",880500,68.08,12933
+metro,779,"Albert Lea, MN",880100,66.57,13220
+metro,780,"Roanoke Rapids, NC",878300,33.02,26599
+metro,781,"Tifton, GA",876600,45.46,19282
+metro,782,"Frankfort, IN",876400,72.94,12016
+metro,783,"McPherson, KS",867600,70.18,12363
+metro,784,"Arkansas City-Winfield, KS",861200,65.43,13162
+metro,785,"Brenham, TX",860300,59.73,14402
+metro,786,"Moultrie, GA",845900,50.8,16650
+metro,787,"Bogalusa, LA",842800,48.0,17557
+metro,788,"Mineral Wells, TX",841200,71.16,11822
+metro,789,"Fredericksburg, TX",837200,65.28,12825
+metro,790,"Fort Morgan, CO",833600,71.7,11627
+metro,791,"DeRidder, LA",828700,58.01,14286
+metro,792,"Russellville, AL",828600,65.77,12598
+metro,793,"Vernal, UT",826300,68.51,12061
+metro,794,"Garden City, KS",825100,62.22,13262
+metro,795,"Brookings, OR",821900,73.74,11146
+metro,796,"Union City, TN",807900,64.01,12621
+metro,797,"Newberry, SC",807400,51.29,15743
+metro,798,"The Dalles, OR",804400,72.55,11088
+metro,799,"New Ulm, MN",801800,71.89,11153
+metro,800,"Washington, IN",798400,64.03,12469
+metro,801,"Juneau, AK",796500,64.14,12419
+metro,802,"Elizabeth City, NC",795100,45.45,17495
+metro,803,"Hays, KS",794900,65.28,12177
+metro,804,"Dyersburg, TN",793500,53.75,14762
+metro,805,"Plainview, TX",790000,64.98,12158
+metro,806,"Le Mars, IA",789900,73.13,10802
+metro,807,"Mitchell, SD",789500,68.69,11493
+metro,808,"Lincoln, IL",785100,71.37,11001
+metro,809,"Miami, OK",783300,65.66,11930
+metro,810,"Monticello, IN",778300,76.37,10191
+metro,811,"Arcadia, FL",778200,61.24,12707
+metro,812,"Corinth, MS",766800,58.71,13061
+metro,813,"Big Spring, TX",766500,63.92,11991
+metro,814,"Washington Court House, OH",765800,65.72,11653
+metro,815,"Morgan City, LA",765000,43.83,17454
+metro,816,"Greensburg, IN",761800,72.8,10465
+metro,817,"Rockingham, NC",758000,43.27,17517
+metro,818,"Mountain Home, ID",757000,66.37,11406
+metro,819,"Yankton, SD",754000,74.37,10138
+metro,820,"La Grande, OR",753700,68.43,11014
+metro,821,"Silver City, NM",753100,61.54,12237
+metro,822,"Elkins, WV",752200,67.3,11176
+metro,823,"Crescent City, CA",738800,63.29,11673
+metro,824,"Gallipolis, OH",736300,62.88,11709
+metro,825,"Kirksville, MO",732200,61.76,11856
+metro,826,"Macomb, IL",730300,64.12,11390
+metro,827,"Great Bend, KS",727600,70.63,10302
+metro,828,"Ottawa, KS",721700,68.92,10471
+metro,829,"Vidalia, GA",717500,52.01,13795
+metro,830,"Ruston, LA",713600,38.06,18749
+metro,831,"Fallon, NV",713000,67.19,10612
+metro,832,"Malvern, AR",701000,58.65,11952
+metro,833,"Kingsville, TX",699600,63.62,10997
+metro,834,"Vineyard Haven, MA",698400,70.31,9933
+metro,835,"El Dorado, AR",697200,45.71,15253
+metro,836,"Pierre, SD",692100,74.68,9268
+metro,837,"Alamosa, CO",679800,66.33,10248
+metro,838,"Lexington, NE",678400,67.77,10011
+metro,839,"Cambridge, MD",673500,47.9,14062
+metro,840,"Connersville, IN",670600,71.24,9413
+metro,841,"Marshall, MN",670200,63.18,10608
+metro,842,"Toccoa, GA",668000,61.33,10892
+metro,843,"Dodge City, KS",664700,65.38,10167
+metro,844,"Evanston, WY-UT",662500,75.46,8780
+metro,845,"Ruidoso, NM",662000,69.92,9468
+metro,846,"Kennett, MO",661500,60.84,10873
+metro,847,"Beatrice, NE",657400,69.68,9435
+metro,848,"McComb, MS",652800,33.06,19744
+metro,849,"Wahpeton, ND-MN",652300,67.73,9631
+metro,850,"Natchez, MS-LA",650300,31.03,20956
+metro,851,"Minden, LA",637100,43.87,14521
+metro,852,"Oskaloosa, IA",635200,71.89,8836
+metro,853,"Vicksburg, MS",633600,38.54,16441
+metro,854,"Brookhaven, MS",632900,46.58,13587
+metro,855,"Moberly, MO",628900,66.26,9491
+metro,856,"Altus, OK",628200,65.53,9586
+metro,857,"Summerville, GA",626400,59.03,10611
+metro,858,"Susanville, CA",624800,66.08,9455
+metro,859,"Jamestown, ND",624800,64.32,9714
+metro,860,"Fairmont, MN",622900,71.16,8753
+metro,861,"Marshall, MO",620200,68.18,9096
+metro,862,"Jesup, GA",618800,51.38,12044
+metro,863,"Spirit Lake, IA",613800,74.59,8229
+metro,864,"Deming, NM",609500,61.05,9984
+metro,865,"Mexico, MO",609400,64.64,9428
+metro,866,"Hood River, OR",607000,66.48,9130
+metro,867,"Middlesborough, KY",606800,62.27,9744
+metro,868,"Carroll, IA",602900,67.67,8909
+metro,869,"Price, UT",586100,72.68,8064
+metro,870,"Blytheville, AR",582800,40.5,14389
+metro,871,"Uvalde, TX",574600,65.13,8823
+metro,872,"Bishop, CA",566200,67.78,8353
+metro,873,"Thomaston, GA",562000,49.1,11445
+metro,874,"Borger, TX",558500,70.25,7950
+metro,875,"Natchitoches, LA",551900,38.15,14467
+metro,876,"Worthington, MN",550700,66.84,8239
+metro,877,"Elk City, OK",541000,63.78,8482
+metro,878,"Huron, SD",537900,61.68,8721
+metro,879,"Woodward, OK",535100,66.79,8012
+metro,880,"Henderson, NC",524900,31.39,16723
+metro,881,"Milledgeville, GA",523800,38.89,13468
+metro,882,"Baker City, OR",522200,67.64,7720
+metro,883,"Maryville, MO",518700,64.0,8105
+metro,884,"Camden, AR",510700,45.2,11299
+metro,885,"Sterling, CO",506000,64.76,7813
+metro,886,"Spencer, IA",505400,68.21,7410
+metro,887,"Pampa, TX",504300,65.21,7734
+metro,888,"Storm Lake, IA",496500,60.95,8146
+metro,889,"Port Lavaca, TX",494500,67.99,7273
+metro,890,"Troy, AL",491000,36.46,13466
+metro,891,"Andrews, TX",486900,68.1,7150
+metro,892,"Beeville, TX",476100,63.45,7504
+metro,893,"Laurinburg, NC",469800,41.17,11412
+metro,894,"Los Alamos, NM",466200,52.76,8836
+metro,895,"Bainbridge, GA",464600,41.54,11184
+metro,896,"Guymon, OK",462900,62.72,7380
+metro,897,"Franklin, KY",460400,56.24,8186
+metro,898,"Grenada, MS",459900,36.87,12473
+metro,899,"Dumas, TX",450800,63.5,7099
+metro,900,"Othello, WA",446900,69.35,6444
+metro,901,"Winnemucca, NV",442000,63.41,6970
+metro,902,"Americus, GA",437800,34.16,12815
+metro,903,"Hereford, TX",412900,67.03,6160
+metro,904,"Liberal, KS",408600,59.96,6814
+metro,905,"Arkadelphia, AR",403700,50.4,8010
+metro,906,"Sweetwater, TX",372600,65.14,5720
+metro,907,"Nantucket, MA",364800,57.4,6355
+metro,908,"Vermillion, SD",358300,63.15,5674
+metro,909,"Town of Pecos, TX",357900,70.34,5088
+metro,910,"Ketchikan, AK",356700,65.93,5410
+metro,911,"Atchison, KS",356700,61.0,5848
+metro,912,"Greenwood, MS",354300,25.51,13887
+metro,913,"Snyder, TX",352500,57.62,6118
+metro,914,"Eufaula, AL-GA",341100,35.51,9605
+metro,915,"Raymondville, TX",331000,64.52,5130
+metro,916,"Cordele, GA",321300,41.47,7747
+metro,917,"Greenville, MS",316000,21.63,14608
+metro,918,"Magnolia, AR",309400,42.69,7248
+metro,919,"Selma, AL",305400,22.82,13382
+metro,920,"Vernon, TX",303500,63.35,4791
+metro,921,"Cleveland, MS",275200,25.53,10778
+metro,922,"Fitzgerald, GA",257100,39.52,6505
+metro,923,"Zapata, TX",234100,56.96,4110
+metro,924,"Forrest City, AR",228000,32.89,6932
+metro,925,"Clarksdale, MS",131100,18.67,7022

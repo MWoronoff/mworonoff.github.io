@@ -1,0 +1,210 @@
+geo_level,rank,market,legal_fees_total,legal_fees_per_hh,households
+dma,1,New York,376178600,46.24,8135797
+dma,2,Los Angeles,304316000,50.87,5982023
+dma,3,Chicago,180647200,50.29,3591817
+dma,4,Dallas-Ft.Worth,165056500,49.44,3338532
+dma,5,Philadelphia,162215100,49.93,3248874
+dma,6,Boston,152459500,55.46,2749167
+dma,7,"Tampa-St.Petersburg, Sarasota",139743600,60.09,2325629
+dma,8,Phoenix,138250200,61.76,2238678
+dma,9,Houston,134641300,47.01,2863965
+dma,10,Seattle-Tacoma,125720200,53.62,2344461
+dma,11,Minneapolis-St. Paul,119232700,59.49,2004171
+dma,12,San Francisco-Oakland-San Jose,119008700,40.8,2916776
+dma,13,Atlanta,117967300,41.41,2848551
+dma,14,Orlando-Daytona Beach-Melbourne,117468100,58.83,1996641
+dma,15,Denver,117464200,60.37,1945639
+dma,16,"Washington, DC",114618600,40.9,2802598
+dma,17,Detroit,100662400,50.81,1981307
+dma,18,Miami-Ft. Lauderdale,96454300,52.88,1823996
+dma,19,Cleveland,91303200,57.92,1576362
+dma,20,"Portland, OR",88700400,62.4,1421556
+dma,21,Sacramento-Stockton-Modesto,84368300,54.62,1544526
+dma,22,Nashville,76698800,58.1,1320138
+dma,23,Salt Lake City,74832700,64.54,1159512
+dma,24,Pittsburgh,74826300,61.58,1215115
+dma,25,St. Louis,72145400,56.04,1287322
+dma,26,Charlotte,71955300,50.62,1421397
+dma,27,Indianapolis,71289800,58.01,1228994
+dma,28,San Antonio,68025600,59.79,1137818
+dma,29,Raleigh-Durham,63164700,45.2,1397327
+dma,30,San Diego,62715200,53.64,1169294
+dma,31,Kansas City,62542200,58.57,1067773
+dma,32,Hartford & New Haven,62134000,56.61,1097649
+dma,33,Greenville-Spartanburg-Asheville-Anderson,61153700,58.95,1037421
+dma,34,"Columbus, OH",58440900,54.94,1063689
+dma,35,Austin,57772200,54.49,1060202
+dma,36,West Palm Beach-Ft. Pierce,56884600,57.82,983781
+dma,37,Cincinnati,56357400,57.7,976737
+dma,38,Milwaukee,55773200,58.8,948592
+dma,39,Harrisburg-Lancaster-Lebanon-York,55095200,64.96,848089
+dma,40,Grand Rapids-Kalamazoo-Battle Creek,53241600,64.13,830213
+dma,41,Baltimore,50453700,42.54,1186125
+dma,42,Oklahoma City,49433300,59.99,823961
+dma,43,Albuquerque-Santa Fe,49239800,65.34,753569
+dma,44,Ft. Myers-Naples,46039800,67.01,687088
+dma,45,"Jacksonville, Brunswick",45927100,52.45,875645
+dma,46,Las Vegas,45563300,50.08,909839
+dma,47,Louisville,43746200,59.17,739380
+dma,48,Providence-New Bedford,41682400,61.22,680834
+dma,49,Wilkes Barre-Scranton,41195200,67.01,614724
+dma,50,Buffalo,40807000,60.65,672834
+dma,51,Greensbro-High Point-Winston-Salem,40420700,52.44,770837
+dma,52,Birmingham,38892600,49.63,783624
+dma,53,Fresno-Visalia,38385600,59.06,649897
+dma,54,Knoxville,38325200,65.37,586277
+dma,55,Albany-Schenectady-Troy,37059700,62.8,590086
+dma,56,Spokane,36804700,67.62,544282
+dma,57,Tulsa,36098700,61.17,590139
+dma,58,Green Bay-Appleton,34535700,69.33,498115
+dma,59,Norfolk-Portsmouth-Newport News,34447000,45.0,765539
+dma,60,Mobile-Penscola,34200100,54.65,625797
+dma,61,Lexington,33872200,61.54,550367
+dma,62,Dayton,33578200,61.27,548062
+dma,63,Little Rock-Pine Bluff,32368100,54.28,596306
+dma,64,Des Moines-Ames,32205300,63.93,503797
+dma,65,Tucson,32077600,63.75,503139
+dma,66,"Springfield, MO",32055100,67.02,478295
+dma,67,New Orleans,31917800,46.9,680609
+dma,68,Portland-Auburn,31480900,69.18,455073
+dma,69,"Wichta-Hutchinson, Plus",30897400,64.82,476681
+dma,70,Charleston-Huntngton,30240700,64.97,465470
+dma,71,Richmond-Petersburg,30118200,46.23,651464
+dma,72,Omaha,29781100,61.51,484133
+dma,73,Flint-Saginaw-Bay City,28522700,62.48,456477
+dma,74,Madison,28459200,64.0,444657
+dma,75,Roanoke-Lynchburg,27592300,58.34,472932
+dma,76,Toledo,27467400,62.84,437099
+dma,77,"Huntsville-Decater, Florence",26615800,56.44,471596
+dma,78,Chattanooga,26530600,62.6,423822
+dma,79,Colorado Springs-Pueblo,26341000,62.37,422321
+dma,80,Syracuse,25961700,62.81,413328
+dma,81,Memphis,25202400,37.7,668461
+dma,82,Paducah-Cape Girardeau-Harris.-Mt Vernon,25135800,63.85,393665
+dma,83,Harlingen-Weslaco-Brownsville-Mcallen,24979900,61.69,404947
+dma,84,Cedar Rapids-Waterloo & Dubuque,24959700,64.34,387907
+dma,85,Boise,24930700,68.26,365239
+dma,86,Burlington-Plattsburgh,24847100,68.34,363605
+dma,87,Waco-Temple-Bryan,23365300,52.04,448973
+dma,88,Champaign & Springfield-Decatur,23346100,60.41,386429
+dma,89,Ft. Smith,23304400,62.47,373067
+dma,90,"Tri-Cities, TN-VA",23014400,66.98,343623
+dma,91,El Paso,22392300,60.33,371159
+dma,92,So. Bend-Elkhart,22133300,63.4,349126
+dma,93,"Rochester, NY",21911000,58.07,377321
+dma,94,Sioux Falls (Mitchell),21392400,68.2,313677
+dma,95,"Lincoln & Hastings-Kearney, Plus",21254800,66.89,317760
+dma,96,"Charleston, SC",20539000,50.08,410123
+dma,97,Davenport-Rock Island-Moline,20406400,65.16,313166
+dma,98,Johnstown-Altoona,20175900,68.03,296580
+dma,99,Reno,20171500,64.83,311159
+dma,100,Savannah,20145700,49.54,406672
+dma,101,Traverse City-Cadillac,19797300,73.38,269777
+dma,102,Evansville,19719300,65.34,301780
+dma,103,Ft. Wayne,19469700,65.27,298302
+dma,104,Eugene,19103700,68.0,280939
+dma,105,Fargo-Valley City,18988700,65.19,291296
+dma,106,"Columbia, SC",18971100,42.01,451538
+dma,107,Myrtle Beach-Florence,18319300,54.06,338892
+dma,108,Yakima-Pasco-Richland-Kennewick,17959700,65.79,272996
+dma,109,Honolulu,17791000,35.88,495914
+dma,110,Shreveport,17548000,46.52,377238
+dma,111,Tyler-Longview,17469200,58.07,300810
+dma,112,Lansing,17025900,62.11,274129
+dma,113,Youngstown,16819500,64.25,261768
+dma,114,Bakersfield,16776300,57.54,291543
+dma,115,Springfield-Holyoke,16688200,61.7,270455
+dma,116,La Cross-Eau Claire,16286700,69.09,235723
+dma,117,Santa Barbara-Santa Maria-San Luis Obispo,16262400,62.78,259058
+dma,118,Greenville-New Bern-Washington,16234200,50.45,321789
+dma,119,Monterey-Salinas,15711500,62.99,249411
+dma,120,Peoria-Bloomington,15443800,61.44,251368
+dma,121,Wilmington,15074000,62.23,242239
+dma,122,Baton Rouge,15054800,42.06,357932
+dma,123,Wausau-Rhinelander,14173300,71.39,198526
+dma,124,Tallahassee-Thomasville,13996000,46.05,303901
+dma,125,Corpus Christi,13819700,63.65,217112
+dma,126,Medford-Klamath Falls,13769400,70.37,195683
+dma,127,Chico-Redding,13420200,65.81,203923
+dma,128,Duluth-Superior,13257300,70.24,188751
+dma,129,Amarillo,12919100,63.73,202701
+dma,130,Columbia-Jefferson City,12800900,63.62,201222
+dma,131,Odessa-Midland,12622300,59.88,210796
+dma,132,Salisbury,12477200,62.35,200101
+dma,133,Augusta,12477200,42.74,291901
+dma,134,Minot-Bismark-Dickenson,12400800,65.88,188224
+dma,135,"Jackson, MS",12167800,37.09,328021
+dma,136,"Lafayette, LA",11990300,48.17,248910
+dma,137,Topeka,11945100,63.81,187195
+dma,138,Sioux City,11590900,67.94,170616
+dma,139,Rockford,11094900,61.53,180327
+dma,140,Joplin-Pittsburg,11004200,67.69,162556
+dma,141,Panama City,10961800,63.03,173919
+dma,142,Lubbock,10866200,60.43,179805
+dma,143,Missoula,10788600,71.65,150574
+dma,144,Anchorage,10745600,60.76,176850
+dma,145,Bangor,10744100,69.34,154945
+dma,146,Macon,10672500,40.42,264058
+dma,147,Idaho Falls-Pocatello,10576000,67.81,155956
+dma,148,Rochester-Mason City-Austin,10391700,63.96,162463
+dma,149,Erie,10380700,66.57,155944
+dma,150,Terre Haute,9990200,67.63,147711
+dma,151,Wichta Falls & Lawton,9946000,61.48,161768
+dma,152,Sherman-Ada,9707200,64.41,150698
+dma,153,"Columbus, GA",9676900,39.38,245748
+dma,154,Montgomery,9439100,38.19,247157
+dma,155,Utica,9384600,66.89,140293
+dma,156,Billings,9365900,70.31,133218
+dma,157,Columbus-Tupelo-West Point,9060400,47.9,189172
+dma,158,Beaumont-Port Arthur,8804900,49.7,177150
+dma,159,Binghamton,8732900,64.28,135863
+dma,160,Wheeling-Steubenville.,8726200,69.17,126160
+dma,161,Bluefield-Beckley-Oak Hill,8505000,66.29,128305
+dma,162,Rapid City,8303000,69.29,119824
+dma,163,Gainesville,8071000,51.68,156165
+dma,164,Abilene-Sweetwater,7964100,62.97,126470
+dma,165,Yuma-El Centro,7931800,65.14,121757
+dma,166,Monroe-El Dorado,7687100,43.89,175138
+dma,167,Biloxi-Gulfport,7674300,52.8,145342
+dma,168,Quincy-Hannibal-Keokuk,7217900,69.55,103776
+dma,169,Clarksburg-Weston,7166300,67.18,106671
+dma,170,Harrisonburg,7090700,65.93,107556
+dma,171,Marquette,6822700,72.31,94360
+dma,172,Elmira,6614100,68.33,96791
+dma,173,Butte-Bozeman,6392400,67.43,94804
+dma,174,"Albany, GA",6372700,42.09,151396
+dma,175,Dothan,6253600,52.59,118904
+dma,176,"Bend, OR",6228000,69.47,89646
+dma,177,Watertown,6213700,67.48,92085
+dma,178,Bowling Green,6088300,60.12,101270
+dma,179,Grand.Junction-Montrose,5680600,70.03,81113
+dma,180,Twin Falls,5661700,69.71,81221
+dma,181,Jonesboro,5561900,59.08,94143
+dma,182,Lake Charles,5438800,51.68,105246
+dma,183,"Jackson, TN",5356700,53.88,99420
+dma,184,Hattiesburg-Laurel,5255400,45.15,116403
+dma,185,Great Falls,5136000,69.83,73555
+dma,186,Charlottesville,4980500,55.31,90055
+dma,187,Laredo,4882200,63.67,76681
+dma,188,Eureka,4503900,66.21,68029
+dma,189,Parkersburg,4382700,68.6,63890
+dma,190,"Alexandria, LA",4380700,49.72,88107
+dma,191,Casper-Riverton,4160100,68.74,60515
+dma,192,Cheyenne-Scottsbluff-Sterling,4099000,66.86,61303
+dma,193,"Lafeyette, IN",4077100,54.46,74859
+dma,194,San Angelo,3899700,65.44,59595
+dma,195,Ottumwa-Kirksville,3663000,68.11,53779
+dma,196,Mankato,3613500,67.99,53149
+dma,197,St. Joseph,3240200,67.82,47777
+dma,198,Fairbanks,2716400,66.19,41042
+dma,199,Meridian,2625000,40.37,65019
+dma,200,Helena,2501100,67.5,37055
+dma,201,Lima,2465500,62.57,39405
+dma,202,Victoria,2330900,66.5,35050
+dma,203,Zanesville,2320600,64.63,35905
+dma,204,Juneau,2258700,67.77,33328
+dma,205,Presque Isle,2052800,69.62,29484
+dma,206,Greenwood-Greenville,1523100,25.88,58855
+dma,207,Alpena,1289300,71.49,18035
+dma,208,North Platte,1086200,73.98,14682
+dma,209,Glendive,326600,72.55,4502
