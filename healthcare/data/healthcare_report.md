@@ -1,6 +1,6 @@
 # Healthcare data check report
 
-Built 2026-10-09. Result: **PASSED**
+Built 2026-10-10. Result: **PASSED**
 
 | Check | Result | Detail |
 | --- | --- | --- |
@@ -14,10 +14,16 @@ Built 2026-10-09. Result: **PASSED**
 | CDC PLACES release | INFO | 2025; measures found: fairpoor, diabetes, bphigh, nodental, hearing, vision, arthritis, obesity, depression, mhlth, indeplive |
 | CDC PLACES ZCTA gaps filled with county values | INFO | Fair or poor health 10,764 ZIPs; Diabetes 10,764 ZIPs; High blood pressure 10,764 ZIPs; No dental visit in past year 8,227 ZIPs; Hearing disability 10,764 ZIPs; Vision disability 10,764 ZIPs; Arthritis 10,764 ZIPs; Obesity 10,764 ZIPs; Depression 10,764 ZIPs; Frequent mental distress 10,764 ZIPs; Independent-living disability 10,764 ZIPs |
 | Adults covered by CDC PLACES | PASS | 94.7% |
+| EASI healthcare spending: Palm Springs | INFO | EASI includes Palm Springs in Los Angeles; the provisional Palm Springs DMA uses the Riverside–San Bernardino metro's per-household spending |
+| EASI U.S. healthcare spending per household | INFO | Medical services $1,215.73; Prescription drugs $215.68 |
+| EASI healthcare spending matched to DMAs | PASS | 210 of 210 |
+| EASI healthcare spending matched to metros | PASS | 387 of 387 |
+| EASI medical services total, DMAs vs. EASI's own total | PASS | 96.9% of EASI's $159.0B |
+| EASI prescription drugs total, DMAs vs. EASI's own total | PASS | 96.9% of EASI's $28.2B |
 | EASI layer matched to metros | PASS | 387 of 387 metros |
-| DMA scores within 0–100 | PASS | 0 out of range; 1,853 scores computed, 37 not computed (missing input) |
+| DMA scores within 0–100 | PASS | 0 out of range; 1,890 scores computed, 0 not computed (missing input) |
 | DMA business counts never negative | PASS | 0 |
-| Metro scores within 0–100 | PASS | 0 out of range; 3,409 scores computed, 74 not computed (missing input) |
+| Metro scores within 0–100 | PASS | 0 out of range; 3,483 scores computed, 0 not computed (missing input) |
 | Metro business counts never negative | PASS | 0 |
 | DMA roll-up matches county totals: Urgent and emergency care | PASS | DMAs 9,117 vs counties 9,117 |
 | DMA roll-up matches county totals: Pharmacy | PASS | DMAs 40,397 vs counties 40,402 |
