@@ -552,7 +552,9 @@
         if (!self.availableAt(m, s.level) && m.hideWhenUnavailable) return null;
         if (!self.availableAt(m, s.level)) return el("div", { class: "az-measure", title: m.help || null }, [el("span", { text: m.label }), el("b", { class: "az-na", text: "Not available at this level" })]);
         var v = fmt(self.val(row, m), m.format);
-        return el("div", { class: "az-measure", title: m.help || null }, [el("span", { text: m.label }), el("b", { class: "num" + (v == null ? " az-na" : ""), text: v == null ? "No data" : v })]);
+        // "e" lists measures filled in for this area rather than taken from the current source release
+        var est = v != null && row.e && row.e.indexOf(m.key) >= 0;
+        return el("div", { class: "az-measure", title: (est ? "Estimated for this area; see Data notes. " : "") + (m.help || "") || null }, [el("span", { text: m.label }), el("b", { class: "num" + (v == null ? " az-na" : ""), text: v == null ? "No data" : v + (est ? " est." : "") })]);
       })));
     }
     if (this.cfg.levels.zip && (s.level === "dma" || s.level === "metro")) {
