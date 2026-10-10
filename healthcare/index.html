@@ -371,7 +371,7 @@ AdtaxiAnalyzer.start({
    "key": "fairpoor",
    "label": "Fair or poor health (adults)",
    "format": "pct",
-   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published.",
+   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published; in Pennsylvania and Kentucky, values are estimated from age, income and education (see How scores work).",
    "subs": [
     "urgent"
    ]
@@ -380,7 +380,7 @@ AdtaxiAnalyzer.start({
    "key": "diabetes",
    "label": "Diabetes (adults)",
    "format": "pct",
-   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published.",
+   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published; in Pennsylvania and Kentucky, values are estimated from age, income and education (see How scores work).",
    "subs": [
     "pharmacy",
     "eye"
@@ -390,7 +390,7 @@ AdtaxiAnalyzer.start({
    "key": "bphigh",
    "label": "High blood pressure (adults)",
    "format": "pct",
-   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published.",
+   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published; in Pennsylvania and Kentucky, values are estimated from age, income and education (see How scores work).",
    "subs": [
     "pharmacy"
    ]
@@ -399,7 +399,7 @@ AdtaxiAnalyzer.start({
    "key": "nodental",
    "label": "No dental visit in past year (adults)",
    "format": "pct",
-   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published.",
+   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published; in Pennsylvania and Kentucky, values are estimated from age, income and education (see How scores work).",
    "subs": [
     "dental"
    ]
@@ -408,7 +408,7 @@ AdtaxiAnalyzer.start({
    "key": "hearing",
    "label": "Hearing disability (adults)",
    "format": "pct",
-   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published.",
+   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published; in Pennsylvania and Kentucky, values are estimated from age, income and education (see How scores work).",
    "subs": [
     "hearing"
    ]
@@ -417,7 +417,7 @@ AdtaxiAnalyzer.start({
    "key": "vision",
    "label": "Vision disability (adults)",
    "format": "pct",
-   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published.",
+   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published; in Pennsylvania and Kentucky, values are estimated from age, income and education (see How scores work).",
    "subs": [
     "eye"
    ]
@@ -426,7 +426,7 @@ AdtaxiAnalyzer.start({
    "key": "arthritis",
    "label": "Arthritis (adults)",
    "format": "pct",
-   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published.",
+   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published; in Pennsylvania and Kentucky, values are estimated from age, income and education (see How scores work).",
    "subs": [
     "chiro"
    ]
@@ -435,7 +435,7 @@ AdtaxiAnalyzer.start({
    "key": "obesity",
    "label": "Obesity (adults)",
    "format": "pct",
-   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published.",
+   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published; in Pennsylvania and Kentucky, values are estimated from age, income and education (see How scores work).",
    "subs": [
     "chiro"
    ]
@@ -444,7 +444,7 @@ AdtaxiAnalyzer.start({
    "key": "depression",
    "label": "Depression (adults)",
    "format": "pct",
-   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published.",
+   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published; in Pennsylvania and Kentucky, values are estimated from age, income and education (see How scores work).",
    "subs": [
     "behavioral"
    ]
@@ -453,7 +453,7 @@ AdtaxiAnalyzer.start({
    "key": "mhlth",
    "label": "Frequent mental distress (adults)",
    "format": "pct",
-   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published.",
+   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published; in Pennsylvania and Kentucky, values are estimated from age, income and education (see How scores work).",
    "subs": [
     "behavioral"
    ]
@@ -462,7 +462,7 @@ AdtaxiAnalyzer.start({
    "key": "indeplive",
    "label": "Independent-living disability (adults)",
    "format": "pct",
-   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published.",
+   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published; in Pennsylvania and Kentucky, values are estimated from age, income and education (see How scores work).",
    "subs": [
     "senior"
    ]
@@ -894,7 +894,7 @@ AdtaxiAnalyzer.start({
    "title": "Consumer Demand",
    "body": [
     "The size and need of each category's target audience. Urgent and emergency care: population, households with children, fair or poor health. Pharmacy: age 65+, diabetes, high blood pressure. Dental: adults, households earning $75K+, no dental visit in the past year. Hearing: age 65+, hearing disability. Eye care: age 45+, vision disability, diabetes. Chiropractic and PT: adults 25 to 64, arthritis, obesity. Behavioral health: adults, depression, frequent mental distress. Med spa: adults 30 to 64, households earning $150K+. Senior and home care: age 65+, age 75+, independent-living disability.",
-    "Health measures are CDC PLACES estimates for adults. Kentucky and Pennsylvania lack most values, so Consumer Demand there uses Census inputs only."
+    "Health measures are CDC PLACES estimates for adults. CDC doesn't publish most of them for Pennsylvania and Kentucky, so the build estimates them there from each ZIP's age, income and education, using how each measure varies with those factors in the states CDC does cover. Before a measure is estimated, the method is tested on Ohio, West Virginia, New York, Maryland, Tennessee and Indiana by hiding their real values and predicting them; it's used only if the average county error is 1.5 percentage points or less. Measures that fail the test show No data, and Consumer Demand uses the remaining inputs. Affected markets say so in their data notes."
    ]
   },
   {
