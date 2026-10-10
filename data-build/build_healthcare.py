@@ -1,4 +1,6 @@
-"""Builds the Healthcare Market Analyzer data (piece 1: market scores) into healthcare/data/.
+"""Builds the Healthcare Market Analyzer data (piece 1: Market Potential Scores) into healthcare/data/.
+
+The analyzer shows healthcare advertisers where their customers are and how to focus ad dollars geographically.
 
 Sources, all public downloads with no key:
   - Census ZIP Business Patterns (detail by industry): healthcare business counts per ZIP, latest year and the year before
@@ -6,6 +8,8 @@ Sources, all public downloads with no key:
   - CDC PLACES (ZCTA and county, GIS-friendly files on data.cdc.gov): adult health measures (Consumer Demand)
   - shared/audience/zip_audience.json: Census ACS ages and income by ZIP (built earlier in the same workflow)
   - data-build/sources/easi_metro_2025.csv: Adtaxi's EASI 2025 metro health-condition layer (Metro view only)
+  - data-build/sources/easi_healthcare_spend_dma.csv / _metro.csv: Adtaxi's EASI 2025 household healthcare spending
+    (Category Spending); easi_dma_crosswalk.csv ties EASI's DMA names to DMA codes
 Geography comes from data-build/geo (ZIP -> county, metro, DMA).
 
   python3 data-build/build_healthcare.py              # live (GitHub Actions)
@@ -24,14 +28,18 @@ OUT = os.path.join(ROOT, "healthcare", "data")
 UA = {"User-Agent": "Mozilla/5.0 (Adtaxi analyzer data build; github.com/MWoronoff)"}
 CBP = "https://www2.census.gov/programs-surveys/cbp/datasets/{y}/{f}"
 MIN_POP = 500
-WEIGHTS = {"pool": 0.35, "spend": 0.25, "comp": 0.20, "demand": 0.20}
+# Market Potential Score: where a healthcare advertiser's customers are. Each part is a percentile (0-100).
+WEIGHTS = {"demand": 0.40, "category": 0.25, "spend": 0.15, "comp": 0.20}
+ZIP_PARTS = ("demand", "spend")      # ZIPs: no EASI spending by ZIP, and ZIP business counts are suppressed under 3
+EASI_SPEND = {"med": ("medical_services", "Medical services"), "rx": ("prescription_drugs", "Prescription drugs")}
+PALM_SPRINGS, LA_DMA, RIVERSIDE_METRO = "804", "803", "40140"
 
 # ---------------- Subcategories ----------------
 # naics: industries counted as prospect businesses. demand: (input key, weight) pairs, defined in DEMAND_INPUTS below.
 SUBCATS = [
     {"id": "urgent",  "label": "Urgent and emergency care", "naics": ["621493"],
      "demand": ["population", "kids_share", "fairpoor"]},
-    {"id": "pharmacy", "label": "Pharmacy", "naics": ["456110"],
+    {"id": "pharmacy", "label": "Pharmacy", "naics": ["456110"], "easi": "rx",
      "demand": ["a65p", "diabetes", "bphigh"]},
     {"id": "dental", "label": "Dental", "naics": ["621210"],
      "demand": ["adults", "inc75_share", "nodental"]},
@@ -211,8 +219,9 @@ def combine(parts, weights):
 def self_test():
     s = pct(pd.Series([10, 20, 30, 40, np.nan]))
     assert list(s[:4]) == [25.0, 50.0, 75.0, 100.0] and np.isnan(s[4]), s
-    c = combine([pd.Series([100.0, np.nan]), pd.Series([0.0, 50.0])], [0.35, 0.25])
-    assert abs(c[0] - 35 / 0.6) < 1e-9 and c[1] == 50.0, c
+    c = combine([pd.Series([100.0, np.nan]), pd.Series([0.0, 50.0])], [0.40, 0.25])
+    assert abs(c[0] - 40 / 0.65) < 1e-9 and c[1] == 50.0, c
+    assert abs(sum(WEIGHTS.values()) - 1) < 1e-9, WEIGHTS
     return "percentile and weighted-average hand checks reproduce exactly"
 
 
@@ -334,37 +343,73 @@ def main():
         rows = {k: agg(g) for k, g in groups}
         return pd.DataFrame.from_dict(rows, orient="index")
 
-    def score(df, use_spend=True, mask=None):
-        """Adds component percentiles and the Prospect Score per subcategory. mask: rows eligible for ranking."""
+    def score(df, parts=tuple(WEIGHTS), mask=None):
+        """Adds component percentiles and the Market Potential Score per subcategory. mask: rows eligible for ranking.
+        demand: target-audience inputs; category: EASI spending for the category (per household and total);
+        spend: share of households earning $75K+; comp: fewer competing businesses per 10,000 residents scores higher."""
         if mask is None: mask = pd.Series(True, index=df.index)
         P = lambda s: pct(s.where(mask))
         dem_pct = {k: P(df[k]) for k in DEMAND_LABELS if k in df.columns}
+        spend = P(df["inc75_share"])
         for s in SUBCATS:
-            i = s["id"]
+            i, e = s["id"], s.get("easi", "med")
             est, prev = df[f"est@{i}"], df[f"prev@{i}"]
             df[f"per10k@{i}"] = (est / df.population * 1e4).where(df.population > 0)
             df[f"growth@{i}"] = ((est - prev) / prev).where(prev >= 3)
-            df[f"pool@{i}"] = P(est)
-            df[f"spend@{i}"] = P(df[f"pay@{i}"]) if use_spend else np.nan
-            df[f"comp@{i}"] = combine([P(df[f"per10k@{i}"]), P(df[f"growth@{i}"])], [0.5, 0.5])
             ins = [dem_pct[k] for k in s["demand"] if k in dem_pct and df[k].notna().any()]
             df[f"demand@{i}"] = combine(ins, [1] * len(ins)) if ins else np.nan
-            comps = ["pool", "comp", "demand"] + (["spend"] if use_spend else [])
-            parts = [df[f"{c}@{i}"] for c in comps]
-            full = pd.concat(parts, axis=1).notna().all(axis=1)
-            sc = combine(parts, [WEIGHTS[c] for c in comps]).where(full & mask)
-            df[f"score@{i}"] = sc.round(1)
-            for c in ("pool", "spend", "comp", "demand"): df[f"{c}@{i}"] = df[f"{c}@{i}"].round(1)
+            if "category" in parts and f"easi_{e}_hh" in df.columns:
+                df[f"category@{i}"] = combine([P(df[f"easi_{e}_hh"]), P(df[f"easi_{e}_total"])], [0.5, 0.5])
+            else:
+                df[f"category@{i}"] = np.nan
+            df[f"spend@{i}"] = spend
+            df[f"comp@{i}"] = P(-df[f"per10k@{i}"]) if "comp" in parts else np.nan
+            cols = [df[f"{c}@{i}"] for c in parts]
+            full = pd.concat(cols, axis=1).notna().all(axis=1)
+            df[f"score@{i}"] = combine(cols, [WEIGHTS[c] for c in parts]).where(full & mask).round(1)
+            for c in WEIGHTS: df[f"{c}@{i}"] = df[f"{c}@{i}"].round(1)
             under = (df[f"demand@{i}"] >= 70) & (P(df[f"per10k@{i}"]) <= 30)
             known = df[f"demand@{i}"].notna() & df[f"per10k@{i}"].notna() & mask
             df[f"under@{i}"] = np.where(under & known, "Yes", np.where(known, "No", None))
         return df
 
+    # EASI household healthcare spending. Market totals = EASI spending per household x this site's households, so they
+    # follow the same ZIP-based boundaries as every other number (EASI's own market definitions differ a little).
+    def add_easi_spend(df, per_hh, label):
+        for e, (col, _) in EASI_SPEND.items():
+            hh = df.index.map(per_hh[col]).astype(float)
+            df[f"easi_{e}_hh"] = hh
+            df[f"easi_{e}_total"] = hh * df.households
+            df[f"easi_{e}_idx"] = (hh / us_hh[col] * 100).round(0)
+        miss = [str(i) for i in df.index if per_hh[EASI_SPEND["med"][0]].get(i) != per_hh[EASI_SPEND["med"][0]].get(i)]
+        rep.append((f"EASI healthcare spending matched to {label}", "PASS" if not miss else "FAIL",
+                    f"{len(df) - len(miss)} of {len(df)}" + (f"; missing {miss[:8]}" if miss else "")))
+
+    src = os.path.join(HERE, "sources")
+    sd = pd.read_csv(os.path.join(src, "easi_healthcare_spend_dma.csv"))
+    xw = pd.read_csv(os.path.join(src, "easi_dma_crosswalk.csv"), dtype={"dma_code": str})
+    sd = sd.merge(xw[["easi_market", "dma_code"]], left_on="market", right_on="easi_market", how="left")
+    if sd.dma_code.isna().any(): sys.exit("easi_dma_crosswalk.csv is missing EASI DMAs: " + ", ".join(sd[sd.dma_code.isna()].market))
+    us_hh = {c: sd[f"{c}_total"].sum() / sd.households.sum() for c, _ in EASI_SPEND.values()}
+    sm = pd.read_csv(os.path.join(src, "easi_healthcare_spend_metro.csv"))
+    em = pd.read_csv(os.path.join(src, "easi_metro_2025.csv"), dtype={"cbsa_code": str})
+    key = lambda t: re.sub(r"[^a-z0-9]", "", str(t).lower())
+    sm["cbsa_code"] = sm.market.map(key).map(dict(zip(em.metro.map(key), em.cbsa_code)))
+    hh_dma = sd.set_index("dma_code")[[f"{c}_per_hh" for c, _ in EASI_SPEND.values()]]
+    hh_dma.columns = [c for c, _ in EASI_SPEND.values()]
+    hh_met = sm.dropna(subset=["cbsa_code"]).set_index("cbsa_code")[[f"{c}_per_hh" for c, _ in EASI_SPEND.values()]]
+    hh_met.columns = hh_dma.columns
+    # EASI counts Palm Springs inside Los Angeles; the provisional Palm Springs DMA uses the Riverside metro rate.
+    if PALM_SPRINGS not in hh_dma.index and RIVERSIDE_METRO in hh_met.index:
+        hh_dma.loc[PALM_SPRINGS] = hh_met.loc[RIVERSIDE_METRO]
+        rep.append(("EASI healthcare spending: Palm Springs", "INFO", "EASI includes Palm Springs in Los Angeles; the provisional Palm Springs DMA uses the Riverside–San Bernardino metro's per-household spending"))
+    rep.append(("EASI U.S. healthcare spending per household", "INFO", "; ".join(f"{lab} ${us_hh[c]:,.2f}" for c, lab in EASI_SPEND.values())))
+
     # DMA and metro
     zd = z[z.dma_code != "0"]
-    dma = score(frame(zd.groupby("dma_code")))
+    dma = frame(zd.groupby("dma_code")); add_easi_spend(dma, hh_dma, "DMAs"); dma = score(dma)
     zm = z[z.cbsa_code.isin(metros)]
-    met = score(frame(zm.groupby("cbsa_code")))
+    met = frame(zm.groupby("cbsa_code")); add_easi_spend(met, hh_met, "metros"); met = score(met)
     us = frame([("us", z)])
     for s in SUBCATS:
         i = s["id"]
@@ -372,6 +417,12 @@ def main():
         us[f"prev@{i}"] = co0[co0.naics.isin(s["naics"])].est.sum()
         us[f"per10k@{i}"] = us[f"est@{i}"] / us.population * 1e4
         us[f"growth@{i}"] = (us[f"est@{i}"] - us[f"prev@{i}"]) / us[f"prev@{i}"]
+    for e, (col, _) in EASI_SPEND.items():
+        us[f"easi_{e}_hh"] = us_hh[col]; us[f"easi_{e}_total"] = us_hh[col] * us.households; us[f"easi_{e}_idx"] = 100.0
+    # Sense check: market totals built from per-household x households should land near EASI's own U.S. totals
+    for e, (col, lab) in EASI_SPEND.items():
+        r = dma[f"easi_{e}_total"].sum() / sd[f"{col}_total"].sum()
+        rep.append((f"EASI {lab.lower()} total, DMAs vs. EASI's own total", "PASS" if 0.95 <= r <= 1.05 else "FAIL", f"{r:.1%} of EASI's ${sd[f'{col}_total'].sum() / 1e9:,.1f}B"))
 
     # EASI metro layer
     easi = pd.read_csv(os.path.join(HERE, "sources", "easi_metro_2025.csv"), dtype={"cbsa_code": str}).set_index("cbsa_code")
@@ -412,8 +463,9 @@ def main():
     if failed: sys.exit("A check failed; the Healthcare data was not updated. See healthcare/data/healthcare_report.md.")
 
     # ---------------- Write ----------------
-    keep_common = ["population", "households", "adults", "a65p", "a75p"] + RATES
-    per_sub = ["score", "pool", "spend", "comp", "demand", "est", "per10k", "growth", "pay", "under"]
+    easi_spend_cols = [f"easi_{e}_{x}" for e in EASI_SPEND for x in ("hh", "total", "idx")]
+    keep_common = ["population", "households", "adults", "a65p", "a75p"] + RATES + easi_spend_cols
+    per_sub = ["score", "demand", "category", "spend", "comp", "est", "per10k", "growth", "under"]
     easi_cols = [f"easi_{c}{x}" for c in conds for x in ("", "_rate", "_idx", "_30", "_g", "_gidx")]
 
     def clean(v):
@@ -425,7 +477,7 @@ def main():
             return round(v, 3) if abs(v) < 1 else round(v, 2) if abs(v) < 100 else round(v)
         if isinstance(v, (np.integer,)): return int(v)
         return v
-    SCORE_KEYS = ("score", "pool", "spend", "comp", "demand")
+    SCORE_KEYS = ("score", "demand", "category", "spend", "comp")
 
     def rows(df, names, flags_fn=None, extra=()):
         out = []
@@ -439,7 +491,7 @@ def main():
                     if k in df.columns:
                         x = clean(r[k])
                         v[k] = int(round(x)) if p in SCORE_KEYS and x is not None else x
-            for k in ("population", "households", "adults", "a65p", "a75p") + tuple(e for e in extra if not e.endswith(("_rate", "_g"))):
+            for k in ("population", "households", "adults", "a65p", "a75p") + tuple(c for c in easi_spend_cols if c.endswith("_total")) + tuple(e for e in extra if not e.endswith(("_rate", "_g"))):
                 if v.get(k) is not None: v[k] = int(round(v[k]))
             for s in SUBCATS:
                 if v.get(f"est@{s['id']}") is not None: v[f"est@{s['id']}"] = int(round(v[f"est@{s['id']}"]))
@@ -482,15 +534,14 @@ def main():
             for k in have: f[k] = df[k]
             for s in SUBCATS:
                 f[f"est@{s['id']}"] = df[f"est_{s['id']}"]; f[f"prev@{s['id']}"] = df[f"est_prev_{s['id']}"]
-                f[f"pay@{s['id']}"] = np.nan
             ok = f.population >= MIN_POP
-            f = score(f, use_spend=False, mask=ok)
+            f = score(f, parts=ZIP_PARTS, mask=ok)
             city = df.city.fillna("")
             out = rows(f, lambda i: f"{i} {city.get(i, '')}".strip())
             for row in out:
                 if f.loc[row["id"], "population"] < MIN_POP:
                     row["u"] = 1; row["f"].append(f"Fewer than {MIN_POP} residents, so this ZIP isn't ranked.")
-                for s in SUBCATS: row["v"].pop(f"pay@{s['id']}", None); row["v"].pop(f"spend@{s['id']}", None)
+                for s in SUBCATS: row["v"].pop(f"category@{s['id']}", None); row["v"].pop(f"comp@{s['id']}", None)
             # no build date in ZIP files, so a rebuild with unchanged data doesn't rewrite all of them
             json.dump({"level": "zip", "parent": {"level": level, "id": code}, "rows": out},
                       open(os.path.join(folder, f"{code}.json"), "w"), separators=(",", ":"))
