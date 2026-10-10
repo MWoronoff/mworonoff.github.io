@@ -207,7 +207,17 @@ AdtaxiAnalyzer.start({
     "metro"
    ],
    "hideWhenUnavailable": true,
-   "help": "EASI 2025 estimated annual household spending on medical services."
+   "help": "EASI 2025 estimated annual household spending on medical services.",
+   "subs": [
+    "urgent",
+    "dental",
+    "hearing",
+    "eye",
+    "chiro",
+    "behavioral",
+    "medspa",
+    "senior"
+   ]
   },
   {
    "key": "easi_med_idx",
@@ -220,7 +230,17 @@ AdtaxiAnalyzer.start({
     "metro"
    ],
    "hideWhenUnavailable": true,
-   "help": "Spending per household divided by the U.S. average, times 100. Above 100 means households here spend more than average."
+   "help": "Spending per household divided by the U.S. average, times 100. Above 100 means households here spend more than average.",
+   "subs": [
+    "urgent",
+    "dental",
+    "hearing",
+    "eye",
+    "chiro",
+    "behavioral",
+    "medspa",
+    "senior"
+   ]
   },
   {
    "key": "easi_med_total",
@@ -233,7 +253,17 @@ AdtaxiAnalyzer.start({
     "metro"
    ],
    "hideWhenUnavailable": true,
-   "help": "EASI spending per household times the households in this market."
+   "help": "EASI spending per household times the households in this market.",
+   "subs": [
+    "urgent",
+    "dental",
+    "hearing",
+    "eye",
+    "chiro",
+    "behavioral",
+    "medspa",
+    "senior"
+   ]
   },
   {
    "key": "easi_rx_hh",
@@ -246,7 +276,10 @@ AdtaxiAnalyzer.start({
     "metro"
    ],
    "hideWhenUnavailable": true,
-   "help": "EASI 2025 estimated annual household spending on prescription drugs."
+   "help": "EASI 2025 estimated annual household spending on prescription drugs.",
+   "subs": [
+    "pharmacy"
+   ]
   },
   {
    "key": "easi_rx_idx",
@@ -259,7 +292,10 @@ AdtaxiAnalyzer.start({
     "metro"
    ],
    "hideWhenUnavailable": true,
-   "help": "Spending per household divided by the U.S. average, times 100."
+   "help": "Spending per household divided by the U.S. average, times 100.",
+   "subs": [
+    "pharmacy"
+   ]
   },
   {
    "key": "easi_rx_total",
@@ -272,7 +308,10 @@ AdtaxiAnalyzer.start({
     "metro"
    ],
    "hideWhenUnavailable": true,
-   "help": "EASI spending per household times the households in this market."
+   "help": "EASI spending per household times the households in this market.",
+   "subs": [
+    "pharmacy"
+   ]
   },
   {
    "key": "population",
@@ -292,17 +331,28 @@ AdtaxiAnalyzer.start({
   {
    "key": "a65p",
    "label": "Age 65+",
-   "format": "int"
+   "format": "int",
+   "subs": [
+    "pharmacy",
+    "hearing",
+    "senior"
+   ]
   },
   {
    "key": "a75p",
    "label": "Age 75+",
-   "format": "int"
+   "format": "int",
+   "subs": [
+    "senior"
+   ]
   },
   {
    "key": "kids_share",
    "label": "Households with children",
-   "format": "pct"
+   "format": "pct",
+   "subs": [
+    "urgent"
+   ]
   },
   {
    "key": "inc75_share",
@@ -312,73 +362,110 @@ AdtaxiAnalyzer.start({
   {
    "key": "inc150_share",
    "label": "Households earning $150K+",
-   "format": "pct"
+   "format": "pct",
+   "subs": [
+    "medspa"
+   ]
   },
   {
    "key": "fairpoor",
    "label": "Fair or poor health (adults)",
    "format": "pct",
-   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published."
+   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published.",
+   "subs": [
+    "urgent"
+   ]
   },
   {
    "key": "diabetes",
    "label": "Diabetes (adults)",
    "format": "pct",
-   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published."
+   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published.",
+   "subs": [
+    "pharmacy",
+    "eye"
+   ]
   },
   {
    "key": "bphigh",
    "label": "High blood pressure (adults)",
    "format": "pct",
-   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published."
+   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published.",
+   "subs": [
+    "pharmacy"
+   ]
   },
   {
    "key": "nodental",
    "label": "No dental visit in past year (adults)",
    "format": "pct",
-   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published."
+   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published.",
+   "subs": [
+    "dental"
+   ]
   },
   {
    "key": "hearing",
    "label": "Hearing disability (adults)",
    "format": "pct",
-   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published."
+   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published.",
+   "subs": [
+    "hearing"
+   ]
   },
   {
    "key": "vision",
    "label": "Vision disability (adults)",
    "format": "pct",
-   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published."
+   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published.",
+   "subs": [
+    "eye"
+   ]
   },
   {
    "key": "arthritis",
    "label": "Arthritis (adults)",
    "format": "pct",
-   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published."
+   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published.",
+   "subs": [
+    "chiro"
+   ]
   },
   {
    "key": "obesity",
    "label": "Obesity (adults)",
    "format": "pct",
-   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published."
+   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published.",
+   "subs": [
+    "chiro"
+   ]
   },
   {
    "key": "depression",
    "label": "Depression (adults)",
    "format": "pct",
-   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published."
+   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published.",
+   "subs": [
+    "behavioral"
+   ]
   },
   {
    "key": "mhlth",
    "label": "Frequent mental distress (adults)",
    "format": "pct",
-   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published."
+   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published.",
+   "subs": [
+    "behavioral"
+   ]
   },
   {
    "key": "indeplive",
    "label": "Independent-living disability (adults)",
    "format": "pct",
-   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published."
+   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published.",
+   "subs": [
+    "senior"
+   ]
   },
   {
    "key": "easi_heart",
@@ -387,7 +474,11 @@ AdtaxiAnalyzer.start({
    "levels": [
     "metro"
    ],
-   "hideWhenUnavailable": true
+   "hideWhenUnavailable": true,
+   "subs": [
+    "pharmacy",
+    "senior"
+   ]
   },
   {
    "key": "easi_heart_rate",
@@ -396,7 +487,11 @@ AdtaxiAnalyzer.start({
    "levels": [
     "metro"
    ],
-   "hideWhenUnavailable": true
+   "hideWhenUnavailable": true,
+   "subs": [
+    "pharmacy",
+    "senior"
+   ]
   },
   {
    "key": "easi_heart_idx",
@@ -407,7 +502,11 @@ AdtaxiAnalyzer.start({
     "metro"
    ],
    "hideWhenUnavailable": true,
-   "help": "Share of adults with the condition divided by the share across all U.S. metros, times 100."
+   "help": "Share of adults with the condition divided by the share across all U.S. metros, times 100.",
+   "subs": [
+    "pharmacy",
+    "senior"
+   ]
   },
   {
    "key": "easi_heart_30",
@@ -416,7 +515,11 @@ AdtaxiAnalyzer.start({
    "levels": [
     "metro"
    ],
-   "hideWhenUnavailable": true
+   "hideWhenUnavailable": true,
+   "subs": [
+    "pharmacy",
+    "senior"
+   ]
   },
   {
    "key": "easi_heart_g",
@@ -425,7 +528,11 @@ AdtaxiAnalyzer.start({
    "levels": [
     "metro"
    ],
-   "hideWhenUnavailable": true
+   "hideWhenUnavailable": true,
+   "subs": [
+    "pharmacy",
+    "senior"
+   ]
   },
   {
    "key": "easi_heart_gidx",
@@ -435,7 +542,11 @@ AdtaxiAnalyzer.start({
     "metro"
    ],
    "hideWhenUnavailable": true,
-   "help": "Above 100 means this metro's count grows faster than across all U.S. metros."
+   "help": "Above 100 means this metro's count grows faster than across all U.S. metros.",
+   "subs": [
+    "pharmacy",
+    "senior"
+   ]
   },
   {
    "key": "easi_cancer",
@@ -444,7 +555,11 @@ AdtaxiAnalyzer.start({
    "levels": [
     "metro"
    ],
-   "hideWhenUnavailable": true
+   "hideWhenUnavailable": true,
+   "subs": [
+    "pharmacy",
+    "senior"
+   ]
   },
   {
    "key": "easi_cancer_rate",
@@ -453,7 +568,11 @@ AdtaxiAnalyzer.start({
    "levels": [
     "metro"
    ],
-   "hideWhenUnavailable": true
+   "hideWhenUnavailable": true,
+   "subs": [
+    "pharmacy",
+    "senior"
+   ]
   },
   {
    "key": "easi_cancer_idx",
@@ -464,7 +583,11 @@ AdtaxiAnalyzer.start({
     "metro"
    ],
    "hideWhenUnavailable": true,
-   "help": "Share of adults with the condition divided by the share across all U.S. metros, times 100."
+   "help": "Share of adults with the condition divided by the share across all U.S. metros, times 100.",
+   "subs": [
+    "pharmacy",
+    "senior"
+   ]
   },
   {
    "key": "easi_cancer_30",
@@ -473,7 +596,11 @@ AdtaxiAnalyzer.start({
    "levels": [
     "metro"
    ],
-   "hideWhenUnavailable": true
+   "hideWhenUnavailable": true,
+   "subs": [
+    "pharmacy",
+    "senior"
+   ]
   },
   {
    "key": "easi_cancer_g",
@@ -482,7 +609,11 @@ AdtaxiAnalyzer.start({
    "levels": [
     "metro"
    ],
-   "hideWhenUnavailable": true
+   "hideWhenUnavailable": true,
+   "subs": [
+    "pharmacy",
+    "senior"
+   ]
   },
   {
    "key": "easi_cancer_gidx",
@@ -492,7 +623,11 @@ AdtaxiAnalyzer.start({
     "metro"
    ],
    "hideWhenUnavailable": true,
-   "help": "Above 100 means this metro's count grows faster than across all U.S. metros."
+   "help": "Above 100 means this metro's count grows faster than across all U.S. metros.",
+   "subs": [
+    "pharmacy",
+    "senior"
+   ]
   },
   {
    "key": "easi_hearing",
@@ -501,7 +636,10 @@ AdtaxiAnalyzer.start({
    "levels": [
     "metro"
    ],
-   "hideWhenUnavailable": true
+   "hideWhenUnavailable": true,
+   "subs": [
+    "hearing"
+   ]
   },
   {
    "key": "easi_hearing_rate",
@@ -510,7 +648,10 @@ AdtaxiAnalyzer.start({
    "levels": [
     "metro"
    ],
-   "hideWhenUnavailable": true
+   "hideWhenUnavailable": true,
+   "subs": [
+    "hearing"
+   ]
   },
   {
    "key": "easi_hearing_idx",
@@ -521,7 +662,10 @@ AdtaxiAnalyzer.start({
     "metro"
    ],
    "hideWhenUnavailable": true,
-   "help": "Share of adults with the condition divided by the share across all U.S. metros, times 100."
+   "help": "Share of adults with the condition divided by the share across all U.S. metros, times 100.",
+   "subs": [
+    "hearing"
+   ]
   },
   {
    "key": "easi_hearing_30",
@@ -530,7 +674,10 @@ AdtaxiAnalyzer.start({
    "levels": [
     "metro"
    ],
-   "hideWhenUnavailable": true
+   "hideWhenUnavailable": true,
+   "subs": [
+    "hearing"
+   ]
   },
   {
    "key": "easi_hearing_g",
@@ -539,7 +686,10 @@ AdtaxiAnalyzer.start({
    "levels": [
     "metro"
    ],
-   "hideWhenUnavailable": true
+   "hideWhenUnavailable": true,
+   "subs": [
+    "hearing"
+   ]
   },
   {
    "key": "easi_hearing_gidx",
@@ -549,7 +699,10 @@ AdtaxiAnalyzer.start({
     "metro"
    ],
    "hideWhenUnavailable": true,
-   "help": "Above 100 means this metro's count grows faster than across all U.S. metros."
+   "help": "Above 100 means this metro's count grows faster than across all U.S. metros.",
+   "subs": [
+    "hearing"
+   ]
   },
   {
    "key": "easi_vision",
@@ -558,7 +711,10 @@ AdtaxiAnalyzer.start({
    "levels": [
     "metro"
    ],
-   "hideWhenUnavailable": true
+   "hideWhenUnavailable": true,
+   "subs": [
+    "eye"
+   ]
   },
   {
    "key": "easi_vision_rate",
@@ -567,7 +723,10 @@ AdtaxiAnalyzer.start({
    "levels": [
     "metro"
    ],
-   "hideWhenUnavailable": true
+   "hideWhenUnavailable": true,
+   "subs": [
+    "eye"
+   ]
   },
   {
    "key": "easi_vision_idx",
@@ -578,7 +737,10 @@ AdtaxiAnalyzer.start({
     "metro"
    ],
    "hideWhenUnavailable": true,
-   "help": "Share of adults with the condition divided by the share across all U.S. metros, times 100."
+   "help": "Share of adults with the condition divided by the share across all U.S. metros, times 100.",
+   "subs": [
+    "eye"
+   ]
   },
   {
    "key": "easi_vision_30",
@@ -587,7 +749,10 @@ AdtaxiAnalyzer.start({
    "levels": [
     "metro"
    ],
-   "hideWhenUnavailable": true
+   "hideWhenUnavailable": true,
+   "subs": [
+    "eye"
+   ]
   },
   {
    "key": "easi_vision_g",
@@ -596,7 +761,10 @@ AdtaxiAnalyzer.start({
    "levels": [
     "metro"
    ],
-   "hideWhenUnavailable": true
+   "hideWhenUnavailable": true,
+   "subs": [
+    "eye"
+   ]
   },
   {
    "key": "easi_vision_gidx",
@@ -606,7 +774,10 @@ AdtaxiAnalyzer.start({
     "metro"
    ],
    "hideWhenUnavailable": true,
-   "help": "Above 100 means this metro's count grows faster than across all U.S. metros."
+   "help": "Above 100 means this metro's count grows faster than across all U.S. metros.",
+   "subs": [
+    "eye"
+   ]
   }
  ],
  "rankBy": [
@@ -618,6 +789,20 @@ AdtaxiAnalyzer.start({
   "growth",
   "population",
   "a65p",
+  "a75p",
+  "kids_share",
+  "inc150_share",
+  "fairpoor",
+  "diabetes",
+  "bphigh",
+  "nodental",
+  "hearing",
+  "vision",
+  "arthritis",
+  "obesity",
+  "depression",
+  "mhlth",
+  "indeplive",
   "easi_heart_idx",
   "easi_cancer_idx",
   "easi_hearing_idx",
@@ -687,12 +872,14 @@ AdtaxiAnalyzer.start({
  "tableColumns": [
   "score",
   "easi_med_idx",
+  "easi_rx_idx",
   "est",
   "per10k",
   "growth",
   "under",
   "population",
-  "a65p"
+  "a65p",
+  "a75p"
  ],
  "methodology": [
   {
@@ -739,6 +926,10 @@ AdtaxiAnalyzer.start({
   {
    "title": "ZIPs in a market",
    "body": "Pick a DMA or metro, then choose ZIPs in market. ZIP scores use Consumer Demand and Spending Power, reweighted to 73% and 27%. ZIPs with fewer than 500 residents are shown but not ranked."
+  },
+  {
+   "title": "Measures shown for each category",
+   "body": "Rankings, table columns and market details show only the measures that relate to the selected category. For example, Dental offers no dental visit in the past year, while Hearing and audiology offers hearing disability and EASI hearing trouble. Population, households, income, competitors and the score appear for every category."
   }
  ],
  "sources": [
