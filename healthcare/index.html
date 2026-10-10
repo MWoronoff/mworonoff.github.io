@@ -20,107 +20,751 @@
 <script>
 AdtaxiAnalyzer.start({
  "title": "Healthcare Market Analyzer",
- "subtitle": "Where healthcare businesses are most likely to buy digital advertising: Prospect Scores for DMAs, metros and ZIPs across nine categories.",
+ "subtitle": "Where healthcare advertisers' customers are: Market Potential Scores for DMAs, metros and ZIPs across nine categories, to focus ad dollars on the highest-potential geographies.",
  "logo": "../shared/adtaxi-logo.svg",
  "exportName": "healthcare",
- "notice": "Preview for review. Named practices, clinics and pharmacies (the Prospect List) come in the next build.",
+ "notice": "Preview for review.",
  "links": [
-  {"label": "All analyzers", "url": "../analyzers/"}
+  {
+   "label": "All analyzers",
+   "url": "../analyzers/"
+  }
  ],
  "defaultLevel": "dma",
  "usMapLevel": "dma",
- "levels": {"us": {"label": "U.S.", "data": "data/us.json"}, "dma": {"label": "DMA", "data": "data/dma.json", "geo": "../shared/geo/dma.topo.json", "idField": "dma_code"}, "metro": {"label": "Metro", "data": "data/metro.json", "geo": "../shared/geo/metro.topo.json", "idField": "cbsa_code"}, "zip": {"label": "ZIPs in market", "data": "data/zip/{level}/{id}.json", "geo": "../shared/geo/zip/{level}/{id}.json", "idField": "zip"}},
+ "levels": {
+  "us": {
+   "label": "U.S.",
+   "data": "data/us.json"
+  },
+  "dma": {
+   "label": "DMA",
+   "data": "data/dma.json",
+   "geo": "../shared/geo/dma.topo.json",
+   "idField": "dma_code"
+  },
+  "metro": {
+   "label": "Metro",
+   "data": "data/metro.json",
+   "geo": "../shared/geo/metro.topo.json",
+   "idField": "cbsa_code"
+  },
+  "zip": {
+   "label": "ZIPs in market",
+   "data": "data/zip/{level}/{id}.json",
+   "geo": "../shared/geo/zip/{level}/{id}.json",
+   "idField": "zip"
+  }
+ },
  "statesGeo": "../shared/geo/states.topo.json",
  "subcategoryLabel": "Category",
  "subcategories": [
-  {"id": "urgent", "label": "Urgent and emergency care"},
-  {"id": "pharmacy", "label": "Pharmacy"},
-  {"id": "dental", "label": "Dental"},
-  {"id": "hearing", "label": "Hearing and audiology"},
-  {"id": "eye", "label": "Eye care"},
-  {"id": "chiro", "label": "Chiropractic and physical therapy"},
-  {"id": "behavioral", "label": "Behavioral health"},
-  {"id": "medspa", "label": "Med spa and aesthetics"},
-  {"id": "senior", "label": "Senior and home care"}
+  {
+   "id": "urgent",
+   "label": "Urgent and emergency care"
+  },
+  {
+   "id": "pharmacy",
+   "label": "Pharmacy"
+  },
+  {
+   "id": "dental",
+   "label": "Dental"
+  },
+  {
+   "id": "hearing",
+   "label": "Hearing and audiology"
+  },
+  {
+   "id": "eye",
+   "label": "Eye care"
+  },
+  {
+   "id": "chiro",
+   "label": "Chiropractic and physical therapy"
+  },
+  {
+   "id": "behavioral",
+   "label": "Behavioral health"
+  },
+  {
+   "id": "medspa",
+   "label": "Med spa and aesthetics"
+  },
+  {
+   "id": "senior",
+   "label": "Senior and home care"
+  }
  ],
  "measures": [
-  {"key": "score", "label": "Prospect Score", "short": "Score", "format": "score", "perSub": true, "levels": ["dma", "metro", "zip"], "help": "0 to 100. Weighted blend of Prospect Pool (35%), Spending Power (25%), Competitive Pressure (20%) and Consumer Demand (20%), each a percentile against the other markets at the same level. ZIPs rank against the other ZIPs in the same market and leave out Spending Power, which isn't published by ZIP."},
-  {"key": "pool", "label": "Prospect Pool", "short": "Pool", "format": "score", "perSub": true, "levels": ["dma", "metro", "zip"], "help": "Percentile of the number of category businesses."},
-  {"key": "spend", "label": "Spending Power", "short": "Spend", "format": "score", "perSub": true, "levels": ["dma", "metro"], "help": "Percentile of annual payroll per business, a stand-in for budget. Not published by ZIP."},
-  {"key": "comp", "label": "Competitive Pressure", "short": "Compete", "format": "score", "perSub": true, "levels": ["dma", "metro", "zip"], "help": "Average of the percentiles for businesses per 10,000 residents and one-year growth in business count."},
-  {"key": "demand", "label": "Consumer Demand", "short": "Demand", "format": "score", "perSub": true, "levels": ["dma", "metro", "zip"], "help": "Average of the percentiles for this category's demand inputs (see How scores work)."},
-  {"key": "est", "label": "Category businesses", "short": "Businesses", "format": "int", "perSub": true, "help": "Establishments in this category's industries. DMAs, metros and the U.S. use complete County Business Patterns counts. In the ZIP view, Census doesn't publish a ZIP's count when it has fewer than 3 businesses in an industry, so those show as 0."},
-  {"key": "per10k", "label": "Businesses per 10,000 residents", "short": "Per 10K", "format": "dec2", "perSub": true},
-  {"key": "growth", "label": "One-year growth in businesses", "short": "Growth", "format": "pct", "perSub": true, "help": "Change in business count from the prior Business Patterns year. Blank where there were fewer than 3 businesses."},
-  {"key": "pay", "label": "Annual payroll per business", "short": "Payroll/biz", "format": "money", "perSub": true, "levels": ["us", "dma", "metro"], "help": "County payroll for this category divided by its businesses, summed to the market. Not published by ZIP."},
-  {"key": "under", "label": "Underserved", "short": "Underserved", "format": "text", "perSub": true, "levels": ["dma", "metro", "zip"], "help": "Strong consumer demand (70th percentile or higher) but few businesses per resident (30th percentile or lower): a pitch for clients weighing a new location. Shown, not scored."},
-  {"key": "population", "label": "Population", "format": "int"},
-  {"key": "households", "label": "Households", "format": "int"},
-  {"key": "adults", "label": "Adults 18+", "format": "int"},
-  {"key": "a65p", "label": "Age 65+", "format": "int"},
-  {"key": "a75p", "label": "Age 75+", "format": "int"},
-  {"key": "kids_share", "label": "Households with children", "format": "pct"},
-  {"key": "inc75_share", "label": "Households earning $75K+", "format": "pct"},
-  {"key": "inc150_share", "label": "Households earning $150K+", "format": "pct"},
-  {"key": "fairpoor", "label": "Fair or poor health (adults)", "format": "pct", "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published."},
-  {"key": "diabetes", "label": "Diabetes (adults)", "format": "pct", "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published."},
-  {"key": "bphigh", "label": "High blood pressure (adults)", "format": "pct", "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published."},
-  {"key": "nodental", "label": "No dental visit in past year (adults)", "format": "pct", "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published."},
-  {"key": "hearing", "label": "Hearing disability (adults)", "format": "pct", "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published."},
-  {"key": "vision", "label": "Vision disability (adults)", "format": "pct", "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published."},
-  {"key": "arthritis", "label": "Arthritis (adults)", "format": "pct", "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published."},
-  {"key": "obesity", "label": "Obesity (adults)", "format": "pct", "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published."},
-  {"key": "depression", "label": "Depression (adults)", "format": "pct", "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published."},
-  {"key": "mhlth", "label": "Frequent mental distress (adults)", "format": "pct", "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published."},
-  {"key": "indeplive", "label": "Independent-living disability (adults)", "format": "pct", "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published."},
-  {"key": "easi_heart", "label": "Heart disease: 2025 count (EASI)", "format": "int", "levels": ["metro"], "hideWhenUnavailable": true},
-  {"key": "easi_heart_rate", "label": "Heart disease: share of adults (EASI)", "format": "pct", "levels": ["metro"], "hideWhenUnavailable": true},
-  {"key": "easi_heart_idx", "label": "Heart disease: index vs. all U.S. metros", "short": "Heart disease idx", "format": "index", "levels": ["metro"], "hideWhenUnavailable": true, "help": "Share of adults with the condition divided by the share across all U.S. metros, times 100."},
-  {"key": "easi_heart_30", "label": "Heart disease: 2030 projection (EASI)", "format": "int", "levels": ["metro"], "hideWhenUnavailable": true},
-  {"key": "easi_heart_g", "label": "Heart disease: growth 2025–2030", "format": "pct", "levels": ["metro"], "hideWhenUnavailable": true},
-  {"key": "easi_heart_gidx", "label": "Heart disease: growth index vs. all U.S. metros", "format": "index", "levels": ["metro"], "hideWhenUnavailable": true, "help": "Above 100 means this metro's count grows faster than across all U.S. metros."},
-  {"key": "easi_cancer", "label": "Any cancer: 2025 count (EASI)", "format": "int", "levels": ["metro"], "hideWhenUnavailable": true},
-  {"key": "easi_cancer_rate", "label": "Any cancer: share of adults (EASI)", "format": "pct", "levels": ["metro"], "hideWhenUnavailable": true},
-  {"key": "easi_cancer_idx", "label": "Any cancer: index vs. all U.S. metros", "short": "Any cancer idx", "format": "index", "levels": ["metro"], "hideWhenUnavailable": true, "help": "Share of adults with the condition divided by the share across all U.S. metros, times 100."},
-  {"key": "easi_cancer_30", "label": "Any cancer: 2030 projection (EASI)", "format": "int", "levels": ["metro"], "hideWhenUnavailable": true},
-  {"key": "easi_cancer_g", "label": "Any cancer: growth 2025–2030", "format": "pct", "levels": ["metro"], "hideWhenUnavailable": true},
-  {"key": "easi_cancer_gidx", "label": "Any cancer: growth index vs. all U.S. metros", "format": "index", "levels": ["metro"], "hideWhenUnavailable": true, "help": "Above 100 means this metro's count grows faster than across all U.S. metros."},
-  {"key": "easi_hearing", "label": "Hearing trouble: 2025 count (EASI)", "format": "int", "levels": ["metro"], "hideWhenUnavailable": true},
-  {"key": "easi_hearing_rate", "label": "Hearing trouble: share of adults (EASI)", "format": "pct", "levels": ["metro"], "hideWhenUnavailable": true},
-  {"key": "easi_hearing_idx", "label": "Hearing trouble: index vs. all U.S. metros", "short": "Hearing trouble idx", "format": "index", "levels": ["metro"], "hideWhenUnavailable": true, "help": "Share of adults with the condition divided by the share across all U.S. metros, times 100."},
-  {"key": "easi_hearing_30", "label": "Hearing trouble: 2030 projection (EASI)", "format": "int", "levels": ["metro"], "hideWhenUnavailable": true},
-  {"key": "easi_hearing_g", "label": "Hearing trouble: growth 2025–2030", "format": "pct", "levels": ["metro"], "hideWhenUnavailable": true},
-  {"key": "easi_hearing_gidx", "label": "Hearing trouble: growth index vs. all U.S. metros", "format": "index", "levels": ["metro"], "hideWhenUnavailable": true, "help": "Above 100 means this metro's count grows faster than across all U.S. metros."},
-  {"key": "easi_vision", "label": "Vision trouble: 2025 count (EASI)", "format": "int", "levels": ["metro"], "hideWhenUnavailable": true},
-  {"key": "easi_vision_rate", "label": "Vision trouble: share of adults (EASI)", "format": "pct", "levels": ["metro"], "hideWhenUnavailable": true},
-  {"key": "easi_vision_idx", "label": "Vision trouble: index vs. all U.S. metros", "short": "Vision trouble idx", "format": "index", "levels": ["metro"], "hideWhenUnavailable": true, "help": "Share of adults with the condition divided by the share across all U.S. metros, times 100."},
-  {"key": "easi_vision_30", "label": "Vision trouble: 2030 projection (EASI)", "format": "int", "levels": ["metro"], "hideWhenUnavailable": true},
-  {"key": "easi_vision_g", "label": "Vision trouble: growth 2025–2030", "format": "pct", "levels": ["metro"], "hideWhenUnavailable": true},
-  {"key": "easi_vision_gidx", "label": "Vision trouble: growth index vs. all U.S. metros", "format": "index", "levels": ["metro"], "hideWhenUnavailable": true, "help": "Above 100 means this metro's count grows faster than across all U.S. metros."}
+  {
+   "key": "score",
+   "label": "Market Potential Score",
+   "short": "Score",
+   "format": "score",
+   "perSub": true,
+   "levels": [
+    "dma",
+    "metro",
+    "zip"
+   ],
+   "help": "0 to 100. Weighted blend of Consumer Demand (40%), Category Spending (25%), Spending Power (15%) and Competition (20%), each a percentile against the other markets at the same level. ZIPs rank against the other ZIPs in the same market using Consumer Demand and Spending Power only (no EASI spending by ZIP, and Census hides small ZIP business counts)."
+  },
+  {
+   "key": "demand",
+   "label": "Consumer Demand",
+   "short": "Demand",
+   "format": "score",
+   "perSub": true,
+   "levels": [
+    "dma",
+    "metro",
+    "zip"
+   ],
+   "help": "Average of the percentiles for this category's target-audience inputs: ages, households and CDC health measures (see How scores work)."
+  },
+  {
+   "key": "category",
+   "label": "Category Spending",
+   "short": "Category $",
+   "format": "score",
+   "perSub": true,
+   "levels": [
+    "dma",
+    "metro"
+   ],
+   "help": "Average of the percentiles for EASI household spending per household and in total: prescription drugs for Pharmacy, medical services for every other category."
+  },
+  {
+   "key": "spend",
+   "label": "Spending Power",
+   "short": "Spend",
+   "format": "score",
+   "perSub": true,
+   "levels": [
+    "dma",
+    "metro",
+    "zip"
+   ],
+   "help": "Percentile of the share of households earning $75K or more."
+  },
+  {
+   "key": "comp",
+   "label": "Competition",
+   "short": "Compete",
+   "format": "score",
+   "perSub": true,
+   "levels": [
+    "dma",
+    "metro"
+   ],
+   "help": "Percentile of businesses per 10,000 residents, reversed: fewer competing businesses scores higher, since each ad dollar faces less competition."
+  },
+  {
+   "key": "est",
+   "label": "Category businesses (competitors)",
+   "short": "Businesses",
+   "format": "int",
+   "perSub": true,
+   "help": "Competing establishments in this category's industries. DMAs, metros and the U.S. use complete County Business Patterns counts. In the ZIP view, Census doesn't publish a ZIP's count when it has fewer than 3 businesses in an industry, so those show as 0."
+  },
+  {
+   "key": "per10k",
+   "label": "Businesses per 10,000 residents",
+   "short": "Per 10K",
+   "format": "dec2",
+   "perSub": true
+  },
+  {
+   "key": "growth",
+   "label": "One-year growth in businesses",
+   "short": "Growth",
+   "format": "pct",
+   "perSub": true,
+   "help": "Change in business count from the prior Business Patterns year. Blank where there were fewer than 3 businesses."
+  },
+  {
+   "key": "under",
+   "label": "Underserved",
+   "short": "Underserved",
+   "format": "text",
+   "perSub": true,
+   "levels": [
+    "dma",
+    "metro",
+    "zip"
+   ],
+   "help": "Strong consumer demand (70th percentile or higher) but few businesses per resident (30th percentile or lower): a pitch for clients weighing a new location. Shown, not scored."
+  },
+  {
+   "key": "easi_med_hh",
+   "label": "Medical services spending per household (EASI)",
+   "short": "Medical $/HH",
+   "format": "money",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "EASI 2025 estimated annual household spending on medical services."
+  },
+  {
+   "key": "easi_med_idx",
+   "label": "Medical services spending: index vs. U.S.",
+   "short": "Medical $ idx",
+   "format": "index",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "Spending per household divided by the U.S. average, times 100. Above 100 means households here spend more than average."
+  },
+  {
+   "key": "easi_med_total",
+   "label": "Medical services spending, est. annual total",
+   "short": "Medical $ total",
+   "format": "moneyM",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "EASI spending per household times the households in this market."
+  },
+  {
+   "key": "easi_rx_hh",
+   "label": "Prescription drug spending per household (EASI)",
+   "short": "Rx $/HH",
+   "format": "money",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "EASI 2025 estimated annual household spending on prescription drugs."
+  },
+  {
+   "key": "easi_rx_idx",
+   "label": "Prescription drug spending: index vs. U.S.",
+   "short": "Rx $ idx",
+   "format": "index",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "Spending per household divided by the U.S. average, times 100."
+  },
+  {
+   "key": "easi_rx_total",
+   "label": "Prescription drug spending, est. annual total",
+   "short": "Rx $ total",
+   "format": "moneyM",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "EASI spending per household times the households in this market."
+  },
+  {
+   "key": "population",
+   "label": "Population",
+   "format": "int"
+  },
+  {
+   "key": "households",
+   "label": "Households",
+   "format": "int"
+  },
+  {
+   "key": "adults",
+   "label": "Adults 18+",
+   "format": "int"
+  },
+  {
+   "key": "a65p",
+   "label": "Age 65+",
+   "format": "int"
+  },
+  {
+   "key": "a75p",
+   "label": "Age 75+",
+   "format": "int"
+  },
+  {
+   "key": "kids_share",
+   "label": "Households with children",
+   "format": "pct"
+  },
+  {
+   "key": "inc75_share",
+   "label": "Households earning $75K+",
+   "format": "pct"
+  },
+  {
+   "key": "inc150_share",
+   "label": "Households earning $150K+",
+   "format": "pct"
+  },
+  {
+   "key": "fairpoor",
+   "label": "Fair or poor health (adults)",
+   "format": "pct",
+   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published."
+  },
+  {
+   "key": "diabetes",
+   "label": "Diabetes (adults)",
+   "format": "pct",
+   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published."
+  },
+  {
+   "key": "bphigh",
+   "label": "High blood pressure (adults)",
+   "format": "pct",
+   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published."
+  },
+  {
+   "key": "nodental",
+   "label": "No dental visit in past year (adults)",
+   "format": "pct",
+   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published."
+  },
+  {
+   "key": "hearing",
+   "label": "Hearing disability (adults)",
+   "format": "pct",
+   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published."
+  },
+  {
+   "key": "vision",
+   "label": "Vision disability (adults)",
+   "format": "pct",
+   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published."
+  },
+  {
+   "key": "arthritis",
+   "label": "Arthritis (adults)",
+   "format": "pct",
+   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published."
+  },
+  {
+   "key": "obesity",
+   "label": "Obesity (adults)",
+   "format": "pct",
+   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published."
+  },
+  {
+   "key": "depression",
+   "label": "Depression (adults)",
+   "format": "pct",
+   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published."
+  },
+  {
+   "key": "mhlth",
+   "label": "Frequent mental distress (adults)",
+   "format": "pct",
+   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published."
+  },
+  {
+   "key": "indeplive",
+   "label": "Independent-living disability (adults)",
+   "format": "pct",
+   "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published."
+  },
+  {
+   "key": "easi_heart",
+   "label": "Heart disease: 2025 count (EASI)",
+   "format": "int",
+   "levels": [
+    "metro"
+   ],
+   "hideWhenUnavailable": true
+  },
+  {
+   "key": "easi_heart_rate",
+   "label": "Heart disease: share of adults (EASI)",
+   "format": "pct",
+   "levels": [
+    "metro"
+   ],
+   "hideWhenUnavailable": true
+  },
+  {
+   "key": "easi_heart_idx",
+   "label": "Heart disease: index vs. all U.S. metros",
+   "short": "Heart disease idx",
+   "format": "index",
+   "levels": [
+    "metro"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "Share of adults with the condition divided by the share across all U.S. metros, times 100."
+  },
+  {
+   "key": "easi_heart_30",
+   "label": "Heart disease: 2030 projection (EASI)",
+   "format": "int",
+   "levels": [
+    "metro"
+   ],
+   "hideWhenUnavailable": true
+  },
+  {
+   "key": "easi_heart_g",
+   "label": "Heart disease: growth 2025–2030",
+   "format": "pct",
+   "levels": [
+    "metro"
+   ],
+   "hideWhenUnavailable": true
+  },
+  {
+   "key": "easi_heart_gidx",
+   "label": "Heart disease: growth index vs. all U.S. metros",
+   "format": "index",
+   "levels": [
+    "metro"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "Above 100 means this metro's count grows faster than across all U.S. metros."
+  },
+  {
+   "key": "easi_cancer",
+   "label": "Any cancer: 2025 count (EASI)",
+   "format": "int",
+   "levels": [
+    "metro"
+   ],
+   "hideWhenUnavailable": true
+  },
+  {
+   "key": "easi_cancer_rate",
+   "label": "Any cancer: share of adults (EASI)",
+   "format": "pct",
+   "levels": [
+    "metro"
+   ],
+   "hideWhenUnavailable": true
+  },
+  {
+   "key": "easi_cancer_idx",
+   "label": "Any cancer: index vs. all U.S. metros",
+   "short": "Any cancer idx",
+   "format": "index",
+   "levels": [
+    "metro"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "Share of adults with the condition divided by the share across all U.S. metros, times 100."
+  },
+  {
+   "key": "easi_cancer_30",
+   "label": "Any cancer: 2030 projection (EASI)",
+   "format": "int",
+   "levels": [
+    "metro"
+   ],
+   "hideWhenUnavailable": true
+  },
+  {
+   "key": "easi_cancer_g",
+   "label": "Any cancer: growth 2025–2030",
+   "format": "pct",
+   "levels": [
+    "metro"
+   ],
+   "hideWhenUnavailable": true
+  },
+  {
+   "key": "easi_cancer_gidx",
+   "label": "Any cancer: growth index vs. all U.S. metros",
+   "format": "index",
+   "levels": [
+    "metro"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "Above 100 means this metro's count grows faster than across all U.S. metros."
+  },
+  {
+   "key": "easi_hearing",
+   "label": "Hearing trouble: 2025 count (EASI)",
+   "format": "int",
+   "levels": [
+    "metro"
+   ],
+   "hideWhenUnavailable": true
+  },
+  {
+   "key": "easi_hearing_rate",
+   "label": "Hearing trouble: share of adults (EASI)",
+   "format": "pct",
+   "levels": [
+    "metro"
+   ],
+   "hideWhenUnavailable": true
+  },
+  {
+   "key": "easi_hearing_idx",
+   "label": "Hearing trouble: index vs. all U.S. metros",
+   "short": "Hearing trouble idx",
+   "format": "index",
+   "levels": [
+    "metro"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "Share of adults with the condition divided by the share across all U.S. metros, times 100."
+  },
+  {
+   "key": "easi_hearing_30",
+   "label": "Hearing trouble: 2030 projection (EASI)",
+   "format": "int",
+   "levels": [
+    "metro"
+   ],
+   "hideWhenUnavailable": true
+  },
+  {
+   "key": "easi_hearing_g",
+   "label": "Hearing trouble: growth 2025–2030",
+   "format": "pct",
+   "levels": [
+    "metro"
+   ],
+   "hideWhenUnavailable": true
+  },
+  {
+   "key": "easi_hearing_gidx",
+   "label": "Hearing trouble: growth index vs. all U.S. metros",
+   "format": "index",
+   "levels": [
+    "metro"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "Above 100 means this metro's count grows faster than across all U.S. metros."
+  },
+  {
+   "key": "easi_vision",
+   "label": "Vision trouble: 2025 count (EASI)",
+   "format": "int",
+   "levels": [
+    "metro"
+   ],
+   "hideWhenUnavailable": true
+  },
+  {
+   "key": "easi_vision_rate",
+   "label": "Vision trouble: share of adults (EASI)",
+   "format": "pct",
+   "levels": [
+    "metro"
+   ],
+   "hideWhenUnavailable": true
+  },
+  {
+   "key": "easi_vision_idx",
+   "label": "Vision trouble: index vs. all U.S. metros",
+   "short": "Vision trouble idx",
+   "format": "index",
+   "levels": [
+    "metro"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "Share of adults with the condition divided by the share across all U.S. metros, times 100."
+  },
+  {
+   "key": "easi_vision_30",
+   "label": "Vision trouble: 2030 projection (EASI)",
+   "format": "int",
+   "levels": [
+    "metro"
+   ],
+   "hideWhenUnavailable": true
+  },
+  {
+   "key": "easi_vision_g",
+   "label": "Vision trouble: growth 2025–2030",
+   "format": "pct",
+   "levels": [
+    "metro"
+   ],
+   "hideWhenUnavailable": true
+  },
+  {
+   "key": "easi_vision_gidx",
+   "label": "Vision trouble: growth index vs. all U.S. metros",
+   "format": "index",
+   "levels": [
+    "metro"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "Above 100 means this metro's count grows faster than across all U.S. metros."
+  }
  ],
- "rankBy": ["score", "est", "per10k", "growth", "pay", "population", "a65p", "easi_heart_idx", "easi_cancer_idx", "easi_hearing_idx", "easi_vision_idx"],
+ "rankBy": [
+  "score",
+  "easi_med_idx",
+  "easi_rx_idx",
+  "est",
+  "per10k",
+  "growth",
+  "population",
+  "a65p",
+  "easi_heart_idx",
+  "easi_cancer_idx",
+  "easi_hearing_idx",
+  "easi_vision_idx"
+ ],
  "defaultRank": "score",
- "components": ["pool", "spend", "comp", "demand"],
- "detailMeasures": ["est", "per10k", "growth", "pay", "under", "population", "adults", "a65p", "a75p", "kids_share", "inc75_share", "inc150_share", "fairpoor", "diabetes", "bphigh", "nodental", "hearing", "vision", "arthritis", "obesity", "depression", "mhlth", "indeplive", "easi_heart", "easi_heart_rate", "easi_heart_idx", "easi_heart_30", "easi_heart_g", "easi_heart_gidx", "easi_cancer", "easi_cancer_rate", "easi_cancer_idx", "easi_cancer_30", "easi_cancer_g", "easi_cancer_gidx", "easi_hearing", "easi_hearing_rate", "easi_hearing_idx", "easi_hearing_30", "easi_hearing_g", "easi_hearing_gidx", "easi_vision", "easi_vision_rate", "easi_vision_idx", "easi_vision_30", "easi_vision_g", "easi_vision_gidx"],
- "tableColumns": ["score", "est", "per10k", "growth", "pay", "under", "population", "a65p"],
+ "components": [
+  "demand",
+  "category",
+  "spend",
+  "comp"
+ ],
+ "detailMeasures": [
+  "easi_med_hh",
+  "easi_med_idx",
+  "easi_med_total",
+  "easi_rx_hh",
+  "easi_rx_idx",
+  "easi_rx_total",
+  "est",
+  "per10k",
+  "growth",
+  "under",
+  "population",
+  "adults",
+  "a65p",
+  "a75p",
+  "kids_share",
+  "inc75_share",
+  "inc150_share",
+  "fairpoor",
+  "diabetes",
+  "bphigh",
+  "nodental",
+  "hearing",
+  "vision",
+  "arthritis",
+  "obesity",
+  "depression",
+  "mhlth",
+  "indeplive",
+  "easi_heart",
+  "easi_heart_rate",
+  "easi_heart_idx",
+  "easi_heart_30",
+  "easi_heart_g",
+  "easi_heart_gidx",
+  "easi_cancer",
+  "easi_cancer_rate",
+  "easi_cancer_idx",
+  "easi_cancer_30",
+  "easi_cancer_g",
+  "easi_cancer_gidx",
+  "easi_hearing",
+  "easi_hearing_rate",
+  "easi_hearing_idx",
+  "easi_hearing_30",
+  "easi_hearing_g",
+  "easi_hearing_gidx",
+  "easi_vision",
+  "easi_vision_rate",
+  "easi_vision_idx",
+  "easi_vision_30",
+  "easi_vision_g",
+  "easi_vision_gidx"
+ ],
+ "tableColumns": [
+  "score",
+  "easi_med_idx",
+  "est",
+  "per10k",
+  "growth",
+  "under",
+  "population",
+  "a65p"
+ ],
  "methodology": [
-  {"title": "Prospect Score", "body": ["Answers one question: where are healthcare businesses most likely to buy digital advertising?", "Prospect Score = 35% Prospect Pool + 25% Spending Power + 20% Competitive Pressure + 20% Consumer Demand. Each part is a percentile (0 to 100) against the other markets at the same level: DMAs against DMAs, metros against metros, ZIPs against the other ZIPs in the same market.", "A score isn't computed when one of its parts has no data, rather than guessing. Markets with no Census-counted businesses in a category say so in their data notes."]},
-  {"title": "Prospect Pool and Competitive Pressure", "body": ["Business counts for DMAs, metros and the U.S. come from Census County Business Patterns, which counts every business. In the ZIP view they come from ZIP Business Patterns, which leaves out any ZIP with fewer than 3 businesses in an industry for privacy, so those ZIPs show 0 and small categories look thinner by ZIP. Competitive Pressure averages businesses per 10,000 residents and one-year growth in business count: crowded, growing markets push businesses to advertise.", "Hearing and audiology counts include physical, occupational and speech therapy offices, which Census reports in the same industry. Med spa and aesthetics counts include all physician offices. The provider-level Prospect List in the next build narrows both."]},
-  {"title": "Spending Power", "body": "Annual payroll per business, from County Business Patterns. Counties split between DMAs are shared by population. Payroll isn't published by ZIP, so ZIP scores leave this part out and reweight the other three."},
-  {"title": "Consumer Demand", "body": ["Urgent and emergency care: population, households with children, fair or poor health. Pharmacy: age 65+, diabetes, high blood pressure. Dental: adults, households earning $75K+, no dental visit in the past year. Hearing: age 65+, hearing disability. Eye care: age 45+, vision disability, diabetes. Chiropractic and PT: adults 25 to 64, arthritis, obesity. Behavioral health: adults, depression, frequent mental distress. Med spa: adults 30 to 64, households earning $150K+. Senior and home care: age 65+, age 75+, independent-living disability.", "Health measures are CDC PLACES estimates for adults. Kentucky and Pennsylvania lack some ZIP values; county values fill in where available."]},
-  {"title": "EASI metro layer", "body": "Metro view only. 2025 counts and 2030 projections of adults with heart disease, any cancer, hearing trouble and vision trouble, from Adtaxi's EASI data. Indexes compare each metro with all U.S. metros combined, since EASI's metro list doesn't cover rural areas outside metros."},
-  {"title": "Underserved", "body": "Flags markets with strong demand (70th percentile or higher) but few businesses per resident (30th percentile or lower). It's shown as a pitch for expansion, not counted in the score."},
-  {"title": "ZIPs in a market", "body": "Pick a DMA or metro, then choose ZIPs in market. ZIPs with fewer than 500 residents are shown but not ranked."}
+  {
+   "title": "Market Potential Score",
+   "body": [
+    "Answers one question: where are a healthcare advertiser's customers, and which geographies deserve the most ad dollars?",
+    "Market Potential Score = 40% Consumer Demand + 25% Category Spending + 15% Spending Power + 20% Competition. Each part is a percentile (0 to 100) against the other markets at the same level: DMAs against DMAs, metros against metros, ZIPs against the other ZIPs in the same market.",
+    "A score isn't computed when one of its parts has no data, rather than guessing."
+   ]
+  },
+  {
+   "title": "Consumer Demand",
+   "body": [
+    "The size and need of each category's target audience. Urgent and emergency care: population, households with children, fair or poor health. Pharmacy: age 65+, diabetes, high blood pressure. Dental: adults, households earning $75K+, no dental visit in the past year. Hearing: age 65+, hearing disability. Eye care: age 45+, vision disability, diabetes. Chiropractic and PT: adults 25 to 64, arthritis, obesity. Behavioral health: adults, depression, frequent mental distress. Med spa: adults 30 to 64, households earning $150K+. Senior and home care: age 65+, age 75+, independent-living disability.",
+    "Health measures are CDC PLACES estimates for adults. Kentucky and Pennsylvania lack most values, so Consumer Demand there uses Census inputs only."
+   ]
+  },
+  {
+   "title": "Category Spending",
+   "body": [
+    "EASI 2025 estimates of household spending: prescription drugs for Pharmacy, medical services for every other category. Half the weight goes to spending per household (how intensely households spend) and half to the market's total (how many dollars are there).",
+    "Totals are EASI's per-household spending times this site's household count, so they follow the same boundaries as every other number. EASI counts Palm Springs inside Los Angeles, so the provisional Palm Springs DMA uses the Riverside–San Bernardino metro's per-household spending. Healthcare spending varies less between markets than tuition or legal fees, so this part moves rankings modestly. Not available by ZIP."
+   ]
+  },
+  {
+   "title": "Spending Power",
+   "body": "Share of households earning $75K or more, from the Census American Community Survey. Kept at 15% because EASI spending already reflects income."
+  },
+  {
+   "title": "Competition",
+   "body": [
+    "Category businesses per 10,000 residents, reversed: markets with fewer competing businesses score higher, because each ad dollar faces less competition for attention. Counts are Census County Business Patterns, which counts every business.",
+    "Hearing and audiology counts include physical, occupational and speech therapy offices, which Census reports in the same industry. Med spa and aesthetics counts include all physician offices. Not used in ZIP scores, because Census hides ZIP counts under 3 businesses."
+   ]
+  },
+  {
+   "title": "EASI metro layer",
+   "body": "Metro view only. 2025 counts and 2030 projections of adults with heart disease, any cancer, hearing trouble and vision trouble, from Adtaxi's EASI data. Indexes compare each metro with all U.S. metros combined, since EASI's metro list doesn't cover rural areas outside metros. Shown, not scored."
+  },
+  {
+   "title": "Underserved",
+   "body": "Flags markets with strong demand (70th percentile or higher) but few businesses per resident (30th percentile or lower). It's shown as a pitch for clients weighing a new location, not counted in the score."
+  },
+  {
+   "title": "ZIPs in a market",
+   "body": "Pick a DMA or metro, then choose ZIPs in market. ZIP scores use Consumer Demand and Spending Power, reweighted to 73% and 27%. ZIPs with fewer than 500 residents are shown but not ranked."
+  }
  ],
  "sources": [
-  {"label": "Census ZIP and County Business Patterns", "url": "https://www.census.gov/programs-surveys/cbp.html"},
-  {"label": "CDC PLACES", "url": "https://www.cdc.gov/places/"},
-  {"label": "Census American Community Survey 5-year"},
-  {"label": "EASI Demographics 2025 (metro health conditions)"},
-  {"label": "Deluxe ZIP file (Q4 2025)"},
-  {"label": "ZIP-level DMA list", "url": "https://github.com/BritCrit/dma_county_zip"}
+  {
+   "label": "Census ZIP and County Business Patterns",
+   "url": "https://www.census.gov/programs-surveys/cbp.html"
+  },
+  {
+   "label": "CDC PLACES",
+   "url": "https://www.cdc.gov/places/"
+  },
+  {
+   "label": "Census American Community Survey 5-year"
+  },
+  {
+   "label": "EASI Demographics 2025 (household healthcare spending; metro health conditions)"
+  },
+  {
+   "label": "Deluxe ZIP file (Q4 2025)"
+  },
+  {
+   "label": "ZIP-level DMA list",
+   "url": "https://github.com/BritCrit/dma_county_zip"
+  }
  ],
- "sourcesNote": "Business counts and payroll are Census Business Patterns; health measures are CDC PLACES; ages and income are Census ACS; population and households are from the Deluxe ZIP file."
+ "sourcesNote": "Household healthcare spending and metro health conditions are EASI; business counts are Census Business Patterns; health measures are CDC PLACES; ages and income are Census ACS; population and households are from the Deluxe ZIP file."
 });
 </script>
 </body>
