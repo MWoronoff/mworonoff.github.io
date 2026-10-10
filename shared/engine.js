@@ -40,7 +40,7 @@
       case "dec1": return NF1.format(v);
       case "dec2": return NF2.format(v);
       case "money": return "$" + NF0.format(v);
-      case "moneyM": return "$" + NF1.format(v / 1e6) + "M";
+      case "moneyM": return Math.abs(v) >= 1e9 ? "$" + NF1.format(v / 1e9) + "B" : "$" + NF1.format(v / 1e6) + "M";
       case "index": return NF0.format(v);
       default: return NF0.format(v);
     }
@@ -67,6 +67,8 @@
     return null;
   };
   Analyzer.prototype.availableAt = function (m, level) { return !m.levels || m.levels.indexOf(level) >= 0; };
+  // A measure with "subs" belongs only to those categories (e.g. "No dental visit" only with Dental).
+  Analyzer.prototype.relevant = function (m) { return !m.subs || !this.state.sub || m.subs.indexOf(this.state.sub) >= 0; };
   Analyzer.prototype.valueKey = function (m) { return m.perSub && this.state.sub ? m.key + "@" + this.state.sub : m.key; };
   Analyzer.prototype.val = function (row, m) {
     if (!row || !m) return undefined;
@@ -190,8 +192,7 @@
         cfg.subcategories.map(function (s) { return el("option", { value: s.id, text: s.label }); }));
       controls.push(el("label", { class: "az-field" }, [el("span", { text: cfg.subcategoryLabel || "Category" }), this.subSel]));
     }
-    this.rankSel = el("select", { onchange: function () { self.state.rank = this.value; self.state.sortKey = null; self.refresh(); } },
-      (cfg.rankBy || []).map(function (k) { var m = self.measure(k); return el("option", { value: k, text: m ? m.label : k }); }));
+    this.rankSel = el("select", { onchange: function () { self.state.rank = this.value; self.state.sortKey = null; self.refresh(); } });
     controls.push(el("label", { class: "az-field" }, [el("span", { text: "Rank and map by" }), this.rankSel]));
     this.showSel = el("select", { onchange: function () { self.state.show = +this.value; self.renderTable(); } },
       [10, 25, 50, 100, 0].map(function (n) { return el("option", { value: n, text: n ? "Top " + n : "All" }); }));
@@ -282,6 +283,14 @@
     // A ranking measure that isn't published at this level (e.g. a Metro-only layer) falls back to the default ranking.
     var rm = this.measure(s.rank), dm = this.measure(this.cfg.defaultRank);
     if (rm && dm && !this.availableAt(rm, s.level === "us" ? (this.cfg.usMapLevel || "dma") : s.level)) s.rank = this.cfg.defaultRank;
+    // Ranking choices follow the selected category; one that doesn't apply falls back to the default ranking.
+    if (rm && dm && !this.relevant(rm)) s.rank = this.cfg.defaultRank;
+    var self0 = this, opts = (this.cfg.rankBy || []).filter(function (k) { var m = self0.measure(k); return !m || self0.relevant(m); });
+    if (this.rankSel.getAttribute("data-opts") !== opts.join(",")) {
+      this.rankSel.innerHTML = "";
+      opts.forEach(function (k) { var m = self0.measure(k); self0.rankSel.appendChild(el("option", { value: k, text: m ? m.label : k })); });
+      this.rankSel.setAttribute("data-opts", opts.join(","));
+    }
     var drill = this.canDrill();
     Array.prototype.forEach.call(this.levelSeg.children, function (b) {
       var lv = b.getAttribute("data-level");
@@ -420,7 +429,7 @@
   Analyzer.prototype.columns = function () {
     var self = this, lv = this.state.level;
     var keys = this.cfg.tableColumns || this.cfg.measures.map(function (m) { return m.key; });
-    return keys.map(function (k) { return self.measure(k); }).filter(function (m) { return m && self.availableAt(m, lv); });
+    return keys.map(function (k) { return self.measure(k); }).filter(function (m) { return m && self.availableAt(m, lv) && self.relevant(m); });
   };
   Analyzer.prototype.sortedRows = function () {
     var self = this, s = this.state, d = this.d(s.level);
@@ -537,7 +546,7 @@
       })));
     }
 
-    var details = (cfg.detailMeasures || []).map(function (k) { return self.measure(k); }).filter(Boolean);
+    var details = (cfg.detailMeasures || []).map(function (k) { return self.measure(k); }).filter(function (m) { return m && self.relevant(m); });
     if (details.length) {
       box.appendChild(el("div", { class: "az-measures" }, details.map(function (m) {
         if (!self.availableAt(m, s.level) && m.hideWhenUnavailable) return null;
@@ -574,7 +583,7 @@
     var self = this, s = this.state;
     var level = s.level, d = this.d(level);
     if (!d) return;
-    var cols = this.cfg.measures.filter(function (m) { return self.availableAt(m, level); });
+    var cols = this.cfg.measures.filter(function (m) { return self.availableAt(m, level) && self.relevant(m); });
     var rows = level === "us" ? d.rows : this.sortedRows().filter(function (r) { return !s.query || r.name.toLowerCase().indexOf(s.query) >= 0; });
     var lines = [["Level", level === "zip" ? "ZIP" : "ID", "Name"].concat(this.subLabel() ? ["Category"] : []).concat(cols.map(function (m) { return m.label; })).map(csvCell).join(",")];
     rows.forEach(function (r) {
