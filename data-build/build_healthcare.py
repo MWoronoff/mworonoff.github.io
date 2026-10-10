@@ -75,16 +75,24 @@ DEMAND_LABELS = {"population": "Population", "adults": "Adults 18+", "a65p": "Ag
 RATES = ["kids_share", "inc75_share", "inc150_share"] + list(PLACES)
 
 
-def est_notes(prev_used, model_used, cur_year, prev_year):
-    """Data-note text for an area whose health measures are partly filled in (values are marked est. on the page)."""
-    out = []
-    if prev_used:
-        out.append(f"CDC's {cur_year} release leaves some health measures out here. Values marked est. come from CDC's "
-                   f"{prev_year} release, adjusted for the change since then in neighboring states.")
-    if model_used:
-        out.append("Values marked est. that neither CDC release covers are estimated from local age, income and education.")
-    if out: out.append("Health measures that couldn't be filled reliably show No data. See How scores work.")
-    return [" ".join(out)] if out else []
+# How a filled-in health value was produced (the "_fill" code on each ZIP; 0 = current CDC release)
+FILL_PREV_REGION, FILL_MODEL, FILL_PREV_LOCAL, FILL_NEIGHBORS = 1, 2, 4, 5
+FILL_TEXT = {
+    FILL_PREV_REGION: "CDC's {prev} release, adjusted for the change since then across neighboring states",
+    FILL_PREV_LOCAL: "CDC's {prev} release, adjusted for the change since then in the nearest counties CDC still covers",
+    FILL_NEIGHBORS: "a distance-weighted average of the nearest counties CDC still covers",
+    FILL_MODEL: "an estimate from local age, income and education",
+}
+
+
+def est_notes(methods, low, cur_year, prev_year):
+    """Data-note text for an area whose health measures are partly filled in (values are marked * on the page)."""
+    if not methods: return []
+    srcs = [FILL_TEXT[m].format(prev=prev_year) for m in (FILL_PREV_LOCAL, FILL_PREV_REGION, FILL_NEIGHBORS, FILL_MODEL) if m in methods]
+    out = [f"CDC's {cur_year} release leaves some health measures out here. Values marked * come from " + "; or ".join(srcs) + "."]
+    if low: out.append("Lower confidence (tested error 1.5 to 3 points): " + ", ".join(low) + ".")
+    out.append("Scores marked * use these values. Health measures that couldn't be filled reliably show No data. See How scores work.")
+    return [" ".join(out)]
 
 
 def log(*a): print(*a, flush=True)
@@ -224,6 +232,7 @@ def places_table(kind, did, cache):
 # if the average county-level error stays within EST_MAX_ERR.
 EST_TEST_STATES = {"39": "Ohio", "54": "West Virginia", "36": "New York", "24": "Maryland", "47": "Tennessee", "18": "Indiana"}
 EST_MAX_ERR = 0.015          # 1.5 percentage points, average county error
+EST_MAX_ERR_LOW = 0.03       # previous-release values up to 3 points are still used, flagged as lower confidence
 
 
 def est_features(z):
@@ -244,76 +253,144 @@ def wls_fit(X, y, w):
     return beta
 
 
-def estimate_gaps(z, have, rep):
-    """Fills missing PLACES values in z with model estimates; returns the list of measures estimated."""
-    X = est_features(z)
-    okx = X.notna().all(axis=1) & (z.adults18 >= 100)
-    state = z.county_fips.fillna("").str[:2]
-    estimated, cols = [], []
-    for k in have:
-        known = z[k].notna() & okx
-        gap = z[k].isna() & okx
-        if gap.sum() == 0: continue
-        errs = {}
-        for st, name in EST_TEST_STATES.items():
-            tr, te = known & (state != st), known & (state == st)
-            if te.sum() < 50: continue
-            beta = wls_fit(X[tr], z.loc[tr, k], z.loc[tr, "adults18"])
-            pred = (X[te].values @ beta).clip(0, 1)
-            d = pd.DataFrame({"c": z.loc[te, "county_fips"], "w": z.loc[te, "adults18"], "p": pred * z.loc[te, "adults18"],
-                              "y": z.loc[te, k] * z.loc[te, "adults18"]}).groupby("c").sum()
-            cerr = ((d.p - d.y).abs() / d.w)
-            errs[name] = float(np.average(cerr, weights=d.w))
-        if not errs: continue
-        avg = float(np.mean(list(errs.values())))
-        detail = f"average county error {avg * 100:.2f} pts (" + ", ".join(f"{n} {e * 100:.2f}" for n, e in errs.items()) + f"); {int(gap.sum()):,} ZIPs"
-        if avg <= EST_MAX_ERR:
-            beta = wls_fit(X[known], z.loc[known, k], z.loc[known, "adults18"])
-            z.loc[gap, k] = (X[gap].values @ beta).clip(0, 1)
-            z[f"{k}_n"] = z[k] * z.adults18
-            z.loc[gap, f"{k}_fill"] = 2
-            estimated.append(k)
-            rep.append((f"Estimated where CDC doesn't publish: {DEMAND_LABELS[k]}", "PASS", "used; " + detail))
-        else:
-            rep.append((f"Estimated where CDC doesn't publish: {DEMAND_LABELS[k]}", "WARN", "not used (error above 1.5 pts); " + detail))
-    return estimated
+def model_test(z, k, X, okx, state):
+    """Tests the age/income/education model for measure k by hiding each test state. Returns ({state: error}, known mask)."""
+    known = z[k].notna() & okx & (z[f"{k}_fill"] == 0)
+    errs = {}
+    for st, name in EST_TEST_STATES.items():
+        tr, te = known & (state != st), known & (state == st)
+        if te.sum() < 50: continue
+        beta = wls_fit(X[tr], z.loc[tr, k], z.loc[tr, "adults18"])
+        pred = (X[te].values @ beta).clip(0, 1)
+        d = pd.DataFrame({"c": z.loc[te, "county_fips"], "w": z.loc[te, "adults18"], "p": pred * z.loc[te, "adults18"],
+                          "y": z.loc[te, k] * z.loc[te, "adults18"]}).groupby("c").sum()
+        errs[name] = float(np.average((d.p - d.y).abs() / d.w, weights=d.w))
+    return errs, known
 
 
-def fill_from_previous(z, have, pzp, pcp, prev_year, cur_year, rep):
-    """Where the newest PLACES release leaves a ZIP blank, uses CDC's previous release (ZIP value, else county value),
-    scaled by the change between the two releases in the neighbouring test states. Tested by predicting each test
-    state's current values from its previous ones, with the scale taken from the other test states."""
+def county_centroids(aud_cols, z):
+    """Population-weighted county centers from ZIP coordinates (radians)."""
+    a = pd.DataFrame({"zip": aud_cols["zip"], "lat": aud_cols["lat"], "lon": aud_cols["lon"]})
+    g = z[["zip", "county_fips", "population"]].merge(a, on="zip", how="inner").dropna()
+    g = g[g.population > 0]
+    w = g.population
+    c = pd.DataFrame({"lat": (g.lat * w).groupby(g.county_fips).sum() / w.groupby(g.county_fips).sum(),
+                      "lon": (g.lon * w).groupby(g.county_fips).sum() / w.groupby(g.county_fips).sum()})
+    return np.radians(c)
+
+
+def nearest_weights(cent, targets, donors, k=8):
+    """For each target county, its k nearest donor counties and inverse-distance-squared weights.
+    Returns {target: (donor array, weight array)}."""
+    out = {}
+    donors = [d for d in donors if d in cent.index]
+    if not donors: return out
+    D = cent.loc[donors]
+    dlat, dlon = D.lat.values, D.lon.values
+    for t in targets:
+        if t not in cent.index: continue
+        lat, lon = cent.at[t, "lat"], cent.at[t, "lon"]
+        h = np.sin((dlat - lat) / 2) ** 2 + np.cos(lat) * np.cos(dlat) * np.sin((dlon - lon) / 2) ** 2
+        km = 6371 * 2 * np.arcsin(np.sqrt(h))
+        idx = np.argsort(km)[:k]
+        out[t] = (np.array(donors)[idx], 1 / np.maximum(km[idx], 10) ** 2)
+    return out
+
+
+def fill_from_previous(z, have, pzp, pcp, prev_year, cur_year, rep, cent):
+    """Fills ZIPs the newest PLACES release leaves blank. Four methods are tested on each measure by hiding a whole
+    neighbouring state and predicting it; the one with the lowest average county error is used:
+      prev_region - CDC's previous release, scaled by the change between releases across the other test states
+      prev_local  - CDC's previous release, scaled by the change in the nearest counties that have both releases
+      neighbors   - distance-weighted average of the nearest counties' current values
+      model       - estimate from local age, income and education (est_features)
+    Returns {measure: method code} for measures filled."""
     prev = z[["zip", "county_fips"]].merge(pzp.rename(columns={"id": "zip"}), on="zip", how="left").set_index(z.index)
-    pcm = pcp.set_index("id")
+    pcm = pcp.set_index("id") if pcp is not None else pd.DataFrame()
     state = z.county_fips.fillna("").str[:2]
     w = z.adults18.fillna(0)
+    used = {}
+    X = est_features(z)
+    okx = X.notna().all(axis=1) & (z.adults18 >= 100)
     for k in have:
-        if k not in prev.columns and k not in pcm.columns: continue
         pv = prev[k] if k in prev.columns else pd.Series(np.nan, index=z.index)
         if k in pcm.columns: pv = pv.fillna(z.county_fips.map(pcm[k]))
-        both = z[k].notna() & pv.notna() & (w > 0) & (z[f"{k}_fill"] == 0)
-        def factor(states):
-            m = both & state.isin(states)
-            return (z.loc[m, k] * w[m]).sum() / (pv[m] * w[m]).sum() if (pv[m] * w[m]).sum() > 0 else np.nan
+        cur_ok = (z[f"{k}_fill"] == 0) & (w > 0)
+        gap = z[k].isna() & (w >= 0)
+        if gap.sum() == 0: continue
+        # county tables: current value, previous value and adults (current-release counties only)
+        cw = w[cur_ok].groupby(z.county_fips[cur_ok]).sum()
+        cc = (z.loc[cur_ok, k] * w[cur_ok]).groupby(z.county_fips[cur_ok]).sum() / cw
+        bo = cur_ok & pv.notna()
+        bw = w[bo].groupby(z.county_fips[bo]).sum()
+        bc = (z.loc[bo, k] * w[bo]).groupby(z.county_fips[bo]).sum()          # current x adults
+        bp = (pv[bo] * w[bo]).groupby(z.county_fips[bo]).sum()                # previous x adults
+        pw_all = pv.notna() & (w > 0)
+        cp = (pv[pw_all] * w[pw_all]).groupby(z.county_fips[pw_all]).sum() / w[pw_all].groupby(z.county_fips[pw_all]).sum()
+        cst = pd.Series(cc.index.str[:2], index=cc.index)
+
+        def predict(method, targets, excl_state):
+            """County predictions for target counties, never using donors from excl_state."""
+            if method == "prev_region":
+                ok = [c for c in bc.index if c[:2] in EST_TEST_STATES and c[:2] != excl_state]
+                f_ = bc[ok].sum() / bp[ok].sum() if bp[ok].sum() > 0 else np.nan
+                return pd.Series({t: cp.get(t, np.nan) * f_ for t in targets}), f_
+            donors = [c for c in (bc.index if method == "prev_local" else cc.index) if c[:2] != excl_state]
+            nw = nearest_weights(cent, targets, donors)
+            res = {}
+            for t, (ds, ww) in nw.items():
+                if method == "prev_local":
+                    aw = ww * bw[ds].values
+                    num, den = (aw * (bc[ds] / bw[ds]).values).sum(), (aw * (bp[ds] / bw[ds]).values).sum()
+                    res[t] = cp.get(t, np.nan) * num / den if den > 0 else np.nan
+                else:
+                    aw = ww * cw[ds].values
+                    res[t] = (aw * cc[ds].values).sum() / aw.sum()
+            return pd.Series(res, dtype=float), None
+
         errs = {}
-        for st, name in EST_TEST_STATES.items():
-            te = both & (state == st)
-            if te.sum() < 50: continue
-            f_ = factor([x for x in EST_TEST_STATES if x != st])
-            d = pd.DataFrame({"c": z.loc[te, "county_fips"], "w": w[te], "p": pv[te] * f_ * w[te], "y": z.loc[te, k] * w[te]}).groupby("c").sum()
-            errs[name] = float(np.average((d.p - d.y).abs() / d.w, weights=d.w))
-        gap = z[k].isna() & pv.notna()
-        if not errs or gap.sum() == 0:
-            continue
-        avg, f_all = float(np.mean(list(errs.values()))), factor(list(EST_TEST_STATES))
-        detail = (f"average county error {avg * 100:.2f} pts (" + ", ".join(f"{n} {e * 100:.2f}" for n, e in errs.items())
-                  + f"); change factor {f_all:.3f}; {int(gap.sum()):,} ZIPs")
-        if avg <= EST_MAX_ERR and f_all == f_all:
-            z.loc[gap, k] = (pv[gap] * f_all).clip(0, 1)
-            z.loc[gap, f"{k}_fill"] = 1
-            rep.append((f"CDC {prev_year} release used where {cur_year} is blank: {DEMAND_LABELS[k]}", "PASS", "used; " + detail))
+        for method in ("prev_region", "prev_local", "neighbors"):
+            if method != "neighbors" and bp.sum() == 0: continue
+            e = {}
+            for st, name in EST_TEST_STATES.items():
+                tc = [c for c in cc.index if c[:2] == st]
+                if len(tc) < 5: continue
+                pr, _ = predict(method, tc, st)
+                d = pd.DataFrame({"p": pr, "y": cc[tc], "w": cw[tc]}).dropna()
+                if len(d): e[name] = float(np.average((d.p - d.y).abs(), weights=d.w))
+            if e: errs[method] = e
+        me, known = model_test(z, k, X, okx, state)
+        if me: errs["model"] = me
+        if not errs: continue
+        avg = {m: float(np.mean(list(e.values()))) for m, e in errs.items()}
+        best = min(avg, key=avg.get)
+        title = f"Filling CDC {cur_year} gaps: {DEMAND_LABELS[k]}"
+        tested = "; ".join(f"{m.replace('_', ' ')} {avg[m] * 100:.2f}" for m in ("prev_region", "prev_local", "neighbors", "model") if m in avg)
+        detail = (f"tested average county error (pts): {tested}. Best: {best.replace('_', ' ')} (" +
+                  ", ".join(f"{n} {v * 100:.2f}" for n, v in errs[best].items()) + ")")
+        if avg[best] > EST_MAX_ERR_LOW:
+            rep.append((title, "WARN", "not used (error above 3 pts); " + detail)); continue
+        gap_c = sorted(set(z.loc[gap & z.county_fips.notna(), "county_fips"]))
+        if best == "model":
+            beta = wls_fit(X[known], z.loc[known, k], z.loc[known, "adults18"])
+            val = pd.Series(np.nan, index=z.index); m_ = gap & okx
+            val[m_] = (X[m_].values @ beta)
+        elif best == "neighbors":
+            pr, f_ = predict(best, gap_c, None)
+            val = z.county_fips.map(pr)
         else:
-            rep.append((f"CDC {prev_year} release used where {cur_year} is blank: {DEMAND_LABELS[k]}", "WARN", "not used (error above 1.5 pts); " + detail))
+            pr, f_ = predict(best, gap_c, None)
+            fac = (pr / cp.reindex(pr.index)) if best == "prev_local" else None
+            val = pv * (f_ if best == "prev_region" else z.county_fips.map(fac))
+        fillm = gap & val.notna()
+        code = {"prev_region": FILL_PREV_REGION, "prev_local": FILL_PREV_LOCAL, "neighbors": FILL_NEIGHBORS, "model": FILL_MODEL}[best]
+        z.loc[fillm, k] = val[fillm].clip(0, 1)
+        z.loc[fillm, f"{k}_fill"] = code
+        if avg[best] > EST_MAX_ERR: z.loc[fillm, f"{k}_low"] = True
+        used[k] = code
+        rep.append((title, "PASS", ("used; " if avg[best] <= EST_MAX_ERR else "used, lower confidence (error 1.5–3 pts); ")
+                    + detail + f"; {int(fillm.sum()):,} ZIPs"))
+    return used
 
 
 # ---------------- Scoring helpers ----------------
@@ -429,25 +506,30 @@ def main():
         rep.append(("CDC PLACES ZCTA gaps filled with county values", "INFO", "; ".join(f"{DEMAND_LABELS[k]} {v:,} ZIPs" for k, v in filled.items() if v)))
         cov = z.loc[z[have[0]].notna(), "adults18"].sum() / z.adults18.sum() if have else 0
         rep.append(("Adults covered by CDC PLACES", "PASS" if cov > 0.9 else "WARN", f"{cov:.1%}"))
-        for k in have: z[f"{k}_fill"] = np.where(z[k].notna(), 0, -1)      # 0 = current CDC; 1 = previous release; 2 = model
+        for k in have: z[f"{k}_fill"] = np.where(z[k].notna(), 0, -1); z[f"{k}_low"] = False   # 0 = current CDC release
+        cent = county_centroids(aud["cols"], z)
         prev_year = None
         if len(ids["zcta"]) > 1 and len(ids["county"]) > 1:
             try:
                 prev_year = ids["zcta"][1][0]
                 pzp, _ = places_table("zcta", ids["zcta"][1][1], a.cache)
                 pcp, _ = places_table("county", ids["county"][1][1], a.cache)
-                fill_from_previous(z, have, pzp, pcp, prev_year, release, rep)
             except Exception as e:
-                rep.append(("CDC PLACES previous release", "WARN", f"not available this run ({e}); gaps go to the model estimate"))
+                pzp = pcp = None
+                rep.append(("CDC PLACES previous release", "WARN", f"not available this run ({e}); tested without it"))
         else:
-            rep.append(("CDC PLACES previous release", "WARN", "not found on data.cdc.gov; gaps go to the model estimate"))
-        est_measures = estimate_gaps(z, have, rep)
+            pzp = pcp = None
+            rep.append(("CDC PLACES previous release", "WARN", "not found on data.cdc.gov; tested without it"))
+        if pzp is None: pzp = pd.DataFrame({"id": []})
+        fill_from_previous(z, have, pzp, pcp, prev_year, release, rep, cent)
         for k in have: z[f"{k}_n"] = z[k] * z.adults18
         if True:
             cov2 = z.loc[z[have[0]].notna(), "adults18"].sum() / z.adults18.sum()
             rep.append(("Adults covered by CDC PLACES plus estimates", "INFO", f"{cov2:.1%}"))
     except Exception as e:
         prev_year = None
+        for k in have:
+            if f"{k}_fill" not in z.columns: z[f"{k}_fill"] = 0; z[f"{k}_low"] = False
         rep.append(("CDC PLACES download", "WARN", f"not available this run ({e}); Consumer Demand uses Census inputs only"))
         release = None
 
@@ -462,8 +544,9 @@ def main():
         r["inc150_share"] = g.inc150.sum() / g.inc_tot.sum() if g.inc_tot.sum() > 0 else np.nan
         for k in have:
             ok = g[k].notna() & g.adults18.notna(); tot = g.loc[ok, "adults18"].sum()
-            r[f"{k}_prevsh"] = g.loc[ok & (g[f"{k}_fill"] == 1), "adults18"].sum() / tot if tot > 0 else 0
-            r[f"{k}_modsh"] = g.loc[ok & (g[f"{k}_fill"] == 2), "adults18"].sum() / tot if tot > 0 else 0
+            r[f"{k}_fillsh"] = g.loc[ok & (g[f"{k}_fill"] > 0), "adults18"].sum() / tot if tot > 0 else 0
+            r[f"{k}_lowsh"] = g.loc[ok & g[f"{k}_low"].astype(bool), "adults18"].sum() / tot if tot > 0 else 0
+            for c in FILL_TEXT: r[f"{k}_c{c}"] = g.loc[ok & (g[f"{k}_fill"] == c), "adults18"].sum() / tot if tot > 0 else 0
         for k in have:
             ok = g[k].notna() & g.adults18.notna()
             covered = g.loc[ok, "adults18"].sum()
@@ -577,7 +660,7 @@ def main():
     # Cross-check: do estimated health measures line up with EASI's independent metro estimates?
     for k, c in (("hearing", "hearing"), ("vision", "vision")):
         if k in met.columns and f"easi_{c}_rate" in met.columns:
-            fsh = met[f"{k}_prevsh"] + met[f"{k}_modsh"]
+            fsh = met[f"{k}_fillsh"]
             e_ = met[fsh >= 0.5]; o_ = met[fsh < 0.5]
             if len(e_) >= 5:
                 ce, co_ = e_[k].corr(e_[f"easi_{c}_rate"]), o_[k].corr(o_[f"easi_{c}_rate"])
@@ -642,14 +725,17 @@ def main():
                 if v.get(f"est@{s['id']}") is not None: v[f"est@{s['id']}"] = int(round(v[f"est@{s['id']}"]))
             v = {k: x for k, x in v.items() if x is not None}          # missing keys read as "No data"
             f = flags_fn(idx, r) if flags_fn else []
-            ek, pv, md = est_keys(r)
-            f += est_notes(pv, md, release, prev_year)
+            ek, methods, low = est_keys(r)
+            f += est_notes(methods, low, release, prev_year)
             none = [s["label"] for s in SUBCATS if f"score@{s['id']}" in df.columns and r.get(f"est@{s['id']}", 0) == 0
                     and r.get(f"score@{s['id']}") != r.get(f"score@{s['id']}")]          # zero businesses and no score
             if none and r.get("population", 0) >= MIN_POP:
                 f.append("No Census-counted businesses here for: " + ", ".join(none) + ". Those categories aren't scored for this area.")
             row = {"id": str(idx), "name": names(idx), "v": v, "f": f}
-            if ek: row["e"] = ek
+            if ek:
+                row["e"] = ek
+                es = [s["id"] for s in SUBCATS if any(k in ek for k in s["demand"])]
+                if es: row["es"] = es
             out.append(row)
         return out
 
@@ -665,12 +751,13 @@ def main():
 
     def est_keys(r):
         """Health measures for this area that are mostly filled in rather than current CDC values."""
-        keys, pv, md = [], False, False
+        keys, methods, low = [], set(), []
         for k in have:
-            p_, m_ = r.get(f"{k}_prevsh", 0) or 0, r.get(f"{k}_modsh", 0) or 0
-            if p_ + m_ >= 0.5 and r.get(k) == r.get(k):
-                keys.append(k); pv = pv or p_ > 0; md = md or m_ > 0
-        return keys, pv, md
+            if (r.get(f"{k}_fillsh", 0) or 0) >= 0.5 and r.get(k) == r.get(k):
+                keys.append(k)
+                methods |= {c for c in FILL_TEXT if (r.get(f"{k}_c{c}", 0) or 0) > 0}
+                if (r.get(f"{k}_lowsh", 0) or 0) >= 0.5: low.append(DEMAND_LABELS[k].lower())
+        return keys, methods, low
 
     meta = {"built": built, "cbpYear": y, "placesRelease": release, "acsYears": aud["meta"]["acsYears"]}
     json.dump({"level": "dma", "meta": meta, "rows": rows(dma, lambda i: tidy(dname.get(i, i)), flags)}, open(os.path.join(OUT, "dma.json"), "w"), separators=(",", ":"))
@@ -691,7 +778,8 @@ def main():
             f["inc150_share"] = (df.inc150 / df.inc_tot).where(df.inc_tot > 0)
             for k in have: f[k] = df[k]
             for k in have:
-                f[f"{k}_prevsh"] = (df[f"{k}_fill"] == 1).astype(float); f[f"{k}_modsh"] = (df[f"{k}_fill"] == 2).astype(float)
+                f[f"{k}_fillsh"] = (df[f"{k}_fill"] > 0).astype(float); f[f"{k}_lowsh"] = df[f"{k}_low"].astype(float)
+                for c in FILL_TEXT: f[f"{k}_c{c}"] = (df[f"{k}_fill"] == c).astype(float)
             for s in SUBCATS:
                 f[f"est@{s['id']}"] = df[f"est_{s['id']}"]; f[f"prev@{s['id']}"] = df[f"est_prev_{s['id']}"]
             ok = f.population >= MIN_POP
