@@ -88,8 +88,12 @@ FILL_TEXT = {
 def est_notes(methods, low, cur_year, prev_year):
     """Data-note text for an area whose health measures are partly filled in (values are marked * on the page)."""
     if not methods: return []
-    srcs = [FILL_TEXT[m].format(prev=prev_year) for m in (FILL_PREV_LOCAL, FILL_PREV_REGION, FILL_NEIGHBORS, FILL_MODEL) if m in methods]
-    out = [f"CDC's {cur_year} release leaves some health measures out here. Values marked * come from " + "; or ".join(srcs) + "."]
+    srcs = []
+    if methods & {FILL_PREV_LOCAL, FILL_PREV_REGION}: srcs.append(f"CDC's {prev_year} release, adjusted for the change since then in nearby areas")
+    if FILL_NEIGHBORS in methods: srcs.append("an average of nearby counties")
+    if FILL_MODEL in methods: srcs.append("an estimate from local age, income and education")
+    lead = ", ".join(srcs[:-1]) + (" or " if len(srcs) > 1 else "") + srcs[-1]
+    out = [f"CDC's {cur_year} release leaves some health measures out here. Values marked * come from {lead}."]
     if low: out.append("Lower confidence (tested error 1.5 to 3 points): " + ", ".join(low) + ".")
     out.append("Scores marked * use these values. Health measures that couldn't be filled reliably show No data. See How scores work.")
     return [" ".join(out)]

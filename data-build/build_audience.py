@@ -47,6 +47,14 @@ REQUESTS = {
     "C16001": [v("C16001", 1), v("C16001", 3)],                       # language at home, population 5+
     "B21001": [v("B21001", 1), v("B21001", 2)],                       # veteran status, civilian 18+
     "B15003": [v("B15003", 1), v("B15003", 19), v("B15003", 20)],     # education, population 25+
+    # Legal analyzer
+    "B12001": [v("B12001", n) for n in (1, 2, 3, 4, 7, 9, 10, 11, 12, 13, 16, 18, 19)],   # sex by marital status, 15+
+    "B25007": [v("B25007", n) for n in range(1, 12)],                 # tenure by age of householder (owner lines 2-11)
+    "B17017": [v("B17017", 1), v("B17017", 2)],                        # households below poverty
+    "B23025": [v("B23025", n) for n in (1, 3, 4, 5)],                  # employment status, 16+
+    "B08301": [v("B08301", 1), v("B08301", 2)],                        # means of transportation to work
+    "B25075": [v("B25075", n) for n in range(1, 28)],                 # value of owner-occupied homes
+    "C16002": [v("C16002", n) for n in (1, 2, 3, 4, 6, 7, 9, 10, 12, 13)],   # household language, limited English
 }
 # Label checks: (variable, words that must appear in its Census label)
 LABEL_CHECKS = [(v("B01001", 2), ["Male"]), (v("B01001", 26), ["Female"])] + \
@@ -63,7 +71,13 @@ LABEL_CHECKS = [(v("B01001", 2), ["Male"]), (v("B01001", 26), ["Female"])] + \
      (v("B03003", 3), ["Hispanic or Latino"]),
      (v("C16001", 3), ["Spanish"]),
      (v("B21001", 2), ["Veteran"]),
-     (v("B15003", 19), ["Some college", "less than 1 year"]), (v("B15003", 20), ["Some college", "no degree"])]
+     (v("B15003", 19), ["Some college", "less than 1 year"]), (v("B15003", 20), ["Some college", "no degree"]),
+     (v("B12001", 7), ["Male", "Separated"]), (v("B12001", 10), ["Male", "Divorced"]), (v("B12001", 16), ["Female", "Separated"]),
+     (v("B12001", 19), ["Female", "Divorced"]), (v("B25007", 2), ["Owner occupied"]), (v("B25007", 7), ["Owner", "55 to 59"]),
+     (v("B25007", 11), ["Owner", "85 years"]), (v("B17017", 2), ["below poverty"]), (v("B23025", 4), ["Employed"]),
+     (v("B23025", 5), ["Unemployed"]), (v("B08301", 2), ["Car, truck, or van"]), (v("B25075", 21), ["$300,000 to $399,999"]),
+     (v("B25075", 27), ["$2,000,000 or more"]), (v("C16002", 4), ["Spanish", "Limited English"]),
+     (v("C16002", 13), ["Other languages", "Limited English"])]
 
 
 KEY = os.environ.get("CENSUS_API_KEY", "").strip()
@@ -234,6 +248,18 @@ def main():
     out["veterans"], out["vet_tot"] = acs[v("B21001", 2)], acs[v("B21001", 1)]
     out["some_college"] = acs[v("B15003", 19)] + acs[v("B15003", 20)]
     out["adults25"] = acs[v("B15003", 1)]
+    # Legal analyzer
+    out["marital_tot"] = acs[v("B12001", 1)]
+    out["divsep"] = sum(acs[v("B12001", n)] for n in (7, 10, 16, 19))
+    out["own_tot"] = acs[v("B25007", 2)]
+    out["own55"] = sum(acs[v("B25007", n)] for n in range(7, 12))
+    out["pov_hh"], out["pov_tot"] = acs[v("B17017", 2)], acs[v("B17017", 1)]
+    out["labor_civ"], out["employed"], out["unemployed"] = acs[v("B23025", 3)], acs[v("B23025", 4)], acs[v("B23025", 5)]
+    out["workers"], out["car_commute"] = acs[v("B08301", 1)], acs[v("B08301", 2)]
+    out["val_tot"] = acs[v("B25075", 1)]
+    out["val300"] = sum(acs[v("B25075", n)] for n in range(21, 28))
+    out["lang_hh"] = acs[v("C16002", 1)]
+    out["lep_hh"] = sum(acs[v("C16002", n)] for n in (4, 7, 10, 13))
 
     # 3. Internal consistency checks
     def chk(name, parts, total, tol=1):
@@ -250,6 +276,24 @@ def main():
                               ("hispanic", "hisp_tot", "Hispanic population"), ("lang_spanish", "pop5", "Spanish at home"),
                               ("veterans", "vet_tot", "Veterans"), ("some_college", "adults25", "Some college, no degree"),
                               ("owners", "hhed_tot", "Homeowners")):
+        n = int((out[part] > out[total] + 1).sum())
+        rep.append((f"{name} never exceeds its total", "PASS" if n == 0 else "FAIL", f"{n} ZIPs over"))
+
+    # Legal tables: parts add up to their totals (catches wrong line numbers, since the file server has no labels)
+    msum = acs[v("B12001", 2)] + acs[v("B12001", 11)]
+    n = int(((msum - out.marital_tot).abs() > 1).sum()); rep.append(("Marital status: male + female = total", "PASS" if n == 0 else "FAIL", f"{n} ZIPs off"))
+    mparts = sum(acs[v("B12001", k)] for k in (3, 4, 9, 10)) - acs[v("B12001", 2)]
+    n = int((mparts.abs() > 1).sum()); rep.append(("Marital status: male never/now married + widowed + divorced = male total", "PASS" if n == 0 else "FAIL", f"{n} ZIPs off"))
+    oparts = sum(acs[v("B25007", k)] for k in range(3, 12)) - out.own_tot
+    n = int((oparts.abs() > 1).sum()); rep.append(("Homeowner ages add up", "PASS" if n == 0 else "FAIL", f"{n} ZIPs off"))
+    n = int(((out.employed + out.unemployed - out.labor_civ).abs() > 1).sum()); rep.append(("Employed + unemployed = civilian labor force", "PASS" if n == 0 else "FAIL", f"{n} ZIPs off"))
+    vparts = sum(acs[v("B25075", k)] for k in range(2, 28)) - out.val_tot
+    n = int((vparts.abs() > 1).sum()); rep.append(("Home value bands add up", "PASS" if n == 0 else "FAIL", f"{n} ZIPs off"))
+    lparts = sum(acs[v("C16002", k)] for k in (2, 3, 6, 9, 12)) - out.lang_hh
+    n = int((lparts.abs() > 1).sum()); rep.append(("Household language groups add up", "PASS" if n == 0 else "FAIL", f"{n} ZIPs off"))
+    for part, total, name in (("divsep", "marital_tot", "Divorced or separated"), ("own55", "own_tot", "Homeowners 55+"),
+                              ("pov_hh", "pov_tot", "Households below poverty"), ("car_commute", "workers", "Car commuters"),
+                              ("val300", "val_tot", "Homes worth $300K+"), ("lep_hh", "lang_hh", "Limited-English households")):
         n = int((out[part] > out[total] + 1).sum())
         rep.append((f"{name} never exceeds its total", "PASS" if n == 0 else "FAIL", f"{n} ZIPs over"))
 
@@ -271,7 +315,16 @@ def main():
              ("Hispanic share", tot("hispanic") / max(tot("hisp_tot"), 1) * 100, 16, 22, "{:.1f}%"),
              ("Spanish at home share", tot("lang_spanish") / max(tot("pop5"), 1) * 100, 10, 16, "{:.1f}%"),
              ("veteran share of civilian adults", tot("veterans") / max(tot("vet_tot"), 1) * 100, 4.5, 8.5, "{:.1f}%"),
-             ("households with children", tot("hh_kids") / max(tot("hh_tot"), 1) * 100, 24, 33, "{:.1f}%")]
+             ("households with children", tot("hh_kids") / max(tot("hh_tot"), 1) * 100, 24, 33, "{:.1f}%"),
+             # Legal: divorced or separated ~11-13% of people 15+; owners 55+ ~50-60% of owners; households in poverty ~11-14%;
+             # unemployment ~4-6%; car, truck or van ~75-85% of workers; homes $300K+ ~40-55%; limited-English households ~4%
+             ("divorced or separated share, 15+", tot("divsep") / max(tot("marital_tot"), 1) * 100, 9, 16, "{:.1f}%"),
+             ("homeowners 55+ share of owners", tot("own55") / max(tot("own_tot"), 1) * 100, 40, 65, "{:.1f}%"),
+             ("households below poverty", tot("pov_hh") / max(tot("pov_tot"), 1) * 100, 9, 16, "{:.1f}%"),
+             ("unemployment rate", tot("unemployed") / max(tot("labor_civ"), 1) * 100, 3, 8, "{:.1f}%"),
+             ("car, truck or van share of workers", tot("car_commute") / max(tot("workers"), 1) * 100, 65, 90, "{:.1f}%"),
+             ("homes worth $300K+", tot("val300") / max(tot("val_tot"), 1) * 100, 30, 65, "{:.1f}%"),
+             ("limited-English households", tot("lep_hh") / max(tot("lang_hh"), 1) * 100, 2, 7, "{:.1f}%")]
     for name, val, lo, hi, fmt in bench:
         rep.append((f"Published benchmark: {name}", "PASS" if lo < val < hi else "FAIL", fmt.format(val) + f" (expected {lo}–{hi})"))
 
@@ -287,14 +340,16 @@ def main():
     # 5. Write compact column arrays
     num = ["population", "households", "acs_pop", "adults18"] + list(AGE_GROUPS) + [f"{s}{b}" for s in "mf" for b in AGE_LINES] + \
           [f"inc_{b}" for b in INC] + ["inc_tot", "hhed_nocol", "hhed_some", "hhed_ba", "hhed_tot", "owners", "hh_kids", "hh_tot",
-          "enr_college", "enr_tot", "hispanic", "hisp_tot", "lang_spanish", "pop5", "veterans", "vet_tot", "some_college", "adults25"]
+          "enr_college", "enr_tot", "hispanic", "hisp_tot", "lang_spanish", "pop5", "veterans", "vet_tot", "some_college", "adults25",
+          "marital_tot", "divsep", "own_tot", "own55", "pov_hh", "pov_tot", "labor_civ", "employed", "unemployed", "workers",
+          "car_commute", "val_tot", "val300", "lang_hh", "lep_hh"]
     cols = {"zip": m.zip.tolist(), "city": m.city.fillna("").tolist(), "state": m.state.tolist(),
             "lat": m.lat.round(4).tolist(), "lon": m.lon.round(4).tolist(),
             "dma": m.dma_code.fillna("").tolist(), "cbsa": m.cbsa_code.fillna("").tolist()}
     for c in num:
         cols[c] = [None if pd.isna(x) else int(round(x)) for x in m[c]]
     meta = {"built": datetime.date.today().isoformat(), "acsYears": f"{year - 4}–{year}", "rows": len(m),
-            "sources": {"acs": f"Census ACS 5-year {year - 4}–{year} (B01001, B19001, B25013, B11005, B14001, B03003, C16001, B21001, B15003)",
+            "sources": {"acs": f"Census ACS 5-year {year - 4}–{year} (" + ", ".join(REQUESTS) + ")",
                         "geo": "Town, DMA and metro from Adtaxi's ZIP geography table"}}
     json.dump({"meta": meta, "cols": cols}, open(os.path.join(OUT, "zip_audience.json"), "w"), separators=(",", ":"))
     print("Wrote", os.path.join(OUT, "zip_audience.json"))
