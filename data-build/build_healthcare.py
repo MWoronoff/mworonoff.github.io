@@ -74,7 +74,7 @@ DEMAND_LABELS = {"population": "Population", "adults": "Adults 18+", "a65p": "Ag
                  "mhlth": "Frequent mental distress", "indeplive": "Independent-living disability"}
 RATES = ["kids_share", "inc75_share", "inc150_share"] + list(PLACES)
 # Measures offered as health conditions in the Healthcare radius tool
-RADIUS_CONDITIONS = ["diabetes", "bphigh", "arthritis", "obesity", "depression", "mhlth", "fairpoor"]
+RADIUS_CONDITIONS = ["diabetes", "bphigh", "arthritis", "obesity", "depression", "mhlth", "fairpoor", "nodental"]
 
 
 # How a filled-in health value was produced (the "_fill" code on each ZIP; 0 = current CDC release)

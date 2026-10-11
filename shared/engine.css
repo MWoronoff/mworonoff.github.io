@@ -200,6 +200,11 @@ button, input, select { font: inherit; color: inherit; }
 .rz-filters-head h2 { margin: 0; font-size: 17px; color: var(--navy); }
 .rz-clear { border: 0; background: none; color: var(--teal); font-weight: 600; cursor: pointer; padding: 2px 0; }
 .rz-clear:hover { text-decoration: underline; }
+.rz-profile { display: flex; flex-direction: column; gap: 8px; padding: 12px; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; }
+.rz-profile .az-field select { width: 100%; font-weight: 600; }
+.rz-either { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; font-size: 13px;
+             background: var(--card); border: 1px dashed var(--teal); border-radius: 8px; padding: 8px 10px; }
+.rz-either[hidden], .rz-note[hidden] { display: none; }
 .rz-presets { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 .rz-presets-label { font-size: 12px; color: var(--muted); font-weight: 600; width: 100%; }
 .rz-presets .az-btn { padding: 6px 10px; font-size: 12px; }
