@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Legal Market Analyzer</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="../shared/adtaxi-logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<link rel="stylesheet" href="../shared/engine.css">
+</head>
+<body>
+<div id="app"><p class="az-loading">Loading the Legal Market Analyzer…</p></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js" crossorigin=""></script>
+<script src="../shared/engine.js"></script>
+<script>
+AdtaxiAnalyzer.start({
+ "title": "Legal Market Analyzer",
+ "subtitle": "Where law firms' potential clients are: Market Potential Scores for DMAs, metros and ZIPs across five practice areas, to focus ad dollars on the highest-potential geographies.",
+ "logo": "../shared/adtaxi-logo.svg",
+ "exportName": "legal",
+ "notice": "Preview for review.",
+ "links": [
+  {
+   "label": "All analyzers",
+   "url": "../analyzers/"
+  }
+ ],
+ "defaultLevel": "dma",
+ "usMapLevel": "dma",
+ "levels": {
+  "us": {
+   "label": "U.S.",
+   "data": "data/us.json"
+  },
+  "dma": {
+   "label": "DMA",
+   "data": "data/dma.json",
+   "geo": "../shared/geo/dma.topo.json",
+   "idField": "dma_code"
+  },
+  "metro": {
+   "label": "Metro",
+   "data": "data/metro.json",
+   "geo": "../shared/geo/metro.topo.json",
+   "idField": "cbsa_code"
+  },
+  "zip": {
+   "label": "ZIPs in market",
+   "data": "data/zip/{level}/{id}.json",
+   "geo": "../shared/geo/zip/{level}/{id}.json",
+   "idField": "zip"
+  }
+ },
+ "statesGeo": "../shared/geo/states.topo.json",
+ "subcategoryLabel": "Practice area",
+ "subcategories": [
+  {
+   "id": "pi",
+   "label": "Personal injury"
+  },
+  {
+   "id": "family",
+   "label": "Family law and divorce"
+  },
+  {
+   "id": "estate",
+   "label": "Estate planning and elder law"
+  },
+  {
+   "id": "bankruptcy",
+   "label": "Bankruptcy and debt relief"
+  },
+  {
+   "id": "employment",
+   "label": "Employment law"
+  }
+ ],
+ "measures": [
+  {
+   "key": "score",
+   "label": "Market Potential Score",
+   "short": "Score",
+   "format": "score",
+   "perSub": true,
+   "levels": [
+    "dma",
+    "metro",
+    "zip"
+   ],
+   "help": "0 to 100. Weighted blend of Consumer Demand (40%), Category Spending (25%), Spending Power (15%) and Competition (20%), each a percentile against the other markets at the same level. ZIPs rank against the other ZIPs in the same market using Consumer Demand and Spending Power only (no EASI spending by ZIP, and Census hides small ZIP business counts)."
+  },
+  {
+   "key": "demand",
+   "label": "Consumer Demand",
+   "short": "Demand",
+   "format": "score",
+   "perSub": true,
+   "levels": [
+    "dma",
+    "metro",
+    "zip"
+   ],
+   "help": "Average of the percentiles for this practice area's client inputs (see How scores work)."
+  },
+  {
+   "key": "category",
+   "label": "Category Spending",
+   "short": "Category $",
+   "format": "score",
+   "perSub": true,
+   "levels": [
+    "dma",
+    "metro"
+   ],
+   "help": "Average of the percentiles for EASI household spending on legal fees, per household and in total."
+  },
+  {
+   "key": "spend",
+   "label": "Spending Power",
+   "short": "Spend",
+   "format": "score",
+   "perSub": true,
+   "levels": [
+    "dma",
+    "metro",
+    "zip"
+   ],
+   "help": "Percentile of the share of households earning $75K or more."
+  },
+  {
+   "key": "comp",
+   "label": "Competition",
+   "short": "Compete",
+   "format": "score",
+   "perSub": true,
+   "levels": [
+    "dma",
+    "metro"
+   ],
+   "help": "Percentile of law offices per 10,000 residents, reversed: fewer competing offices scores higher, since each ad dollar faces less competition."
+  },
+  {
+   "key": "est",
+   "label": "Law offices (competitors)",
+   "short": "Law offices",
+   "format": "int",
+   "help": "Offices of lawyers (all practice areas; Census doesn't split them). DMAs, metros and the U.S. use complete County Business Patterns counts. In the ZIP view, Census doesn't publish a ZIP's count when it has fewer than 3 offices, so those show as 0."
+  },
+  {
+   "key": "per10k",
+   "label": "Law offices per 10,000 residents",
+   "short": "Per 10K",
+   "format": "dec2"
+  },
+  {
+   "key": "growth",
+   "label": "One-year growth in law offices",
+   "short": "Growth",
+   "format": "pct",
+   "help": "Change in office count from the prior Business Patterns year. Blank where there were fewer than 3 offices."
+  },
+  {
+   "key": "under",
+   "label": "Underserved",
+   "short": "Underserved",
+   "format": "text",
+   "perSub": true,
+   "levels": [
+    "dma",
+    "metro",
+    "zip"
+   ],
+   "help": "Strong client demand (70th percentile or higher) but few law offices per resident (30th percentile or lower): a pitch for firms weighing a new office. Shown, not scored."
+  },
+  {
+   "key": "easi_hh",
+   "label": "Legal fees spending per household (EASI)",
+   "short": "Legal $/HH",
+   "format": "money",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "help": "EASI 2025 estimated annual household spending on legal fees. Much of it is wills, estates and similar work; contingency-fee cases such as personal injury are paid from settlements and barely appear.",
+   "hideWhenUnavailable": true
+  },
+  {
+   "key": "easi_idx",
+   "label": "Legal fees spending: index vs. U.S.",
+   "short": "Legal $ idx",
+   "format": "index",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "help": "Spending per household divided by the U.S. average, times 100.",
+   "hideWhenUnavailable": true
+  },
+  {
+   "key": "easi_total",
+   "label": "Legal fees spending, est. annual total",
+   "short": "Legal $ total",
+   "format": "moneyM",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "help": "EASI spending per household times the households in this market.",
+   "hideWhenUnavailable": true
+  },
+  {
+   "key": "population",
+   "label": "Population",
+   "format": "int"
+  },
+  {
+   "key": "households",
+   "label": "Households",
+   "format": "int"
+  },
+  {
+   "key": "adults",
+   "label": "Adults 18+",
+   "format": "int",
+   "subs": [
+    "pi"
+   ]
+  },
+  {
+   "key": "car_commute",
+   "label": "Workers commuting by car",
+   "format": "int",
+   "subs": [
+    "pi"
+   ]
+  },
+  {
+   "key": "car_share",
+   "label": "Share of workers commuting by car",
+   "format": "pct",
+   "subs": [
+    "pi"
+   ]
+  },
+  {
+   "key": "divsep",
+   "label": "Divorced or separated adults",
+   "format": "int",
+   "subs": [
+    "family"
+   ]
+  },
+  {
+   "key": "divsep_share",
+   "label": "Share divorced or separated (15+)",
+   "format": "pct",
+   "subs": [
+    "family"
+   ]
+  },
+  {
+   "key": "kids_share",
+   "label": "Households with children",
+   "format": "pct",
+   "subs": [
+    "family"
+   ]
+  },
+  {
+   "key": "own55",
+   "label": "Homeowners 55+",
+   "format": "int",
+   "subs": [
+    "estate"
+   ]
+  },
+  {
+   "key": "a65p",
+   "label": "Age 65+",
+   "format": "int",
+   "subs": [
+    "estate"
+   ]
+  },
+  {
+   "key": "val300_share",
+   "label": "Owner homes worth $300K+",
+   "format": "pct",
+   "subs": [
+    "estate"
+   ]
+  },
+  {
+   "key": "pov_share",
+   "label": "Households below poverty",
+   "format": "pct",
+   "subs": [
+    "bankruptcy"
+   ]
+  },
+  {
+   "key": "inc_lt35_share",
+   "label": "Households earning under $35K",
+   "format": "pct",
+   "subs": [
+    "bankruptcy"
+   ]
+  },
+  {
+   "key": "unemp_rate",
+   "label": "Unemployment rate",
+   "format": "pct",
+   "subs": [
+    "bankruptcy",
+    "employment"
+   ]
+  },
+  {
+   "key": "employed",
+   "label": "Employed workers",
+   "format": "int",
+   "subs": [
+    "employment"
+   ]
+  },
+  {
+   "key": "inc75_share",
+   "label": "Households earning $75K+",
+   "format": "pct"
+  },
+  {
+   "key": "lep_share",
+   "label": "Limited-English households",
+   "format": "pct",
+   "help": "Households where no one 14 or older speaks English very well: a signal for bilingual practices."
+  }
+ ],
+ "rankBy": [
+  "score",
+  "easi_idx",
+  "est",
+  "per10k",
+  "growth",
+  "population",
+  "adults",
+  "car_commute",
+  "car_share",
+  "divsep",
+  "divsep_share",
+  "kids_share",
+  "own55",
+  "a65p",
+  "val300_share",
+  "pov_share",
+  "inc_lt35_share",
+  "unemp_rate",
+  "employed",
+  "lep_share"
+ ],
+ "defaultRank": "score",
+ "components": [
+  "demand",
+  "category",
+  "spend",
+  "comp"
+ ],
+ "detailMeasures": [
+  "easi_hh",
+  "easi_idx",
+  "easi_total",
+  "est",
+  "per10k",
+  "growth",
+  "under",
+  "population",
+  "households",
+  "adults",
+  "car_commute",
+  "car_share",
+  "divsep",
+  "divsep_share",
+  "kids_share",
+  "own55",
+  "a65p",
+  "val300_share",
+  "pov_share",
+  "inc_lt35_share",
+  "unemp_rate",
+  "employed",
+  "inc75_share",
+  "lep_share"
+ ],
+ "tableColumns": [
+  "score",
+  "easi_idx",
+  "est",
+  "per10k",
+  "growth",
+  "under",
+  "population",
+  "car_share",
+  "divsep_share",
+  "own55",
+  "pov_share",
+  "unemp_rate"
+ ],
+ "methodology": [
+  {
+   "title": "Market Potential Score",
+   "body": [
+    "Answers one question: where are a law firm's potential clients, and which geographies deserve the most ad dollars?",
+    "Market Potential Score = 40% Consumer Demand + 25% Category Spending + 15% Spending Power + 20% Competition. Each part is a percentile (0 to 100) against the other markets at the same level: DMAs against DMAs, metros against metros, ZIPs against the other ZIPs in the same market.",
+    "A score isn't computed when one of its parts has no data, rather than guessing."
+   ]
+  },
+  {
+   "title": "Consumer Demand",
+   "body": [
+    "The size and need of each practice area's client base, from the Census American Community Survey. Personal injury: adults, workers commuting by car and the share who do. Family law and divorce: divorced or separated adults, their share of people 15+, and households with children. Estate planning and elder law: homeowners 55+, people 65+ and the share of owner homes worth $300K+. Bankruptcy and debt relief: households, the share below poverty, the share earning under $35K and the unemployment rate. Employment law: employed workers and the unemployment rate.",
+    "Criminal defense isn't included, because crime data isn't reliable by county."
+   ]
+  },
+  {
+   "title": "Category Spending",
+   "body": "EASI 2025 estimates of household spending on legal fees, the same for every practice area. Half the weight goes to spending per household and half to the market's total, which is EASI's per-household spending times this site's household count. Legal fees run highest where older households buy wills and estate work; personal injury and other contingency-fee cases are paid from settlements and barely show up. EASI counts Palm Springs inside Los Angeles, so the provisional Palm Springs DMA uses the Riverside–San Bernardino metro's rate. Not available by ZIP."
+  },
+  {
+   "title": "Spending Power",
+   "body": "Share of households earning $75K or more, from the Census American Community Survey. Kept at 15% because EASI spending already reflects income."
+  },
+  {
+   "title": "Competition",
+   "body": "Offices of lawyers per 10,000 residents, reversed: markets with fewer competing offices score higher. Census counts all law offices in one industry, so the same competitor count applies to every practice area. Counts are Census County Business Patterns, which counts every business. Not used in ZIP scores, because Census hides ZIP counts under 3 offices."
+  },
+  {
+   "title": "Underserved",
+   "body": "Flags markets with strong client demand (70th percentile or higher) but few law offices per resident (30th percentile or lower). It's shown as a pitch for firms weighing a new office, not counted in the score."
+  },
+  {
+   "title": "Measures shown for each practice area",
+   "body": "Rankings, table columns and market details show only the measures that relate to the selected practice area. Population, households, income, limited-English households, law offices and the score appear for every practice area."
+  },
+  {
+   "title": "ZIPs in a market",
+   "body": "Pick a DMA or metro, then choose ZIPs in market. ZIP scores use Consumer Demand and Spending Power, reweighted to 73% and 27%. ZIPs with fewer than 500 residents are shown but not ranked."
+  }
+ ],
+ "sources": [
+  {
+   "label": "Census ZIP and County Business Patterns",
+   "url": "https://www.census.gov/programs-surveys/cbp.html"
+  },
+  {
+   "label": "Census American Community Survey 5-year"
+  },
+  {
+   "label": "EASI Demographics 2025 (household legal fees spending)"
+  },
+  {
+   "label": "Deluxe ZIP file (Q4 2025)"
+  },
+  {
+   "label": "ZIP-level DMA list",
+   "url": "https://github.com/BritCrit/dma_county_zip"
+  }
+ ],
+ "sourcesNote": "Household legal fees spending is EASI; law office counts are Census Business Patterns; client measures and income are Census ACS; population and households are from the Deluxe ZIP file."
+});
+</script>
+</body>
+</html>
