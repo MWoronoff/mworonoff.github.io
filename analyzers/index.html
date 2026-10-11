@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Adtaxi Market Analyzers</title>
+<meta name="robots" content="noindex">
+<meta name="description" content="Adtaxi market analyzers for Healthcare, Legal and Higher Education: where each category's customers are, down to the ZIP code.">
+<link rel="icon" href="../shared/adtaxi-logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../shared/engine.css">
+<style>
+  .hub-intro { max-width: 1500px; margin: 0 auto; padding: 26px 28px 6px; }
+  .hub-intro p { margin: 0; max-width: 78ch; font-size: 15px; color: var(--ink); }
+  .hub-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 18px; padding: 0; list-style: none; counter-reset: step; }
+  .hub-steps li { counter-increment: step; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px 14px 52px; position: relative; }
+  .hub-steps li::before {
+    content: counter(step); position: absolute; left: 16px; top: 14px;
+    width: 24px; height: 24px; border-radius: 50%; background: var(--navy); color: #fff;
+    font-weight: 700; font-size: 13px; display: grid; place-items: center;
+  }
+  .hub-steps b { display: block; margin-bottom: 2px; }
+  .hub-steps span { color: var(--muted); }
+
+  .hub-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+  .hub-card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow);
+              display: flex; flex-direction: column; overflow: hidden; }
+  .hub-card-head { padding: 18px 20px 14px; border-top: 5px solid var(--teal); }
+  .hub-card h2 { margin: 0 0 6px; font-size: 20px; letter-spacing: -0.01em; }
+  .hub-card-head p { margin: 0; color: var(--muted); }
+  .hub-cats { padding: 0 20px 16px; flex: 1; }
+  .hub-cats h3 { margin: 0 0 8px; font-size: 13px; color: var(--muted); font-weight: 600; }
+  .hub-cats ul { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 6px; }
+  .hub-cats li { background: var(--bg); border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; font-size: 13px; }
+  .hub-actions { display: flex; flex-wrap: wrap; gap: 10px; padding: 14px 20px 18px; border-top: 1px solid var(--line); }
+  .hub-actions a { text-decoration: none; }
+  .hub-note { margin: 22px 0 0; color: var(--muted); font-size: 13px; max-width: 90ch; }
+
+  @media (max-width: 1100px) { .hub-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 760px) {
+    .hub-grid, .hub-steps { grid-template-columns: 1fr; }
+    .hub-intro, .az-main { padding-left: 16px; padding-right: 16px; }
+  }
+</style>
+</head>
+<body>
+<header class="az-header">
+  <div class="az-header-inner">
+    <div class="az-title">
+      <h1>Adtaxi Market Analyzers</h1>
+      <p>Where each category's customers are, from DMA to ZIP code, so ad dollars go to the geographies with the most potential.</p>
+    </div>
+    <img class="az-logo" src="../shared/adtaxi-logo.svg" alt="Adtaxi">
+  </div>
+</header>
+
+<section class="hub-intro" aria-label="How to use the analyzers">
+  <p>Each analyzer scores every DMA, metro and ZIP for a category's market potential, using Census, CDC, Department of Education and EASI consumer spending data. Its ZIP Code Radius Tool then counts the exact audience around any location.</p>
+  <ol class="hub-steps">
+    <li><b>Find the strongest markets</b><span>Rank DMAs and metros by Market Potential Score for the client's category.</span></li>
+    <li><b>Drill into ZIPs</b><span>See which ZIPs inside a market score highest, and why.</span></li>
+    <li><b>Size the audience around a location</b><span>Pick a ZIP and radius, choose the audience, and export the ranked ZIP list.</span></li>
+  </ol>
+</section>
+
+<main class="az-main">
+  <div class="hub-grid">
+    <article class="hub-card">
+      <div class="hub-card-head">
+        <h2>Healthcare</h2>
+        <p>Patients by condition, age, insurance and spending on medical services and prescriptions.</p>
+      </div>
+      <div class="hub-cats">
+        <h3>9 categories</h3>
+        <ul>
+          <li>Urgent and emergency care</li><li>Pharmacy</li><li>Dental</li><li>Hearing and audiology</li><li>Eye care</li>
+          <li>Chiropractic and physical therapy</li><li>Behavioral health</li><li>Med spa and aesthetics</li><li>Senior and home care</li>
+        </ul>
+      </div>
+      <div class="hub-actions">
+        <a class="az-btn primary" href="../healthcare/">Open Market Analyzer</a>
+        <a class="az-btn" href="../healthcare/radius.html">Zip Code Radius Tool</a>
+      </div>
+    </article>
+
+    <article class="hub-card">
+      <div class="hub-card-head">
+        <h2>Legal</h2>
+        <p>Potential clients by life event, homeownership, employment and spending on legal fees.</p>
+      </div>
+      <div class="hub-cats">
+        <h3>5 practice areas</h3>
+        <ul>
+          <li>Personal injury</li><li>Family law and divorce</li><li>Estate planning and elder law</li><li>Bankruptcy and debt relief</li><li>Employment law</li>
+        </ul>
+      </div>
+      <div class="hub-actions">
+        <a class="az-btn primary" href="../legal/">Open Market Analyzer</a>
+        <a class="az-btn" href="../legal/radius.html">Zip Code Radius Tool</a>
+      </div>
+    </article>
+
+    <article class="hub-card">
+      <div class="hub-card-head">
+        <h2>Higher Education</h2>
+        <p>Potential students by age, education, family background and spending on college tuition.</p>
+      </div>
+      <div class="hub-cats">
+        <h3>5 types of schools</h3>
+        <ul>
+          <li>Four-year colleges and universities</li><li>Community colleges</li><li>Trade and career schools</li>
+          <li>Graduate and professional programs</li><li>Adult and online degree completion</li>
+        </ul>
+      </div>
+      <div class="hub-actions">
+        <a class="az-btn primary" href="../higher-ed/">Open Market Analyzer</a>
+        <a class="az-btn" href="../higher-ed/radius.html">Zip Code Radius Tool</a>
+      </div>
+    </article>
+  </div>
+
+  <p class="hub-note">Sources include the Census Bureau (American Community Survey, ZIP and County Business Patterns), CDC PLACES, the Department of Education's IPEDS directory and EASI Demographics 2025. Each analyzer's "How scores work" explains its method and data dates.</p>
+</main>
+</body>
+</html>
