@@ -101,6 +101,7 @@
     lep:      { label: "Limited English", type: "flag", text: "Limited-English household", share: function (c, i) { return ratio(c.lep_hh[i], c.lang_hh[i]); } }
   };
   var CLASSES = [[0, 80, "--ramp-1", "Under 80"], [80, 100, "--ramp-2", "80–99"], [100, 120, "--ramp-3", "100–119"], [120, 150, "--ramp-4", "120–149"], [150, Infinity, "--ramp-5", "150+"]];
+  var SMALL_ZIP = 1000;   // when sorting by index, ZIPs with fewer residents go last: a high share of a tiny ZIP is too few people to buy
   var NF0 = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
   var NF1 = new Intl.NumberFormat("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
@@ -473,14 +474,10 @@
   Radius.prototype.renderTable = function () {
     var self = this, s = this.state, rows = this.visible().slice(), est = this.isEstimate();
     var cols = [["zip", "ZIP", "l"], ["town", "Town", "l"], ["dist", "Miles", "n"], ["pop", "Population", "n"], ["aud", est ? "Est. audience" : "Audience", "n"], ["share", "Share", "n"], ["idx", "Index", "n"]];
-    var k = s.sortKey, dir = s.sortDir === "asc" ? 1 : -1;
-    rows.sort(function (a, b) {
-      var x = a[k], y = b[k];
-      if (x == null && y == null) return 0; if (x == null) return 1; if (y == null) return -1;
-      return typeof x === "string" ? dir * x.localeCompare(y) : dir * (x - y);
-    });
+    this.sortRows(rows);
+    var k = s.sortKey, nSmall = k === "idx" ? rows.filter(function (r) { return (r.pop || 0) < SMALL_ZIP; }).length : 0;
     this.tableTitle.textContent = "ZIPs within " + s.r + " miles";
-    this.tableNote.textContent = (rows.length > s.show ? "Showing " + s.show + " of " + NF0.format(rows.length) + " ZIPs. Export includes all." : NF0.format(rows.length) + " ZIPs.") + " Click a column to sort.";
+    this.tableNote.textContent = (rows.length > s.show ? "Showing " + s.show + " of " + NF0.format(rows.length) + " ZIPs. Export includes all." : NF0.format(rows.length) + " ZIPs.") + (nSmall ? " ZIPs under " + NF0.format(SMALL_ZIP) + " residents are listed last." : "") + " Click a column to sort.";
     this.thead.innerHTML = "";
     var hr = el("tr");
     cols.forEach(function (cdef) {
@@ -506,6 +503,17 @@
     if (!rows.length) frag.appendChild(el("tr", null, [el("td", { colspan: "7", class: "az-empty", text: "No ZIPs meet the index cutoff. Lower the Show setting or widen the radius." })]));
     this.tbody.appendChild(frag);
     if (rows.length > s.show) this.tbody.appendChild(el("tr", null, [el("td", { colspan: "7" }, [el("button", { type: "button", class: "az-btn", text: "Show all " + NF0.format(rows.length), onclick: function () { s.show = 1e9; self.renderTable(); } })])]));
+  };
+
+  Radius.prototype.sortRows = function (rows) {
+    var s = this.state, k = s.sortKey, dir = s.sortDir === "asc" ? 1 : -1;
+    rows.sort(function (a, b) {
+      if (k === "idx") { var sa = (a.pop || 0) < SMALL_ZIP, sb = (b.pop || 0) < SMALL_ZIP; if (sa !== sb) return sa ? 1 : -1; }
+      var x = a[k], y = b[k];
+      if (x == null && y == null) return 0; if (x == null) return 1; if (y == null) return -1;
+      return typeof x === "string" ? dir * x.localeCompare(y) : dir * (x - y);
+    });
+    return rows;
   };
 
   /* ---------- Map ---------- */
@@ -585,7 +593,7 @@
   Radius.prototype.exportCSV = function () {
     if (!this.rows) return;
     var s = this.state, est = this.isEstimate();
-    var rows = this.visible().slice().sort(function (a, b) { return (b.aud || 0) - (a.aud || 0); });
+    var rows = this.sortRows(this.visible().slice());   // same order as the table
     var lines = [["ZIP", "Town", "Miles from center", "Population", est ? "Estimated audience" : "Audience", "Audience share", "Index vs US", "Audience definition"].map(csvCell).join(",")];
     var def = this.describe();
     rows.forEach(function (r) {
@@ -615,7 +623,7 @@
       ["Everything else is an estimate", list(traits).replace(/^./, function (x) { return x.toUpperCase(); }) + " come from separate tables. The tool multiplies the base count by each trait's share in that ZIP, which assumes the traits are independent within a ZIP. That's the standard approach, but real overlaps can be higher or lower, so combined counts are labeled as estimates."]
     ];
     if (aged.length) secs.push(["Traits applied by age group", list(aged).replace(/^./, function (x) { return x.toUpperCase(); }) + " are published by age, so the tool applies each age group's own rate in each ZIP. For example, hearing difficulty among people 75 and older uses the 75+ rate, which is far higher than the rate for all ages."]);
-    if ((this.cfg.profiles || []).length) secs.push(["Best prospects", "Each category starts from a profile of its likely customers, built from the same Census and CDC data. A profile is a starting point: change any filter to fit the client. When a profile includes an \"either\" condition (such as 65 and older, or diabetes), people who meet either one are counted once. The ZIP list is sorted by index, so the ZIPs where prospects are most concentrated come first; sort by Est. audience to see the largest counts."]);
+    if ((this.cfg.profiles || []).length) secs.push(["Best prospects", "Each category starts from a profile of its likely customers, built from the same Census and CDC data. A profile is a starting point: change any filter to fit the client. When a profile includes an \"either\" condition (such as 65 and older, or diabetes), people who meet either one are counted once. The ZIP list is sorted by index, so the ZIPs where prospects are most concentrated come first; ZIPs with fewer than 1,000 residents are listed after the rest, since a high share of a tiny ZIP is too few people to reach. Sort by Est. audience to see the largest counts."]);
     if (cf.indexOf("parented") >= 0) secs.push(["Parents' education", "This is the education of the head of household in every household in the ZIP. Combine it with Children at home to estimate households with children whose head of household has no college."]);
     secs.push(["Index vs. U.S.", "A ZIP's audience share of its population, divided by the same share nationally, times 100. Above 100 means the audience is more concentrated there than in the U.S. overall."]);
     secs = secs.concat((this.cfg.methodology || []).map(function (m) { return [m.title, m.body]; }));
