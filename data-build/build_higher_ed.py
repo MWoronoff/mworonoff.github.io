@@ -114,7 +114,7 @@ def load_ipeds(cache, rep):
         csvs = sorted([n for n in zf.namelist() if n.lower().endswith(".csv")], key=lambda n: ("_rv" not in n.lower(), n))
         if not csvs: continue
         d = pd.read_csv(zf.open(csvs[0]), dtype=str, encoding="latin-1")
-        d.columns = [c.strip().upper().lstrip("\ufeff").replace("ï»¿", "") for c in d.columns]
+        d.columns = [re.sub(r"^[^A-Z0-9]+", "", c.strip().upper()) for c in d.columns]   # drops a byte-order mark read as text
         rep.append(("IPEDS institution directory", "INFO", f"{y} ({csvs[0]}, {len(d):,} records)"))
         return y, d
     sys.exit("No IPEDS institution directory (HD file) could be downloaded from nces.ed.gov.")
