@@ -33,7 +33,11 @@ jobs:
       - name: Build Legal data
         run: python3 data-build/build_legal.py
       - name: Build Higher Education data
-        run: python3 data-build/build_higher_ed.py
+        run: |
+          set -o pipefail
+          python3 data-build/build_higher_ed.py 2>&1 | tee higher_ed.log || {
+            msg=$(grep -v '^\[PASS\]' higher_ed.log | tail -n 25 | sed ':a;N;$!ba;s/%/%25/g;s/\n/%0A/g')
+            echo "::error title=Higher Education build::$msg"; exit 1; }
       - name: Build engine test page data
         run: python3 data-build/build_engine_test.py
       - name: Commit results
