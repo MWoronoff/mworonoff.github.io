@@ -1,0 +1,488 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Higher Education Market Analyzer</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="../shared/adtaxi-logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<link rel="stylesheet" href="../shared/engine.css">
+</head>
+<body>
+<div id="app"><p class="az-loading">Loading the Higher Education Market Analyzer…</p></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js" crossorigin=""></script>
+<script src="../shared/engine.js"></script>
+<script>
+AdtaxiAnalyzer.start({
+ "title": "Higher Education Market Analyzer",
+ "subtitle": "Where colleges' and schools' potential students are: Market Potential Scores for DMAs, metros and ZIPs across five types of schools, to focus ad dollars on the highest-potential geographies.",
+ "logo": "../shared/adtaxi-logo.svg",
+ "exportName": "higher-ed",
+ "notice": "Preview for review.",
+ "links": [
+  {
+   "label": "Zip Code Radius Tool",
+   "url": "radius.html"
+  },
+  {
+   "label": "All analyzers",
+   "url": "../analyzers/"
+  }
+ ],
+ "defaultLevel": "dma",
+ "usMapLevel": "dma",
+ "levels": {
+  "us": {
+   "label": "U.S.",
+   "data": "data/us.json"
+  },
+  "dma": {
+   "label": "DMA",
+   "data": "data/dma.json",
+   "geo": "../shared/geo/dma.topo.json",
+   "idField": "dma_code"
+  },
+  "metro": {
+   "label": "Metro",
+   "data": "data/metro.json",
+   "geo": "../shared/geo/metro.topo.json",
+   "idField": "cbsa_code"
+  },
+  "zip": {
+   "label": "ZIPs in market",
+   "data": "data/zip/{level}/{id}.json",
+   "geo": "../shared/geo/zip/{level}/{id}.json",
+   "idField": "zip"
+  }
+ },
+ "statesGeo": "../shared/geo/states.topo.json",
+ "subcategoryLabel": "Type of school",
+ "subcategories": [
+  {
+   "id": "fouryear",
+   "label": "Four-year colleges and universities"
+  },
+  {
+   "id": "community",
+   "label": "Community colleges"
+  },
+  {
+   "id": "trade",
+   "label": "Trade and career schools"
+  },
+  {
+   "id": "graduate",
+   "label": "Graduate and professional programs"
+  },
+  {
+   "id": "adult",
+   "label": "Adult and online degree completion"
+  }
+ ],
+ "measures": [
+  {
+   "key": "score",
+   "label": "Market Potential Score",
+   "short": "Score",
+   "format": "score",
+   "perSub": true,
+   "levels": [
+    "dma",
+    "metro",
+    "zip"
+   ],
+   "help": "0 to 100. Weighted blend of Consumer Demand (40%), Category Spending (25%), Spending Power (15%) and Competition (20%), each a percentile against the other markets at the same level. ZIPs rank against the other ZIPs in the same market using Consumer Demand and Spending Power only (no EASI spending by ZIP, and most ZIPs have no school)."
+  },
+  {
+   "key": "demand",
+   "label": "Consumer Demand",
+   "short": "Demand",
+   "format": "score",
+   "perSub": true,
+   "levels": [
+    "dma",
+    "metro",
+    "zip"
+   ],
+   "help": "Average of the percentiles for this type of school's student inputs (see How scores work)."
+  },
+  {
+   "key": "category",
+   "label": "Category Spending",
+   "short": "Category $",
+   "format": "score",
+   "perSub": true,
+   "levels": [
+    "dma",
+    "metro"
+   ],
+   "help": "Average of the percentiles for EASI household spending on college tuition, per household and in total."
+  },
+  {
+   "key": "spend",
+   "label": "Spending Power",
+   "short": "Spend",
+   "format": "score",
+   "perSub": true,
+   "levels": [
+    "dma",
+    "metro",
+    "zip"
+   ],
+   "help": "Percentile of the share of households earning $75K or more."
+  },
+  {
+   "key": "comp",
+   "label": "Competition",
+   "short": "Compete",
+   "format": "score",
+   "perSub": true,
+   "levels": [
+    "dma",
+    "metro"
+   ],
+   "help": "Percentile of competing schools of this type per 100,000 residents, reversed: fewer competing schools scores higher, since each ad dollar faces less competition."
+  },
+  {
+   "key": "est",
+   "label": "Competing schools of this type",
+   "short": "Schools",
+   "format": "int",
+   "perSub": true,
+   "help": "Schools of the selected type located here, from the Department of Education's IPEDS directory of schools that take federal student aid. A school counts where its campus address is."
+  },
+  {
+   "key": "per100k",
+   "label": "Competing schools per 100,000 residents",
+   "short": "Per 100K",
+   "format": "dec2",
+   "perSub": true,
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "hideWhenUnavailable": true
+  },
+  {
+   "key": "under",
+   "label": "Underserved",
+   "short": "Underserved",
+   "format": "text",
+   "perSub": true,
+   "levels": [
+    "dma",
+    "metro"
+   ],
+   "help": "Strong student demand (70th percentile or higher) but few competing schools per resident (30th percentile or lower): a pitch for schools weighing a new campus or a recruiting push. Shown, not scored."
+  },
+  {
+   "key": "easi_hh",
+   "label": "College tuition spending per household (EASI)",
+   "short": "Tuition $/HH",
+   "format": "money",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "EASI 2025 estimated annual household spending on college tuition."
+  },
+  {
+   "key": "easi_idx",
+   "label": "College tuition spending: index vs. U.S.",
+   "short": "Tuition idx",
+   "format": "index",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "Spending per household divided by the U.S. average, times 100."
+  },
+  {
+   "key": "easi_total",
+   "label": "College tuition spending, est. annual total",
+   "short": "Tuition total",
+   "format": "moneyM",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "EASI spending per household times the households in this market."
+  },
+  {
+   "key": "population",
+   "label": "Population",
+   "format": "int"
+  },
+  {
+   "key": "households",
+   "label": "Households",
+   "format": "int"
+  },
+  {
+   "key": "age15_24",
+   "label": "Ages 15-24",
+   "format": "int",
+   "subs": [
+    "fouryear"
+   ]
+  },
+  {
+   "key": "age15_24_share",
+   "label": "Share of population ages 15-24",
+   "format": "pct",
+   "subs": [
+    "fouryear"
+   ]
+  },
+  {
+   "key": "age18_24",
+   "label": "Ages 18-24",
+   "format": "int",
+   "subs": [
+    "community"
+   ]
+  },
+  {
+   "key": "hs_only",
+   "label": "Adults 25+ whose highest education is high school",
+   "format": "int",
+   "subs": [
+    "community"
+   ]
+  },
+  {
+   "key": "hs_share",
+   "label": "Share of adults 25+ whose highest is high school",
+   "format": "pct",
+   "subs": [
+    "community"
+   ]
+  },
+  {
+   "key": "nodeg18_34",
+   "label": "Adults 18-34 without a college degree",
+   "format": "int",
+   "subs": [
+    "trade"
+   ]
+  },
+  {
+   "key": "nodeg_share",
+   "label": "Share of 18-34s without a college degree",
+   "format": "pct",
+   "subs": [
+    "trade"
+   ]
+  },
+  {
+   "key": "unemp_rate",
+   "label": "Unemployment rate",
+   "format": "pct",
+   "subs": [
+    "trade"
+   ]
+  },
+  {
+   "key": "ba_only",
+   "label": "Adults 25+ whose highest degree is a bachelor's",
+   "format": "int",
+   "subs": [
+    "graduate"
+   ]
+  },
+  {
+   "key": "ba_share",
+   "label": "Share of adults 25+ whose highest is a bachelor's",
+   "format": "pct",
+   "subs": [
+    "graduate"
+   ]
+  },
+  {
+   "key": "somecol25_64",
+   "label": "Adults 25-64 with some college, no degree",
+   "format": "int",
+   "subs": [
+    "adult"
+   ]
+  },
+  {
+   "key": "somecol_share",
+   "label": "Share of 25-64s with some college, no degree",
+   "format": "pct",
+   "subs": [
+    "adult"
+   ]
+  },
+  {
+   "key": "inc100_share",
+   "label": "Households earning $100K+",
+   "format": "pct",
+   "subs": [
+    "fouryear",
+    "graduate"
+   ]
+  },
+  {
+   "key": "enr_college",
+   "label": "Enrolled in college or graduate school",
+   "format": "int",
+   "help": "People currently enrolled in college, undergraduate or graduate, who live here."
+  },
+  {
+   "key": "inc75_share",
+   "label": "Households earning $75K+",
+   "format": "pct"
+  },
+  {
+   "key": "hisp_share",
+   "label": "Hispanic or Latino population",
+   "format": "pct",
+   "help": "A signal for Hispanic-Serving Institutions and Spanish-language recruiting."
+  }
+ ],
+ "rankBy": [
+  "score",
+  "easi_idx",
+  "est",
+  "per100k",
+  "population",
+  "age15_24",
+  "age15_24_share",
+  "age18_24",
+  "hs_only",
+  "hs_share",
+  "nodeg18_34",
+  "nodeg_share",
+  "unemp_rate",
+  "ba_only",
+  "ba_share",
+  "somecol25_64",
+  "somecol_share",
+  "inc100_share",
+  "enr_college",
+  "hisp_share"
+ ],
+ "defaultRank": "score",
+ "components": [
+  "demand",
+  "category",
+  "spend",
+  "comp"
+ ],
+ "detailMeasures": [
+  "easi_hh",
+  "easi_idx",
+  "easi_total",
+  "est",
+  "per100k",
+  "under",
+  "population",
+  "households",
+  "age15_24",
+  "age15_24_share",
+  "age18_24",
+  "hs_only",
+  "hs_share",
+  "nodeg18_34",
+  "nodeg_share",
+  "unemp_rate",
+  "ba_only",
+  "ba_share",
+  "somecol25_64",
+  "somecol_share",
+  "inc100_share",
+  "enr_college",
+  "inc75_share",
+  "hisp_share"
+ ],
+ "tableColumns": [
+  "score",
+  "easi_idx",
+  "est",
+  "per100k",
+  "under",
+  "population",
+  "age15_24_share",
+  "hs_share",
+  "nodeg_share",
+  "ba_share",
+  "somecol_share",
+  "hisp_share"
+ ],
+ "methodology": [
+  {
+   "title": "Market Potential Score",
+   "body": [
+    "Answers one question: where are a school's potential students, and which geographies deserve the most ad dollars?",
+    "Market Potential Score = 40% Consumer Demand + 25% Category Spending + 15% Spending Power + 20% Competition. Each part is a percentile (0 to 100) against the other markets at the same level: DMAs against DMAs, metros against metros, ZIPs against the other ZIPs in the same market.",
+    "A score isn't computed when one of its parts has no data, rather than guessing."
+   ]
+  },
+  {
+   "title": "Consumer Demand",
+   "body": [
+    "The size and concentration of each type of school's likely students, from the Census American Community Survey. Four-year colleges: people 15-24, their share of the population, and households earning $100K+. Community colleges: people 18-24, plus adults 25+ whose highest education is a high school diploma or GED, in number and share. Trade and career schools: adults 18-34 without a college degree, in number and share, and the unemployment rate. Graduate and professional programs: adults 25+ whose highest degree is a bachelor's, in number and share, and households earning $100K+. Adult and online degree completion: adults 25-64 with some college but no degree, in number and share."
+   ]
+  },
+  {
+   "title": "Category Spending",
+   "body": "EASI 2025 estimates of household spending on college tuition, the same for every type of school. Half the weight goes to spending per household and half to the market's total, which is EASI's per-household spending times this site's household count. EASI counts Palm Springs inside Los Angeles, so the provisional Palm Springs DMA uses the Riverside–San Bernardino metro's rate. Not available by ZIP."
+  },
+  {
+   "title": "Spending Power",
+   "body": "Share of households earning $75K or more, from the Census American Community Survey. Kept at 15% because EASI spending already reflects income."
+  },
+  {
+   "title": "Competition",
+   "body": "Competing schools of the selected type per 100,000 residents, reversed: markets with fewer competing schools score higher. Schools come from the Department of Education's IPEDS directory, which lists every college, university, community college and career school that takes federal student aid, at its campus address. Four-year: public and private schools whose highest award is a bachelor's or higher, excluding colleges that are mainly two-year. Community colleges: public two-year colleges and public colleges that are mainly two-year. Trade and career: private two-year schools and all schools with programs under two years. Graduate: schools awarding master's, professional or doctoral degrees. Adult and online: all degree-granting schools. Schools outside federal aid, such as some coding bootcamps, aren't included. Online schools count at their headquarters, though they enroll nationwide."
+  },
+  {
+   "title": "Underserved",
+   "body": "Flags markets with strong student demand (70th percentile or higher) but few competing schools per resident (30th percentile or lower). It's shown as a pitch for schools weighing a new campus or a recruiting push, not counted in the score."
+  },
+  {
+   "title": "Measures shown for each type of school",
+   "body": "Rankings, table columns and market details show only the measures that relate to the selected type of school. Population, households, college enrollment, income, Hispanic population, competing schools and the score appear for every type."
+  },
+  {
+   "title": "ZIPs in a market",
+   "body": "Pick a DMA or metro, then choose ZIPs in market. ZIP scores use Consumer Demand and Spending Power, reweighted to 73% and 27%. ZIPs with fewer than 500 residents are shown but not ranked. The ZIP view still shows how many competing schools sit in each ZIP. For recruiting across a wider area, use the Zip Code Radius Tool, which reaches up to 300 miles."
+  }
+ ],
+ "sources": [
+  {
+   "label": "Department of Education IPEDS institution directory",
+   "url": "https://nces.ed.gov/ipeds/"
+  },
+  {
+   "label": "Census American Community Survey 5-year"
+  },
+  {
+   "label": "EASI Demographics 2025 (household college tuition spending)"
+  },
+  {
+   "label": "Deluxe ZIP file (Q4 2025)"
+  },
+  {
+   "label": "ZIP-level DMA list",
+   "url": "https://github.com/BritCrit/dma_county_zip"
+  }
+ ],
+ "sourcesNote": "Household college tuition spending is EASI; competing schools are IPEDS; student measures and income are Census ACS; population and households are from the Deluxe ZIP file."
+});
+</script>
+</body>
+</html>

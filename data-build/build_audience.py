@@ -46,7 +46,7 @@ REQUESTS = {
     "B03003": [v("B03003", 1), v("B03003", 3)],                       # Hispanic or Latino origin
     "C16001": [v("C16001", 1), v("C16001", 3)],                       # language at home, population 5+
     "B21001": [v("B21001", 1), v("B21001", 2)],                       # veteran status, civilian 18+
-    "B15003": [v("B15003", 1), v("B15003", 19), v("B15003", 20)],     # education, population 25+
+    "B15003": [v("B15003", n) for n in (1, 17, 18, 19, 20, 21, 22, 23, 24, 25)],   # education, population 25+
     # Legal analyzer
     "B12001": [v("B12001", n) for n in (1, 2, 3, 4, 7, 9, 10, 11, 12, 13, 16, 18, 19)],   # sex by marital status, 15+
     "B25007": [v("B25007", n) for n in range(1, 12)],                 # tenure by age of householder (owner lines 2-11)
@@ -55,7 +55,12 @@ REQUESTS = {
     "B08301": [v("B08301", 1), v("B08301", 2)],                        # means of transportation to work
     "B25075": [v("B25075", n) for n in range(1, 28)],                 # value of owner-occupied homes
     "C16002": [v("C16002", n) for n in (1, 2, 3, 4, 6, 7, 9, 10, 12, 13)],   # household language, limited English
+    # Higher Education analyzer: sex by age by educational attainment, 18+ (all 83 lines, so every age group can be checked)
+    "B15001": [v("B15001", n) for n in range(1, 84)],
 }
+# B15001 layout: male total 2, female total 43; each age group's total line, followed by its 7 education lines
+# (less than 9th grade, 9th-12th no diploma, high school graduate, some college no degree, associate's, bachelor's, graduate)
+B15001_GROUPS = {"18_24": (3, 44), "25_34": (11, 52), "35_44": (19, 60), "45_64": (27, 68), "65p": (35, 76)}
 # Label checks: (variable, words that must appear in its Census label)
 LABEL_CHECKS = [(v("B01001", 2), ["Male"]), (v("B01001", 26), ["Female"])] + \
     [(v("B01001", n), ["Male", t]) for n, t in AGE_LABELS.items()] + \
@@ -77,7 +82,12 @@ LABEL_CHECKS = [(v("B01001", 2), ["Male"]), (v("B01001", 26), ["Female"])] + \
      (v("B25007", 11), ["Owner", "85 years"]), (v("B17017", 2), ["below poverty"]), (v("B23025", 4), ["Employed"]),
      (v("B23025", 5), ["Unemployed"]), (v("B08301", 2), ["Car, truck, or van"]), (v("B25075", 21), ["$300,000 to $399,999"]),
      (v("B25075", 27), ["$2,000,000 or more"]), (v("C16002", 4), ["Spanish", "Limited English"]),
-     (v("C16002", 13), ["Other languages", "Limited English"])]
+     (v("C16002", 13), ["Other languages", "Limited English"]),
+     (v("B15003", 17), ["Regular high school diploma"]), (v("B15003", 18), ["GED"]), (v("B15003", 21), ["Associate"]),
+     (v("B15003", 22), ["Bachelor"]), (v("B15003", 25), ["Doctorate"]),
+     (v("B15001", 3), ["Male", "18 to 24"]), (v("B15001", 7), ["Male", "18 to 24", "Some college"]),
+     (v("B15001", 27), ["Male", "45 to 64"]), (v("B15001", 43), ["Female"]), (v("B15001", 52), ["Female", "25 to 34"]),
+     (v("B15001", 83), ["Female", "65 years and over", "Graduate"])]
 
 
 KEY = os.environ.get("CENSUS_API_KEY", "").strip()
@@ -260,6 +270,16 @@ def main():
     out["val300"] = sum(acs[v("B25075", n)] for n in range(21, 28))
     out["lang_hh"] = acs[v("C16002", 1)]
     out["lep_hh"] = sum(acs[v("C16002", n)] for n in (4, 7, 10, 13))
+    # Higher Education analyzer
+    out["hs_only"] = acs[v("B15003", 17)] + acs[v("B15003", 18)]           # 25+, highest is a high school diploma or GED
+    out["assoc"] = acs[v("B15003", 21)]
+    out["ba_only"] = acs[v("B15003", 22)]                                   # 25+, highest is a bachelor's degree
+    out["grad_deg"] = sum(acs[v("B15003", n)] for n in (23, 24, 25))
+    G = lambda grp, k: acs[v("B15001", B15001_GROUPS[grp][0] + k)] + acs[v("B15001", B15001_GROUPS[grp][1] + k)]
+    out["pop18_34"] = G("18_24", 0) + G("25_34", 0)
+    out["nodeg18_34"] = sum(G(g, k) for g in ("18_24", "25_34") for k in (1, 2, 3, 4))   # no college degree
+    out["pop25_64"] = sum(G(g, 0) for g in ("25_34", "35_44", "45_64"))
+    out["somecol25_64"] = sum(G(g, 4) for g in ("25_34", "35_44", "45_64"))
 
     # 3. Internal consistency checks
     def chk(name, parts, total, tol=1):
@@ -297,6 +317,26 @@ def main():
         n = int((out[part] > out[total] + 1).sum())
         rep.append((f"{name} never exceeds its total", "PASS" if n == 0 else "FAIL", f"{n} ZIPs over"))
 
+    # Higher Education tables: every B15001 age group adds up, and the 25+ figures agree with B15003 (catches wrong line numbers)
+    bad = 0
+    for g, (ml, fl) in B15001_GROUPS.items():
+        for base in (ml, fl):
+            bad += int(((sum(acs[v("B15001", base + k)] for k in range(1, 8)) - acs[v("B15001", base)]).abs() > 1).sum())
+    rep.append(("Education by age (B15001): each age group adds up", "PASS" if bad == 0 else "FAIL", f"{bad} ZIP-groups off"))
+    for base, name in ((2, "male"), (43, "female")):
+        n = int(((sum(acs[v("B15001", B15001_GROUPS[g][0 if base == 2 else 1])] for g in B15001_GROUPS) - acs[v("B15001", base)]).abs() > 1).sum())
+        rep.append((f"Education by age: {name} age groups add up to the {name} total", "PASS" if n == 0 else "FAIL", f"{n} ZIPs off"))
+    p25 = sum(G(g, 0) for g in ("25_34", "35_44", "45_64", "65p"))
+    n = int(((p25 - out.adults25).abs() > 2).sum()); rep.append(("Education by age agrees with B15003: adults 25+", "PASS" if n == 0 else "FAIL", f"{n} ZIPs off"))
+    sc = sum(G(g, 4) for g in ("25_34", "35_44", "45_64", "65p"))
+    n = int(((sc - out.some_college).abs() > 2).sum()); rep.append(("Education by age agrees with B15003: some college, no degree", "PASS" if n == 0 else "FAIL", f"{n} ZIPs off"))
+    ba = sum(G(g, 6) for g in ("25_34", "35_44", "45_64", "65p"))
+    n = int(((ba - out.ba_only).abs() > 2).sum()); rep.append(("Education by age agrees with B15003: bachelor's degree", "PASS" if n == 0 else "FAIL", f"{n} ZIPs off"))
+    for part, total, name in (("nodeg18_34", "pop18_34", "Adults 18-34 without a degree"), ("somecol25_64", "pop25_64", "Adults 25-64 with some college"),
+                              ("hs_only", "adults25", "High school as highest education")):
+        n = int((out[part] > out[total] + 1).sum())
+        rep.append((f"{name} never exceeds its total", "PASS" if n == 0 else "FAIL", f"{n} ZIPs over"))
+
     # 4. Join to the master ZIP list
     geo = pd.read_csv(os.path.join(HERE, "geo", "zip_geo.csv"), dtype={"zip": str, "dma_code": str, "cbsa_code": str})
     m = geo[["zip", "city", "state", "lat", "lon", "dma_code", "cbsa_code", "population", "households"]].merge(out, on="zip", how="left")
@@ -324,7 +364,13 @@ def main():
              ("unemployment rate", tot("unemployed") / max(tot("labor_civ"), 1) * 100, 3, 8, "{:.1f}%"),
              ("car, truck or van share of workers", tot("car_commute") / max(tot("workers"), 1) * 100, 65, 90, "{:.1f}%"),
              ("homes worth $300K+", tot("val300") / max(tot("val_tot"), 1) * 100, 30, 65, "{:.1f}%"),
-             ("limited-English households", tot("lep_hh") / max(tot("lang_hh"), 1) * 100, 2, 7, "{:.1f}%")]
+             ("limited-English households", tot("lep_hh") / max(tot("lang_hh"), 1) * 100, 2, 7, "{:.1f}%"),
+             # Higher Education: high school as highest ~26% of 25+; bachelor's as highest ~21%; some college, no degree ~19% of 25-64;
+             # 18-34 without a college degree ~60%
+             ("high school as highest education, 25+", tot("hs_only") / max(tot("adults25"), 1) * 100, 20, 32, "{:.1f}%"),
+             ("bachelor's as highest degree, 25+", tot("ba_only") / max(tot("adults25"), 1) * 100, 17, 26, "{:.1f}%"),
+             ("some college, no degree, 25-64", tot("somecol25_64") / max(tot("pop25_64"), 1) * 100, 14, 25, "{:.1f}%"),
+             ("18-34 without a college degree", tot("nodeg18_34") / max(tot("pop18_34"), 1) * 100, 45, 72, "{:.1f}%")]
     for name, val, lo, hi, fmt in bench:
         rep.append((f"Published benchmark: {name}", "PASS" if lo < val < hi else "FAIL", fmt.format(val) + f" (expected {lo}–{hi})"))
 
@@ -342,7 +388,8 @@ def main():
           [f"inc_{b}" for b in INC] + ["inc_tot", "hhed_nocol", "hhed_some", "hhed_ba", "hhed_tot", "owners", "hh_kids", "hh_tot",
           "enr_college", "enr_tot", "hispanic", "hisp_tot", "lang_spanish", "pop5", "veterans", "vet_tot", "some_college", "adults25",
           "marital_tot", "divsep", "own_tot", "own55", "pov_hh", "pov_tot", "labor_civ", "employed", "unemployed", "workers",
-          "car_commute", "val_tot", "val300", "lang_hh", "lep_hh"]
+          "car_commute", "val_tot", "val300", "lang_hh", "lep_hh",
+          "hs_only", "assoc", "ba_only", "grad_deg", "pop18_34", "nodeg18_34", "pop25_64", "somecol25_64"]
     cols = {"zip": m.zip.tolist(), "city": m.city.fillna("").tolist(), "state": m.state.tolist(),
             "lat": m.lat.round(4).tolist(), "lon": m.lon.round(4).tolist(),
             "dma": m.dma_code.fillna("").tolist(), "cbsa": m.cbsa_code.fillna("").tolist()}
