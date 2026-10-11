@@ -73,6 +73,8 @@ DEMAND_LABELS = {"population": "Population", "adults": "Adults 18+", "a65p": "Ag
                  "arthritis": "Arthritis", "obesity": "Obesity", "depression": "Depression",
                  "mhlth": "Frequent mental distress", "indeplive": "Independent-living disability"}
 RATES = ["kids_share", "inc75_share", "inc150_share"] + list(PLACES)
+# Measures offered as health conditions in the Healthcare radius tool
+RADIUS_CONDITIONS = ["diabetes", "bphigh", "arthritis", "obesity", "depression", "mhlth", "fairpoor"]
 
 
 # How a filled-in health value was produced (the "_fill" code on each ZIP; 0 = current CDC release)
@@ -799,6 +801,19 @@ def main():
                       open(os.path.join(folder, f"{code}.json"), "w"), separators=(",", ":"))
             nfiles += 1
     log(f"Wrote {len(dma)} DMAs, {len(met)} metros and {nfiles} ZIP files to {OUT}")
+
+    # ZIP condition rates for the Healthcare radius tool (CDC PLACES share of adults, in tenths of a percent, with the
+    # same county and estimated fills the scores use). The radius tool joins these to the ZIP audience data by ZIP.
+    radius_keys = [k for k in RADIUS_CONDITIONS if k in have]
+    zc_out = z[z[radius_keys[0]].notna()] if radius_keys else z.iloc[0:0]
+    cols = {"zip": zc_out.zip.tolist()}
+    for k in radius_keys:
+        cols[k] = [None if pd.isna(x) else int(round(x * 1000)) for x in zc_out[k]]
+        cols[k + "_est"] = [int(x > 0) for x in zc_out[f"{k}_fill"]]
+    json.dump({"meta": {"built": built, "release": release, "units": "tenths of a percent of adults 18+",
+                        "labels": {k: DEMAND_LABELS[k] for k in radius_keys}}, "cols": cols},
+              open(os.path.join(OUT, "zip_conditions.json"), "w"), separators=(",", ":"))
+    log(f"Wrote {len(zc_out):,} ZIPs of condition rates ({', '.join(radius_keys) or 'none'}) for the radius tool")
 
 
 if __name__ == "__main__":

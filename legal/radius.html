@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zip Code Radius Tool - Legal</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="../shared/adtaxi-logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<link rel="stylesheet" href="../shared/engine.css">
+</head>
+<body>
+<div id="app"><p class="az-loading">Loading the radius tool…</p></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js" crossorigin=""></script>
+<script src="../shared/radius.js"></script>
+<script>
+AdtaxiRadius.start({
+  title: "Zip Code Radius Tool - Legal",
+  subtitle: "Pick a center ZIP or town and a radius, then choose the clients you want to reach to see how many live there and which ZIPs over-index.",
+  logo: "../shared/adtaxi-logo.svg",
+  exportName: "legal-radius",
+  links: [ { label: "Legal Market Analyzer", url: "./" }, { label: "All analyzers", url: "../analyzers/" } ],
+  audienceData: "../shared/audience/zip_audience.json",
+  extraData: [ { url: "../shared/audience/zip_audience_legal.json", label: "Home, home value and employment data" } ],
+  zipGeo: "../shared/geo/zip/{level}/{id}.json",
+  ageSet: "adult",
+  defaultZip: "77002",
+  defaultRadius: 25,
+  radii: [5, 10, 15, 25, 50, 100],
+  radiusLabel: "Up to {r} miles",
+  filters: ["gender", "age", "income", "home", "employ", "car", "divsep", "poverty", "lep", "hispanic", "spanish"],
+  presets: [
+    { label: "Car commuters (personal injury)", sel: { employ: ["emp"], car: true } },
+    { label: "Divorced or separated", sel: { divsep: true } },
+    { label: "Homeowners 55+ (estate planning)", sel: { age: ["55p"], home: ["ownlt200", "own200_400", "own400_750", "own750p"] } },
+    { label: "Owners of $400K+ homes", sel: { home: ["own400_750", "own750p"] } },
+    { label: "Renters below poverty", sel: { home: ["rent"], poverty: true } },
+    { label: "Limited-English households", sel: { lep: true } }
+  ],
+  methodology: [
+    { title: "Home and home value", body: "Owner and renter shares come from Census by the age of the head of household, so they use each age group's own rate; a homeowner 55+ selection uses the share of households headed by someone 55 or older that own their home. Home value bands are the share of owner-occupied homes in each value range in the ZIP." },
+    { title: "Employment and commuting", body: "Employment status is the share of people 16 and older. Everyone who commutes by car is employed, so combining Commutes by car with Employed doesn't count employment twice." }
+  ]
+});
+</script>
+</body>
+</html>

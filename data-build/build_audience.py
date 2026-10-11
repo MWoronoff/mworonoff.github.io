@@ -38,7 +38,7 @@ INC_LABELS = {2: "Less than $10,000", 5: "$20,000 to $24,999", 6: "$25,000 to $2
               16: "$150,000 to $199,999", 17: "$200,000 or more"}
 
 REQUESTS = {
-    "B01001": [v("B01001", 1)] + [v("B01001", n) for n in range(6, 26)] + [v("B01001", n + 24) for n in range(6, 26)],
+    "B01001": [v("B01001", 1)] + [v("B01001", n) for n in range(3, 26)] + [v("B01001", n + 24) for n in range(3, 26)],
     "B19001": [v("B19001", n) for n in range(1, 18)],
     "B25013": [v("B25013", n) for n in range(1, 12)],
     "B11005": [v("B11005", 1), v("B11005", 2)],
@@ -49,18 +49,40 @@ REQUESTS = {
     "B15003": [v("B15003", n) for n in (1, 17, 18, 19, 20, 21, 22, 23, 24, 25)],   # education, population 25+
     # Legal analyzer
     "B12001": [v("B12001", n) for n in (1, 2, 3, 4, 7, 9, 10, 11, 12, 13, 16, 18, 19)],   # sex by marital status, 15+
-    "B25007": [v("B25007", n) for n in range(1, 12)],                 # tenure by age of householder (owner lines 2-11)
+    "B25007": [v("B25007", n) for n in range(1, 22)],                 # tenure by age of householder (owner 2-11, renter 12-21)
     "B17017": [v("B17017", 1), v("B17017", 2)],                        # households below poverty
-    "B23025": [v("B23025", n) for n in (1, 3, 4, 5)],                  # employment status, 16+
+    "B23025": [v("B23025", n) for n in range(1, 8)],                   # employment status, 16+
     "B08301": [v("B08301", 1), v("B08301", 2)],                        # means of transportation to work
     "B25075": [v("B25075", n) for n in range(1, 28)],                 # value of owner-occupied homes
     "C16002": [v("C16002", n) for n in (1, 2, 3, 4, 6, 7, 9, 10, 12, 13)],   # household language, limited English
+    # Healthcare radius tool
+    "B27001": [v("B27001", n) for n in range(1, 58)],                 # health insurance coverage by sex by age
+    "B18102": [v("B18102", n) for n in range(1, 40)],                 # hearing difficulty by sex by age
+    "B18103": [v("B18103", n) for n in range(1, 40)],                 # vision difficulty by sex by age
+    "B09021": [v("B09021", n) for n in range(1, 29)],                 # living arrangements of adults by age
     # Higher Education analyzer: sex by age by educational attainment, 18+ (all 83 lines, so every age group can be checked)
     "B15001": [v("B15001", n) for n in range(1, 84)],
 }
 # B15001 layout: male total 2, female total 43; each age group's total line, followed by its 7 education lines
 # (less than 9th grade, 9th-12th no diploma, high school graduate, some college no degree, associate's, bachelor's, graduate)
 B15001_GROUPS = {"18_24": (3, 44), "25_34": (11, 52), "35_44": (19, 60), "45_64": (27, 68), "65p": (35, 76)}
+# Healthcare radius age brackets (all ages), as B01001 lines for males (+24 for females)
+HC_AGES = {"u18": range(3, 7), "18_34": range(7, 13), "35_64": range(13, 20), "65_74": range(20, 23), "75p": range(23, 26)}
+# B18102 / B18103 (difficulty by sex by age): each age group is a total line then "with" and "without"; male groups start
+# at these lines, female groups 19 lines later. Under 5 and 5-17 together make the under-18 bracket.
+DIS_GROUPS = {"u5": 3, "5_17": 6, "18_34": 9, "35_64": 12, "65_74": 15, "75p": 18}
+DIS_BRACKETS = {"u18": ("u5", "5_17"), "18_34": ("18_34",), "35_64": ("35_64",), "65_74": ("65_74",), "75p": ("75p",)}
+# B27001 (insurance by sex by age): total line, then "with" and "no" coverage; male groups at these lines, female +28.
+INS_GROUPS = {"u6": 3, "6_18": 6, "19_25": 9, "26_34": 12, "35_44": 15, "45_54": 18, "55_64": 21, "65_74": 24, "75p": 27}
+INS_BRACKETS = {"u18": ("u6", "6_18"), "18_34": ("19_25", "26_34"), "35_64": ("35_44", "45_54", "55_64"),
+                "65_74": ("65_74",), "75p": ("75p",)}
+# B09021 (living arrangements, adults 18+): age-group total lines, each followed by "lives alone" and five other lines
+LIV_GROUPS = {"18_34": 8, "35_64": 15, "65p": 22}
+# B25007 (tenure by age of householder) mapped to the Legal radius adult age brackets: owner line, renter line = +10
+TEN_BRACKETS = {"18_24": [3], "25_34": [4], "35_44": [5], "45_54": [6], "55p": [7, 8, 9, 10, 11]}
+AGE_TEXT = {"u18": "under 18", "18_34": "18–34", "35_64": "35–64", "65_74": "65–74", "75p": "75+", "65p": "65+"}
+# B25075 (value of owner-occupied homes) bands
+VAL_BANDS = {"lt200": range(2, 19), "200_400": range(19, 22), "400_750": range(22, 24), "750p": range(24, 28)}
 # Label checks: (variable, words that must appear in its Census label)
 LABEL_CHECKS = [(v("B01001", 2), ["Male"]), (v("B01001", 26), ["Female"])] + \
     [(v("B01001", n), ["Male", t]) for n, t in AGE_LABELS.items()] + \
@@ -87,7 +109,17 @@ LABEL_CHECKS = [(v("B01001", 2), ["Male"]), (v("B01001", 26), ["Female"])] + \
      (v("B15003", 22), ["Bachelor"]), (v("B15003", 25), ["Doctorate"]),
      (v("B15001", 3), ["Male", "18 to 24"]), (v("B15001", 7), ["Male", "18 to 24", "Some college"]),
      (v("B15001", 27), ["Male", "45 to 64"]), (v("B15001", 43), ["Female"]), (v("B15001", 52), ["Female", "25 to 34"]),
-     (v("B15001", 83), ["Female", "65 years and over", "Graduate"])]
+     (v("B15001", 83), ["Female", "65 years and over", "Graduate"]),
+     (v("B01001", 3), ["Male", "Under 5"]), (v("B01001", 27), ["Female", "Under 5"]),
+     (v("B27001", 3), ["Male", "Under 6"]), (v("B27001", 5), ["Male", "Under 6", "No health insurance"]),
+     (v("B27001", 27), ["Male", "75 years"]), (v("B27001", 30), ["Female"]), (v("B27001", 57), ["Female", "75 years", "No health insurance"]),
+     (v("B18102", 4), ["Male", "Under 5", "With a hearing difficulty"]), (v("B18102", 18), ["Male", "75 years"]),
+     (v("B18102", 21), ["Female"]), (v("B18102", 38), ["Female", "75 years", "With a hearing difficulty"]),
+     (v("B18103", 4), ["Male", "Under 5", "With a vision difficulty"]), (v("B18103", 38), ["Female", "75 years", "With a vision difficulty"]),
+     (v("B09021", 2), ["Lives alone"]), (v("B09021", 8), ["18 to 34"]), (v("B09021", 23), ["65 years and over", "Lives alone"]),
+     (v("B25007", 12), ["Renter occupied"]), (v("B25007", 13), ["Renter", "15 to 24"]), (v("B25007", 21), ["Renter", "85 years"]),
+     (v("B25075", 18), ["$175,000 to $199,999"]), (v("B25075", 23), ["$500,000 to $749,999"]), (v("B25075", 24), ["$750,000 to $999,999"]),
+     (v("B23025", 6), ["Armed Forces"]), (v("B23025", 7), ["Not in labor force"])]
 
 
 KEY = os.environ.get("CENSUS_API_KEY", "").strip()
@@ -270,6 +302,25 @@ def main():
     out["val300"] = sum(acs[v("B25075", n)] for n in range(21, 28))
     out["lang_hh"] = acs[v("C16002", 1)]
     out["lep_hh"] = sum(acs[v("C16002", n)] for n in (4, 7, 10, 13))
+    out["pop16"], out["nilf"] = acs[v("B23025", 1)], acs[v("B23025", 7)]
+    for b, lines in TEN_BRACKETS.items():                                  # owner and renter householders by age
+        out[f"o{b}"] = sum(acs[v("B25007", n)] for n in lines)
+        out[f"r{b}"] = sum(acs[v("B25007", n + 10)] for n in lines)
+    for b, lines in VAL_BANDS.items():
+        out[f"val_{b}"] = sum(acs[v("B25075", n)] for n in lines)
+    # Healthcare radius tool: people by sex and age bracket, and insurance, hearing, vision and living alone by age bracket
+    for sex, off in (("m", 0), ("f", 24)):
+        for b, lines in HC_AGES.items():
+            out[f"{sex}h{b}"] = sum(acs[v("B01001", n + off)] for n in lines)
+    for b, groups in DIS_BRACKETS.items():
+        out[f"civ_{b}"] = sum(acs[v("B18102", DIS_GROUPS[g] + off)] for g in groups for off in (0, 19))
+        out[f"hear_{b}"] = sum(acs[v("B18102", DIS_GROUPS[g] + off + 1)] for g in groups for off in (0, 19))
+        out[f"vis_{b}"] = sum(acs[v("B18103", DIS_GROUPS[g] + off + 1)] for g in groups for off in (0, 19))
+    for b, groups in INS_BRACKETS.items():
+        out[f"inst_{b}"] = sum(acs[v("B27001", INS_GROUPS[g] + off)] for g in groups for off in (0, 28))
+        out[f"unins_{b}"] = sum(acs[v("B27001", INS_GROUPS[g] + off + 2)] for g in groups for off in (0, 28))
+    for b, line in LIV_GROUPS.items():
+        out[f"liv_{b}"], out[f"alone_{b}"] = acs[v("B09021", line)], acs[v("B09021", line + 1)]
     # Higher Education analyzer
     out["hs_only"] = acs[v("B15003", 17)] + acs[v("B15003", 18)]           # 25+, highest is a high school diploma or GED
     out["assoc"] = acs[v("B15003", 21)]
@@ -337,6 +388,45 @@ def main():
         n = int((out[part] > out[total] + 1).sum())
         rep.append((f"{name} never exceeds its total", "PASS" if n == 0 else "FAIL", f"{n} ZIPs over"))
 
+    # Legal and Healthcare radius tables: parts add up (catches wrong line numbers, since the file server has no labels)
+    def add_up(name, table, total, parts, tol=1):
+        diff = sum(acs[v(table, k)] for k in parts) - acs[v(table, total)]
+        return int((diff.abs() > tol).sum())
+    def rep_add(name, n, unit="ZIPs off"): rep.append((name, "PASS" if n == 0 else "FAIL", f"{n} {unit}"))
+    rep_add("Employment: labor force + not in labor force = population 16+", add_up("", "B23025", 1, (2, 7)))
+    rep_add("Employment: civilian employed + unemployed + armed forces = labor force", add_up("", "B23025", 2, (4, 5, 6)))
+    rep_add("Renter ages add up", add_up("", "B25007", 12, range(13, 22)))
+    rep_add("Owners + renters = occupied homes (by age of householder)", add_up("", "B25007", 1, (2, 12)))
+    n = int(((sum(out[f"{s}h{b}"] for s in "mf" for b in HC_AGES) - out.acs_pop).abs() > 1).sum())
+    rep_add("Healthcare age brackets add up to population", n)
+    for table, word in (("B18102", "Hearing"), ("B18103", "Vision")):
+        bad = 0
+        for base in (2, 21):
+            bad += add_up("", table, base, [base + DIS_GROUPS[g] - 2 for g in DIS_GROUPS])
+            for g in DIS_GROUPS:
+                gl = base + DIS_GROUPS[g] - 2
+                bad += add_up("", table, gl, (gl + 1, gl + 2))
+        bad += add_up("", table, 1, (2, 21))
+        rep_add(f"{word} difficulty by age: every group adds up", bad, "ZIP-groups off")
+    n = int(((acs[v("B18102", 1)] - acs[v("B18103", 1)]).abs() > 1).sum())
+    rep_add("Hearing and vision tables cover the same people", n)
+    bad = add_up("", "B27001", 1, (2, 30))
+    for base in (2, 30):
+        bad += add_up("", "B27001", base, [base + INS_GROUPS[g] - 2 for g in INS_GROUPS])
+        for g in INS_GROUPS:
+            gl = base + INS_GROUPS[g] - 2
+            bad += add_up("", "B27001", gl, (gl + 1, gl + 2))
+    rep_add("Health insurance by age: every group adds up", bad, "ZIP-groups off")
+    bad = add_up("", "B09021", 1, LIV_GROUPS.values()) + add_up("", "B09021", 1, range(2, 8))
+    for line in LIV_GROUPS.values(): bad += add_up("", "B09021", line, range(line + 1, line + 7))
+    rep_add("Living arrangements by age: every group adds up", bad, "ZIP-groups off")
+    for part, total, name in (("nilf", "pop16", "Not in labor force"),) + tuple(
+            (f"{t}_{b}", f"civ_{b}", f"{w} difficulty, {AGE_TEXT[b]}") for t, w in (("hear", "Hearing"), ("vis", "Vision")) for b in DIS_BRACKETS) + tuple(
+            (f"unins_{b}", f"inst_{b}", f"Uninsured, {AGE_TEXT[b]}") for b in INS_BRACKETS) + tuple(
+            (f"alone_{b}", f"liv_{b}", f"Living alone, {AGE_TEXT[b]}") for b in LIV_GROUPS):
+        n = int((out[part] > out[total] + 1).sum())
+        rep.append((f"{name} never exceeds its total", "PASS" if n == 0 else "FAIL", f"{n} ZIPs over"))
+
     # 4. Join to the master ZIP list
     geo = pd.read_csv(os.path.join(HERE, "geo", "zip_geo.csv"), dtype={"zip": str, "dma_code": str, "cbsa_code": str})
     m = geo[["zip", "city", "state", "lat", "lon", "dma_code", "cbsa_code", "population", "households"]].merge(out, on="zip", how="left")
@@ -370,7 +460,17 @@ def main():
              ("high school as highest education, 25+", tot("hs_only") / max(tot("adults25"), 1) * 100, 20, 32, "{:.1f}%"),
              ("bachelor's as highest degree, 25+", tot("ba_only") / max(tot("adults25"), 1) * 100, 17, 26, "{:.1f}%"),
              ("some college, no degree, 25-64", tot("somecol25_64") / max(tot("pop25_64"), 1) * 100, 14, 25, "{:.1f}%"),
-             ("18-34 without a college degree", tot("nodeg18_34") / max(tot("pop18_34"), 1) * 100, 45, 72, "{:.1f}%")]
+             ("18-34 without a college degree", tot("nodeg18_34") / max(tot("pop18_34"), 1) * 100, 45, 72, "{:.1f}%"),
+             # Healthcare radius: uninsured ~8-9%, under 2% at 65+; hearing difficulty ~3.5-4%, 13-16% at 75+; vision ~2.5%;
+             # adults 65+ living alone ~25-29%; renters ~35%; homes $750K+ ~10-14%
+             ("uninsured share, all ages", sum(tot(f"unins_{b}") for b in INS_BRACKETS) / max(sum(tot(f"inst_{b}") for b in INS_BRACKETS), 1) * 100, 5.5, 12, "{:.1f}%"),
+             ("uninsured share, 65-74", tot("unins_65_74") / max(tot("inst_65_74"), 1) * 100, 0.2, 3, "{:.1f}%"),
+             ("hearing difficulty, all ages", sum(tot(f"hear_{b}") for b in DIS_BRACKETS) / max(sum(tot(f"civ_{b}") for b in DIS_BRACKETS), 1) * 100, 2.5, 5, "{:.1f}%"),
+             ("hearing difficulty, 75+", tot("hear_75p") / max(tot("civ_75p"), 1) * 100, 9, 22, "{:.1f}%"),
+             ("vision difficulty, all ages", sum(tot(f"vis_{b}") for b in DIS_BRACKETS) / max(sum(tot(f"civ_{b}") for b in DIS_BRACKETS), 1) * 100, 1.5, 3.8, "{:.1f}%"),
+             ("adults 65+ living alone", tot("alone_65p") / max(tot("liv_65p"), 1) * 100, 20, 34, "{:.1f}%"),
+             ("renter share of households", sum(tot(f"r{b}") for b in TEN_BRACKETS) / max(tot("hhed_tot"), 1) * 100, 28, 42, "{:.1f}%"),
+             ("homes worth $750K+", tot("val_750p") / max(tot("val_tot"), 1) * 100, 5, 20, "{:.1f}%")]
     for name, val, lo, hi, fmt in bench:
         rep.append((f"Published benchmark: {name}", "PASS" if lo < val < hi else "FAIL", fmt.format(val) + f" (expected {lo}–{hi})"))
 
@@ -390,6 +490,10 @@ def main():
           "marital_tot", "divsep", "own_tot", "own55", "pov_hh", "pov_tot", "labor_civ", "employed", "unemployed", "workers",
           "car_commute", "val_tot", "val300", "lang_hh", "lep_hh",
           "hs_only", "assoc", "ba_only", "grad_deg", "pop18_34", "nodeg18_34", "pop25_64", "somecol25_64"]
+    # Columns only one site's radius tool uses go in their own file, so every page doesn't load them
+    extra = {"zip_audience_health.json": [f"{s}h{b}" for s in "mf" for b in HC_AGES] + [f"{t}_{b}" for t in ("civ", "hear", "vis") for b in DIS_BRACKETS] +
+                                         [f"{t}_{b}" for t in ("inst", "unins") for b in INS_BRACKETS] + [f"{t}_{b}" for t in ("liv", "alone") for b in LIV_GROUPS],
+             "zip_audience_legal.json": ["pop16", "nilf"] + [f"{t}{b}" for t in "or" for b in TEN_BRACKETS] + [f"val_{b}" for b in VAL_BANDS]}
     cols = {"zip": m.zip.tolist(), "city": m.city.fillna("").tolist(), "state": m.state.tolist(),
             "lat": m.lat.round(4).tolist(), "lon": m.lon.round(4).tolist(),
             "dma": m.dma_code.fillna("").tolist(), "cbsa": m.cbsa_code.fillna("").tolist()}
@@ -400,6 +504,12 @@ def main():
                         "geo": "Town, DMA and metro from Adtaxi's ZIP geography table"}}
     json.dump({"meta": meta, "cols": cols}, open(os.path.join(OUT, "zip_audience.json"), "w"), separators=(",", ":"))
     print("Wrote", os.path.join(OUT, "zip_audience.json"))
+    for name, ecols in extra.items():
+        ec = {"zip": cols["zip"]}
+        for c in ecols: ec[c] = [None if pd.isna(x) else int(round(x)) for x in m[c]]
+        json.dump({"meta": {"built": meta["built"], "acsYears": meta["acsYears"]}, "cols": ec},
+                  open(os.path.join(OUT, name), "w"), separators=(",", ":"))
+        print("Wrote", os.path.join(OUT, name))
 
 
 if __name__ == "__main__":

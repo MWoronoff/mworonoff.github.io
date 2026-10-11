@@ -5,11 +5,32 @@
  *
  * Audience math (per ZIP): base people x the share of each other selected trait, assuming traits are independent
  * within a ZIP. Gender x age is one Census table, so that part is exact; anything combined with it is an estimate.
+ * Traits Census publishes by age (insurance, hearing, vision, living alone, home ownership, health conditions for adults)
+ * are applied within each age group, so "hearing difficulty" among people 75+ uses the 75+ rate, not the all-ages rate.
+ * A site picks its age groups with cfg.ageSet: "default" (15+, Higher Education), "health" (all ages) or "adult" (18+).
  */
 (function () {
   "use strict";
 
   var AGE = [["15_17", "15–17"], ["18_24", "18–24"], ["25_34", "25–34"], ["35_44", "35–44"], ["45_54", "45–54"], ["55p", "55+"]];
+  var AGE_SETS = {
+    "default": { options: AGE, col: function (sex, b) { return sex + b; }, all: "acs_pop",
+                 note: "Gender and age cover people 15 and older. Leave a group blank to include everyone.",
+                 method: "Counts of people by sex and age come from one Census table, so a gender and age selection is an exact count for people 15 and older." },
+    health:    { options: [["u18", "Under 18"], ["18_34", "18–34"], ["35_64", "35–64"], ["65_74", "65–74"], ["75p", "75+"]],
+                 col: function (sex, b) { return sex + "h" + b; }, all: "acs_pop",
+                 note: "Ages cover everyone. Leave a group blank to include everyone.",
+                 method: "Counts of people by sex and age come from one Census table, so a gender and age selection is an exact count. The age groups match the ones Census uses for insurance, hearing and vision, so those filters use the rate for each age group." },
+    adult:     { options: [["18_24", "18–24"], ["25_34", "25–34"], ["35_44", "35–44"], ["45_54", "45–54"], ["55p", "55+"]],
+                 col: function (sex, b) { return sex + b; }, all: "adults18",
+                 note: "Counts cover adults 18 and older. Leave a group blank to include every adult.",
+                 method: "The audience starts from adults 18 and older. Counts of adults by sex and age come from one Census table, so a gender and age selection is an exact count." }
+  };
+  // Health conditions (CDC PLACES, adults): any of the selected, treating conditions as independent within a ZIP
+  var CONDITIONS = [["diabetes", "Diabetes"], ["bphigh", "High blood pressure"], ["arthritis", "Arthritis"], ["obesity", "Obesity"],
+                    ["depression", "Depression"], ["mhlth", "Frequent mental distress"], ["fairpoor", "Fair or poor health"]];
+  var VALUES = [["lt200", "Under $200K"], ["200_400", "$200K–$399K"], ["400_750", "$400K–$749K"], ["750p", "$750K+"]];
+  var EMPLOY = { emp: "employed", unemp: "unemployed", nilf: "nilf" };
   var FILTERS = {
     gender:   { label: "Gender", type: "multi", options: [["m", "Male"], ["f", "Female"]] },
     age:      { label: "Age", type: "multi", options: AGE },
@@ -25,7 +46,55 @@
     spanish:  { label: "Spanish at home", type: "flag", text: "Spanish spoken at home", share: function (c, i) { return ratio(c.lang_spanish[i], c.pop5[i]); } },
     veterans: { label: "Veterans", type: "flag", text: "Civilian veterans 18+", share: function (c, i) { return ratio(c.veterans[i], c.vet_tot[i]); } },
     somecollege: { label: "Some college, no degree", type: "flag", text: "Adults 25+ who started college but didn't finish", share: function (c, i) { return ratio(c.some_college[i], c.adults25[i]); } },
-    homeowners: { label: "Homeowners", type: "flag", text: "Owner-occupied households", share: function (c, i) { return ratio(c.owners ? c.owners[i] : null, c.hhed_tot[i]); } }
+    homeowners: { label: "Homeowners", type: "flag", text: "Owner-occupied households", share: function (c, i) { return ratio(c.owners ? c.owners[i] : null, c.hhed_tot[i]); } },
+
+    // Healthcare (age set "health"): applied within each age group
+    insurance: { label: "Health insurance", type: "multi", options: [["ins", "Insured"], ["unins", "Uninsured"]],
+                 byAge: function (c, i, b, sel) {
+                   var u = ratio(c["unins_" + b][i], c["inst_" + b][i]); if (u == null) return null;
+                   return (sel.indexOf("unins") >= 0 ? u : 0) + (sel.indexOf("ins") >= 0 ? 1 - u : 0);
+                 } },
+    conditions: { label: "Health conditions (adults, any of)", type: "multi", options: CONDITIONS,
+                  byAge: function (c, i, b, sel) {
+                    if (b === "u18") return 0;
+                    var none = 1;
+                    for (var k = 0; k < sel.length; k++) { var p = c[sel[k]] ? c[sel[k]][i] : null; if (p == null) return null; none *= 1 - Math.min(1, p / 1000); }
+                    return 1 - none;
+                  } },
+    hearing:  { label: "Hearing difficulty", type: "flag", text: "Hearing difficulty", byAge: function (c, i, b) { return ratio(c["hear_" + b][i], c["civ_" + b][i]); } },
+    vision:   { label: "Vision difficulty", type: "flag", text: "Vision difficulty", byAge: function (c, i, b) { return ratio(c["vis_" + b][i], c["civ_" + b][i]); } },
+    alone:    { label: "Lives alone", type: "flag", text: "Lives alone (adults)",
+                byAge: function (c, i, b) {
+                  if (b === "u18") return 0;
+                  var g = b === "65_74" || b === "75p" ? "65p" : b;
+                  return ratio(c["alone_" + g][i], c["liv_" + g][i]);
+                } },
+
+    // Legal (age set "adult")
+    home:     { label: "Home", type: "multi", options: [["rent", "Renter"]].concat(VALUES.map(function (x) { return ["own" + x[0], "Owner, home " + x[1]]; })),
+                byAge: function (c, i, b, sel) {
+                  var o = c["o" + b][i], r = c["r" + b][i]; if (o == null || r == null) return null;
+                  var t = o + r; if (!t) return 0;
+                  var share = sel.indexOf("rent") >= 0 ? r / t : 0, vt = c.val_tot[i], vs = 0;
+                  for (var k = 0; k < VALUES.length; k++) if (sel.indexOf("own" + VALUES[k][0]) >= 0) {
+                    var x = c["val_" + VALUES[k][0]][i]; if (x == null || vt == null) return null; vs += vt ? x / vt : 0;
+                  }
+                  return share + o / t * Math.min(1, vs);
+                } },
+    employ:   { label: "Employment", type: "multi", options: [["emp", "Employed"], ["unemp", "Unemployed"], ["nilf", "Not in labor force"]],
+                share: function (c, i, sel) { return ratio(sum(sel, function (k) { return c[EMPLOY[k]][i]; }), c.pop16[i]); } },
+    car:      { label: "Commutes by car", type: "flag", text: "Commutes by car, truck or van",
+                share: function (c, i, v, all) {
+                  var e = all.employ;
+                  if (e && e.length) {   // car commuters are all employed: share within the selected employment groups
+                    if (e.indexOf("emp") < 0) return 0;
+                    return ratio(c.car_commute[i], sum(e, function (k) { return c[EMPLOY[k]][i]; }));
+                  }
+                  return ratio(c.car_commute[i], c.pop16[i]);
+                } },
+    divsep:   { label: "Divorced or separated", type: "flag", text: "Divorced or separated", share: function (c, i) { return ratio(c.divsep[i], c.marital_tot[i]); } },
+    poverty:  { label: "Below poverty", type: "flag", text: "Household below the poverty line", share: function (c, i) { return ratio(c.pov_hh[i], c.pov_tot[i]); } },
+    lep:      { label: "Limited English", type: "flag", text: "Limited-English household", share: function (c, i) { return ratio(c.lep_hh[i], c.lang_hh[i]); } }
   };
   var CLASSES = [[0, 80, "--ramp-1", "Under 80"], [80, 100, "--ramp-2", "80–99"], [100, 120, "--ramp-3", "100–119"], [120, 150, "--ramp-4", "120–149"], [150, Infinity, "--ramp-5", "150+"]];
   var NF0 = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
@@ -53,6 +122,10 @@
 
   function Radius(cfg, root) {
     this.cfg = cfg; this.root = root; this.geo = {};
+    this.ages = AGE_SETS[cfg.ageSet || "default"];
+    this.filterDefs = {};
+    for (var k in FILTERS) this.filterDefs[k] = FILTERS[k];
+    this.filterDefs.age = { label: "Age", type: "multi", options: this.ages.options };
     this.state = { zip: cfg.defaultZip || "", r: cfg.defaultRadius || 25, minIndex: 0, sortKey: "aud", sortDir: "desc", show: 50, sel: {} };
     this.readHash();
   }
@@ -68,7 +141,7 @@
       else if (k === "r" && +val > 0) s.r = +val;
       else if (k === "min") s.minIndex = +val || 0;
       else if (k === "f" && val) val.split(";").forEach(function (part) {
-        var p = part.split(":"), f = FILTERS[p[0]];
+        var p = part.split(":"), f = self.filterDefs[p[0]];
         if (!f || self.cfg.filters.indexOf(p[0]) < 0) return;
         if (f.type === "flag") { s.sel[p[0]] = true; return; }
         var opts = (p[1] || "").split(",").filter(function (o) { return f.options.some(function (x) { return x[0] === o; }); });
@@ -118,9 +191,10 @@
     this.errorBox = el("div", { class: "az-error", role: "alert", hidden: true });
 
     // Filters: multi-choice groups as chips, yes/no filters together under one heading
-    var flags = cfg.filters.filter(function (k) { return FILTERS[k].type === "flag"; });
-    var groups = cfg.filters.filter(function (k) { return FILTERS[k].type !== "flag"; }).map(function (key) {
-      var f = FILTERS[key];
+    var defs = this.filterDefs;
+    var flags = cfg.filters.filter(function (k) { return defs[k].type === "flag"; });
+    var groups = cfg.filters.filter(function (k) { return defs[k].type !== "flag"; }).map(function (key) {
+      var f = defs[key];
       return el("fieldset", { class: "rz-group" }, [el("legend", { text: f.label }), el("div", { class: "rz-chips" }, f.options.map(function (o) {
         return el("label", { class: "rz-chip" }, [el("input", { type: "checkbox", "data-f": key, value: o[0], onchange: function () {
           var cur = s.sel[key] || [], i = cur.indexOf(o[0]);
@@ -131,7 +205,7 @@
       }))]);
     });
     if (flags.length) groups.push(el("fieldset", { class: "rz-group rz-flags" }, [el("legend", { text: cfg.flagsLabel || "Narrow to" })].concat(flags.map(function (key) {
-      var f = FILTERS[key];
+      var f = defs[key];
       return el("label", { class: "rz-check", title: f.label }, [el("input", { type: "checkbox", "data-f": key, onchange: function () { if (this.checked) s.sel[key] = true; else delete s.sel[key]; self.update(false); } }), el("span", { text: f.text })]);
     }))));
     var presets = (cfg.presets || []).length ? el("div", { class: "rz-presets" }, [el("span", { class: "rz-presets-label", text: "Start from" })].concat(cfg.presets.map(function (p) {
@@ -140,7 +214,7 @@
     this.filterPanel = el("aside", { class: "az-panel rz-filters", "aria-label": "Audience filters" }, [
       el("div", { class: "rz-filters-head" }, [el("h2", { text: "Audience" }),
         el("button", { type: "button", class: "rz-clear", text: "Clear all", onclick: function () { s.sel = {}; self.syncFilters(); self.update(false); } })]),
-      presets].concat(groups).concat([el("p", { class: "rz-note", text: "Gender and age cover people 15 and older. Leave a group blank to include everyone." })]));
+      presets].concat(groups).concat([el("p", { class: "rz-note", text: this.ages.note })]));
 
     // Summary + map
     this.summary = el("div", { class: "rz-summary", "aria-live": "polite" });
@@ -185,7 +259,28 @@
     }).then(function (d) {
       self.c = d.cols; self.meta = d.meta; self.n = d.cols.zip.length;
       self.byZip = {}; for (var i = 0; i < self.n; i++) self.byZip[d.cols.zip[i]] = i;
-      self.sourcesP.textContent = [d.meta.sources.acs, d.meta.sources.geo, "ZIP boundaries: Census ZIP Code Tabulation Areas"].join(" · ") + ". Data built " + d.meta.built + ".";
+      self.sourcesP.textContent = [d.meta.sources.acs, d.meta.sources.geo, "ZIP boundaries: Census ZIP Code Tabulation Areas"]
+        .concat((self.cfg.extraData || []).map(function (x) { return x.source; }).filter(Boolean)).join(" · ") + ". Data built " + d.meta.built + ".";
+      return Promise.all((self.cfg.extraData || []).map(function (x) { return self.loadExtra(x); }));
+    });
+  };
+  // Extra ZIP columns from a site's own build (e.g. Healthcare condition rates), joined to the audience data by ZIP
+  Radius.prototype.loadExtra = function (x) {
+    var self = this;
+    return fetch(x.url).then(function (r) {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.json();
+    }).then(function (d) {
+      var zips = d.cols.zip;
+      Object.keys(d.cols).forEach(function (k) {
+        if (k === "zip") return;
+        var arr = new Array(self.n).fill(null), src = d.cols[k];
+        for (var j = 0; j < zips.length; j++) { var i = self.byZip[zips[j]]; if (i !== undefined) arr[i] = src[j]; }
+        self.c[k] = arr;
+      });
+    }).catch(function (e) {
+      (x.columns || []).forEach(function (k) { if (!self.c[k]) self.c[k] = new Array(self.n).fill(null); });
+      self.showError((x.label || "Some data") + " couldn't load (" + e.message + "), so those filters show no data. Refresh to try again.");
     });
   };
   Radius.prototype.suggest = function (q) {
@@ -220,28 +315,34 @@
 
   /* ---------- Audience math ---------- */
   Radius.prototype.audience = function (i) {
-    var c = this.c, sel = this.state.sel, base;
+    var c = this.c, sel = this.state.sel, defs = this.filterDefs, ages = this.ages, base;
     var g = sel.gender && sel.gender.length ? sel.gender : null, a = sel.age && sel.age.length ? sel.age : null;
-    if (g || a) {
-      var sexes = g || ["m", "f"], ages = a || AGE.map(function (x) { return x[0]; });
+    var keys = Object.keys(sel), byAge = keys.filter(function (k) { return defs[k].byAge; });
+    if (g || a || byAge.length) {
+      // Add up sex x age cells; traits Census publishes by age are applied with each age group's own rate
+      var sexes = g || ["m", "f"], groups = a || ages.options.map(function (x) { return x[0]; });
       base = 0;
-      for (var si = 0; si < sexes.length; si++) for (var ai = 0; ai < ages.length; ai++) {
-        var v = c[sexes[si] + ages[ai]][i]; if (v == null) return null; base += v;
+      for (var si = 0; si < sexes.length; si++) for (var ai = 0; ai < groups.length; ai++) {
+        var v = c[ages.col(sexes[si], groups[ai])][i]; if (v == null) return null;
+        for (var bk = 0; bk < byAge.length && v > 0; bk++) {
+          var sa = defs[byAge[bk]].byAge(c, i, groups[ai], sel[byAge[bk]], sel); if (sa == null) return null;
+          v *= sa;
+        }
+        base += v;
       }
-    } else base = c.acs_pop[i];
+    } else base = c[ages.all][i];
     if (base == null) return null;
     if (base === 0) return 0;
-    var keys = Object.keys(sel);
     for (var k = 0; k < keys.length; k++) {
-      var f = FILTERS[keys[k]]; if (!f.share) continue;
-      var sh = f.share(c, i, sel[keys[k]]); if (sh == null) return null;
+      var f = defs[keys[k]]; if (!f.share) continue;
+      var sh = f.share(c, i, sel[keys[k]], sel); if (sh == null) return null;
       base *= sh;
     }
     return base;
   };
   Radius.prototype.isEstimate = function () {
-    var sel = this.state.sel;
-    return Object.keys(sel).some(function (k) { return FILTERS[k].share; });
+    var sel = this.state.sel, defs = this.filterDefs;
+    return Object.keys(sel).some(function (k) { return defs[k].share || defs[k].byAge; });
   };
   Radius.prototype.computeNational = function () {
     var A = 0, P = 0;
@@ -400,9 +501,9 @@
 
   /* ---------- Export + methodology ---------- */
   Radius.prototype.describe = function () {
-    var sel = this.state.sel, parts = [];
+    var sel = this.state.sel, parts = [], defs = this.filterDefs;
     this.cfg.filters.forEach(function (k) {
-      var f = FILTERS[k], v = sel[k];
+      var f = defs[k], v = sel[k];
       if (!v) return;
       if (v === true) parts.push(f.text);
       else parts.push(f.label + ": " + v.map(function (o) { return f.options.filter(function (x) { return x[0] === o; })[0][1]; }).join(", "));
@@ -428,13 +529,23 @@
     b.innerHTML = "";
     b.appendChild(el("button", { type: "button", class: "az-modal-close", "aria-label": "Close", text: "×", onclick: function () { self.modal.close(); } }));
     b.appendChild(el("h2", { id: "rz-method-title", text: "How estimates work" }));
+    var defs = this.filterDefs, cf = this.cfg.filters;
+    var noun = function (k) {   // filter label as a noun in a sentence: "Hispanic or Latino" keeps its capital
+      var t = defs[k].label.replace(/ \(.*\)$/, "").replace(", no degree", " without a degree");
+      return /^(Hispanic|Spanish)/.test(t) ? t : t.charAt(0).toLowerCase() + t.slice(1);
+    };
+    var traits = cf.filter(function (k) { return k !== "gender" && k !== "age"; }).map(noun);
+    var aged = cf.filter(function (k) { return defs[k].byAge; }).map(noun);
+    var list = function (a) { return a.length < 2 ? a.join("") : a.slice(0, -1).join(", ") + " and " + a[a.length - 1]; };
     var secs = [
       ["Which ZIPs are included", "A ZIP is in range when its center point is inside the circle. PO box and business-only ZIPs with no residents are left out."],
-      ["Gender and age", "Counts of people by sex and age come from one Census table, so a gender and age selection is an exact count for people 15 and older."],
-      ["Everything else is an estimate", "Income, parents' education, children at home, enrollment, Hispanic origin, language, veteran status and some college come from separate Census tables. The tool multiplies the base count by each trait's share in that ZIP, which assumes the traits are independent within a ZIP. That's the standard approach, but real overlaps can be higher or lower, so combined counts are labeled as estimates."],
-      ["Parents' education", "This is the education of the head of household in every household in the ZIP. Combine it with Children at home to estimate households with children whose head of household has no college."],
-      ["Index vs. U.S.", "A ZIP's audience share of its population, divided by the same share nationally, times 100. Above 100 means the audience is more concentrated there than in the U.S. overall."]
-    ].concat((this.cfg.methodology || []).map(function (m) { return [m.title, m.body]; }));
+      ["Gender and age", this.ages.method],
+      ["Everything else is an estimate", list(traits).replace(/^./, function (x) { return x.toUpperCase(); }) + " come from separate tables. The tool multiplies the base count by each trait's share in that ZIP, which assumes the traits are independent within a ZIP. That's the standard approach, but real overlaps can be higher or lower, so combined counts are labeled as estimates."]
+    ];
+    if (aged.length) secs.push(["Traits applied by age group", list(aged).replace(/^./, function (x) { return x.toUpperCase(); }) + " are published by age, so the tool applies each age group's own rate in each ZIP. For example, hearing difficulty among people 75 and older uses the 75+ rate, which is far higher than the rate for all ages."]);
+    if (cf.indexOf("parented") >= 0) secs.push(["Parents' education", "This is the education of the head of household in every household in the ZIP. Combine it with Children at home to estimate households with children whose head of household has no college."]);
+    secs.push(["Index vs. U.S.", "A ZIP's audience share of its population, divided by the same share nationally, times 100. Above 100 means the audience is more concentrated there than in the U.S. overall."]);
+    secs = secs.concat((this.cfg.methodology || []).map(function (m) { return [m.title, m.body]; }));
     secs.forEach(function (x) { b.appendChild(el("h3", { text: x[0] })); b.appendChild(el("p", { text: x[1] })); });
     if (this.meta) b.appendChild(el("p", { class: "az-empty", text: "Census ACS " + this.meta.acsYears + ". Data built " + this.meta.built + "." }));
     if (this.modal.showModal) this.modal.showModal(); else this.modal.setAttribute("open", "");
