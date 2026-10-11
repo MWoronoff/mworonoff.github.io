@@ -40,6 +40,35 @@ Result: **PASSED**
 | Adults 18-34 without a degree never exceeds its total | PASS | 0 ZIPs over |
 | Adults 25-64 with some college never exceeds its total | PASS | 0 ZIPs over |
 | High school as highest education never exceeds its total | PASS | 0 ZIPs over |
+| Employment: labor force + not in labor force = population 16+ | PASS | 0 ZIPs off |
+| Employment: civilian employed + unemployed + armed forces = labor force | PASS | 0 ZIPs off |
+| Renter ages add up | PASS | 0 ZIPs off |
+| Owners + renters = occupied homes (by age of householder) | PASS | 0 ZIPs off |
+| Healthcare age brackets add up to population | PASS | 0 ZIPs off |
+| Hearing difficulty by age: every group adds up | PASS | 0 ZIP-groups off |
+| Vision difficulty by age: every group adds up | PASS | 0 ZIP-groups off |
+| Hearing and vision tables cover the same people | PASS | 0 ZIPs off |
+| Health insurance by age: every group adds up | PASS | 0 ZIP-groups off |
+| Living arrangements by age: every group adds up | PASS | 0 ZIP-groups off |
+| Not in labor force never exceeds its total | PASS | 0 ZIPs over |
+| Hearing difficulty, under 18 never exceeds its total | PASS | 0 ZIPs over |
+| Hearing difficulty, 18–34 never exceeds its total | PASS | 0 ZIPs over |
+| Hearing difficulty, 35–64 never exceeds its total | PASS | 0 ZIPs over |
+| Hearing difficulty, 65–74 never exceeds its total | PASS | 0 ZIPs over |
+| Hearing difficulty, 75+ never exceeds its total | PASS | 0 ZIPs over |
+| Vision difficulty, under 18 never exceeds its total | PASS | 0 ZIPs over |
+| Vision difficulty, 18–34 never exceeds its total | PASS | 0 ZIPs over |
+| Vision difficulty, 35–64 never exceeds its total | PASS | 0 ZIPs over |
+| Vision difficulty, 65–74 never exceeds its total | PASS | 0 ZIPs over |
+| Vision difficulty, 75+ never exceeds its total | PASS | 0 ZIPs over |
+| Uninsured, under 18 never exceeds its total | PASS | 0 ZIPs over |
+| Uninsured, 18–34 never exceeds its total | PASS | 0 ZIPs over |
+| Uninsured, 35–64 never exceeds its total | PASS | 0 ZIPs over |
+| Uninsured, 65–74 never exceeds its total | PASS | 0 ZIPs over |
+| Uninsured, 75+ never exceeds its total | PASS | 0 ZIPs over |
+| Living alone, 18–34 never exceeds its total | PASS | 0 ZIPs over |
+| Living alone, 35–64 never exceeds its total | PASS | 0 ZIPs over |
+| Living alone, 65+ never exceeds its total | PASS | 0 ZIPs over |
 | ZIPs with Census data | INFO | 33,632 of 40,745 ZIPs, holding 100.0% of Deluxe population; the rest are PO box or business ZIPs |
 | Published benchmark: share age 65+ | PASS | 17.2% (expected 15–20) |
 | National totals | INFO | population 334,834,098; households 129,206,758; college enrolled 21,410,409; households with children 38,161,116 |
@@ -59,3 +88,11 @@ Result: **PASSED**
 | Published benchmark: bachelor's as highest degree, 25+ | PASS | 21.6% (expected 17–26) |
 | Published benchmark: some college, no degree, 25-64 | PASS | 18.9% (expected 14–25) |
 | Published benchmark: 18-34 without a college degree | PASS | 63.5% (expected 45–72) |
+| Published benchmark: uninsured share, all ages | PASS | 8.4% (expected 5.5–12) |
+| Published benchmark: uninsured share, 65-74 | PASS | 1.1% (expected 0.2–3) |
+| Published benchmark: hearing difficulty, all ages | PASS | 3.6% (expected 2.5–5) |
+| Published benchmark: hearing difficulty, 75+ | PASS | 21.0% (expected 9–22) |
+| Published benchmark: vision difficulty, all ages | PASS | 2.5% (expected 1.5–3.8) |
+| Published benchmark: adults 65+ living alone | PASS | 27.4% (expected 20–34) |
+| Published benchmark: renter share of households | PASS | 34.8% (expected 28–42) |
+| Published benchmark: homes worth $750K+ | PASS | 13.9% (expected 5–20) |
