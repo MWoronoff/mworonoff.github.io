@@ -31,6 +31,15 @@ Result: **PASSED**
 | Car commuters never exceeds its total | PASS | 0 ZIPs over |
 | Homes worth $300K+ never exceeds its total | PASS | 0 ZIPs over |
 | Limited-English households never exceeds its total | PASS | 0 ZIPs over |
+| Education by age (B15001): each age group adds up | PASS | 0 ZIP-groups off |
+| Education by age: male age groups add up to the male total | PASS | 0 ZIPs off |
+| Education by age: female age groups add up to the female total | PASS | 0 ZIPs off |
+| Education by age agrees with B15003: adults 25+ | PASS | 0 ZIPs off |
+| Education by age agrees with B15003: some college, no degree | PASS | 0 ZIPs off |
+| Education by age agrees with B15003: bachelor's degree | PASS | 0 ZIPs off |
+| Adults 18-34 without a degree never exceeds its total | PASS | 0 ZIPs over |
+| Adults 25-64 with some college never exceeds its total | PASS | 0 ZIPs over |
+| High school as highest education never exceeds its total | PASS | 0 ZIPs over |
 | ZIPs with Census data | INFO | 33,632 of 40,745 ZIPs, holding 100.0% of Deluxe population; the rest are PO box or business ZIPs |
 | Published benchmark: share age 65+ | PASS | 17.2% (expected 15–20) |
 | National totals | INFO | population 334,834,098; households 129,206,758; college enrolled 21,410,409; households with children 38,161,116 |
@@ -46,3 +55,7 @@ Result: **PASSED**
 | Published benchmark: car, truck or van share of workers | PASS | 77.3% (expected 65–90) |
 | Published benchmark: homes worth $300K+ | PASS | 55.0% (expected 30–65) |
 | Published benchmark: limited-English households | PASS | 4.3% (expected 2–7) |
+| Published benchmark: high school as highest education, 25+ | PASS | 26.0% (expected 20–32) |
+| Published benchmark: bachelor's as highest degree, 25+ | PASS | 21.6% (expected 17–26) |
+| Published benchmark: some college, no degree, 25-64 | PASS | 18.9% (expected 14–25) |
+| Published benchmark: 18-34 without a college degree | PASS | 63.5% (expected 45–72) |
