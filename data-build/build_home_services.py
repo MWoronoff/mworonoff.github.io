@@ -195,10 +195,14 @@ def zcta_land(cache, rep):
             except Exception as e:
                 log(f"Gazetteer {y}: not available -> {e}"); continue
         zf = zipfile.ZipFile(io.BytesIO(blob))
-        df = pd.read_csv(zf.open(zf.namelist()[0]), sep="\t", dtype={"GEOID": str})
-        df.columns = [c.strip() for c in df.columns]
+        raw = zf.open(zf.namelist()[0]).read().decode("utf-8-sig", "replace")
+        sep = "|" if "|" in raw.split("\n", 1)[0] else "\t"          # newer Gazetteer files use pipes
+        df = pd.read_csv(io.StringIO(raw), sep=sep, dtype=str)
+        df.columns = [c.strip().upper() for c in df.columns]
+        if "GEOID" not in df.columns or "ALAND_SQMI" not in df.columns:
+            raise RuntimeError(f"Gazetteer {y} has unexpected columns {list(df.columns)[:8]}")
         rep.append(("Land area source", "INFO", f"Census {y} Gazetteer ZCTA file ({len(df):,} ZIPs)"))
-        return df.set_index(df.GEOID.str.zfill(5)).ALAND_SQMI.astype(float)
+        return df.set_index(df.GEOID.str.strip().str.zfill(5)).ALAND_SQMI.astype(float)
     raise RuntimeError("No Census Gazetteer ZCTA file could be found")
 
 
