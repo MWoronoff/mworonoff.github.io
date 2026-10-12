@@ -152,6 +152,13 @@ AdtaxiAnalyzer.start({
    "help": "Percentile of competing schools of this type per 100,000 residents, reversed: fewer competing schools scores higher, since each ad dollar faces less competition."
   },
   {
+   "key": "density",
+   "label": "Households per square mile",
+   "short": "HH/sq mi",
+   "format": "int",
+   "help": "Households divided by land area (Census Gazetteer). Denser markets put more prospects inside each service area and radius."
+  },
+  {
    "key": "est",
    "label": "Competing schools of this type",
    "short": "Schools",
@@ -359,24 +366,8 @@ AdtaxiAnalyzer.start({
  "rankBy": [
   "score",
   "easi_idx",
-  "est",
-  "per100k",
-  "population",
-  "age15_24",
-  "age15_24_share",
-  "age18_24",
-  "hs_only",
-  "hs_share",
-  "nodeg18_34",
-  "nodeg_share",
-  "unemp_rate",
-  "ba_only",
-  "ba_share",
-  "somecol25_64",
-  "somecol_share",
-  "inc100_share",
-  "enr_college",
-  "hisp_share"
+  "easi_total",
+  "density"
  ],
  "defaultRank": "score",
  "components": [
@@ -389,6 +380,7 @@ AdtaxiAnalyzer.start({
   "easi_hh",
   "easi_idx",
   "easi_total",
+  "density",
   "est",
   "per100k",
   "under",
@@ -414,16 +406,10 @@ AdtaxiAnalyzer.start({
  "tableColumns": [
   "score",
   "easi_idx",
-  "est",
-  "per100k",
-  "under",
+  "easi_total",
+  "density",
   "population",
-  "age15_24_share",
-  "hs_share",
-  "nodeg_share",
-  "ba_share",
-  "somecol_share",
-  "hisp_share"
+  "under"
  ],
  "methodology": [
   {
@@ -457,8 +443,16 @@ AdtaxiAnalyzer.start({
    "body": "Flags markets with strong student demand (70th percentile or higher) but few competing schools per resident (30th percentile or lower). It's shown as a pitch for schools weighing a new campus or a recruiting push, not counted in the score."
   },
   {
+   "title": "Competing schools",
+   "body": "Switch on Show competing schools to put a circle on each market (or each ZIP in the ZIP view) sized by the number of schools of the selected type, from the Department of Education's IPEDS directory."
+  },
+  {
    "title": "Measures shown for each type of school",
-   "body": "Rankings, table columns and market details show only the measures that relate to the selected type of school. Population, households, college enrollment, income, Hispanic population, competing schools and the score appear for every type."
+   "body": "Rank and map by offers four choices, each answering a different question: the Market Potential Score (where to put the money overall), the college tuition spending index vs. U.S. (how intensely households spend on college), total tuition spending (how big the market is in dollars) and households per square mile (how many prospects a recruiting area can reach). Market details add Consumer Demand and the other parts of the score, plus the student, income and school measures that relate to the selected type of school."
+  },
+  {
+   "title": "Households per square mile",
+   "body": "Households divided by land area from the Census Gazetteer, for each ZIP, metro and DMA. It isn't part of the score; use it to compare how many prospects a service area or radius can reach."
   },
   {
    "title": "ZIPs in a market",
@@ -484,7 +478,13 @@ AdtaxiAnalyzer.start({
    "url": "https://github.com/BritCrit/dma_county_zip"
   }
  ],
- "sourcesNote": "Household college tuition spending is EASI; competing schools are IPEDS; student measures and income are Census ACS; population and households are from the Deluxe ZIP file."
+ "sourcesNote": "Household college tuition spending is EASI; competing schools are IPEDS; student measures and income are Census ACS; population and households are from the Deluxe ZIP file.",
+ "pointLayer": {
+  "key": "est",
+  "label": "Show competing schools",
+  "unit": "schools",
+  "legend": "Circle size = schools of this type in the area"
+ }
 });
 </script>
 </body>

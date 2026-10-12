@@ -152,6 +152,13 @@ AdtaxiAnalyzer.start({
    "help": "Percentile of law offices per 10,000 residents, reversed: fewer competing offices scores higher, since each ad dollar faces less competition."
   },
   {
+   "key": "density",
+   "label": "Households per square mile",
+   "short": "HH/sq mi",
+   "format": "int",
+   "help": "Households divided by land area (Census Gazetteer). Denser markets put more prospects inside each service area and radius."
+  },
+  {
    "key": "est",
    "label": "Law offices (competitors)",
    "short": "Law offices",
@@ -353,24 +360,8 @@ AdtaxiAnalyzer.start({
  "rankBy": [
   "score",
   "easi_idx",
-  "est",
-  "per10k",
-  "growth",
-  "population",
-  "adults",
-  "car_commute",
-  "car_share",
-  "divsep",
-  "divsep_share",
-  "kids_share",
-  "own55",
-  "a65p",
-  "val300_share",
-  "pov_share",
-  "inc_lt35_share",
-  "unemp_rate",
-  "employed",
-  "lep_share"
+  "easi_total",
+  "density"
  ],
  "defaultRank": "score",
  "components": [
@@ -383,6 +374,7 @@ AdtaxiAnalyzer.start({
   "easi_hh",
   "easi_idx",
   "easi_total",
+  "density",
   "est",
   "per10k",
   "growth",
@@ -408,16 +400,10 @@ AdtaxiAnalyzer.start({
  "tableColumns": [
   "score",
   "easi_idx",
-  "est",
-  "per10k",
-  "growth",
-  "under",
+  "easi_total",
+  "density",
   "population",
-  "car_share",
-  "divsep_share",
-  "own55",
-  "pov_share",
-  "unemp_rate"
+  "under"
  ],
  "methodology": [
   {
@@ -452,8 +438,16 @@ AdtaxiAnalyzer.start({
    "body": "Flags markets with strong client demand (70th percentile or higher) but few law offices per resident (30th percentile or lower). It's shown as a pitch for firms weighing a new office, not counted in the score."
   },
   {
+   "title": "Competitor locations",
+   "body": "Switch on Show competitor locations to put a circle on each market (or each ZIP in the ZIP view) sized by the number of law offices, from Census Business Patterns. Census counts all law offices in one industry, so the circles are the same for every practice area. These are counts by area; Census doesn't publish business addresses. In the ZIP view, Census doesn't publish a ZIP's count when it has fewer than 3 businesses, so those ZIPs show no circle."
+  },
+  {
    "title": "Measures shown for each practice area",
-   "body": "Rankings, table columns and market details show only the measures that relate to the selected practice area. Population, households, income, limited-English households, law offices and the score appear for every practice area."
+   "body": "Rank and map by offers four choices, each answering a different question: the Market Potential Score (where to put the money overall), the legal fees spending index vs. U.S. (how intensely households spend on legal services), total legal fees spending (how big the market is in dollars) and households per square mile (how many prospects a service area can reach). Market details add Consumer Demand and the other parts of the score, plus the client, income and law office measures that relate to the selected practice area."
+  },
+  {
+   "title": "Households per square mile",
+   "body": "Households divided by land area from the Census Gazetteer, for each ZIP, metro and DMA. It isn't part of the score; use it to compare how many prospects a service area or radius can reach."
   },
   {
    "title": "ZIPs in a market",
@@ -479,7 +473,14 @@ AdtaxiAnalyzer.start({
    "url": "https://github.com/BritCrit/dma_county_zip"
   }
  ],
- "sourcesNote": "Household legal fees spending is EASI; law office counts are Census Business Patterns; client measures and income are Census ACS; population and households are from the Deluxe ZIP file."
+ "sourcesNote": "Household legal fees spending is EASI; law office counts are Census Business Patterns; client measures and income are Census ACS; population and households are from the Deluxe ZIP file.",
+ "pointLayer": {
+  "key": "est",
+  "label": "Show competitor locations",
+  "unit": "law offices",
+  "legend": "Circle size = law offices in the area",
+  "zipNote": "Census doesn't publish ZIPs with fewer than 3."
+ }
 });
 </script>
 </body>

@@ -36,7 +36,7 @@ AdtaxiRadius.start({
   defaultRadius: 15,
   radii: [5, 10, 15, 25, 50, 100],
   radiusLabel: "Up to {r} miles",
-  filters: ["gender", "age", "income", "insurance", "conditions", "nodental", "hearing", "vision", "alone", "hispanic", "spanish"],
+  filters: ["gender", "age", "income5", "insurance", "conditions", "nodental", "hearing", "vision", "alone"],
   profileLabel: "Best prospects for",
   profiles: [
     { id: "urgent", label: "Urgent and emergency care", note: "Families: children and adults under 65 with health insurance.",
@@ -45,7 +45,7 @@ AdtaxiRadius.start({
       sel: { age: ["18_34", "35_64", "65_74", "75p"] },
       either: [ { text: "age 65+", sel: { age: ["65_74", "75p"] } }, { text: "diabetes or high blood pressure", sel: { conditions: ["diabetes", "bphigh"] } } ] },
     { id: "dental", label: "Dental", note: "Adults 18–64 with household income of $75K or more and health insurance. Add \u201cNo dental visit in the past year\u201d to find patients overdue for care.",
-      sel: { age: ["18_34", "35_64"], income: ["75_100", "100_150", "150_200", "200p"], insurance: ["ins"] } },
+      sel: { age: ["18_34", "35_64"], income5: ["75_100", "100_150", "150p"], insurance: ["ins"] } },
     { id: "hearing", label: "Hearing and audiology", note: "Adults 65 and older with hearing difficulty.",
       sel: { age: ["65_74", "75p"], hearing: true } },
     { id: "eye", label: "Eye care", note: "Adults 35 and older with vision difficulty or diabetes.",
@@ -56,7 +56,7 @@ AdtaxiRadius.start({
     { id: "behavioral", label: "Behavioral health", note: "Adults 18–64 with depression or frequent mental distress, with health insurance.",
       sel: { age: ["18_34", "35_64"], conditions: ["depression", "mhlth"], insurance: ["ins"] } },
     { id: "medspa", label: "Med spa and aesthetics", note: "Women 35–64 with household income of $100K or more.",
-      sel: { gender: ["f"], age: ["35_64"], income: ["100_150", "150_200", "200p"] } },
+      sel: { gender: ["f"], age: ["35_64"], income5: ["100_150", "150p"] } },
     { id: "senior", label: "Senior and home care", note: "Adults 75 and older living alone.",
       sel: { age: ["75p"], alone: true } }
   ],

@@ -168,6 +168,13 @@ AdtaxiAnalyzer.start({
    "help": "Percentile of businesses per 10,000 residents, reversed: fewer competing businesses scores higher, since each ad dollar faces less competition."
   },
   {
+   "key": "density",
+   "label": "Households per square mile",
+   "short": "HH/sq mi",
+   "format": "int",
+   "help": "Households divided by land area (Census Gazetteer). Denser markets put more prospects inside each service area and radius."
+  },
+  {
    "key": "est",
    "label": "Category businesses (competitors)",
    "short": "Businesses",
@@ -202,6 +209,48 @@ AdtaxiAnalyzer.start({
     "zip"
    ],
    "help": "Strong consumer demand (70th percentile or higher) but few businesses per resident (30th percentile or lower): a pitch for clients weighing a new location. Shown, not scored."
+  },
+  {
+   "key": "easi_hh",
+   "label": "Spending per household (EASI)",
+   "short": "$/HH",
+   "format": "money",
+   "perSub": true,
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "EASI 2025 estimated annual household spending for the selected category: how active households are. Pharmacy uses prescription drugs; every other category uses medical services."
+  },
+  {
+   "key": "easi_idx",
+   "label": "Spending index vs. U.S.",
+   "short": "Spend idx",
+   "format": "index",
+   "perSub": true,
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "Spending per household divided by the U.S. average, times 100. Above 100 means households here spend more than average. Pharmacy uses prescription drugs; every other category uses medical services."
+  },
+  {
+   "key": "easi_total",
+   "label": "Total spending, est. annual",
+   "short": "Total $",
+   "format": "moneyM",
+   "perSub": true,
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "EASI spending per household times the households in this market: the size of the prize. Pharmacy uses prescription drugs; every other category uses medical services."
   },
   {
    "key": "easi_med_hh",
@@ -789,31 +838,9 @@ AdtaxiAnalyzer.start({
  ],
  "rankBy": [
   "score",
-  "easi_med_idx",
-  "easi_rx_idx",
-  "est",
-  "per10k",
-  "growth",
-  "population",
-  "a65p",
-  "a75p",
-  "kids_share",
-  "inc150_share",
-  "fairpoor",
-  "diabetes",
-  "bphigh",
-  "nodental",
-  "hearing",
-  "vision",
-  "arthritis",
-  "obesity",
-  "depression",
-  "mhlth",
-  "indeplive",
-  "easi_heart_idx",
-  "easi_cancer_idx",
-  "easi_hearing_idx",
-  "easi_vision_idx"
+  "easi_idx",
+  "easi_total",
+  "density"
  ],
  "defaultRank": "score",
  "components": [
@@ -823,12 +850,10 @@ AdtaxiAnalyzer.start({
   "comp"
  ],
  "detailMeasures": [
-  "easi_med_hh",
-  "easi_med_idx",
-  "easi_med_total",
-  "easi_rx_hh",
-  "easi_rx_idx",
-  "easi_rx_total",
+  "easi_hh",
+  "easi_idx",
+  "easi_total",
+  "density",
   "est",
   "per10k",
   "growth",
@@ -878,15 +903,11 @@ AdtaxiAnalyzer.start({
  ],
  "tableColumns": [
   "score",
-  "easi_med_idx",
-  "easi_rx_idx",
-  "est",
-  "per10k",
-  "growth",
-  "under",
+  "easi_idx",
+  "easi_total",
+  "density",
   "population",
-  "a65p",
-  "a75p"
+  "under"
  ],
  "methodology": [
   {
@@ -931,12 +952,20 @@ AdtaxiAnalyzer.start({
    "body": "Flags markets with strong demand (70th percentile or higher) but few businesses per resident (30th percentile or lower). It's shown as a pitch for clients weighing a new location, not counted in the score."
   },
   {
+   "title": "Competitor locations",
+   "body": "Switch on Show competitor locations to put a circle on each market (or each ZIP in the ZIP view) sized by the number of competing businesses in the selected category, from Census Business Patterns. These are counts by area; Census doesn't publish business addresses. In the ZIP view, Census doesn't publish a ZIP's count when it has fewer than 3 businesses, so those ZIPs show no circle."
+  },
+  {
    "title": "ZIPs in a market",
    "body": "Pick a DMA or metro, then choose ZIPs in market. ZIP scores use Consumer Demand and Spending Power, reweighted to 73% and 27%. ZIPs with fewer than 500 residents are shown but not ranked."
   },
   {
+   "title": "Households per square mile",
+   "body": "Households divided by land area from the Census Gazetteer, for each ZIP, metro and DMA. It isn't part of the score; use it to compare how many prospects a service area or radius can reach."
+  },
+  {
    "title": "Measures shown for each category",
-   "body": "Rankings, table columns and market details show only the measures that relate to the selected category. For example, Dental offers no dental visit in the past year, while Hearing and audiology offers hearing disability and EASI hearing trouble. Population, households, income, competitors and the score appear for every category."
+   "body": "Rank and map by offers four choices, each answering a different question: the Market Potential Score (where to put the money overall), the spending index vs. U.S. (how intensely households spend: prescription drugs for Pharmacy, medical services for every other category), total spending (how big the market is in dollars) and households per square mile (how many prospects a service area can reach). Market details add Consumer Demand and the other parts of the score, plus the health, age, income and competitor measures that relate to the selected category."
   }
  ],
  "sources": [
@@ -962,7 +991,14 @@ AdtaxiAnalyzer.start({
    "url": "https://github.com/BritCrit/dma_county_zip"
   }
  ],
- "sourcesNote": "Household healthcare spending and metro health conditions are EASI; business counts are Census Business Patterns; health measures are CDC PLACES; ages and income are Census ACS; population and households are from the Deluxe ZIP file."
+ "sourcesNote": "Household healthcare spending and metro health conditions are EASI; business counts are Census Business Patterns; health measures are CDC PLACES; ages and income are Census ACS; population and households are from the Deluxe ZIP file.",
+ "pointLayer": {
+  "key": "est",
+  "label": "Show competitor locations",
+  "unit": "competing businesses",
+  "legend": "Circle size = competing businesses in the area",
+  "zipNote": "Census doesn't publish ZIPs with fewer than 3."
+ }
 });
 </script>
 </body>

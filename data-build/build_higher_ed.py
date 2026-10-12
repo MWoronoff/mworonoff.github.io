@@ -17,7 +17,7 @@ Geography comes from data-build/geo (ZIP -> metro, DMA).
 import argparse, datetime, io, json, os, re, sys, zipfile
 import numpy as np
 import pandas as pd
-from build_healthcare import get, pct, combine
+from build_healthcare import get, pct, combine, zcta_land
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -144,6 +144,7 @@ def main():
     acs["inc100"] = acs[["inc_100_150", "inc_150_200", "inc_200p"]].sum(axis=1, min_count=3)
     acs["inc75"] = acs.inc100 + acs.inc_75_100
     z = z.merge(acs, on="zip", how="left")
+    z["land"] = z.zip.map(zcta_land(a.cache, rep))          # square miles, for households per square mile
 
     # IPEDS schools -> ZIP
     y, d = load_ipeds(a.cache, rep)
@@ -191,6 +192,8 @@ def main():
 
     def agg(g):
         r = {"population": g.population.sum(), "households": g.households.sum()}
+        land = g.land.where(g.land > 0).sum()
+        r["density"] = g.households.where(g.land > 0, 0).sum() / land if land > 0 else np.nan
         for c in COUNTS[2:]: r[c] = g[c].sum(min_count=1)
         for k, (n, dn) in RATE_PARTS.items():
             den = g[dn].sum(); r[k] = g[n].sum() / den if den > 0 else np.nan
@@ -281,7 +284,7 @@ def main():
     if failed: sys.exit("A check failed; the Higher Education data was not updated. See higher-ed/data/higher_ed_report.md.")
 
     # ---------------- Write ----------------
-    keep = COUNTS + RATES + ["easi_hh", "easi_total", "easi_idx"]
+    keep = COUNTS + RATES + ["density", "easi_hh", "easi_total", "easi_idx"]
     per_sub = ["score", "demand", "category", "spend", "comp", "under", "est", "per100k"]
     SCORE_KEYS = ("score", "demand", "category", "spend", "comp", "est")
     INTS = COUNTS + ["easi_total"]
@@ -334,6 +337,7 @@ def main():
             df = g.set_index("zip")
             f = pd.DataFrame(index=df.index)
             for c in COUNTS: f[c] = df[c]
+            f["density"] = (df.households / df.land).where(df.land > 0)
             for k, (n, dn) in RATE_PARTS.items(): f[k] = (df[n] / df[dn]).where(df[dn] > 0)
             for c in EST: f[c] = df[c]
             ok = f.population >= MIN_POP

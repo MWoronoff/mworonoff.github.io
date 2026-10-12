@@ -16,7 +16,7 @@ Geography comes from data-build/geo (ZIP -> county, metro, DMA). Download helper
 import argparse, datetime, json, os, re, sys
 import numpy as np
 import pandas as pd
-from build_healthcare import cbp_years, zbp, cbp_county, pct, combine
+from build_healthcare import cbp_years, zbp, cbp_county, pct, combine, zcta_land
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -86,6 +86,7 @@ def main():
     acs = acs[["zip"] + ACS_COLS]
     acs["inc75"] = acs[["inc_75_100", "inc_100_150", "inc_150_200", "inc_200p"]].sum(axis=1, min_count=4)
     z = z.merge(acs.drop(columns=["inc_75_100", "inc_100_150", "inc_150_200", "inc_200p"]), on="zip", how="left")
+    z["land"] = z.zip.map(zcta_land(a.cache, rep))          # square miles, for households per square mile
 
     # Business Patterns: offices of lawyers
     y = cbp_years(a.cache)
@@ -110,6 +111,8 @@ def main():
     # ---------------- Aggregate ----------------
     def agg(g):
         r = {"population": g.population.sum(), "households": g.households.sum(), "adults": g.adults18.sum(min_count=1)}
+        land = g.land.where(g.land > 0).sum()
+        r["density"] = g.households.where(g.land > 0, 0).sum() / land if land > 0 else np.nan
         for c in ("a65p", "divsep", "own55", "employed", "car_commute"): r[c] = g[c].sum(min_count=1)
         for k, (n, d) in RATE_PARTS.items():
             den = g[d].sum(); r[k] = g[n].sum() / den if den > 0 else np.nan
@@ -201,7 +204,7 @@ def main():
     if failed: sys.exit("A check failed; the Legal data was not updated. See legal/data/legal_report.md.")
 
     # ---------------- Write ----------------
-    keep = COUNTS + RATES + ["est", "per10k", "growth", "easi_hh", "easi_total", "easi_idx"]
+    keep = COUNTS + RATES + ["density", "est", "per10k", "growth", "easi_hh", "easi_total", "easi_idx"]
     per_sub = ["score", "demand", "category", "spend", "comp", "under"]
     SCORE_KEYS = ("score", "demand", "category", "spend", "comp")
     INTS = COUNTS + ["est", "easi_total"]
@@ -254,6 +257,7 @@ def main():
             df = g.set_index("zip")
             f = pd.DataFrame(index=df.index)
             f["population"], f["households"], f["adults"] = df.population, df.households, df.adults18
+            f["density"] = (df.households / df.land).where(df.land > 0)
             for c in ("a65p", "divsep", "own55", "employed", "car_commute"): f[c] = df[c]
             for k, (n, d) in RATE_PARTS.items(): f[k] = (df[n] / df[d]).where(df[d] > 0)
             f["est"], f["prev"] = df.zest, df.zest_prev

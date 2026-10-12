@@ -25,8 +25,7 @@ Geography comes from data-build/geo (ZIP -> county, metro, DMA). Download helper
 import argparse, datetime, gzip, io, json, os, re, sys
 import numpy as np
 import pandas as pd
-from build_healthcare import cbp_years, zbp, cbp_county, pct, combine, fetch, get
-import urllib.request, zipfile
+from build_healthcare import cbp_years, zbp, cbp_county, pct, combine, fetch, zcta_land
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -37,7 +36,6 @@ CLIMDIV = "https://www.ncei.noaa.gov/pub/data/cirs/climdiv/"
 STORMS = "https://www.ncei.noaa.gov/pub/data/swdi/stormevents/csvfiles/"
 YEARS = 10                              # climate and hail: average of the last 10 complete years
 HAIL_MIN = 1.0                          # inches: hail this size or larger damages roofs
-GAZ = "https://www2.census.gov/geo/docs/maps-data/data/gazetteer/{y}_Gazetteer/{y}_Gaz_zcta_national.zip"
 
 # Market Potential Score: where a home service company's potential customers are. Each part is a percentile (0-100).
 WEIGHTS = {"demand": 0.40, "category": 0.25, "spend": 0.15, "comp": 0.20}
@@ -180,30 +178,6 @@ def hail(cache, rep):
     rep.append(("Hail source", "INFO", f"NOAA Storm Events, hail {HAIL_MIN:.0f}-inch+ by county, {yrs[0]}–{yrs[-1]}; "
                 f"{len(allr):,} county-days with hail"))
     return days, len(ct) / len(yrs) / len(CT_OLD)   # Connecticut: average per former county
-
-
-def zcta_land(cache, rep):
-    """Land area of each ZIP (ZCTA) in square miles, from the Census Gazetteer."""
-    this = datetime.date.today().year
-    for y in range(this, this - 5, -1):
-        name = f"{y}_Gaz_zcta_national.zip"
-        if cache:
-            if not os.path.exists(os.path.join(cache, name)): continue
-            blob = open(os.path.join(cache, name), "rb").read()
-        else:
-            try: blob = get(GAZ.format(y=y), tries=2)
-            except Exception as e:
-                log(f"Gazetteer {y}: not available -> {e}"); continue
-        zf = zipfile.ZipFile(io.BytesIO(blob))
-        raw = zf.open(zf.namelist()[0]).read().decode("utf-8-sig", "replace")
-        sep = "|" if "|" in raw.split("\n", 1)[0] else "\t"          # newer Gazetteer files use pipes
-        df = pd.read_csv(io.StringIO(raw), sep=sep, dtype=str)
-        df.columns = [c.strip().upper() for c in df.columns]
-        if "GEOID" not in df.columns or "ALAND_SQMI" not in df.columns:
-            raise RuntimeError(f"Gazetteer {y} has unexpected columns {list(df.columns)[:8]}")
-        rep.append(("Land area source", "INFO", f"Census {y} Gazetteer ZCTA file ({len(df):,} ZIPs)"))
-        return df.set_index(df.GEOID.str.strip().str.zfill(5)).ALAND_SQMI.astype(float)
-    raise RuntimeError("No Census Gazetteer ZCTA file could be found")
 
 
 def main():

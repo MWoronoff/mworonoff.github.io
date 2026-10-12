@@ -399,6 +399,33 @@ def fill_from_previous(z, have, pzp, pcp, prev_year, cur_year, rep, cent):
     return used
 
 
+GAZ = "https://www2.census.gov/geo/docs/maps-data/data/gazetteer/{y}_Gazetteer/{y}_Gaz_zcta_national.zip"
+
+
+def zcta_land(cache, rep):
+    """Land area of each ZIP (ZCTA) in square miles, from the Census Gazetteer."""
+    this = datetime.date.today().year
+    for y in range(this, this - 5, -1):
+        name = f"{y}_Gaz_zcta_national.zip"
+        if cache:
+            if not os.path.exists(os.path.join(cache, name)): continue
+            blob = open(os.path.join(cache, name), "rb").read()
+        else:
+            try: blob = get(GAZ.format(y=y), tries=2)
+            except Exception as e:
+                log(f"Gazetteer {y}: not available -> {e}"); continue
+        zf = zipfile.ZipFile(io.BytesIO(blob))
+        raw = zf.open(zf.namelist()[0]).read().decode("utf-8-sig", "replace")
+        sep = "|" if "|" in raw.split("\n", 1)[0] else "\t"          # newer Gazetteer files use pipes
+        df = pd.read_csv(io.StringIO(raw), sep=sep, dtype=str)
+        df.columns = [c.strip().upper() for c in df.columns]
+        if "GEOID" not in df.columns or "ALAND_SQMI" not in df.columns:
+            raise RuntimeError(f"Gazetteer {y} has unexpected columns {list(df.columns)[:8]}")
+        rep.append(("Land area source", "INFO", f"Census {y} Gazetteer ZCTA file ({len(df):,} ZIPs)"))
+        return df.set_index(df.GEOID.str.strip().str.zfill(5)).ALAND_SQMI.astype(float)
+    raise RuntimeError("No Census Gazetteer ZCTA file could be found")
+
+
 # ---------------- Scoring helpers ----------------
 def pct(s):
     """Percentile 0-100 within the group; missing stays missing."""
@@ -446,6 +473,7 @@ def main():
     acs["inc75"] = acs[["inc_75_100", "inc_100_150", "inc_150_200", "inc_200p"]].sum(axis=1, min_count=4)
     acs["inc150"] = acs[["inc_150_200", "inc_200p"]].sum(axis=1, min_count=2)
     z = z.merge(acs.drop(columns=["inc_75_100", "inc_100_150", "inc_150_200", "inc_200p"]), on="zip", how="left")
+    z["land"] = z.zip.map(zcta_land(a.cache, rep))          # square miles, for households per square mile
 
     # Business Patterns
     y = cbp_years(a.cache)
@@ -544,6 +572,8 @@ def main():
         """g: DataFrame of ZIP rows -> dict of raw values for one area."""
         r = {"population": g.population.sum(), "households": g.households.sum(),
              "acs_pop": g.acs_pop.sum(min_count=1), "adults": g.adults18.sum(min_count=1)}
+        land = g.land.where(g.land > 0).sum()
+        r["density"] = g.households.where(g.land > 0, 0).sum() / land if land > 0 else np.nan
         for c in ("a65p", "a75p", "a45p", "a25_64", "a30_64"): r[c] = g[c].sum(min_count=1)
         r["kids_share"] = g.hh_kids.sum() / g.hh_tot.sum() if g.hh_tot.sum() > 0 else np.nan
         r["inc75_share"] = g.inc75.sum() / g.inc_tot.sum() if g.inc_tot.sum() > 0 else np.nan
@@ -698,7 +728,7 @@ def main():
 
     # ---------------- Write ----------------
     easi_spend_cols = [f"easi_{e}_{x}" for e in EASI_SPEND for x in ("hh", "total", "idx")]
-    keep_common = ["population", "households", "adults", "a65p", "a75p"] + RATES + easi_spend_cols
+    keep_common = ["population", "households", "adults", "a65p", "a75p", "density"] + RATES + easi_spend_cols
     per_sub = ["score", "demand", "category", "spend", "comp", "est", "per10k", "growth", "under"]
     easi_cols = [f"easi_{c}{x}" for c in conds for x in ("", "_rate", "_idx", "_30", "_g", "_gidx")]
 
@@ -729,6 +759,10 @@ def main():
                 if v.get(k) is not None: v[k] = int(round(v[k]))
             for s in SUBCATS:
                 if v.get(f"est@{s['id']}") is not None: v[f"est@{s['id']}"] = int(round(v[f"est@{s['id']}"]))
+            for s in SUBCATS:                       # the spending each category is scored on, under one name for every category
+                e = s.get("easi", "med")
+                for t in ("hh", "idx", "total"):
+                    if v.get(f"easi_{e}_{t}") is not None: v[f"easi_{t}@{s['id']}"] = v[f"easi_{e}_{t}"]
             v = {k: x for k, x in v.items() if x is not None}          # missing keys read as "No data"
             f = flags_fn(idx, r) if flags_fn else []
             ek, methods, low = est_keys(r)
@@ -778,6 +812,7 @@ def main():
             df = g.set_index("zip")
             f = pd.DataFrame(index=df.index)
             f["population"], f["households"], f["adults"] = df.population, df.households, df.adults18
+            f["density"] = (df.households / df.land).where(df.land > 0)
             for c in ("a65p", "a75p", "a45p", "a25_64", "a30_64"): f[c] = df[c]
             f["kids_share"] = (df.hh_kids / df.hh_tot).where(df.hh_tot > 0)
             f["inc75_share"] = (df.inc75 / df.inc_tot).where(df.inc_tot > 0)
