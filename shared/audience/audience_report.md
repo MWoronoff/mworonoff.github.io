@@ -44,6 +44,16 @@ Result: **PASSED**
 | Employment: civilian employed + unemployed + armed forces = labor force | PASS | 0 ZIPs off |
 | Renter ages add up | PASS | 0 ZIPs off |
 | Owners + renters = occupied homes (by age of householder) | PASS | 0 ZIPs off |
+| Year built: owner years add up | PASS | 0 ZIPs off |
+| Year built: renter years add up | PASS | 0 ZIPs off |
+| Year built: owners + renters = occupied homes | PASS | 0 ZIPs off |
+| Units in structure: owner types add up | PASS | 0 ZIPs off |
+| Units in structure: renter types add up | PASS | 0 ZIPs off |
+| Year moved in: owner years add up | PASS | 0 ZIPs off |
+| Year moved in: renter years add up | PASS | 0 ZIPs off |
+| B25036 owner homes agree with B25007 | PASS | 0 ZIPs off |
+| B25032 owner homes agree with B25007 | PASS | 0 ZIPs off |
+| B25038 owner homes agree with B25007 | PASS | 0 ZIPs off |
 | Healthcare age brackets add up to population | PASS | 0 ZIPs off |
 | Hearing difficulty by age: every group adds up | PASS | 0 ZIP-groups off |
 | Vision difficulty by age: every group adds up | PASS | 0 ZIP-groups off |
@@ -96,3 +106,6 @@ Result: **PASSED**
 | Published benchmark: adults 65+ living alone | PASS | 27.4% (expected 20–34) |
 | Published benchmark: renter share of households | PASS | 34.8% (expected 28–42) |
 | Published benchmark: homes worth $750K+ | PASS | 13.9% (expected 5–20) |
+| Published benchmark: owner homes built before 1980 | PASS | 48.2% (expected 35–56) |
+| Published benchmark: owner homes that are single-family detached | PASS | 82.3% (expected 74–90) |
+| Published benchmark: owners in the home since before 2010 | PASS | 48.2% (expected 30–60) |
