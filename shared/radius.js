@@ -1,5 +1,5 @@
 /*
- * Adtaxi ZIP radius audience tool. Shared by the Healthcare, Legal and Higher Education analyzers.
+ * Adtaxi ZIP radius audience tool. Shared by the Healthcare, Legal, Higher Education, Home Services and Apartment analyzers.
  * A site page loads Leaflet, topojson-client, engine.css, this file and its own config, then calls
  * AdtaxiRadius.start(config, document.getElementById("app")).
  *
@@ -36,6 +36,7 @@
   var BUILT = [["pre1980", "Before 1980"], ["80_99", "1980–1999"], ["2000p", "2000 or later"]];
   var VALUES = [["lt200", "Under $200K"], ["200_400", "$200K–$399K"], ["400_750", "$400K–$749K"], ["750p", "$750K+"]];
   var EMPLOY = { emp: "employed", unemp: "unemployed", nilf: "nilf" };
+  var RINC = [["lt35", "Under $35K"], ["35_50", "$35K–$49K"], ["50_75", "$50K–$74K"], ["75_100", "$75K–$99K"], ["100_150", "$100K–$149K"], ["150p", "$150K+"]];
   var FILTERS = {
     gender:   { label: "Gender", type: "multi", options: [["m", "Male"], ["f", "Female"]] },
     age:      { label: "Age", type: "multi", options: AGE },
@@ -124,7 +125,30 @@
     sfd:      { label: "Single-family detached", type: "flag", text: "Owner home is a single-family detached house",
                 byAge: function (c, i, b, v, all) { var o = ownerPart(c, i, b, all, "sfd"), x = ratio(c.sfd_own[i], c.hu_tot[i]); return o == null || x == null ? null : o * x; } },
     longten:  { label: "Owned since before 2010", type: "flag", text: "Owner has lived in the home since before 2010",
-                byAge: function (c, i, b, v, all) { var o = ownerPart(c, i, b, all, "longten"), x = ratio(c.lt_own[i], c.hm_tot[i]); return o == null || x == null ? null : o * x; } }
+                byAge: function (c, i, b, v, all) { var o = ownerPart(c, i, b, all, "longten"), x = ratio(c.lt_own[i], c.hm_tot[i]); return o == null || x == null ? null : o * x; } },
+
+    // Apartment (age set "adult"): renter households. The first renter filter selected applies the renter rate for each
+    // age group; the others apply their share among renter households, so renters aren't counted twice.
+    renter:   { label: "Renters", type: "flag", text: "Rents their home",
+                byAge: function (c, i, b, v, all) { return renterPart(c, i, b, all, "renter"); } },
+    rinc:     { label: "Renter household income", type: "multi", options: RINC,
+                byAge: function (c, i, b, sel, all) {
+                  var r = renterPart(c, i, b, all, "rinc"), t = c.rinc_tot ? c.rinc_tot[i] : null; if (r == null || t == null) return null;
+                  var x = sum(sel, function (k) { return c["rinc_" + k][i]; }); if (x == null) return null;
+                  return t ? r * Math.min(1, x / t) : 0;
+                } },
+    rtype:    { label: "Rental type", type: "multi", options: [["apt", "Apartment building (5+ units)"], ["sfd", "Single-family house"]],
+                byAge: function (c, i, b, sel, all) {
+                  var r = renterPart(c, i, b, all, "rtype"), t = c.r_tot ? c.r_tot[i] : null; if (r == null || t == null) return null;
+                  var x = sum(sel, function (k) { return c[k === "apt" ? "r_5p" : "r_sfd"][i]; }); if (x == null) return null;
+                  return t ? r * Math.min(1, x / t) : 0;
+                } },
+    rmoved:   { label: "Recent movers", type: "flag", text: "Renter who moved in 2021 or later",
+                byAge: function (c, i, b, v, all) { var r = renterPart(c, i, b, all, "rmoved"), x = ratio(c.r_moved21[i], c.r_mtot[i]); return r == null || x == null ? null : r * x; } },
+    rburden:  { label: "Rent-burdened", type: "flag", text: "Renter paying 30%+ of income in rent",
+                byAge: function (c, i, b, v, all) { var r = renterPart(c, i, b, all, "rburden"), x = ratio(c.rb_30p[i], c.rb_base[i]); return r == null || x == null ? null : r * x; } },
+    rkids:    { label: "Renters with children", type: "flag", text: "Renter household with children under 18",
+                byAge: function (c, i, b, v, all) { var r = renterPart(c, i, b, all, "rkids"), x = ratio(c.r_kids[i], c.rk_tot[i]); return r == null || x == null ? null : r * x; } }
   };
   // Homeowner rate for an age group, applied once: by the first selected owner filter in OWNER_ORDER, 1 for the rest
   var OWNER_ORDER = ["built", "ownval", "sfd", "longten"];
@@ -134,6 +158,14 @@
     var o = c["o" + b] ? c["o" + b][i] : null, r = c["r" + b] ? c["r" + b][i] : null;
     if (o == null || r == null) return null;
     return o + r ? o / (o + r) : 0;
+  }
+  // Renter rate for an age group, applied once: by the first selected renter filter in RENTER_ORDER, 1 for the rest
+  var RENTER_ORDER = ["renter", "rinc", "rtype", "rmoved", "rburden", "rkids"];
+  function renterPart(c, i, b, all, me) {
+    for (var k = 0; k < RENTER_ORDER.length && RENTER_ORDER[k] !== me; k++) if (all && picked(all[RENTER_ORDER[k]])) return 1;
+    var o = c["o" + b] ? c["o" + b][i] : null, r = c["r" + b] ? c["r" + b][i] : null;
+    if (o == null || r == null) return null;
+    return o + r ? r / (o + r) : 0;
   }
   var CLASSES = [[0, 80, "--ramp-1", "Under 80"], [80, 100, "--ramp-2", "80–99"], [100, 120, "--ramp-3", "100–119"], [120, 150, "--ramp-4", "120–149"], [150, Infinity, "--ramp-5", "150+"]];
   var SMALL_ZIP = 1000;   // when sorting by index, ZIPs with fewer residents go last: a high share of a tiny ZIP is too few people to buy
@@ -660,6 +692,7 @@
     if (aged.length) secs.push(["Traits applied by age group", list(aged).replace(/^./, function (x) { return x.toUpperCase(); }) + " are published by age, so the tool applies each age group's own rate in each ZIP. For example, hearing difficulty among people 75 and older uses the 75+ rate, which is far higher than the rate for all ages."]);
     if ((this.cfg.profiles || []).length) secs.push(["Best prospects", "Each category starts from a profile of its likely customers, built from the same Census and CDC data. A profile is a starting point: change any filter to fit the client. When a profile includes an \"either\" condition (such as 65 and older, or diabetes), people who meet either one are counted once. The ZIP list is sorted by index, so the ZIPs where prospects are most concentrated come first; ZIPs with fewer than 1,000 residents are listed after the rest, since a high share of a tiny ZIP is too few people to reach. Sort by Est. audience to see the largest counts."]);
     if (cf.indexOf("built") >= 0) secs.push(["Homeowners", "Year built, home value, single-family detached and years in the home are Census counts of owner-occupied homes in each ZIP. The tool applies the homeowner rate for each age of householder once, then each selected trait's share among owner homes, so combining them doesn't count owners twice."]);
+    if (cf.indexOf("renter") >= 0) secs.push(["Renters", "Renter income, rental type, recent moves, rent burden and children at home are Census counts of renter households in each ZIP. The tool applies the renter rate for each age of householder once, then each selected trait's share among renter households, so combining them doesn't count renters twice. Counts are adults in renter households."]);
     if (cf.indexOf("parented") >= 0) secs.push(["Parents' education", "This is the education of the head of household in every household in the ZIP. Combine it with Children at home to estimate households with children whose head of household has no college."]);
     secs.push(["Index vs. U.S.", "A ZIP's audience share of its population, divided by the same share nationally, times 100. Above 100 means the audience is more concentrated there than in the U.S. overall."]);
     secs = secs.concat((this.cfg.methodology || []).map(function (m) { return [m.title, m.body]; }));

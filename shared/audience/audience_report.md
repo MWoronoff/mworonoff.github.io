@@ -51,6 +51,15 @@ Result: **PASSED**
 | Units in structure: renter types add up | PASS | 0 ZIPs off |
 | Year moved in: owner years add up | PASS | 0 ZIPs off |
 | Year moved in: renter years add up | PASS | 0 ZIPs off |
+| Renter income: bands add up to renters | PASS | 0 ZIPs off |
+| Owner income: bands add up to owners | PASS | 0 ZIPs off |
+| Rent burden: bands add up | PASS | 0 ZIPs off |
+| Household type: owners + renters = occupied homes | PASS | 0 ZIPs off |
+| B25118 renter households agree with B25007 | PASS | 0 ZIPs off |
+| B25070 renter households agree with B25007 | PASS | 0 ZIPs off |
+| B25115 renter households agree with B25007 | PASS | 0 ZIPs off |
+| B25032 renter households agree with B25007 | PASS | 0 ZIPs off |
+| B25038 renter households agree with B25007 | PASS | 0 ZIPs off |
 | B25036 owner homes agree with B25007 | PASS | 0 ZIPs off |
 | B25032 owner homes agree with B25007 | PASS | 0 ZIPs off |
 | B25038 owner homes agree with B25007 | PASS | 0 ZIPs off |
@@ -109,3 +118,8 @@ Result: **PASSED**
 | Published benchmark: owner homes built before 1980 | PASS | 48.2% (expected 35–56) |
 | Published benchmark: owner homes that are single-family detached | PASS | 82.3% (expected 74–90) |
 | Published benchmark: owners in the home since before 2010 | PASS | 48.2% (expected 30–60) |
+| Published benchmark: renters paying 30%+ of income in rent | PASS | 51.1% (expected 42–58) |
+| Published benchmark: renters in buildings with 5+ units | PASS | 46.8% (expected 35–52) |
+| Published benchmark: renter households with children | PASS | 25.9% (expected 22–40) |
+| Published benchmark: rental vacancy rate | PASS | 5.5% (expected 3.5–9) |
+| Published benchmark: renters earning $100K+ | PASS | 22.7% (expected 10–26) |

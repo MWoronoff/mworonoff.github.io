@@ -66,7 +66,18 @@ REQUESTS = {
     "B25036": [v("B25036", n) for n in range(1, 24)],                 # tenure by year structure built
     "B25032": [v("B25032", n) for n in range(1, 24)],                 # tenure by units in structure
     "B25038": [v("B25038", n) for n in range(1, 16)],                 # tenure by year householder moved into unit
+    # Apartment analyzer: renter income, rent burden, rental vacancy, renters with children
+    "B25118": [v("B25118", n) for n in range(1, 26)],                 # tenure by household income
+    "B25070": [v("B25070", n) for n in range(1, 12)],                 # gross rent as a percentage of household income
+    "B25004": [v("B25004", n) for n in range(1, 9)],                  # vacancy status
+    "B25115": [v("B25115", n) for n in range(1, 28)],                 # tenure by household type and presence of own children
 }
+# B25118 renter lines: 14 renter total, 15 under $5,000 ... 20 $25,000-$34,999, 21 $35-49K, 22 $50-74K, 23 $75-99K, 24 $100-149K, 25 $150K+
+RINC = {"lt35": range(15, 21), "35_50": [21], "50_75": [22], "75_100": [23], "100_150": [24], "150p": [25]}
+# B25070: 7 = 30.0 to 34.9 percent ... 10 = 50 percent or more; 11 = not computed
+BURDEN30 = (7, 8, 9, 10)
+# B25115 renter lines: 15 renter total; own children under 18 at 18 (married couple), 22 (male householder), 25 (female householder)
+RENT_KIDS = (18, 22, 25)
 # B25036 owner lines: 3 built 2020 or later, 4 2010-2019, 5 2000-2009, 6 1990s, 7 1980s, 8 1970s ... 12 1939 or earlier (renter = +11)
 BUILT = {"2000p": (3, 4, 5), "80_99": (6, 7), "pre1980": (8, 9, 10, 11, 12)}
 # B25038 owner lines: 3 moved in 2021 or later, 4 2018-2020, 5 2010-2017, 6 2000-2009, 7 1990s, 8 1989 or earlier
@@ -132,7 +143,17 @@ LABEL_CHECKS = [(v("B01001", 2), ["Male"]), (v("B01001", 26), ["Female"])] + \
      (v("B25036", 8), ["Owner", "1970 to 1979"]), (v("B25036", 12), ["Owner", "1939 or earlier"]), (v("B25036", 13), ["Renter occupied"]),
      (v("B25032", 2), ["Owner"]), (v("B25032", 3), ["Owner", "1, detached"]), (v("B25032", 13), ["Renter"]),
      (v("B25038", 2), ["Owner occupied"]), (v("B25038", 6), ["Owner", "2000 to 2009"]), (v("B25038", 8), ["Owner", "1989 or earlier"]),
-     (v("B25038", 9), ["Renter occupied"])]
+     (v("B25038", 9), ["Renter occupied"]),
+     (v("B25038", 10), ["Renter", "2021 or later"]),
+     (v("B25032", 14), ["Renter", "1, detached"]), (v("B25032", 18), ["Renter", "5 to 9"]), (v("B25032", 20), ["Renter", "20 to 49"]),
+     (v("B25032", 21), ["Renter", "50 or more"]),
+     (v("B25118", 2), ["Owner occupied"]), (v("B25118", 14), ["Renter occupied"]), (v("B25118", 15), ["Renter", "Less than $5,000"]),
+     (v("B25118", 20), ["Renter", "$25,000 to $34,999"]), (v("B25118", 21), ["Renter", "$35,000 to $49,999"]),
+     (v("B25118", 24), ["Renter", "$100,000 to $149,999"]), (v("B25118", 25), ["Renter", "$150,000 or more"]),
+     (v("B25070", 7), ["30.0 to 34.9 percent"]), (v("B25070", 10), ["50.0 percent or more"]), (v("B25070", 11), ["Not computed"]),
+     (v("B25004", 2), ["For rent"]), (v("B25004", 3), ["Rented, not occupied"]),
+     (v("B25115", 15), ["Renter occupied"]), (v("B25115", 18), ["Renter", "Married-couple", "With own children"]),
+     (v("B25115", 22), ["Renter", "Male householder", "With own children"]), (v("B25115", 25), ["Renter", "Female householder", "With own children"])]
 
 
 KEY = os.environ.get("CENSUS_API_KEY", "").strip()
@@ -350,6 +371,18 @@ def main():
     out["hu_tot"], out["sfd_own"] = acs[v("B25032", 2)], acs[v("B25032", 3)]   # owner homes; single-family detached
     out["hm_tot"] = acs[v("B25038", 2)]                                     # owner homes (year moved in table)
     out["lt_own"] = sum(acs[v("B25038", n)] for n in MOVED_PRE2010)         # owners in the home since before 2010
+    # Apartment analyzer: renter households and their traits
+    out["r_tot"] = acs[v("B25032", 13)]                                       # renter households (units in structure table)
+    out["r_sfd"] = acs[v("B25032", 14)]                                       # renting a single-family detached house
+    out["r_5p"] = sum(acs[v("B25032", n)] for n in (18, 19, 20, 21))          # renting in a building with 5+ units
+    out["r_20p"] = acs[v("B25032", 20)] + acs[v("B25032", 21)]                # renting in a building with 20+ units
+    out["r_mtot"], out["r_moved21"] = acs[v("B25038", 9)], acs[v("B25038", 10)]   # renters who moved in 2021 or later
+    out["rinc_tot"] = acs[v("B25118", 14)]
+    for b, lines in RINC.items(): out[f"rinc_{b}"] = sum(acs[v("B25118", n)] for n in lines)
+    out["rb_base"] = acs[v("B25070", 1)] - acs[v("B25070", 11)]              # renters whose burden can be computed
+    out["rb_30p"] = sum(acs[v("B25070", n)] for n in BURDEN30)               # paying 30%+ of income in rent
+    out["vac_rent"], out["vac_rented"] = acs[v("B25004", 2)], acs[v("B25004", 3)]   # vacant for rent; rented, not yet occupied
+    out["rk_tot"], out["r_kids"] = acs[v("B25115", 15)], sum(acs[v("B25115", n)] for n in RENT_KIDS)
 
     # 3. Internal consistency checks
     def chk(name, parts, total, tol=1):
@@ -424,6 +457,13 @@ def main():
     rep_add("Units in structure: renter types add up", add_up("", "B25032", 13, range(14, 24)))
     rep_add("Year moved in: owner years add up", add_up("", "B25038", 2, range(3, 9)))
     rep_add("Year moved in: renter years add up", add_up("", "B25038", 9, range(10, 16)))
+    rep_add("Renter income: bands add up to renters", add_up("", "B25118", 14, range(15, 26)))
+    rep_add("Owner income: bands add up to owners", add_up("", "B25118", 2, range(3, 14)))
+    rep_add("Rent burden: bands add up", add_up("", "B25070", 1, range(2, 12)))
+    rep_add("Household type: owners + renters = occupied homes", add_up("", "B25115", 1, (2, 15)))
+    for t, line in (("B25118", 14), ("B25070", 1), ("B25115", 15), ("B25032", 13), ("B25038", 9)):
+        n = int(((acs[v(t, line)] - acs[v("B25007", 12)]).abs() > 1).sum())
+        rep_add(f"{t} renter households agree with B25007", n)
     for t in ("B25036", "B25032", "B25038"):
         n = int(((acs[v(t, 2)] - acs[v("B25007", 2)]).abs() > 1).sum())
         rep_add(f"{t} owner homes agree with B25007", n)
@@ -505,7 +545,14 @@ def main():
              # and about 45% of owners moved in before 2010
              ("owner homes built before 1980", tot("hb_pre1980") / max(tot("hb_tot"), 1) * 100, 35, 56, "{:.1f}%"),
              ("owner homes that are single-family detached", tot("sfd_own") / max(tot("hu_tot"), 1) * 100, 74, 90, "{:.1f}%"),
-             ("owners in the home since before 2010", tot("lt_own") / max(tot("hm_tot"), 1) * 100, 30, 60, "{:.1f}%")]
+             ("owners in the home since before 2010", tot("lt_own") / max(tot("hm_tot"), 1) * 100, 30, 60, "{:.1f}%"),
+             # Apartment: about half of renters pay 30%+ of income in rent; about 40-45% rent in 5+ unit buildings; about a third of
+             # renter households have children; national rental vacancy about 5-7%; renters $100K+ about 15-20%
+             ("renters paying 30%+ of income in rent", tot("rb_30p") / max(tot("rb_base"), 1) * 100, 42, 58, "{:.1f}%"),
+             ("renters in buildings with 5+ units", tot("r_5p") / max(tot("r_tot"), 1) * 100, 35, 52, "{:.1f}%"),
+             ("renter households with children", tot("r_kids") / max(tot("rk_tot"), 1) * 100, 22, 40, "{:.1f}%"),
+             ("rental vacancy rate", tot("vac_rent") / max(tot("vac_rent") + tot("vac_rented") + tot("r_tot"), 1) * 100, 3.5, 9, "{:.1f}%"),
+             ("renters earning $100K+", (tot("rinc_100_150") + tot("rinc_150p")) / max(tot("rinc_tot"), 1) * 100, 10, 26, "{:.1f}%")]
     for name, val, lo, hi, fmt in bench:
         rep.append((f"Published benchmark: {name}", "PASS" if lo < val < hi else "FAIL", fmt.format(val) + f" (expected {lo}–{hi})"))
 
@@ -529,6 +576,8 @@ def main():
     extra = {"zip_audience_health.json": [f"{s}h{b}" for s in "mf" for b in HC_AGES] + [f"{t}_{b}" for t in ("civ", "hear", "vis") for b in DIS_BRACKETS] +
                                          [f"{t}_{b}" for t in ("inst", "unins") for b in INS_BRACKETS] + [f"{t}_{b}" for t in ("liv", "alone") for b in LIV_GROUPS],
              "zip_audience_legal.json": ["pop16", "nilf"] + [f"{t}{b}" for t in "or" for b in TEN_BRACKETS] + [f"val_{b}" for b in VAL_BANDS],
+             "zip_audience_apt.json": ["r_tot", "r_sfd", "r_5p", "r_20p", "r_mtot", "r_moved21", "rinc_tot"] + [f"rinc_{b}" for b in RINC] +
+                                      ["rb_base", "rb_30p", "vac_rent", "vac_rented", "rk_tot", "r_kids"],
              "zip_audience_home.json": ["hb_tot"] + [f"hb_{b}" for b in BUILT] + ["hu_tot", "sfd_own", "hm_tot", "lt_own"]}
     cols = {"zip": m.zip.tolist(), "city": m.city.fillna("").tolist(), "state": m.state.tolist(),
             "lat": m.lat.round(4).tolist(), "lon": m.lon.round(4).tolist(),
