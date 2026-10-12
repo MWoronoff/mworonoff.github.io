@@ -51,9 +51,10 @@ LA_DMA = "803"
 SUBCATS = [
     {"id": "any", "label": "Any home service", "naics": ["238160", "238210", "238220", "238320", "238330"], "easi": ANY_EASI,
      "demand": ["owners", "pre2000_share", "sfd_share", "lt_share"]},
-    # HVAC: climate is the greater of heating or cooling need, counted twice; home age is left out because systems wear out
-    # on a 15-20 year cycle in new and old homes alike
-    {"id": "hvac", "label": "HVAC", "naics": ["238220"], "easi": ["hvac"], "demand": ["owners", "clim_stress", "clim_stress"]},
+    # HVAC: climate is the greater of heating or cooling need; home age is left out because systems wear out on a 15-20
+    # year cycle in new and old homes alike. Standard weights: they tracked contractor employment as well as or better
+    # than heavier climate weighting (see the HVAC validation lines in the report).
+    {"id": "hvac", "label": "HVAC", "naics": ["238220"], "easi": ["hvac"], "demand": ["owners", "clim_stress"]},
     {"id": "roof", "label": "Roofing and gutters", "naics": ["238160"], "easi": ["roof"], "demand": ["sfd_own", "hail_days", "pre2000_share"]},
     {"id": "plumb", "label": "Plumbing", "naics": ["238220"], "easi": ["plumb"], "demand": ["owners", "pre1980_share"]},
     {"id": "elec", "label": "Electrical", "naics": ["238210"], "easi": ["hvac"], "demand": ["owners", "pre1980_share", "val300_share"]},

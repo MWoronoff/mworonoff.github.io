@@ -793,8 +793,8 @@ AdtaxiAnalyzer.start({
    "title": "Consumer Demand",
    "body": [
     "The size and need of each service's customer base. Homeowners and home characteristics come from the Census American Community Survey; climate and hail come from NOAA.",
-    "HVAC: homeowners, heating plus cooling degree days and the share of owner homes built before 2000. Roofing and gutters: owners of single-family detached homes, days a year with 1-inch or larger hail, and the share of owner homes built before 2000. Plumbing: homeowners and the share of owner homes built before 1980. Electrical: homeowners, the share of owner homes built before 1980 and the share worth $300K or more. Painting and wallpaper: homeowners, the share of owner homes worth $300K or more and the share of owners in their home since before 2010, the owners most likely to hire out repainting. Flooring: homeowners, the share of owner homes built before 2000 and the share of owners in their home since before 2010, when original floors get replaced. Any home service: homeowners, the share of owner homes built before 2000, the share that are single-family detached and the share of owners in their home since before 2010.",
-    "Degree days are NOAA's county heating and cooling degree days (base 65°F), averaged over the last 10 complete years. Hail days count the days with hail an inch or larger reported in the county by NOAA Storm Events over the same years. NOAA's county climate files don't cover Alaska or Hawaii, so their HVAC demand leaves degree days out; Washington, DC uses its two Maryland neighbors. NOAA reports Connecticut hail by its eight former counties, so Connecticut ZIPs use their average."
+    "HVAC: homeowners and heating or cooling need, whichever is greater in the market, so Minneapolis winters and Houston summers both count fully. Home age isn't used for HVAC, because systems wear out on a 15–20 year cycle in new and old homes alike. Roofing and gutters: owners of single-family detached homes, days a year with 1-inch or larger hail, and the share of owner homes built before 2000. Plumbing: homeowners and the share of owner homes built before 1980. Electrical: homeowners, the share of owner homes built before 1980 and the share worth $300K or more. Painting and wallpaper: homeowners, the share of owner homes worth $300K or more and the share of owners in their home since before 2010, the owners most likely to hire out repainting. Flooring: homeowners, the share of owner homes built before 2000 and the share of owners in their home since before 2010, when original floors get replaced. Any home service: homeowners, the share of owner homes built before 2000, the share that are single-family detached and the share of owners in their home since before 2010.",
+    "Heating and cooling need come from NOAA's county heating and cooling degree days (base 65°F), averaged over the last 10 complete years; each market is scored on the higher of its two percentiles. Hail days count the days with hail an inch or larger reported in the county by NOAA Storm Events over the same years. NOAA's county climate files don't cover Alaska or Hawaii, so their HVAC demand leaves degree days out; Washington, DC uses its two Maryland neighbors. NOAA reports Connecticut hail by its eight former counties, so Connecticut ZIPs use their average."
    ]
   },
   {
@@ -824,6 +824,10 @@ AdtaxiAnalyzer.start({
   {
    "title": "Households per square mile",
    "body": "Households divided by land area from the Census Gazetteer, for each ZIP, metro and DMA. It isn't part of the score; use it to compare how many prospects a service area or radius can reach."
+  },
+  {
+   "title": "How the HVAC scoring was checked",
+   "body": "HVAC scores were tested against an independent benchmark: HVAC and plumbing contractor employees per 1,000 households, from Census Business Patterns, since contractors employ people where homeowners buy the work. Scoring climate on the greater of heating or cooling need, and leaving out home age, roughly doubled how well DMA scores line up with that benchmark. Giving climate extra weight, or cutting EASI spending's weight, didn't improve it, so HVAC uses the same weights as every other service. The check runs with every data build and appears in the build report."
   },
   {
    "title": "ZIPs in a market",
