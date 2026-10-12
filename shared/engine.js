@@ -350,7 +350,7 @@
     var rows = d.rows.map(function (r) { return { label: r[0], aud: r[1], us: r[2], diff: r[2] ? r[1] / r[2] - 1 : null }; });
     var sortKey = this.adSort || "aud";
     var pct = function (x) { return (Math.round(x * 10) / 10).toFixed(1) + "%"; };
-    var dif = function (x) { return (x >= 0 ? "+" : "−") + Math.round(Math.abs(x) * 100) + "%"; };
+    var dif = function (x) { var n = Math.round(Math.abs(x) * 100); return (n === 0 ? "" : x > 0 ? "+" : "−") + n + "%"; };
     var byAud = rows.slice().sort(function (a, b) { return b.aud - a.aud; });
     var byDiff = rows.slice().sort(function (a, b) { return b.diff - a.diff; });
     var topDiff = byDiff.slice(0, 3).map(function (r) { return r.label; });
