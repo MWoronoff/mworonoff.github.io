@@ -31,6 +31,7 @@
   // Health conditions (CDC PLACES, adults): any of the selected, treating conditions as independent within a ZIP
   var CONDITIONS = [["diabetes", "Diabetes"], ["bphigh", "High blood pressure"], ["arthritis", "Arthritis"], ["obesity", "Obesity"],
                     ["depression", "Depression"], ["mhlth", "Frequent mental distress"], ["fairpoor", "Fair or poor health"]];
+  var INC4 = { lt50: ["lt35", "35_50"], "50_100": ["50_75", "75_100"], "100_150": ["100_150"], "150p": ["150_200", "200p"] };   // fewer income bands
   var BUILT = [["pre1980", "Before 1980"], ["80_99", "1980–1999"], ["2000p", "2000 or later"]];
   var VALUES = [["lt200", "Under $200K"], ["200_400", "$200K–$399K"], ["400_750", "$400K–$749K"], ["750p", "$750K+"]];
   var EMPLOY = { emp: "employed", unemp: "unemployed", nilf: "nilf" };
@@ -40,6 +41,8 @@
     income:   { label: "Household income", type: "multi", options: [["lt35", "Under $35K"], ["35_50", "$35K–$49K"], ["50_75", "$50K–$74K"], ["75_100", "$75K–$99K"],
                            ["100_150", "$100K–$149K"], ["150_200", "$150K–$199K"], ["200p", "$200K+"]],
                 share: function (c, i, sel) { return ratio(sum(sel, function (b) { return c["inc_" + b][i]; }), c.inc_tot[i]); } },
+    income4:  { label: "Household income", type: "multi", options: [["lt50", "Under $50K"], ["50_100", "$50K–$99K"], ["100_150", "$100K–$149K"], ["150p", "$150K+"]],
+                share: function (c, i, sel) { return ratio(sum(sel, function (b) { return sum(INC4[b], function (x) { return c["inc_" + x][i]; }); }), c.inc_tot[i]); } },
     parented: { label: "Parents' education (head of household)", type: "multi",
                 options: [["nocol", "No college"], ["some", "Some college or associate's"], ["ba", "Bachelor's or higher"]],
                 share: function (c, i, sel) { return ratio(sum(sel, function (b) { return c["hhed_" + b][i]; }), c.hhed_tot[i]); } },

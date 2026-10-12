@@ -33,7 +33,7 @@ AdtaxiRadius.start({
   defaultRadius: 25,
   radii: [5, 10, 15, 25, 50, 100],
   radiusLabel: "Up to {r} miles",
-  filters: ["gender", "age", "income", "built", "ownval", "sfd", "longten", "kids", "hispanic", "spanish"],
+  filters: ["age", "income4", "built", "ownval", "sfd", "longten"],
   profileLabel: "Best prospects for",
   profiles: [
     { id: "any", label: "Any home service", note: "Homeowners 35 and older in single-family detached homes built before 2000.", sel: { age: ["35_44", "45_54", "55p"], built: ["pre1980", "80_99"], sfd: true } },
@@ -43,11 +43,6 @@ AdtaxiRadius.start({
     { id: "elec", label: "Electrical", note: "Owners of homes built before 1980 worth $200K or more, the likeliest to update wiring and panels.", sel: { built: ["pre1980"], ownval: ["200_400", "400_750", "750p"] } },
     { id: "paint", label: "Painting and wallpaper", note: "Owners of homes worth $200K or more who have lived there since before 2010, the likeliest to hire out repainting.", sel: { ownval: ["200_400", "400_750", "750p"], longten: true } },
     { id: "floor", label: "Flooring", note: "Owners of homes built before 2000 who have lived there since before 2010, when original floors get replaced.", sel: { built: ["pre1980", "80_99"], longten: true } },
-  ],
-  presets: [
-    { label: "Owners since before 2010", sel: { longten: true } },
-    { label: "Owners of $400K+ homes", sel: { ownval: ["400_750", "750p"] } },
-    { label: "Owners of homes built 2000 or later", sel: { built: ["2000p"] } }
   ],
   methodology: [
     { title: "Year built and home type", body: "Census publishes year built, units in the building and the year the owner moved in for owner-occupied homes in each ZIP, but not by the owner's age. So an owner selection applies each age group's homeownership rate, and the home traits apply the ZIP's share among all owner homes." },
