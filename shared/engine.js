@@ -130,6 +130,7 @@
     if ((cfg.subcategories || []).some(function (s) { return s.id === p.sub; })) this.state.sub = p.sub;
     if ((cfg.rankBy || []).indexOf(p.rank) >= 0) this.state.rank = p.rank;
     if (p.area) this.state.area = p.area;
+    if (p.pts === "1" && cfg.pointLayer) this.state.points = true;
   };
   Analyzer.prototype.writeHash = function () {
     var s = this.state, parts = ["level=" + s.level];
@@ -137,6 +138,7 @@
     if (s.rank) parts.push("rank=" + encodeURIComponent(s.rank));
     if (s.level === "zip" && s.parent) parts.push("in=" + s.parent.level + ":" + encodeURIComponent(s.parent.id));
     if (s.area && s.level !== "us") parts.push("area=" + encodeURIComponent(s.area));
+    if (s.points) parts.push("pts=1");
     var h = "#" + parts.join("&");
     if (location.hash !== h) history.replaceState(null, "", h);
   };
@@ -360,6 +362,7 @@
     if (this.areaLayer) this.map.removeLayer(this.areaLayer);
     if (this.stateLayer) this.map.removeLayer(this.stateLayer);
     if (this.parentLayer) { this.map.removeLayer(this.parentLayer); this.parentLayer = null; }
+    if (this.pointsLayer) { this.map.removeLayer(this.pointsLayer); this.pointsLayer = null; }
     this.layerById = {};
     this.mapMsg.hidden = true;
     if (!fc) {
@@ -409,6 +412,12 @@
     this.mapHead.appendChild(el("b", { text: (m ? m.label : "") + (m && m.perSub && this.subLabel() ? ": " + this.subLabel() : "") }));
     this.mapHead.appendChild(el("span", { text: lv === "zip" ? "ZIPs in " + this.parentName() + ", ranked within this market." :
       "By " + this.levelLabel(lv) + (s.level === "us" ? ". Click a market to rank at that level." : ". Click a market for details.") }));
+    var P0 = this.cfg.pointLayer;
+    if (P0) {
+      var box = el("input", { type: "checkbox", onchange: function () { s.points = this.checked; self.renderPoints(d); self.writeHash(); } });
+      box.checked = !!s.points;
+      this.mapHead.appendChild(el("label", { class: "az-pt-toggle" }, [box, " " + (P0.label || "Show locations")]));
+    }
     this.legend.innerHTML = "";
     if (br.length) {
       var lo = values.filter(function (x) { return typeof x === "number"; });
@@ -421,6 +430,32 @@
       }
     }
     this.legend.appendChild(el("div", { class: "az-legend-row" }, [el("span", { class: "az-swatch nodata" }), el("span", { text: lv === "zip" ? "Not ranked or no data" : "No data" })]));
+    this.renderPoints(d);
+  };
+  // Optional overlay: a circle on each area sized by a count (e.g. competing businesses), switched on and off by the user
+  Analyzer.prototype.renderPoints = function (d) {
+    var self = this, P0 = this.cfg.pointLayer, s = this.state;
+    if (this.pointsLayer) { this.map.removeLayer(this.pointsLayer); this.pointsLayer = null; }
+    if (this.ptLegend) { this.ptLegend.remove(); this.ptLegend = null; }
+    if (!P0 || !s.points || !this.layerById) return;
+    var m = this.measure(P0.key); if (!m) return;
+    var pts = [], max = 0;
+    Object.keys(this.layerById).forEach(function (id) {
+      var row = d.byId[id], v = row ? self.val(row, m) : null;
+      if (typeof v !== "number" || v <= 0) return;
+      var b = self.layerById[id].getBounds(); if (!b.isValid()) return;
+      pts.push([b.getCenter(), v, row.name]); if (v > max) max = v;
+    });
+    var big = this.mapLevel === "zip" ? 16 : 22;
+    pts.sort(function (a, b) { return b[1] - a[1]; });   // big circles first, so small ones stay clickable on top
+    this.pointsLayer = L.layerGroup(pts.map(function (p) {
+      var r = Math.max(2.5, Math.sqrt(p[1] / max) * big);
+      return L.circleMarker(p[0], { radius: r, color: "#ffffff", weight: 1, fillColor: cssVar("--pt") || "#e07b24", fillOpacity: 0.85 })
+        .bindTooltip('<div class="az-tip"><b>' + p[2] + "</b><br>" + fmt(p[1], m.format) + " " + (P0.unit || "") + "</div>", { direction: "top", opacity: 0.97 });
+    })).addTo(this.map);
+    this.ptLegend = el("div", { class: "az-legend-row az-pt-legend" }, [el("span", { class: "az-pt-dot" }),
+      el("span", { text: (P0.legend || "Circle size = count") + (this.mapLevel === "zip" && P0.zipNote ? " " + P0.zipNote : "") })]);
+    this.legend.appendChild(this.ptLegend);
   };
   Analyzer.prototype.highlight = function () {
     var self = this;

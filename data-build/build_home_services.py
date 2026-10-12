@@ -25,7 +25,8 @@ Geography comes from data-build/geo (ZIP -> county, metro, DMA). Download helper
 import argparse, datetime, gzip, io, json, os, re, sys
 import numpy as np
 import pandas as pd
-from build_healthcare import cbp_years, zbp, cbp_county, pct, combine, fetch
+from build_healthcare import cbp_years, zbp, cbp_county, pct, combine, fetch, get
+import urllib.request, zipfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -36,6 +37,7 @@ CLIMDIV = "https://www.ncei.noaa.gov/pub/data/cirs/climdiv/"
 STORMS = "https://www.ncei.noaa.gov/pub/data/swdi/stormevents/csvfiles/"
 YEARS = 10                              # climate and hail: average of the last 10 complete years
 HAIL_MIN = 1.0                          # inches: hail this size or larger damages roofs
+GAZ = "https://www2.census.gov/geo/docs/maps-data/data/gazetteer/{y}_Gazetteer/{y}_Gaz_zcta_national.zip"
 
 # Market Potential Score: where a home service company's potential customers are. Each part is a percentile (0-100).
 WEIGHTS = {"demand": 0.40, "category": 0.25, "spend": 0.15, "comp": 0.20}
@@ -63,6 +65,7 @@ DEMAND_LABELS = {"owners": "Homeowners", "sfd_own": "Owners of single-family det
                  "lt_share": "Owners in their home since before 2010", "val300_share": "Owner homes worth $300K+",
                  "degdays": "Heating + cooling degree days", "hail_days": "Days a year with 1-inch+ hail"}
 COUNTS = ["population", "households", "owners", "sfd_own"]
+DENSITY = ["density"]                                    # households per square mile of land
 RATES = ["own_share", "pre1980_share", "pre2000_share", "sfd_share", "lt_share", "val300_share", "inc75_share"]
 CLIMATE = ["hdd", "cdd", "degdays", "hail_days"]           # household-weighted averages of county values
 RATE_PARTS = {"own_share": ("owners", "hh_tot"), "pre1980_share": ("hb_pre1980", "hb_tot"), "pre2000_share": ("hb_pre2000", "hb_tot"),
@@ -179,6 +182,26 @@ def hail(cache, rep):
     return days, len(ct) / len(yrs) / len(CT_OLD)   # Connecticut: average per former county
 
 
+def zcta_land(cache, rep):
+    """Land area of each ZIP (ZCTA) in square miles, from the Census Gazetteer."""
+    this = datetime.date.today().year
+    for y in range(this, this - 5, -1):
+        name = f"{y}_Gaz_zcta_national.zip"
+        if cache:
+            if not os.path.exists(os.path.join(cache, name)): continue
+            blob = open(os.path.join(cache, name), "rb").read()
+        else:
+            try: blob = get(GAZ.format(y=y), tries=2)
+            except Exception as e:
+                log(f"Gazetteer {y}: not available -> {e}"); continue
+        zf = zipfile.ZipFile(io.BytesIO(blob))
+        df = pd.read_csv(zf.open(zf.namelist()[0]), sep="\t", dtype={"GEOID": str})
+        df.columns = [c.strip() for c in df.columns]
+        rep.append(("Land area source", "INFO", f"Census {y} Gazetteer ZCTA file ({len(df):,} ZIPs)"))
+        return df.set_index(df.GEOID.str.zfill(5)).ALAND_SQMI.astype(float)
+    raise RuntimeError("No Census Gazetteer ZCTA file could be found")
+
+
 def main():
     ap_ = argparse.ArgumentParser(); ap_.add_argument("--cache"); a = ap_.parse_args()
     rep = [("Formula tests", "PASS", self_test())]
@@ -205,6 +228,9 @@ def main():
     acs["hb_pre2000"] = acs.hb_pre1980 + acs.hb_80_99
     acs = acs.rename(columns={"own_tot": "owners"})
     z = z.merge(acs.drop(columns=["inc_75_100", "inc_100_150", "inc_150_200", "inc_200p"]), on="zip", how="left")
+
+    # Land area for household density
+    z["land"] = z.zip.map(zcta_land(a.cache, rep))
 
     # NOAA climate and hail by county, then to ZIPs. Counties NOAA doesn't list use their state's average.
     hdd, cdd = climdiv(a.cache, rep)
@@ -301,6 +327,8 @@ def main():
              "sfd_own": g.sfd_own.sum(min_count=1)}
         for k, (n, d) in RATE_PARTS.items():
             den = g[d].sum(); r[k] = g[n].sum() / den if den > 0 else np.nan
+        land = g.land.where(g.land > 0).sum()
+        r["density"] = g.households.where(g.land > 0, 0).sum() / land if land > 0 else np.nan
         w = g.households.where(g.households > 0, 0)
         for k in CLIMATE:
             ok = g[k].notna() & (w > 0)
@@ -345,6 +373,8 @@ def main():
             if "category" in parts and f"easi_{ek}_hh" in df.columns:
                 df[f"category@{i}"] = combine([P(df[f"easi_{ek}_hh"]), P(df[f"easi_{ek}_total"])], [0.5, 0.5])
             else: df[f"category@{i}"] = np.nan
+            for t in ("hh", "idx", "total"):      # the spending this service is scored on, under one name for every service
+                if f"easi_{ek}_{t}" in df.columns: df[f"easi_{t}@{i}"] = df[f"easi_{ek}_{t}"]
             df[f"spend@{i}"] = spend
             df[f"comp@{i}"] = P(-df[f"per10k@{i}"]) if "comp" in parts else np.nan
             cols = [df[f"{c}@{i}"] for c in parts]
@@ -369,6 +399,9 @@ def main():
         us[f"growth@{i}"] = (us[f"est@{i}"] - us[f"prev@{i}"]) / us[f"prev@{i}"]
     for k in ALL_EASI: us[f"easi_{k}_hh"] = us_hh[k]
     add_easi(us)
+    for s in SUBCATS:
+        ek = "any" if s["id"] == "any" else s["easi"][0]
+        for t in ("hh", "idx", "total"): us[f"easi_{t}@{s['id']}"] = us[f"easi_{ek}_{t}"]
 
     # ---------------- Checks ----------------
     for name, df in (("DMA", dma), ("Metro", met)):
@@ -397,6 +430,10 @@ def main():
         v_ = us[k].iloc[0]
         rep.append((f"U.S. household-weighted {k.upper()}", "PASS" if lo <= v_ <= hi else "FAIL", f"{v_:,.0f} (expected {lo:,}–{hi:,})"))
     rep.append(("U.S. household-weighted 1-inch hail days", "INFO", f"{us.hail_days.iloc[0]:.1f} a year"))
+    v_ = us.density.iloc[0]
+    rep.append(("U.S. households per square mile", "PASS" if 25 <= v_ <= 50 else "FAIL", f"{v_:.1f} (expected 25–50)"))
+    nyc = dma.density.get("501", np.nan)
+    rep.append(("Density sense check: New York DMA is far denser than the U.S.", "PASS" if nyc > 10 * v_ else "FAIL", f"{nyc:,.0f} vs {v_:.0f} households per square mile"))
 
     failed = [r for r in rep if r[1] == "FAIL"]
     os.makedirs(OUT, exist_ok=True)
@@ -408,10 +445,11 @@ def main():
 
     # ---------------- Write ----------------
     easi_keys = [f"easi_{k}_{t}" for k in ALL_EASI + ["any"] for t in ("hh", "total", "idx")]
-    keep = COUNTS + RATES + CLIMATE + easi_keys
-    per_sub = ["score", "demand", "category", "spend", "comp", "under", "est", "per10k", "growth"]
+    keep = COUNTS + DENSITY + RATES + CLIMATE + easi_keys
+    per_sub = ["score", "demand", "category", "spend", "comp", "under", "est", "per10k", "growth", "easi_hh", "easi_idx", "easi_total"]
     SCORE_KEYS = ("score", "demand", "category", "spend", "comp")
     INTS = COUNTS + ["hdd", "cdd", "degdays"] + [k for k in easi_keys if k.endswith("_total")]
+    SUB_INTS = ("est", "easi_total", "easi_idx")
 
     def clean(v):
         if v is None: return None
@@ -434,7 +472,7 @@ def main():
                 for p in per_sub:
                     k = f"{p}@{s['id']}"
                     if k in df.columns:
-                        x = clean(r[k]); v[k] = int(round(x)) if (p in SCORE_KEYS or p == "est") and x is not None else x
+                        x = clean(r[k]); v[k] = int(round(x)) if (p in SCORE_KEYS or p in SUB_INTS) and x is not None else x
             v = {k: x for k, x in v.items() if x is not None}
             out.append({"id": str(idx), "name": names(idx), "v": v, "f": flags_fn(idx, r) if flags_fn else []})
         return out
@@ -470,6 +508,7 @@ def main():
             df = g.set_index("zip")
             f = pd.DataFrame(index=df.index)
             for c in ("population", "households", "owners", "sfd_own") + tuple(CLIMATE): f[c] = df[c]
+            f["density"] = (df.households / df.land).where(df.land > 0)
             for k, (n, d) in RATE_PARTS.items(): f[k] = (df[n] / df[d]).where(df[d] > 0)
             for s in SUBCATS: f[f"est@{s['id']}"], f[f"prev@{s['id']}"] = df[f"zest_{s['id']}"], df[f"zest_prev_{s['id']}"]
             ok = f.population >= MIN_POP

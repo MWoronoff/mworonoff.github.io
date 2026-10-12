@@ -164,6 +164,55 @@ AdtaxiAnalyzer.start({
    "help": "Percentile of contractors per 10,000 residents, reversed: fewer competing contractors scores higher, since each ad dollar faces less competition."
   },
   {
+   "key": "easi_hh",
+   "label": "Spending per household (EASI)",
+   "short": "$/HH",
+   "format": "money",
+   "perSub": true,
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "EASI 2025 estimated annual household spending on the selected service: how active households are. HVAC and Electrical: heat, a/c and electrical work. Roofing: roofing and gutters. Plumbing: plumbing and water heating. Painting: painting and papering (hired work). Flooring: flooring installation, repair and replacement. Any home service: all five combined."
+  },
+  {
+   "key": "easi_idx",
+   "label": "Spending index vs. U.S.",
+   "short": "Spend idx",
+   "format": "index",
+   "perSub": true,
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "Spending per household divided by the U.S. average, times 100. Above 100 means households here spend more on this service than average."
+  },
+  {
+   "key": "easi_total",
+   "label": "Total spending, est. annual",
+   "short": "Total $",
+   "format": "moneyM",
+   "perSub": true,
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "EASI spending per household times the households in this market: the size of the prize."
+  },
+  {
+   "key": "density",
+   "label": "Households per square mile",
+   "short": "HH/sq mi",
+   "format": "int",
+   "help": "Households divided by land area (Census Gazetteer). Denser markets put more prospects inside each service area and radius."
+  },
+  {
    "key": "est",
    "label": "Contractors (competitors)",
    "format": "int",
@@ -249,7 +298,7 @@ AdtaxiAnalyzer.start({
   },
   {
    "key": "easi_hvac_hh",
-   "label": "Heat, a/c and electrical work spending per household (EASI)",
+   "label": "Heat, a/c and electrical work per household (EASI)",
    "format": "money",
    "short": "HVAC/elec $/HH",
    "levels": [
@@ -259,9 +308,7 @@ AdtaxiAnalyzer.start({
    ],
    "hideWhenUnavailable": true,
    "subs": [
-    "any",
-    "hvac",
-    "elec"
+    "any"
    ],
    "help": "EASI 2025 estimated annual household spending on heat, a/c and electrical work. DMA figures average the metro and micro areas in the DMA, weighted by households."
   },
@@ -303,7 +350,7 @@ AdtaxiAnalyzer.start({
   },
   {
    "key": "easi_roof_hh",
-   "label": "Roofing and gutters spending per household (EASI)",
+   "label": "Roofing and gutters per household (EASI)",
    "format": "money",
    "short": "Roofing $/HH",
    "levels": [
@@ -313,8 +360,7 @@ AdtaxiAnalyzer.start({
    ],
    "hideWhenUnavailable": true,
    "subs": [
-    "any",
-    "roof"
+    "any"
    ],
    "help": "EASI 2025 estimated annual household spending on roofing and gutters. DMA figures average the metro and micro areas in the DMA, weighted by households."
   },
@@ -354,7 +400,7 @@ AdtaxiAnalyzer.start({
   },
   {
    "key": "easi_plumb_hh",
-   "label": "Plumbing and water heating spending per household (EASI)",
+   "label": "Plumbing and water heating per household (EASI)",
    "format": "money",
    "short": "Plumbing $/HH",
    "levels": [
@@ -364,8 +410,7 @@ AdtaxiAnalyzer.start({
    ],
    "hideWhenUnavailable": true,
    "subs": [
-    "any",
-    "plumb"
+    "any"
    ],
    "help": "EASI 2025 estimated annual household spending on plumbing and water heating. DMA figures average the metro and micro areas in the DMA, weighted by households."
   },
@@ -405,7 +450,7 @@ AdtaxiAnalyzer.start({
   },
   {
    "key": "easi_paint_hh",
-   "label": "Painting and papering spending per household (EASI)",
+   "label": "Painting and papering per household (EASI)",
    "short": "Painting $/HH",
    "format": "money",
    "levels": [
@@ -415,8 +460,7 @@ AdtaxiAnalyzer.start({
    ],
    "hideWhenUnavailable": true,
    "subs": [
-    "any",
-    "paint"
+    "any"
    ],
    "help": "EASI 2025 estimated annual household spending on painting and papering done by contractors. Metro figures average the DMAs the metro's ZIPs fall in, weighted by households."
   },
@@ -504,7 +548,7 @@ AdtaxiAnalyzer.start({
   },
   {
    "key": "easi_floor_hh",
-   "label": "Flooring spending per household (EASI)",
+   "label": "Flooring per household (EASI)",
    "short": "Flooring $/HH",
    "format": "money",
    "levels": [
@@ -514,8 +558,7 @@ AdtaxiAnalyzer.start({
    ],
    "hideWhenUnavailable": true,
    "subs": [
-    "any",
-    "floor"
+    "any"
    ],
    "help": "EASI 2025 estimated annual household spending on flooring installation, repair and replacement in owned homes. Metro figures average the DMAs the metro's ZIPs fall in, weighted by households."
   },
@@ -682,27 +725,12 @@ AdtaxiAnalyzer.start({
  ],
  "rankBy": [
   "score",
-  "easi_any_idx",
-  "easi_hvac_idx",
-  "easi_roof_idx",
-  "easi_plumb_idx",
-  "easi_paint_idx",
-  "easi_floor_idx",
-  "est",
-  "per10k",
-  "growth",
-  "population",
+  "demand",
+  "easi_idx",
+  "easi_hh",
+  "easi_total",
   "owners",
-  "own_share",
-  "sfd_own",
-  "sfd_share",
-  "pre1980_share",
-  "pre2000_share",
-  "lt_share",
-  "val300_share",
-  "degdays",
-  "hail_days",
-  "inc75_share"
+  "density"
  ],
  "defaultRank": "score",
  "components": [
@@ -712,31 +740,17 @@ AdtaxiAnalyzer.start({
   "comp"
  ],
  "detailMeasures": [
-  "easi_any_hh",
-  "easi_any_idx",
-  "easi_any_total",
+  "easi_hh",
+  "easi_idx",
+  "easi_total",
   "easi_hvac_hh",
-  "easi_hvac_idx",
-  "easi_hvac_total",
   "easi_roof_hh",
-  "easi_roof_idx",
-  "easi_roof_total",
   "easi_plumb_hh",
-  "easi_plumb_idx",
-  "easi_plumb_total",
   "easi_paint_hh",
-  "easi_paint_idx",
-  "easi_paint_total",
+  "easi_floor_hh",
   "easi_paintsup_hh",
   "easi_paintsup_idx",
-  "easi_paintsup_total",
-  "easi_floor_hh",
-  "easi_floor_idx",
-  "easi_floor_total",
-  "est",
-  "per10k",
-  "growth",
-  "under",
+  "density",
   "population",
   "households",
   "owners",
@@ -751,25 +765,21 @@ AdtaxiAnalyzer.start({
   "hdd",
   "cdd",
   "hail_days",
-  "inc75_share"
+  "inc75_share",
+  "est",
+  "per10k",
+  "growth",
+  "under"
  ],
  "tableColumns": [
   "score",
-  "easi_any_idx",
-  "easi_hvac_idx",
-  "easi_roof_idx",
-  "easi_plumb_idx",
-  "easi_paint_idx",
-  "easi_floor_idx",
-  "est",
-  "per10k",
-  "under",
+  "demand",
+  "easi_idx",
+  "easi_hh",
+  "easi_total",
   "owners",
-  "pre1980_share",
-  "pre2000_share",
-  "sfd_share",
-  "degdays",
-  "hail_days"
+  "density",
+  "under"
  ],
  "methodology": [
   {
@@ -809,8 +819,16 @@ AdtaxiAnalyzer.start({
    "body": "Flags markets with strong customer demand (70th percentile or higher) but few contractors per resident (30th percentile or lower). It's shown as a pitch for companies weighing a new location or service area, not counted in the score."
   },
   {
+   "title": "Contractor locations",
+   "body": "Switch on Show contractor locations to put a circle on each market (or each ZIP in the ZIP view) sized by the number of contractors for the selected service, from Census Business Patterns. These are counts by area; Census doesn't publish business addresses. In the ZIP view, Census doesn't publish a ZIP's count when it has fewer than 3 businesses, so those ZIPs show no circle."
+  },
+  {
    "title": "Measures shown for each service",
-   "body": "Rankings, table columns and market details show only the measures that relate to the selected service. Population, households, homeowners, income, contractors and the score appear for every service."
+   "body": "Rank and map by offers the score, Consumer Demand, the service's EASI spending (per household, index vs. U.S. and total), homeowners and households per square mile. Market details add the home, climate, income and contractor measures that relate to the selected service."
+  },
+  {
+   "title": "Households per square mile",
+   "body": "Households divided by land area from the Census Gazetteer, for each ZIP, metro and DMA. It isn't part of the score; use it to compare how many prospects a service area or radius can reach."
   },
   {
    "title": "ZIPs in a market",
@@ -844,7 +862,14 @@ AdtaxiAnalyzer.start({
    "url": "https://github.com/BritCrit/dma_county_zip"
   }
  ],
- "sourcesNote": "Household home services spending is EASI; contractor counts are Census Business Patterns; homeowner and home measures and income are Census ACS; degree days and hail are NOAA; population and households are from the Deluxe ZIP file."
+ "sourcesNote": "Household home services spending is EASI; contractor counts are Census Business Patterns; homeowner and home measures and income are Census ACS; degree days and hail are NOAA; population and households are from the Deluxe ZIP file.",
+ "pointLayer": {
+  "key": "est",
+  "label": "Show contractor locations",
+  "unit": "contractors",
+  "legend": "Circle size = contractors in the area",
+  "zipNote": "Census doesn't publish ZIPs with fewer than 3."
+ }
 });
 </script>
 </body>
