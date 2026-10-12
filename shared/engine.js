@@ -467,8 +467,8 @@
     this.mapHead.appendChild(el("b", { text: (m ? m.label : "") + (m && m.perSub && this.subLabel() ? ": " + this.subLabel() : "") }));
     this.mapHead.appendChild(el("span", { text: lv === "zip" ? "ZIPs in " + this.parentName() + ", ranked within this market." :
       "By " + this.levelLabel(lv) + (s.level === "us" ? ". Click a market to rank at that level." : ". Click a market for details.") }));
-    var P0 = this.cfg.pointLayer;
-    if (P0) {
+    var P0 = this.cfg.pointLayer, pm = P0 && this.measure(P0.key);
+    if (P0 && (!pm || this.relevant(pm))) {      // no toggle for a category without that count
       var box = el("input", { type: "checkbox", onchange: function () { s.points = this.checked; self.renderPoints(d); self.writeHash(); } });
       box.checked = !!s.points;
       this.mapHead.appendChild(el("label", { class: "az-pt-toggle" }, [box, " " + (P0.label || "Show locations")]));
@@ -493,7 +493,7 @@
     if (this.pointsLayer) { this.map.removeLayer(this.pointsLayer); this.pointsLayer = null; }
     if (this.ptLegend) { this.ptLegend.remove(); this.ptLegend = null; }
     if (!P0 || !s.points || !this.layerById) return;
-    var m = this.measure(P0.key); if (!m) return;
+    var m = this.measure(P0.key); if (!m || !this.relevant(m)) return;
     var pts = [], max = 0;
     Object.keys(this.layerById).forEach(function (id) {
       var row = d.byId[id], v = row ? self.val(row, m) : null;
@@ -636,7 +636,7 @@
       ]));
     }
 
-    var comps = (cfg.components || []).map(function (k) { return self.measure(k); }).filter(function (m) { return m && self.availableAt(m, s.level); });
+    var comps = (cfg.components || []).map(function (k) { return self.measure(k); }).filter(function (m) { return m && self.availableAt(m, s.level) && self.relevant(m); });
     if (comps.length) {
       box.appendChild(el("div", { class: "az-bars" }, comps.map(function (m) {
         var v = self.val(row, m), ok = typeof v === "number";

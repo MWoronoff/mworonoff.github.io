@@ -37,24 +37,26 @@ PALM_SPRINGS, LA_DMA, RIVERSIDE_METRO = "804", "803", "40140"
 # ---------------- Subcategories ----------------
 # naics: industries counted as prospect businesses. demand: (input key, weight) pairs, defined in DEMAND_INPUTS below.
 SUBCATS = [
-    {"id": "urgent",  "label": "Urgent and emergency care", "naics": ["621493"],
-     "demand": ["population", "kids_share", "fairpoor"]},
-    {"id": "pharmacy", "label": "Pharmacy", "naics": ["456110"], "easi": "rx",
-     "demand": ["a65p", "diabetes", "bphigh"]},
+    {"id": "urgent",  "label": "Urgent and emergency care", "naics": ["621493"], "counts": False,
+     "demand": ["population", "kids_share", "ins1864"],
+     "note": "No Competition part: Census's urgent care industry is mostly outpatient surgery centers, and many urgent care clinics are counted as physician offices."},
+    {"id": "pharmacy", "label": "Pharmacy", "naics": ["456110"], "easi": "rx", "spend": False,
+     "demand": ["a65p", "a65s", "diabetes", "bphigh"],
+     "note": "No Spending Power part: prescriptions follow age and health and are mostly paid by insurance, not household income."},
     {"id": "dental", "label": "Dental", "naics": ["621210"],
      "demand": ["adults", "inc75_share", "nodental"]},
-    {"id": "hearing", "label": "Hearing and audiology", "naics": ["621340", "456199"],
+    {"id": "hearing", "label": "Hearing and audiology", "naics": ["621340", "456199"], "counts": False,
      "demand": ["a65p", "hearing"],
-     "note": "Business counts include offices of physical, occupational and speech therapists and audiologists (one Census industry) plus health and personal care stores; the provider-level Prospect List narrows this to audiologists and hearing aid specialists."},
+     "note": "No Competition part: Census counts audiologists with physical, occupational and speech therapists (mostly physical therapy), so no clean hearing business count exists."},
     {"id": "eye", "label": "Eye care", "naics": ["621320", "456130"],
-     "demand": ["a45p", "vision", "diabetes"]},
+     "demand": ["a45p", "a45s", "diabetes"]},
     {"id": "chiro", "label": "Chiropractic and physical therapy", "naics": ["621310", "621340"],
      "demand": ["a25_64", "arthritis", "obesity"]},
     {"id": "behavioral", "label": "Behavioral health", "naics": ["621330", "621420"],
      "demand": ["adults", "depression", "mhlth"]},
-    {"id": "medspa", "label": "Med spa and aesthetics", "naics": ["621111"],
-     "demand": ["a30_64", "inc150_share"],
-     "note": "Census counts dermatology and plastic surgery practices together with all other physician offices; the provider-level Prospect List separates them."},
+    {"id": "medspa", "label": "Med spa and aesthetics", "naics": ["621111"], "counts": False,
+     "demand": ["a30_64", "a30_64s", "inc150_share"],
+     "note": "No Competition part: Census has no med spa industry and counts aesthetics practices with all physician offices."},
     {"id": "senior", "label": "Senior and home care", "naics": ["621610", "623312"],
      "demand": ["a65p", "a75p", "indeplive"]},
 ]
@@ -66,13 +68,17 @@ PLACES = {"fairpoor": ("GHLTH", False), "diabetes": ("DIABETES", False), "bphigh
           "arthritis": ("ARTHRITIS", False), "obesity": ("OBESITY", False), "depression": ("DEPRESSION", False),
           "mhlth": ("MHLTH", False), "indeplive": ("INDEPLIVE", False)}
 DEMAND_LABELS = {"population": "Population", "adults": "Adults 18+", "a65p": "Age 65+", "a75p": "Age 75+", "a45p": "Age 45+",
-                 "a25_64": "Adults 25–64", "a30_64": "Adults 30–64", "kids_share": "Households with children",
+                 "a25_64": "Adults 25–64", "a30_64": "Adults 30–64",
+                 "a45s": "Share of residents 45+", "a65s": "Share of residents 65+", "a30_64s": "Share of residents 30–64",
+                 "ins1864": "Adults 18–64 with health insurance", "kids_share": "Households with children",
                  "inc75_share": "Households $75K+", "inc150_share": "Households $150K+",
                  "fairpoor": "Fair or poor health", "diabetes": "Diabetes", "bphigh": "High blood pressure",
                  "nodental": "No dental visit in past year", "hearing": "Hearing disability", "vision": "Vision disability",
                  "arthritis": "Arthritis", "obesity": "Obesity", "depression": "Depression",
                  "mhlth": "Frequent mental distress", "indeplive": "Independent-living disability"}
-RATES = ["kids_share", "inc75_share", "inc150_share"] + list(PLACES)
+SHARES = ["a45s", "a65s", "a30_64s", "ins1864"]          # age shares of ACS population; insured share of adults 18-64
+RATES = ["kids_share", "inc75_share", "inc150_share"] + SHARES + list(PLACES)
+COUNTED = lambda s: s.get("counts", True)                # False: no Census industry matches the category, so no Competition
 # Measures offered as health conditions in the Healthcare radius tool
 RADIUS_CONDITIONS = ["diabetes", "bphigh", "arthritis", "obesity", "depression", "mhlth", "fairpoor", "nodental"]
 
@@ -446,7 +452,7 @@ def validate_scores(rep, z, co, subs, levels, what="businesses"):
             bench = (emp.reindex(df.index) / df.households * 1000).where(df.households > 0)
             sc = df.get(f"score@{sid}")
             if sc is None: continue
-            nc = combine([df[f"demand@{sid}"], df[f"category@{sid}"], df[f"spend@{sid}"]], [0.40, 0.25, 0.15])
+            nc = combine([df[f"demand@{sid}"], df[f"category@{sid}"], df[f"spend@{sid}"]], [0.40, 0.25, 0.15])   # missing parts drop out
             ok = sc.notna() & bench.notna() & (bench > 0)
             if ok.sum() < 30: continue
             r1 = sc[ok].rank().corr(bench[ok].rank()); r2 = nc[ok].rank().corr(bench[ok].rank())
@@ -504,6 +510,12 @@ def main():
     acs["inc75"] = acs[["inc_75_100", "inc_100_150", "inc_150_200", "inc_200p"]].sum(axis=1, min_count=4)
     acs["inc150"] = acs[["inc_150_200", "inc_200p"]].sum(axis=1, min_count=2)
     z = z.merge(acs.drop(columns=["inc_75_100", "inc_100_150", "inc_150_200", "inc_200p"]), on="zip", how="left")
+    hl = pd.DataFrame(json.load(open(os.path.join(ROOT, "shared", "audience", "zip_audience_health.json")))["cols"])
+    ins_cols = ["inst_18_34", "inst_35_64", "unins_18_34", "unins_35_64"]
+    if any(c not in hl.columns for c in ins_cols):
+        sys.exit("shared/audience/zip_audience_health.json has no insurance counts; the audience step must run first.")
+    hl["ins_base"] = hl.inst_18_34 + hl.inst_35_64; hl["ins_yes"] = hl.ins_base - hl.unins_18_34 - hl.unins_35_64
+    z = z.merge(hl[["zip", "ins_base", "ins_yes"]], on="zip", how="left")
     z["land"] = z.zip.map(zcta_land(a.cache, rep))          # square miles, for households per square mile
 
     # Business Patterns
@@ -606,6 +618,9 @@ def main():
         land = g.land.where(g.land > 0).sum()
         r["density"] = g.households.where(g.land > 0, 0).sum() / land if land > 0 else np.nan
         for c in ("a65p", "a75p", "a45p", "a25_64", "a30_64"): r[c] = g[c].sum(min_count=1)
+        ap = g.acs_pop.sum()
+        for c, k in (("a45p", "a45s"), ("a65p", "a65s"), ("a30_64", "a30_64s")): r[k] = g[c].sum() / ap if ap > 0 else np.nan
+        ib = g.ins_base.sum(); r["ins1864"] = g.ins_yes.sum() / ib if ib > 0 else np.nan
         r["kids_share"] = g.hh_kids.sum() / g.hh_tot.sum() if g.hh_tot.sum() > 0 else np.nan
         r["inc75_share"] = g.inc75.sum() / g.inc_tot.sum() if g.inc_tot.sum() > 0 else np.nan
         r["inc150_share"] = g.inc150.sum() / g.inc_tot.sum() if g.inc_tot.sum() > 0 else np.nan
@@ -648,15 +663,16 @@ def main():
                 df[f"category@{i}"] = combine([P(df[f"easi_{e}_hh"]), P(df[f"easi_{e}_total"])], [0.5, 0.5])
             else:
                 df[f"category@{i}"] = np.nan
-            df[f"spend@{i}"] = spend
-            df[f"comp@{i}"] = P(-df[f"per10k@{i}"]) if "comp" in parts else np.nan
-            cols = [df[f"{c}@{i}"] for c in parts]
+            use = [c for c in parts if not (c == "comp" and not COUNTED(s)) and not (c == "spend" and not s.get("spend", True))]
+            df[f"spend@{i}"] = spend if "spend" in use else np.nan
+            df[f"comp@{i}"] = P(-df[f"per10k@{i}"]) if "comp" in use else np.nan
+            cols = [df[f"{c}@{i}"] for c in use]
             full = pd.concat(cols, axis=1).notna().all(axis=1)
-            df[f"score@{i}"] = combine(cols, [WEIGHTS[c] for c in parts]).where(full & mask).round(1)
+            df[f"score@{i}"] = combine(cols, [WEIGHTS[c] for c in use]).where(full & mask).round(1)
             for c in WEIGHTS: df[f"{c}@{i}"] = df[f"{c}@{i}"].round(1)
             under = (df[f"demand@{i}"] >= 70) & (P(df[f"per10k@{i}"]) <= 30)
             known = df[f"demand@{i}"].notna() & df[f"per10k@{i}"].notna() & mask
-            df[f"under@{i}"] = np.where(under & known, "Yes", np.where(known, "No", None))
+            df[f"under@{i}"] = np.where(under & known, "Yes", np.where(known, "No", None)) if COUNTED(s) else None
         return df
 
     # EASI household healthcare spending. Market totals = EASI spending per household x this site's households, so they
@@ -696,7 +712,9 @@ def main():
     dma = frame(zd.groupby("dma_code")); add_easi_spend(dma, hh_dma, "DMAs"); dma = score(dma)
     zm = z[z.cbsa_code.isin(metros)]
     met = frame(zm.groupby("cbsa_code")); add_easi_spend(met, hh_met, "metros"); met = score(met)
-    validate_scores(rep, z, co, [(x["id"], x["label"], x["naics"]) for x in SUBCATS],
+    rep.append(("Score reality check: categories not checked", "INFO", "; ".join(x["label"] for x in SUBCATS if not COUNTED(x)) +
+                " (no Census industry matches these categories, so business employment isn't a meaningful benchmark)"))
+    validate_scores(rep, z, co, [(x["id"], x["label"], x["naics"]) for x in SUBCATS if COUNTED(x)],
                     [("DMAs", dma, "dma_code"), ("metros", met, "cbsa_code")], "category businesses")
     us = frame([("us", z)])
     for s in SUBCATS:
@@ -761,7 +779,7 @@ def main():
 
     # ---------------- Write ----------------
     easi_spend_cols = [f"easi_{e}_{x}" for e in EASI_SPEND for x in ("hh", "total", "idx")]
-    keep_common = ["population", "households", "adults", "a65p", "a75p", "density"] + RATES + easi_spend_cols
+    keep_common = ["population", "households", "adults", "a45p", "a65p", "a75p", "a30_64", "density"] + RATES + easi_spend_cols
     per_sub = ["score", "demand", "category", "spend", "comp", "est", "per10k", "growth", "under"]
     easi_cols = [f"easi_{c}{x}" for c in conds for x in ("", "_rate", "_idx", "_30", "_g", "_gidx")]
 
@@ -784,11 +802,12 @@ def main():
                 if c in df.columns: v[c] = clean(r[c])
             for s in SUBCATS:
                 for p in per_sub:
+                    if not COUNTED(s) and p in ("est", "per10k", "growth", "under", "comp"): continue
                     k = f"{p}@{s['id']}"
                     if k in df.columns:
                         x = clean(r[k])
                         v[k] = int(round(x)) if p in SCORE_KEYS and x is not None else x
-            for k in ("population", "households", "adults", "a65p", "a75p") + tuple(c for c in easi_spend_cols if c.endswith("_total")) + tuple(e for e in extra if not e.endswith(("_rate", "_g"))):
+            for k in ("population", "households", "adults", "a45p", "a65p", "a75p", "a30_64") + tuple(c for c in easi_spend_cols if c.endswith("_total")) + tuple(e for e in extra if not e.endswith(("_rate", "_g"))):
                 if v.get(k) is not None: v[k] = int(round(v[k]))
             for s in SUBCATS:
                 if v.get(f"est@{s['id']}") is not None: v[f"est@{s['id']}"] = int(round(v[f"est@{s['id']}"]))
@@ -800,7 +819,7 @@ def main():
             f = flags_fn(idx, r) if flags_fn else []
             ek, methods, low = est_keys(r)
             f += est_notes(methods, low, release, prev_year)
-            none = [s["label"] for s in SUBCATS if f"score@{s['id']}" in df.columns and r.get(f"est@{s['id']}", 0) == 0
+            none = [s["label"] for s in SUBCATS if COUNTED(s) and f"score@{s['id']}" in df.columns and r.get(f"est@{s['id']}", 0) == 0
                     and r.get(f"score@{s['id']}") != r.get(f"score@{s['id']}")]          # zero businesses and no score
             if none and r.get("population", 0) >= MIN_POP:
                 f.append("No Census-counted businesses here for: " + ", ".join(none) + ". Those categories aren't scored for this area.")
@@ -847,6 +866,8 @@ def main():
             f["population"], f["households"], f["adults"] = df.population, df.households, df.adults18
             f["density"] = (df.households / df.land).where(df.land > 0)
             for c in ("a65p", "a75p", "a45p", "a25_64", "a30_64"): f[c] = df[c]
+            for c, k in (("a45p", "a45s"), ("a65p", "a65s"), ("a30_64", "a30_64s")): f[k] = (df[c] / df.acs_pop).where(df.acs_pop > 0)
+            f["ins1864"] = (df.ins_yes / df.ins_base).where(df.ins_base > 0)
             f["kids_share"] = (df.hh_kids / df.hh_tot).where(df.hh_tot > 0)
             f["inc75_share"] = (df.inc75 / df.inc_tot).where(df.inc_tot > 0)
             f["inc150_share"] = (df.inc150 / df.inc_tot).where(df.inc_tot > 0)

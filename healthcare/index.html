@@ -115,7 +115,7 @@ AdtaxiAnalyzer.start({
     "metro",
     "zip"
    ],
-   "help": "0 to 100. Weighted blend of Consumer Demand (40%), Category Spending (25%), Spending Power (15%) and Competition (20%), each a percentile against the other markets at the same level. ZIPs rank against the other ZIPs in the same market using Consumer Demand and Spending Power only (no EASI spending by ZIP, and Census hides small ZIP business counts)."
+   "help": "0 to 100. Weighted blend of Consumer Demand (40%), Category Spending (25%), Spending Power (15%) and Competition (20%), each a percentile against the other markets at the same level. Pharmacy leaves out Spending Power, and Urgent and emergency care, Hearing and audiology, and Med spa and aesthetics leave out Competition; the remaining parts keep their relative weights. ZIPs rank against the other ZIPs in the same market using Consumer Demand and Spending Power only (no EASI spending by ZIP, and Census hides small ZIP business counts)."
   },
   {
    "key": "demand",
@@ -153,7 +153,17 @@ AdtaxiAnalyzer.start({
     "metro",
     "zip"
    ],
-   "help": "Percentile of the share of households earning $75K or more."
+   "help": "Percentile of the share of households earning $75K or more.",
+   "subs": [
+    "urgent",
+    "dental",
+    "hearing",
+    "eye",
+    "chiro",
+    "behavioral",
+    "medspa",
+    "senior"
+   ]
   },
   {
    "key": "comp",
@@ -165,7 +175,15 @@ AdtaxiAnalyzer.start({
     "dma",
     "metro"
    ],
-   "help": "Percentile of businesses per 10,000 residents, reversed: fewer competing businesses scores higher, since each ad dollar faces less competition."
+   "help": "Percentile of businesses per 10,000 residents, reversed: fewer competing businesses scores higher, since each ad dollar faces less competition. Not used for Urgent and emergency care, Hearing and audiology, or Med spa and aesthetics, which have no matching Census business count.",
+   "subs": [
+    "pharmacy",
+    "dental",
+    "eye",
+    "chiro",
+    "behavioral",
+    "senior"
+   ]
   },
   {
    "key": "density",
@@ -180,14 +198,30 @@ AdtaxiAnalyzer.start({
    "short": "Businesses",
    "format": "int",
    "perSub": true,
-   "help": "Competing establishments in this category's industries. DMAs, metros and the U.S. use complete County Business Patterns counts. In the ZIP view, Census doesn't publish a ZIP's count when it has fewer than 3 businesses in an industry, so those show as 0."
+   "help": "Competing establishments in this category's industries. DMAs, metros and the U.S. use complete County Business Patterns counts. In the ZIP view, Census doesn't publish a ZIP's count when it has fewer than 3 businesses in an industry, so those show as 0.",
+   "subs": [
+    "pharmacy",
+    "dental",
+    "eye",
+    "chiro",
+    "behavioral",
+    "senior"
+   ]
   },
   {
    "key": "per10k",
    "label": "Businesses per 10,000 residents",
    "short": "Per 10K",
    "format": "dec2",
-   "perSub": true
+   "perSub": true,
+   "subs": [
+    "pharmacy",
+    "dental",
+    "eye",
+    "chiro",
+    "behavioral",
+    "senior"
+   ]
   },
   {
    "key": "growth",
@@ -195,7 +229,15 @@ AdtaxiAnalyzer.start({
    "short": "Growth",
    "format": "pct",
    "perSub": true,
-   "help": "Change in business count from the prior Business Patterns year. Blank where there were fewer than 3 businesses."
+   "help": "Change in business count from the prior Business Patterns year. Blank where there were fewer than 3 businesses.",
+   "subs": [
+    "pharmacy",
+    "dental",
+    "eye",
+    "chiro",
+    "behavioral",
+    "senior"
+   ]
   },
   {
    "key": "under",
@@ -208,7 +250,15 @@ AdtaxiAnalyzer.start({
     "metro",
     "zip"
    ],
-   "help": "Strong consumer demand (70th percentile or higher) but few businesses per resident (30th percentile or lower): a pitch for clients weighing a new location. Shown, not scored."
+   "help": "Strong consumer demand (70th percentile or higher) but few businesses per resident (30th percentile or lower): a pitch for clients weighing a new location. Shown, not scored.",
+   "subs": [
+    "pharmacy",
+    "dental",
+    "eye",
+    "chiro",
+    "behavioral",
+    "senior"
+   ]
   },
   {
    "key": "easi_hh",
@@ -385,6 +435,14 @@ AdtaxiAnalyzer.start({
    "format": "int"
   },
   {
+   "key": "a45p",
+   "label": "Age 45+",
+   "format": "int",
+   "subs": [
+    "eye"
+   ]
+  },
+  {
    "key": "a65p",
    "label": "Age 65+",
    "format": "int",
@@ -401,6 +459,50 @@ AdtaxiAnalyzer.start({
    "subs": [
     "senior"
    ]
+  },
+  {
+   "key": "a30_64",
+   "label": "Age 30–64",
+   "format": "int",
+   "subs": [
+    "medspa"
+   ]
+  },
+  {
+   "key": "a45s",
+   "label": "Share of residents 45+",
+   "format": "pct",
+   "subs": [
+    "eye"
+   ],
+   "help": "Residents 45 and older as a share of all residents (Census ACS). Routine eye exams, reading glasses and cataract care rise sharply from the mid-40s."
+  },
+  {
+   "key": "a65s",
+   "label": "Share of residents 65+",
+   "format": "pct",
+   "subs": [
+    "pharmacy"
+   ],
+   "help": "Residents 65 and older as a share of all residents (Census ACS). Prescriptions per person climb steeply with age."
+  },
+  {
+   "key": "a30_64s",
+   "label": "Share of residents 30–64",
+   "format": "pct",
+   "subs": [
+    "medspa"
+   ],
+   "help": "Residents 30 to 64 as a share of all residents (Census ACS), the core age range for aesthetic treatments."
+  },
+  {
+   "key": "ins1864",
+   "label": "Adults 18–64 with health insurance",
+   "format": "pct",
+   "subs": [
+    "urgent"
+   ],
+   "help": "Share of adults 18 to 64 with health insurance (Census ACS). Insured working-age adults and their families are urgent care's core paying patients."
   },
   {
    "key": "kids_share",
@@ -428,9 +530,7 @@ AdtaxiAnalyzer.start({
    "label": "Fair or poor health (adults)",
    "format": "pct",
    "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published. Values marked * come from CDC's previous release (see How scores work).",
-   "subs": [
-    "urgent"
-   ]
+   "subs": []
   },
   {
    "key": "diabetes",
@@ -474,9 +574,7 @@ AdtaxiAnalyzer.start({
    "label": "Vision disability (adults)",
    "format": "pct",
    "help": "CDC PLACES model-based estimate for adults, weighted by adult population. County values fill in where ZIP values aren't published. Values marked * come from CDC's previous release (see How scores work).",
-   "subs": [
-    "eye"
-   ]
+   "subs": []
   },
   {
    "key": "arthritis",
@@ -860,8 +958,14 @@ AdtaxiAnalyzer.start({
   "under",
   "population",
   "adults",
+  "a45p",
   "a65p",
   "a75p",
+  "a30_64",
+  "a45s",
+  "a65s",
+  "a30_64s",
+  "ins1864",
   "kids_share",
   "inc75_share",
   "inc150_share",
@@ -914,14 +1018,14 @@ AdtaxiAnalyzer.start({
    "title": "Market Potential Score",
    "body": [
     "Answers one question: where are a healthcare advertiser's customers, and which geographies deserve the most ad dollars?",
-    "Market Potential Score = 40% Consumer Demand + 25% Category Spending + 15% Spending Power + 20% Competition. Each part is a percentile (0 to 100) against the other markets at the same level: DMAs against DMAs, metros against metros, ZIPs against the other ZIPs in the same market.",
+    "Market Potential Score = 40% Consumer Demand + 25% Category Spending + 15% Spending Power + 20% Competition. Each part is a percentile (0 to 100) against the other markets at the same level: DMAs against DMAs, metros against metros, ZIPs against the other ZIPs in the same market. Two exceptions, where a part would measure the wrong thing: Pharmacy leaves out Spending Power, because prescriptions follow age and health and are mostly paid by insurance; Urgent and emergency care, Hearing and audiology, and Med spa and aesthetics leave out Competition, because Census has no business count that matches them. The remaining parts keep their relative weights.",
     "A score isn't computed when one of its parts has no data, rather than guessing."
    ]
   },
   {
    "title": "Consumer Demand",
    "body": [
-    "The size and need of each category's target audience. Urgent and emergency care: population, households with children, fair or poor health. Pharmacy: age 65+, diabetes, high blood pressure. Dental: adults, households earning $75K+, no dental visit in the past year. Hearing: age 65+, hearing disability. Eye care: age 45+, vision disability, diabetes. Chiropractic and PT: adults 25 to 64, arthritis, obesity. Behavioral health: adults, depression, frequent mental distress. Med spa: adults 30 to 64, households earning $150K+. Senior and home care: age 65+, age 75+, independent-living disability.",
+    "The size and concentration of each category's likely customers. Urgent and emergency care: population, households with children, adults 18–64 with health insurance. Pharmacy: residents 65+ (count and share), diabetes, high blood pressure. Dental: adults, households earning $75K+, no dental visit in the past year. Hearing: age 65+, hearing disability. Eye care: residents 45+ (count and share), diabetes. Chiropractic and PT: adults 25 to 64, arthritis, obesity. Behavioral health: adults, depression, frequent mental distress. Med spa: residents 30 to 64 (count and share), households earning $150K+. Senior and home care: age 65+, age 75+, independent-living disability.",
     "Health measures are CDC PLACES estimates for adults. CDC's newest release leaves most of them out for Pennsylvania and Kentucky, because those states couldn't collect enough survey data that year. For each missing measure the build tests four ways to fill the gap: CDC's previous-release values adjusted for the change since then across neighboring states; the same values adjusted for the change in the nearest counties CDC still covers; a distance-weighted average of the nearest covered counties; and an estimate from local age, income and education. Each method is tested by hiding a whole neighboring state (Ohio, West Virginia, New York, Maryland, Tennessee, Indiana) and predicting it, and the method with the lowest average county error is used. Errors of 1.5 percentage points or less are used as is; 1.5 to 3 points are used but named as lower confidence in the market's data notes; above 3 points the measure shows No data. Filled-in values are marked with an asterisk (*), and so are the score and Consumer Demand of any category that uses them. When CDC restores these states, current values replace the filled-in ones automatically."
    ]
   },
@@ -940,7 +1044,7 @@ AdtaxiAnalyzer.start({
    "title": "Competition",
    "body": [
     "Category businesses per 10,000 residents, reversed: markets with fewer competing businesses score higher, because each ad dollar faces less competition for attention. Counts are Census County Business Patterns, which counts every business.",
-    "Hearing and audiology counts include physical, occupational and speech therapy offices, which Census reports in the same industry. Med spa and aesthetics counts include all physician offices. Not used in ZIP scores, because Census hides ZIP counts under 3 businesses."
+    "Not used for Urgent and emergency care (Census's industry is mostly outpatient surgery centers, and many urgent care clinics are counted as physician offices), Hearing and audiology (audiologists are counted with physical therapists) or Med spa and aesthetics (counted with all physician offices). For those categories the site shows no competitor counts rather than misleading ones. Not used in ZIP scores, because Census hides ZIP counts under 3 businesses."
    ]
   },
   {
@@ -949,11 +1053,11 @@ AdtaxiAnalyzer.start({
   },
   {
    "title": "Underserved",
-   "body": "Flags markets with strong demand (70th percentile or higher) but few businesses per resident (30th percentile or lower). It's shown as a pitch for clients weighing a new location, not counted in the score."
+   "body": "Flags markets with strong demand (70th percentile or higher) but few businesses per resident (30th percentile or lower). It's shown as a pitch for clients weighing a new location, not counted in the score. Not shown for categories without a Census business count."
   },
   {
    "title": "Competitor locations",
-   "body": "Switch on Show competitor locations to put a circle on each market (or each ZIP in the ZIP view) sized by the number of competing businesses in the selected category, from Census Business Patterns. These are counts by area; Census doesn't publish business addresses. In the ZIP view, Census doesn't publish a ZIP's count when it has fewer than 3 businesses, so those ZIPs show no circle."
+   "body": "Switch on Show competitor locations to put a circle on each market (or each ZIP in the ZIP view) sized by the number of competing businesses in the selected category, from Census Business Patterns. These are counts by area; Census doesn't publish business addresses. In the ZIP view, Census doesn't publish a ZIP's count when it has fewer than 3 businesses, so those ZIPs show no circle. Not offered for Urgent and emergency care, Hearing and audiology, or Med spa and aesthetics, which have no matching Census business count."
   },
   {
    "title": "ZIPs in a market",
