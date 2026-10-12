@@ -5,6 +5,7 @@ Built 2026-10-12. Result: **PASSED**
 | Check | Result | Detail |
 | --- | --- | --- |
 | Formula tests | PASS | percentile and weighted-average hand checks reproduce exactly |
+| Land area source | INFO | Census 2026 Gazetteer ZCTA file (33,791 ZIPs) |
 | Business Patterns years | INFO | 2023 (growth measured from 2022) |
 | Published benchmark: offices of lawyers | PASS | 164,612 (expected 140,000–230,000) |
 | ZIP detail coverage of county counts (cells under 3 businesses aren't published) | INFO | 96% |

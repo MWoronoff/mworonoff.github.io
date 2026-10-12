@@ -5,6 +5,7 @@ Built 2026-10-12. Result: **PASSED**
 | Check | Result | Detail |
 | --- | --- | --- |
 | Formula tests | PASS | percentile, weighted-average and school-type hand checks reproduce exactly |
+| Land area source | INFO | Census 2026 Gazetteer ZCTA file (33,791 ZIPs) |
 | IPEDS institution directory | INFO | 2024 (HD2024.csv, 6,072 records) |
 | IPEDS schools kept (active, postsecondary, sectors 1-9) | INFO | 5,893 of 6,072 records |
 | Carnegie classification used to separate two-year from four-year public colleges | INFO | C21BASIC |

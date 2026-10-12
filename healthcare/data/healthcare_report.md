@@ -5,6 +5,7 @@ Built 2026-10-12. Result: **PASSED**
 | Check | Result | Detail |
 | --- | --- | --- |
 | Formula tests | PASS | percentile and weighted-average hand checks reproduce exactly |
+| Land area source | INFO | Census 2026 Gazetteer ZCTA file (33,791 ZIPs) |
 | Business Patterns years | INFO | 2023 (growth measured from 2022) |
 | Business ZIPs matched to the ZIP geography | PASS | 815 of 563,924 healthcare businesses sit in ZIPs not in the geography table |
 | ZIP detail coverage of county counts (cells under 3 businesses aren't published) | INFO | Urgent and emergency care 57%; Pharmacy 78%; Dental 96%; Hearing and audiology 81%; Eye care 69%; Chiropractic and physical therapy 85%; Behavioral health 83%; Med spa and aesthetics 96%; Senior and home care 80% |
