@@ -13,6 +13,8 @@ Built 2026-10-12. Result: **PASSED**
 | EASI U.S. legal fees per household | INFO | $54.93 |
 | EASI legal fees matched to DMAs | PASS | 210 of 210 |
 | EASI legal fees matched to metros | PASS | 387 of 387 |
+| Score reality check, DMAs: rank correlation with law offices' employees per 1,000 households, score (without Competition) | INFO | Personal injury 0.10 (0.51); Family law and divorce 0.06 (0.53); Estate planning and elder law 0.35 (0.57); Bankruptcy and debt relief -0.29 (0.37); Employment law 0.19 (0.53). None weak. |
+| Score reality check, metros: rank correlation with law offices' employees per 1,000 households, score (without Competition) | INFO | Personal injury 0.08 (0.47); Family law and divorce -0.06 (0.40); Estate planning and elder law 0.22 (0.48); Bankruptcy and debt relief -0.30 (0.33); Employment law 0.06 (0.42). None weak. |
 | EASI legal fees total, DMAs vs. EASI's own total | PASS | 96.8% of EASI's $7.19B |
 | DMA scores within 0–100 | PASS | 0 out of range; 1,050 scores computed, 0 not computed (missing input) |
 | Metro scores within 0–100 | PASS | 0 out of range; 1,935 scores computed, 0 not computed (missing input) |

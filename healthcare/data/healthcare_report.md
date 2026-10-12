@@ -31,6 +31,8 @@ Built 2026-10-12. Result: **PASSED**
 | EASI U.S. healthcare spending per household | INFO | Medical services $1,215.73; Prescription drugs $215.68 |
 | EASI healthcare spending matched to DMAs | PASS | 210 of 210 |
 | EASI healthcare spending matched to metros | PASS | 387 of 387 |
+| Score reality check, DMAs: rank correlation with category businesses' employees per 1,000 households, score (without Competition) | INFO | Urgent and emergency care -0.16 (0.18); Pharmacy -0.21 (0.33); Dental 0.37 (0.66); Hearing and audiology -0.04 (0.31); Eye care -0.10 (0.33); Chiropractic and physical therapy -0.07 (0.32); Behavioral health 0.08 (0.41); Med spa and aesthetics 0.18 (0.29); Senior and home care 0.20 (0.45). Weak (under 0.20 without Competition): Urgent and emergency care |
+| Score reality check, metros: rank correlation with category businesses' employees per 1,000 households, score (without Competition) | INFO | Urgent and emergency care -0.26 (-0.05); Pharmacy -0.28 (0.15); Dental 0.21 (0.51); Hearing and audiology -0.02 (0.25); Eye care -0.22 (0.11); Chiropractic and physical therapy -0.10 (0.25); Behavioral health -0.05 (0.27); Med spa and aesthetics 0.00 (0.10); Senior and home care 0.05 (0.29). Weak (under 0.20 without Competition): Urgent and emergency care, Pharmacy, Eye care, Med spa and aesthetics |
 | EASI medical services total, DMAs vs. EASI's own total | PASS | 96.9% of EASI's $159.0B |
 | EASI prescription drugs total, DMAs vs. EASI's own total | PASS | 96.9% of EASI's $28.2B |
 | Cross-check vs. EASI: Hearing disability | INFO | correlation with EASI hearing trouble: 0.49 across 22 metros with estimated values; 0.71 across 365 metros with CDC values |
