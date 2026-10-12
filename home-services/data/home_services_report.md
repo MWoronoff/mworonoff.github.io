@@ -5,6 +5,7 @@ Built 2026-10-12. Result: **PASSED**
 | Check | Result | Detail |
 | --- | --- | --- |
 | Formula tests | PASS | percentile, weighted-average, degree-day and NOAA state-code hand checks reproduce exactly |
+| Land area source | INFO | Census 2026 Gazetteer ZCTA file (33,791 ZIPs) |
 | Climate source | INFO | NOAA county degree-day files (climdiv-hddccy-v1.0.0-20261006, climdiv-cddccy-v1.0.0-20261006); years 2016–2025 |
 | Hail source | INFO | NOAA Storm Events, hail 1-inch+ by county, 2016–2025; 35,459 county-days with hail |
 | ZIPs with NOAA climate data | INFO | 99.3% of population; none for AK, HI (NOAA's county climate files skip Alaska and Hawaii) |
@@ -43,3 +44,5 @@ Built 2026-10-12. Result: **PASSED**
 | U.S. household-weighted HDD | PASS | 3,954 (expected 3,000–6,000) |
 | U.S. household-weighted CDD | PASS | 1,594 (expected 900–2,600) |
 | U.S. household-weighted 1-inch hail days | INFO | 1.3 a year |
+| U.S. households per square mile | PASS | 45.0 (expected 25–50) |
+| Density sense check: New York DMA is far denser than the U.S. | PASS | 721 vs 45 households per square mile |
