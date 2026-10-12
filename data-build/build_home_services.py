@@ -25,7 +25,7 @@ Geography comes from data-build/geo (ZIP -> county, metro, DMA). Download helper
 import argparse, datetime, gzip, io, json, os, re, sys
 import numpy as np
 import pandas as pd
-from build_healthcare import cbp_years, zbp, cbp_county, pct, combine, fetch, zcta_land
+from build_healthcare import cbp_years, zbp, cbp_county, pct, combine, fetch, zcta_land, validate_scores
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -417,6 +417,8 @@ def main():
         rep.append((f"HVAC validation, {label}: rank correlation with contractor employees per 1,000 households", "INFO", "; ".join(out)))
 
     validate(dma, "DMAs"); validate(met, "metros")
+    validate_scores(rep, z, co, [(x["id"], x["label"], x["naics"]) for x in SUBCATS],
+                    [("DMAs", dma, "dma_code"), ("metros", met, "cbsa_code")], "contractors")
 
     # ---------------- Checks ----------------
     for name, df in (("DMA", dma), ("Metro", met)):

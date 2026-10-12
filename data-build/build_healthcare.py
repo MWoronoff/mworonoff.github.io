@@ -428,6 +428,35 @@ def zcta_land(cache, rep):
     raise RuntimeError("No Census Gazetteer ZCTA file could be found")
 
 
+def validate_scores(rep, z, co, subs, levels, what="businesses"):
+    """Reality check: rank correlation between each category's Market Potential Score and an independent benchmark,
+    Census employees in the category's industries per 1,000 households. Businesses hire where customers buy, and head
+    counts aren't inflated by local wages the way dollar figures are. Shown with and without the Competition part,
+    which is business density reversed and so works against this benchmark by design. Reported, not enforced.
+    subs: list of (id, label, naics list); levels: list of (label, scored frame, ZIP column grouping into its index)."""
+    if co.emp.notna().sum() == 0:
+        rep.append(("Score reality check", "INFO", "Census employment counts not available; skipped")); return
+    cpop = z.groupby("county_fips").population.transform("sum")
+    share = (z.population / cpop).where(cpop > 0, 0)
+    for lab, df, col in levels:
+        lines, weak = [], []
+        for sid, slab, naics in subs:
+            ce = co[co.naics.isin(naics)].groupby("county_fips").emp.sum(min_count=1)
+            emp = (z.county_fips.map(ce).fillna(0) * share).groupby(z[col]).sum()
+            bench = (emp.reindex(df.index) / df.households * 1000).where(df.households > 0)
+            sc = df.get(f"score@{sid}")
+            if sc is None: continue
+            nc = combine([df[f"demand@{sid}"], df[f"category@{sid}"], df[f"spend@{sid}"]], [0.40, 0.25, 0.15])
+            ok = sc.notna() & bench.notna() & (bench > 0)
+            if ok.sum() < 30: continue
+            r1 = sc[ok].rank().corr(bench[ok].rank()); r2 = nc[ok].rank().corr(bench[ok].rank())
+            lines.append(f"{slab} {r1:.2f} ({r2:.2f})")
+            if r2 < 0.2: weak.append(slab)
+        if lines:
+            rep.append((f"Score reality check, {lab}: rank correlation with {what}' employees per 1,000 households, score (without Competition)",
+                        "INFO", "; ".join(lines) + (f". Weak (under 0.20 without Competition): {', '.join(weak)}" if weak else ". None weak.")))
+
+
 # ---------------- Scoring helpers ----------------
 def pct(s):
     """Percentile 0-100 within the group; missing stays missing."""
@@ -667,6 +696,8 @@ def main():
     dma = frame(zd.groupby("dma_code")); add_easi_spend(dma, hh_dma, "DMAs"); dma = score(dma)
     zm = z[z.cbsa_code.isin(metros)]
     met = frame(zm.groupby("cbsa_code")); add_easi_spend(met, hh_met, "metros"); met = score(met)
+    validate_scores(rep, z, co, [(x["id"], x["label"], x["naics"]) for x in SUBCATS],
+                    [("DMAs", dma, "dma_code"), ("metros", met, "cbsa_code")], "category businesses")
     us = frame([("us", z)])
     for s in SUBCATS:
         i = s["id"]
