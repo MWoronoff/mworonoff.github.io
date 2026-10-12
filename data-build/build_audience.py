@@ -62,7 +62,15 @@ REQUESTS = {
     "B09021": [v("B09021", n) for n in range(1, 29)],                 # living arrangements of adults by age
     # Higher Education analyzer: sex by age by educational attainment, 18+ (all 83 lines, so every age group can be checked)
     "B15001": [v("B15001", n) for n in range(1, 84)],
+    # Home Services analyzer: owner homes by year built, units in structure and year moved in (all lines, so they can be added up)
+    "B25036": [v("B25036", n) for n in range(1, 24)],                 # tenure by year structure built
+    "B25032": [v("B25032", n) for n in range(1, 24)],                 # tenure by units in structure
+    "B25038": [v("B25038", n) for n in range(1, 16)],                 # tenure by year householder moved into unit
 }
+# B25036 owner lines: 3 built 2020 or later, 4 2010-2019, 5 2000-2009, 6 1990s, 7 1980s, 8 1970s ... 12 1939 or earlier (renter = +11)
+BUILT = {"2000p": (3, 4, 5), "80_99": (6, 7), "pre1980": (8, 9, 10, 11, 12)}
+# B25038 owner lines: 3 moved in 2021 or later, 4 2018-2020, 5 2010-2017, 6 2000-2009, 7 1990s, 8 1989 or earlier
+MOVED_PRE2010 = (6, 7, 8)
 # B15001 layout: male total 2, female total 43; each age group's total line, followed by its 7 education lines
 # (less than 9th grade, 9th-12th no diploma, high school graduate, some college no degree, associate's, bachelor's, graduate)
 B15001_GROUPS = {"18_24": (3, 44), "25_34": (11, 52), "35_44": (19, 60), "45_64": (27, 68), "65p": (35, 76)}
@@ -119,7 +127,12 @@ LABEL_CHECKS = [(v("B01001", 2), ["Male"]), (v("B01001", 26), ["Female"])] + \
      (v("B09021", 2), ["Lives alone"]), (v("B09021", 8), ["18 to 34"]), (v("B09021", 23), ["65 years and over", "Lives alone"]),
      (v("B25007", 12), ["Renter occupied"]), (v("B25007", 13), ["Renter", "15 to 24"]), (v("B25007", 21), ["Renter", "85 years"]),
      (v("B25075", 18), ["$175,000 to $199,999"]), (v("B25075", 23), ["$500,000 to $749,999"]), (v("B25075", 24), ["$750,000 to $999,999"]),
-     (v("B23025", 6), ["Armed Forces"]), (v("B23025", 7), ["Not in labor force"])]
+     (v("B23025", 6), ["Armed Forces"]), (v("B23025", 7), ["Not in labor force"]),
+     (v("B25036", 2), ["Owner occupied"]), (v("B25036", 3), ["Owner", "2020 or later"]), (v("B25036", 6), ["Owner", "1990 to 1999"]),
+     (v("B25036", 8), ["Owner", "1970 to 1979"]), (v("B25036", 12), ["Owner", "1939 or earlier"]), (v("B25036", 13), ["Renter occupied"]),
+     (v("B25032", 2), ["Owner"]), (v("B25032", 3), ["Owner", "1, detached"]), (v("B25032", 13), ["Renter"]),
+     (v("B25038", 2), ["Owner occupied"]), (v("B25038", 6), ["Owner", "2000 to 2009"]), (v("B25038", 8), ["Owner", "1989 or earlier"]),
+     (v("B25038", 9), ["Renter occupied"])]
 
 
 KEY = os.environ.get("CENSUS_API_KEY", "").strip()
@@ -331,6 +344,12 @@ def main():
     out["nodeg18_34"] = sum(G(g, k) for g in ("18_24", "25_34") for k in (1, 2, 3, 4))   # no college degree
     out["pop25_64"] = sum(G(g, 0) for g in ("25_34", "35_44", "45_64"))
     out["somecol25_64"] = sum(G(g, 4) for g in ("25_34", "35_44", "45_64"))
+    # Home Services analyzer
+    out["hb_tot"] = acs[v("B25036", 2)]                                     # owner homes (year built table)
+    for b, lines in BUILT.items(): out[f"hb_{b}"] = sum(acs[v("B25036", n)] for n in lines)
+    out["hu_tot"], out["sfd_own"] = acs[v("B25032", 2)], acs[v("B25032", 3)]   # owner homes; single-family detached
+    out["hm_tot"] = acs[v("B25038", 2)]                                     # owner homes (year moved in table)
+    out["lt_own"] = sum(acs[v("B25038", n)] for n in MOVED_PRE2010)         # owners in the home since before 2010
 
     # 3. Internal consistency checks
     def chk(name, parts, total, tol=1):
@@ -397,6 +416,17 @@ def main():
     rep_add("Employment: civilian employed + unemployed + armed forces = labor force", add_up("", "B23025", 2, (4, 5, 6)))
     rep_add("Renter ages add up", add_up("", "B25007", 12, range(13, 22)))
     rep_add("Owners + renters = occupied homes (by age of householder)", add_up("", "B25007", 1, (2, 12)))
+    # Home Services tables: every owner and renter group adds up, and all three agree on the number of owner homes
+    rep_add("Year built: owner years add up", add_up("", "B25036", 2, range(3, 13)))
+    rep_add("Year built: renter years add up", add_up("", "B25036", 13, range(14, 24)))
+    rep_add("Year built: owners + renters = occupied homes", add_up("", "B25036", 1, (2, 13)))
+    rep_add("Units in structure: owner types add up", add_up("", "B25032", 2, range(3, 13)))
+    rep_add("Units in structure: renter types add up", add_up("", "B25032", 13, range(14, 24)))
+    rep_add("Year moved in: owner years add up", add_up("", "B25038", 2, range(3, 9)))
+    rep_add("Year moved in: renter years add up", add_up("", "B25038", 9, range(10, 16)))
+    for t in ("B25036", "B25032", "B25038"):
+        n = int(((acs[v(t, 2)] - acs[v("B25007", 2)]).abs() > 1).sum())
+        rep_add(f"{t} owner homes agree with B25007", n)
     n = int(((sum(out[f"{s}h{b}"] for s in "mf" for b in HC_AGES) - out.acs_pop).abs() > 1).sum())
     rep_add("Healthcare age brackets add up to population", n)
     for table, word in (("B18102", "Hearing"), ("B18103", "Vision")):
@@ -470,7 +500,12 @@ def main():
              ("vision difficulty, all ages", sum(tot(f"vis_{b}") for b in DIS_BRACKETS) / max(sum(tot(f"civ_{b}") for b in DIS_BRACKETS), 1) * 100, 1.5, 3.8, "{:.1f}%"),
              ("adults 65+ living alone", tot("alone_65p") / max(tot("liv_65p"), 1) * 100, 20, 34, "{:.1f}%"),
              ("renter share of households", sum(tot(f"r{b}") for b in TEN_BRACKETS) / max(tot("hhed_tot"), 1) * 100, 28, 42, "{:.1f}%"),
-             ("homes worth $750K+", tot("val_750p") / max(tot("val_tot"), 1) * 100, 5, 20, "{:.1f}%")]
+             ("homes worth $750K+", tot("val_750p") / max(tot("val_tot"), 1) * 100, 5, 20, "{:.1f}%"),
+             # Home Services: about half of owner homes were built before 1980 (median year built is about 1980), about 82% are single-family detached,
+             # and about 45% of owners moved in before 2010
+             ("owner homes built before 1980", tot("hb_pre1980") / max(tot("hb_tot"), 1) * 100, 35, 56, "{:.1f}%"),
+             ("owner homes that are single-family detached", tot("sfd_own") / max(tot("hu_tot"), 1) * 100, 74, 90, "{:.1f}%"),
+             ("owners in the home since before 2010", tot("lt_own") / max(tot("hm_tot"), 1) * 100, 30, 60, "{:.1f}%")]
     for name, val, lo, hi, fmt in bench:
         rep.append((f"Published benchmark: {name}", "PASS" if lo < val < hi else "FAIL", fmt.format(val) + f" (expected {lo}–{hi})"))
 
@@ -493,7 +528,8 @@ def main():
     # Columns only one site's radius tool uses go in their own file, so every page doesn't load them
     extra = {"zip_audience_health.json": [f"{s}h{b}" for s in "mf" for b in HC_AGES] + [f"{t}_{b}" for t in ("civ", "hear", "vis") for b in DIS_BRACKETS] +
                                          [f"{t}_{b}" for t in ("inst", "unins") for b in INS_BRACKETS] + [f"{t}_{b}" for t in ("liv", "alone") for b in LIV_GROUPS],
-             "zip_audience_legal.json": ["pop16", "nilf"] + [f"{t}{b}" for t in "or" for b in TEN_BRACKETS] + [f"val_{b}" for b in VAL_BANDS]}
+             "zip_audience_legal.json": ["pop16", "nilf"] + [f"{t}{b}" for t in "or" for b in TEN_BRACKETS] + [f"val_{b}" for b in VAL_BANDS],
+             "zip_audience_home.json": ["hb_tot"] + [f"hb_{b}" for b in BUILT] + ["hu_tot", "sfd_own", "hm_tot", "lt_own"]}
     cols = {"zip": m.zip.tolist(), "city": m.city.fillna("").tolist(), "state": m.state.tolist(),
             "lat": m.lat.round(4).tolist(), "lon": m.lon.round(4).tolist(),
             "dma": m.dma_code.fillna("").tolist(), "cbsa": m.cbsa_code.fillna("").tolist()}

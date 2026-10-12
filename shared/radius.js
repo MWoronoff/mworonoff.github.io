@@ -31,6 +31,7 @@
   // Health conditions (CDC PLACES, adults): any of the selected, treating conditions as independent within a ZIP
   var CONDITIONS = [["diabetes", "Diabetes"], ["bphigh", "High blood pressure"], ["arthritis", "Arthritis"], ["obesity", "Obesity"],
                     ["depression", "Depression"], ["mhlth", "Frequent mental distress"], ["fairpoor", "Fair or poor health"]];
+  var BUILT = [["pre1980", "Before 1980"], ["80_99", "1980–1999"], ["2000p", "2000 or later"]];
   var VALUES = [["lt200", "Under $200K"], ["200_400", "$200K–$399K"], ["400_750", "$400K–$749K"], ["750p", "$750K+"]];
   var EMPLOY = { emp: "employed", unemp: "unemployed", nilf: "nilf" };
   var FILTERS = {
@@ -98,8 +99,36 @@
                 } },
     divsep:   { label: "Divorced or separated", type: "flag", text: "Divorced or separated", share: function (c, i) { return ratio(c.divsep[i], c.marital_tot[i]); } },
     poverty:  { label: "Below poverty", type: "flag", text: "Household below the poverty line", share: function (c, i) { return ratio(c.pov_hh[i], c.pov_tot[i]); } },
-    lep:      { label: "Limited English", type: "flag", text: "Limited-English household", share: function (c, i) { return ratio(c.lep_hh[i], c.lang_hh[i]); } }
+    lep:      { label: "Limited English", type: "flag", text: "Limited-English household", share: function (c, i) { return ratio(c.lep_hh[i], c.lang_hh[i]); } },
+
+    // Home Services (age set "adult"): owner homes. The first owner filter selected applies the homeowner rate for each
+    // age group; the others apply their share among owner homes, so owners aren't counted twice.
+    built:    { label: "Owner home built", type: "multi", options: BUILT,
+                byAge: function (c, i, b, sel, all) {
+                  var t = c.hb_tot[i], o = ownerPart(c, i, b, all, "built"); if (o == null || t == null) return null;
+                  var x = sum(sel, function (k) { return c["hb_" + k][i]; }); if (x == null) return null;
+                  return t ? o * Math.min(1, x / t) : 0;
+                } },
+    ownval:   { label: "Owner home value", type: "multi", options: VALUES,
+                byAge: function (c, i, b, sel, all) {
+                  var t = c.val_tot[i], o = ownerPart(c, i, b, all, "ownval"); if (o == null || t == null) return null;
+                  var x = sum(sel, function (k) { return c["val_" + k][i]; }); if (x == null) return null;
+                  return t ? o * Math.min(1, x / t) : 0;
+                } },
+    sfd:      { label: "Single-family detached", type: "flag", text: "Owner home is a single-family detached house",
+                byAge: function (c, i, b, v, all) { var o = ownerPart(c, i, b, all, "sfd"), x = ratio(c.sfd_own[i], c.hu_tot[i]); return o == null || x == null ? null : o * x; } },
+    longten:  { label: "Owned since before 2010", type: "flag", text: "Owner has lived in the home since before 2010",
+                byAge: function (c, i, b, v, all) { var o = ownerPart(c, i, b, all, "longten"), x = ratio(c.lt_own[i], c.hm_tot[i]); return o == null || x == null ? null : o * x; } }
   };
+  // Homeowner rate for an age group, applied once: by the first selected owner filter in OWNER_ORDER, 1 for the rest
+  var OWNER_ORDER = ["built", "ownval", "sfd", "longten"];
+  function picked(v) { return v === true || (v && v.length > 0); }
+  function ownerPart(c, i, b, all, me) {
+    for (var k = 0; k < OWNER_ORDER.length && OWNER_ORDER[k] !== me; k++) if (all && picked(all[OWNER_ORDER[k]])) return 1;
+    var o = c["o" + b] ? c["o" + b][i] : null, r = c["r" + b] ? c["r" + b][i] : null;
+    if (o == null || r == null) return null;
+    return o + r ? o / (o + r) : 0;
+  }
   var CLASSES = [[0, 80, "--ramp-1", "Under 80"], [80, 100, "--ramp-2", "80–99"], [100, 120, "--ramp-3", "100–119"], [120, 150, "--ramp-4", "120–149"], [150, Infinity, "--ramp-5", "150+"]];
   var SMALL_ZIP = 1000;   // when sorting by index, ZIPs with fewer residents go last: a high share of a tiny ZIP is too few people to buy
   var NF0 = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
@@ -624,6 +653,7 @@
     ];
     if (aged.length) secs.push(["Traits applied by age group", list(aged).replace(/^./, function (x) { return x.toUpperCase(); }) + " are published by age, so the tool applies each age group's own rate in each ZIP. For example, hearing difficulty among people 75 and older uses the 75+ rate, which is far higher than the rate for all ages."]);
     if ((this.cfg.profiles || []).length) secs.push(["Best prospects", "Each category starts from a profile of its likely customers, built from the same Census and CDC data. A profile is a starting point: change any filter to fit the client. When a profile includes an \"either\" condition (such as 65 and older, or diabetes), people who meet either one are counted once. The ZIP list is sorted by index, so the ZIPs where prospects are most concentrated come first; ZIPs with fewer than 1,000 residents are listed after the rest, since a high share of a tiny ZIP is too few people to reach. Sort by Est. audience to see the largest counts."]);
+    if (cf.indexOf("built") >= 0) secs.push(["Homeowners", "Year built, home value, single-family detached and years in the home are Census counts of owner-occupied homes in each ZIP. The tool applies the homeowner rate for each age of householder once, then each selected trait's share among owner homes, so combining them doesn't count owners twice."]);
     if (cf.indexOf("parented") >= 0) secs.push(["Parents' education", "This is the education of the head of household in every household in the ZIP. Combine it with Children at home to estimate households with children whose head of household has no college."]);
     secs.push(["Index vs. U.S.", "A ZIP's audience share of its population, divided by the same share nationally, times 100. Above 100 means the audience is more concentrated there than in the U.S. overall."]);
     secs = secs.concat((this.cfg.methodology || []).map(function (m) { return [m.title, m.body]; }));

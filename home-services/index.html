@@ -1,12 +1,851 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Adtaxi Home Services Market Analyzer</title><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
-<link rel="stylesheet" href="styles.css?v=20260921-v2"></head><body>
-<header><div class="header-inner"><div class="brand-copy"><h1>Home Services Market Analyzer</h1><p>Find replacement-ready homeowner opportunity across U.S. markets and identify where local service demand is concentrated.</p></div><div class="adtaxi-logo-wrap" aria-label="Adtaxi"><img class="adtaxi-logo-image" src="logo.png" alt="Adtaxi"></div></div></header>
-<main><section class="controls">
-<label>Analysis<select id="analysis"><option value="" selected>Select analysis...</option><option value="Media Market">Media Market - DMA</option><option value="Market Expansion">Market Expansion - Metro</option><option value="Local Opportunity">Local Opportunity - County</option><option value="Neighborhood Targeting">Neighborhood Targeting - ZIP</option></select></label>
-<label>Category<select id="category"><option value="" selected>Select category...</option><option value="hvac">HVAC</option><option value="roofing">Roofing</option><option value="windows">Windows & Doors</option></select></label>
-<label id="dmaWrap" style="display:none"><span>DMA</span><select id="dmaSelect"><option value="">Select DMA...</option></select></label><label id="marketWrap">Market<select id="market"></select></label><label id="countyWrap" style="display:none">County<select id="county"></select></label><label id="centerZipWrap" style="display:none">Center ZIP<input id="centerZip" inputmode="numeric" maxlength="5" placeholder="e.g. 80202"></label><label id="radiusWrap" style="display:none">Service Area<select id="radius"><option value="0">Selected County</option><option value="10">10 miles</option><option value="25">25 miles</option><option value="50">50 miles</option></select></label><label>Rank By<select id="rankBy"><option value="opportunity">Opportunity Score</option></select></label><label>Rank View<select id="rankDir"><option value="top">Top</option><option value="bottom">Bottom</option></select></label><label>Show<select id="topN"><option value="10">10</option><option value="25" selected>25</option><option value="50">50</option></select></label></section>
-<section id="stageNotice" class="notice hidden"></section>
-<section id="view"><div class="kpis" id="kpis"><div><b>&nbsp;</b><span>Market Opportunity</span></div><div><b>&nbsp;</b><span>Replacement Potential Index</span></div><div><b>&nbsp;</b><span>Need Index</span></div><div><b>&nbsp;</b><span>Homeowner Market Size</span></div></div><div class="toolbar"><button id="methodBtn" type="button">Methodology for this layer</button><a class="weather-btn" href="weather-outlook.html">90-Day Weather Outlook</a><a class="weather-btn" href="radius-tool.html">ZIP Radius Tool</a><button id="csvBtn" type="button">Export current rankings CSV</button></div><div class="panel conditions"><h2>Market Conditions</h2><p class="muted" id="conditionsNote">Reported and observed market statistics are shown separately from the Opportunity Score.</p><div class="condition-grid" id="conditions"><div><span>Households</span><b>&nbsp;</b></div><div><span>Owner households</span><b>&nbsp;</b></div><div><span>Homeownership</span><b>&nbsp;</b></div><div><span>Residential ZIP Codes</span><b>&nbsp;</b></div></div><div class="industry-strip" id="industry"></div></div><div class="grid"><div class="panel"><h2 id="chartTitle">Market Opportunity</h2><p class="muted" id="chartNote">Complete the selections above to view market rankings.</p><div id="bars"></div></div><div class="panel"><h2 id="whyTitle">What the Numbers Tell Us</h2><h3 id="marketName">&nbsp;</h3><div id="why"></div><p class="method" id="method"></p></div></div><div class="panel intelligence"><div class="intel-head"><div><h2>Adtaxi Market Intelligence</h2><p class="muted" id="intelNote">Research signals that explain the selected market opportunity.</p></div><span class="intel-badge">U.S. benchmark = 100</span></div><div class="intel-grid" id="intelGrid"></div><div class="takeaways" id="intelTakeaways"></div></div><div class="panel map-panel"><h2>Geographic Opportunity View</h2><p class="muted" id="mapNote">Complete the selections above to view geographic opportunity.</p><div id="map"></div></div><div class="panel"><h2 id="tableTitle">Market Rankings</h2><div class="tablewrap"><table><thead id="thead"></thead><tbody id="rankings"></tbody></table></div></div><div class="panel sources"><h2>Sources & Data Notes</h2><p class="muted">Housing and geography statistics come from the analyzer’s validated ZIP/housing source layer. Market Conditions and Industry Pulse are descriptive and do not alter scores unless explicitly identified as a score input.</p><div class="source-links"><a href="https://www.census.gov/construction/bps/index.html" target="_blank" rel="noopener">U.S. Census Building Permits Survey</a><a href="https://www.ahrinet.org/analytics/statistics" target="_blank" rel="noopener">AHRI HVAC Statistics</a><a href="https://www.jchs.harvard.edu/research-areas/remodeling/lira" target="_blank" rel="noopener">Harvard JCHS LIRA</a><a href="https://www.spc.noaa.gov/wcm/" target="_blank" rel="noopener">NOAA/SPC Severe Weather Data</a></div><p class="source-note">Census BPS measures new privately owned residential construction; it is contextual and is not treated as a direct measure of replacement HVAC, roofing, or window/door jobs. NOAA/SPC hail/wind history is a contextual roofing-risk source and is not currently part of the Opportunity Score.</p></div></section>
-<div id="methodModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="methodModalTitle"><div class="modal-card"><button id="methodClose" class="modal-close" aria-label="Close">×</button><h2 id="methodModalTitle">Methodology</h2><div id="methodBody"></div></div></div>
-</main><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-<script src="app-20260921-v5.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Home Services Market Analyzer</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="../shared/adtaxi-logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<link rel="stylesheet" href="../shared/engine.css">
+</head>
+<body>
+<div id="app"><p class="az-loading">Loading the Home Services Market Analyzer…</p></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js" crossorigin=""></script>
+<script src="../shared/engine.js"></script>
+<script>
+AdtaxiAnalyzer.start({
+ "title": "Home Services Market Analyzer",
+ "subtitle": "Where home service companies' potential customers are: Market Potential Scores for DMAs, metros and ZIPs across HVAC, roofing, plumbing, electrical, painting and flooring, to focus ad dollars on the highest-potential geographies.",
+ "logo": "../shared/adtaxi-logo.svg",
+ "exportName": "home-services",
+ "notice": "Preview for review.",
+ "links": [
+  {
+   "label": "Zip Code Radius Tool",
+   "url": "radius.html"
+  },
+  {
+   "label": "90-day weather outlook",
+   "url": "weather-outlook.html"
+  },
+  {
+   "label": "All analyzers",
+   "url": "../analyzers/"
+  }
+ ],
+ "radiusPage": "radius.html",
+ "radiusDefault": 10,
+ "radiusProfiles": true,
+ "defaultLevel": "dma",
+ "usMapLevel": "dma",
+ "levels": {
+  "us": {
+   "label": "U.S.",
+   "data": "data/us.json"
+  },
+  "dma": {
+   "label": "DMA",
+   "data": "data/dma.json",
+   "geo": "../shared/geo/dma.topo.json",
+   "idField": "dma_code"
+  },
+  "metro": {
+   "label": "Metro",
+   "data": "data/metro.json",
+   "geo": "../shared/geo/metro.topo.json",
+   "idField": "cbsa_code"
+  },
+  "zip": {
+   "label": "ZIPs in market",
+   "data": "data/zip/{level}/{id}.json",
+   "geo": "../shared/geo/zip/{level}/{id}.json",
+   "idField": "zip"
+  }
+ },
+ "statesGeo": "../shared/geo/states.topo.json",
+ "subcategoryLabel": "Service",
+ "subcategories": [
+  {
+   "id": "any",
+   "label": "Any home service"
+  },
+  {
+   "id": "hvac",
+   "label": "HVAC"
+  },
+  {
+   "id": "roof",
+   "label": "Roofing and gutters"
+  },
+  {
+   "id": "plumb",
+   "label": "Plumbing"
+  },
+  {
+   "id": "elec",
+   "label": "Electrical"
+  },
+  {
+   "id": "paint",
+   "label": "Painting and wallpaper"
+  },
+  {
+   "id": "floor",
+   "label": "Flooring"
+  }
+ ],
+ "measures": [
+  {
+   "key": "score",
+   "label": "Market Potential Score",
+   "format": "score",
+   "short": "Score",
+   "perSub": true,
+   "levels": [
+    "dma",
+    "metro",
+    "zip"
+   ],
+   "help": "0 to 100. Weighted blend of Consumer Demand (40%), Category Spending (25%), Spending Power (15%) and Competition (20%), each a percentile against the other markets at the same level. ZIPs rank against the other ZIPs in the same market using Consumer Demand and Spending Power only (no EASI spending by ZIP, and Census hides small ZIP business counts)."
+  },
+  {
+   "key": "demand",
+   "label": "Consumer Demand",
+   "format": "score",
+   "short": "Demand",
+   "perSub": true,
+   "levels": [
+    "dma",
+    "metro",
+    "zip"
+   ],
+   "help": "Average of the percentiles for this service's customer inputs (see How scores work)."
+  },
+  {
+   "key": "category",
+   "label": "Category Spending",
+   "format": "score",
+   "short": "Category $",
+   "perSub": true,
+   "levels": [
+    "dma",
+    "metro"
+   ],
+   "help": "Average of the percentiles for EASI household spending on this service, per household and in total."
+  },
+  {
+   "key": "spend",
+   "label": "Spending Power",
+   "format": "score",
+   "short": "Spend",
+   "perSub": true,
+   "levels": [
+    "dma",
+    "metro",
+    "zip"
+   ],
+   "help": "Percentile of the share of households earning $75K or more."
+  },
+  {
+   "key": "comp",
+   "label": "Competition",
+   "format": "score",
+   "short": "Compete",
+   "perSub": true,
+   "levels": [
+    "dma",
+    "metro"
+   ],
+   "help": "Percentile of contractors per 10,000 residents, reversed: fewer competing contractors scores higher, since each ad dollar faces less competition."
+  },
+  {
+   "key": "est",
+   "label": "Contractors (competitors)",
+   "format": "int",
+   "short": "Contractors",
+   "perSub": true,
+   "help": "Contractor businesses in this service's industries. Census counts HVAC and plumbing contractors as one industry, so both show the same count. DMAs, metros and the U.S. use complete County Business Patterns counts. In the ZIP view, Census doesn't publish a ZIP's count when it has fewer than 3 businesses, so those show as 0."
+  },
+  {
+   "key": "per10k",
+   "label": "Contractors per 10,000 residents",
+   "format": "dec2",
+   "short": "Per 10K",
+   "perSub": true
+  },
+  {
+   "key": "growth",
+   "label": "One-year growth in contractors",
+   "format": "pct",
+   "short": "Growth",
+   "perSub": true,
+   "help": "Change in contractor count from the prior Business Patterns year. Blank where there were fewer than 3."
+  },
+  {
+   "key": "under",
+   "label": "Underserved",
+   "format": "text",
+   "short": "Underserved",
+   "perSub": true,
+   "levels": [
+    "dma",
+    "metro",
+    "zip"
+   ],
+   "help": "Strong customer demand (70th percentile or higher) but few contractors per resident (30th percentile or lower): a pitch for companies weighing a new location or service area. Shown, not scored."
+  },
+  {
+   "key": "easi_any_hh",
+   "label": "Combined home services spending per household (EASI)",
+   "format": "money",
+   "short": "Home svc $/HH",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "hideWhenUnavailable": true,
+   "subs": [
+    "any"
+   ],
+   "help": "EASI 2025 estimated annual household spending on heat, a/c and electrical work, roofing and gutters, plumbing and water heating, painting and papering, and flooring combined. Each piece uses the geography EASI publishes it for (see How scores work)."
+  },
+  {
+   "key": "easi_any_idx",
+   "label": "Combined home services spending: index vs. U.S.",
+   "format": "index",
+   "short": "Home svc $ idx",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "hideWhenUnavailable": true,
+   "subs": [
+    "any"
+   ],
+   "help": "Spending per household divided by the U.S. average, times 100. Above 100 means households here spend more than average."
+  },
+  {
+   "key": "easi_any_total",
+   "label": "Combined home services spending, est. annual total",
+   "format": "moneyM",
+   "short": "Home svc $ total",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "hideWhenUnavailable": true,
+   "subs": [
+    "any"
+   ],
+   "help": "EASI spending per household times the households in this market."
+  },
+  {
+   "key": "easi_hvac_hh",
+   "label": "Heat, a/c and electrical work spending per household (EASI)",
+   "format": "money",
+   "short": "HVAC/elec $/HH",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "hideWhenUnavailable": true,
+   "subs": [
+    "any",
+    "hvac",
+    "elec"
+   ],
+   "help": "EASI 2025 estimated annual household spending on heat, a/c and electrical work. DMA figures average the metro and micro areas in the DMA, weighted by households."
+  },
+  {
+   "key": "easi_hvac_idx",
+   "label": "Heat, a/c and electrical work spending: index vs. U.S.",
+   "format": "index",
+   "short": "HVAC/elec $ idx",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "hideWhenUnavailable": true,
+   "subs": [
+    "any",
+    "hvac",
+    "elec"
+   ],
+   "help": "Spending per household divided by the U.S. average, times 100. Above 100 means households here spend more than average."
+  },
+  {
+   "key": "easi_hvac_total",
+   "label": "Heat, a/c and electrical work spending, est. annual total",
+   "format": "moneyM",
+   "short": "HVAC/elec $ total",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "hideWhenUnavailable": true,
+   "subs": [
+    "any",
+    "hvac",
+    "elec"
+   ],
+   "help": "EASI spending per household times the households in this market."
+  },
+  {
+   "key": "easi_roof_hh",
+   "label": "Roofing and gutters spending per household (EASI)",
+   "format": "money",
+   "short": "Roofing $/HH",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "hideWhenUnavailable": true,
+   "subs": [
+    "any",
+    "roof"
+   ],
+   "help": "EASI 2025 estimated annual household spending on roofing and gutters. DMA figures average the metro and micro areas in the DMA, weighted by households."
+  },
+  {
+   "key": "easi_roof_idx",
+   "label": "Roofing and gutters spending: index vs. U.S.",
+   "format": "index",
+   "short": "Roofing $ idx",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "hideWhenUnavailable": true,
+   "subs": [
+    "any",
+    "roof"
+   ],
+   "help": "Spending per household divided by the U.S. average, times 100. Above 100 means households here spend more than average."
+  },
+  {
+   "key": "easi_roof_total",
+   "label": "Roofing and gutters spending, est. annual total",
+   "format": "moneyM",
+   "short": "Roofing $ total",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "hideWhenUnavailable": true,
+   "subs": [
+    "any",
+    "roof"
+   ],
+   "help": "EASI spending per household times the households in this market."
+  },
+  {
+   "key": "easi_plumb_hh",
+   "label": "Plumbing and water heating spending per household (EASI)",
+   "format": "money",
+   "short": "Plumbing $/HH",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "hideWhenUnavailable": true,
+   "subs": [
+    "any",
+    "plumb"
+   ],
+   "help": "EASI 2025 estimated annual household spending on plumbing and water heating. DMA figures average the metro and micro areas in the DMA, weighted by households."
+  },
+  {
+   "key": "easi_plumb_idx",
+   "label": "Plumbing and water heating spending: index vs. U.S.",
+   "format": "index",
+   "short": "Plumbing $ idx",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "hideWhenUnavailable": true,
+   "subs": [
+    "any",
+    "plumb"
+   ],
+   "help": "Spending per household divided by the U.S. average, times 100. Above 100 means households here spend more than average."
+  },
+  {
+   "key": "easi_plumb_total",
+   "label": "Plumbing and water heating spending, est. annual total",
+   "format": "moneyM",
+   "short": "Plumbing $ total",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "hideWhenUnavailable": true,
+   "subs": [
+    "any",
+    "plumb"
+   ],
+   "help": "EASI spending per household times the households in this market."
+  },
+  {
+   "key": "easi_paint_hh",
+   "label": "Painting and papering spending per household (EASI)",
+   "short": "Painting $/HH",
+   "format": "money",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "hideWhenUnavailable": true,
+   "subs": [
+    "any",
+    "paint"
+   ],
+   "help": "EASI 2025 estimated annual household spending on painting and papering done by contractors. Metro figures average the DMAs the metro's ZIPs fall in, weighted by households."
+  },
+  {
+   "key": "easi_paint_idx",
+   "label": "Painting and papering spending: index vs. U.S.",
+   "short": "Painting $ idx",
+   "format": "index",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "hideWhenUnavailable": true,
+   "subs": [
+    "any",
+    "paint"
+   ],
+   "help": "Spending per household divided by the U.S. average, times 100. Above 100 means households here spend more than average."
+  },
+  {
+   "key": "easi_paint_total",
+   "label": "Painting and papering spending, est. annual total",
+   "short": "Painting $ total",
+   "format": "moneyM",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "hideWhenUnavailable": true,
+   "subs": [
+    "any",
+    "paint"
+   ],
+   "help": "EASI spending per household times the households in this market."
+  },
+  {
+   "key": "easi_paintsup_hh",
+   "label": "Paints, wallpaper and supplies spending per household (EASI)",
+   "short": "Paint supplies $/HH",
+   "format": "money",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "hideWhenUnavailable": true,
+   "subs": [
+    "paint"
+   ],
+   "help": "EASI 2025 estimated annual household spending on paints, wallpaper and supplies, mostly do-it-yourself buying, so it's shown for context and not scored. Metro figures average the DMAs the metro's ZIPs fall in, weighted by households."
+  },
+  {
+   "key": "easi_paintsup_idx",
+   "label": "Paints, wallpaper and supplies spending: index vs. U.S.",
+   "short": "Paint supplies $ idx",
+   "format": "index",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "hideWhenUnavailable": true,
+   "subs": [
+    "paint"
+   ],
+   "help": "Spending per household divided by the U.S. average, times 100. Above 100 means households here spend more than average."
+  },
+  {
+   "key": "easi_paintsup_total",
+   "label": "Paints, wallpaper and supplies spending, est. annual total",
+   "short": "Paint supplies $ total",
+   "format": "moneyM",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "hideWhenUnavailable": true,
+   "subs": [
+    "paint"
+   ],
+   "help": "EASI spending per household times the households in this market."
+  },
+  {
+   "key": "easi_floor_hh",
+   "label": "Flooring spending per household (EASI)",
+   "short": "Flooring $/HH",
+   "format": "money",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "hideWhenUnavailable": true,
+   "subs": [
+    "any",
+    "floor"
+   ],
+   "help": "EASI 2025 estimated annual household spending on flooring installation, repair and replacement in owned homes. Metro figures average the DMAs the metro's ZIPs fall in, weighted by households."
+  },
+  {
+   "key": "easi_floor_idx",
+   "label": "Flooring spending: index vs. U.S.",
+   "short": "Flooring $ idx",
+   "format": "index",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "hideWhenUnavailable": true,
+   "subs": [
+    "any",
+    "floor"
+   ],
+   "help": "Spending per household divided by the U.S. average, times 100. Above 100 means households here spend more than average."
+  },
+  {
+   "key": "easi_floor_total",
+   "label": "Flooring spending, est. annual total",
+   "short": "Flooring $ total",
+   "format": "moneyM",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "hideWhenUnavailable": true,
+   "subs": [
+    "any",
+    "floor"
+   ],
+   "help": "EASI spending per household times the households in this market."
+  },
+  {
+   "key": "population",
+   "label": "Population",
+   "format": "int"
+  },
+  {
+   "key": "households",
+   "label": "Households",
+   "format": "int"
+  },
+  {
+   "key": "owners",
+   "label": "Homeowners",
+   "format": "int",
+   "help": "Owner-occupied households."
+  },
+  {
+   "key": "own_share",
+   "label": "Share of households that own",
+   "format": "pct"
+  },
+  {
+   "key": "sfd_own",
+   "label": "Owners of single-family detached homes",
+   "format": "int",
+   "subs": [
+    "any",
+    "roof"
+   ]
+  },
+  {
+   "key": "sfd_share",
+   "label": "Owner homes that are single-family detached",
+   "format": "pct",
+   "subs": [
+    "any",
+    "roof"
+   ]
+  },
+  {
+   "key": "pre1980_share",
+   "label": "Owner homes built before 1980",
+   "format": "pct",
+   "subs": [
+    "any",
+    "plumb",
+    "elec"
+   ],
+   "help": "Older plumbing and wiring are the most common reasons for repair and replacement work."
+  },
+  {
+   "key": "pre2000_share",
+   "label": "Owner homes built before 2000",
+   "format": "pct",
+   "subs": [
+    "any",
+    "hvac",
+    "roof",
+    "floor"
+   ]
+  },
+  {
+   "key": "lt_share",
+   "label": "Owners in their home since before 2010",
+   "format": "pct",
+   "subs": [
+    "any",
+    "paint",
+    "floor"
+   ],
+   "help": "Long-time owners are the ones replacing original systems and roofs."
+  },
+  {
+   "key": "val300_share",
+   "label": "Owner homes worth $300K+",
+   "format": "pct",
+   "subs": [
+    "elec",
+    "paint"
+   ]
+  },
+  {
+   "key": "degdays",
+   "label": "Heating + cooling degree days",
+   "format": "int",
+   "short": "Degree days",
+   "subs": [
+    "any",
+    "hvac"
+   ],
+   "help": "NOAA's yearly heating plus cooling degree days (base 65°F), averaged over the last 10 complete years and weighted by households. Higher means heating and air conditioning work harder."
+  },
+  {
+   "key": "hdd",
+   "label": "Heating degree days",
+   "format": "int",
+   "subs": [
+    "any",
+    "hvac"
+   ]
+  },
+  {
+   "key": "cdd",
+   "label": "Cooling degree days",
+   "format": "int",
+   "subs": [
+    "any",
+    "hvac"
+   ]
+  },
+  {
+   "key": "hail_days",
+   "label": "Days a year with 1-inch+ hail",
+   "format": "dec2",
+   "short": "Hail days",
+   "subs": [
+    "any",
+    "roof"
+   ],
+   "help": "Average days a year with hail an inch or larger reported in residents' counties (NOAA Storm Events, last 10 complete years), weighted by households. Large counties report more days simply because they cover more ground."
+  },
+  {
+   "key": "inc75_share",
+   "label": "Households earning $75K+",
+   "format": "pct"
+  }
+ ],
+ "rankBy": [
+  "score",
+  "easi_any_idx",
+  "easi_hvac_idx",
+  "easi_roof_idx",
+  "easi_plumb_idx",
+  "easi_paint_idx",
+  "easi_floor_idx",
+  "est",
+  "per10k",
+  "growth",
+  "population",
+  "owners",
+  "own_share",
+  "sfd_own",
+  "sfd_share",
+  "pre1980_share",
+  "pre2000_share",
+  "lt_share",
+  "val300_share",
+  "degdays",
+  "hail_days",
+  "inc75_share"
+ ],
+ "defaultRank": "score",
+ "components": [
+  "demand",
+  "category",
+  "spend",
+  "comp"
+ ],
+ "detailMeasures": [
+  "easi_any_hh",
+  "easi_any_idx",
+  "easi_any_total",
+  "easi_hvac_hh",
+  "easi_hvac_idx",
+  "easi_hvac_total",
+  "easi_roof_hh",
+  "easi_roof_idx",
+  "easi_roof_total",
+  "easi_plumb_hh",
+  "easi_plumb_idx",
+  "easi_plumb_total",
+  "easi_paint_hh",
+  "easi_paint_idx",
+  "easi_paint_total",
+  "easi_paintsup_hh",
+  "easi_paintsup_idx",
+  "easi_paintsup_total",
+  "easi_floor_hh",
+  "easi_floor_idx",
+  "easi_floor_total",
+  "est",
+  "per10k",
+  "growth",
+  "under",
+  "population",
+  "households",
+  "owners",
+  "own_share",
+  "sfd_own",
+  "sfd_share",
+  "pre1980_share",
+  "pre2000_share",
+  "lt_share",
+  "val300_share",
+  "degdays",
+  "hdd",
+  "cdd",
+  "hail_days",
+  "inc75_share"
+ ],
+ "tableColumns": [
+  "score",
+  "easi_any_idx",
+  "easi_hvac_idx",
+  "easi_roof_idx",
+  "easi_plumb_idx",
+  "easi_paint_idx",
+  "easi_floor_idx",
+  "est",
+  "per10k",
+  "under",
+  "owners",
+  "pre1980_share",
+  "pre2000_share",
+  "sfd_share",
+  "degdays",
+  "hail_days"
+ ],
+ "methodology": [
+  {
+   "title": "Market Potential Score",
+   "body": [
+    "Answers one question: where are a home service company's potential customers, and which geographies deserve the most ad dollars?",
+    "Market Potential Score = 40% Consumer Demand + 25% Category Spending + 15% Spending Power + 20% Competition. Each part is a percentile (0 to 100) against the other markets at the same level: DMAs against DMAs, metros against metros, ZIPs against the other ZIPs in the same market.",
+    "A score isn't computed when one of its parts has no data, rather than guessing."
+   ]
+  },
+  {
+   "title": "Services covered",
+   "body": "The analyzer covers the home services with EASI household spending data: HVAC, roofing and gutters, plumbing, electrical, painting and wallpaper, and flooring, plus Any home service, which combines them all. Windows and doors, remodeling, landscaping and pest control aren't included, because EASI has no spending data for them."
+  },
+  {
+   "title": "Consumer Demand",
+   "body": [
+    "The size and need of each service's customer base. Homeowners and home characteristics come from the Census American Community Survey; climate and hail come from NOAA.",
+    "HVAC: homeowners, heating plus cooling degree days and the share of owner homes built before 2000. Roofing and gutters: owners of single-family detached homes, days a year with 1-inch or larger hail, and the share of owner homes built before 2000. Plumbing: homeowners and the share of owner homes built before 1980. Electrical: homeowners, the share of owner homes built before 1980 and the share worth $300K or more. Painting and wallpaper: homeowners, the share of owner homes worth $300K or more and the share of owners in their home since before 2010, the owners most likely to hire out repainting. Flooring: homeowners, the share of owner homes built before 2000 and the share of owners in their home since before 2010, when original floors get replaced. Any home service: homeowners, the share of owner homes built before 2000, the share that are single-family detached and the share of owners in their home since before 2010.",
+    "Degree days are NOAA's county heating and cooling degree days (base 65°F), averaged over the last 10 complete years. Hail days count the days with hail an inch or larger reported in the county by NOAA Storm Events over the same years. NOAA's county climate files don't cover Alaska or Hawaii, so their HVAC demand leaves degree days out; Washington, DC uses its two Maryland neighbors. NOAA reports Connecticut hail by its eight former counties, so Connecticut ZIPs use their average."
+   ]
+  },
+  {
+   "title": "Category Spending",
+   "body": "EASI 2025 estimates of household spending: heat, a/c and electrical work (used for HVAC and Electrical); roofing and gutters; plumbing and water heating; painting and papering (hired work, not supplies); flooring installation, repair and replacement in owned homes; and all five combined for Any home service. Half the weight goes to spending per household and half to the market's total, which is EASI's per-household spending times this site's household count. EASI publishes heating, roofing and plumbing by metro and micro area only, so a DMA's figure is the household-weighted average of the metro and micro areas inside it; the few DMAs with no metro or micro area use their state's average. EASI publishes painting and flooring by DMA only, so a metro's figure is the household-weighted average of the DMAs its ZIPs fall in. EASI counts Palm Springs inside Los Angeles, so the provisional Palm Springs DMA uses the Los Angeles painting and flooring rates. Paint and wallpaper supplies spending is shown for context but not scored, since it's mostly do-it-yourself buying. Not available by ZIP."
+  },
+  {
+   "title": "Spending Power",
+   "body": "Share of households earning $75K or more, from the Census American Community Survey. Kept at 15% because EASI spending already reflects income."
+  },
+  {
+   "title": "Competition",
+   "body": "Contractors per 10,000 residents, reversed: markets with fewer competing contractors score higher. Roofing; electrical; plumbing, heating and air-conditioning; painting and wall covering; and flooring contractors, from Census County Business Patterns, which counts every business. Census counts HVAC and plumbing contractors as one industry, so HVAC and Plumbing share a competitor count; Any home service counts all five industries. Not used in ZIP scores, because Census hides ZIP counts under 3 businesses."
+  },
+  {
+   "title": "Underserved",
+   "body": "Flags markets with strong customer demand (70th percentile or higher) but few contractors per resident (30th percentile or lower). It's shown as a pitch for companies weighing a new location or service area, not counted in the score."
+  },
+  {
+   "title": "Measures shown for each service",
+   "body": "Rankings, table columns and market details show only the measures that relate to the selected service. Population, households, homeowners, income, contractors and the score appear for every service."
+  },
+  {
+   "title": "ZIPs in a market",
+   "body": "Pick a DMA or metro, then choose ZIPs in market. ZIP scores use Consumer Demand and Spending Power, reweighted to 73% and 27%. ZIPs with fewer than 500 residents are shown but not ranked."
+  }
+ ],
+ "sources": [
+  {
+   "label": "Census ZIP and County Business Patterns",
+   "url": "https://www.census.gov/programs-surveys/cbp.html"
+  },
+  {
+   "label": "Census American Community Survey 5-year"
+  },
+  {
+   "label": "NOAA nClimDiv county degree days",
+   "url": "https://www.ncei.noaa.gov/access/monitoring/climate-at-a-glance/"
+  },
+  {
+   "label": "NOAA Storm Events Database (hail)",
+   "url": "https://www.ncdc.noaa.gov/stormevents/"
+  },
+  {
+   "label": "EASI Demographics 2025 (household home services spending)"
+  },
+  {
+   "label": "Deluxe ZIP file (Q4 2025)"
+  },
+  {
+   "label": "ZIP-level DMA list",
+   "url": "https://github.com/BritCrit/dma_county_zip"
+  }
+ ],
+ "sourcesNote": "Household home services spending is EASI; contractor counts are Census Business Patterns; homeowner and home measures and income are Census ACS; degree days and hail are NOAA; population and households are from the Deluxe ZIP file."
+});
+</script>
+</body>
+</html>
