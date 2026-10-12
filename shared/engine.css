@@ -257,3 +257,36 @@ a.az-btn { display: inline-block; text-decoration: none; text-align: center; }
 .az-pt-toggle input { width: 16px; height: 16px; accent-color: var(--pt); margin: 0; }
 .az-pt-dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: var(--pt); border: 1px solid #fff; flex: none; }
 .az-pt-legend { margin-top: 6px; max-width: 180px; }
+
+/* Ad response panel */
+.az-ad { padding: 18px 20px; margin-top: 18px; }
+.az-ad-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
+.az-ad-head h2 { margin: 0 0 4px; font-size: 18px; color: var(--navy); }
+.az-ad-head p { margin: 0; color: var(--muted); max-width: 75ch; }
+.az-ad-take { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 22px; margin: 14px 0 10px; padding: 12px 14px; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; }
+.az-ad-take p { margin: 0; }
+.az-ad-legend { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 12px; color: var(--muted); margin: 6px 0 8px; }
+.az-ad-key { display: inline-block; width: 14px; height: 8px; border-radius: 3px; margin-left: 10px; }
+.az-ad-key:first-child { margin-left: 0; }
+.az-ad-key.aud { background: var(--teal); }
+.az-ad-key.us { background: #b9c6d3; }
+.az-ad-key.star { width: auto; height: auto; color: #e07b24; font-size: 13px; }
+.az-ad-rows { display: grid; }
+.az-ad-row { display: grid; grid-template-columns: minmax(200px, 2.2fr) minmax(120px, 2fr) 64px 64px 84px; gap: 12px; align-items: center; padding: 7px 4px; border-top: 1px solid var(--line); }
+.az-ad-colhead { border-top: 0; color: var(--muted); font-size: 12px; font-weight: 600; padding-top: 0; }
+.az-ad-row.top { background: #fff7ef; }
+.az-ad-star { color: #e07b24; }
+.az-ad-bars { display: grid; gap: 3px; }
+.az-ad-bar { display: block; height: 7px; border-radius: 4px; }
+.az-ad-bar.aud { background: var(--teal); }
+.az-ad-bar.us { background: #b9c6d3; }
+.az-ad-row .num { text-align: right; font-variant-numeric: tabular-nums; }
+.az-ad-row .muted { color: var(--muted); }
+.az-ad-diff { font-weight: 700; color: var(--teal); }
+.az-ad-note { margin: 10px 0 0; font-size: 12px; color: var(--muted); }
+@media (max-width: 760px) {
+  .az-ad-take { grid-template-columns: 1fr; }
+  .az-ad-row { grid-template-columns: 1fr 52px 52px 60px; }
+  .az-ad-bars { display: none; }
+  .az-ad-colhead span:nth-child(2) { display: none; }
+}

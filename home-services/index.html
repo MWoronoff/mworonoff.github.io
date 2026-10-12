@@ -830,6 +830,10 @@ AdtaxiAnalyzer.start({
    "body": "HVAC scores were tested against an independent benchmark: HVAC and plumbing contractor employees per 1,000 households, from Census Business Patterns, since contractors employ people where homeowners buy the work. Scoring climate on the greater of heating or cooling need, and leaving out home age, roughly doubled how well DMA scores line up with that benchmark. Giving climate extra weight, or cutting EASI spending's weight, didn't improve it, so HVAC uses the same weights as every other service. The check runs with every data build and appears in the build report."
   },
   {
+   "title": "Advertising response",
+   "body": "For services with survey data, a panel below the map shows how the service's audience responded to 17 types of advertising in the past 30 days, compared with all U.S. adults. It's national data, so it's the same for every market. \"Vs. average\" is a percent difference: 53.5% vs. 36.7% is 46% more likely, not 17 points. High-reach channels (the top of the list by response) and over-responsive channels (the largest differences) answer different questions; a channel can over-respond strongly while reaching fewer people."
+  },
+  {
    "title": "ZIPs in a market",
    "body": "Pick a DMA or metro, then choose ZIPs in market. ZIP scores use Consumer Demand and Spending Power, reweighted to 73% and 27%. ZIPs with fewer than 500 residents are shown but not ranked."
   }
@@ -868,6 +872,103 @@ AdtaxiAnalyzer.start({
   "unit": "contractors",
   "legend": "Circle size = contractors in the area",
   "zipNote": "Census doesn't publish ZIPs with fewer than 3."
+ },
+ "adResponse": {
+  "title": "How {sub} prospects respond to advertising",
+  "note": "National survey data: the share of each audience who responded to that type of ad in the past 30 days. \"Vs. average\" is how much more likely than all U.S. adults (a percent difference, not percentage points). The same national figures apply to every market.",
+  "subs": {
+   "hvac": {
+    "short": "HVAC audience",
+    "audience": "the HVAC audience",
+    "rows": [
+     [
+      "Streaming TV advertising (such as Hulu, Pluto TV or YouTube TV)",
+      53.5,
+      36.7
+     ],
+     [
+      "Ad on a social network",
+      50.5,
+      35.9
+     ],
+     [
+      "Ad on search results pages (like on Google, Yahoo or Bing)",
+      48.5,
+      35.8
+     ],
+     [
+      "Television (traditional, including cable or satellite subscription)",
+      48.1,
+      34.7
+     ],
+     [
+      "Mobile phone app or text message",
+      47.8,
+      36.6
+     ],
+     [
+      "Online display ads (banners and pop-up ads)",
+      44.4,
+      30.0
+     ],
+     [
+      "Ad that plays before or during the video you want to watch",
+      43.9,
+      31.1
+     ],
+     [
+      "Emailed ad or newsletter",
+      42.3,
+      28.6
+     ],
+     [
+      "Text link ad on a website",
+      41.3,
+      27.3
+     ],
+     [
+      "Ads/Coupons in your mailbox",
+      40.7,
+      29.9
+     ],
+     [
+      "Advertising circulars in your mailbox or inserted in the newspaper",
+      39.6,
+      27.2
+     ],
+     [
+      "Newspaper (print, online, mobile or tablet)",
+      39.1,
+      23.5
+     ],
+     [
+      "Ad on a podcast",
+      38.9,
+      22.7
+     ],
+     [
+      "Radio (over-the-air, online, mobile or tablet)",
+      38.2,
+      25.5
+     ],
+     [
+      "Outdoor ad/sign/billboard/transit",
+      38.2,
+      23.6
+     ],
+     [
+      "Ads at movie theater",
+      38.1,
+      21.5
+     ],
+     [
+      "Magazine (print, online, mobile or on tablet)",
+      37.1,
+      21.5
+     ]
+    ]
+   }
+  }
  }
 });
 </script>
