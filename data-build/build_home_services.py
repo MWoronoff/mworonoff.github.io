@@ -411,7 +411,8 @@ def main():
         for name, (dm, wd, wc) in versions.items():
             full = combine([dm, cat, spd, cmp_], [wd, wc, .15, .20])
             nocomp = combine([dm, cat, spd], [wd, wc, .15])
-            out.append(f"{name}: {full[ok].corr(bench[ok], method='spearman'):.2f} (without Competition {nocomp[ok].corr(bench[ok], method='spearman'):.2f})")
+            rho = lambda x: x[ok].rank().corr(bench[ok].rank())        # Spearman, without needing scipy
+            out.append(f"{name}: {rho(full):.2f} (without Competition {rho(nocomp):.2f})")
         rep.append((f"HVAC validation, {label}: rank correlation with contractor employees per 1,000 households", "INFO", "; ".join(out)))
 
     validate(dma, "DMAs"); validate(met, "metros")
