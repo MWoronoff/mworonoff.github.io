@@ -170,11 +170,13 @@ def zbp(year, cache):
 
 def cbp_county(year, cache):
     f = f"cbp{year % 100:02d}co.zip"
-    df = read_zip_table(fetch(f, CBP.format(y=year, f=f), cache), ["fipstate", "fipscty", "naics", "est", "ap"])
+    blob = fetch(f, CBP.format(y=year, f=f), cache)
+    try: df = read_zip_table(blob, ["fipstate", "fipscty", "naics", "est", "ap", "emp"])
+    except RuntimeError: df = read_zip_table(blob, ["fipstate", "fipscty", "naics", "est", "ap"]); df["emp"] = None
     df["naics"] = naics_clean(df.naics)
     df["county_fips"] = df.fipstate.str.zfill(2) + df.fipscty.str.zfill(3)
-    for c in ("est", "ap"): df[c] = pd.to_numeric(df[c], errors="coerce")
-    return df[["county_fips", "naics", "est", "ap"]]
+    for c in ("est", "ap", "emp"): df[c] = pd.to_numeric(df[c], errors="coerce")
+    return df[["county_fips", "naics", "est", "ap", "emp"]]
 
 
 def places_ids(cache):

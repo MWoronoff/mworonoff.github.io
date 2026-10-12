@@ -51,7 +51,9 @@ LA_DMA = "803"
 SUBCATS = [
     {"id": "any", "label": "Any home service", "naics": ["238160", "238210", "238220", "238320", "238330"], "easi": ANY_EASI,
      "demand": ["owners", "pre2000_share", "sfd_share", "lt_share"]},
-    {"id": "hvac", "label": "HVAC", "naics": ["238220"], "easi": ["hvac"], "demand": ["owners", "degdays", "pre2000_share"]},
+    # HVAC: climate is the greater of heating or cooling need, counted twice; home age is left out because systems wear out
+    # on a 15-20 year cycle in new and old homes alike
+    {"id": "hvac", "label": "HVAC", "naics": ["238220"], "easi": ["hvac"], "demand": ["owners", "clim_stress", "clim_stress"]},
     {"id": "roof", "label": "Roofing and gutters", "naics": ["238160"], "easi": ["roof"], "demand": ["sfd_own", "hail_days", "pre2000_share"]},
     {"id": "plumb", "label": "Plumbing", "naics": ["238220"], "easi": ["plumb"], "demand": ["owners", "pre1980_share"]},
     {"id": "elec", "label": "Electrical", "naics": ["238210"], "easi": ["hvac"], "demand": ["owners", "pre1980_share", "val300_share"]},
@@ -61,7 +63,8 @@ SUBCATS = [
 DEMAND_LABELS = {"owners": "Homeowners", "sfd_own": "Owners of single-family detached homes", "pre1980_share": "Owner homes built before 1980",
                  "pre2000_share": "Owner homes built before 2000", "sfd_share": "Owner homes that are single-family detached",
                  "lt_share": "Owners in their home since before 2010", "val300_share": "Owner homes worth $300K+",
-                 "degdays": "Heating + cooling degree days", "hail_days": "Days a year with 1-inch+ hail"}
+                 "degdays": "Heating + cooling degree days", "hail_days": "Days a year with 1-inch+ hail",
+                 "clim_stress": "Heating or cooling need, whichever is greater"}
 COUNTS = ["population", "households", "owners", "sfd_own"]
 DENSITY = ["density"]                                    # households per square mile of land
 RATES = ["own_share", "pre1980_share", "pre2000_share", "sfd_share", "lt_share", "val300_share", "inc75_share"]
@@ -258,6 +261,8 @@ def main():
         c0 = co0[co0.naics.isin(s["naics"])].groupby("county_fips").est.sum()
         z[f"cest_{i}"] = z.county_fips.map(cs).fillna(0) * z.cshare
         z[f"cprev_{i}"] = z.county_fips.map(c0).fillna(0) * z.cshare
+        ce = co[co.naics.isin(s["naics"])].groupby("county_fips").emp.sum(min_count=1)
+        z[f"cemp_{i}"] = z.county_fips.map(ce).fillna(0) * z.cshare
     co_in = co[co.county_fips.isin(set(z.county_fips))]
 
     # EASI home spending by metro and micro area
@@ -313,6 +318,7 @@ def main():
             r[k] = (g.loc[ok, k] * w[ok]).sum() / w[ok].sum() if w[ok].sum() > 0 else np.nan
         for s in SUBCATS:
             i = s["id"]; r[f"est@{i}"], r[f"prev@{i}"] = g[f"cest_{i}"].sum(), g[f"cprev_{i}"].sum()
+            r[f"emp@{i}"] = g[f"cemp_{i}"].sum()
         for k in DMA_EASI:  # household-weighted DMA rates (exact for a DMA: one value)
             ok = g[f"zeasi_{k}"].notna() & (w > 0)
             r[f"easi_{k}_hh"] = (g.loc[ok, f"zeasi_{k}"] * w[ok]).sum() / w[ok].sum() if w[ok].sum() > 0 else np.nan
@@ -340,6 +346,8 @@ def main():
         if mask is None: mask = pd.Series(True, index=df.index)
         P = lambda s: pct(s.where(mask))
         spend = P(df.inc75_share)
+        if "hdd" in df.columns and "cdd" in df.columns:      # percentile of the more extreme need, heating or cooling
+            df["clim_stress"] = pd.concat([P(df.hdd), P(df.cdd)], axis=1).max(axis=1)
         dem_pct = {k: P(df[k]) for k in DEMAND_LABELS if k in df.columns}
         for s in SUBCATS:
             i = s["id"]
@@ -380,6 +388,33 @@ def main():
     for s in SUBCATS:
         ek = "any" if s["id"] == "any" else s["easi"][0]
         for t in ("hh", "idx", "total"): us[f"easi_{t}@{s['id']}"] = us[f"easi_{ek}_{t}"]
+
+    # ---------------- HVAC validation ----------------
+    # Independent benchmark: HVAC and plumbing contractor employees per 1,000 households (Census Business Patterns).
+    # Contractors employ people where homeowners buy the work; head counts aren't inflated by local wage levels the way
+    # dollar figures are. Candidate scores are compared by rank correlation, with and without the Competition part
+    # (which is contractor density reversed, so it works against this benchmark by construction).
+    def validate(df, label):
+        Pv = lambda x: x.rank(pct=True) * 100
+        bench = df["emp@hvac"] / df.households * 1000
+        ok = bench.notna() & (df["emp@hvac"] > 0)
+        if ok.sum() < 30:
+            rep.append((f"HVAC validation, {label}", "INFO", "Census employment counts not available; skipped")); return
+        own, clim = Pv(df.owners), pd.concat([Pv(df.hdd), Pv(df.cdd)], axis=1).max(axis=1)
+        old_d = combine([own, Pv(df.degdays), Pv(df.pre2000_share)], [1, 1, 1])
+        d1, d2 = combine([own, clim], [1, 1]), combine([own, clim], [1, 2])
+        cat, spd, cmp_ = df["category@hvac"], df["spend@hvac"], df["comp@hvac"]
+        versions = {"before (degree days summed, home age)": (old_d, .40, .25), "A: fixes, standard 40/25/15/20": (d1, .40, .25),
+                    "A2: fixes + climate x2, standard 40/25/15/20": (d2, .40, .25), "C: fixes + climate x2, 48/17/15/20": (d2, .48, .17),
+                    "B: fixes + climate x2, 55/10/15/20": (d2, .55, .10)}
+        out = []
+        for name, (dm, wd, wc) in versions.items():
+            full = combine([dm, cat, spd, cmp_], [wd, wc, .15, .20])
+            nocomp = combine([dm, cat, spd], [wd, wc, .15])
+            out.append(f"{name}: {full[ok].corr(bench[ok], method='spearman'):.2f} (without Competition {nocomp[ok].corr(bench[ok], method='spearman'):.2f})")
+        rep.append((f"HVAC validation, {label}: rank correlation with contractor employees per 1,000 households", "INFO", "; ".join(out)))
+
+    validate(dma, "DMAs"); validate(met, "metros")
 
     # ---------------- Checks ----------------
     for name, df in (("DMA", dma), ("Metro", met)):
