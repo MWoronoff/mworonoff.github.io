@@ -23,6 +23,8 @@ Built 2026-10-12. Result: **PASSED**
 | EASI painting and flooring DMAs matched | PASS | 209 of 209 |
 | EASI Palm Springs (painting and flooring) | INFO | EASI includes Palm Springs in Los Angeles, so the provisional Palm Springs DMA uses the Los Angeles rate |
 | EASI U.S. painting and flooring spending per household | INFO | paint $94.48; floor $51.73; paintsup $17.79 |
+| HVAC validation, DMAs: rank correlation with contractor employees per 1,000 households | INFO | before (degree days summed, home age): 0.14 (without Competition 0.36); A: fixes, standard 40/25/15/20: 0.32 (without Competition 0.56); A2: fixes + climate x2, standard 40/25/15/20: 0.31 (without Competition 0.56); C: fixes + climate x2, 48/17/15/20: 0.29 (without Competition 0.56); B: fixes + climate x2, 55/10/15/20: 0.26 (without Competition 0.54) |
+| HVAC validation, metros: rank correlation with contractor employees per 1,000 households | INFO | before (degree days summed, home age): 0.09 (without Competition 0.32); A: fixes, standard 40/25/15/20: 0.22 (without Competition 0.45); A2: fixes + climate x2, standard 40/25/15/20: 0.21 (without Competition 0.45); C: fixes + climate x2, 48/17/15/20: 0.20 (without Competition 0.45); B: fixes + climate x2, 55/10/15/20: 0.18 (without Competition 0.44) |
 | DMA scores within 0–100 | PASS | 0 out of range; 1,470 scores computed, 0 not computed (missing input) |
 | Metro scores within 0–100 | PASS | 0 out of range; 2,709 scores computed, 0 not computed (missing input) |
 | EASI spending matched to metros | PASS | 387 of 387 |
