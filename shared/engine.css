@@ -290,3 +290,20 @@ a.az-btn { display: inline-block; text-decoration: none; text-align: center; }
   .az-ad-bars { display: none; }
   .az-ad-colhead span:nth-child(2) { display: none; }
 }
+
+/* Radius tool shown inside an analyzer page (Geography > Radius) */
+.az-radius-embed > .az-main { max-width: none; margin: 0; padding: 16px 0 0; }
+/* Anything switched off with the hidden attribute stays off, even where a class sets display (Radius view) */
+.az-main [hidden], .az-main[hidden] { display: none !important; }
+/* Phones: the Geography buttons wrap to two rows so Radius stays visible */
+@media (max-width: 640px) {
+  .az-seg { flex-wrap: wrap; overflow: visible; }
+  .az-seg button { flex: 1 1 30%; }
+}
+/* Ad response panel: compact (short ad-type names, one bar for the target group) */
+.az-ad-row { grid-template-columns: minmax(96px, 1fr) minmax(120px, 3fr) 64px 56px 72px; gap: 10px; padding: 4px 4px; font-size: 13px; }
+.az-ad-bar { height: 8px; }
+@media (max-width: 640px) { .az-ad-row { grid-template-columns: 1fr 52px 52px 60px; } }
+.az-ad-row { grid-template-columns: 120px minmax(100px, 340px) 72px 56px 72px; justify-content: start; }
+.az-ad-bar { height: 6px; }
+@media (max-width: 640px) { .az-ad-row { grid-template-columns: 1fr 64px 52px 60px; justify-content: stretch; } }

@@ -101,15 +101,17 @@
   Analyzer.prototype.levelLabel = function (level) { return (this.cfg.levels[level] && this.cfg.levels[level].label) || LEVEL_LABELS[level]; };
   Analyzer.prototype.parentName = function () {
     var p = this.state.parent, pd = p && this.data[p.level], row = pd && pd.byId[p.id];
-    return row ? row.name + " " + LEVEL_LABELS[p.level] : "";
+    return row ? row.name + (p.level === "county" ? "" : " " + LEVEL_LABELS[p.level]) : "";   // county names already say County/Parish
   };
   Analyzer.prototype.canDrill = function () {
     var s = this.state;
-    return !!this.cfg.levels.zip && ((s.level === "dma" || s.level === "metro") && !!s.area || s.level === "zip");
+    return !!this.cfg.levels.zip && (this.drillable(s.level) && !!s.area || s.level === "zip");
   };
+  // ZIPs in market opens from a DMA, a metro or (when the site has a County view) a county
+  Analyzer.prototype.drillable = function (level) { return level === "dma" || level === "metro" || (level === "county" && !!this.cfg.levels.county); };
   Analyzer.prototype.drill = function () {
     var s = this.state;
-    if (!this.cfg.levels.zip || !(s.level === "dma" || s.level === "metro") || !s.area) return;
+    if (!this.cfg.levels.zip || !this.drillable(s.level) || !s.area) return;
     s.parent = { level: s.level, id: s.area };
     s.level = "zip"; s.area = null; s.sortKey = null; s.query = ""; if (this.search) this.search.value = "";
     this.refresh();
@@ -122,9 +124,12 @@
     var p = {};
     h.split("&").forEach(function (kv) { var a = kv.split("="); if (a[0]) p[a[0]] = decodeURIComponent(a[1] || ""); });
     var cfg = this.cfg;
+    // Radius view (also where the old radius.html links forward to): #level=radius&sub=..&zip=..&r=..
+    this.wantRadius = p.level === "radius" && cfg.radius ? { zip: p.zip, r: p.r, p: p.p || p.sub } : null;
+    if (this.wantRadius && cfg.subcategories && cfg.subcategories.some(function (x) { return x.id === (p.p || p.sub); })) this.state.sub = p.p || p.sub;
     if (cfg.levels[p.level]) this.state.level = p.level;
     if (p.level === "zip") {
-      var m = /^(dma|metro):(.+)$/.exec(p["in"] || "");
+      var m = /^(dma|metro|county):(.+)$/.exec(p["in"] || "");
       if (m && cfg.levels.zip) this.state.parent = { level: m[1], id: m[2] }; else this.state.level = "dma";
     }
     if ((cfg.subcategories || []).some(function (s) { return s.id === p.sub; })) this.state.sub = p.sub;
@@ -133,7 +138,14 @@
     if (p.pts === "1" && cfg.pointLayer) this.state.points = true;
   };
   Analyzer.prototype.writeHash = function () {
-    var s = this.state, parts = ["level=" + s.level];
+    var s = this.state, parts = ["level=" + (this.mode === "radius" ? "radius" : s.level)];
+    if (this.mode === "radius") {
+      if (s.sub) parts.push("sub=" + encodeURIComponent(s.sub));
+      var rs = this.radius && this.radius.state;
+      if (rs && rs.zip) parts.push("zip=" + rs.zip); if (rs && rs.r) parts.push("r=" + rs.r);
+      var hr = "#" + parts.join("&"); if (location.hash !== hr) history.replaceState(null, "", hr);
+      return;
+    }
     if (s.sub) parts.push("sub=" + encodeURIComponent(s.sub));
     if (s.rank) parts.push("rank=" + encodeURIComponent(s.rank));
     if (s.level === "zip" && s.parent) parts.push("in=" + s.parent.level + ":" + encodeURIComponent(s.parent.id));
@@ -190,28 +202,31 @@
 
     // Controls
     this.levelSeg = el("div", { class: "az-seg", role: "group", "aria-label": "Geography level" },
-      Object.keys(cfg.levels).map(function (lv) {
+      Object.keys(cfg.levels).concat(cfg.radius ? ["radius"] : []).map(function (lv) {
+        if (lv === "radius") return el("button", { type: "button", "data-level": "radius", text: "Radius",
+          title: "Count prospects within a radius of any ZIP or town", onclick: function () { self.openRadius(); } });
         if (lv === "zip") return el("button", { type: "button", "data-level": "zip", text: cfg.levels.zip.label || "ZIPs in market",
-          title: "Pick a DMA or metro first, then see the ZIPs inside it", onclick: function () { if (self.state.level !== "zip") self.drill(); } });
+          title: "Pick a DMA, metro or county first, then see the ZIPs inside it", onclick: function () { if (self.mode === "radius") self.closeRadius(); if (self.state.level !== "zip") self.drill(); } });
         return el("button", { type: "button", "data-level": lv, text: cfg.levels[lv].label || LEVEL_LABELS[lv],
-          onclick: function () { self.setLevel(lv); } });
+          onclick: function () { if (self.mode === "radius") self.closeRadius(); self.setLevel(lv); } });
       }));
     var controls = [el("div", { class: "az-field" }, [el("span", { text: "Geography" }), this.levelSeg])];
     if ((cfg.subcategories || []).length) {
-      this.subSel = el("select", { "aria-label": cfg.subcategoryLabel || "Category", onchange: function () { self.state.sub = this.value; self.state.sortKey = null; self.refresh(); } },
+      this.subSel = el("select", { "aria-label": cfg.subcategoryLabel || "Category", onchange: function () { self.state.sub = this.value; self.state.sortKey = null;
+        if (self.mode === "radius") { if (self.radius) self.radius.usePreset(self.state.sub); self.writeHash(); } else self.refresh(); } },
         cfg.subcategories.map(function (s) { return el("option", { value: s.id, text: s.label }); }));
       controls.push(el("label", { class: "az-field" }, [el("span", { text: cfg.subcategoryLabel || "Category" }), this.subSel]));
     }
     this.rankSel = el("select", { onchange: function () { self.state.rank = this.value; self.state.sortKey = null; self.refresh(); } });
-    controls.push(el("label", { class: "az-field" }, [el("span", { text: "Rank and map by" }), this.rankSel]));
+    controls.push(el("label", { class: "az-field az-only" }, [el("span", { text: "Rank and map by" }), this.rankSel]));
     this.showSel = el("select", { onchange: function () { self.state.show = +this.value; self.renderTable(); } },
       [10, 25, 50, 100, 0].map(function (n) { return el("option", { value: n, text: n ? "Top " + n : "All" }); }));
     this.showSel.value = String(this.state.show);
-    controls.push(el("label", { class: "az-field" }, [el("span", { text: "Show" }), this.showSel]));
+    controls.push(el("label", { class: "az-field az-only" }, [el("span", { text: "Show" }), this.showSel]));
     this.search = el("input", { type: "search", placeholder: "Find a market", "aria-label": "Find a market",
       oninput: function () { self.state.query = this.value.trim().toLowerCase(); self.renderTable(); } });
-    controls.push(el("label", { class: "az-field" }, [el("span", { text: "Search" }), this.search]));
-    controls.push(el("div", { class: "az-actions" }, [
+    controls.push(el("label", { class: "az-field az-only" }, [el("span", { text: "Search" }), this.search]));
+    controls.push(el("div", { class: "az-actions az-only" }, [
       el("button", { type: "button", class: "az-btn", text: "How scores work", onclick: function () { self.openMethod(); } }),
       el("button", { type: "button", class: "az-btn primary", text: "Export CSV", onclick: function () { self.exportCSV(); } })
     ]));
@@ -254,7 +269,10 @@
 
     this.errorBox = el("div", { class: "az-error", role: "alert", hidden: true });
     this.adPanel = el("section", { class: "az-panel az-ad", hidden: true, "aria-live": "polite" });
-    var main = el("main", { class: "az-main" }, [controlBar, this.notice, this.errorBox, stage, this.adPanel, this.tablePanel, sources]);
+    this.radiusBox = el("div", { class: "az-radius-embed", hidden: true });
+    this.anaParts = [stage, this.adPanel, this.tablePanel, sources];
+    this.controlBar = controlBar;
+    var main = el("main", { class: "az-main" }, [controlBar, this.notice, this.errorBox, stage, this.adPanel, this.tablePanel, sources, this.radiusBox]);
     this.root.innerHTML = "";
     this.root.appendChild(header);
     this.root.appendChild(main);
@@ -269,6 +287,49 @@
   };
 
   /* ---------- State changes ---------- */
+  /* ---------- Radius view: the Zip Code Radius Tool inside the analyzer page ---------- */
+  Analyzer.prototype.openRadius = function (opt) {
+    var self = this, cfg = this.cfg, s = this.state; opt = opt || {};
+    this.mode = "radius";
+    this.anaParts.forEach(function (x) { x.hidden = true; });
+    Array.prototype.forEach.call(this.controlBar.querySelectorAll(".az-only"), function (x) { x.hidden = true; });
+    this.radiusBox.hidden = false;
+    Array.prototype.forEach.call(this.levelSeg.children, function (b) {
+      var on = b.getAttribute("data-level") === "radius"; b.setAttribute("aria-pressed", on);
+      if (b.getAttribute("data-level") === "zip") b.disabled = false;
+    });
+    var preset = cfg.radiusProfiles ? s.sub : null;
+    function go() {
+      if (!self.radius) {
+        var RC = cfg.radius === true ? window.ADTAXI_RADIUS : cfg.radius;   // the site's radius-config.js sets ADTAXI_RADIUS
+        var rc = {}; for (var k in RC) rc[k] = RC[k];
+        rc.embedded = true; rc.initial = { zip: opt.zip, r: opt.r, p: opt.p || preset };
+        rc.onState = function () { self.writeHash(); };
+        self.radius = window.AdtaxiRadius.start(rc, self.radiusBox);
+      } else {
+        if (preset) self.radius.usePreset(preset);
+        if (opt.zip) self.radius.centerOn(opt.zip);
+        self.radius.resize();
+      }
+      self.writeHash();
+      window.scrollTo(0, 0);
+    }
+    if (window.AdtaxiRadius) go();
+    else {
+      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js";
+      sc.onload = go; sc.onerror = function () { self.showError("The radius tool didn't load. Refresh the page and try again."); };
+      document.head.appendChild(sc);
+    }
+  };
+  Analyzer.prototype.closeRadius = function () {
+    this.mode = null;
+    this.radiusBox.hidden = true;
+    this.anaParts.forEach(function (x) { x.hidden = false; });
+    Array.prototype.forEach.call(this.controlBar.querySelectorAll(".az-only"), function (x) { x.hidden = false; });
+    this.adPanel.hidden = !this.cfg.adResponse;
+    var m = this.map; setTimeout(function () { m.invalidateSize(); }, 0);
+    this.refresh();
+  };
   Analyzer.prototype.setLevel = function (lv) {
     var s = this.state;
     if (s.level === lv) return;
@@ -342,6 +403,7 @@
   /* ---------- Ad response (optional, national survey data per category) ---------- */
   Analyzer.prototype.renderAd = function () {
     var A = this.cfg.adResponse, box = this.adPanel, self = this;
+    if (this.mode === "radius") { box.hidden = true; return; }   // the Radius view shows only the radius tool
     if (!A || !box) return;
     var d = A.subs && A.subs[this.state.sub];
     box.innerHTML = "";
@@ -353,9 +415,17 @@
     var dif = function (x) { var n = Math.round(Math.abs(x) * 100); return (n === 0 ? "" : x > 0 ? "+" : "−") + n + "%"; };
     var byAud = rows.slice().sort(function (a, b) { return b.aud - a.aud; });
     var byDiff = rows.slice().sort(function (a, b) { return b.diff - a.diff; });
-    var short = function (t) { return t.replace(/ \(.*\)$/, ""); };
+    // Short names for AudienceSCAN's ad types (the full survey wording shows on hover)
+    var SHORT = { "Ad on a social network": "Social", "Streaming TV advertising (such as Hulu, Pluto TV or YouTube TV)": "Streaming TV",
+      "Ad on search results pages (like on Google, Yahoo or Bing)": "Search", "Mobile phone app or text message": "Mobile",
+      "Television (traditional, including cable or satellite subscription)": "TV/Cable/Sat.", "Ad that plays before or during the video you want to watch": "Pre-roll",
+      "Online display ads (banners and pop-up ads)": "Online display", "Emailed ad or newsletter": "Email", "Text link ad on a website": "Text link",
+      "Ads/Coupons in your mailbox": "Direct mail", "Advertising circulars in your mailbox or inserted in the newspaper": "Circulars",
+      "Radio (over-the-air, online, mobile or tablet)": "Radio", "Outdoor ad/sign/billboard/transit": "Outdoor", "Newspaper (print, online, mobile or tablet)": "Newspaper",
+      "Ads at movie theater": "Movie theater", "Ad on a podcast": "Podcast", "Magazine (print, online, mobile or on tablet)": "Magazine" };
+    var short = function (t) { return SHORT[t] || t.replace(/ \(.*\)$/, ""); };
     var list = function (a, f) { return a.map(function (r) { return short(r.label) + " (" + f(r) + ")"; }).join(", "); };
-    var max = Math.max.apply(null, rows.map(function (r) { return Math.max(r.aud, r.us); }));
+    var max = Math.max.apply(null, rows.map(function (r) { return r.aud; }));
     box.appendChild(el("div", { class: "az-ad-head" }, [
       el("div", null, [
         el("h2", { text: (A.title || "How prospects respond to advertising").replace("{sub}", this.subLabel()).replace("{aud}", (d.short || "").toLowerCase()) }),
@@ -368,17 +438,14 @@
     box.appendChild(el("div", { class: "az-ad-take" }, [
       el("p", null, [el("b", { text: "Highest response: " }), list(byAud.slice(0, 3), function (r) { return pct(r.aud); })])
     ]));
-    var legend = el("div", { class: "az-ad-legend" }, [el("span", { class: "az-ad-key aud" }), " " + (d.short || "This audience"), el("span", { class: "az-ad-key us" }), " Total"]);
-    box.appendChild(legend);
     var list2 = el("div", { class: "az-ad-rows", role: "table", "aria-label": "Advertising response by type of ad" });
     list2.appendChild(el("div", { class: "az-ad-row az-ad-colhead", role: "row" }, [el("span", { role: "columnheader", text: "Type of ad" }), el("span", { role: "columnheader", text: "" }),
       el("span", { class: "num", role: "columnheader", text: d.short || "Audience" }), el("span", { class: "num", role: "columnheader", text: "Total" }), el("span", { class: "num", role: "columnheader", text: "Vs. average" })]));
     (sortKey === "diff" ? byDiff : byAud).forEach(function (r) {
       list2.appendChild(el("div", { class: "az-ad-row", role: "row" }, [
-        el("span", { class: "az-ad-label", role: "cell", text: r.label }),
+        el("span", { class: "az-ad-label", role: "cell", text: short(r.label), title: r.label }),
         el("span", { class: "az-ad-bars", role: "cell", "aria-hidden": "true" }, [
-          el("span", { class: "az-ad-bar aud", style: "width:" + (r.aud / max * 100) + "%" }),
-          el("span", { class: "az-ad-bar us", style: "width:" + (r.us / max * 100) + "%" })]),
+          el("span", { class: "az-ad-bar aud", style: "width:" + (r.aud / max * 100) + "%" })]),
         el("span", { class: "num", role: "cell", text: pct(r.aud) }),
         el("span", { class: "num muted", role: "cell", text: pct(r.us) }),
         el("span", { class: "num az-ad-diff", role: "cell", text: dif(r.diff) })
@@ -545,7 +612,7 @@
       this.tablePanel.hidden = true;
       return;
     }
-    this.tablePanel.hidden = false;
+    this.tablePanel.hidden = this.mode === "radius";   // stays hidden behind the Radius view
     var cols = this.columns(), rankM = this.measure(s.rank);
     var all = this.sortedRows();
     // Rank numbers follow the "rank by" measure, independent of column sorting.
@@ -654,11 +721,13 @@
         return el("div", { class: "az-measure", title: (mk ? "Estimated for this area; see Data notes. " : "") + (m.help || "") || null }, [el("span", { text: m.label }), el("b", { class: "num" + (v == null ? " az-na" : ""), text: v == null ? "No data" : v + mk })]);
       })));
     }
-    if (this.cfg.levels.zip && (s.level === "dma" || s.level === "metro")) {
+    if (this.cfg.levels.zip && this.drillable(s.level)) {
       box.appendChild(el("button", { type: "button", class: "az-btn primary az-drill", text: "See ZIPs in this market", onclick: function () { self.drill(); } }));
     }
     if (s.level === "zip") {
-      if (cfg.radiusPage) box.appendChild(el("a", { class: "az-btn primary az-drill", href: cfg.radiusPage + "#zip=" + encodeURIComponent(row.id) + "&r=" + (cfg.radiusDefault || 10) + (cfg.radiusProfiles && this.state.sub ? "&p=" + encodeURIComponent(this.state.sub) : ""),
+      if (cfg.radius) box.appendChild(el("button", { type: "button", class: "az-btn primary az-drill", onclick: function () { self.openRadius({ zip: row.id }); },
+        text: cfg.radiusProfiles && this.subLabel() ? "Find best prospects around this ZIP" : "Build a radius audience from this ZIP" }));
+      else if (cfg.radiusPage) box.appendChild(el("a", { class: "az-btn primary az-drill", href: cfg.radiusPage + "#zip=" + encodeURIComponent(row.id) + "&r=" + (cfg.radiusDefault || 10) + (cfg.radiusProfiles && this.state.sub ? "&p=" + encodeURIComponent(this.state.sub) : ""),
         text: cfg.radiusProfiles && this.subLabel() ? "Find best prospects around this ZIP" : "Build a radius audience from this ZIP" }));
       box.appendChild(el("button", { type: "button", class: "az-btn az-drill", text: "Back to " + this.parentName(), onclick: function () { self.setLevel(s.parent.level); } }));
     }
@@ -702,7 +771,8 @@
       var app = new Analyzer(cfg, root || document.getElementById("app"));
       app.build();
       app.refresh();
-      window.addEventListener("hashchange", function () { app.readHash(); app.refresh(); });
+      if (app.wantRadius) app.openRadius(app.wantRadius);
+      window.addEventListener("hashchange", function () { app.readHash(); if (app.wantRadius) app.openRadius(app.wantRadius); else { if (app.mode === "radius") app.closeRadius(); app.refresh(); } });
       return app;
     },
     format: fmt

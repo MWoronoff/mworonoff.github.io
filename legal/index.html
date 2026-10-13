@@ -17,6 +17,7 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js" crossorigin=""></script>
 <script src="../shared/engine.js"></script>
+<script src="radius-config.js"></script>
 <script>
 AdtaxiAnalyzer.start({
  "title": "Legal Market Analyzer",
@@ -26,15 +27,10 @@ AdtaxiAnalyzer.start({
  "notice": "Preview for review.",
  "links": [
   {
-   "label": "Zip Code Radius Tool",
-   "url": "radius.html"
-  },
-  {
    "label": "All analyzers",
    "url": "../analyzers/"
   }
  ],
- "radiusPage": "radius.html",
  "radiusDefault": 10,
  "radiusProfiles": true,
  "defaultLevel": "dma",
@@ -462,7 +458,7 @@ AdtaxiAnalyzer.start({
   },
   {
    "title": "ZIPs in a market",
-   "body": "Pick a DMA or metro, then choose ZIPs in market. ZIP scores use Consumer Demand and Spending Power, reweighted to 73% and 27%. ZIPs with fewer than 500 residents are shown but not ranked."
+   "body": "Pick a DMA, metro or county, then choose ZIPs in market. ZIP scores use Consumer Demand and Spending Power, reweighted to 73% and 27%. ZIPs with fewer than 500 residents are shown but not ranked."
   },
   {
    "title": "Advertising response",
@@ -959,7 +955,8 @@ AdtaxiAnalyzer.start({
     ]
    }
   }
- }
+ },
+ "radius": true
 });
 </script>
 </body>

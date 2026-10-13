@@ -201,7 +201,12 @@
     this.state = { zip: cfg.defaultZip || "", r: cfg.defaultRadius || 0, minIndex: 0, sortKey: "aud", sortDir: "desc", show: 50, sel: {}, profile: null };
     this.profiles = {};
     (cfg.profiles || []).forEach(function (p) { this.profiles[p.id] = p; }, this);
-    this.readHash();
+    if (cfg.embedded) {   // inside an analyzer page: the analyzer owns the URL and passes the starting ZIP, radius and preset
+      var ini = cfg.initial || {};
+      if (/^\d{5}$/.test(ini.zip || "")) this.state.zip = ini.zip;
+      if (+ini.r > 0) this.state.r = +ini.r;
+      if (ini.p && this.profiles[ini.p]) { this.state.profile = ini.p; this.state.sel = JSON.parse(JSON.stringify(this.profiles[ini.p].sel)); this.state.sortKey = "idx"; }
+    } else this.readHash();
   }
 
   /* ---------- URL state ---------- */
@@ -228,6 +233,7 @@
     if (s.profile && !hasF) { s.sel = JSON.parse(JSON.stringify(this.profiles[s.profile].sel)); s.sortKey = "idx"; s.sortDir = "desc"; }
   };
   Radius.prototype.writeHash = function () {
+    if (this.cfg.embedded) { if (this.cfg.onState) this.cfg.onState(this.state); return; }
     var s = this.state, f = [];
     Object.keys(s.sel).forEach(function (k) {
       var v = s.sel[k];
@@ -241,9 +247,9 @@
   /* ---------- Layout ---------- */
   Radius.prototype.build = function () {
     var cfg = this.cfg, self = this, s = this.state;
-    document.title = cfg.title;
+    if (!cfg.embedded) document.title = cfg.title;
     var links = (cfg.links || []).map(function (l) { return el("a", { href: l.url, text: l.label }); });
-    var header = el("header", { class: "az-header" }, [el("div", { class: "az-header-inner" }, [
+    var header = cfg.embedded ? null : el("header", { class: "az-header" }, [el("div", { class: "az-header-inner" }, [
       el("div", { class: "az-title" }, [el("h1", { text: cfg.title }), el("p", { text: cfg.subtitle || "" }),
         links.length ? el("nav", { class: "az-links", "aria-label": "Related tools" }, links) : null]),
       el("img", { class: "az-logo", src: cfg.logo || "../shared/adtaxi-logo.svg", alt: "Adtaxi" })])]);
@@ -320,7 +326,7 @@
     var sources = el("section", { class: "az-panel az-sources" }, [el("h2", { text: "Sources" }), this.sourcesP = el("p")]);
 
     var main = el("main", { class: "az-main" }, [controls, this.errorBox, el("section", { class: "rz-stage" }, [this.filterPanel, right]), table, sources]);
-    this.root.innerHTML = ""; this.root.appendChild(header); this.root.appendChild(main); this.root.appendChild(this.modal);
+    this.root.innerHTML = ""; if (header) this.root.appendChild(header); this.root.appendChild(main); this.root.appendChild(this.modal);
     this.rSel.value = s.r ? String(s.r) : ""; this.minSel.value = String(s.minIndex);
     this.syncFilters();
 
@@ -710,6 +716,14 @@
     if (this.modal.showModal) this.modal.showModal(); else this.modal.setAttribute("open", "");
   };
 
+  /* ---------- Used by an analyzer page that embeds the radius tool ---------- */
+  Radius.prototype.resize = function () { if (this.map) this.map.invalidateSize(); };
+  Radius.prototype.usePreset = function (id) { if (this.profiles[id] && this.state.profile !== id) this.applyProfile(id); };
+  Radius.prototype.centerOn = function (zip) {
+    if (!/^\d{5}$/.test(zip || "") || zip === this.state.zip) return;
+    if (this.c) this.setCenter(zip); else this.state.zip = zip;
+  };
+
   window.AdtaxiRadius = {
     start: function (cfg, root) {
       var app = new Radius(cfg, root || document.getElementById("app"));
@@ -721,7 +735,7 @@
         }
         app.update(true);
       }).catch(function (e) { app.showError(e.message + ". Refresh the page; if it keeps happening, the audience data hasn't been built yet."); });
-      window.addEventListener("hashchange", function () {
+      if (!cfg.embedded) window.addEventListener("hashchange", function () {
         if (!app.c) return;
         app.readHash(); app.syncFilters();
         app.rSel.value = app.state.r ? String(app.state.r) : ""; app.minSel.value = String(app.state.minIndex);
