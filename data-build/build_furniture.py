@@ -6,7 +6,7 @@ Sources, all public downloads with no key (plus Adtaxi's EASI files in data-buil
   - Census County and ZIP Business Patterns: furniture retailers (NAICS 449110; 442110 before the 2022 NAICS), the
     competitors for every furniture line (Census doesn't split stores by product line)
   - shared/audience/zip_audience*.json: Census ACS households, homeownership, recent movers (owners and renters who moved
-    in 2021 or later), households with children, women 25-34, adults 18-34, single-family homes and income by ZIP
+    in 2020 or later), households with children, women 25-34, adults 18-34, single-family homes and income by ZIP
   - data-build/sources/easi_furniture_spend_dma.csv / _metro.csv: EASI 2025 household spending on furniture and six
     furniture lines (Category Spending); easi_dma_crosswalk.csv ties EASI's DMA names to DMA codes
 Geography comes from data-build/geo (ZIP -> county, metro, DMA). Download helpers are shared with build_healthcare.py.
@@ -50,7 +50,7 @@ SUBCATS = [
      "demand": ["f25_34", "hh_kids", "movers_share"]},
 ]
 EASI_LINES = sorted({e for s in SUBCATS for e in s["easi"]})
-DEMAND_LABELS = {"movers": "Households that moved in 2021 or later", "movers_share": "Share of households that moved in 2021 or later",
+DEMAND_LABELS = {"movers": "Households that moved in 2020 or later", "movers_share": "Share of households that moved in 2020 or later",
                  "owners": "Homeowner households", "households": "Households", "kids_share": "Households with children",
                  "pop18_34": "Adults 18-34", "sfd_own": "Owners in single-family detached homes",
                  "sfd_share": "Share of owner homes that are single-family detached", "f25_34": "Women 25-34",
@@ -62,8 +62,8 @@ RATE_PARTS = {"movers_share": ("movers", "occ_moved"), "own_share": ("owners", "
 RATES = list(RATE_PARTS)
 ACS_MAIN = ["adults18", "hh_kids", "hh_tot", "inc_tot", "inc_75_100", "inc_100_150", "inc_150_200", "inc_200p", "own_tot",
             "pop18_34", "f25_34"]
-ACS_HOME = ["hm_tot", "o_moved21", "sfd_own", "hu_tot"]
-ACS_APT = ["r_mtot", "r_moved21"]
+ACS_HOME = ["hm_tot", "o_moved20", "sfd_own", "hu_tot"]
+ACS_APT = ["r_mtot", "r_moved20"]
 
 
 def log(*a): print(*a, flush=True)
@@ -105,10 +105,10 @@ def main():
         .merge(load_audience("zip_audience_apt.json", ACS_APT), on="zip", how="left")
     acs["inc75"] = acs[["inc_75_100", "inc_100_150", "inc_150_200", "inc_200p"]].sum(axis=1, min_count=4)
     acs["inc100"] = acs[["inc_100_150", "inc_150_200", "inc_200p"]].sum(axis=1, min_count=3)
-    acs["movers"] = acs.o_moved21 + acs.r_moved21                      # households that moved in 2021 or later
+    acs["movers"] = acs.o_moved20 + acs.r_moved20                      # households that moved in 2020 or later
     acs["occ_moved"] = acs.hm_tot + acs.r_mtot                         # occupied homes in the year-moved-in table
     acs = acs.rename(columns={"own_tot": "owners"})
-    z = z.merge(acs.drop(columns=["inc_75_100", "inc_100_150", "inc_150_200", "inc_200p", "o_moved21", "r_moved21", "r_mtot", "hm_tot"]),
+    z = z.merge(acs.drop(columns=["inc_75_100", "inc_100_150", "inc_150_200", "inc_200p", "o_moved20", "r_moved20", "r_mtot", "hm_tot"]),
                 on="zip", how="left")
     z["land"] = z.zip.map(zcta_land(a.cache, rep))          # square miles, for households per square mile
 
@@ -232,7 +232,7 @@ def main():
     tot_c = co_in[co_in.naics.isin(NAICS)].est.sum() - z[z.dma_code == "0"].cest.sum()
     rep.append(("DMA roll-up matches county totals: furniture retailers", "PASS" if tot_c > 0 and abs(tot_d - tot_c) / tot_c <= 0.005 else "FAIL",
                 f"DMAs {int(round(tot_d)):,} vs counties {int(round(tot_c)):,}"))
-    for k, lo, hi in (("movers_share", .15, .40), ("own_share", .58, .72), ("kids_share", .22, .36), ("sfd_share", .74, .90), ("inc75_share", .35, .60)):
+    for k, lo, hi in (("movers_share", .20, .45), ("own_share", .58, .72), ("kids_share", .22, .36), ("sfd_share", .74, .90), ("inc75_share", .35, .60)):
         v_ = us[k].iloc[0]
         rep.append((f"U.S. {DEMAND_LABELS.get(k, k).lower()}", "PASS" if lo <= v_ <= hi else "FAIL", f"{v_:.1%} (expected {lo:.0%}–{hi:.0%})"))
     county_checks(rep, cty, [x["id"] for x in SUBCATS])

@@ -371,7 +371,10 @@ def main():
     out["hu_tot"], out["sfd_own"] = acs[v("B25032", 2)], acs[v("B25032", 3)]   # owner homes; single-family detached
     out["hm_tot"] = acs[v("B25038", 2)]                                     # owner homes (year moved in table)
     out["lt_own"] = sum(acs[v("B25038", n)] for n in MOVED_PRE2010)         # owners in the home since before 2010
-    out["o_moved21"] = acs[v("B25038", 3)]                                  # owners who moved in 2021 or later (Furniture)
+    # Furniture: households that moved in 2020 or later. In the 2020-2024 ACS the newest brackets are "2023 or later"
+    # (line 3 owners, 10 renters) and "2020 to 2022" (line 4 owners, 11 renters).
+    out["o_moved20"] = acs[v("B25038", 3)] + acs[v("B25038", 4)]
+    out["r_moved20"] = acs[v("B25038", 10)] + acs[v("B25038", 11)]
     # Apartment analyzer: renter households and their traits
     out["r_tot"] = acs[v("B25032", 13)]                                       # renter households (units in structure table)
     out["r_sfd"] = acs[v("B25032", 14)]                                       # renting a single-family detached house
@@ -577,9 +580,9 @@ def main():
     extra = {"zip_audience_health.json": [f"{s}h{b}" for s in "mf" for b in HC_AGES] + [f"{t}_{b}" for t in ("civ", "hear", "vis") for b in DIS_BRACKETS] +
                                          [f"{t}_{b}" for t in ("inst", "unins") for b in INS_BRACKETS] + [f"{t}_{b}" for t in ("liv", "alone") for b in LIV_GROUPS],
              "zip_audience_legal.json": ["pop16", "nilf"] + [f"{t}{b}" for t in "or" for b in TEN_BRACKETS] + [f"val_{b}" for b in VAL_BANDS],
-             "zip_audience_apt.json": ["r_tot", "r_sfd", "r_5p", "r_20p", "r_mtot", "r_moved21", "rinc_tot"] + [f"rinc_{b}" for b in RINC] +
+             "zip_audience_apt.json": ["r_tot", "r_sfd", "r_5p", "r_20p", "r_mtot", "r_moved21", "r_moved20", "rinc_tot"] + [f"rinc_{b}" for b in RINC] +
                                       ["rb_base", "rb_30p", "vac_rent", "vac_rented", "rk_tot", "r_kids"],
-             "zip_audience_home.json": ["hb_tot"] + [f"hb_{b}" for b in BUILT] + ["hu_tot", "sfd_own", "hm_tot", "lt_own", "o_moved21"]}
+             "zip_audience_home.json": ["hb_tot"] + [f"hb_{b}" for b in BUILT] + ["hu_tot", "sfd_own", "hm_tot", "lt_own", "o_moved20"]}
     cols = {"zip": m.zip.tolist(), "city": m.city.fillna("").tolist(), "state": m.state.tolist(),
             "lat": m.lat.round(4).tolist(), "lon": m.lon.round(4).tolist(),
             "dma": m.dma_code.fillna("").tolist(), "cbsa": m.cbsa_code.fillna("").tolist()}
