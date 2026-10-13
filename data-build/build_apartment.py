@@ -45,7 +45,7 @@ SUBCATS = [
     {"id": "student", "label": "Student housing", "demand": ["college", "college_share", "r_u25"], "spend": None},
     {"id": "senior", "label": "Active adult / 55+", "demand": ["r55p", "r55_share"], "spend": "rinc50_share"},
 ]
-DEMAND_LABELS = {"renters": "Renter households", "renter_share": "Share of households renting", "moved_share": "Renters who moved in since 2021",
+DEMAND_LABELS = {"renters": "Renter households", "renter_share": "Share of households renting", "moved_share": "Renters who moved in 2020 or later",
                  "apt_share": "Renters in buildings with 5+ units", "rinc100": "Renters earning $100K+", "r25_44_share": "Renter householders 25–44",
                  "rinc_mid": "Renters earning $35K–$99K", "rinc_mid_share": "Share of renters earning $35K–$99K",
                  "rinc_lt35": "Renters earning under $35K", "rinc_lt35_share": "Share of renters earning under $35K",
@@ -56,13 +56,13 @@ DEMAND_LABELS = {"renters": "Renter households", "renter_share": "Share of house
 SPEND_LABELS = {"rinc50_share": "Renters earning $50K+", "rinc75_share": "Renters earning $75K+", "rinc100_share": "Renters earning $100K+"}
 COUNTS = ["population", "households", "renters", "rinc100", "rinc_mid", "rinc_lt35", "college", "r_u25", "r55p", "r_kids", "r_5p"]
 # numerator, denominator for each rate (summed over ZIPs, so markets get true rates)
-RATE_PARTS = {"renter_share": ("r_tot", "hh_tot"), "moved_share": ("r_moved21", "r_mtot"), "apt_share": ("r_5p", "r_tot"),
+RATE_PARTS = {"renter_share": ("r_tot", "hh_tot"), "moved_share": ("r_moved20", "r_mtot"), "apt_share": ("r_5p", "r_tot"),
               "sfd_share": ("r_sfd", "r_tot"), "r25_44_share": ("r25_44", "r_age"), "r55_share": ("r55p", "r_age"),
               "rinc100_share": ("rinc100", "rinc_tot"), "rinc_mid_share": ("rinc_mid", "rinc_tot"), "rinc_lt35_share": ("rinc_lt35", "rinc_tot"),
               "rinc50_share": ("rinc50", "rinc_tot"), "rinc75_share": ("rinc75", "rinc_tot"), "burden_share": ("rb_30p", "rb_base"),
               "rkids_share": ("r_kids", "rk_tot"), "college_share": ("college", "acs_pop"), "vacancy": ("vac_rent", "vac_base")}
 RATES = list(RATE_PARTS)
-APT_COLS = ["r_tot", "r_sfd", "r_5p", "r_20p", "r_mtot", "r_moved21", "rinc_tot", "rinc_lt35", "rinc_35_50", "rinc_50_75", "rinc_75_100",
+APT_COLS = ["r_tot", "r_sfd", "r_5p", "r_20p", "r_mtot", "r_moved20", "rinc_tot", "rinc_lt35", "rinc_35_50", "rinc_50_75", "rinc_75_100",
             "rinc_100_150", "rinc_150p", "rb_base", "rb_30p", "vac_rent", "vac_rented", "rk_tot", "r_kids"]
 AGE_COLS = ["r18_24", "r25_34", "r35_44", "r45_54", "r55p"]
 PERMITS = "https://www2.census.gov/econ/bps/County/co{y}a.txt"
@@ -213,7 +213,7 @@ def main():
     zr, zdate = zori(a.cache, met_list, rep)
 
     # ---------------- Aggregate ----------------
-    SUMS = ["population", "households", "acs_pop", "hh_tot", "renters", "r_tot", "r_sfd", "r_5p", "r_mtot", "r_moved21", "rinc_tot", "rinc100",
+    SUMS = ["population", "households", "acs_pop", "hh_tot", "renters", "r_tot", "r_sfd", "r_5p", "r_mtot", "r_moved20", "rinc_tot", "rinc100",
             "rinc_mid", "rinc_lt35", "rinc50", "rinc75", "rb_base", "rb_30p", "vac_rent", "vac_base", "rk_tot", "r_kids", "college",
             "r_age", "r25_44", "r55p", "r_u25"]
 

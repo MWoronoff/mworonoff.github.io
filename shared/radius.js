@@ -143,8 +143,8 @@
                   var x = sum(sel, function (k) { return c[k === "apt" ? "r_5p" : "r_sfd"][i]; }); if (x == null) return null;
                   return t ? r * Math.min(1, x / t) : 0;
                 } },
-    rmoved:   { label: "Recent movers", type: "flag", text: "Renter who moved in 2021 or later",
-                byAge: function (c, i, b, v, all) { var r = renterPart(c, i, b, all, "rmoved"), x = ratio(c.r_moved21[i], c.r_mtot[i]); return r == null || x == null ? null : r * x; } },
+    rmoved:   { label: "Recent movers", type: "flag", text: "Renter who moved in 2020 or later",
+                byAge: function (c, i, b, v, all) { var r = renterPart(c, i, b, all, "rmoved"), x = ratio(c.r_moved20[i], c.r_mtot[i]); return r == null || x == null ? null : r * x; } },
     rburden:  { label: "Rent-burdened", type: "flag", text: "Renter paying 30%+ of income in rent",
                 byAge: function (c, i, b, v, all) { var r = renterPart(c, i, b, all, "rburden"), x = ratio(c.rb_30p[i], c.rb_base[i]); return r == null || x == null ? null : r * x; } },
     rkids:    { label: "Renters with children", type: "flag", text: "Renter household with children under 18",
