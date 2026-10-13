@@ -368,11 +368,11 @@
     box.appendChild(el("div", { class: "az-ad-take" }, [
       el("p", null, [el("b", { text: "Highest response: " }), list(byAud.slice(0, 3), function (r) { return pct(r.aud); })])
     ]));
-    var legend = el("div", { class: "az-ad-legend" }, [el("span", { class: "az-ad-key aud" }), " " + (d.short || "This audience"), el("span", { class: "az-ad-key us" }), " All U.S. adults"]);
+    var legend = el("div", { class: "az-ad-legend" }, [el("span", { class: "az-ad-key aud" }), " " + (d.short || "This audience"), el("span", { class: "az-ad-key us" }), " Total"]);
     box.appendChild(legend);
     var list2 = el("div", { class: "az-ad-rows", role: "table", "aria-label": "Advertising response by type of ad" });
     list2.appendChild(el("div", { class: "az-ad-row az-ad-colhead", role: "row" }, [el("span", { role: "columnheader", text: "Type of ad" }), el("span", { role: "columnheader", text: "" }),
-      el("span", { class: "num", role: "columnheader", text: d.short || "Audience" }), el("span", { class: "num", role: "columnheader", text: "All U.S." }), el("span", { class: "num", role: "columnheader", text: "Vs. average" })]));
+      el("span", { class: "num", role: "columnheader", text: d.short || "Audience" }), el("span", { class: "num", role: "columnheader", text: "Total" }), el("span", { class: "num", role: "columnheader", text: "Vs. average" })]));
     (sortKey === "diff" ? byDiff : byAud).forEach(function (r) {
       list2.appendChild(el("div", { class: "az-ad-row", role: "row" }, [
         el("span", { class: "az-ad-label", role: "cell", text: r.label }),
