@@ -371,6 +371,7 @@ def main():
     out["hu_tot"], out["sfd_own"] = acs[v("B25032", 2)], acs[v("B25032", 3)]   # owner homes; single-family detached
     out["hm_tot"] = acs[v("B25038", 2)]                                     # owner homes (year moved in table)
     out["lt_own"] = sum(acs[v("B25038", n)] for n in MOVED_PRE2010)         # owners in the home since before 2010
+    out["o_moved21"] = acs[v("B25038", 3)]                                  # owners who moved in 2021 or later (Furniture)
     # Apartment analyzer: renter households and their traits
     out["r_tot"] = acs[v("B25032", 13)]                                       # renter households (units in structure table)
     out["r_sfd"] = acs[v("B25032", 14)]                                       # renting a single-family detached house
@@ -578,7 +579,7 @@ def main():
              "zip_audience_legal.json": ["pop16", "nilf"] + [f"{t}{b}" for t in "or" for b in TEN_BRACKETS] + [f"val_{b}" for b in VAL_BANDS],
              "zip_audience_apt.json": ["r_tot", "r_sfd", "r_5p", "r_20p", "r_mtot", "r_moved21", "rinc_tot"] + [f"rinc_{b}" for b in RINC] +
                                       ["rb_base", "rb_30p", "vac_rent", "vac_rented", "rk_tot", "r_kids"],
-             "zip_audience_home.json": ["hb_tot"] + [f"hb_{b}" for b in BUILT] + ["hu_tot", "sfd_own", "hm_tot", "lt_own"]}
+             "zip_audience_home.json": ["hb_tot"] + [f"hb_{b}" for b in BUILT] + ["hu_tot", "sfd_own", "hm_tot", "lt_own", "o_moved21"]}
     cols = {"zip": m.zip.tolist(), "city": m.city.fillna("").tolist(), "state": m.state.tolist(),
             "lat": m.lat.round(4).tolist(), "lon": m.lon.round(4).tolist(),
             "dma": m.dma_code.fillna("").tolist(), "cbsa": m.cbsa_code.fillna("").tolist()}
