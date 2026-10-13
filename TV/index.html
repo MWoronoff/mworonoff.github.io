@@ -65,6 +65,37 @@
   .tv-insight b { display: block; font-size: 19px; color: var(--navy); margin-top: 3px; }
   .tv-insight small { color: var(--muted); font-size: 12px; }
   .tv-wait { color: var(--muted); padding: 10px 0; }
+  .tv-charts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 14px; }
+  .tv-chart { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px 8px; }
+  .tv-chart h3 { margin: 0; font-size: 14px; color: var(--navy); }
+  .tv-chart p { margin: 2px 0 6px; font-size: 12px; color: var(--muted); }
+  .tv-chart svg { width: 100%; height: auto; display: block; }
+  .tv-key { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: #44586c; margin-top: 4px; }
+  .tv-key i { display: inline-block; width: 12px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+  .tv-reshead { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; flex-wrap: wrap; }
+  .tv-print-only { display: none; }
+  .tv-psum { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px 18px; border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; margin: 12px 0 0; font-size: 12px; }
+  .tv-psum div { display: flex; justify-content: space-between; gap: 8px; border-bottom: 1px solid #eef2f5; padding: 3px 0; }
+  .tv-psum span { color: #44586c; } .tv-psum b { color: var(--ink); }
+  @media (max-width: 800px) { .tv-charts { grid-template-columns: 1fr; } }
+  @media print {
+    @page { size: letter; margin: 0.35in; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body { background: #fff; }
+    .az-header { padding: 14px 20px; } .az-logo { width: 64px; height: 64px; } .az-title p { font-size: 12px; }
+    .az-links, .az-controls, .az-stage, .tv-plan, .tv-slider, .tv-method, #err, #printBtn, .tv-need { display: none !important; }
+    .az-main { padding: 8px 0 0; max-width: none; zoom: 0.8; }
+    .az-panel { box-shadow: none; }
+    .tv-print-only { display: block; }
+    .tv-stream, .tv-results { margin-top: 10px; padding: 10px 12px; break-inside: avoid; }
+    .tv-cols { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+    .tv-col { border-bottom: 0 !important; border-right: 1px solid var(--line) !important; padding: 8px 10px; }
+    .tv-col:last-child { border-right: 0 !important; }
+    .tv-col .az-measure { padding: 4px 0; }
+    .tv-insights { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+    .tv-charts { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+    .tv-scards { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+  }
   .tv-need { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; background: var(--warn-bg); border: 1px solid var(--warn-line); border-radius: 10px; padding: 14px 16px; font-size: 14px; color: var(--ink); }
   .tv-need b { color: var(--navy); }
   .az-field input.tv-missing { border: 2px solid #d99a00; background: #fffbea; }
@@ -142,8 +173,12 @@
   </section>
 
   <section class="az-panel tv-results" id="results">
-    <h2>Shifting budget from Broadcast TV to Digital Video</h2>
-    <p id="resSub">Compared with spending the whole budget on Broadcast TV.</p>
+    <div class="tv-reshead">
+      <div><h2>Shifting budget from Broadcast TV to Digital Video</h2>
+      <p id="resSub" style="margin:0 0 12px;color:var(--muted);font-size:13px">Compared with spending the whole budget on Broadcast TV.</p></div>
+      <button type="button" class="az-btn" id="printBtn" disabled title="Enter the campaign inputs first">Print or save as PDF</button>
+    </div>
+    <div class="tv-print-only" id="printSum"></div>
     <div class="tv-slider">
       <label for="shift" style="font-weight:700;color:#0f2742;font-size:14px">Drag to shift budget<br><span style="font-weight:400">from Broadcast TV to Digital Video</span></label>
       <div class="tv-slider-track">
@@ -155,6 +190,8 @@
     </div>
     <div id="resBody"><p class="tv-wait">Choose a market and enter the campaign inputs to see results.</p></div>
   </section>
+
+  <p class="tv-print-only" id="printFoot" style="font-size:11px;color:#5f7286;margin:8px 2px 0">Source: Scarborough USA+ 2026 Release 1 (Jan 2025–May 2026): broadcast audiences for ABC, CBS, CW, FOX and NBC, and DMA streaming profiles. Spot price and CPMs are planning figures unless entered from the schedule. Digital Video is counted as 100% on target. Combined reach is not modeled. Prepared by Adtaxi.</p>
 
   <section class="az-panel az-sources tv-method">
     <h2>How the numbers work</h2>
@@ -330,6 +367,64 @@
              totT: totT, waste: waste, gross: gross, eff: gross ? totT / gross : 0, cpm: totT ? inp.budget / totT * 1000 : 0 };
   }
 
+  /* Two small charts across every split, 0% to 100% digital in 5-point steps */
+  function shiftCharts(inp, t, a, p) {
+    var pts = [];
+    for (var q = 0; q <= 100; q += 5) { var s = scenario(q / 100, inp, t, a); pts.push({ q: q, tv: s.tvT, dg: s.dT, tot: s.totT, cpm: s.cpm }); }
+    var W = 520, H = 240, L = 62, R = 16, T = 18, B = 44, iw = W - L - R, ih = H - T - B;
+    var x = function (q) { return L + q / 100 * iw; };
+    var nice = function (v) { var e = Math.pow(10, Math.floor(Math.log10(v || 1))), m = v / e, steps = [1, 1.2, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10]; for (var i = 0; i < steps.length; i++) if (m <= steps[i]) return steps[i] * e; return 10 * e; };
+    var short = function (v) { return v >= 1e6 ? (v / 1e6).toFixed(v >= 1e7 ? 0 : 1) + "M" : v >= 1e3 ? Math.round(v / 1e3) + "K" : Math.round(v) + ""; };
+    var axisX = function () {
+      return [0, 25, 50, 75, 100].map(function (q) { return '<text x="' + x(q) + '" y="' + (H - 26) + '" text-anchor="middle" font-size="11" fill="#5f7286">' + q + "%</text>"; }).join("") +
+        '<text x="' + (L + iw / 2) + '" y="' + (H - 6) + '" text-anchor="middle" font-size="11" fill="#5f7286">Share of budget in Digital Video</text>';
+    };
+    var cur = function (y1, label) {
+      var cx = x(p * 100), anchor = p > 0.7 ? "end" : "start", dx = p > 0.7 ? -10 : 10;
+      return '<line x1="' + cx + '" x2="' + cx + '" y1="' + T + '" y2="' + (T + ih) + '" stroke="#0f2742" stroke-width="1.5" stroke-dasharray="4 3"/>' +
+        '<circle cx="' + cx + '" cy="' + y1 + '" r="5" fill="#0f2742" stroke="#fff" stroke-width="2"/>' +
+        '<text x="' + (cx + dx) + '" y="' + Math.max(T + 12, y1 - 10) + '" text-anchor="' + anchor + '" font-size="12" font-weight="700" fill="#0f2742" stroke="#ffffff" stroke-width="4" paint-order="stroke">' + label + "</text>";
+    };
+    // Chart 1: target impressions, stacked Broadcast + Digital
+    var max1 = nice(Math.max.apply(null, pts.map(function (d) { return d.tot; })) * 1.06);
+    var y1 = function (v) { return T + ih - v / max1 * ih; };
+    var grid1 = [0, 0.2, 0.4, 0.6, 0.8, 1].map(function (f) { var v = max1 * f; return '<line x1="' + L + '" x2="' + (L + iw) + '" y1="' + y1(v) + '" y2="' + y1(v) + '" stroke="#e3e9ef"/><text x="' + (L - 8) + '" y="' + (y1(v) + 4) + '" text-anchor="end" font-size="11" fill="#5f7286">' + short(v) + "</text>"; }).join("");
+    var areaTv = "M" + pts.map(function (d) { return x(d.q) + "," + y1(d.tv); }).join(" L") + " L" + x(100) + "," + y1(0) + " L" + x(0) + "," + y1(0) + "Z";
+    var areaDg = "M" + pts.map(function (d) { return x(d.q) + "," + y1(d.tot); }).join(" L") + " L" + pts.slice().reverse().map(function (d) { return x(d.q) + "," + y1(d.tv); }).join(" L") + "Z";
+    var lineTot = "M" + pts.map(function (d) { return x(d.q) + "," + y1(d.tot); }).join(" L");
+    var curPt = scenario(p, inp, t, a);
+    var c1 = '<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Target impressions at every budget split">' + grid1 +
+      '<path d="' + areaTv + '" fill="#0f2742" fill-opacity="0.85"/><path d="' + areaDg + '" fill="#13a196" fill-opacity="0.85"/>' +
+      '<path d="' + lineTot + '" fill="none" stroke="#0b5d53" stroke-width="2"/>' + axisX() + cur(y1(curPt.totT), short(curPt.totT)) + "</svg>";
+    // Chart 2: effective target CPM
+    var cpms = pts.map(function (d) { return d.cpm; });
+    var max2 = nice(Math.max.apply(null, cpms) * 1.1);
+    var y2 = function (v) { return T + ih - v / max2 * ih; };
+    var grid2 = [0, 0.2, 0.4, 0.6, 0.8, 1].map(function (f) { var v = max2 * f; return '<line x1="' + L + '" x2="' + (L + iw) + '" y1="' + y2(v) + '" y2="' + y2(v) + '" stroke="#e3e9ef"/><text x="' + (L - 8) + '" y="' + (y2(v) + 4) + '" text-anchor="end" font-size="11" fill="#5f7286">$' + (max2 >= 20 ? Math.round(v) : v.toFixed(2)) + "</text>"; }).join("");
+    var lineCpm = "M" + pts.map(function (d) { return x(d.q) + "," + y2(d.cpm); }).join(" L");
+    var c2 = '<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Effective target CPM at every budget split">' + grid2 +
+      '<line x1="' + L + '" x2="' + (L + iw) + '" y1="' + y2(pts.at(0).cpm) + '" y2="' + y2(pts.at(0).cpm) + '" stroke="#8a9aa9" stroke-dasharray="3 3"/>' +
+      '<text x="' + (L + iw) + '" y="' + (y2(pts.at(0).cpm) - 6) + '" text-anchor="end" font-size="11" fill="#5f7286">All Broadcast ' + money(pts.at(0).cpm) + "</text>" +
+      '<path d="' + lineCpm + '" fill="none" stroke="#0f7e70" stroke-width="3"/>' + axisX() + cur(y2(curPt.cpm), money(curPt.cpm)) + "</svg>";
+    var first = pts.at(0), last = pts.at(-1);
+    var better = last.tot > first.tot;
+    return '<div class="tv-charts">' +
+      '<div class="tv-chart"><h3>Target impressions at every split</h3><p>' + (better ? "Each step toward Digital Video adds target impressions: " : "Each step toward Digital Video lowers target impressions: ") + short(first.tot) + " at all Broadcast, " + short(last.tot) + " at all Digital.</p>" + c1 +
+      '<div class="tv-key"><span><i style="background:#0f2742"></i>Broadcast</span><span><i style="background:#13a196"></i>Digital Video</span><span><i style="background:#0f2742;height:2px;width:14px"></i>Selected split</span></div></div>' +
+      '<div class="tv-chart"><h3>Effective target CPM at every split</h3><p>Cost per 1,000 target impressions for the whole budget: ' + money(first.cpm) + " at all Broadcast, " + money(last.cpm) + " at all Digital.</p>" + c2 +
+      '<div class="tv-key"><span><i style="background:#0f7e70"></i>Combined campaign</span><span><i style="background:#8a9aa9;height:2px;width:14px"></i>All Broadcast level</span></div></div>' +
+      "</div>";
+  }
+
+  function printSummary(inp, t, p) {
+    var it = function (l, v) { return "<div><span>" + l + "</span><b>" + v + "</b></div>"; };
+    var today = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+    $("printSum").innerHTML = '<div style="display:flex;justify-content:space-between;align-items:baseline"><b style="font-size:18px;color:#0f2742">' + esc(M.name) + " · " + esc(demoLabel()) + '</b><span style="font-size:12px;color:#5f7286">' + today + "</span></div>" +
+      '<div class="tv-psum">' + it("Campaign budget", money0(inp.budget)) + it("Split", Math.round((1 - p) * 100) + "% Broadcast / " + Math.round(p * 100) + "% Digital") +
+      it("Broadcast CPM (A18+)", money(cpmVal(M))) + it("Average :30 spot", money(inp.spot)) + it("Target audience per spot", fmt(inp.avgT)) +
+      it("Broadcast frequency", inp.tvfreq.toFixed(1)) + it("Digital Video CPM", money(inp.dcpm)) + it("Digital frequency cap", p > 0 ? inp.dfreq.toFixed(1) : "—") + "</div>";
+  }
+
   function renderResults() {
     var p = +$("shift").value / 100;
     $("shiftLab").textContent = Math.round(p * 100) + "% digital";
@@ -346,6 +441,7 @@
     var needDigital = p > 0;
     need(!needDigital || dcpm > 0, "dcpm", "the Digital Video CPM");
     need(!needDigital || dfreq >= 1, "dfreq", "the digital frequency cap (1 or more)");
+    $("printBtn").disabled = !!missing.length;
     if (missing.length) {
       body.innerHTML = '<div class="tv-need"><span>To see results, enter <b>' + missing.join(", ").replace(/, ([^,]*)$/, " and $1") +
         '</b>.</span><button type="button" class="az-btn primary" id="goMissing">Go to ' + (firstId === "market" ? "market" : "the field") + "</button></div>";
@@ -405,7 +501,9 @@
         '<div class="tv-col"><h3>Combined campaign</h3>' + comb + "</div>" +
       "</div>" +
       (p > 0 && p < 1 ? '<p class="tv-hint" style="margin:8px 0 0">Ranges for the trimmed Broadcast schedule: the low reach holds the entered frequency; the high reach holds the full schedule\'s reach.</p>' : "") +
-      '<div class="tv-insights">' + ins.map(function (x) { return '<div class="tv-insight"><span>' + x[0] + "</span><b class=\"num\">" + x[1] + "</b><small>" + x[2] + "</small></div>"; }).join("") + "</div>";
+      '<div class="tv-insights">' + ins.map(function (x) { return '<div class="tv-insight"><span>' + x[0] + "</span><b class=\"num\">" + x[1] + "</b><small>" + x[2] + "</small></div>"; }).join("") + "</div>" +
+      shiftCharts(inp, t, a, p);
+    printSummary(inp, t, p);
   }
 
   // Fill the spot price and audience fields with the averages unless the user has adjusted them.
@@ -457,6 +555,7 @@
   $("avgaud").addEventListener("input", function () { edited.avgaud = true; });
   $("spotReset").addEventListener("click", function () { edited.spot = false; refresh(); });
   $("avgReset").addEventListener("click", function () { edited.avgaud = false; refresh(); });
+  $("printBtn").addEventListener("click", function () { window.print(); });
   $("market").addEventListener("change", function () { selectMarket(this.value, true); });
   ["budget", "bcpm", "spot", "avgaud", "tvfreq", "dcpm", "dfreq", "shift"].forEach(function (id) { $(id).addEventListener("input", refresh); });
 
