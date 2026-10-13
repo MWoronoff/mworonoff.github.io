@@ -1,0 +1,97 @@
+{
+ "source": "2026 AudienceSCAN® study",
+ "measure": "saw or heard an ad of this type that led them to take action in the past 30 days",
+ "groups": {
+  "patio_furniture": {
+   "short": "Patio furniture buyers",
+   "audience": "patio furniture buyers",
+   "rows": [
+    [
+     "Streaming TV advertising (such as Hulu, Pluto TV or YouTube TV)",
+     47.0,
+     36.7
+    ],
+    [
+     "Ad on a social network",
+     46.8,
+     35.9
+    ],
+    [
+     "Mobile phone app or text message",
+     45.9,
+     36.6
+    ],
+    [
+     "Ad on search results pages (like on Google, Yahoo or Bing)",
+     45.2,
+     35.8
+    ],
+    [
+     "Television (traditional, including cable or satellite subscription)",
+     41.4,
+     34.7
+    ],
+    [
+     "Online display ads (banners and pop-up ads)",
+     40.5,
+     30.0
+    ],
+    [
+     "Ad that plays before or during the video you want to watch",
+     39.4,
+     31.1
+    ],
+    [
+     "Ads/Coupons in your mailbox",
+     38.3,
+     29.9
+    ],
+    [
+     "Text link ad on a website",
+     37.1,
+     27.3
+    ],
+    [
+     "Emailed ad or newsletter",
+     36.5,
+     28.6
+    ],
+    [
+     "Advertising circulars in your mailbox or inserted in the newspaper",
+     34.6,
+     27.2
+    ],
+    [
+     "Radio (over-the-air, online, mobile or tablet)",
+     34.0,
+     25.5
+    ],
+    [
+     "Outdoor ad/sign/billboard/transit",
+     31.7,
+     23.6
+    ],
+    [
+     "Ad on a podcast",
+     31.7,
+     22.7
+    ],
+    [
+     "Newspaper (print, online, mobile or tablet)",
+     31.1,
+     23.5
+    ],
+    [
+     "Magazine (print, online, mobile or on tablet)",
+     30.7,
+     21.5
+    ],
+    [
+     "Ads at movie theater",
+     30.4,
+     21.5
+    ]
+   ]
+  }
+ }
+}
