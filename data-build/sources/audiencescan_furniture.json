@@ -274,6 +274,97 @@
      21.5
     ]
    ]
+  },
+  "baby_furniture": {
+   "short": "Baby furniture buyers",
+   "audience": "baby furniture buyers",
+   "rows": [
+    [
+     "Streaming TV advertising (such as Hulu, Pluto TV or YouTube TV)",
+     57.5,
+     36.7
+    ],
+    [
+     "Ad on a social network",
+     54.3,
+     35.9
+    ],
+    [
+     "Mobile phone app or text message",
+     53.1,
+     36.6
+    ],
+    [
+     "Ad on search results pages (like on Google, Yahoo or Bing)",
+     52.3,
+     35.8
+    ],
+    [
+     "Television (traditional, including cable or satellite subscription)",
+     51.6,
+     34.7
+    ],
+    [
+     "Online display ads (banners and pop-up ads)",
+     49.5,
+     30.0
+    ],
+    [
+     "Ad that plays before or during the video you want to watch",
+     49.4,
+     31.1
+    ],
+    [
+     "Text link ad on a website",
+     48.4,
+     27.3
+    ],
+    [
+     "Radio (over-the-air, online, mobile or tablet)",
+     46.0,
+     25.5
+    ],
+    [
+     "Emailed ad or newsletter",
+     45.1,
+     28.6
+    ],
+    [
+     "Ads/Coupons in your mailbox",
+     43.8,
+     29.9
+    ],
+    [
+     "Outdoor ad/sign/billboard/transit",
+     42.7,
+     23.6
+    ],
+    [
+     "Ads at movie theater",
+     42.7,
+     21.5
+    ],
+    [
+     "Newspaper (print, online, mobile or tablet)",
+     42.2,
+     23.5
+    ],
+    [
+     "Ad on a podcast",
+     42.1,
+     22.7
+    ],
+    [
+     "Advertising circulars in your mailbox or inserted in the newspaper",
+     40.8,
+     27.2
+    ],
+    [
+     "Magazine (print, online, mobile or on tablet)",
+     37.8,
+     21.5
+    ]
+   ]
   }
  }
 }
