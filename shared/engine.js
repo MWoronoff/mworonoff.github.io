@@ -358,8 +358,8 @@
     var max = Math.max.apply(null, rows.map(function (r) { return Math.max(r.aud, r.us); }));
     box.appendChild(el("div", { class: "az-ad-head" }, [
       el("div", null, [
-        el("h2", { text: (A.title || "How prospects respond to advertising").replace("{sub}", this.subLabel()) }),
-        el("p", { text: d.audience ? "Percent of the target group (" + d.audience + ") and of all U.S. adults who responded to advertising on each medium in the past 30 days. Percentages are based on everyone in each group, not only people who use that medium." : "" })
+        el("h2", { text: (A.title || "How prospects respond to advertising").replace("{sub}", this.subLabel()).replace("{aud}", (d.short || "").toLowerCase()) }),
+        el("p", { text: d.audience ? "Percent of the target group (" + d.audience + ") and of all U.S. adults who saw or heard an ad on each medium that led them to take action in the past 30 days. Percentages are based on everyone in each group, not only people who use that medium." : "" })
       ]),
       el("div", { class: "az-seg", role: "group", "aria-label": "Sort ad types" }, [["aud", "Sort by response"], ["diff", "Sort by vs. average"]].map(function (o) {
         return el("button", { type: "button", "aria-pressed": String(sortKey === o[0]), text: o[1], onclick: function () { self.adSort = o[0]; self.renderAd(); } });
