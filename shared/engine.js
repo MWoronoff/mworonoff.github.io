@@ -353,7 +353,6 @@
     var dif = function (x) { var n = Math.round(Math.abs(x) * 100); return (n === 0 ? "" : x > 0 ? "+" : "−") + n + "%"; };
     var byAud = rows.slice().sort(function (a, b) { return b.aud - a.aud; });
     var byDiff = rows.slice().sort(function (a, b) { return b.diff - a.diff; });
-    var topDiff = byDiff.slice(0, 3).map(function (r) { return r.label; });
     var short = function (t) { return t.replace(/ \(.*\)$/, ""); };
     var list = function (a, f) { return a.map(function (r) { return short(r.label) + " (" + f(r) + ")"; }).join(", "); };
     var max = Math.max.apply(null, rows.map(function (r) { return Math.max(r.aud, r.us); }));
@@ -367,19 +366,16 @@
       }))
     ]));
     box.appendChild(el("div", { class: "az-ad-take" }, [
-      el("p", null, [el("b", { text: "Reaches the most: " }), list(byAud.slice(0, 3), function (r) { return pct(r.aud); })]),
-      el("p", null, [el("b", { text: "Most above average: " }), list(byDiff.slice(0, 3), function (r) { return dif(r.diff) + " vs. U.S."; })])
+      el("p", null, [el("b", { text: "Reaches the most: " }), list(byAud.slice(0, 3), function (r) { return pct(r.aud); })])
     ]));
-    var legend = el("div", { class: "az-ad-legend" }, [el("span", { class: "az-ad-key aud" }), " " + (d.short || "This audience"), el("span", { class: "az-ad-key us" }), " All U.S. adults",
-      el("span", { class: "az-ad-key star", text: "★" }), " Top 3 above average"]);
+    var legend = el("div", { class: "az-ad-legend" }, [el("span", { class: "az-ad-key aud" }), " " + (d.short || "This audience"), el("span", { class: "az-ad-key us" }), " All U.S. adults"]);
     box.appendChild(legend);
     var list2 = el("div", { class: "az-ad-rows", role: "table", "aria-label": "Advertising response by type of ad" });
     list2.appendChild(el("div", { class: "az-ad-row az-ad-colhead", role: "row" }, [el("span", { role: "columnheader", text: "Type of ad" }), el("span", { role: "columnheader", text: "" }),
       el("span", { class: "num", role: "columnheader", text: d.short || "Audience" }), el("span", { class: "num", role: "columnheader", text: "All U.S." }), el("span", { class: "num", role: "columnheader", text: "Vs. average" })]));
     (sortKey === "diff" ? byDiff : byAud).forEach(function (r) {
-      var star = topDiff.indexOf(r.label) >= 0;
-      list2.appendChild(el("div", { class: "az-ad-row" + (star ? " top" : ""), role: "row" }, [
-        el("span", { class: "az-ad-label", role: "cell" }, [star ? el("span", { class: "az-ad-star", "aria-label": "Top 3 above average", text: "★ " }) : null, r.label]),
+      list2.appendChild(el("div", { class: "az-ad-row", role: "row" }, [
+        el("span", { class: "az-ad-label", role: "cell", text: r.label }),
         el("span", { class: "az-ad-bars", role: "cell", "aria-hidden": "true" }, [
           el("span", { class: "az-ad-bar aud", style: "width:" + (r.aud / max * 100) + "%" }),
           el("span", { class: "az-ad-bar us", style: "width:" + (r.us / max * 100) + "%" })]),
