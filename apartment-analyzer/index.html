@@ -575,6 +575,13 @@ AdtaxiAnalyzer.start({
   {
    "title": "ZIPs in a market",
    "body": "Pick a DMA, metro or county, then choose ZIPs in market. ZIP scores use Consumer Demand and Spending Power, reweighted to 73% and 27% (Consumer Demand only for Affordable and Student housing). ZIPs with fewer than 500 residents are shown but not ranked."
+  },
+  {
+   "title": "Advertising response",
+   "body": [
+    "In the Radius view, once you pick a center and a radius, a panel under the radius map shows the percent of the target group and of all U.S. adults who saw or heard an ad on each of 17 media that led them to take action in the past 30 days (AudienceSCAN's \"responded last 30 days\"). Percentages are based on everyone in each group, not only people who use that medium, and they are response rates, not reach. It's national data, so it's the same for every market. \"Vs. average\" is a percent difference, not percentage points.",
+    "It comes after the geography on purpose: first find where the prospects are, then see how that target group responds to advertising. The panel follows the radius tool's \"Best prospects for\" preset. Student housing uses full-time students (the same group as the Higher Education analyzer). Every other category uses potential apartment switchers, the closest AudienceSCAN group for renters; it isn't specific to luxury, workforce, affordable or 55+ housing."
+   ]
   }
  ],
  "sources": [
@@ -602,6 +609,9 @@ AdtaxiAnalyzer.start({
   {
    "label": "ZIP-level DMA list",
    "url": "https://github.com/BritCrit/dma_county_zip"
+  },
+  {
+   "label": "2026 AudienceSCAN® study (advertising response)"
   }
  ],
  "sourcesNote": "Rent spending totals are EASI; rents, renter counts and renter traits are Census ACS (rents via the Deluxe ZIP file); landlord counts are Census Business Patterns; permits are the Census Building Permits Survey; rent change is Zillow; population and households are from the Deluxe ZIP file.",
@@ -612,7 +622,560 @@ AdtaxiAnalyzer.start({
   "legend": "Circle size = landlords and property managers in the area",
   "zipNote": "Census doesn't publish ZIPs with fewer than 3."
  },
- "radius": true
+ "radius": true,
+ "adResponse": {
+  "title": "Advertising response: {sub}",
+  "source": "2026 AudienceSCAN® study",
+  "note": "National survey data: the percent who saw or heard an ad of each type that led them to take action in the past 30 days. Percentages are based on all U.S. adults and on everyone in the target group, not on users of each medium. \"Vs. average\" is how much more likely the target group is to have responded than all U.S. adults (a percent difference, not percentage points). The same national figures apply to every market.",
+  "subs": {
+   "all": {
+    "short": "Apartment switchers",
+    "audience": "potential apartment switchers",
+    "rows": [
+     [
+      "Mobile phone app or text message",
+      41.9,
+      36.6
+     ],
+     [
+      "Ad on a social network",
+      41.3,
+      35.9
+     ],
+     [
+      "Streaming TV advertising (such as Hulu, Pluto TV or YouTube TV)",
+      40.1,
+      36.7
+     ],
+     [
+      "Ad on search results pages (like on Google, Yahoo or Bing)",
+      38.9,
+      35.8
+     ],
+     [
+      "Ad that plays before or during the video you want to watch",
+      36.9,
+      31.1
+     ],
+     [
+      "Television (traditional, including cable or satellite subscription)",
+      34.5,
+      34.7
+     ],
+     [
+      "Online display ads (banners and pop-up ads)",
+      33.1,
+      30.0
+     ],
+     [
+      "Text link ad on a website",
+      30.0,
+      27.3
+     ],
+     [
+      "Ads/Coupons in your mailbox",
+      27.6,
+      29.9
+     ],
+     [
+      "Emailed ad or newsletter",
+      27.4,
+      28.6
+     ],
+     [
+      "Advertising circulars in your mailbox or inserted in the newspaper",
+      25.5,
+      27.2
+     ],
+     [
+      "Radio (over-the-air, online, mobile or tablet)",
+      23.8,
+      25.5
+     ],
+     [
+      "Outdoor ad/sign/billboard/transit",
+      23.2,
+      23.6
+     ],
+     [
+      "Ads at movie theater",
+      21.3,
+      21.5
+     ],
+     [
+      "Ad on a podcast",
+      21.1,
+      22.7
+     ],
+     [
+      "Newspaper (print, online, mobile or tablet)",
+      21.0,
+      23.5
+     ],
+     [
+      "Magazine (print, online, mobile or on tablet)",
+      18.4,
+      21.5
+     ]
+    ]
+   },
+   "luxury": {
+    "short": "Apartment switchers",
+    "audience": "potential apartment switchers",
+    "rows": [
+     [
+      "Mobile phone app or text message",
+      41.9,
+      36.6
+     ],
+     [
+      "Ad on a social network",
+      41.3,
+      35.9
+     ],
+     [
+      "Streaming TV advertising (such as Hulu, Pluto TV or YouTube TV)",
+      40.1,
+      36.7
+     ],
+     [
+      "Ad on search results pages (like on Google, Yahoo or Bing)",
+      38.9,
+      35.8
+     ],
+     [
+      "Ad that plays before or during the video you want to watch",
+      36.9,
+      31.1
+     ],
+     [
+      "Television (traditional, including cable or satellite subscription)",
+      34.5,
+      34.7
+     ],
+     [
+      "Online display ads (banners and pop-up ads)",
+      33.1,
+      30.0
+     ],
+     [
+      "Text link ad on a website",
+      30.0,
+      27.3
+     ],
+     [
+      "Ads/Coupons in your mailbox",
+      27.6,
+      29.9
+     ],
+     [
+      "Emailed ad or newsletter",
+      27.4,
+      28.6
+     ],
+     [
+      "Advertising circulars in your mailbox or inserted in the newspaper",
+      25.5,
+      27.2
+     ],
+     [
+      "Radio (over-the-air, online, mobile or tablet)",
+      23.8,
+      25.5
+     ],
+     [
+      "Outdoor ad/sign/billboard/transit",
+      23.2,
+      23.6
+     ],
+     [
+      "Ads at movie theater",
+      21.3,
+      21.5
+     ],
+     [
+      "Ad on a podcast",
+      21.1,
+      22.7
+     ],
+     [
+      "Newspaper (print, online, mobile or tablet)",
+      21.0,
+      23.5
+     ],
+     [
+      "Magazine (print, online, mobile or on tablet)",
+      18.4,
+      21.5
+     ]
+    ]
+   },
+   "mid": {
+    "short": "Apartment switchers",
+    "audience": "potential apartment switchers",
+    "rows": [
+     [
+      "Mobile phone app or text message",
+      41.9,
+      36.6
+     ],
+     [
+      "Ad on a social network",
+      41.3,
+      35.9
+     ],
+     [
+      "Streaming TV advertising (such as Hulu, Pluto TV or YouTube TV)",
+      40.1,
+      36.7
+     ],
+     [
+      "Ad on search results pages (like on Google, Yahoo or Bing)",
+      38.9,
+      35.8
+     ],
+     [
+      "Ad that plays before or during the video you want to watch",
+      36.9,
+      31.1
+     ],
+     [
+      "Television (traditional, including cable or satellite subscription)",
+      34.5,
+      34.7
+     ],
+     [
+      "Online display ads (banners and pop-up ads)",
+      33.1,
+      30.0
+     ],
+     [
+      "Text link ad on a website",
+      30.0,
+      27.3
+     ],
+     [
+      "Ads/Coupons in your mailbox",
+      27.6,
+      29.9
+     ],
+     [
+      "Emailed ad or newsletter",
+      27.4,
+      28.6
+     ],
+     [
+      "Advertising circulars in your mailbox or inserted in the newspaper",
+      25.5,
+      27.2
+     ],
+     [
+      "Radio (over-the-air, online, mobile or tablet)",
+      23.8,
+      25.5
+     ],
+     [
+      "Outdoor ad/sign/billboard/transit",
+      23.2,
+      23.6
+     ],
+     [
+      "Ads at movie theater",
+      21.3,
+      21.5
+     ],
+     [
+      "Ad on a podcast",
+      21.1,
+      22.7
+     ],
+     [
+      "Newspaper (print, online, mobile or tablet)",
+      21.0,
+      23.5
+     ],
+     [
+      "Magazine (print, online, mobile or on tablet)",
+      18.4,
+      21.5
+     ]
+    ]
+   },
+   "affordable": {
+    "short": "Apartment switchers",
+    "audience": "potential apartment switchers",
+    "rows": [
+     [
+      "Mobile phone app or text message",
+      41.9,
+      36.6
+     ],
+     [
+      "Ad on a social network",
+      41.3,
+      35.9
+     ],
+     [
+      "Streaming TV advertising (such as Hulu, Pluto TV or YouTube TV)",
+      40.1,
+      36.7
+     ],
+     [
+      "Ad on search results pages (like on Google, Yahoo or Bing)",
+      38.9,
+      35.8
+     ],
+     [
+      "Ad that plays before or during the video you want to watch",
+      36.9,
+      31.1
+     ],
+     [
+      "Television (traditional, including cable or satellite subscription)",
+      34.5,
+      34.7
+     ],
+     [
+      "Online display ads (banners and pop-up ads)",
+      33.1,
+      30.0
+     ],
+     [
+      "Text link ad on a website",
+      30.0,
+      27.3
+     ],
+     [
+      "Ads/Coupons in your mailbox",
+      27.6,
+      29.9
+     ],
+     [
+      "Emailed ad or newsletter",
+      27.4,
+      28.6
+     ],
+     [
+      "Advertising circulars in your mailbox or inserted in the newspaper",
+      25.5,
+      27.2
+     ],
+     [
+      "Radio (over-the-air, online, mobile or tablet)",
+      23.8,
+      25.5
+     ],
+     [
+      "Outdoor ad/sign/billboard/transit",
+      23.2,
+      23.6
+     ],
+     [
+      "Ads at movie theater",
+      21.3,
+      21.5
+     ],
+     [
+      "Ad on a podcast",
+      21.1,
+      22.7
+     ],
+     [
+      "Newspaper (print, online, mobile or tablet)",
+      21.0,
+      23.5
+     ],
+     [
+      "Magazine (print, online, mobile or on tablet)",
+      18.4,
+      21.5
+     ]
+    ]
+   },
+   "senior": {
+    "short": "Apartment switchers",
+    "audience": "potential apartment switchers",
+    "rows": [
+     [
+      "Mobile phone app or text message",
+      41.9,
+      36.6
+     ],
+     [
+      "Ad on a social network",
+      41.3,
+      35.9
+     ],
+     [
+      "Streaming TV advertising (such as Hulu, Pluto TV or YouTube TV)",
+      40.1,
+      36.7
+     ],
+     [
+      "Ad on search results pages (like on Google, Yahoo or Bing)",
+      38.9,
+      35.8
+     ],
+     [
+      "Ad that plays before or during the video you want to watch",
+      36.9,
+      31.1
+     ],
+     [
+      "Television (traditional, including cable or satellite subscription)",
+      34.5,
+      34.7
+     ],
+     [
+      "Online display ads (banners and pop-up ads)",
+      33.1,
+      30.0
+     ],
+     [
+      "Text link ad on a website",
+      30.0,
+      27.3
+     ],
+     [
+      "Ads/Coupons in your mailbox",
+      27.6,
+      29.9
+     ],
+     [
+      "Emailed ad or newsletter",
+      27.4,
+      28.6
+     ],
+     [
+      "Advertising circulars in your mailbox or inserted in the newspaper",
+      25.5,
+      27.2
+     ],
+     [
+      "Radio (over-the-air, online, mobile or tablet)",
+      23.8,
+      25.5
+     ],
+     [
+      "Outdoor ad/sign/billboard/transit",
+      23.2,
+      23.6
+     ],
+     [
+      "Ads at movie theater",
+      21.3,
+      21.5
+     ],
+     [
+      "Ad on a podcast",
+      21.1,
+      22.7
+     ],
+     [
+      "Newspaper (print, online, mobile or tablet)",
+      21.0,
+      23.5
+     ],
+     [
+      "Magazine (print, online, mobile or on tablet)",
+      18.4,
+      21.5
+     ]
+    ]
+   },
+   "student": {
+    "short": "Full-time students",
+    "audience": "full-time students",
+    "rows": [
+     [
+      "Mobile phone app or text message",
+      48.4,
+      36.6
+     ],
+     [
+      "Ad on a social network",
+      46.9,
+      35.9
+     ],
+     [
+      "Streaming TV advertising (such as Hulu, Pluto TV or YouTube TV)",
+      46.2,
+      36.7
+     ],
+     [
+      "Online display ads (banners and pop-up ads)",
+      42.3,
+      30.0
+     ],
+     [
+      "Ad on search results pages (like on Google, Yahoo or Bing)",
+      41.4,
+      35.8
+     ],
+     [
+      "Television (traditional, including cable or satellite subscription)",
+      40.4,
+      34.7
+     ],
+     [
+      "Emailed ad or newsletter",
+      40.3,
+      28.6
+     ],
+     [
+      "Ad that plays before or during the video you want to watch",
+      39.8,
+      31.1
+     ],
+     [
+      "Ads/Coupons in your mailbox",
+      38.4,
+      29.9
+     ],
+     [
+      "Text link ad on a website",
+      35.4,
+      27.3
+     ],
+     [
+      "Ads at movie theater",
+      35.4,
+      21.5
+     ],
+     [
+      "Ad on a podcast",
+      34.6,
+      22.7
+     ],
+     [
+      "Advertising circulars in your mailbox or inserted in the newspaper",
+      34.2,
+      27.2
+     ],
+     [
+      "Radio (over-the-air, online, mobile or tablet)",
+      33.5,
+      25.5
+     ],
+     [
+      "Outdoor ad/sign/billboard/transit",
+      33.0,
+      23.6
+     ],
+     [
+      "Newspaper (print, online, mobile or tablet)",
+      32.0,
+      23.5
+     ],
+     [
+      "Magazine (print, online, mobile or on tablet)",
+      30.7,
+      21.5
+     ]
+    ]
+   }
+  }
+ }
 });
 </script>
 </body>
