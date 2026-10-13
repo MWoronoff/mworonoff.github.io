@@ -432,9 +432,9 @@
     var short = function (t) { return SHORT[t] || t.replace(/ \(.*\)$/, ""); };
     var list = function (a, f) { return a.map(function (r) { return short(r.label) + " (" + f(r) + ")"; }).join(", "); };
     var max = Math.max.apply(null, rows.map(function (r) { return r.aud; }));
-    // Bars start above zero (5 points below the lowest value, rounded down to a multiple of 5) so differences between ad types stand out
+    // Bars start above zero (10 points below the lowest value, rounded down to a multiple of 10, e.g. lowest about 40% -> axis starts at 30%) so differences between ad types stand out
     var min = Math.min.apply(null, rows.map(function (r) { return r.aud; }));
-    var base = Math.max(0, Math.floor(min / 5) * 5 - 5);
+    var base = Math.max(0, Math.floor((min - 10) / 10) * 10);
     var barW = function (v) { return max > base ? Math.max(1, (v - base) / (max - base) * 100) : 100; };
     box.appendChild(el("div", { class: "az-ad-head" }, [
       el("div", null, [
