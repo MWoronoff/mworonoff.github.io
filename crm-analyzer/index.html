@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Customer Market Analyzer</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="../shared/adtaxi-logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<link rel="stylesheet" href="../shared/engine.css">
+<link rel="stylesheet" href="crm.css">
+</head>
+<body>
+<header class="az-header">
+  <div class="az-header-inner">
+    <div class="az-title">
+      <h1>Customer Market Analyzer</h1>
+      <p>Upload a customer list to see where you're winning and where you're underperforming against each ZIP's potential, what your strongest ZIPs have in common, and which untapped ZIPs look like them.</p>
+      <div class="az-links"><a href="../analyzers/">All analyzers</a><a href="#" id="crm-method-link">How it works</a></div>
+    </div>
+    <img class="az-logo" src="../shared/adtaxi-logo.svg" alt="Adtaxi">
+  </div>
+</header>
+<main class="az-main" id="crm"><p class="az-loading">Loading the Customer Market Analyzer…</p></main>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js" crossorigin=""></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="crm.js"></script>
+</body>
+</html>

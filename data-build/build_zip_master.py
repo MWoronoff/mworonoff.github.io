@@ -536,14 +536,22 @@ def build_fhfa():
             log(f"  not at {u}: {e}")
     if raw is None:
         raise RuntimeError("FHFA ZIP5 file not found")
-    probe = pd.read_excel(io.BytesIO(raw), header=None, nrows=20)
-    hdr = next(i for i in range(len(probe)) if probe.iloc[i].astype(str).str.contains("Year", case=False).any())
+    probe = pd.read_excel(io.BytesIO(raw), header=None, nrows=30, dtype=str)
+    log("  first rows of the FHFA file:")
+    for i in range(min(8, len(probe))):
+        log("   ", [str(v)[:40] for v in probe.iloc[i].tolist()])
+    norm = lambda v: re.sub(r"\s+", " ", str(v)).strip().lower()
+    hdr = next((i for i in range(len(probe)) if any(norm(v) == "year" for v in probe.iloc[i])), None)
+    if hdr is None:
+        raise RuntimeError("no header row with a 'Year' column in the FHFA file")
     d = pd.read_excel(io.BytesIO(raw), header=hdr, dtype=str)
-    d.columns = [str(c).strip() for c in d.columns]
-    zc = next(c for c in d.columns if "zip" in c.lower())
-    yc = next(c for c in d.columns if c.lower() == "year")
-    chg = next(c for c in d.columns if "change" in c.lower())
-    hpi = next(c for c in d.columns if c.strip().upper() == "HPI")
+    d.columns = [norm(c) for c in d.columns]
+    pick = lambda test, what: next((c for c in d.columns if test(c)), None) or (_ for _ in ()).throw(
+        RuntimeError(f"FHFA file has no {what} column; columns are {list(d.columns)}"))
+    zc = pick(lambda c: "zip" in c, "ZIP")
+    yc = pick(lambda c: c == "year", "Year")
+    chg = pick(lambda c: "change" in c, "annual change")
+    hpi = pick(lambda c: c == "hpi", "HPI")
     d["zip"] = z5(d[zc])
     d["year"] = pd.to_numeric(d[yc], errors="coerce")
     d["chg"] = pd.to_numeric(d[chg], errors="coerce")
@@ -618,6 +626,21 @@ def build_index(status):
     save(idx, "zip_index.csv.gz")
 
 
+def merge_previous_facts(status):
+    """On a partial run, carry the previous report facts forward for sources that kept their file."""
+    path = os.path.join(OUT, "source_facts.json")
+    old = json.load(open(path)) if os.path.exists(path) else {}
+    for s, v in status.items():
+        if v.startswith("kept") and s in old.get("facts", {}) and s not in REPORT:
+            REPORT[s] = old["facts"][s]
+            status[s] = f"kept from {old['built'].get(s, 'an earlier run')}"
+    built = old.get("built", {})
+    for s, v in status.items():
+        if v == "built":
+            built[s] = datetime.date.today().isoformat()
+    json.dump({"facts": {k: v for k, v in REPORT.items()}, "built": built}, open(path, "w"), indent=1, default=str)
+
+
 def write_report(status, started):
     L = ["# Master ZIP data report", "",
          f"Built {datetime.date.today().isoformat()} in {(time.time() - started) / 60:.0f} minutes.", "",
@@ -659,7 +682,7 @@ def write_report(status, started):
           "credit or employment advertising.",
           "- To refresh Deluxe, replace the workbooks in data-build/sources/deluxe/ and run the action. The public sources "
           "refresh themselves on the monthly schedule."]
-    failed = [s for s, v in status.items() if not v.startswith("built")]
+    failed = [s for s, v in status.items() if not v.startswith(("built", "kept"))]
     if failed:
         L += ["", "## Problems", ""] + [f"- {NAMES[s]}: {status[s]}" for s in failed]
     open(os.path.join(OUT, "master_report.md"), "w").write("\n".join(L) + "\n")
@@ -688,6 +711,7 @@ def main():
             print(f"::warning title={NAMES[s]}::{status[s]}")
     if not os.path.exists(os.path.join(OUT, FILES["deluxe"])):
         sys.exit("The Deluxe file is required for the index; stopping.")
+    merge_previous_facts(status)
     build_index(status)
     # merge this run's dictionary rows with the previous dictionary rows for sources that weren't rebuilt
     dpath = os.path.join(OUT, "field_dictionary.csv")

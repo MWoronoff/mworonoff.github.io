@@ -16,6 +16,7 @@ on:
 
 permissions:
   contents: write
+  pages: write
 
 concurrency:
   group: zip-master
@@ -37,14 +38,21 @@ jobs:
           set -o pipefail
           if [ -n "${{ github.event.inputs.only }}" ]; then ARGS="--only ${{ github.event.inputs.only }}"; else ARGS=""; fi
           python3 data-build/build_zip_master.py $ARGS 2>&1 | tee master.log
+      - name: Build Customer Market Analyzer data
+        run: python3 data-build/build_crm_data.py
       - name: Commit results
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@users.noreply.github.com"
-          git add data-build/master
-          if git diff --cached --quiet -- 'data-build/master/*.gz'; then
+          git add data-build/master crm-analyzer/data
+          if git diff --cached --quiet -- 'data-build/master/*.gz' 'crm-analyzer/data'; then
             echo "No data changed; nothing to commit."
             exit 0
           fi
-          git commit -m "Build master ZIP data"
+          git commit -m "Build master ZIP data and Customer Market Analyzer data"
           git push
+      - name: Republish the site
+        if: success()
+        run: gh api -X POST "repos/${{ github.repository }}/pages/builds" || true
+        env:
+          GH_TOKEN: ${{ github.token }}
