@@ -114,7 +114,6 @@
       <label class="az-field"><span id="freqLabel">Schedule frequency, selected target</span><input id="tvfreq" type="number" min="1" step="0.1" inputmode="decimal"><span class="tv-hint">Average frequency for the whole schedule, for the selected target, as quoted for the schedule.</span></label>
       <div class="tv-group">Digital Video</div>
       <label class="az-field"><span>Digital Video CPM ($)</span><input id="dcpm" type="number" min="0" step="0.5" inputmode="decimal" value="45"><span class="tv-hint">Starts at the $45 planning CPM; edit to match the buy.</span></label>
-      <label class="az-field"><span>On-target rate (%)</span><input id="ontarget" type="number" min="1" max="100" step="1" inputmode="decimal"><span class="tv-hint">Share of digital impressions that reach the selected target, e.g. from the vendor's verification report.</span></label>
       <label class="az-field"><span>Frequency cap, whole campaign</span><input id="dfreq" type="number" min="1" step="0.1" inputmode="decimal"></label>
     </div>
   </section>
@@ -137,7 +136,7 @@
     <p><b>Targets.</b> Adults 18+, 18–34, 18–49, 25–54 and 50+, and Men and Women 18+, 18–49, 25–54 and 50+ are measured by Scarborough. Other age ranges for adults are built from measured age bands. Other gender and age combinations, and any household income selection, are estimates: income shares are applied on the assumption that income is independent of gender and age within a market. Estimated targets are labeled.</p>
     <p><b>Broadcast delivery.</b> Spots = Broadcast spend ÷ average spot price. Target impressions = spots × average target audience per spot. Target GRPs = target impressions ÷ target population × 100. Target reach = GRPs ÷ the schedule's frequency. Off-target (wasted) impressions are the spots' audience outside the selected target. The spot price starts at the market average: the market's average adult audience per spot × the Broadcast CPM ÷ 1,000. The Broadcast CPM starts at a planning figure that declines with DMA rank, set so Denver (DMA 17) is $7.00 for adults 18+; it is not a quoted market rate, so adjust the CPM or the spot price to match the schedule. The average audience per spot starts at Scarborough's average for the selected target and can also be adjusted. Changing the market resets the CPM, spot price and audience to that market's averages; changing the target resets the audience.</p>
     <p><b>Smaller Broadcast schedules.</b> The frequency entered describes the full schedule. When part of the budget moves to Digital Video, the remaining schedule's reach is shown as a range: the low end holds frequency steady (reach falls with GRPs); the high end holds reach steady (frequency falls with GRPs). The actual result for a trimmed schedule falls between the two.</p>
-    <p><b>Digital Video.</b> Impressions = spend ÷ CPM × 1,000. Target impressions = impressions × on-target rate. Target reach = target impressions ÷ frequency cap, limited to the target population.</p>
+    <p><b>Digital Video.</b> Impressions = spend ÷ CPM × 1,000. Digital Video is targeted by gender, age and household income, so every impression is counted as reaching the selected target (100% target efficiency). Target reach = target impressions ÷ frequency cap, limited to the target population.</p>
     <p><b>Combined campaign.</b> Spend, target and off-target impressions, target efficiency and effective target CPM are added across Broadcast and Digital Video. Combined reach and frequency are not shown because the overlap between the Broadcast and Digital Video audiences is not measured.</p>
   </section>
 </main>
@@ -308,7 +307,7 @@
     var p = +$("shift").value / 100;
     $("shiftLab").textContent = Math.round(p * 100) + "%";
     var body = $("resBody");
-    var budget = num("budget"), tvfreq = num("tvfreq"), dcpm = num("dcpm"), ont = num("ontarget"), dfreq = num("dfreq");
+    var budget = num("budget"), tvfreq = num("tvfreq"), dcpm = num("dcpm"), dfreq = num("dfreq");
     if (M && budget) $("shiftDollars").textContent = money0(budget * (1 - p)) + " Broadcast / " + money0(budget * p) + " Digital Video";
     else $("shiftDollars").textContent = "";
     var missing = [];
@@ -318,7 +317,6 @@
     var needDigital = p > 0;
     if (needDigital) {
       if (!(dcpm > 0)) missing.push("the Digital Video CPM");
-      if (!(ont > 0 && ont <= 100)) missing.push("the on-target rate (1 to 100)");
       if (!(dfreq >= 1)) missing.push("the digital frequency cap (1 or more)");
     }
     if (missing.length) {
@@ -328,7 +326,7 @@
     var t = target(M, gender, $("age").value, hhiChecked());
     var avgT = num("avgaud") || M.avg_a18 * t.composition;
     var inp = { budget: budget, spot: num("spot") || estSpot(M), avgT: avgT, tvfreq: tvfreq,
-                dcpm: dcpm || 0, ontarget: (ont || 0) / 100, dfreq: dfreq || 1 };
+                dcpm: dcpm || 0, ontarget: 1, dfreq: dfreq || 1 };
     var a = scenario(0, inp, t, null), b = scenario(p, inp, t, a);
     $("resSub").textContent = demoLabel() + " in " + M.name + ", compared with spending the whole " + money0(budget) + " on Broadcast TV.";
 
@@ -345,7 +343,7 @@
     };
     var digCol = p === 0 ? '<p class="tv-wait">Move the slider to shift budget to Digital Video.</p>' :
       row("Spend", money0(b.ds)) + row("Impressions", fmt(b.dImp)) + row("Target impressions", fmt(b.dT)) +
-      row("Off-target impressions", fmt(b.dImp - b.dT), "tv-loss") + row("Target efficiency", pct(inp.ontarget)) +
+      row("Target efficiency", pct(inp.ontarget)) +
       row("Frequency", b.dFreq.toFixed(1)) + row("Target reach", fmt(b.dReach)) + row("Target reach %", pct(b.dReach / t.universe)) +
       row("Effective target CPM", b.dT ? money(b.ds / b.dT * 1000) : "—");
     var comb = row("Spend", money0(b.ts + b.ds)) + row("Target impressions", fmt(b.totT)) + row("Off-target impressions", fmt(b.waste), "tv-loss") +
@@ -414,7 +412,7 @@
   $("spotReset").addEventListener("click", function () { edited.spot = false; refresh(); });
   $("avgReset").addEventListener("click", function () { edited.avgaud = false; refresh(); });
   $("market").addEventListener("change", function () { selectMarket(this.value, true); });
-  ["budget", "bcpm", "spot", "avgaud", "tvfreq", "dcpm", "ontarget", "dfreq", "shift"].forEach(function (id) { $(id).addEventListener("input", refresh); });
+  ["budget", "bcpm", "spot", "avgaud", "tvfreq", "dcpm", "dfreq", "shift"].forEach(function (id) { $(id).addEventListener("input", refresh); });
 
   Promise.all([
     fetch("data/markets.json").then(function (r) { if (!r.ok) throw new Error("markets"); return r.json(); }),
