@@ -438,20 +438,31 @@
     box.appendChild(el("div", { class: "az-ad-take" }, [
       el("p", null, [el("b", { text: "Highest response: " }), list(byAud.slice(0, 3), function (r) { return pct(r.aud); })])
     ]));
-    var list2 = el("div", { class: "az-ad-rows", role: "table", "aria-label": "Advertising response by type of ad" });
-    list2.appendChild(el("div", { class: "az-ad-row az-ad-colhead", role: "row" }, [el("span", { role: "columnheader", text: "Type of ad" }), el("span", { role: "columnheader", text: "" }),
-      el("span", { class: "num", role: "columnheader", text: d.short || "Audience" }), el("span", { class: "num", role: "columnheader", text: "Total" }), el("span", { class: "num", role: "columnheader", text: "Vs. average" })]));
-    (sortKey === "diff" ? byDiff : byAud).forEach(function (r) {
-      list2.appendChild(el("div", { class: "az-ad-row", role: "row" }, [
-        el("span", { class: "az-ad-label", role: "cell", text: short(r.label), title: r.label }),
+    // Two columns side by side (first 11 ad types on the left, the rest on the right) so the box stays short
+    var ordered = sortKey === "diff" ? byDiff : byAud, SPLIT = 11;
+    var colHead = function () {
+      return el("div", { class: "az-ad-row az-ad-colhead", role: "row" }, [el("span", { role: "columnheader", text: "Type of ad" }), el("span", { role: "columnheader", text: "" }),
+        el("span", { class: "num", role: "columnheader", text: d.short || "Audience" }), el("span", { class: "num", role: "columnheader", text: "Total" }), el("span", { class: "num", role: "columnheader", text: "Vs. average" })]);
+    };
+    var adRow = function (r, rank) {
+      return el("div", { class: "az-ad-row", role: "row" }, [
+        el("span", { class: "az-ad-label", role: "cell", title: r.label }, [el("span", { class: "az-ad-rank", text: rank + "." }), short(r.label)]),
         el("span", { class: "az-ad-bars", role: "cell", "aria-hidden": "true" }, [
           el("span", { class: "az-ad-bar aud", style: "width:" + (r.aud / max * 100) + "%" })]),
         el("span", { class: "num", role: "cell", text: pct(r.aud) }),
         el("span", { class: "num muted", role: "cell", text: pct(r.us) }),
         el("span", { class: "num az-ad-diff", role: "cell", text: dif(r.diff) })
-      ]));
+      ]);
+    };
+    var cols = el("div", { class: "az-ad-cols" });
+    [ordered.slice(0, SPLIT), ordered.slice(SPLIT)].forEach(function (part, c) {
+      if (!part.length) return;
+      var t = el("div", { class: "az-ad-rows", role: "table", "aria-label": "Advertising response by type of ad, " + (c ? (SPLIT + 1) + " to " + ordered.length : "1 to " + Math.min(SPLIT, ordered.length)) });
+      t.appendChild(colHead());
+      part.forEach(function (r, i) { t.appendChild(adRow(r, c * SPLIT + i + 1)); });
+      cols.appendChild(t);
     });
-    box.appendChild(list2);
+    box.appendChild(cols);
     box.appendChild(el("p", { class: "az-ad-note", text: (A.note || "") + (d.source ? " Source: " + d.source + "." : A.source ? " Source: " + A.source + "." : "") }));
   };
 

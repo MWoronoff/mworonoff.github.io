@@ -307,3 +307,12 @@ a.az-btn { display: inline-block; text-decoration: none; text-align: center; }
 .az-ad-row { grid-template-columns: 120px minmax(100px, 340px) 72px 56px 72px; justify-content: start; }
 .az-ad-bar { height: 6px; }
 @media (max-width: 640px) { .az-ad-row { grid-template-columns: 1fr 64px 52px 60px; justify-content: stretch; } }
+/* Ad response: two side-by-side columns (1-11 left, 12+ right) to keep the box short */
+.az-ad-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0 32px; align-items: start; }
+.az-ad-cols .az-ad-row { grid-template-columns: minmax(110px, 1.2fr) minmax(60px, 1.6fr) 60px 52px 64px; justify-content: stretch; gap: 8px; }
+.az-ad-rank { color: var(--muted); display: inline-block; min-width: 22px; font-variant-numeric: tabular-nums; }
+@media (max-width: 900px) {
+  .az-ad-cols { grid-template-columns: 1fr; }
+  .az-ad-cols .az-ad-rows + .az-ad-rows .az-ad-colhead { display: none; }   /* one list on narrow screens */
+}
+@media (max-width: 640px) { .az-ad-cols .az-ad-row { grid-template-columns: 1fr 58px 50px 58px; } }
