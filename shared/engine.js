@@ -435,7 +435,9 @@
     // Bars start above zero (10 points below the lowest value, rounded down to a multiple of 10, e.g. lowest about 40% -> axis starts at 30%) so differences between ad types stand out
     var min = Math.min.apply(null, rows.map(function (r) { return r.aud; }));
     var base = Math.max(0, Math.floor((min - 10) / 10) * 10);
-    var barW = function (v) { return max > base ? Math.max(1, (v - base) / (max - base) * 100) : 100; };
+    // Scale ends 10 points above the highest value, rounded up to a multiple of 10 (e.g. highest 60% -> scale ends at 70%)
+    var top = Math.min(100, Math.ceil((max + 10) / 10) * 10);
+    var barW = function (v) { return top > base ? Math.max(1, (v - base) / (top - base) * 100) : 100; };
     box.appendChild(el("div", { class: "az-ad-head" }, [
       el("div", null, [
         el("h2", { text: (A.title || "How prospects respond to advertising").replace("{sub}", this.subLabel()).replace("{aud}", (d.short || "").toLowerCase()) }),
@@ -473,7 +475,7 @@
       cols.appendChild(t);
     });
     box.appendChild(cols);
-    box.appendChild(el("p", { class: "az-ad-note", text: (A.note || "") + (base > 0 ? " Bars start at " + base + "%, not zero, to make the differences easier to see." : "") + (d.source ? " Source: " + d.source + "." : A.source ? " Source: " + A.source + "." : "") }));
+    box.appendChild(el("p", { class: "az-ad-note", text: (A.note || "") + " Bar scale runs from " + base + "% to " + top + "%" + (base > 0 ? ", not from zero, to make the differences easier to see." : ".") + (d.source ? " Source: " + d.source + "." : A.source ? " Source: " + A.source + "." : "") }));
   };
 
   /* ---------- Map ---------- */
