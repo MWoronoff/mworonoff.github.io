@@ -366,7 +366,7 @@
       }))
     ]));
     box.appendChild(el("div", { class: "az-ad-take" }, [
-      el("p", null, [el("b", { text: "Reaches the most: " }), list(byAud.slice(0, 3), function (r) { return pct(r.aud); })])
+      el("p", null, [el("b", { text: "Highest response: " }), list(byAud.slice(0, 3), function (r) { return pct(r.aud); })])
     ]));
     var legend = el("div", { class: "az-ad-legend" }, [el("span", { class: "az-ad-key aud" }), " " + (d.short || "This audience"), el("span", { class: "az-ad-key us" }), " All U.S. adults"]);
     box.appendChild(legend);
