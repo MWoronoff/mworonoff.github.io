@@ -19,6 +19,7 @@ import argparse, datetime, io, json, os, re, sys, time, urllib.parse, urllib.req
 import warnings
 import numpy as np
 import pandas as pd
+from county_level import county_frame, county_mask, county_checks, county_flag, county_names, mark_unranked, COUNTY_PARTS
 warnings.simplefilter("ignore", pd.errors.PerformanceWarning)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -712,6 +713,7 @@ def main():
     dma = frame(zd.groupby("dma_code")); add_easi_spend(dma, hh_dma, "DMAs"); dma = score(dma)
     zm = z[z.cbsa_code.isin(metros)]
     met = frame(zm.groupby("cbsa_code")); add_easi_spend(met, hh_met, "metros"); met = score(met)
+    cty = county_frame(z, frame); cty = score(cty, parts=COUNTY_PARTS, mask=county_mask(cty))
     rep.append(("Score reality check: categories not checked", "INFO", "; ".join(x["label"] for x in SUBCATS if not COUNTED(x)) +
                 " (no Census industry matches these categories, so business employment isn't a meaningful benchmark)"))
     validate_scores(rep, z, co, [(x["id"], x["label"], x["naics"]) for x in SUBCATS if COUNTED(x)],
@@ -769,6 +771,7 @@ def main():
         rep.append((f"DMA roll-up matches county totals: {s['label']}", "PASS" if ok else "FAIL", f"DMAs {int(round(tot_d)):,} vs counties {int(round(tot_c)):,}"))
     rep.append(("U.S. population (Deluxe)", "INFO", f"{int(us.population.iloc[0]):,}"))
 
+    county_checks(rep, cty, [x["id"] for x in SUBCATS])
     failed = [r for r in rep if r[1] == "FAIL"]
     os.makedirs(OUT, exist_ok=True)
     with open(os.path.join(OUT, "healthcare_report.md"), "w") as f:
@@ -854,6 +857,9 @@ def main():
     meta = {"built": built, "cbpYear": y, "placesRelease": release, "acsYears": aud["meta"]["acsYears"]}
     json.dump({"level": "dma", "meta": meta, "rows": rows(dma, lambda i: tidy(dname.get(i, i)), flags)}, open(os.path.join(OUT, "dma.json"), "w"), separators=(",", ":"))
     json.dump({"level": "metro", "meta": meta, "rows": rows(met, lambda i: mname.get(i, i), flags, easi_cols)}, open(os.path.join(OUT, "metro.json"), "w"), separators=(",", ":"))
+    cname = county_names()
+    json.dump({"level": "county", "meta": meta, "rows": mark_unranked(rows(cty, lambda i: cname.get(str(i), str(i)), lambda i, r: county_flag(r)), cty)},
+              open(os.path.join(OUT, "county.json"), "w"), separators=(",", ":"))
     json.dump({"level": "us", "meta": meta, "rows": rows(us, lambda i: "United States")}, open(os.path.join(OUT, "us.json"), "w"), separators=(",", ":"))
 
     # ZIPs inside each market, ranked within the market (no ZIP-level payroll, so Spending Power is left out there)

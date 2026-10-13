@@ -21,6 +21,7 @@ import argparse, datetime, io, json, os, re, sys
 import numpy as np
 import pandas as pd
 from build_healthcare import cbp_years, zbp, cbp_county, pct, combine, zcta_land, validate_scores, get, fetch
+from county_level import county_frame, county_mask, county_checks, county_flag, county_names, mark_unranked, COUNTY_PARTS
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -290,6 +291,8 @@ def main():
     us_rent_hh = us.rent_hh.iloc[0]
     for df in (dma, met, us): df["rent_idx"] = (df.rent_hh / us_rent_hh * 100).round(0)
     dma = score(dma); met = score(met)
+    cty = county_frame(z, frame); cty["rent_idx"] = (cty.rent_hh / us_rent_hh * 100).round(0)
+    cty = score(cty, parts=COUNTY_PARTS, mask=county_mask(cty))
     if zr is not None: met["rent_chg"] = met.index.map(zr)
     validate_scores(rep, z, co, [(x["id"], x["label"], NAICS) for x in SUBCATS],
                     [("DMAs", dma, "dma_code"), ("metros", met, "cbsa_code")], "residential landlords and property managers")
@@ -319,6 +322,7 @@ def main():
         rep.append((f"Census rent per household vs. EASI rent per household, {name}", "INFO",
                     f"rank correlation {df.rent_hh.rank().corr(df.easi_hh.rank()):.2f} (EASI's per-household rent varies little between markets, so it isn't scored)"))
 
+    county_checks(rep, cty, [x["id"] for x in SUBCATS])
     failed = [r for r in rep if r[1] == "FAIL"]
     os.makedirs(OUT, exist_ok=True)
     with open(os.path.join(OUT, "apartment_report.md"), "w") as f:
@@ -374,6 +378,9 @@ def main():
     meta = {"built": built, "cbpYear": y, "acsYears": aud["meta"]["acsYears"], "permitsYear": pyear, "zoriMonth": zdate}
     json.dump({"level": "dma", "meta": meta, "rows": rows(dma, lambda i: tidy(dname.get(i, i)), flags)}, open(os.path.join(OUT, "dma.json"), "w"), separators=(",", ":"))
     json.dump({"level": "metro", "meta": meta, "rows": rows(met, lambda i: mname.get(i, i))}, open(os.path.join(OUT, "metro.json"), "w"), separators=(",", ":"))
+    cname = county_names()
+    json.dump({"level": "county", "meta": meta, "rows": mark_unranked(rows(cty, lambda i: cname.get(str(i), str(i)), lambda i, r: county_flag(r)), cty)},
+              open(os.path.join(OUT, "county.json"), "w"), separators=(",", ":"))
     json.dump({"level": "us", "meta": meta, "rows": rows(us, lambda i: "United States")}, open(os.path.join(OUT, "us.json"), "w"), separators=(",", ":"))
 
     # ZIPs inside each market, ranked within the market

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Builds the map boundary files for all analyzers from Census cartographic boundary files.
 # Needs: data-build/geo/county_geo.csv and zip_geo.csv (from build_geography.py), Node with mapshaper.
-# Writes: shared/geo/dma.topo.json, shared/geo/metro.topo.json, shared/geo/states.topo.json
+# Writes: shared/geo/dma.topo.json, metro.topo.json, county.topo.json, states.topo.json, data-build/geo/county_names.csv
 set -euo pipefail
 cd "$(dirname "$0")/.."
 WORK=data-build/tmp; OUT=shared/geo; mkdir -p "$WORK" "$OUT"
@@ -63,6 +63,13 @@ $MS "$WORK/zcta_joined.json" -filter "dma_code != '0'" -split dma_code \
 $MS "$WORK/zcta_joined.json" -filter "cbsa_type == 'Metro'" -split cbsa_code \
   -o "$OUT/zip/metro/" format=topojson singles quantization=1e5
 echo "ZIP boundary files: $(ls "$OUT/zip/dma" | wc -l) DMAs, $(ls "$OUT/zip/metro" | wc -l) metros"
+
+# 4b. County shapes (all counties in 50 states + DC) for the County view, plus county display names for the builds
+$MS "$WORK/counties.json" -filter-fields fips,NAMELSAD,STUSPS -simplify 8% keep-shapes \
+  -rename-layers county -o "$OUT/county.topo.json" format=topojson quantization=1e5
+$MS "$WORK/counties.json" -each "name=NAMELSAD + ', ' + STUSPS" -filter-fields fips,name \
+  -o data-build/geo/county_names.csv format=csv
+echo "County shapes: $(node -e 'const t=require("./shared/geo/county.topo.json");console.log(Object.values(t.objects)[0].geometries.length)')"
 
 # 5. State outlines for context
 $MS "$WORK/counties.json" -each "st=fips.slice(0,2)" -dissolve st -simplify 6% keep-shapes \

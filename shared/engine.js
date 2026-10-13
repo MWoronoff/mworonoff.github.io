@@ -11,7 +11,7 @@
 (function () {
   "use strict";
 
-  var LEVEL_LABELS = { us: "U.S.", dma: "DMA", metro: "Metro", zip: "ZIP" };
+  var LEVEL_LABELS = { us: "U.S.", dma: "DMA", metro: "Metro", county: "County", zip: "ZIP" };
   var RAMP = ["--ramp-1", "--ramp-2", "--ramp-3", "--ramp-4", "--ramp-5"];
 
   function el(tag, attrs, children) {

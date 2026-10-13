@@ -20,7 +20,7 @@
 <script>
 AdtaxiAnalyzer.start({
  "title": "Apartment Market Analyzer",
- "subtitle": "Where apartment advertisers' prospective residents are: Market Potential Scores for DMAs, metros and ZIPs across six rental categories, to focus ad dollars on the highest-potential geographies.",
+ "subtitle": "Where apartment advertisers' prospective residents are: Market Potential Scores for DMAs, metros, counties and ZIPs across six rental categories, to focus ad dollars on the highest-potential geographies.",
  "logo": "../shared/adtaxi-logo.svg",
  "exportName": "apartments",
  "notice": "Preview for review.",
@@ -55,6 +55,12 @@ AdtaxiAnalyzer.start({
    "data": "data/metro.json",
    "geo": "../shared/geo/metro.topo.json",
    "idField": "cbsa_code"
+  },
+  "county": {
+   "label": "County",
+   "data": "data/county.json",
+   "geo": "../shared/geo/county.topo.json",
+   "idField": "fips"
   },
   "zip": {
    "label": "ZIPs in market",
@@ -101,9 +107,10 @@ AdtaxiAnalyzer.start({
    "levels": [
     "dma",
     "metro",
+    "county",
     "zip"
    ],
-   "help": "0 to 100. Weighted blend of Consumer Demand (40%), Category Spending (25%), Spending Power (15%) and Competition (20%), each a percentile against the other markets at the same level. Affordable housing and Student housing leave out Spending Power, because those renters aren't defined by what they can pay; the remaining parts keep their relative weights. ZIPs rank against the other ZIPs in the same market using Consumer Demand and Spending Power only (no EASI spending by ZIP, and Census hides small ZIP business counts)."
+   "help": "0 to 100. Weighted blend of Consumer Demand (40%), Category Spending (25%), Spending Power (15%) and Competition (20%), each a percentile against the other markets at the same level. Affordable housing and Student housing leave out Spending Power, because those renters aren't defined by what they can pay; the remaining parts keep their relative weights. ZIPs rank against the other ZIPs in the same market using Consumer Demand and Spending Power only (no EASI spending by ZIP, and Census hides small ZIP business counts). Counties rank against all U.S. counties without Category Spending (EASI isn't published by county), so the other parts are re-weighted to 100%; counties under 1,000 residents aren't ranked."
   },
   {
    "key": "demand",
@@ -114,6 +121,7 @@ AdtaxiAnalyzer.start({
    "levels": [
     "dma",
     "metro",
+    "county",
     "zip"
    ],
    "help": "Average of the percentiles for this category's renter inputs (see How scores work)."
@@ -139,6 +147,7 @@ AdtaxiAnalyzer.start({
    "levels": [
     "dma",
     "metro",
+    "county",
     "zip"
    ],
    "help": "Percentile of the share of renter households in this category's income range: $50K+ for All apartments, Mid-market and Active adult; $100K+ for Luxury.",
@@ -157,7 +166,8 @@ AdtaxiAnalyzer.start({
    "perSub": true,
    "levels": [
     "dma",
-    "metro"
+    "metro",
+    "county"
    ],
    "help": "Percentile of residential landlords and property managers per 10,000 renter households, reversed: fewer competing landlords and managers scores higher, since each ad dollar faces less competition."
   },
@@ -169,7 +179,8 @@ AdtaxiAnalyzer.start({
    "levels": [
     "us",
     "dma",
-    "metro"
+    "metro",
+    "county"
    ],
    "help": "Annual rent per household (typical rent x 12 x share of households renting) divided by the U.S. figure, times 100. Above 100 means households here spend more on rent than average. From Census rents and renter counts."
   },
@@ -208,7 +219,8 @@ AdtaxiAnalyzer.start({
    "levels": [
     "us",
     "dma",
-    "metro"
+    "metro",
+    "county"
    ],
    "help": "Typical rent x 12 x the share of households renting: average yearly rent spending across all households."
   },
@@ -227,7 +239,8 @@ AdtaxiAnalyzer.start({
    "levels": [
     "us",
     "dma",
-    "metro"
+    "metro",
+    "county"
    ],
    "help": "Units in new buildings with 5 or more units, from the Census Building Permits Survey (latest full year, by county). New buildings in lease-up are heavy advertisers. Shown, not scored."
   },
@@ -239,7 +252,8 @@ AdtaxiAnalyzer.start({
    "levels": [
     "us",
     "dma",
-    "metro"
+    "metro",
+    "county"
    ],
    "help": "Permitted units in new 5+ unit buildings per 1,000 renter households: how much new supply is coming relative to the market. Shown, not scored."
   },
@@ -283,6 +297,7 @@ AdtaxiAnalyzer.start({
    "levels": [
     "dma",
     "metro",
+    "county",
     "zip"
    ],
    "help": "Strong renter demand (70th percentile or higher) but few landlords and managers per renter household (30th percentile or lower). Shown, not scored."

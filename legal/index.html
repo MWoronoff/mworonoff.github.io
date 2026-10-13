@@ -20,7 +20,7 @@
 <script>
 AdtaxiAnalyzer.start({
  "title": "Legal Market Analyzer",
- "subtitle": "Where law firms' potential clients are: Market Potential Scores for DMAs, metros and ZIPs across five practice areas, to focus ad dollars on the highest-potential geographies.",
+ "subtitle": "Where law firms' potential clients are: Market Potential Scores for DMAs, metros, counties and ZIPs across five practice areas, to focus ad dollars on the highest-potential geographies.",
  "logo": "../shared/adtaxi-logo.svg",
  "exportName": "legal",
  "notice": "Preview for review.",
@@ -55,6 +55,12 @@ AdtaxiAnalyzer.start({
    "data": "data/metro.json",
    "geo": "../shared/geo/metro.topo.json",
    "idField": "cbsa_code"
+  },
+  "county": {
+   "label": "County",
+   "data": "data/county.json",
+   "geo": "../shared/geo/county.topo.json",
+   "idField": "fips"
   },
   "zip": {
    "label": "ZIPs in market",
@@ -97,9 +103,10 @@ AdtaxiAnalyzer.start({
    "levels": [
     "dma",
     "metro",
+    "county",
     "zip"
    ],
-   "help": "0 to 100. Weighted blend of Consumer Demand (40%), Category Spending (25%), Spending Power (15%) and Competition (20%), each a percentile against the other markets at the same level. ZIPs rank against the other ZIPs in the same market using Consumer Demand and Spending Power only (no EASI spending by ZIP, and Census hides small ZIP business counts)."
+   "help": "0 to 100. Weighted blend of Consumer Demand (40%), Category Spending (25%), Spending Power (15%) and Competition (20%), each a percentile against the other markets at the same level. ZIPs rank against the other ZIPs in the same market using Consumer Demand and Spending Power only (no EASI spending by ZIP, and Census hides small ZIP business counts). Counties rank against all U.S. counties without Category Spending (EASI isn't published by county), so the other parts are re-weighted to 100%; counties under 1,000 residents aren't ranked."
   },
   {
    "key": "demand",
@@ -110,6 +117,7 @@ AdtaxiAnalyzer.start({
    "levels": [
     "dma",
     "metro",
+    "county",
     "zip"
    ],
    "help": "Average of the percentiles for this practice area's client inputs (see How scores work)."
@@ -135,6 +143,7 @@ AdtaxiAnalyzer.start({
    "levels": [
     "dma",
     "metro",
+    "county",
     "zip"
    ],
    "help": "Percentile of the share of households earning $75K or more."
@@ -147,7 +156,8 @@ AdtaxiAnalyzer.start({
    "perSub": true,
    "levels": [
     "dma",
-    "metro"
+    "metro",
+    "county"
    ],
    "help": "Percentile of law offices per 10,000 residents, reversed: fewer competing offices scores higher, since each ad dollar faces less competition."
   },
@@ -187,6 +197,7 @@ AdtaxiAnalyzer.start({
    "levels": [
     "dma",
     "metro",
+    "county",
     "zip"
    ],
    "help": "Strong client demand (70th percentile or higher) but few law offices per resident (30th percentile or lower): a pitch for firms weighing a new office. Shown, not scored."

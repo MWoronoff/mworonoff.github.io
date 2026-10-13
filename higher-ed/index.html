@@ -20,7 +20,7 @@
 <script>
 AdtaxiAnalyzer.start({
  "title": "Higher Education Market Analyzer",
- "subtitle": "Where colleges' and schools' potential students are: Market Potential Scores for DMAs, metros and ZIPs across five types of schools, to focus ad dollars on the highest-potential geographies.",
+ "subtitle": "Where colleges' and schools' potential students are: Market Potential Scores for DMAs, metros, counties and ZIPs across five types of schools, to focus ad dollars on the highest-potential geographies.",
  "logo": "../shared/adtaxi-logo.svg",
  "exportName": "higher-ed",
  "notice": "Preview for review.",
@@ -55,6 +55,12 @@ AdtaxiAnalyzer.start({
    "data": "data/metro.json",
    "geo": "../shared/geo/metro.topo.json",
    "idField": "cbsa_code"
+  },
+  "county": {
+   "label": "County",
+   "data": "data/county.json",
+   "geo": "../shared/geo/county.topo.json",
+   "idField": "fips"
   },
   "zip": {
    "label": "ZIPs in market",
@@ -97,9 +103,10 @@ AdtaxiAnalyzer.start({
    "levels": [
     "dma",
     "metro",
+    "county",
     "zip"
    ],
-   "help": "0 to 100. Weighted blend of Consumer Demand (40%), Category Spending (25%), Spending Power (15%) and Competition (20%), each a percentile against the other markets at the same level. ZIPs rank against the other ZIPs in the same market using Consumer Demand and Spending Power only (no EASI spending by ZIP, and most ZIPs have no school)."
+   "help": "0 to 100. Weighted blend of Consumer Demand (40%), Category Spending (25%), Spending Power (15%) and Competition (20%), each a percentile against the other markets at the same level. ZIPs rank against the other ZIPs in the same market using Consumer Demand and Spending Power only (no EASI spending by ZIP, and most ZIPs have no school). Counties rank against all U.S. counties without Category Spending (EASI isn't published by county), so the other parts are re-weighted to 100%; counties under 1,000 residents aren't ranked."
   },
   {
    "key": "demand",
@@ -110,6 +117,7 @@ AdtaxiAnalyzer.start({
    "levels": [
     "dma",
     "metro",
+    "county",
     "zip"
    ],
    "help": "Average of the percentiles for this type of school's student inputs (see How scores work)."
@@ -135,6 +143,7 @@ AdtaxiAnalyzer.start({
    "levels": [
     "dma",
     "metro",
+    "county",
     "zip"
    ],
    "help": "Percentile of the share of households earning $75K or more."
@@ -147,7 +156,8 @@ AdtaxiAnalyzer.start({
    "perSub": true,
    "levels": [
     "dma",
-    "metro"
+    "metro",
+    "county"
    ],
    "help": "Percentile of competing schools of this type per 100,000 residents, reversed: fewer competing schools scores higher, since each ad dollar faces less competition."
   },
@@ -175,7 +185,8 @@ AdtaxiAnalyzer.start({
    "levels": [
     "us",
     "dma",
-    "metro"
+    "metro",
+    "county"
    ],
    "hideWhenUnavailable": true
   },
@@ -187,7 +198,8 @@ AdtaxiAnalyzer.start({
    "perSub": true,
    "levels": [
     "dma",
-    "metro"
+    "metro",
+    "county"
    ],
    "help": "Strong student demand (70th percentile or higher) but few competing schools per resident (30th percentile or lower): a pitch for schools weighing a new campus or a recruiting push. Shown, not scored."
   },

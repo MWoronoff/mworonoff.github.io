@@ -17,6 +17,7 @@ import argparse, datetime, json, os, re, sys
 import numpy as np
 import pandas as pd
 from build_healthcare import cbp_years, zbp, cbp_county, pct, combine, zcta_land, validate_scores
+from county_level import county_frame, county_mask, county_checks, county_flag, county_names, mark_unranked, COUNTY_PARTS
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -174,6 +175,7 @@ def main():
     dma = frame(zd.groupby("dma_code")); add_easi(dma, hh_dma, "DMAs"); dma = score(dma)
     zm = z[z.cbsa_code.isin(metros)]
     met = frame(zm.groupby("cbsa_code")); add_easi(met, hh_met, "metros"); met = score(met)
+    cty = county_frame(z, frame); cty = score(cty, parts=COUNTY_PARTS, mask=county_mask(cty))
     validate_scores(rep, z, co, [(x["id"], x["label"], NAICS) for x in SUBCATS],
                     [("DMAs", dma, "dma_code"), ("metros", met, "cbsa_code")], "law offices")
     us = frame([("us", z)])
@@ -197,6 +199,7 @@ def main():
         v_ = us[k].iloc[0]
         rep.append((f"U.S. {DEMAND_LABELS.get(k, k).lower()}", "PASS" if lo <= v_ <= hi else "FAIL", f"{v_:.1%} (expected {lo:.0%}–{hi:.0%})"))
 
+    county_checks(rep, cty, [x["id"] for x in SUBCATS])
     failed = [r for r in rep if r[1] == "FAIL"]
     os.makedirs(OUT, exist_ok=True)
     with open(os.path.join(OUT, "legal_report.md"), "w") as f:
@@ -249,6 +252,9 @@ def main():
     meta = {"built": built, "cbpYear": y, "acsYears": aud["meta"]["acsYears"]}
     json.dump({"level": "dma", "meta": meta, "rows": rows(dma, lambda i: tidy(dname.get(i, i)), flags)}, open(os.path.join(OUT, "dma.json"), "w"), separators=(",", ":"))
     json.dump({"level": "metro", "meta": meta, "rows": rows(met, lambda i: mname.get(i, i))}, open(os.path.join(OUT, "metro.json"), "w"), separators=(",", ":"))
+    cname = county_names()
+    json.dump({"level": "county", "meta": meta, "rows": mark_unranked(rows(cty, lambda i: cname.get(str(i), str(i)), lambda i, r: county_flag(r)), cty)},
+              open(os.path.join(OUT, "county.json"), "w"), separators=(",", ":"))
     json.dump({"level": "us", "meta": meta, "rows": rows(us, lambda i: "United States")}, open(os.path.join(OUT, "us.json"), "w"), separators=(",", ":"))
 
     # ZIPs inside each market, ranked within the market
