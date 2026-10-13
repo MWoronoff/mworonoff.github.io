@@ -198,7 +198,7 @@
     this.filterDefs = {};
     for (var k in FILTERS) this.filterDefs[k] = FILTERS[k];
     this.filterDefs.age = { label: "Age", type: "multi", options: this.ages.options };
-    this.state = { zip: cfg.defaultZip || "", r: cfg.defaultRadius || 25, minIndex: 0, sortKey: "aud", sortDir: "desc", show: 50, sel: {}, profile: null };
+    this.state = { zip: cfg.defaultZip || "", r: cfg.defaultRadius || 0, minIndex: 0, sortKey: "aud", sortDir: "desc", show: 50, sel: {}, profile: null };
     this.profiles = {};
     (cfg.profiles || []).forEach(function (p) { this.profiles[p.id] = p; }, this);
     this.readHash();
@@ -255,8 +255,9 @@
     this.rSel = el("select", { "aria-label": "Radius", onchange: function () { s.r = +this.value; self.update(true); } },
       (function () {
         var radii = (cfg.radii || [5, 10, 15, 25, 50]).slice();
-        if (radii.indexOf(s.r) < 0) { radii.push(s.r); radii.sort(function (a, b) { return a - b; }); }   // keep a radius from a shared link
-        return radii.map(function (r) { return el("option", { value: r, text: (cfg.radiusLabel || "{r} miles").replace("{r}", r) }); });
+        if (s.r && radii.indexOf(s.r) < 0) { radii.push(s.r); radii.sort(function (a, b) { return a - b; }); }   // keep a radius from a shared link
+        return [el("option", { value: "", text: "Choose a radius", disabled: "disabled" })].concat(
+          radii.map(function (r) { return el("option", { value: r, text: (cfg.radiusLabel || "{r} miles").replace("{r}", r) }); }));
       })());
     this.minSel = el("select", { "aria-label": "Show", onchange: function () { s.minIndex = +this.value; self.update(false); } },
       [[0, "All ZIPs in range"], [100, "Index 100+"], [120, "Index 120+"], [150, "Index 150+"]].map(function (o) { return el("option", { value: o[0], text: o[1] }); }));
@@ -320,7 +321,7 @@
 
     var main = el("main", { class: "az-main" }, [controls, this.errorBox, el("section", { class: "rz-stage" }, [this.filterPanel, right]), table, sources]);
     this.root.innerHTML = ""; this.root.appendChild(header); this.root.appendChild(main); this.root.appendChild(this.modal);
-    this.rSel.value = String(s.r); this.minSel.value = String(s.minIndex);
+    this.rSel.value = s.r ? String(s.r) : ""; this.minSel.value = String(s.minIndex);
     this.syncFilters();
 
     this.map = L.map(this.mapEl, { zoomControl: false, zoomSnap: 0.25, minZoom: 3, maxZoom: 12 });
@@ -495,7 +496,7 @@
     var s = this.state, c = this.c;
     if (!c) return;
     var ci = this.byZip[s.zip];
-    if (ci === undefined) { this.renderEmpty(); return; }
+    if (ci === undefined || !s.r) { this.renderEmpty(); return; }
     this.computeNational();
     var lat0 = c.lat[ci], lon0 = c.lon[ci], rows = [];
     var dLat = s.r / 69, dLon = s.r / (69 * Math.cos(lat0 * Math.PI / 180));   // quick bounding box first
@@ -518,9 +519,17 @@
     var m = this.state.minIndex;
     return m ? this.rows.filter(function (r) { return r.idx != null && r.idx >= m; }) : this.rows;
   };
+  // Nothing is preselected: results appear once the user has chosen both a center and a radius
   Radius.prototype.renderEmpty = function () {
+    var s = this.state, hasZip = this.c && this.byZip[s.zip] !== undefined;
+    var msg = hasZip ? "Choose a radius to see the audience around " + s.zip + "." :
+              s.r ? "Enter a ZIP or town to see the audience within " + s.r + " miles." :
+              "Enter a ZIP or town and choose a radius to see the audience.";
+    this.rows = null; this.mapToken = (this.mapToken || 0) + 1;
+    ["circle", "centerMark", "zipLayer"].forEach(function (k) { if (this[k]) { this.map.removeLayer(this[k]); this[k] = null; } }, this);
+    if (hasZip && this.map) this.map.setView([this.c.lat[this.byZip[s.zip]], this.c.lon[this.byZip[s.zip]]], 9);
     this.summary.innerHTML = "";
-    this.summary.appendChild(el("p", { class: "az-empty", text: "Enter a ZIP or town to see the audience around it." }));
+    this.summary.appendChild(el("p", { class: "az-empty", text: msg }));
     this.tbody.innerHTML = ""; this.thead.innerHTML = ""; this.tableTitle.textContent = "ZIPs in range"; this.tableNote.textContent = "";
   };
   Radius.prototype.renderSummary = function () {
@@ -709,13 +718,13 @@
         if (app.state.zip && app.byZip[app.state.zip] !== undefined) {
           var c = app.c, i = app.byZip[app.state.zip];
           app.zipIn.value = app.state.zip + " " + c.city[i] + ", " + c.state[i];
-          app.update(true);
-        } else app.renderEmpty();
+        }
+        app.update(true);
       }).catch(function (e) { app.showError(e.message + ". Refresh the page; if it keeps happening, the audience data hasn't been built yet."); });
       window.addEventListener("hashchange", function () {
         if (!app.c) return;
         app.readHash(); app.syncFilters();
-        app.rSel.value = String(app.state.r); app.minSel.value = String(app.state.minIndex);
+        app.rSel.value = app.state.r ? String(app.state.r) : ""; app.minSel.value = String(app.state.minIndex);
         var i = app.byZip[app.state.zip];
         if (i !== undefined) app.zipIn.value = app.state.zip + " " + app.c.city[i] + ", " + app.c.state[i];
         app.update(true);
