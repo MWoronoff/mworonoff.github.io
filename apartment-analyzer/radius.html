@@ -41,8 +41,7 @@ AdtaxiRadius.start({
     { id: "mid", label: "Mid-market / workforce", note: "Adults renting in apartment buildings, in renter households earning $35K–$99K.", sel: { rinc: ["35_50", "50_75", "75_100"], rtype: ["apt"] } },
     { id: "affordable", label: "Affordable housing", note: "Adults in renter households earning under $35K.", sel: { rinc: ["lt35"] } },
     { id: "student", label: "Student housing", note: "Renters 18–24 enrolled in college or graduate school.", sel: { age: ["18_24"], renter: true, enrolled: true } },
-    { id: "senior", label: "Active adult / 55+", note: "Renters 55 and older.", sel: { age: ["55p"], renter: true } },
-    { id: "sfr", label: "Single-family rental", note: "Adults in renter households with children who rent a single-family house.", sel: { rkids: true, rtype: ["sfd"] } }
+    { id: "senior", label: "Active adult / 55+", note: "Renters 55 and older.", sel: { age: ["55p"], renter: true } }
   ],
   methodology: [
     { title: "Renter rate by age", body: "Census reports whether a household rents by the age of the head of household, so the tool uses each age group's own renter rate. Counts are adults living in renter households." },

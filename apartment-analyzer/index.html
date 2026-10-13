@@ -20,7 +20,7 @@
 <script>
 AdtaxiAnalyzer.start({
  "title": "Apartment Market Analyzer",
- "subtitle": "Where apartment advertisers' prospective residents are: Market Potential Scores for DMAs, metros and ZIPs across seven rental categories, to focus ad dollars on the highest-potential geographies.",
+ "subtitle": "Where apartment advertisers' prospective residents are: Market Potential Scores for DMAs, metros and ZIPs across six rental categories, to focus ad dollars on the highest-potential geographies.",
  "logo": "../shared/adtaxi-logo.svg",
  "exportName": "apartments",
  "notice": "Preview for review.",
@@ -89,10 +89,6 @@ AdtaxiAnalyzer.start({
   {
    "id": "senior",
    "label": "Active adult / 55+"
-  },
-  {
-   "id": "sfr",
-   "label": "Single-family rental"
   }
  ],
  "measures": [
@@ -145,13 +141,12 @@ AdtaxiAnalyzer.start({
     "metro",
     "zip"
    ],
-   "help": "Percentile of the share of renter households in this category's income range: $50K+ for All apartments, Mid-market and Active adult; $75K+ for Single-family rental; $100K+ for Luxury.",
+   "help": "Percentile of the share of renter households in this category's income range: $50K+ for All apartments, Mid-market and Active adult; $100K+ for Luxury.",
    "subs": [
     "all",
     "luxury",
     "mid",
-    "senior",
-    "sfr"
+    "senior"
    ]
   },
   {
@@ -448,38 +443,6 @@ AdtaxiAnalyzer.start({
    ]
   },
   {
-   "key": "r_kids",
-   "label": "Renter households with children",
-   "format": "int",
-   "subs": [
-    "sfr"
-   ]
-  },
-  {
-   "key": "rkids_share",
-   "label": "Share of renters with children",
-   "format": "pct",
-   "subs": [
-    "sfr"
-   ]
-  },
-  {
-   "key": "sfd_share",
-   "label": "Renters in single-family houses",
-   "format": "pct",
-   "subs": [
-    "sfr"
-   ]
-  },
-  {
-   "key": "rinc75_share",
-   "label": "Share of renters earning $75K+",
-   "format": "pct",
-   "subs": [
-    "sfr"
-   ]
-  },
-  {
    "key": "easi_hh",
    "label": "EASI rent spending per household",
    "format": "money",
@@ -539,10 +502,6 @@ AdtaxiAnalyzer.start({
   "r_u25",
   "r55p",
   "r55_share",
-  "r_kids",
-  "rkids_share",
-  "sfd_share",
-  "rinc75_share",
   "easi_hh"
  ],
  "tableColumns": [
@@ -565,7 +524,7 @@ AdtaxiAnalyzer.start({
   },
   {
    "title": "Consumer Demand",
-   "body": "The size and concentration of each category's likely residents, from the Census American Community Survey. All apartments: renter households, the share of households renting, renters who moved in since 2021 (turnover means leases to fill) and renters in buildings with 5+ units. Luxury / Class A: renters earning $100K+, renter householders 25–44 and apartment renters. Mid-market / workforce: renters earning $35K–$99K (count and share) and apartment renters. Affordable housing: renters earning under $35K (count and share) and renters paying 30% or more of income in rent. Student housing: college and graduate students (count and share of residents) and renter householders under 25. Active adult / 55+: renter householders 55+ (count and share of renters). Single-family rental: renter households with children (count and share) and renters in single-family houses."
+   "body": "The size and concentration of each category's likely residents, from the Census American Community Survey. All apartments: renter households, the share of households renting, renters who moved in since 2021 (turnover means leases to fill) and renters in buildings with 5+ units. Luxury / Class A: renters earning $100K+, renter householders 25–44 and apartment renters. Mid-market / workforce: renters earning $35K–$99K (count and share) and apartment renters. Affordable housing: renters earning under $35K (count and share) and renters paying 30% or more of income in rent. Student housing: college and graduate students (count and share of residents) and renter householders under 25. Active adult / 55+: renter householders 55+ (count and share of renters)."
   },
   {
    "title": "Category Spending",
@@ -576,7 +535,7 @@ AdtaxiAnalyzer.start({
   },
   {
    "title": "Spending Power",
-   "body": "Share of renter households in the income range each category serves: $50K+ for All apartments, Mid-market and Active adult, $75K+ for Single-family rental and $100K+ for Luxury. Not used for Affordable housing or Student housing."
+   "body": "Share of renter households in the income range each category serves: $50K+ for All apartments, Mid-market and Active adult, and $100K+ for Luxury. Not used for Affordable housing or Student housing."
   },
   {
    "title": "Competition",

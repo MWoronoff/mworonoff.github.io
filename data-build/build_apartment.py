@@ -43,7 +43,6 @@ SUBCATS = [
     {"id": "affordable", "label": "Affordable housing", "demand": ["rinc_lt35", "rinc_lt35_share", "burden_share"], "spend": None},
     {"id": "student", "label": "Student housing", "demand": ["college", "college_share", "r_u25"], "spend": None},
     {"id": "senior", "label": "Active adult / 55+", "demand": ["r55p", "r55_share"], "spend": "rinc50_share"},
-    {"id": "sfr", "label": "Single-family rental", "demand": ["r_kids", "rkids_share", "sfd_share"], "spend": "rinc75_share"},
 ]
 DEMAND_LABELS = {"renters": "Renter households", "renter_share": "Share of households renting", "moved_share": "Renters who moved in since 2021",
                  "apt_share": "Renters in buildings with 5+ units", "rinc100": "Renters earning $100K+", "r25_44_share": "Renter householders 25–44",
