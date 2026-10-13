@@ -74,6 +74,19 @@
   .tv-key i { display: inline-block; width: 12px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
   .tv-reshead { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; flex-wrap: wrap; }
   .tv-print-only { display: none; }
+  /* Off-screen sheet used to build the downloadable PDF */
+  .tv-pdf { position: fixed; left: -12000px; top: 0; width: 1000px; background: #fff; color: var(--ink); font-family: "Inter", "Segoe UI", Arial, sans-serif; }
+  .tv-pdf .tv-print-only { display: block; }
+  .tv-pdf .az-main { padding: 12px 22px 18px; max-width: none; }
+  .tv-pdf .az-header { padding: 18px 22px; }
+  .tv-pdf .az-panel { box-shadow: none; }
+  .tv-pdf .tv-stream, .tv-pdf .tv-results { margin-top: 10px; padding: 12px 14px; }
+  .tv-pdf .tv-cols { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+  .tv-pdf .tv-col { border-bottom: 0 !important; border-right: 1px solid var(--line) !important; }
+  .tv-pdf .tv-col:last-child { border-right: 0 !important; }
+  .tv-pdf .tv-insights { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+  .tv-pdf .tv-charts { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .tv-pdf .tv-scards { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
   .tv-psum { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px 18px; border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; margin: 12px 0 0; font-size: 12px; }
   .tv-psum div { display: flex; justify-content: space-between; gap: 8px; border-bottom: 1px solid #eef2f5; padding: 3px 0; }
   .tv-psum span { color: #44586c; } .tv-psum b { color: var(--ink); }
@@ -176,7 +189,7 @@
     <div class="tv-reshead">
       <div><h2>Shifting budget from Broadcast TV to Digital Video</h2>
       <p id="resSub" style="margin:0 0 12px;color:var(--muted);font-size:13px">Compared with spending the whole budget on Broadcast TV.</p></div>
-      <button type="button" class="az-btn" id="printBtn" disabled title="Enter the campaign inputs first">Print or save as PDF</button>
+      <button type="button" class="az-btn primary" id="printBtn" disabled title="Enter the campaign inputs first">Download PDF summary</button>
     </div>
     <div class="tv-print-only" id="printSum"></div>
     <div class="tv-slider">
@@ -555,7 +568,55 @@
   $("avgaud").addEventListener("input", function () { edited.avgaud = true; });
   $("spotReset").addEventListener("click", function () { edited.spot = false; refresh(); });
   $("avgReset").addEventListener("click", function () { edited.avgaud = false; refresh(); });
-  $("printBtn").addEventListener("click", function () { window.print(); });
+  /* ---------- PDF download: render an off-screen one-page sheet, then save it as a letter-size PDF ---------- */
+  function loadScript(src) {
+    return new Promise(function (ok, fail) {
+      if (document.querySelector('script[src="' + src + '"]')) return ok();
+      var sc = document.createElement("script"); sc.src = src; sc.onload = function () { ok(); }; sc.onerror = fail; document.head.appendChild(sc);
+    });
+  }
+  function buildSheet() {
+    var sheet = document.createElement("div"); sheet.className = "tv-pdf";
+    var parts = [document.querySelector(".az-header"), $("streamPanel"), $("results"), $("printFoot")];
+    var main = document.createElement("div"); main.className = "az-main";
+    parts.forEach(function (el, i) {
+      if (!el || el.hidden) return;
+      var c = el.cloneNode(true);
+      Array.prototype.forEach.call(c.querySelectorAll(".az-links, .tv-slider, #printBtn, .tv-need, .tv-print-only[hidden]"), function (x) { x.remove(); });
+      Array.prototype.forEach.call(c.querySelectorAll("[id]"), function (x) { x.removeAttribute("id"); });
+      c.removeAttribute("id");
+      if (i === 0) sheet.appendChild(c); else main.appendChild(c);
+    });
+    sheet.appendChild(main);
+    document.body.appendChild(sheet);
+    return sheet;
+  }
+  $("printBtn").addEventListener("click", function () {
+    var btn = this, label = btn.textContent;
+    btn.disabled = true; btn.textContent = "Preparing PDF…";
+    var done = function () { btn.disabled = false; btn.textContent = label; };
+    Promise.all([
+      loadScript("https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"),
+      loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js")
+    ]).then(function () {
+      var sheet = buildSheet();
+      return window.html2canvas(sheet, { scale: 2, backgroundColor: "#ffffff", useCORS: true, logging: false }).then(function (canvas) {
+        sheet.remove();
+        var pdf = new window.jspdf.jsPDF({ unit: "pt", format: "letter", orientation: "portrait" });
+        var pw = pdf.internal.pageSize.getWidth(), ph = pdf.internal.pageSize.getHeight(), m = 22;
+        var w = pw - 2 * m, h = canvas.height * w / canvas.width;
+        if (h > ph - 2 * m) { h = ph - 2 * m; w = canvas.width * h / canvas.height; }
+        pdf.addImage(canvas.toDataURL("image/jpeg", 0.92), "JPEG", (pw - w) / 2, m, w, h);
+        var safe = function (x) { return x.replace(/[^A-Za-z0-9]+/g, "-").replace(/^-|-$/g, ""); };
+        var d = new Date(), stamp = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+        pdf.save("Adtaxi-TV-Digital-" + safe(M.name) + "-" + safe(demoLabel()) + "-" + stamp + ".pdf");
+        done();
+      });
+    }).catch(function () {
+      Array.prototype.forEach.call(document.querySelectorAll(".tv-pdf"), function (x) { x.remove(); });
+      done(); window.print();   // fallback: the browser's print window, which can also save a PDF
+    });
+  });
   $("market").addEventListener("change", function () { selectMarket(this.value, true); });
   ["budget", "bcpm", "spot", "avgaud", "tvfreq", "dcpm", "dfreq", "shift"].forEach(function (id) { $(id).addEventListener("input", refresh); });
 
