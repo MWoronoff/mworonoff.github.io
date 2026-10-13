@@ -53,5 +53,5 @@ Built 2026-10-13. Result: **PASSED**
 | DMA roll-up matches county totals: Med spa and aesthetics | PASS | DMAs 203,457 vs counties 203,466 |
 | DMA roll-up matches county totals: Senior and home care | PASS | DMAs 59,098 vs counties 59,098 |
 | U.S. population (Deluxe) | INFO | 331,438,416 |
-| Counties built from ZIPs | PASS | 3,144 counties (3,100 with 1,000+ residents are ranked) |
-| County scores within 0–100 | PASS | 0 out of range; 27,900 scores computed |
+| Counties built from ZIPs | PASS | 3,144 counties (2,399 with 10,000+ residents are ranked) |
+| County scores within 0–100 | PASS | 0 out of range; 21,591 scores computed |

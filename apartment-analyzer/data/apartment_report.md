@@ -29,5 +29,5 @@ Built 2026-10-13. Result: **PASSED**
 | U.S. renters in buildings with 5+ units | PASS | 46.8% (expected 35.0%–52.0%) |
 | Census rent per household vs. EASI rent per household, DMAs | INFO | rank correlation 0.49 (EASI's per-household rent varies little between markets, so it isn't scored) |
 | Census rent per household vs. EASI rent per household, metros | INFO | rank correlation 0.47 (EASI's per-household rent varies little between markets, so it isn't scored) |
-| Counties built from ZIPs | PASS | 3,144 counties (3,100 with 1,000+ residents are ranked) |
-| County scores within 0–100 | PASS | 0 out of range; 18,600 scores computed |
+| Counties built from ZIPs | PASS | 3,144 counties (2,399 with 10,000+ residents are ranked) |
+| County scores within 0–100 | PASS | 0 out of range; 14,394 scores computed |
