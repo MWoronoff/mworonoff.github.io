@@ -371,7 +371,9 @@ def build_lodes():
                 except Exception:
                     continue
             else:
-                raise RuntimeError(f"no LODES {kind} file for {st.upper()}")
+                years[(st, kind)] = None
+                log(f"  {st.upper()}: no recent LODES {kind} file; skipped")
+                continue
             years[(st, kind)] = y
             d = pd.read_csv(io.BytesIO(raw), compression="gzip", dtype={geo: str},
                             usecols=[geo] + [v for v in LODES_VARS])
@@ -380,6 +382,10 @@ def build_lodes():
             g.columns = [f"lodes_{kind}_{c.lower()}" for c in g.columns]
             parts.append(g)
         log(f"  {st.upper()}: workplace {years[(st, 'wac')]}, residence {years[(st, 'rac')]}")
+    missing = sorted({s.upper() for (s, k), y in years.items() if y is None})
+    years = {k: y for k, y in years.items() if y is not None}
+    if not years:
+        raise RuntimeError("no LODES files found for any state")
     allp = pd.concat(parts)
     out = allp.groupby(level=0).sum(min_count=1).reset_index().rename(columns={"zcta": "zip"})
     yrs = sorted(set(years.values()))
@@ -389,7 +395,8 @@ def build_lodes():
         for k, v in LODES_VARS.items():
             labels[f"lodes_{kind}_{k.lower()}"] = f"{txt}: {v}"
     lag = [f"{s.upper()} {k} {y}" for (s, k), y in years.items() if y != yrs[-1]]
-    REPORT["lodes"] = {"release": rel, "rows": len(out), "jobs": int(out["lodes_wac_c000"].sum()), "lagging": lag}
+    REPORT["lodes"] = {"release": rel, "rows": len(out), "jobs": int(out["lodes_wac_c000"].sum()), "lagging": lag,
+                       "missing": missing}
     add_dict("zip_lodes.csv.gz", list(out.columns[1:]), "U.S. Census Bureau, LEHD Origin-Destination Employment Statistics (LODES 8)",
              rel, labels, "Census blocks rolled up to 2020 ZCTAs with the LODES crosswalk. Primary and secondary jobs "
                           "(JT00), all workers (S000). Puerto Rico is not covered. Excludes self-employed and military.")
@@ -508,11 +515,27 @@ def build_places():
 # ----------------------------------------------------------------------------------------------------------------
 # FHFA house price index, 5-digit ZIP (annual, developmental)
 # ----------------------------------------------------------------------------------------------------------------
-FHFA_URL = "https://www.fhfa.gov/hpi/download/annually/hpi_at_bdl_zip5.xlsx"
+FHFA_PAGE = "https://www.fhfa.gov/data/hpi/datasets?tab=additional-data"
+FHFA_URLS = ["https://www.fhfa.gov/hpi/download/annual/hpi_at_zip5.xlsx",
+             "https://www.fhfa.gov/hpi/download/annually/hpi_at_bdl_zip5.xlsx"]
 
 
 def build_fhfa():
-    raw = fetch_bytes(FHFA_URL)
+    urls = list(FHFA_URLS)
+    try:   # use whatever five-digit ZIP file the downloads page links to now
+        page = fetch_bytes(FHFA_PAGE, timeout=120).decode("utf-8", "replace")
+        found = re.findall(r'href="([^"]*zip5[^"]*\.xlsx)"', page, flags=re.I)
+        urls = [u if u.startswith("http") else "https://www.fhfa.gov" + u for u in found] + urls
+    except Exception as e:
+        log(f"  FHFA page not read ({e}); trying known addresses")
+    raw = None
+    for u in urls:
+        try:
+            raw = fetch_bytes(u); log(f"  {u}"); break
+        except Exception as e:
+            log(f"  not at {u}: {e}")
+    if raw is None:
+        raise RuntimeError("FHFA ZIP5 file not found")
     probe = pd.read_excel(io.BytesIO(raw), header=None, nrows=20)
     hdr = next(i for i in range(len(probe)) if probe.iloc[i].astype(str).str.contains("Year", case=False).any())
     d = pd.read_excel(io.BytesIO(raw), header=hdr, dtype=str)
@@ -623,7 +646,8 @@ def write_report(status, started):
         L.append(f"- Business Patterns: {c['est']:,} establishments; {c['naics_rows']:,} ZIP-by-industry rows.")
     l = REPORT.get("lodes")
     if l:
-        L.append(f"- LODES: {l['jobs']:,} jobs placed in ZIPs." + (f" States on an older year: {', '.join(l['lagging'])}." if l["lagging"] else ""))
+        L.append(f"- LODES: {l['jobs']:,} jobs placed in ZIPs." + (f" States on an older year: {', '.join(l['lagging'])}." if l["lagging"] else "")
+                 + (f" States with no recent files (no jobs data): {', '.join(l['missing'])}." if l["missing"] else ""))
     p = REPORT.get("places")
     if p:
         L.append(f"- PLACES: {p['measures']} measures.")
