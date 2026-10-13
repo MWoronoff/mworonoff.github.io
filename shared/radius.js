@@ -257,7 +257,7 @@
         var radii = (cfg.radii || [5, 10, 15, 25, 50]).slice();
         if (s.r && radii.indexOf(s.r) < 0) { radii.push(s.r); radii.sort(function (a, b) { return a - b; }); }   // keep a radius from a shared link
         return [el("option", { value: "", text: "Choose a radius", disabled: "disabled" })].concat(
-          radii.map(function (r) { return el("option", { value: r, text: (cfg.radiusLabel || "{r} miles").replace("{r}", r) }); }));
+          radii.map(function (r) { return el("option", { value: r, text: (cfg.radiusLabels && cfg.radiusLabels[r]) || (cfg.radiusLabel || "{r} miles").replace("{r}", r) }); }));
       })());
     this.minSel = el("select", { "aria-label": "Show", onchange: function () { s.minIndex = +this.value; self.update(false); } },
       [[0, "All ZIPs in range"], [100, "Index 100+"], [120, "Index 120+"], [150, "Index 150+"]].map(function (o) { return el("option", { value: o[0], text: o[1] }); }));
