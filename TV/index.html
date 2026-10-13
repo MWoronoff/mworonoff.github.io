@@ -52,6 +52,9 @@
   .tv-insight b { display: block; font-size: 19px; color: var(--navy); margin-top: 3px; }
   .tv-insight small { color: var(--muted); font-size: 12px; }
   .tv-wait { color: var(--muted); padding: 10px 0; }
+  .tv-need { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; background: var(--warn-bg); border: 1px solid var(--warn-line); border-radius: 10px; padding: 14px 16px; font-size: 14px; color: var(--ink); }
+  .tv-need b { color: var(--navy); }
+  .az-field input.tv-missing { border: 2px solid #d99a00; background: #fffbea; }
   .tv-method p { margin: 0 0 8px; line-height: 1.55; }
   @media (max-width: 1000px) { .tv-cols, .tv-insights { grid-template-columns: 1fr 1fr; } .tv-col:nth-child(2) { border-right: 0; } .tv-col { border-bottom: 1px solid var(--line); } }
   @media (max-width: 560px) { .tv-cols, .tv-insights { grid-template-columns: 1fr; } .tv-col { border-right: 0; } .tv-map { height: 320px; } }
@@ -319,17 +322,18 @@
     var budget = num("budget"), tvfreq = num("tvfreq"), dcpm = num("dcpm"), dfreq = num("dfreq");
     if (M && budget) $("shiftDollars").textContent = money0(budget * (1 - p)) + " Broadcast / " + money0(budget * p) + " Digital Video";
     else $("shiftDollars").textContent = "";
-    var missing = [];
-    if (!M) missing.push("a market");
-    if (!(budget > 0)) missing.push("the campaign budget");
-    if (!(tvfreq >= 1)) missing.push("the Broadcast schedule frequency (1 or more)");
+    var missing = [], firstId = null;
+    var need = function (ok, id, label) { $(id).classList.toggle("tv-missing", !ok && !!M); if (!ok) { missing.push(label); if (!firstId) firstId = id; } };
+    if (!M) { missing.push("a market"); firstId = "market"; }
+    need(budget > 0, "budget", "the campaign budget");
+    need(tvfreq >= 1, "tvfreq", "the Broadcast schedule frequency (1 or more)");
     var needDigital = p > 0;
-    if (needDigital) {
-      if (!(dcpm > 0)) missing.push("the Digital Video CPM");
-      if (!(dfreq >= 1)) missing.push("the digital frequency cap (1 or more)");
-    }
+    need(!needDigital || dcpm > 0, "dcpm", "the Digital Video CPM");
+    need(!needDigital || dfreq >= 1, "dfreq", "the digital frequency cap (1 or more)");
     if (missing.length) {
-      body.innerHTML = '<p class="tv-wait">To see results, enter ' + missing.join(", ").replace(/, ([^,]*)$/, " and $1") + ".</p>";
+      body.innerHTML = '<div class="tv-need"><span>To see results, enter <b>' + missing.join(", ").replace(/, ([^,]*)$/, " and $1") +
+        '</b>.</span><button type="button" class="az-btn primary" id="goMissing">Go to ' + (firstId === "market" ? "market" : "the field") + "</button></div>";
+      $("goMissing").addEventListener("click", function () { var f = $(firstId); f.scrollIntoView({ behavior: "smooth", block: "center" }); setTimeout(function () { f.focus(); }, 350); });
       return;
     }
     var t = target(M, gender, $("age").value, hhiChecked());
