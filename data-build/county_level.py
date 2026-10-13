@@ -6,14 +6,14 @@ population share within each county, so a county's ZIPs add back up to its full 
 
 EASI spending is published only for DMAs and metros, so counties are scored without Category Spending: the score is
 the weighted blend of the remaining parts (Consumer Demand, Spending Power, Competition), re-weighted to 100%.
-Counties with fewer than MIN_COUNTY_POP residents are shown but not ranked (tiny counties swing wildly on rates).
+Counties with fewer than MIN_COUNTY_POP residents are shown but not ranked (small counties have wide Census margins of error and few businesses, so their rates swing widely).
 """
 import os
 
 import pandas as pd
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-MIN_COUNTY_POP = 1000
+MIN_COUNTY_POP = 10000
 COUNTY_PARTS = ("demand", "spend", "comp")
 
 
