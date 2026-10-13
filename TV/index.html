@@ -103,11 +103,12 @@
 
   <section class="az-panel tv-plan">
     <h2>Campaign inputs</h2>
-    <p>The spot price and audience per spot fill in with the market averages, and the Digital Video CPM with the $45 planning CPM. Adjust any of them to match the schedule. Results appear once the budget and frequencies are entered.</p>
+    <p>The Broadcast CPM, spot price and audience per spot fill in with the market averages, and the Digital Video CPM with the $45 planning CPM. Adjust any of them to match the schedule. Results appear once the budget and frequencies are entered.</p>
     <div class="tv-inputs">
       <div class="tv-group">Campaign</div>
       <label class="az-field"><span>Campaign budget ($)</span><input id="budget" type="number" min="0" step="1000" inputmode="decimal"></label>
       <div class="tv-group">Broadcast TV schedule</div>
+      <label class="az-field"><span>Broadcast CPM, adults 18+ ($)</span><input id="bcpm" type="number" min="0" step="0.01" inputmode="decimal"><span class="tv-hint"><span id="cpmHint">Filled in with the market's planning CPM once a market is chosen; the spot price follows it.</span> <button type="button" class="tv-reset" id="cpmReset" hidden>Reset to average</button></span></label>
       <label class="az-field"><span>Average :30 spot price ($)</span><input id="spot" type="number" min="0" step="0.01" inputmode="decimal"><span class="tv-hint"><span id="spotHint">Filled in with the market average once a market is chosen; edit to match the schedule.</span> <button type="button" class="tv-reset" id="spotReset" hidden>Reset to average</button></span></label>
       <label class="az-field"><span id="avgLabel">Average target audience per spot</span><input id="avgaud" type="number" min="0" step="1" inputmode="decimal"><span class="tv-hint"><span id="avgHint">Filled in with the Scarborough average for the selected target; edit to match the schedule.</span> <button type="button" class="tv-reset" id="avgReset" hidden>Reset to average</button></span></label>
       <label class="az-field"><span id="freqLabel">Schedule frequency, selected target</span><input id="tvfreq" type="number" min="1" step="0.1" inputmode="decimal"><span class="tv-hint">Average frequency for the whole schedule, for the selected target, as quoted for the schedule.</span></label>
@@ -134,7 +135,7 @@
     <h2>How the numbers work</h2>
     <p><b>Broadcast audience.</b> Scarborough USA+ 2026 Release 1: average audience per half-hour across ABC, CBS, CW, FOX and NBC (635 network and half-hour observations per market, all dayparts). Spanish-language and independent stations are not included, which matters most in markets with large Hispanic populations such as Miami and Los Angeles.</p>
     <p><b>Targets.</b> Adults 18+, 18–34, 18–49, 25–54 and 50+, and Men and Women 18+, 18–49, 25–54 and 50+ are measured by Scarborough. Other age ranges for adults are built from measured age bands. Other gender and age combinations, and any household income selection, are estimates: income shares are applied on the assumption that income is independent of gender and age within a market. Estimated targets are labeled.</p>
-    <p><b>Broadcast delivery.</b> Spots = Broadcast spend ÷ average spot price. Target impressions = spots × average target audience per spot. Target GRPs = target impressions ÷ target population × 100. Target reach = GRPs ÷ the schedule's frequency. Off-target (wasted) impressions are the spots' audience outside the selected target. The spot price starts at the market average, estimated as the market's average adult audience per spot × a planning CPM that declines with DMA rank. That CPM is a planning figure, not a market rate; adjust the spot price to match the schedule. The average audience per spot starts at Scarborough's average for the selected target and can also be adjusted. Changing the market resets both to that market's averages; changing the target resets the audience.</p>
+    <p><b>Broadcast delivery.</b> Spots = Broadcast spend ÷ average spot price. Target impressions = spots × average target audience per spot. Target GRPs = target impressions ÷ target population × 100. Target reach = GRPs ÷ the schedule's frequency. Off-target (wasted) impressions are the spots' audience outside the selected target. The spot price starts at the market average: the market's average adult audience per spot × the Broadcast CPM ÷ 1,000. The Broadcast CPM starts at a planning figure that declines with DMA rank, set so Denver (DMA 17) is $7.00 for adults 18+; it is not a quoted market rate, so adjust the CPM or the spot price to match the schedule. The average audience per spot starts at Scarborough's average for the selected target and can also be adjusted. Changing the market resets the CPM, spot price and audience to that market's averages; changing the target resets the audience.</p>
     <p><b>Smaller Broadcast schedules.</b> The frequency entered describes the full schedule. When part of the budget moves to Digital Video, the remaining schedule's reach is shown as a range: the low end holds frequency steady (reach falls with GRPs); the high end holds reach steady (frequency falls with GRPs). The actual result for a trimmed schedule falls between the two.</p>
     <p><b>Digital Video.</b> Impressions = spend ÷ CPM × 1,000. Target impressions = impressions × on-target rate. Target reach = target impressions ÷ frequency cap, limited to the target population.</p>
     <p><b>Combined campaign.</b> Spend, target and off-target impressions, target efficiency and effective target CPM are added across Broadcast and Digital Video. Combined reach and frequency are not shown because the overlap between the Broadcast and Digital Video audiences is not measured.</p>
@@ -148,7 +149,7 @@
   "use strict";
   var $ = function (id) { return document.getElementById(id); };
   var DATA = null, M = null, gender = "A";
-  var edited = { spot: false, avgaud: false };  // true once the user changes a filled-in average
+  var edited = { bcpm: false, spot: false, avgaud: false };  // true once the user changes a filled-in average
   var AGE_BANDS = { "18-34": ["18-24", "25-34"], "35-54": ["35-44", "45-54"], "35-64": ["35-44", "45-54", "55-64"], "55+": ["55-64", "65+"], "65+": ["65+"] };
   var ANCHOR = { "18-34": "18-49", "35-54": "25-54", "35-64": "25-54", "55+": "50+", "65+": "50+" };
   var HHI_KEYS = ["u25", "25to49", "50to74", "75to99", "100to149", "150to249", "250plus"];
@@ -240,7 +241,8 @@
   function restyle() { if (dmaLayer) dmaLayer.eachLayer(function (l) { l.setStyle(styleFor(l.feature.properties.dma_code)); }); }
 
   /* ---------- Benchmark panel ---------- */
-  function estSpot(m) { return m.avg_a18 * m.planning_cpm / 1000; }
+  function cpmVal(m) { var c = num("bcpm"); return c !== null && c > 0 ? c : m.planning_cpm; }
+  function estSpot(m) { return m.avg_a18 * cpmVal(m) / 1000; }
   function renderBench() {
     var box = $("bench");
     if (!M) { box.innerHTML = '<p class="az-empty">Choose a market from the list or the map to see its broadcast audience benchmark.</p>'; return; }
@@ -265,8 +267,10 @@
         row("Target CPM", avgT ? money(spot / avgT * 1000) : "—") +
       "</div>" +
       '<p class="tv-hint" style="margin:0">Averages across ABC, CBS, CW, FOX and NBC, all half-hours. ' +
-      (spotIsEst ? "The spot price is the market average, estimated from a " + money(M.planning_cpm) + " planning CPM; adjust it below to match the schedule." : "Spot price as adjusted below.") + "</p>";
-    $("spotHint").textContent = "Market average: " + money(estSpot(M)) + " (from a planning CPM). Edit to match the schedule.";
+      (spotIsEst ? "The spot price is the average adult audience per spot × a " + money(cpmVal(M)) + " Broadcast CPM; adjust either below to match the schedule." : "Spot price as adjusted below.") + "</p>";
+    $("spotHint").textContent = "Average audience " + fmt(M.avg_a18) + " × " + money(cpmVal(M)) + " CPM = " + money(estSpot(M)) + ". Edit to match the schedule.";
+    $("cpmHint").textContent = "Planning CPM for " + M.name + ": " + money(M.planning_cpm) + ". The spot price follows it unless edited.";
+    $("cpmReset").hidden = !edited.bcpm;
     $("avgHint").textContent = "Scarborough average: " + fmt(avgT) + " for " + demoLabel() + (t.measured ? "" : " (estimated)") + ". Edit to match the schedule.";
     $("spotReset").hidden = !edited.spot; $("avgReset").hidden = !edited.avgaud;
     $("avgLabel").textContent = "Average audience per spot, " + demoLabel();
@@ -379,14 +383,15 @@
 
   // Fill the spot price and audience fields with the averages unless the user has adjusted them.
   function syncAverages() {
-    if (!M) { if (!edited.spot) $("spot").value = ""; if (!edited.avgaud) $("avgaud").value = ""; return; }
+    if (!M) { if (!edited.bcpm) $("bcpm").value = ""; if (!edited.spot) $("spot").value = ""; if (!edited.avgaud) $("avgaud").value = ""; return; }
+    if (!edited.bcpm) $("bcpm").value = M.planning_cpm.toFixed(2);
     if (!edited.spot) $("spot").value = estSpot(M).toFixed(2);
     if (!edited.avgaud) $("avgaud").value = Math.round(M.avg_a18 * target(M, gender, $("age").value, hhiChecked()).composition);
   }
   function refresh() { syncAverages(); renderBench(); renderResults(); }
   function selectMarket(name, pan) {
     M = name ? DATA.byName[name] : null;
-    edited.spot = false; edited.avgaud = false;  // a new market starts from its own averages
+    edited.bcpm = false; edited.spot = false; edited.avgaud = false;  // a new market starts from its own averages
     restyle();
     if (M && pan !== false && layerByCode[M.dma_code]) map.fitBounds(layerByCode[M.dma_code].getBounds(), { maxZoom: 6, padding: [30, 30] });
     refresh();
@@ -402,12 +407,14 @@
   });
   $("age").addEventListener("change", function () { edited.avgaud = false; refresh(); });
   $("hhi").addEventListener("change", function () { edited.avgaud = false; refresh(); });
+  $("bcpm").addEventListener("input", function () { edited.bcpm = true; });
   $("spot").addEventListener("input", function () { edited.spot = true; });
+  $("cpmReset").addEventListener("click", function () { edited.bcpm = false; refresh(); });
   $("avgaud").addEventListener("input", function () { edited.avgaud = true; });
   $("spotReset").addEventListener("click", function () { edited.spot = false; refresh(); });
   $("avgReset").addEventListener("click", function () { edited.avgaud = false; refresh(); });
   $("market").addEventListener("change", function () { selectMarket(this.value, true); });
-  ["budget", "spot", "avgaud", "tvfreq", "dcpm", "ontarget", "dfreq", "shift"].forEach(function (id) { $(id).addEventListener("input", refresh); });
+  ["budget", "bcpm", "spot", "avgaud", "tvfreq", "dcpm", "ontarget", "dfreq", "shift"].forEach(function (id) { $(id).addEventListener("input", refresh); });
 
   Promise.all([
     fetch("data/markets.json").then(function (r) { if (!r.ok) throw new Error("markets"); return r.json(); }),

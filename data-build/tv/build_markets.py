@@ -14,6 +14,10 @@ def grab(path, name):
     return json.loads(m.group(1))
 
 DIM = grab("archive/tv-2026-10/index.html", "DIM_DATA")
+
+# Planning CPMs keep the old rank-based curve, rescaled so Denver (DMA 17) = $7.00 for adults 18+
+# (Oct 2026: the old curve put Denver at $15.61, an average :30 spot near $691).
+CPM_SCALE = 7.0 / DIM["Denver"]["planning_cpm"]
 MEAS = grab("archive/tv-2026-10/Gindex.html", "DATA")
 
 DMA_CODES = {
@@ -40,7 +44,7 @@ for name, d in sorted(DIM.items()):
         "adults": round(d["base"]),
         "avg_a18": round(d["avg_a18"], 1),
         "obs": d["obs"],
-        "planning_cpm": d["planning_cpm"],
+        "planning_cpm": round(d["planning_cpm"] * CPM_SCALE, 2),
         "measured": meas,
         "gender": {k: {"share": round(v["share"], 6), "composition": round(v["composition"], 6)} for k, v in d["gender"].items() if k != "A"},
         "age": {k: {"share": round(v["share"], 6), "composition": round(v["composition"], 6)} for k, v in d["age"].items() if k != "18+"},
