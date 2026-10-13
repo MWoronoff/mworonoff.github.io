@@ -23,3 +23,5 @@ Built 2026-10-13. Result: **PASSED**
 | U.S. unemployment rate | PASS | 5.2% (expected 3%–8%) |
 | U.S. share of workers commuting by car | PASS | 77.3% (expected 65%–90%) |
 | U.S. households below poverty | PASS | 12.6% (expected 9%–16%) |
+| Counties built from ZIPs | PASS | 3,144 counties (3,100 with 1,000+ residents are ranked) |
+| County scores within 0–100 | PASS | 0 out of range; 15,500 scores computed |

@@ -50,3 +50,5 @@ Built 2026-10-13. Result: **PASSED**
 | U.S. household-weighted 1-inch hail days | INFO | 1.3 a year |
 | U.S. households per square mile | PASS | 45.0 (expected 25–50) |
 | Density sense check: New York DMA is far denser than the U.S. | PASS | 721 vs 45 households per square mile |
+| Counties built from ZIPs | PASS | 3,144 counties (3,100 with 1,000+ residents are ranked) |
+| County scores within 0–100 | PASS | 0 out of range; 21,700 scores computed |

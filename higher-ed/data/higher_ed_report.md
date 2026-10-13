@@ -29,3 +29,5 @@ Built 2026-10-13. Result: **PASSED**
 | U.S. share whose highest is a bachelor's | PASS | 21.6% (expected 17%–26%) |
 | U.S. share of 25-64s with some college, no degree | PASS | 18.9% (expected 14%–25%) |
 | U.S. unemployment rate | PASS | 5.2% (expected 3%–8%) |
+| Counties built from ZIPs | PASS | 3,144 counties (3,100 with 1,000+ residents are ranked) |
+| County scores within 0–100 | PASS | 0 out of range; 15,500 scores computed |
