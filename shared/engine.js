@@ -305,6 +305,7 @@
         var rc = {}; for (var k in RC) rc[k] = RC[k];
         rc.embedded = true; rc.initial = { zip: opt.zip, r: opt.r, p: opt.p || preset };
         rc.onState = function () { self.writeHash(); };
+        rc.onUpdate = function (ready) { self.radiusReady = ready; self.renderAd(); };
         self.radius = window.AdtaxiRadius.start(rc, self.radiusBox);
       } else {
         if (preset) self.radius.usePreset(preset);
@@ -326,7 +327,7 @@
     this.radiusBox.hidden = true;
     this.anaParts.forEach(function (x) { x.hidden = false; });
     Array.prototype.forEach.call(this.controlBar.querySelectorAll(".az-only"), function (x) { x.hidden = false; });
-    this.adPanel.hidden = !this.cfg.adResponse;
+    this.adPanel.hidden = true;
     var m = this.map; setTimeout(function () { m.invalidateSize(); }, 0);
     this.refresh();
   };
@@ -402,10 +403,15 @@
 
   /* ---------- Ad response (optional, national survey data per category) ---------- */
   Analyzer.prototype.renderAd = function () {
-    var A = this.cfg.adResponse, box = this.adPanel, self = this;
-    if (this.mode === "radius") { box.hidden = true; return; }   // the Radius view shows only the radius tool
-    if (!A || !box) return;
-    var d = A.subs && A.subs[this.state.sub];
+    // Ad response comes at the end of the process: only in the Radius view, under the radius map, after a center and radius are chosen
+    var A = this.cfg.adResponse, self = this;
+    if (this.adPanel) this.adPanel.hidden = true;
+    var rad = this.mode === "radius" && this.radius, box = rad && this.radius.extra;
+    if (!box) return;
+    if (!A || !this.radiusReady) { box.innerHTML = ""; box.hidden = true; return; }
+    var rp = this.radius.state.profile;
+    var d = A.subs && (A.subs[rp] || A.subs[this.state.sub]);
+    if (!box.classList.contains("az-panel")) box.className = "rz-extra az-panel az-ad";
     box.innerHTML = "";
     if (!d) { box.hidden = true; return; }
     box.hidden = false;

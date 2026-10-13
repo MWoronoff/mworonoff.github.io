@@ -314,7 +314,8 @@
     this.summary = el("div", { class: "rz-summary", "aria-live": "polite" });
     this.legend = el("div", { class: "az-legend", "aria-label": "Map legend" });
     this.mapEl = el("div", { class: "az-map rz-map", role: "region", "aria-label": "Map of ZIPs in the radius" });
-    var right = el("div", { class: "rz-right" }, [this.summary, el("div", { class: "az-panel az-map-panel" }, [this.mapEl, this.legend])]);
+    this.extra = el("div", { class: "rz-extra" });   // filled by an analyzer page that embeds the tool (ad response, under the map)
+    var right = el("div", { class: "rz-right" }, [this.summary, el("div", { class: "az-panel az-map-panel" }, [this.mapEl, this.legend]), this.extra]);
 
     // Table
     this.tableTitle = el("h2"); this.tableNote = el("span");
@@ -502,7 +503,7 @@
     var s = this.state, c = this.c;
     if (!c) return;
     var ci = this.byZip[s.zip];
-    if (ci === undefined || !s.r) { this.renderEmpty(); return; }
+    if (ci === undefined || !s.r) { this.renderEmpty(); if (this.cfg.onUpdate) this.cfg.onUpdate(false); return; }
     this.computeNational();
     var lat0 = c.lat[ci], lon0 = c.lon[ci], rows = [];
     var dLat = s.r / 69, dLon = s.r / (69 * Math.cos(lat0 * Math.PI / 180));   // quick bounding box first
@@ -520,6 +521,7 @@
     this.renderSummary();
     this.renderTable();
     this.renderMap(moved);
+    if (this.cfg.onUpdate) this.cfg.onUpdate(true);   // a center and radius are set: the analyzer can show what comes next
   };
   Radius.prototype.visible = function () {
     var m = this.state.minIndex;

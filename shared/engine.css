@@ -316,3 +316,11 @@ a.az-btn { display: inline-block; text-decoration: none; text-align: center; }
   .az-ad-cols .az-ad-rows + .az-ad-rows .az-ad-colhead { display: none; }   /* one list on narrow screens */
 }
 @media (max-width: 640px) { .az-ad-cols .az-ad-row { grid-template-columns: 1fr 58px 50px 58px; } }
+/* Ad response in the Radius view: under the radius map, one compact list */
+.rz-extra.az-ad { margin-top: 16px; }
+.rz-extra[hidden] { display: none !important; }
+.rz-extra .az-ad-head { flex-wrap: wrap; gap: 10px; }
+.rz-extra .az-ad-cols { grid-template-columns: 1fr; }
+.rz-extra .az-ad-cols .az-ad-rows + .az-ad-rows .az-ad-colhead { display: none; }
+.rz-extra .az-ad-cols .az-ad-row { grid-template-columns: minmax(110px, 1.2fr) minmax(50px, 1.4fr) 60px 52px 64px; }
+@media (max-width: 640px) { .rz-extra .az-ad-cols .az-ad-row { grid-template-columns: 1fr 58px 50px 58px; } }
