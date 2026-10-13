@@ -432,6 +432,10 @@
     var short = function (t) { return SHORT[t] || t.replace(/ \(.*\)$/, ""); };
     var list = function (a, f) { return a.map(function (r) { return short(r.label) + " (" + f(r) + ")"; }).join(", "); };
     var max = Math.max.apply(null, rows.map(function (r) { return r.aud; }));
+    // Bars start above zero (5 points below the lowest value, rounded down to a multiple of 5) so differences between ad types stand out
+    var min = Math.min.apply(null, rows.map(function (r) { return r.aud; }));
+    var base = Math.max(0, Math.floor(min / 5) * 5 - 5);
+    var barW = function (v) { return max > base ? Math.max(1, (v - base) / (max - base) * 100) : 100; };
     box.appendChild(el("div", { class: "az-ad-head" }, [
       el("div", null, [
         el("h2", { text: (A.title || "How prospects respond to advertising").replace("{sub}", this.subLabel()).replace("{aud}", (d.short || "").toLowerCase()) }),
@@ -454,7 +458,7 @@
       return el("div", { class: "az-ad-row", role: "row" }, [
         el("span", { class: "az-ad-label", role: "cell", title: r.label }, [el("span", { class: "az-ad-rank", text: rank + "." }), short(r.label)]),
         el("span", { class: "az-ad-bars", role: "cell", "aria-hidden": "true" }, [
-          el("span", { class: "az-ad-bar aud", style: "width:" + (r.aud / max * 100) + "%" })]),
+          el("span", { class: "az-ad-bar aud", style: "width:" + barW(r.aud) + "%" })]),
         el("span", { class: "num", role: "cell", text: pct(r.aud) }),
         el("span", { class: "num muted", role: "cell", text: pct(r.us) }),
         el("span", { class: "num az-ad-diff", role: "cell", text: dif(r.diff) })
@@ -469,7 +473,7 @@
       cols.appendChild(t);
     });
     box.appendChild(cols);
-    box.appendChild(el("p", { class: "az-ad-note", text: (A.note || "") + (d.source ? " Source: " + d.source + "." : A.source ? " Source: " + A.source + "." : "") }));
+    box.appendChild(el("p", { class: "az-ad-note", text: (A.note || "") + (base > 0 ? " Bars start at " + base + "%, not zero, to make the differences easier to see." : "") + (d.source ? " Source: " + d.source + "." : A.source ? " Source: " + A.source + "." : "") }));
   };
 
   /* ---------- Map ---------- */
