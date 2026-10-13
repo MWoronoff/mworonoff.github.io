@@ -1,0 +1,67 @@
+{
+ "facts": {
+  "deluxe": {
+   "release": "Deluxe ZIP database, update dated 10/01/2025",
+   "rows": 41558,
+   "residential": 33623,
+   "pop": 334723696,
+   "dups_dropped": 0,
+   "files": 10
+  },
+  "acs": {
+   "release": "ACS 5-year 2020\u20132024",
+   "rows": 33772,
+   "tables": 41,
+   "columns": 835,
+   "age_bad": 0,
+   "inc_bad": 0,
+   "labels": "table shells"
+  },
+  "irs": {
+   "release": "tax year 2022",
+   "rows": 27588,
+   "columns": 173,
+   "returns": 153922620
+  },
+  "cbp": {
+   "release": "2023",
+   "rows": 34954,
+   "naics_rows": 772314,
+   "est": 8356295
+  },
+  "lodes": {
+   "release": "2021\u20132023 (latest available per state)",
+   "rows": 33497,
+   "jobs": 150573256,
+   "lagging": [
+    "MI wac 2021"
+   ],
+   "missing": [
+    "AK"
+   ]
+  },
+  "ruca": {
+   "release": "2020 codes",
+   "rows": 41146
+  },
+  "places": {
+   "release": "PLACES: ZCTA Data (GIS Friendly Format), 2025 release",
+   "rows": 32520,
+   "measures": 40
+  },
+  "fhfa": {
+   "release": "annual index through 2025",
+   "rows": 15772
+  }
+ },
+ "built": {
+  "deluxe": "2026-10-13",
+  "acs": "2026-10-13",
+  "irs": "2026-10-13",
+  "cbp": "2026-10-13",
+  "lodes": "2026-10-13",
+  "ruca": "2026-10-13",
+  "places": "2026-10-13",
+  "fhfa": "2026-10-13"
+ }
+}
