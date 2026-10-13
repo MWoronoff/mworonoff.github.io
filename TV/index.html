@@ -30,8 +30,13 @@
   .tv-reset { border: 0; background: none; padding: 0; color: var(--teal); font-size: 11px; font-weight: 600; text-decoration: underline; cursor: pointer; }
   .tv-reset[hidden] { display: none; }
   .tv-slider { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; background: #f7fafc; border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; }
-  .tv-slider input { flex: 1 1 260px; accent-color: var(--teal); }
-  .tv-slider b { font-size: 20px; color: var(--navy); min-width: 52px; text-align: right; }
+  .tv-slider-track { flex: 1 1 320px; display: flex; flex-direction: column; gap: 6px; padding-top: 6px; }
+  .tv-slider input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 12px; border-radius: 999px; background: #dce4ec; outline-offset: 6px; cursor: pointer; margin: 0; }
+  .tv-slider input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 30px; height: 30px; border-radius: 50%; background: var(--teal); border: 4px solid #fff; box-shadow: 0 1px 6px rgba(15,39,66,.35); cursor: grab; }
+  .tv-slider input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; background: var(--teal); border: 4px solid #fff; box-shadow: 0 1px 6px rgba(15,39,66,.35); cursor: grab; }
+  .tv-ticks { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
+  .tv-ticks em { font-style: normal; font-weight: 600; color: var(--navy); }
+  .tv-slider b { font-size: 26px; color: var(--navy); min-width: 52px; text-align: right; }
   .tv-slider span { color: var(--muted); font-size: 13px; }
   .tv-cols { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
   .tv-col { padding: 12px 14px; border-right: 1px solid var(--line); }
@@ -122,9 +127,12 @@
     <h2>Shifting budget from Broadcast TV to Digital Video</h2>
     <p id="resSub">Compared with spending the whole budget on Broadcast TV.</p>
     <div class="tv-slider">
-      <label for="shift" style="font-weight:600;color:#44586c">Budget shifted to Digital Video</label>
-      <input id="shift" type="range" min="0" max="100" step="5" value="0">
-      <b id="shiftLab">0%</b>
+      <label for="shift" style="font-weight:700;color:#0f2742;font-size:14px">Drag to shift budget<br><span style="font-weight:400">from Broadcast TV to Digital Video</span></label>
+      <div class="tv-slider-track">
+        <input id="shift" type="range" min="0" max="100" step="5" value="0" aria-label="Share of budget shifted to Digital Video">
+        <div class="tv-ticks" aria-hidden="true"><em>All Broadcast</em><span>25%</span><span>50%</span><span>75%</span><em>All Digital</em></div>
+      </div>
+      <b id="shiftLab">0% digital</b>
       <span id="shiftDollars"></span>
     </div>
     <div id="resBody"><p class="tv-wait">Choose a market and enter the campaign inputs to see results.</p></div>
@@ -305,7 +313,8 @@
 
   function renderResults() {
     var p = +$("shift").value / 100;
-    $("shiftLab").textContent = Math.round(p * 100) + "%";
+    $("shiftLab").textContent = Math.round(p * 100) + "% digital";
+    $("shift").style.background = "linear-gradient(to right, #0f7e70 0%, #0f7e70 " + (p * 100) + "%, #dce4ec " + (p * 100) + "%, #dce4ec 100%)";
     var body = $("resBody");
     var budget = num("budget"), tvfreq = num("tvfreq"), dcpm = num("dcpm"), dfreq = num("dfreq");
     if (M && budget) $("shiftDollars").textContent = money0(budget * (1 - p)) + " Broadcast / " + money0(budget * p) + " Digital Video";
