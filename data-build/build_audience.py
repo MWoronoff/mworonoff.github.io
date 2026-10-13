@@ -80,7 +80,9 @@ BURDEN30 = (7, 8, 9, 10)
 RENT_KIDS = (18, 22, 25)
 # B25036 owner lines: 3 built 2020 or later, 4 2010-2019, 5 2000-2009, 6 1990s, 7 1980s, 8 1970s ... 12 1939 or earlier (renter = +11)
 BUILT = {"2000p": (3, 4, 5), "80_99": (6, 7), "pre1980": (8, 9, 10, 11, 12)}
-# B25038 owner lines: 3 moved in 2021 or later, 4 2018-2020, 5 2010-2017, 6 2000-2009, 7 1990s, 8 1989 or earlier
+# B25038 owner lines: 3 newest group ("2023 or later" in 2020-2024), 4 the group before it ("2020 to 2022"),
+# 5 2010-2019, 6 2000-2009, 7 1990s, 8 1989 or earlier. Lines 3+4 are "moved in 2020 or later" for 2020-2024; the
+# group years shift with each release, so the label checks below look for "or later" rather than a fixed year.
 MOVED_PRE2010 = (6, 7, 8)
 # B15001 layout: male total 2, female total 43; each age group's total line, followed by its 7 education lines
 # (less than 9th grade, 9th-12th no diploma, high school graduate, some college no degree, associate's, bachelor's, graduate)
@@ -144,7 +146,7 @@ LABEL_CHECKS = [(v("B01001", 2), ["Male"]), (v("B01001", 26), ["Female"])] + \
      (v("B25032", 2), ["Owner"]), (v("B25032", 3), ["Owner", "1, detached"]), (v("B25032", 13), ["Renter"]),
      (v("B25038", 2), ["Owner occupied"]), (v("B25038", 6), ["Owner", "2000 to 2009"]), (v("B25038", 8), ["Owner", "1989 or earlier"]),
      (v("B25038", 9), ["Renter occupied"]),
-     (v("B25038", 10), ["Renter", "2021 or later"]),
+     (v("B25038", 10), ["Renter", "or later"]),
      (v("B25032", 14), ["Renter", "1, detached"]), (v("B25032", 18), ["Renter", "5 to 9"]), (v("B25032", 20), ["Renter", "20 to 49"]),
      (v("B25032", 21), ["Renter", "50 or more"]),
      (v("B25118", 2), ["Owner occupied"]), (v("B25118", 14), ["Renter occupied"]), (v("B25118", 15), ["Renter", "Less than $5,000"]),
@@ -380,7 +382,7 @@ def main():
     out["r_sfd"] = acs[v("B25032", 14)]                                       # renting a single-family detached house
     out["r_5p"] = sum(acs[v("B25032", n)] for n in (18, 19, 20, 21))          # renting in a building with 5+ units
     out["r_20p"] = acs[v("B25032", 20)] + acs[v("B25032", 21)]                # renting in a building with 20+ units
-    out["r_mtot"], out["r_moved21"] = acs[v("B25038", 9)], acs[v("B25038", 10)]   # renters who moved in 2021 or later
+    out["r_mtot"], out["r_moved21"] = acs[v("B25038", 9)], acs[v("B25038", 10)]   # renters in the newest move-in group (not shown on any page)
     out["rinc_tot"] = acs[v("B25118", 14)]
     for b, lines in RINC.items(): out[f"rinc_{b}"] = sum(acs[v("B25118", n)] for n in lines)
     out["rb_base"] = acs[v("B25070", 1)] - acs[v("B25070", 11)]              # renters whose burden can be computed

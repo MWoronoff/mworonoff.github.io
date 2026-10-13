@@ -139,11 +139,14 @@
 
   function render() {
     var root = $("crm"); root.innerHTML = "";
-    if (S.params.category || S.params.dma) {
-      var ctx = [];
-      if (S.params.category) ctx.push(S.params.category.replace(/-/g, " ") + (S.params.sub ? ", " + S.params.sub.replace(/-/g, " ") : ""));
-      if (S.params.dma) ctx.push("market preset from the analyzer");
-      root.appendChild(el("p", { class: "crm-context", text: "Opened from the " + ctx.join(" analyzer; ") + "." }));
+    if (S.params.from || S.params.category) {
+      var name = S.params.from || (S.params.category.replace(/-/g, " ") + " analyzer");
+      var dmaName = null;
+      if (S.params.dma) { var dz = S.list.find(function (z) { return z.dma === S.params.dma; }); if (dz) dmaName = titleCase(dz.dma_name) + " DMA"; }
+      var back = document.referrer && /analyzer|healthcare|legal|higher-ed|home-services|furniture|apartment/.test(document.referrer) ? document.referrer : null;
+      root.appendChild(el("p", { class: "crm-context" }, [
+        "Opened from the " + name + (S.params.subl ? " (" + S.params.subl + ")" : "") + (dmaName ? ", with the trade area set to the " + dmaName : "") + ". ",
+        back ? el("a", { href: back, text: "Back to the analyzer" }) : null]));
     }
     root.appendChild(uploadPanel());
     root.appendChild(el("div", { id: "crm-setup" }));

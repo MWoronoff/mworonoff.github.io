@@ -118,6 +118,17 @@
   };
 
   /* ---------- URL state ---------- */
+  // Link to the Customer Market Analyzer with this analyzer's category, subcategory and selected DMA
+  Analyzer.prototype.crmUrl = function () {
+    var s = this.state, cfg = this.cfg, q = [];
+    q.push("category=" + encodeURIComponent(cfg.exportName || ""));
+    var sub = (cfg.subcategories || []).filter(function (x) { return x.id === s.sub; })[0];
+    if (sub) q.push("sub=" + encodeURIComponent(sub.id), "subl=" + encodeURIComponent(sub.label));
+    q.push("from=" + encodeURIComponent(cfg.title || ""));
+    var dma = s.level === "dma" && s.area ? s.area : (s.level === "zip" && s.parent && s.parent.level === "dma" ? s.parent.id : null);
+    if (dma) q.push("dma=" + encodeURIComponent(dma));
+    return (cfg.crmUrl || "../crm-analyzer/") + "?" + q.join("&");
+  };
   Analyzer.prototype.readHash = function () {
     var h = (location.hash || "").replace(/^#/, "");
     if (!h) return;
@@ -228,6 +239,9 @@
     controls.push(el("label", { class: "az-field az-only" }, [el("span", { text: "Search" }), this.search]));
     controls.push(el("div", { class: "az-actions az-only" }, [
       el("button", { type: "button", class: "az-btn", text: "How scores work", onclick: function () { self.openMethod(); } }),
+      cfg.crm === false ? null : el("button", { type: "button", class: "az-btn", text: "Analyze your customers",
+        title: "Upload a customer list and compare it with this market's potential, ZIP by ZIP",
+        onclick: function () { location.href = self.crmUrl(); } }),
       el("button", { type: "button", class: "az-btn primary", text: "Export CSV", onclick: function () { self.exportCSV(); } })
     ]));
     var controlBar = el("section", { class: "az-controls", "aria-label": "Analyzer controls" }, controls);
