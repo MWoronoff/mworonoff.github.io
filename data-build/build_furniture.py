@@ -297,7 +297,8 @@ def main():
 
     # ZIPs inside each market, ranked within the market
     nfiles = 0
-    for level, col, src_ in (("dma", "dma_code", zd), ("metro", "cbsa_code", zm)):
+    for level, col, src_ in (("dma", "dma_code", zd), ("metro", "cbsa_code", zm),
+                                ("county", "county_fips", z[z.county_fips.astype(str).str.len() == 5])):
         folder = os.path.join(OUT, "zip", level); os.makedirs(folder, exist_ok=True)
         for code, g in src_.groupby(col):
             df = g.set_index("zip")

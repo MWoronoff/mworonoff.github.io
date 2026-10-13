@@ -864,7 +864,8 @@ def main():
 
     # ZIPs inside each market, ranked within the market (no ZIP-level payroll, so Spending Power is left out there)
     nfiles = 0
-    for level, col, src in (("dma", "dma_code", zd), ("metro", "cbsa_code", zm)):
+    for level, col, src in (("dma", "dma_code", zd), ("metro", "cbsa_code", zm),
+                                ("county", "county_fips", z[z.county_fips.astype(str).str.len() == 5])):
         folder = os.path.join(OUT, "zip", level); os.makedirs(folder, exist_ok=True)
         for code, g in src.groupby(col):
             df = g.set_index("zip")

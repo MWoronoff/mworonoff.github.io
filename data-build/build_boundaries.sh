@@ -53,16 +53,18 @@ $MS "$CBSA_SHP" -filter "LSAD == 'M1' && !/, PR$/.test(NAME)" -each "cbsa_code=S
   -simplify 6% keep-shapes -rename-layers metro -o "$OUT/metro.topo.json" format=topojson quantization=1e5
 
 # 4. ZIP (ZCTA) boundaries, one file per DMA and per metro, loaded only when a market is opened
-rm -rf "$OUT/zip"; mkdir -p "$OUT/zip/dma" "$OUT/zip/metro"
+rm -rf "$OUT/zip"; mkdir -p "$OUT/zip/dma" "$OUT/zip/metro" "$OUT/zip/county"
 $MS "$ZCTA_SHP" -each "zip=String($ZCTA_FIELD)" \
-  -join data-build/geo/zip_geo.csv keys=zip,zip string-fields=zip,dma_code,cbsa_code \
-  -filter "dma_code != null" -filter-fields zip,dma_code,cbsa_code,cbsa_type \
+  -join data-build/geo/zip_geo.csv keys=zip,zip string-fields=zip,dma_code,cbsa_code,county_fips \
+  -filter "dma_code != null" -filter-fields zip,dma_code,cbsa_code,cbsa_type,county_fips \
   -simplify 8% keep-shapes -o "$WORK/zcta_joined.json" format=geojson
 $MS "$WORK/zcta_joined.json" -filter "dma_code != '0'" -split dma_code \
   -o "$OUT/zip/dma/" format=topojson singles quantization=1e5
 $MS "$WORK/zcta_joined.json" -filter "cbsa_type == 'Metro'" -split cbsa_code \
   -o "$OUT/zip/metro/" format=topojson singles quantization=1e5
-echo "ZIP boundary files: $(ls "$OUT/zip/dma" | wc -l) DMAs, $(ls "$OUT/zip/metro" | wc -l) metros"
+$MS "$WORK/zcta_joined.json" -filter "county_fips != null && county_fips.length == 5" -split county_fips \
+  -o "$OUT/zip/county/" format=topojson singles quantization=1e5
+echo "ZIP boundary files: $(ls "$OUT/zip/dma" | wc -l) DMAs, $(ls "$OUT/zip/metro" | wc -l) metros, $(ls "$OUT/zip/county" | wc -l) counties"
 
 # 4b. County shapes (all counties in 50 states + DC) for the County view, plus county display names for the builds
 $MS "$WORK/counties.json" -filter-fields fips,NAMELSAD,STUSPS -simplify 8% keep-shapes \
