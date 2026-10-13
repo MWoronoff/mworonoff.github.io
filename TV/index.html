@@ -515,7 +515,25 @@
       var sc = document.createElement("script"); sc.src = src; sc.onload = function () { ok(); }; sc.onerror = fail; document.head.appendChild(sc);
     });
   }
-  function buildSheet() {
+  /* The logo SVG has no width/height of its own, so html2canvas drops it. Rasterize it to a PNG first. */
+  var logoPngCache = null;
+  function logoPng() {
+    if (logoPngCache) return Promise.resolve(logoPngCache);
+    return fetch("../shared/adtaxi-logo.svg").then(function (r) { if (!r.ok) throw new Error("logo"); return r.text(); }).then(function (svg) {
+      svg = svg.replace(/<svg\b/, '<svg width="512" height="512"');
+      return new Promise(function (ok, fail) {
+        var img = new Image();
+        img.onload = function () {
+          var c = document.createElement("canvas"); c.width = 512; c.height = 512;
+          c.getContext("2d").drawImage(img, 0, 0, 512, 512);
+          logoPngCache = c.toDataURL("image/png"); ok(logoPngCache);
+        };
+        img.onerror = fail;
+        img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+      });
+    });
+  }
+  function buildSheet(logo) {
     var sheet = document.createElement("div"); sheet.className = "tv-pdf";
     var parts = [document.querySelector(".az-header"), $("streamPanel"), $("results"), $("printFoot")];
     var main = document.createElement("div"); main.className = "az-main";
@@ -525,7 +543,11 @@
       Array.prototype.forEach.call(c.querySelectorAll(".az-links, .tv-slider, #printBtn, .tv-need, .tv-print-only[hidden]"), function (x) { x.remove(); });
       Array.prototype.forEach.call(c.querySelectorAll("[id]"), function (x) { x.removeAttribute("id"); });
       c.removeAttribute("id");
-      if (i === 0) sheet.appendChild(c); else main.appendChild(c);
+      if (i === 0) {
+        var lg = c.querySelector(".az-logo");
+        if (lg && logo) { lg.src = logo; lg.width = 96; lg.height = 96; }
+        sheet.appendChild(c);
+      } else main.appendChild(c);
     });
     sheet.appendChild(main);
     document.body.appendChild(sheet);
@@ -539,7 +561,12 @@
       loadScript("https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"),
       loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js")
     ]).then(function () {
-      var sheet = buildSheet();
+      return logoPng().catch(function () { return null; });
+    }).then(function (logo) {
+      var sheet = buildSheet(logo);
+      var lg = sheet.querySelector(".az-logo");
+      return (lg && lg.decode ? lg.decode().catch(function () {}) : Promise.resolve()).then(function () { return sheet; });
+    }).then(function (sheet) {
       return window.html2canvas(sheet, { scale: 2, backgroundColor: "#ffffff", useCORS: true, logging: false }).then(function (canvas) {
         sheet.remove();
         var pdf = new window.jspdf.jsPDF({ unit: "pt", format: "letter", orientation: "portrait" });
