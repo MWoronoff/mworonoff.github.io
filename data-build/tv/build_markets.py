@@ -53,3 +53,33 @@ for name, d in sorted(DIM.items()):
 
 json.dump(out, open("TV/data/markets.json", "w"), separators=(",", ":"))
 print(len(out["markets"]), "markets written")
+
+# ---- Streaming and connected TV by DMA (Scarborough USA+ 2026 Release 1, DMA profile reports) ----
+# Sources (Oct 2026, supplied by the user): adults 18+ and adults 55+ in each DMA who streamed video
+# in the past 7 / 30 days and who have any connected-TV device. The antenna column is not used.
+import pandas as pd
+
+def norm(n):
+    n = n.replace(" DMA", "").lower()
+    for a, b in [("ft.", "ft "), ("st.", "st "), ("/", "-"), (".", " "), ("saint", "st"), ("fort ", "ft ")]:
+        n = n.replace(a, b)
+    return " ".join(n.replace("-", " ").split())
+
+def streaming(path):
+    df = pd.read_excel(path, header=None)
+    us = df.iloc[7]
+    out = {"_us": {"w7": us[3] / us[1], "m30": us[6] / us[1], "ctv": us[12] / us[1]}}
+    for _, r in df.iloc[10:].iterrows():
+        if isinstance(r[0], str) and r[0].endswith("DMA") and r[1] == r[1]:
+            out[norm(r[0])] = {"w7": r[3] / r[1], "m30": r[6] / r[1], "ctv": r[12] / r[1]}
+    return out
+
+S18 = streaming("data-build/tv/sources/streaming_adults18.xls")
+S55 = streaming("data-build/tv/sources/streaming_adults55.xls")
+rnd = lambda d: {k: round(v, 4) for k, v in d.items()}
+out["streaming_us"] = {"a18": rnd(S18["_us"]), "a55": rnd(S55["_us"])}
+for m in out["markets"]:
+    key = norm(m["name"])
+    m["streaming"] = {"a18": rnd(S18[key]), "a55": rnd(S55[key])}
+json.dump(out, open("TV/data/markets.json", "w"), separators=(",", ":"))
+print("streaming added for", len(out["markets"]), "markets")

@@ -20,6 +20,19 @@
   .tv-tag { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .03em; padding: 3px 8px; border-radius: 999px; background: #e6f4f1; color: var(--teal); }
   .tv-tag.modeled { background: var(--warn-bg); color: #8a5a00; }
   .tv-plan { margin-top: 16px; padding: 16px 18px; }
+  .tv-stream { margin-top: 16px; padding: 16px 18px; }
+  .tv-stream[hidden] { display: none; }
+  .tv-stream h2 { margin: 0 0 4px; font-size: 17px; color: var(--navy); }
+  .tv-stream > p { margin: 0 0 12px; color: var(--muted); font-size: 13px; }
+  .tv-scards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .tv-scard { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+  .tv-scard h3 { margin: 0 0 8px; font-size: 13px; color: #44586c; font-weight: 600; }
+  .tv-srow { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 4px 0; }
+  .tv-srow span { font-size: 13px; color: #44586c; }
+  .tv-srow b { font-size: 22px; color: var(--teal); }
+  .tv-srow.sub b { font-size: 17px; color: var(--navy); }
+  .tv-srow small { display: block; font-size: 11px; color: var(--muted); text-align: right; }
+  @media (max-width: 800px) { .tv-scards { grid-template-columns: 1fr; } }
   .tv-plan h2, .tv-results h2 { margin: 0 0 4px; font-size: 17px; color: var(--navy); }
   .tv-plan > p, .tv-results > p { margin: 0 0 12px; color: var(--muted); font-size: 13px; }
   .tv-inputs { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px 18px; }
@@ -109,6 +122,8 @@
     </section>
   </div>
 
+  <section class="az-panel tv-stream" id="streamPanel" hidden aria-live="polite"></section>
+
   <section class="az-panel tv-plan">
     <h2>Campaign inputs</h2>
     <p>The Broadcast CPM, spot price and audience per spot fill in with the market averages, and the Digital Video CPM with the $45 planning CPM. Adjust any of them to match the schedule. Results appear once the budget and frequencies are entered.</p>
@@ -147,6 +162,7 @@
     <p><b>Targets.</b> Adults 18+, 18–34, 18–49, 25–54 and 50+, and Men and Women 18+, 18–49, 25–54 and 50+ are measured by Scarborough. Other age ranges for adults are built from measured age bands. Other gender and age combinations, and any household income selection, are estimates: income shares are applied on the assumption that income is independent of gender and age within a market. Estimated targets are labeled.</p>
     <p><b>Broadcast delivery.</b> Spots = Broadcast spend ÷ average spot price. Target impressions = spots × average target audience per spot. Target GRPs = target impressions ÷ target population × 100. Target reach = GRPs ÷ the schedule's frequency. Off-target (wasted) impressions are the spots' audience outside the selected target. The spot price starts at the market average: the market's average adult audience per spot × the Broadcast CPM ÷ 1,000. The Broadcast CPM starts at a planning figure that declines with DMA rank, set so Denver (DMA 17) is $7.00 for adults 18+; it is not a quoted market rate, so adjust the CPM or the spot price to match the schedule. The average audience per spot starts at Scarborough's average for the selected target and can also be adjusted. Changing the market resets the CPM, spot price and audience to that market's averages; changing the target resets the audience.</p>
     <p><b>Smaller Broadcast schedules.</b> The frequency entered describes the full schedule. When part of the budget moves to Digital Video, the remaining schedule's reach is shown as a range: the low end holds frequency steady (reach falls with GRPs); the high end holds reach steady (frequency falls with GRPs). The actual result for a trimmed schedule falls between the two.</p>
+    <p><b>Streaming in the market.</b> Scarborough USA+ 2026 Release 1 DMA profiles: the share of adults 18+, and of adults 55+, in the market who streamed video in the past 7 and past 30 days and who have any connected-TV device, with the U.S. figure for comparison.</p>
     <p><b>Digital Video.</b> Impressions = spend ÷ CPM × 1,000. Digital Video is targeted by gender, age and household income, so every impression is counted as reaching the selected target (100% target efficiency). Target reach = target impressions ÷ frequency cap, limited to the target population.</p>
     <p><b>Combined campaign.</b> Spend, target and off-target impressions, target efficiency and effective target CPM are added across Broadcast and Digital Video. Combined reach and frequency are not shown because the overlap between the Broadcast and Digital Video audiences is not measured.</p>
   </section>
@@ -399,7 +415,24 @@
     if (!edited.spot) $("spot").value = estSpot(M).toFixed(2);
     if (!edited.avgaud) $("avgaud").value = Math.round(M.avg_a18 * target(M, gender, $("age").value, hhiChecked()).composition);
   }
-  function refresh() { syncAverages(); renderBench(); renderResults(); }
+  function renderStreaming() {
+    var box = $("streamPanel");
+    if (!M || !M.streaming) { box.hidden = true; return; }
+    box.hidden = false;
+    var us = DATA.streaming_us, st = M.streaming;
+    var older = ["50+", "55+", "65+"].indexOf($("age").value) >= 0;
+    var first = older ? "a55" : "a18", second = older ? "a18" : "a55";
+    var lab = { a18: "Adults 18+", a55: "Adults 55+" };
+    var card = function (title, key) {
+      var row = function (g, cls) { return '<div class="tv-srow' + cls + '"><span>' + lab[g] + '</span><div><b class="num">' + pct(st[g][key]) + '</b><small>U.S. ' + pct(us[g][key]) + "</small></div></div>"; };
+      return '<div class="tv-scard"><h3>' + title + "</h3>" + row(first, "") + row(second, " sub") + "</div>";
+    };
+    box.innerHTML = "<h2>Streaming in " + esc(M.name) + "</h2>" +
+      "<p>Share of adults in the market who stream video and have a connected-TV device. Digital Video reaches them on these screens.</p>" +
+      '<div class="tv-scards">' + card("Streamed video, past 7 days", "w7") + card("Streamed video, past 30 days", "m30") + card("Have a connected-TV device", "ctv") + "</div>" +
+      '<p class="tv-hint" style="margin:10px 0 0">Source: Scarborough USA+ 2026 Release 1 (Jan 2025–May 2026), DMA profiles.</p>';
+  }
+  function refresh() { syncAverages(); renderBench(); renderStreaming(); renderResults(); }
   function selectMarket(name, pan) {
     M = name ? DATA.byName[name] : null;
     edited.bcpm = false; edited.spot = false; edited.avgaud = false;  // a new market starts from its own averages
