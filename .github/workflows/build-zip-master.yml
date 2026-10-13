@@ -1,0 +1,50 @@
+name: Build master ZIP data
+
+# Builds data-build/master/ from the Deluxe workbooks in data-build/sources/deluxe/ plus public sources (Census ACS,
+# IRS, Census Business Patterns, Census LODES, USDA RUCA, CDC PLACES, FHFA). Each public source finds its newest
+# release on its own, so the monthly run picks up new releases automatically. Results are committed only when the
+# data changed. Run it by hand from the Actions tab after replacing the Deluxe workbooks.
+on:
+  workflow_dispatch:
+    inputs:
+      only:
+        description: "Sources to rebuild, comma-separated (blank = all): deluxe,acs,irs,cbp,lodes,ruca,places,fhfa"
+        required: false
+        default: ""
+  schedule:
+    - cron: "0 9 5 * *"   # 5th of every month, 09:00 UTC
+
+permissions:
+  contents: write
+
+concurrency:
+  group: zip-master
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install Python packages
+        run: pip install pandas openpyxl
+      - name: Build master ZIP data
+        run: |
+          set -o pipefail
+          if [ -n "${{ github.event.inputs.only }}" ]; then ARGS="--only ${{ github.event.inputs.only }}"; else ARGS=""; fi
+          python3 data-build/build_zip_master.py $ARGS 2>&1 | tee master.log
+      - name: Commit results
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add data-build/master
+          if git diff --cached --quiet -- 'data-build/master/*.gz'; then
+            echo "No data changed; nothing to commit."
+            exit 0
+          fi
+          git commit -m "Build master ZIP data"
+          git push
