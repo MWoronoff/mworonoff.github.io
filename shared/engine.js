@@ -397,7 +397,10 @@
     var mapLevel = s.level === "us" ? (this.cfg.usMapLevel || "dma") : s.level;
     var needed = [this.ensureLevel(s.level)];
     if (mapLevel !== s.level) needed.push(this.ensureLevel(mapLevel));
+    var ticket = this.refreshTicket = (this.refreshTicket || 0) + 1;   // a newer refresh supersedes this one
     Promise.all(needed).then(function () {
+      if (ticket !== self.refreshTicket) return;     // the view changed while this one was loading
+      if (s.level !== "us" && !self.d(s.level)) return;
       self.mapLevel = mapLevel;
       if (s.level === "us") s.area = (self.data.us.rows[0] || {}).id;
       else if (!self.d(s.level).byId[s.area]) s.area = (self.sortedRows()[0] || {}).id || null;  // open on the top-ranked market
@@ -410,6 +413,7 @@
       self.renderAd();
       self.writeHash();
     }).catch(function (e) {
+      if (ticket !== self.refreshTicket) return;     // a stale load failing doesn't matter
       self.errorBox.hidden = false;
       if (s.level === "zip" && s.parent) {
         // ZIP data for this market didn't load: step back to the market so the page stays usable.
