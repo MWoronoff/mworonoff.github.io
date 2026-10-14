@@ -4,7 +4,7 @@ window.ADTAXI_RADIUS = {
   subtitle: "Pick a property's ZIP or town and a radius, then choose the renters you want to reach to see how many live there and which ZIPs over-index.",
   logo: "../shared/adtaxi-logo.svg",
   exportName: "apartment-radius",
-  links: [ { label: "Apartment Market Analyzer", url: "./" }, { label: "All analyzers", url: "../analyzers/" } ],
+  links: [ { label: "Apartment Market Analyzer", url: "./" }, { label: "Home", url: "../analyzers/" } ],
   audienceData: "../shared/audience/zip_audience.json",
   extraData: [ { url: "../shared/audience/zip_audience_legal.json", label: "Renter and owner households by age" },
                { url: "../shared/audience/zip_audience_apt.json", label: "Renter household data" } ],

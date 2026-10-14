@@ -4,7 +4,7 @@ window.ADTAXI_RADIUS = {
   subtitle: "Pick a center ZIP or town and a radius, then choose the clients you want to reach to see how many live there and which ZIPs over-index.",
   logo: "../shared/adtaxi-logo.svg",
   exportName: "legal-radius",
-  links: [ { label: "Legal Market Analyzer", url: "./" }, { label: "All analyzers", url: "../analyzers/" } ],
+  links: [ { label: "Legal Market Analyzer", url: "./" }, { label: "Home", url: "../analyzers/" } ],
   audienceData: "../shared/audience/zip_audience.json",
   extraData: [ { url: "../shared/audience/zip_audience_legal.json", label: "Home, home value and employment data" } ],
   zipGeo: "../shared/geo/zip/{level}/{id}.json",

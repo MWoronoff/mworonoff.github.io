@@ -4,7 +4,7 @@ window.ADTAXI_RADIUS = {
   subtitle: "Pick a center ZIP or town and a radius, then choose the audience to see how many people it reaches and which ZIPs over-index.",
   logo: "../shared/adtaxi-logo.svg",
   exportName: "higher-ed-radius",
-  links: [ { label: "Higher Education Market Analyzer", url: "./" }, { label: "All analyzers", url: "../analyzers/" } ],
+  links: [ { label: "Higher Education Market Analyzer", url: "./" }, { label: "Home", url: "../analyzers/" } ],
   audienceData: "../shared/audience/zip_audience.json",
   zipGeo: "../shared/geo/zip/{level}/{id}.json",
   radii: [5, 10, 15, 25, 50, 100, 200, 300],

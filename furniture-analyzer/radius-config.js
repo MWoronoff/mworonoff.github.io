@@ -4,7 +4,7 @@ window.ADTAXI_RADIUS = {
   subtitle: "Pick a center ZIP or town and a radius, then choose the buyers you want to reach to see how many live there and which ZIPs over-index.",
   logo: "../shared/adtaxi-logo.svg",
   exportName: "furniture-radius",
-  links: [ { label: "Furniture Market Analyzer", url: "./" }, { label: "All analyzers", url: "../analyzers/" } ],
+  links: [ { label: "Furniture Market Analyzer", url: "./" }, { label: "Home", url: "../analyzers/" } ],
   audienceData: "../shared/audience/zip_audience.json",
   extraData: [ { url: "../shared/audience/zip_audience_legal.json", label: "Home and home value data" } ],
   zipGeo: "../shared/geo/zip/{level}/{id}.json",

@@ -4,7 +4,7 @@ window.ADTAXI_RADIUS = {
   subtitle: "Pick a center ZIP or town and a radius, then choose the patients you want to reach to see how many live there and which ZIPs over-index.",
   logo: "../shared/adtaxi-logo.svg",
   exportName: "healthcare-radius",
-  links: [ { label: "Healthcare Market Analyzer", url: "./" }, { label: "All analyzers", url: "../analyzers/" } ],
+  links: [ { label: "Healthcare Market Analyzer", url: "./" }, { label: "Home", url: "../analyzers/" } ],
   audienceData: "../shared/audience/zip_audience.json",
   extraData: [
     { url: "../shared/audience/zip_audience_health.json", label: "Insurance, hearing, vision and living-alone data" },

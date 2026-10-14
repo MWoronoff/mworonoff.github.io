@@ -4,7 +4,7 @@ window.ADTAXI_RADIUS = {
   subtitle: "Pick a center ZIP or town and a radius, then choose the homeowners you want to reach to see how many live there and which ZIPs over-index.",
   logo: "../shared/adtaxi-logo.svg",
   exportName: "home-services-radius",
-  links: [ { label: "Home Services Market Analyzer", url: "./" }, { label: "All analyzers", url: "../analyzers/" } ],
+  links: [ { label: "Home Services Market Analyzer", url: "./" }, { label: "Home", url: "../analyzers/" } ],
   audienceData: "../shared/audience/zip_audience.json",
   extraData: [ { url: "../shared/audience/zip_audience_legal.json", label: "Homeowner and home value data" },
                { url: "../shared/audience/zip_audience_home.json", label: "Year built, home type and years in the home data" } ],
