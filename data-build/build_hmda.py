@@ -25,7 +25,8 @@ LAR_URLS = ["https://s3.amazonaws.com/cfpb-hmda-public/prod/snapshot-data/{y}/{y
             "https://files.ffiec.cfpb.gov/static-data/snapshot/{y}/{y}_public_lar_csv.zip",
             "https://s3.amazonaws.com/cfpb-hmda-public/prod/one-year-data/{y}/{y}_public_lar_one_year_csv.zip"]
 REL_URL = "https://www2.census.gov/geo/docs/maps-data/data/rel2020/zcta520/tab20_zcta520_tract20_natl.txt"
-COLS = ["action_taken", "occupancy_type", "loan_purpose", "lien_status", "open-end_line_of_credit", "census_tract", "county_code"]
+COLS = ["action_taken", "occupancy_type", "loan_purpose", "lien_status", "open_end_line_of_credit", "business_or_commercial_purpose",
+        "census_tract", "county_code"]
 
 
 def log(*a): print(*a, flush=True)
@@ -73,7 +74,7 @@ def find_lar(year):
 
 def classify(d):
     """Owner-occupied originations: purchase (first lien), equity (open-end, second lien, home improvement, other), refinance."""
-    d = d[(d.action_taken == 1) & (d.occupancy_type == 1)]
+    d = d[(d.action_taken == 1) & (d.occupancy_type == 1) & (d.business != 1)]
     purch = (d.loan_purpose == 1) & (d.lien_status == 1) & (d.open_end != 1)
     equity = ~purch & ((d.open_end == 1) | (d.lien_status == 2) | d.loan_purpose.isin([2, 4]))
     refi = ~purch & ~equity & d.loan_purpose.isin([31, 32])
@@ -89,13 +90,15 @@ def read_lar(path):
     head = zf.open(name).readline().decode("utf-8", "replace")
     sep = "|" if head.count("|") > head.count(",") else ","
     have = [c.strip().strip('"') for c in head.strip().split(sep)]
-    miss = [c for c in COLS if c not in have]
+    norm = {c.replace("-", "_"): c for c in have}          # older files spell some names with hyphens
+    miss = [c for c in COLS if c not in norm]
     if miss: sys.exit(f"HMDA file is missing expected columns {miss}; columns are {have[:30]}...")
     parts, n = [], 0
-    for ch in pd.read_csv(zf.open(name), sep=sep, usecols=COLS, dtype=str, chunksize=2_000_000, low_memory=False):
+    for ch in pd.read_csv(zf.open(name), sep=sep, usecols=[norm[c] for c in COLS], dtype=str, chunksize=2_000_000, low_memory=False):
         n += len(ch)
-        ch = ch.rename(columns={"open-end_line_of_credit": "open_end"})
-        for c in ("action_taken", "occupancy_type", "loan_purpose", "lien_status", "open_end"):
+        ch.columns = [c.replace("-", "_") for c in ch.columns]
+        ch = ch.rename(columns={"open_end_line_of_credit": "open_end", "business_or_commercial_purpose": "business"})
+        for c in ("action_taken", "occupancy_type", "loan_purpose", "lien_status", "open_end", "business"):
             ch[c] = pd.to_numeric(ch[c], errors="coerce")
         parts.append(classify(ch))
         log(f"  {n:,} records read")
