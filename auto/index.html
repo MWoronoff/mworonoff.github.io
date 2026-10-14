@@ -91,7 +91,7 @@ AdtaxiAnalyzer.start({
    "label": "Market Potential Score",
    "format": "score",
    "short": "Score",
-   "help": "0 to 100. Weighted blend of Consumer Demand (40%), Category Spending (25%), Spending Power (15%) and Competition (20%), each a percentile against the other markets at the same level. The used lines leave out Spending Power, because used-vehicle buyers are spread across middle incomes (re-weighted: Demand 47%, Category Spending 29%, Competition 24%). ZIPs rank against the other ZIPs in the same market using Consumer Demand and Spending Power only. Counties have no EASI data, and counties under 10,000 residents aren't ranked.",
+   "help": "0–100. Consumer Demand 40%, Category Spending 25%, Spending Power 15%, Competition 20%, each a percentile among markets at the same level. Used lines omit Spending Power (Demand 47%, Category Spending 29%, Competition 24%). ZIPs use Demand and Spending Power only. Counties have no Category Spending; under 10,000 residents aren't ranked.",
    "perSub": true,
    "levels": [
     "dma",
@@ -264,7 +264,7 @@ AdtaxiAnalyzer.start({
    "label": "Competing dealers",
    "format": "int",
    "short": "Dealers",
-   "help": "New lines: new car dealers. Used lines: used car dealers (franchised new-car dealers also sell used vehicles but are counted as new car dealers). DMAs, metros and the U.S. use complete County Business Patterns counts. In the ZIP view, Census doesn't publish a ZIP's count when it has fewer than 3, so those show as 0.",
+   "help": "New lines: new car dealers. Used lines: used car dealers (franchised dealers' used lots count as new car dealers). Complete County Business Patterns counts; ZIP counts under 3 aren't published and show as 0.",
    "perSub": true
   },
   {

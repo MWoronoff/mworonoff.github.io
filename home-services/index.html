@@ -114,7 +114,7 @@ AdtaxiAnalyzer.start({
     "county",
     "zip"
    ],
-   "help": "0 to 100. Weighted blend of Consumer Demand (40%), Category Spending (25%), Spending Power (15%) and Competition (20%), each a percentile against the other markets at the same level. ZIPs rank against the other ZIPs in the same market using Consumer Demand and Spending Power only (no EASI spending by ZIP, and Census hides small ZIP business counts). Counties rank against all U.S. counties without Category Spending (EASI isn't published by county), so the other parts are re-weighted to 100%; counties under 10,000 residents aren't ranked."
+   "help": "0–100. Consumer Demand 40%, Category Spending 25%, Spending Power 15%, Competition 20%, each a percentile among markets at the same level. ZIPs use Demand and Spending Power only. Counties have no Category Spending; under 10,000 residents aren't ranked."
   },
   {
    "key": "demand",
@@ -181,7 +181,7 @@ AdtaxiAnalyzer.start({
     "metro"
    ],
    "hideWhenUnavailable": true,
-   "help": "EASI 2025 estimated annual household spending on the selected service: how active households are. HVAC and Electrical: heat, a/c and electrical work. Roofing: roofing and gutters. Plumbing: plumbing and water heating. Painting: painting and papering (hired work). Flooring: flooring installation, repair and replacement. Any home service: all five combined."
+   "help": "EASI 2025 annual household spending on the selected service. HVAC and Electrical: heat, a/c and electrical work. Roofing: roofing and gutters. Plumbing: plumbing and water heating. Painting: hired painting and papering. Flooring: installation, repair and replacement. Any: all five."
   },
   {
    "key": "easi_idx",
@@ -224,7 +224,7 @@ AdtaxiAnalyzer.start({
    "format": "int",
    "short": "Contractors",
    "perSub": true,
-   "help": "Contractor businesses in this service's industries. Census counts HVAC and plumbing contractors as one industry, so both show the same count. DMAs, metros and the U.S. use complete County Business Patterns counts. In the ZIP view, Census doesn't publish a ZIP's count when it has fewer than 3 businesses, so those show as 0."
+   "help": "Contractors in this service's industries; HVAC and Plumbing share one Census count. Complete County Business Patterns counts; ZIP counts under 3 aren't published and show as 0."
   },
   {
    "key": "per10k",
@@ -269,7 +269,7 @@ AdtaxiAnalyzer.start({
    "subs": [
     "any"
    ],
-   "help": "EASI 2025 estimated annual household spending on heat, a/c and electrical work, roofing and gutters, plumbing and water heating, painting and papering, and flooring combined. Each piece uses the geography EASI publishes it for (see How scores work)."
+   "help": "EASI 2025 annual household spending on all five services combined (see How scores work)."
   },
   {
    "key": "easi_any_idx",

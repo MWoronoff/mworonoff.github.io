@@ -95,7 +95,7 @@ AdtaxiAnalyzer.start({
    "label": "Market Potential Score",
    "format": "score",
    "short": "Score",
-   "help": "0 to 100. Weighted blend of Consumer Demand (40%), Category Spending (25%), Spending Power (15%) and Competition (20%), each a percentile against the other markets at the same level. Category Spending (EASI) applies to Wealth management and Retirement planning; the other lines have no matching EASI measure, so their parts are re-weighted to 100%. Tax preparation also leaves out Spending Power. ZIPs rank against the other ZIPs in the same market using Consumer Demand and Spending Power only. Counties have no EASI data and under 10,000 residents aren't ranked.",
+   "help": "0–100. Consumer Demand 40%, Category Spending 25%, Spending Power 15%, Competition 20%, each a percentile among markets at the same level. Category Spending applies to Wealth and Retirement only; Tax omits Spending Power. ZIPs use Demand and Spending Power only. Counties have no Category Spending; under 10,000 residents aren't ranked.",
    "perSub": true,
    "levels": [
     "dma",
@@ -389,7 +389,7 @@ AdtaxiAnalyzer.start({
    "label": "Competing businesses",
    "format": "int",
    "short": "Competitors",
-   "help": "Tax preparation: tax preparation services. Wealth management and Retirement planning: investment advice and portfolio management firms. Mortgage lines: real estate credit lenders and mortgage and loan brokers (banks and credit unions also lend, but Census counts them together with all their other business). DMAs, metros and the U.S. use complete County Business Patterns counts. In the ZIP view, Census doesn't publish a ZIP's count when it has fewer than 3, so those show as 0.",
+   "help": "Tax: tax preparers. Wealth and Retirement: investment advice and portfolio management firms. Mortgage lines: real estate lenders and mortgage brokers (banks and credit unions not separable in Census). Complete County Business Patterns counts; ZIP counts under 3 aren't published and show as 0.",
    "perSub": true
   },
   {
