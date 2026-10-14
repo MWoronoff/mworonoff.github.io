@@ -1,4 +1,4 @@
-"""Build the county map data for the analyzer home page (analyzers/preview/home-maps.json).
+"""Build the county map data for the analyzer home page (analyzers/home-maps.json).
 
 Draws every lower-48 county once as a compact SVG path (Albers equal-area projection, simplified), plus state
 outlines, and stores each category's county Market Potential Score as a class 0-4 (fifths of counties) so the page
@@ -125,7 +125,7 @@ def main():
             parts.append("M" + "L".join("%g %g" % q for q in pts[:-1]) + "z")
         return "".join(parts)
     out["radius"] = [[min(3, int(d // 5)), lpath(g)] for d, g in zips if d <= 32]
-    dest = os.path.join(ROOT, "analyzers/preview/home-maps.json")
+    dest = os.path.join(ROOT, "analyzers/home-maps.json")
     json.dump(out, open(dest, "w"), separators=(",", ":"))
     print("wrote", dest, os.path.getsize(dest) // 1024, "KB,", len(out["fips"]), "counties,", W, "x", H)
 
