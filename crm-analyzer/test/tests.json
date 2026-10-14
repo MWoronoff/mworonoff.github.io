@@ -1,0 +1,66 @@
+{
+ "tests": [
+  {
+   "id": "phoenix-family",
+   "title": "Phoenix family entertainment center",
+   "stores": [
+    "85018",
+    "85226",
+    "85383"
+   ],
+   "setup": "A family entertainment business with three Phoenix-area locations. Enter all three ZIPs as locations.",
+   "answer": "Customers come from ZIPs with many households with children (affinity rises with the square of the share). Customer rates halve about every 7 miles from the nearest location.",
+   "look": "The strongest-ZIP profile should lead with households with children, kids' age groups or larger households, and the top look-alikes should be family-heavy suburbs.",
+   "customers": 2903,
+   "file": "phoenix-family.csv"
+  },
+  {
+   "id": "montana-rural",
+   "title": "Helena, Montana farm and ranch supply",
+   "stores": [
+    "59601"
+   ],
+   "setup": "A rural supply store in Helena (59601) with customers spread over long distances.",
+   "answer": "Customers come from ZIPs with high homeownership and many households with 3+ vehicles. Customer rates halve about every 24 miles.",
+   "look": "Expect many ZIPs marked 'too few to judge'; that's normal for a sparse rural market. The profile should feature 3+ vehicles and homeownership.",
+   "customers": 698,
+   "file": "montana-rural.csv"
+  },
+  {
+   "id": "atlanta-small",
+   "title": "Atlanta tutoring service (small list)",
+   "stores": [
+    "30319"
+   ],
+   "setup": "A tutoring business in Brookhaven (30319) with only 150 customers.",
+   "answer": "Customers come from ZIPs with many college-educated adults. Customer rates halve about every 5.5 miles.",
+   "look": "With only 150 customers the tool uses the top-performing fifth of ZIPs for the profile. Expect education, income or home value near the top; they move together.",
+   "customers": 150,
+   "file": "atlanta-small.csv"
+  },
+  {
+   "id": "florida-retirees",
+   "title": "Palm Beach County hearing clinic",
+   "stores": [
+    "33480"
+   ],
+   "setup": "A hearing clinic in Palm Beach (33480). Try 'Adults 65+' as the potential, then 'Households', and compare.",
+   "answer": "Customers come from ZIPs with many adults 65+ who own their homes. Customer rates halve about every 7 miles.",
+   "look": "With 'Households' as potential, the profile should lead with age 65+, median age or Social Security income. With 'Adults 65+' as potential, the age effect is already built into expected customers, so fewer ZIPs over-perform and homeownership stands out more.",
+   "customers": 1782,
+   "file": "florida-retirees.csv"
+  },
+  {
+   "id": "dallas-no-pattern",
+   "title": "Dallas delivery service (no pattern)",
+   "stores": [
+    "75201"
+   ],
+   "setup": "A delivery business in downtown Dallas (75201).",
+   "answer": "There is no pattern: customers were spread purely by household count, with no distance effect.",
+   "look": "The tool should say distance makes little difference, mark only a handful of ZIPs over or under (chance), and label the strongest-ZIP profile as tentative.",
+   "customers": 4477,
+   "file": "dallas-no-pattern.csv"
+  }
+ ]
+}

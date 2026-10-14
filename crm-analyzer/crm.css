@@ -32,13 +32,16 @@
 .crm-kpi span { display: block; font-weight: 600; color: var(--ink); }
 .crm-kpi small { display: block; color: var(--muted); margin-top: 2px; }
 
-.crm-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 16px; margin-top: 16px; }
-@media (max-width: 1100px) { .crm-grid { grid-template-columns: 1fr; } }
+.crm-maps { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; margin-top: 16px; }
+@media (max-width: 1000px) { .crm-maps { grid-template-columns: 1fr; } }
+.crm-profile { margin-top: 16px; }
+.crm-seg button { font-size: 12.5px; }
+.crm-legend-note { flex-basis: 100%; color: var(--muted); }
 .crm-map-panel, .crm-profile { padding: 14px 16px; }
 .crm-map-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
 .crm-map-head h3, .crm-profile h3 { margin: 0; font-size: 16px; color: var(--navy); }
 .crm-profile h4 { margin: 16px 0 6px; font-size: 14px; color: var(--navy); }
-.crm-map { height: 560px; border-radius: 10px; border: 1px solid var(--line); }
+.crm-map { height: 500px; border-radius: 10px; border: 1px solid var(--line); }
 .crm-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; margin-top: 10px; font-size: 12.5px; }
 .crm-legend b { color: var(--navy); margin-right: 4px; }
 .crm-key { display: inline-flex; align-items: center; gap: 6px; }
@@ -79,3 +82,16 @@
 }
 .crm-fitbar { position: relative; overflow: visible; }
 .crm-fitmark { position: absolute; top: -3px; width: 2px; height: 14px; background: var(--navy); transform: translateX(-1px); }
+.crm-tests { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 12px; }
+.crm-tests summary { cursor: pointer; font-weight: 700; color: var(--navy); }
+.crm-test-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; margin-top: 10px; }
+.crm-test { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; background: #fbfcfd; }
+.crm-test b { color: var(--navy); }
+.crm-test small { color: var(--muted); }
+.crm-test p { margin: 4px 0 8px; font-size: 13px; flex: 1; }
+.crm-test-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.crm-test-actions a.az-btn { text-decoration: none; }
+.crm-test-answer { margin-top: 16px; padding: 14px 18px; border-left: 4px solid var(--teal); }
+.crm-test-answer h3 { margin: 0 0 4px; font-size: 16px; color: var(--navy); }
+.crm-answer { margin-top: 10px; }
+.crm-answer p { margin: 0 0 6px; max-width: 90ch; }

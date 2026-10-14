@@ -164,6 +164,7 @@
     root.appendChild(el("div", { id: "crm-setup" }));
     root.appendChild(el("div", { id: "crm-results" }));
     $("crm-method-link").onclick = function (e) { e.preventDefault(); method(); };
+    loadTests();
   }
 
   /* ---------- step 1: the customer file ---------- */
@@ -187,15 +188,48 @@
           el("button", { class: "az-btn", type: "button", text: "Use pasted ZIPs", onclick: function () {
             var rows = $("crm-paste").value.split(/\r?\n/).filter(function (l) { return l.trim(); }).map(function (l) { return l.split(/[,\t;]/); });
             if (!rows.length) return;
-            S.file = { name: "Pasted list", header: ["ZIP", "Amount"], rows: rows };
+            S.file = { name: "Pasted list", header: ["ZIP", "Amount"], rows: rows }; S.test = null;
             mapColumns(0, rows.some(function (r) { return r[1] && !isNaN(parseFloat(r[1])); }) ? 1 : -1);
           } }),
           el("button", { class: "az-btn", type: "button", text: "Try sample data", onclick: sample })
-        ])])
+        ])]),
+      el("details", { class: "crm-tests", id: "crm-tests" }, [
+        el("summary", { text: "Practice with test files that have a known answer" }),
+        el("p", { class: "crm-note", text: "Each file is a synthetic customer list with a hidden pattern built on real ZIP data. Load one, look at the results, decide what you think drives the business, then reveal the answer and see whether the tool found it." }),
+        el("div", { class: "crm-test-list", id: "crm-test-list" }, [el("p", { class: "crm-note", text: "Loading test files…" })])
+      ])
     ]);
   }
 
+  function loadTests() {
+    fetch("test/tests.json").then(function (r) { return r.json(); }).then(function (j) {
+      var box = $("crm-test-list"); if (!box) return; box.innerHTML = "";
+      j.tests.forEach(function (t) {
+        box.appendChild(el("div", { class: "crm-test" }, [
+          el("b", { text: t.title }), el("small", { text: NF0.format(t.customers) + " customers · locations " + t.stores.join(", ") }),
+          el("p", { text: t.setup }),
+          el("div", { class: "crm-test-actions" }, [
+            el("button", { class: "az-btn primary", type: "button", text: "Load this test", onclick: function () { loadTest(t); } }),
+            el("a", { class: "az-btn", href: "test/" + t.file, download: t.file, text: "Download CSV" })])
+        ]));
+      });
+    }).catch(function () { var box = $("crm-test-list"); if (box) box.innerHTML = "<p class='crm-note'>The test files couldn't be loaded.</p>"; });
+  }
+
+  function loadTest(t) {
+    fetch("test/" + t.file).then(function (r) { return r.text(); }).then(function (txt) {
+      var lines = txt.trim().split(/\r?\n/), header = lines.shift().split(",");
+      S.file = { name: t.title + " (test file)", header: header, rows: lines.map(function (l) { return l.split(","); }) };
+      S.test = t;
+      S.params.locs = t.stores.join(", ");
+      guessColumns();
+      $("crm-locs").value = t.stores.join(", ");
+      $("crm-setup").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
+
   function readFile(file) {
+    S.test = null;
     var r = new FileReader();
     r.onload = function () {
       try {
@@ -305,7 +339,7 @@
         var n = 0, L = Math.exp(-lam), p = 1; do { n++; p *= rand(); } while (p > L && n < 2000); n--;
         for (var i = 0; i < n; i++) rows.push([z.zip, Math.round(400 + rand() * 2600)]);
       });
-      S.file = { name: "Sample customers (synthetic, Denver area)", header: ["ZIP", "Sale amount"], rows: rows };
+      S.file = { name: "Sample customers (synthetic, Denver area)", header: ["ZIP", "Sale amount"], rows: rows }; S.test = null;
       S.params.locs = store;
       mapColumns(0, 1);
       $("crm-locs").value = store;
@@ -498,23 +532,23 @@
       ]),
       R.useDist ? null : el("p", { class: "crm-warn", text: "No location ZIP was entered, so expected customers don't account for distance. ZIPs near your business will look stronger than they are. Add your location ZIPs above and analyze again for a fairer comparison." })
     ]));
-    // map + profile side by side
-    var mapBox = el("div", { class: "az-map crm-map", id: "crm-map" });
-    var modeSel = el("div", { class: "az-seg", role: "group", "aria-label": "Map shows" }, [
-      ["status", "Performance"], ["pen", "Customers per 1,000 households"], ["sim", "Similarity"]].map(function (m, i) {
-        return el("button", { type: "button", "aria-pressed": i === 0 ? "true" : "false", text: m[1], onclick: function () {
-          Array.prototype.forEach.call(this.parentNode.children, function (b) { b.setAttribute("aria-pressed", "false"); });
-          this.setAttribute("aria-pressed", "true"); S.mapMode = m[0]; styleMap(); } });
-      }));
-    wrap.appendChild(el("div", { class: "crm-grid" }, [
-      el("section", { class: "az-panel crm-map-panel" }, [el("div", { class: "crm-map-head" }, [el("h3", { text: "Map" }), modeSel]), mapBox, el("div", { class: "crm-legend", id: "crm-legend" })]),
-      profilePanel()
-    ]));
+    if (S.test) {
+      var t = S.test, ans = el("div", { class: "crm-answer", hidden: true }, [
+        el("p", {}, [el("b", { text: "The planted pattern: " }), t.answer]),
+        el("p", {}, [el("b", { text: "What to look for: " }), t.look])]);
+      wrap.appendChild(el("section", { class: "az-panel crm-test-answer" }, [
+        el("h3", { text: "Test file: " + t.title }),
+        el("p", { class: "crm-note", text: "Look through the maps and the strongest-ZIP profile first and decide what you think drives this business. Then check the answer." }),
+        el("button", { class: "az-btn primary", type: "button", text: "Reveal the answer", onclick: function () { ans.hidden = false; this.remove(); } }),
+        ans]));
+    }
+    // two linked maps: your customers (left) and market potential (right), then the profile
+    wrap.appendChild(el("div", { class: "crm-maps" }, [mapPanel("l"), mapPanel("r")]));
+    wrap.appendChild(profilePanel());
     wrap.appendChild(perfPanel());
     wrap.appendChild(simPanel());
     results(wrap);
-    S.mapMode = "status";
-    drawMap();
+    drawMaps();
   }
 
   function kpi(big, label, note) {
@@ -651,79 +685,157 @@
   }
   function flashMsg(box, t) { var p = el("p", { class: "crm-toast", text: t }); box.appendChild(p); setTimeout(function () { p.remove(); }, 2500); }
 
-  /* ---------- map ---------- */
-  function drawMap() {
+  /* ---------- maps ---------- */
+  // Left map: how the advertiser is doing. Right map: where the potential is. Panning or zooming one moves the other.
+  var MAPS = {
+    l: { title: "Your customers", mode: "pen", modes: function () {
+      return [["pen", "Customers per 1,000 households"]].concat(S.hasValue ? [["spend", "Sales per household"]] : []).concat([["status", "Performance vs. expected"]]); } },
+    r: { title: "Market potential", mode: "pot", modes: function () {
+      return [["pot", BASES[S.res.o.base].label + " per ZIP"], ["sim", "Similarity to your strongest ZIPs"]]; } }
+  };
+  var RAMP = ["#dff1ee", "#a9dcd4", "#5fb8ac", "#1f8f81", "#0b5d53"], NONE = "#eef2f5", OUTSIDE = "#f6f8fa";
+  function mapPanel(side) {
+    var M = MAPS[side];
+    M.mode = M.modes()[0][0];
+    var seg = el("div", { class: "az-seg crm-seg", role: "group", "aria-label": M.title + " map shows" }, M.modes().map(function (m) {
+      return el("button", { type: "button", "aria-pressed": m[0] === M.mode ? "true" : "false", text: m[1], onclick: function () {
+        Array.prototype.forEach.call(this.parentNode.children, function (x) { x.setAttribute("aria-pressed", "false"); });
+        this.setAttribute("aria-pressed", "true"); M.mode = m[0]; styleMap(side); } });
+    }));
+    return el("section", { class: "az-panel crm-map-panel" }, [
+      el("div", { class: "crm-map-head" }, [el("h3", { text: M.title }), seg]),
+      el("div", { class: "az-map crm-map", id: "crm-map-" + side }),
+      el("div", { class: "crm-legend", id: "crm-legend-" + side })]);
+  }
+  // value shown for a ZIP in a given mode (null = no data)
+  function mapValue(zip, mode) {
+    var e = S.byZip[zip]; if (!e) return null;
+    if (mode === "pen") return e.it ? e.it.pen : null;
+    if (mode === "spend") return e.it ? e.it.V / e.it.z.hh : null;
+    if (mode === "pot") return e.it ? e.it.B : (e.c ? e.c.B : null);
+    if (mode === "sim") return e.c ? e.c.sim : null;
+    return null;
+  }
+  // five classes: fifths of the trade area's non-zero values (similarity uses fixed steps)
+  function breaks(mode) {
+    if (mode === "sim") return [20, 40, 60, 75, 90];
+    var v = S.res.items.map(function (it) { return mapValue(it.z.zip, mode); }).filter(function (x) { return x > 0; }).sort(function (a, b) { return a - b; });
+    if (!v.length) return [0, 0, 0, 0];
+    return [0.2, 0.4, 0.6, 0.8].map(function (q) { return v[Math.min(v.length - 1, Math.floor(q * v.length))]; });
+  }
+  function colorFor(side, zip) {
+    var M = MAPS[side], e = S.byZip[zip];
+    if (M.mode === "status") return e && e.it ? STATUS[e.it.status].color : OUTSIDE;
+    var v = mapValue(zip, M.mode);
+    if (v == null) return OUTSIDE;
+    if (M.mode === "sim") { if (v < 20) return NONE; for (var i = 4; i >= 0; i--) if (v >= [20, 40, 60, 75, 90][i]) return RAMP[i]; }
+    if (v <= 0) return NONE;
+    var br = M.br; for (var k = 0; k < br.length; k++) if (v < br[k]) return RAMP[k];
+    return RAMP[4];
+  }
+  function styleFor(side) {
+    return function (f) {
+      var e = S.byZip[f.properties.zip], inside = !!(e && e.it), M = MAPS[side];
+      var show = inside || M.mode === "sim" || M.mode === "pot";
+      return { color: "#ffffff", weight: 0.6, fillColor: colorFor(side, f.properties.zip), fillOpacity: show ? 0.9 : 0.35 };
+    };
+  }
+  function styleMap(side) {
+    var M = MAPS[side];
+    M.br = breaks(M.mode);
+    if (M.layer) M.layer.setStyle(styleFor(side));
+    legend(side);
+  }
+  function drawMaps() {
     var R = S.res;
-    if (S.map) { S.map.remove(); S.map = null; }
-    S.map = L.map("crm-map", { scrollWheelZoom: false, preferCanvas: false });
-    L.tileLayer("https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png", { attribution: "© OpenStreetMap, © CARTO", subdomains: "abcd", maxZoom: 13 }).addTo(S.map);
-    var pts = R.items.map(function (it) { return [it.z.lat, it.z.lon]; });
-    S.map.fitBounds(L.latLngBounds(pts).pad(0.05));
-    var dmas = {}; R.cand.concat(R.items).forEach(function (c) { if (c.z.dma) dmas[c.z.dma] = true; });
+    ["l", "r"].forEach(function (side) { var M = MAPS[side]; if (M.map) { M.map.remove(); M.map = null; } M.layers = {}; });
     S.byZip = {}; R.items.forEach(function (it) { S.byZip[it.z.zip] = { it: it }; });
     R.cand.forEach(function (c) { (S.byZip[c.z.zip] || (S.byZip[c.z.zip] = {})).c = c; });
+    var bounds = L.latLngBounds(R.items.map(function (it) { return [it.z.lat, it.z.lon]; })).pad(0.05);
+    var syncing = false;
+    ["l", "r"].forEach(function (side) {
+      var M = MAPS[side];
+      M.map = L.map("crm-map-" + side, { scrollWheelZoom: false });
+      L.tileLayer("https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png", { attribution: "© OpenStreetMap, © CARTO", subdomains: "abcd", maxZoom: 13 }).addTo(M.map);
+      M.map.fitBounds(bounds);
+      // when a pan or zoom on this map finishes, put the other map in the same place
+      M.map.on("moveend", function () {
+        if (syncing) return;
+        var other = MAPS[side === "l" ? "r" : "l"].map;
+        if (!other) return;
+        var c = M.map.getCenter(), oc = other.getCenter();
+        if (other.getZoom() === M.map.getZoom() && Math.abs(c.lat - oc.lat) < 1e-6 && Math.abs(c.lng - oc.lng) < 1e-6) return;
+        syncing = true;
+        other.setView(c, M.map.getZoom(), { animate: false });
+        syncing = false;
+      });
+    });
+    var dmas = {}; R.cand.concat(R.items).forEach(function (c) { if (c.z.dma) dmas[c.z.dma] = true; });
     Promise.all(Object.keys(dmas).map(function (d) {
       return fetch(GEO.replace("{id}", d)).then(function (r) { return r.ok ? r.json() : null; }).then(function (t) {
         return t ? topojson.feature(t, t.objects[Object.keys(t.objects)[0]]).features : [];
       }).catch(function () { return []; });
     })).then(function (lists) {
       var feats = [].concat.apply([], lists).filter(function (f) { return S.byZip[f.properties.zip]; });
-      var canvas = feats.length > 1200 ? L.canvas({ padding: 0.3 }) : undefined;
-      S.layers = {};
-      S.zipLayer = L.geoJSON({ type: "FeatureCollection", features: feats }, {
-        renderer: canvas, style: zipStyle,
-        onEachFeature: function (f, layer) {
-          S.layers[f.properties.zip] = layer;
-          layer.bindTooltip(function () { return tip(f.properties.zip); }, { sticky: true, opacity: 0.97 });
-        }
-      }).addTo(S.map);
-      R.o.locs.forEach(function (l) {
-        var z = S.zips[l];
-        L.circleMarker([z.lat, z.lon], { radius: 7, color: "#fff", weight: 2, fillColor: "#0f2742", fillOpacity: 1 }).addTo(S.map).bindTooltip("Your location: " + l + " " + z.city);
-        if (R.o.radius) L.circle([z.lat, z.lon], { radius: R.o.radius * 1609.34, color: "#0f2742", weight: 1.5, dashArray: "6 6", fill: false, interactive: false }).addTo(S.map);
+      ["l", "r"].forEach(function (side) {
+        var M = MAPS[side];
+        M.br = breaks(M.mode);
+        M.layer = L.geoJSON({ type: "FeatureCollection", features: feats }, {
+          renderer: feats.length > 1200 ? L.canvas({ padding: 0.3 }) : undefined, style: styleFor(side),
+          onEachFeature: function (f, layer) {
+            M.layers[f.properties.zip] = layer;
+            layer.bindTooltip(function () { return tip(f.properties.zip); }, { sticky: true, opacity: 0.97 });
+          }
+        }).addTo(M.map);
+        R.o.locs.forEach(function (l) {
+          var z = S.zips[l];
+          L.circleMarker([z.lat, z.lon], { radius: 7, color: "#fff", weight: 2, fillColor: "#0f2742", fillOpacity: 1 }).addTo(M.map).bindTooltip("Your location: " + l + " " + z.city);
+          if (R.o.radius) L.circle([z.lat, z.lon], { radius: R.o.radius * 1609.34, color: "#0f2742", weight: 1.5, dashArray: "6 6", fill: false, interactive: false }).addTo(M.map);
+        });
+        legend(side);
       });
-      legend();
     });
   }
-  function zipColor(zip) {
-    var e = S.byZip[zip], m = S.mapMode;
-    if (m === "status") return e.it ? STATUS[e.it.status].color : "#f6f8fa";
-    if (m === "pen") {
-      if (!e.it) return "#f6f8fa";
-      var r = e.it.pen, avg = S.res.inMarket / S.res.items.reduce(function (s, it) { return s + it.z.hh; }, 0) * 1000;
-      var q = r / avg;
-      return q === 0 ? "#eef2f5" : q < 0.5 ? "#dff1ee" : q < 0.9 ? "#a9dcd4" : q < 1.5 ? "#5fb8ac" : q < 3 ? "#1f8f81" : "#0b5d53";
-    }
-    if (!e.c) return "#f6f8fa";
-    var s = e.c.sim;
-    return s < 20 ? "#eef2f5" : s < 40 ? "#dff1ee" : s < 60 ? "#a9dcd4" : s < 75 ? "#5fb8ac" : s < 90 ? "#1f8f81" : "#0b5d53";
-  }
-  function zipStyle(f) {
-    var e = S.byZip[f.properties.zip], inside = !!(e && e.it);
-    return { color: "#ffffff", weight: 0.6, fillColor: zipColor(f.properties.zip), fillOpacity: inside || S.mapMode === "sim" ? 0.9 : 0.35 };
-  }
-  function styleMap() { if (S.zipLayer) S.zipLayer.setStyle(zipStyle); legend(); }
   function tip(zip) {
-    var e = S.byZip[zip], z = S.zips[zip], h = "<div class='az-tip'><b>" + zip + " " + z.city + "</b><br>";
-    if (e.it) h += NF0.format(e.it.A) + " customers, " + NF1.format(e.it.E) + " expected (index " + NF0.format(e.it.idx) + ")<br>" + STATUS[e.it.status].label + "<br>";
-    else h += "Outside your trade area<br>";
+    var e = S.byZip[zip], z = S.zips[zip], R = S.res, h = "<div class='az-tip'><b>" + zip + " " + z.city + "</b><br>";
+    if (e.it) {
+      h += NF0.format(e.it.A) + " customers (" + NF1.format(e.it.pen) + " per 1,000 households)<br>";
+      if (S.hasValue) h += "$" + NF0.format(e.it.V) + " in sales ($" + NF1.format(e.it.V / e.it.z.hh) + " per household)<br>";
+      h += NF1.format(e.it.E) + " expected · index " + NF0.format(e.it.idx) + " · " + STATUS[e.it.status].label + "<br>";
+      h += BASES[R.o.base].label + ": " + NF0.format(e.it.B) + "<br>";
+    } else {
+      h += "Outside your trade area<br>";
+      if (e.c) h += BASES[R.o.base].label + ": " + NF0.format(e.c.B) + "<br>";
+    }
     if (e.c) h += "Similarity " + NF0.format(e.c.sim) + (e.c.opp ? " · untapped" : "");
     return h + "</div>";
   }
-  function legend() {
-    var box = $("crm-legend"); if (!box) return; box.innerHTML = "";
-    var rows = S.mapMode === "status" ? ["over", "inline", "under", "few"].map(function (k) { return [STATUS[k].color, STATUS[k].label]; })
-      : S.mapMode === "pen" ? [["#0b5d53", "3× your average or more"], ["#1f8f81", "1.5–3×"], ["#5fb8ac", "0.9–1.5×"], ["#a9dcd4", "0.5–0.9×"], ["#dff1ee", "Under 0.5×"], ["#eef2f5", "No customers"]]
-      : [["#0b5d53", "90–100"], ["#1f8f81", "75–90"], ["#5fb8ac", "60–75"], ["#a9dcd4", "40–60"], ["#dff1ee", "20–40"], ["#eef2f5", "Under 20"]];
-    box.appendChild(el("b", { text: S.mapMode === "status" ? "Performance vs. expected" : S.mapMode === "pen" ? "Customers per 1,000 households" : "Similarity to your strongest ZIPs" }));
+  function legend(side) {
+    var M = MAPS[side], box = $("crm-legend-" + side); if (!box) return; box.innerHTML = "";
+    var f = M.mode === "spend" ? function (v) { return "$" + NF1.format(v); } : M.mode === "pen" ? function (v) { return NF1.format(v); } : function (v) { return NF0.format(v); };
+    var rows;
+    if (M.mode === "status") rows = ["over", "inline", "under", "few"].map(function (k) { return [STATUS[k].color, STATUS[k].label]; });
+    else if (M.mode === "sim") rows = [[RAMP[4], "90–100"], [RAMP[3], "75–90"], [RAMP[2], "60–75"], [RAMP[1], "40–60"], [RAMP[0], "20–40"], [NONE, "Under 20"]];
+    else {
+      var b = M.br;
+      rows = [[RAMP[4], f(b[3]) + "+"], [RAMP[3], f(b[2]) + "–" + f(b[3])], [RAMP[2], f(b[1]) + "–" + f(b[2])], [RAMP[1], f(b[0]) + "–" + f(b[1])], [RAMP[0], "Under " + f(b[0])]];
+      if (M.mode !== "pot") rows.push([NONE, M.mode === "spend" ? "No sales" : "No customers"]);
+    }
+    var title = { pen: "Customers per 1,000 households", spend: "Sales per household", status: "Performance vs. expected",
+                  pot: BASES[S.res.o.base].label + " per ZIP", sim: "Similarity to your strongest ZIPs" }[M.mode];
+    box.appendChild(el("b", { text: title }));
     rows.forEach(function (r) { box.appendChild(el("span", { class: "crm-key" }, [el("i", { style: "background:" + r[0] }), r[1]])); });
+    if (M.mode !== "status" && M.mode !== "sim") box.appendChild(el("small", { class: "crm-legend-note", text: "Colors split the trade area's ZIPs into fifths." }));
   }
   function flash(zip) {
-    var l = S.layers && S.layers[zip]; if (!l) return;
-    document.getElementById("crm-map").scrollIntoView({ behavior: "smooth", block: "center" });
-    S.map.fitBounds(l.getBounds(), { maxZoom: 11, padding: [60, 60] });
-    l.setStyle({ color: "#0f2742", weight: 3 }); l.bringToFront(); l.openTooltip();
-    setTimeout(function () { l.setStyle({ color: "#ffffff", weight: 0.6 }); }, 2500);
+    var first = MAPS.l.layers && MAPS.l.layers[zip]; if (!first) return;
+    $("crm-map-l").scrollIntoView({ behavior: "smooth", block: "center" });
+    MAPS.l.map.fitBounds(first.getBounds(), { maxZoom: 11, padding: [60, 60] });
+    ["l", "r"].forEach(function (side) {
+      var l = MAPS[side].layers[zip]; if (!l) return;
+      l.setStyle({ color: "#0f2742", weight: 3 }); l.bringToFront(); if (side === "l") l.openTooltip();
+      setTimeout(function () { l.setStyle({ color: "#ffffff", weight: 0.6 }); }, 2500);
+    });
   }
 
   /* ---------- how it works ---------- */
