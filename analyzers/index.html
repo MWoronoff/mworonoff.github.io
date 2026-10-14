@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Adtaxi Market Analyzers</title>
 <meta name="robots" content="noindex">
-<meta name="description" content="Adtaxi market analyzers: market potential for six business categories, scored for every U.S. county, metro and ZIP code, plus ZIP radius, customer and TV planning tools.">
+<meta name="description" content="Adtaxi market analyzers: market potential for seven business categories, scored for every U.S. county, metro and ZIP code, plus ZIP radius, customer and TV planning tools.">
 <link rel="icon" href="/shared/adtaxi-logo.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -226,7 +226,8 @@
             <tr><td>EASI Demographics</td><td>Consumer spending by category: medical, legal, tuition, home repair, furniture, rent</td><td>Category analyzers</td></tr>
             <tr><td>Census Business Patterns</td><td>Competing businesses by ZIP and county</td><td>Category analyzers, Customer Market Analyzer</td></tr>
             <tr><td>CDC PLACES</td><td>Local health estimates such as hearing, dental and chronic conditions</td><td>Healthcare, Customer Market Analyzer</td></tr>
-            <tr><td>IRS Statistics of Income</td><td>Household income and tax-return detail by ZIP</td><td>Customer Market Analyzer</td></tr>
+            <tr><td>IRS Statistics of Income</td><td>Household income and tax-return detail by ZIP</td><td>Financial, Customer Market Analyzer</td></tr>
+            <tr><td>HMDA mortgage data (FFIEC/CFPB)</td><td>Home purchase, refinance and home equity loans made in each ZIP</td><td>Financial</td></tr>
             <tr><td>AudienceSCAN</td><td>How each buyer group responds to different kinds of advertising</td><td>Category analyzers, radius tool</td></tr>
             <tr><td>Scarborough USA+</td><td>Measured broadcast TV audiences by market</td><td>TV + Digital Video</td></tr>
             <tr><td>Other federal and market data</td><td>Department of Education (IPEDS), NOAA climate and hail, Census building permits, LEHD jobs, USDA rural codes, FHFA home prices, Zillow rents</td><td>Higher Ed, Home Services, Apartments, Customer Market Analyzer</td></tr>
@@ -264,7 +265,10 @@
       lines: "Living room, bedroom, mattresses, kitchen and dining, outdoor, baby and nursery" },
     { key: "apartments", name: "Apartments", path: "/apartment-analyzer/", shown: "Student housing",
       desc: "Renter households by income, age, building type and recent moves, plus rents and new supply.",
-      lines: "Luxury, mid-market, affordable, student housing, active adult 55+" }
+      lines: "Luxury, mid-market, affordable, student housing, active adult 55+" },
+    { key: "financial", name: "Financial", path: "/financial/", shown: "Wealth management",
+      desc: "Prospects by tax filing, investment and retirement income, mortgage activity and homeownership.",
+      lines: "Tax preparation, wealth management, retirement planning, home purchase mortgage, refinance and home equity" }
   ];
   var css = getComputedStyle(document.documentElement);
   var RAMP = ["--r0", "--r1", "--r2", "--r3", "--r4"].map(function (v) { return css.getPropertyValue(v).trim(); });
@@ -345,7 +349,7 @@
       canvas.width = Math.round(cssW * dpr); canvas.height = Math.round(cssW * dpr * M.h / M.w);
       return { ctx: canvas.getContext("2d"), scale: canvas.width / M.w };
     }
-    function classOf(key) { var s = M.cats[key]; return function (i) { var ch = s.charAt(i); return ch === "x" ? -1 : +ch; }; }
+    function classOf(key) { var s = M.cats[key] || ""; return function (i) { var ch = s.charAt(i); return ch === "x" || ch === "" ? -1 : +ch; }; }
 
     // tiles: each category's own map
     Array.prototype.forEach.call(document.querySelectorAll("canvas[data-cat]"), function (cv) {

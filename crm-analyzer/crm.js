@@ -36,7 +36,8 @@
     "higher-ed": { "": "a18_34", fouryear: "a18_34", community: "a18_34", trade: "a18_34", graduate: "bach", adult: "somecol" },
     "home-services": { "": "own" },
     furniture: { "": "hh", outdoor: "own", baby: "kids5" },
-    apartments: { "": "rent", senior: "a55p" }
+    apartments: { "": "rent", senior: "a55p" },
+    financial: { "": "hh", tax: "hh", wealth: "inc100", retire: "a55p", purchase: "rent", refi: "own" }
   };
   function categoryBase(p) {
     var cat = (p.category || "").toLowerCase(), map = CATEGORY_BASE[cat] || CATEGORY_BASE[cat.replace(/-analyzer$/, "")];

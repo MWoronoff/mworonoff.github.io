@@ -148,10 +148,26 @@
     rburden:  { label: "Rent-burdened", type: "flag", text: "Renter paying 30%+ of income in rent",
                 byAge: function (c, i, b, v, all) { var r = renterPart(c, i, b, all, "rburden"), x = ratio(c.rb_30p[i], c.rb_base[i]); return r == null || x == null ? null : r * x; } },
     rkids:    { label: "Renters with children", type: "flag", text: "Renter household with children under 18",
-                byAge: function (c, i, b, v, all) { var r = renterPart(c, i, b, all, "rkids"), x = ratio(c.r_kids[i], c.rk_tot[i]); return r == null || x == null ? null : r * x; } }
+                byAge: function (c, i, b, v, all) { var r = renterPart(c, i, b, all, "rkids"), x = ratio(c.r_kids[i], c.rk_tot[i]); return r == null || x == null ? null : r * x; } },
+    // Financial (age set "adult"). Tax return traits (IRS, by ZIP) are shares of returns, which stand in for households.
+    mortg:    { label: "Mortgage", type: "multi", options: [["with", "Owner with a mortgage or home equity loan"], ["free", "Owner, no mortgage"]],
+                byAge: function (c, i, b, sel, all) {
+                  var o = ownerPart(c, i, b, all, "mortg"), t = c.own_units ? c.own_units[i] : null; if (o == null || t == null) return null;
+                  var x = sum(sel, function (k) { return c[k === "with" ? "mortg" : "mortg_free"][i]; }); if (x == null) return null;
+                  return t ? o * Math.min(1, x / t) : 0;
+                } },
+    mover:    { label: "Recent movers", type: "flag", text: "Moved in the past year", share: function (c, i) { return ratio(c.movers ? c.movers[i] : null, c.mob_tot ? c.mob_tot[i] : null); } },
+    taxprep:  { label: "Paid tax preparer", type: "flag", text: "Household pays a preparer to file taxes", share: function (c, i) { return irsShare(c, i, "prep"); } },
+    eitc:     { label: "Earned Income Credit", type: "flag", text: "Household claims the Earned Income Credit", share: function (c, i) { return irsShare(c, i, "eitc"); } },
+    selfemp:  { label: "Self-employed", type: "flag", text: "Household has business or self-employment income", share: function (c, i) { return irsShare(c, i, "selfemp"); } },
+    invest:   { label: "Dividend income", type: "flag", text: "Household has dividend income", share: function (c, i) { return irsShare(c, i, "div"); } },
+    capgain:  { label: "Capital gains", type: "flag", text: "Household reports capital gains", share: function (c, i) { return irsShare(c, i, "cg"); } },
+    ira:      { label: "IRA distributions", type: "flag", text: "Household takes IRA distributions", share: function (c, i) { return irsShare(c, i, "ira"); } },
+    pension:  { label: "Pension income", type: "flag", text: "Household has pension or annuity income", share: function (c, i) { return irsShare(c, i, "pens"); } }
   };
   // Homeowner rate for an age group, applied once: by the first selected owner filter in OWNER_ORDER, 1 for the rest
-  var OWNER_ORDER = ["built", "ownval", "sfd", "longten"];
+  var OWNER_ORDER = ["mortg", "built", "ownval", "sfd", "longten"];
+  function irsShare(c, i, k) { return c.returns ? ratio(c[k] ? c[k][i] : null, c.returns[i]) : null; }
   function picked(v) { return v === true || (v && v.length > 0); }
   function ownerPart(c, i, b, all, me) {
     for (var k = 0; k < OWNER_ORDER.length && OWNER_ORDER[k] !== me; k++) if (all && picked(all[OWNER_ORDER[k]])) return 1;
