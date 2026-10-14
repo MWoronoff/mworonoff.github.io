@@ -23,7 +23,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install Python packages
-        run: pip install pandas
+        run: pip install pandas shapely
       - name: Build boundary files
         run: bash data-build/build_boundaries.sh
       - name: Build radius audience data
@@ -58,11 +58,13 @@ jobs:
             echo "::error title=Furniture build::$msg"; exit 1; }
       - name: Build engine test page data
         run: python3 data-build/build_engine_test.py
+      - name: Build home page maps
+        run: python3 data-build/build_home_maps.py
       - name: Commit results
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@users.noreply.github.com"
-          git add data-build/geo/county_names.csv shared/geo shared/audience engine-test/data healthcare/data legal/data higher-ed/data home-services/data apartment-analyzer/data furniture-analyzer/data
+          git add data-build/geo/county_names.csv shared/geo shared/audience engine-test/data healthcare/data legal/data higher-ed/data home-services/data apartment-analyzer/data furniture-analyzer/data analyzers/preview/home-maps.json
           git diff --cached --quiet || git commit -m "Build geography, audience, Healthcare, Legal, Higher Education, Home Services and test data"
           git push
       - name: Republish the site
