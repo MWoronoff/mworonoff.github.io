@@ -147,7 +147,7 @@
     var td = this.tbody.querySelector(".az-empty"); if (td) td.textContent = msg + " Clear the search to see all markets.";
   };
 
-  var DISCLAIMER = "Estimates for planning. Scores and figures are modeled from public government data and licensed third-party data and may differ from actual results. They show where prospects are concentrated; they don't guarantee advertising performance.";
+  var DISCLAIMER = "Estimates for planning. Scores and figures are modeled from public government and licensed third-party data.";
   var ABOUT_ESTIMATES = { title: "About these estimates", body: [
     "Every figure here is an estimate built for planning. Scores rank markets against each other; they aren't forecasts of sales, leads or advertising results.",
     "Sources differ in timing. Census American Community Survey figures are 5-year averages and, like all surveys, carry margins of error that are widest for small ZIPs and counties. IRS, mortgage, business-count and EASI figures are each the newest year published, so they may be one to three years old. Each source's year is listed under Sources.",
