@@ -577,9 +577,9 @@
         el("button", { class: "az-btn primary", type: "button", text: "Reveal the answer", onclick: function () { ans.hidden = false; this.remove(); } }),
         ans]));
     }
-    // two linked maps: your customers (left) and market potential (right), then the profile
+    // two linked maps: market potential (left) and your customers (right), then the profile
     wrap.appendChild(el("section", { id: "crm-print-top", class: "crm-print-only" }));
-    wrap.appendChild(el("div", { class: "crm-maps" }, [mapPanel("l"), mapPanel("r")]));
+    wrap.appendChild(el("div", { class: "crm-maps" }, [mapPanel("r"), mapPanel("l")]));
     wrap.appendChild(el("section", { id: "crm-print-bottom", class: "crm-print-only" }));
     wrap.appendChild(profilePanel());
     wrap.appendChild(perfPanel());
@@ -723,14 +723,14 @@
   function flashMsg(box, t) { var p = el("p", { class: "crm-toast", text: t }); box.appendChild(p); setTimeout(function () { p.remove(); }, 2500); }
 
   /* ---------- maps ---------- */
-  // Left map: how the advertiser is doing. Right map: where the potential is. Panning or zooming one moves the other.
+  // Map keys: "l" = how the advertiser is doing (shown on the right), "r" = where the potential is (shown on the left). Panning or zooming one moves the other.
   var MAPS = {
     l: { title: "Your customers", mode: "pen", modes: function () {
       return [["pen", "Customers per 1,000 households"]].concat(S.hasValue ? [["spend", "Sales per household"]] : []).concat([["status", "Performance vs. expected"]]); } },
     r: { title: "Market potential", mode: "pot", modes: function () {
       return [["pot", BASES[S.res.o.base].label + " per ZIP"], ["sim", "Similarity to your strongest ZIPs"]]; } }
   };
-  // Teal for your customers (left map), navy-blue for market potential and similarity (right map)
+  // Teal for your customers (right-hand map), navy-blue for market potential and similarity (left-hand map)
   var RAMPS = { l: ["#dff1ee", "#a9dcd4", "#5fb8ac", "#1f8f81", "#0b5d53"], r: ["#e3eaf4", "#b5c7e0", "#7b98c2", "#3f629a", "#173a6b"] };
   var RAMP = RAMPS.l, NONE = "#eef2f5", OUTSIDE = "#f6f8fa";
   function mapPanel(side) {
