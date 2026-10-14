@@ -13,7 +13,7 @@ on:
         description: "What to build"
         type: choice
         default: all
-        options: [all, healthcare, legal, higher-ed, home-services, apartments, furniture, financial]
+        options: [all, healthcare, legal, higher-ed, home-services, apartments, furniture, financial, auto]
 
 concurrency:
   group: analyzer-data
@@ -89,6 +89,14 @@ jobs:
             msg=$(grep -v '^\[PASS\]' financial.log | tail -n 25 | sed ':a;N;$!ba;s/%/%25/g;s/\n/%0A/g')
             echo "::error title=Financial build::$msg"; exit 1; }
           echo "::notice title=Financial build::$(grep -v '^\[PASS\]' financial.log | tail -n 14 | sed ':a;N;$!ba;s/%/%25/g;s/\n/%0A/g')"
+      - name: Build Auto data
+        if: (inputs.target || 'all') == 'all' || inputs.target == 'auto'
+        run: |
+          set -o pipefail
+          python3 data-build/build_auto.py 2>&1 | tee auto.log || {
+            msg=$(grep -v '^\[PASS\]' auto.log | tail -n 25 | sed ':a;N;$!ba;s/%/%25/g;s/\n/%0A/g')
+            echo "::error title=Auto build::$msg"; exit 1; }
+          echo "::notice title=Auto build::$(grep -v '^\[PASS\]' auto.log | tail -n 12 | sed ':a;N;$!ba;s/%/%25/g;s/\n/%0A/g')"
       - name: Build engine test page data
         if: (inputs.target || 'all') == 'all'
         run: python3 data-build/build_engine_test.py
@@ -98,7 +106,7 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@users.noreply.github.com"
-          git add data-build/geo/county_names.csv shared/geo shared/audience engine-test/data healthcare/data legal/data higher-ed/data home-services/data apartment-analyzer/data furniture-analyzer/data financial/data analyzers/home-maps.json
+          git add data-build/geo/county_names.csv shared/geo shared/audience engine-test/data healthcare/data legal/data higher-ed/data home-services/data apartment-analyzer/data furniture-analyzer/data financial/data auto/data analyzers/home-maps.json
           git diff --cached --quiet || git commit -m "Build analyzer data (${{ inputs.target || 'all' }})"
           for i in 1 2 3; do git pull --rebase -q && git push && break; sleep 15; done
       - name: Republish the site

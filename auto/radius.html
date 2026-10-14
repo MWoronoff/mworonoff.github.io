@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<title>Zip Code Radius Tool</title>
+<script>
+  // The radius tool now lives inside the analyzer (Geography > Radius). Forward old links, keeping the ZIP, radius and preset.
+  (function () {
+    var p = {}; (location.hash || "").replace(/^#/, "").split("&").forEach(function (kv) { var a = kv.split("="); if (a[0]) p[a[0]] = decodeURIComponent(a[1] || ""); });
+    var h = "#level=radius" + (p.p ? "&sub=" + encodeURIComponent(p.p) : "") + (/^\d{5}$/.test(p.zip || "") ? "&zip=" + p.zip : "") + (+p.r > 0 ? "&r=" + (+p.r) : "");
+    location.replace("./" + h);
+  })();
+</script>
+</head>
+<body>
+<p>The Zip Code Radius Tool is now part of the analyzer. <a href="./#level=radius">Open it here</a>.</p>
+</body>
+</html>

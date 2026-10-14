@@ -37,7 +37,8 @@
     "home-services": { "": "own" },
     furniture: { "": "hh", outdoor: "own", baby: "kids5" },
     apartments: { "": "rent", senior: "a55p" },
-    financial: { "": "hh", tax: "hh", wealth: "inc100", retire: "a55p", purchase: "rent", refi: "own" }
+    financial: { "": "hh", tax: "hh", wealth: "inc100", retire: "a55p", purchase: "rent", refi: "own" },
+    auto: { "": "hh", newcar: "inc100", newtruck: "hh", usedcar: "hh", usedtruck: "hh" }
   };
   function categoryBase(p) {
     var cat = (p.category || "").toLowerCase(), map = CATEGORY_BASE[cat] || CATEGORY_BASE[cat.replace(/-analyzer$/, "")];

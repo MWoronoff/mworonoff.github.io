@@ -163,7 +163,13 @@
     invest:   { label: "Dividend income", type: "flag", text: "Household has dividend income", share: function (c, i) { return irsShare(c, i, "div"); } },
     capgain:  { label: "Capital gains", type: "flag", text: "Household reports capital gains", share: function (c, i) { return irsShare(c, i, "cg"); } },
     ira:      { label: "IRA distributions", type: "flag", text: "Household takes IRA distributions", share: function (c, i) { return irsShare(c, i, "ira"); } },
-    pension:  { label: "Pension income", type: "flag", text: "Household has pension or annuity income", share: function (c, i) { return irsShare(c, i, "pens"); } }
+    pension:  { label: "Pension income", type: "flag", text: "Household has pension or annuity income", share: function (c, i) { return irsShare(c, i, "pens"); } },
+    // Auto (age set "adult"): share of households with this many vehicles available (Census)
+    vehicles: { label: "Vehicles in household", type: "multi", options: [["0", "None"], ["1", "1"], ["2", "2"], ["3p", "3 or more"]],
+                share: function (c, i, sel) {
+                  if (!c.veh_tot) return null;
+                  return ratio(sum(sel, function (k) { var col = { "0": "veh0", "1": "v1", "2": "v2", "3p": "veh3p" }[k]; return c[col] ? c[col][i] : null; }), c.veh_tot[i]);
+                } }
   };
   // Homeowner rate for an age group, applied once: by the first selected owner filter in OWNER_ORDER, 1 for the rest
   var OWNER_ORDER = ["mortg", "built", "ownval", "sfd", "longten"];

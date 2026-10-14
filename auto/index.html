@@ -1,0 +1,1021 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Auto Market Analyzer</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="../shared/adtaxi-logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<link rel="stylesheet" href="../shared/engine.css">
+</head>
+<body>
+<div id="app"><p class="az-loading">Loading the Auto Market Analyzer…</p></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js" crossorigin=""></script>
+<script src="../shared/engine.js"></script>
+<script src="radius-config.js"></script>
+<script>
+AdtaxiAnalyzer.start({
+ "title": "Auto Market Analyzer",
+ "subtitle": "Where auto dealers' best prospects are: Market Potential Scores for DMAs, metros, counties and ZIPs for new and used cars, trucks and SUVs, to focus ad dollars on the highest-potential geographies.",
+ "logo": "../shared/adtaxi-logo.svg",
+ "exportName": "auto",
+ "notice": "Preview for review.",
+ "links": [
+  {
+   "label": "Home",
+   "url": "../analyzers/"
+  }
+ ],
+ "radiusDefault": 10,
+ "radiusProfiles": true,
+ "defaultLevel": "dma",
+ "usMapLevel": "dma",
+ "levels": {
+  "us": {
+   "label": "U.S.",
+   "data": "data/us.json"
+  },
+  "dma": {
+   "label": "DMA",
+   "data": "data/dma.json",
+   "geo": "../shared/geo/dma.topo.json",
+   "idField": "dma_code"
+  },
+  "metro": {
+   "label": "Metro",
+   "data": "data/metro.json",
+   "geo": "../shared/geo/metro.topo.json",
+   "idField": "cbsa_code"
+  },
+  "county": {
+   "label": "County",
+   "data": "data/county.json",
+   "geo": "../shared/geo/county.topo.json",
+   "idField": "fips"
+  },
+  "zip": {
+   "label": "ZIPs in market",
+   "data": "data/zip/{level}/{id}.json",
+   "geo": "../shared/geo/zip/{level}/{id}.json",
+   "idField": "zip"
+  }
+ },
+ "statesGeo": "../shared/geo/states.topo.json",
+ "subcategoryLabel": "Vehicle line",
+ "subcategories": [
+  {
+   "id": "newcar",
+   "label": "New cars"
+  },
+  {
+   "id": "newtruck",
+   "label": "New trucks and SUVs"
+  },
+  {
+   "id": "usedcar",
+   "label": "Used cars"
+  },
+  {
+   "id": "usedtruck",
+   "label": "Used trucks and SUVs"
+  }
+ ],
+ "measures": [
+  {
+   "key": "score",
+   "label": "Market Potential Score",
+   "format": "score",
+   "short": "Score",
+   "help": "0 to 100. Weighted blend of Consumer Demand (40%), Category Spending (25%), Spending Power (15%) and Competition (20%), each a percentile against the other markets at the same level. The used lines leave out Spending Power, because used-vehicle buyers are spread across middle incomes (re-weighted: Demand 47%, Category Spending 29%, Competition 24%). ZIPs rank against the other ZIPs in the same market using Consumer Demand and Spending Power only. Counties have no EASI data, and counties under 10,000 residents aren't ranked.",
+   "perSub": true,
+   "levels": [
+    "dma",
+    "metro",
+    "county",
+    "zip"
+   ]
+  },
+  {
+   "key": "demand",
+   "label": "Consumer Demand",
+   "format": "score",
+   "short": "Demand",
+   "help": "Average of the percentiles for this line's prospect inputs (see How scores work).",
+   "perSub": true,
+   "levels": [
+    "dma",
+    "metro",
+    "county",
+    "zip"
+   ]
+  },
+  {
+   "key": "category",
+   "label": "Category Spending",
+   "format": "score",
+   "short": "Category $",
+   "help": "Average of the percentiles for EASI household spending on this line, per household and in total.",
+   "perSub": true,
+   "levels": [
+    "dma",
+    "metro"
+   ]
+  },
+  {
+   "key": "spend",
+   "label": "Spending Power",
+   "format": "score",
+   "short": "Spend",
+   "subs": [
+    "newcar",
+    "newtruck"
+   ],
+   "help": "Percentile of the share of households earning $75K or more.",
+   "perSub": true,
+   "levels": [
+    "dma",
+    "metro",
+    "county",
+    "zip"
+   ]
+  },
+  {
+   "key": "comp",
+   "label": "Competition",
+   "format": "score",
+   "short": "Compete",
+   "help": "Percentile of dealers per 10,000 residents, reversed: fewer competing dealers scores higher.",
+   "perSub": true,
+   "levels": [
+    "dma",
+    "metro",
+    "county"
+   ]
+  },
+  {
+   "key": "density",
+   "label": "Households per square mile",
+   "format": "int",
+   "short": "HH/sq mi",
+   "help": "Households divided by land area (Census Gazetteer)."
+  },
+  {
+   "key": "vehicles",
+   "label": "Household vehicles",
+   "format": "int",
+   "help": "Cars, vans and trucks kept at home for use by household members (Census). Households with 5 or more are counted as 5.5."
+  },
+  {
+   "key": "veh_per_hh",
+   "label": "Vehicles per household",
+   "format": "dec2"
+  },
+  {
+   "key": "veh3p_share",
+   "label": "Households with 3+ vehicles",
+   "format": "pct",
+   "subs": [
+    "newtruck",
+    "usedtruck"
+   ]
+  },
+  {
+   "key": "veh3p",
+   "label": "Households with 3+ vehicles (count)",
+   "format": "int",
+   "subs": [
+    "newtruck",
+    "usedtruck"
+   ]
+  },
+  {
+   "key": "rural_share",
+   "label": "Share of residents in small-town and rural ZIPs",
+   "format": "pct",
+   "subs": [
+    "newtruck",
+    "usedtruck"
+   ],
+   "help": "Residents of ZIPs outside metro cores and their commuting areas (USDA rural-urban commuting area codes 4–10). Pickups and SUVs sell best where driving distances are long."
+  },
+  {
+   "key": "kids_share",
+   "label": "Households with children",
+   "format": "pct",
+   "subs": [
+    "newtruck"
+   ],
+   "help": "Families drive SUV and minivan demand."
+  },
+  {
+   "key": "inc100_share",
+   "label": "Households earning $100K+",
+   "format": "pct",
+   "subs": [
+    "newcar"
+   ]
+  },
+  {
+   "key": "inc35_100_share",
+   "label": "Households earning $35K–$99K",
+   "format": "pct",
+   "subs": [
+    "usedcar",
+    "usedtruck"
+   ]
+  },
+  {
+   "key": "car_share",
+   "label": "Share of workers commuting by car",
+   "format": "pct",
+   "subs": [
+    "newcar",
+    "usedcar"
+   ]
+  },
+  {
+   "key": "car_commute",
+   "label": "Workers commuting by car",
+   "format": "int",
+   "subs": [
+    "newcar",
+    "usedcar"
+   ]
+  },
+  {
+   "key": "noveh_share",
+   "label": "Households with no vehicle",
+   "format": "pct",
+   "help": "Shown, not scored."
+  },
+  {
+   "key": "own_share",
+   "label": "Homeowner households",
+   "format": "pct",
+   "help": "Shown, not scored."
+  },
+  {
+   "key": "est",
+   "label": "Competing dealers",
+   "format": "int",
+   "short": "Dealers",
+   "help": "New lines: new car dealers. Used lines: used car dealers (franchised new-car dealers also sell used vehicles but are counted as new car dealers). DMAs, metros and the U.S. use complete County Business Patterns counts. In the ZIP view, Census doesn't publish a ZIP's count when it has fewer than 3, so those show as 0.",
+   "perSub": true
+  },
+  {
+   "key": "per10k",
+   "label": "Dealers per 10,000 residents",
+   "format": "dec2",
+   "short": "Per 10K",
+   "perSub": true
+  },
+  {
+   "key": "growth",
+   "label": "One-year growth in dealers",
+   "format": "pct",
+   "short": "Growth",
+   "help": "Change from the prior Business Patterns year. Blank where there were fewer than 3.",
+   "perSub": true
+  },
+  {
+   "key": "under",
+   "label": "Underserved",
+   "format": "text",
+   "short": "Underserved",
+   "help": "Strong prospect demand (70th percentile or higher) but few dealers per resident (30th percentile or lower). Shown, not scored.",
+   "perSub": true,
+   "levels": [
+    "dma",
+    "metro",
+    "county"
+   ]
+  },
+  {
+   "key": "population",
+   "label": "Population",
+   "format": "int"
+  },
+  {
+   "key": "households",
+   "label": "Households",
+   "format": "int"
+  },
+  {
+   "key": "inc75_share",
+   "label": "Households earning $75K+",
+   "format": "pct"
+  },
+  {
+   "key": "easi_new_cars_hh",
+   "label": "New cars spending per household (EASI)",
+   "short": "New cars $/HH",
+   "format": "money",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "subs": [
+    "newcar"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "EASI 2025 estimated annual household spending."
+  },
+  {
+   "key": "easi_new_cars_idx",
+   "label": "New cars spending: index vs. U.S.",
+   "short": "New cars idx",
+   "format": "index",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "subs": [
+    "newcar"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "Per household divided by the U.S. average, times 100."
+  },
+  {
+   "key": "easi_new_cars_total",
+   "label": "New cars spending, est. annual total",
+   "short": "New cars total",
+   "format": "moneyM",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "subs": [
+    "newcar"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "EASI per household times the households in this market."
+  },
+  {
+   "key": "easi_new_trucks_hh",
+   "label": "New trucks spending per household (EASI)",
+   "short": "New trucks $/HH",
+   "format": "money",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "subs": [
+    "newtruck"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "EASI 2025 estimated annual household spending."
+  },
+  {
+   "key": "easi_new_trucks_idx",
+   "label": "New trucks spending: index vs. U.S.",
+   "short": "New trucks idx",
+   "format": "index",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "subs": [
+    "newtruck"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "Per household divided by the U.S. average, times 100."
+  },
+  {
+   "key": "easi_new_trucks_total",
+   "label": "New trucks spending, est. annual total",
+   "short": "New trucks total",
+   "format": "moneyM",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "subs": [
+    "newtruck"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "EASI per household times the households in this market."
+  },
+  {
+   "key": "easi_used_cars_hh",
+   "label": "Used cars spending per household (EASI)",
+   "short": "Used cars $/HH",
+   "format": "money",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "subs": [
+    "usedcar"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "EASI 2025 estimated annual household spending."
+  },
+  {
+   "key": "easi_used_cars_idx",
+   "label": "Used cars spending: index vs. U.S.",
+   "short": "Used cars idx",
+   "format": "index",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "subs": [
+    "usedcar"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "Per household divided by the U.S. average, times 100."
+  },
+  {
+   "key": "easi_used_cars_total",
+   "label": "Used cars spending, est. annual total",
+   "short": "Used cars total",
+   "format": "moneyM",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "subs": [
+    "usedcar"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "EASI per household times the households in this market."
+  },
+  {
+   "key": "easi_used_trucks_hh",
+   "label": "Used trucks spending per household (EASI)",
+   "short": "Used trucks $/HH",
+   "format": "money",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "subs": [
+    "usedtruck"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "EASI 2025 estimated annual household spending."
+  },
+  {
+   "key": "easi_used_trucks_idx",
+   "label": "Used trucks spending: index vs. U.S.",
+   "short": "Used trucks idx",
+   "format": "index",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "subs": [
+    "usedtruck"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "Per household divided by the U.S. average, times 100."
+  },
+  {
+   "key": "easi_used_trucks_total",
+   "label": "Used trucks spending, est. annual total",
+   "short": "Used trucks total",
+   "format": "moneyM",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "subs": [
+    "usedtruck"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "EASI per household times the households in this market."
+  }
+ ],
+ "rankBy": [
+  "score",
+  "easi_new_cars_idx",
+  "easi_new_cars_total",
+  "easi_new_trucks_idx",
+  "easi_new_trucks_total",
+  "easi_used_cars_idx",
+  "easi_used_cars_total",
+  "easi_used_trucks_idx",
+  "easi_used_trucks_total",
+  "vehicles",
+  "veh3p_share",
+  "rural_share",
+  "density"
+ ],
+ "defaultRank": "score",
+ "components": [
+  "demand",
+  "category",
+  "spend",
+  "comp"
+ ],
+ "detailMeasures": [
+  "easi_new_cars_hh",
+  "easi_new_cars_idx",
+  "easi_new_cars_total",
+  "easi_new_trucks_hh",
+  "easi_new_trucks_idx",
+  "easi_new_trucks_total",
+  "easi_used_cars_hh",
+  "easi_used_cars_idx",
+  "easi_used_cars_total",
+  "easi_used_trucks_hh",
+  "easi_used_trucks_idx",
+  "easi_used_trucks_total",
+  "density",
+  "est",
+  "per10k",
+  "growth",
+  "under",
+  "population",
+  "households",
+  "vehicles",
+  "veh_per_hh",
+  "veh3p",
+  "veh3p_share",
+  "rural_share",
+  "kids_share",
+  "inc100_share",
+  "inc35_100_share",
+  "car_commute",
+  "car_share",
+  "noveh_share",
+  "own_share",
+  "inc75_share"
+ ],
+ "tableColumns": [
+  "score",
+  "density",
+  "population",
+  "under"
+ ],
+ "methodology": [
+  {
+   "title": "Market Potential Score",
+   "body": [
+    "Answers one question: where are an auto dealer's best prospects, and which geographies deserve the most ad dollars?",
+    "Market Potential Score = 40% Consumer Demand + 25% Category Spending + 15% Spending Power + 20% Competition. Each part is a percentile (0 to 100) against the other markets at the same level: DMAs against DMAs, metros against metros, ZIPs against the other ZIPs in the same market.",
+    "The used lines leave out Spending Power: used-vehicle buyers are spread across middle incomes, so rewarding high incomes would point away from them. Their other parts are re-weighted to 100%.",
+    "A score isn't computed when one of its parts has no data, rather than guessing."
+   ]
+  },
+  {
+   "title": "Consumer Demand",
+   "body": [
+    "Every line starts from the market's household vehicles: the cars, vans and trucks households keep, from the Census American Community Survey. Each line then adds what marks its buyers.",
+    "New cars: households earning $100K or more and the share of workers commuting by car.",
+    "New trucks and SUVs: households with 3 or more vehicles, the share of residents in small-town and rural ZIPs, and households with children.",
+    "Used cars: households earning $35K–$99K and the share commuting by car.",
+    "Used trucks and SUVs: households with 3 or more vehicles, the rural share and households earning $35K–$99K.",
+    "Vehicle registrations by model aren't published free, so Census vehicles available stand in for the vehicles on the road."
+   ]
+  },
+  {
+   "title": "Category Spending",
+   "body": "EASI 2025 estimates of household spending on new cars, new trucks, used cars and used trucks, each used for its own line. Half the weight goes to spending per household and half to the market's total (per household times this site's households). EASI's trucks include pickups, SUVs and vans. EASI counts Palm Springs inside Los Angeles, so the provisional Palm Springs DMA uses the Riverside–San Bernardino metro's rate. Not available by county or ZIP."
+  },
+  {
+   "title": "Spending Power",
+   "body": "Share of households earning $75K or more, from the Census American Community Survey. Used for the new lines only."
+  },
+  {
+   "title": "Competition",
+   "body": "Dealers per 10,000 residents, reversed: markets with fewer competing dealers score higher. The new lines use new car dealers; the used lines use used car dealers. Census counts dealerships, not brands, and franchised new-car dealers' used lots are counted with them. Counts are Census County Business Patterns. Not used in ZIP scores, because Census hides ZIP counts under 3."
+  },
+  {
+   "title": "Underserved",
+   "body": "Flags markets with strong prospect demand (70th percentile or higher) but few dealers per resident (30th percentile or lower). Shown, not scored."
+  },
+  {
+   "title": "Households per square mile",
+   "body": "Households divided by land area from the Census Gazetteer. It isn't part of the score; use it to compare how many prospects a service area or radius can reach."
+  },
+  {
+   "title": "ZIPs in a market",
+   "body": "Pick a DMA, metro or county, then choose ZIPs in market. ZIP scores use Consumer Demand and Spending Power, reweighted to 73% and 27% (used lines: Consumer Demand only). ZIPs with fewer than 500 residents are shown but not ranked."
+  },
+  {
+   "title": "Advertising response",
+   "body": [
+    "In the Radius view, once you pick a center and a radius, a panel under the radius map shows the percent of the target group and of all U.S. adults who saw or heard an ad on each of 17 media that led them to take action in the past 30 days (AudienceSCAN). Percentages are based on everyone in each group, not only people who use that medium, and they are response rates, not reach. It's national data, so it's the same for every market. \"Vs. average\" is a percent difference, not percentage points.",
+    "New lines use AudienceSCAN's new car/truck shoppers; used lines use used car/truck shoppers. AudienceSCAN gives these groups' percentages only; the all-adults figures are the same national figures used for every other group.",
+    "It comes after the geography on purpose: first find where the prospects are, then see how that target group responds to advertising."
+   ]
+  }
+ ],
+ "sources": [
+  {
+   "label": "Census American Community Survey 5-year (vehicles available, income, commuting)"
+  },
+  {
+   "label": "USDA rural-urban commuting area codes",
+   "url": "https://www.ers.usda.gov/data-products/rural-urban-commuting-area-codes/"
+  },
+  {
+   "label": "EASI Demographics 2025 (vehicle spending)"
+  },
+  {
+   "label": "Census ZIP and County Business Patterns",
+   "url": "https://www.census.gov/programs-surveys/cbp.html"
+  },
+  {
+   "label": "Deluxe ZIP file (Q4 2025)"
+  },
+  {
+   "label": "ZIP-level DMA list",
+   "url": "https://github.com/BritCrit/dma_county_zip"
+  }
+ ],
+ "sourcesNote": "Vehicle spending is EASI; vehicles, income, children and commuting are Census ACS; rural ZIPs are USDA; dealer counts are Census Business Patterns; population and households are from the Deluxe ZIP file.",
+ "radius": true,
+ "adResponse": {
+  "title": "How your target group responds to advertising",
+  "source": "2026 AudienceSCAN® study",
+  "note": "National survey data: the percent who saw or heard an ad of each type that led them to take action in the past 30 days. Percentages are based on all U.S. adults and on everyone in the target group, not on users of each medium. \"Vs. average\" is how much more likely the target group is to have responded than all U.S. adults (a percent difference, not percentage points). AudienceSCAN gives the shopper groups' percentages only; the all-adults figures are the same national figures used for every other group. The same national figures apply to every market.",
+  "subs": {
+   "newcar": {
+    "short": "New vehicle shoppers",
+    "audience": "new car/truck shoppers",
+    "rows": [
+     [
+      "Streaming TV advertising (such as Hulu, Pluto TV or YouTube TV)",
+      53.1,
+      36.7
+     ],
+     [
+      "Ad on a social network",
+      51.6,
+      35.9
+     ],
+     [
+      "Mobile phone app or text message",
+      50.9,
+      36.6
+     ],
+     [
+      "Ad on search results pages (like on Google, Yahoo or Bing)",
+      50.2,
+      35.8
+     ],
+     [
+      "Television (traditional, including cable or satellite subscription)",
+      49.3,
+      34.7
+     ],
+     [
+      "Ad that plays before or during the video you want to watch",
+      44.9,
+      31.1
+     ],
+     [
+      "Online display ads (banners and pop-up ads)",
+      44.5,
+      30.0
+     ],
+     [
+      "Text link ad on a website",
+      41.2,
+      27.3
+     ],
+     [
+      "Emailed ad or newsletter",
+      40.8,
+      28.6
+     ],
+     [
+      "Ads/Coupons in your mailbox",
+      39.7,
+      29.9
+     ],
+     [
+      "Ad on a podcast",
+      38.2,
+      22.7
+     ],
+     [
+      "Radio (over-the-air, online, mobile or tablet)",
+      38.0,
+      25.5
+     ],
+     [
+      "Advertising circulars in your mailbox or inserted in the newspaper",
+      37.6,
+      27.2
+     ],
+     [
+      "Newspaper (print, online, mobile or tablet)",
+      37.0,
+      23.5
+     ],
+     [
+      "Outdoor ad/sign/billboard/transit",
+      36.7,
+      23.6
+     ],
+     [
+      "Ads at movie theater",
+      35.7,
+      21.5
+     ],
+     [
+      "Magazine (print, online, mobile or on tablet)",
+      34.4,
+      21.5
+     ]
+    ]
+   },
+   "newtruck": {
+    "short": "New vehicle shoppers",
+    "audience": "new car/truck shoppers",
+    "rows": [
+     [
+      "Streaming TV advertising (such as Hulu, Pluto TV or YouTube TV)",
+      53.1,
+      36.7
+     ],
+     [
+      "Ad on a social network",
+      51.6,
+      35.9
+     ],
+     [
+      "Mobile phone app or text message",
+      50.9,
+      36.6
+     ],
+     [
+      "Ad on search results pages (like on Google, Yahoo or Bing)",
+      50.2,
+      35.8
+     ],
+     [
+      "Television (traditional, including cable or satellite subscription)",
+      49.3,
+      34.7
+     ],
+     [
+      "Ad that plays before or during the video you want to watch",
+      44.9,
+      31.1
+     ],
+     [
+      "Online display ads (banners and pop-up ads)",
+      44.5,
+      30.0
+     ],
+     [
+      "Text link ad on a website",
+      41.2,
+      27.3
+     ],
+     [
+      "Emailed ad or newsletter",
+      40.8,
+      28.6
+     ],
+     [
+      "Ads/Coupons in your mailbox",
+      39.7,
+      29.9
+     ],
+     [
+      "Ad on a podcast",
+      38.2,
+      22.7
+     ],
+     [
+      "Radio (over-the-air, online, mobile or tablet)",
+      38.0,
+      25.5
+     ],
+     [
+      "Advertising circulars in your mailbox or inserted in the newspaper",
+      37.6,
+      27.2
+     ],
+     [
+      "Newspaper (print, online, mobile or tablet)",
+      37.0,
+      23.5
+     ],
+     [
+      "Outdoor ad/sign/billboard/transit",
+      36.7,
+      23.6
+     ],
+     [
+      "Ads at movie theater",
+      35.7,
+      21.5
+     ],
+     [
+      "Magazine (print, online, mobile or on tablet)",
+      34.4,
+      21.5
+     ]
+    ]
+   },
+   "usedcar": {
+    "short": "Used vehicle shoppers",
+    "audience": "used car/truck shoppers",
+    "rows": [
+     [
+      "Streaming TV advertising (such as Hulu, Pluto TV or YouTube TV)",
+      45.6,
+      36.7
+     ],
+     [
+      "Mobile phone app or text message",
+      45.4,
+      36.6
+     ],
+     [
+      "Ad on a social network",
+      44.2,
+      35.9
+     ],
+     [
+      "Ad on search results pages (like on Google, Yahoo or Bing)",
+      41.9,
+      35.8
+     ],
+     [
+      "Television (traditional, including cable or satellite subscription)",
+      40.0,
+      34.7
+     ],
+     [
+      "Ad that plays before or during the video you want to watch",
+      39.6,
+      31.1
+     ],
+     [
+      "Online display ads (banners and pop-up ads)",
+      36.0,
+      30.0
+     ],
+     [
+      "Ads/Coupons in your mailbox",
+      34.9,
+      29.9
+     ],
+     [
+      "Emailed ad or newsletter",
+      33.5,
+      28.6
+     ],
+     [
+      "Text link ad on a website",
+      32.5,
+      27.3
+     ],
+     [
+      "Radio (over-the-air, online, mobile or tablet)",
+      31.6,
+      25.5
+     ],
+     [
+      "Advertising circulars in your mailbox or inserted in the newspaper",
+      31.3,
+      27.2
+     ],
+     [
+      "Outdoor ad/sign/billboard/transit",
+      29.1,
+      23.6
+     ],
+     [
+      "Newspaper (print, online, mobile or tablet)",
+      26.6,
+      23.5
+     ],
+     [
+      "Ad on a podcast",
+      26.3,
+      22.7
+     ],
+     [
+      "Ads at movie theater",
+      25.4,
+      21.5
+     ],
+     [
+      "Magazine (print, online, mobile or on tablet)",
+      24.4,
+      21.5
+     ]
+    ]
+   },
+   "usedtruck": {
+    "short": "Used vehicle shoppers",
+    "audience": "used car/truck shoppers",
+    "rows": [
+     [
+      "Streaming TV advertising (such as Hulu, Pluto TV or YouTube TV)",
+      45.6,
+      36.7
+     ],
+     [
+      "Mobile phone app or text message",
+      45.4,
+      36.6
+     ],
+     [
+      "Ad on a social network",
+      44.2,
+      35.9
+     ],
+     [
+      "Ad on search results pages (like on Google, Yahoo or Bing)",
+      41.9,
+      35.8
+     ],
+     [
+      "Television (traditional, including cable or satellite subscription)",
+      40.0,
+      34.7
+     ],
+     [
+      "Ad that plays before or during the video you want to watch",
+      39.6,
+      31.1
+     ],
+     [
+      "Online display ads (banners and pop-up ads)",
+      36.0,
+      30.0
+     ],
+     [
+      "Ads/Coupons in your mailbox",
+      34.9,
+      29.9
+     ],
+     [
+      "Emailed ad or newsletter",
+      33.5,
+      28.6
+     ],
+     [
+      "Text link ad on a website",
+      32.5,
+      27.3
+     ],
+     [
+      "Radio (over-the-air, online, mobile or tablet)",
+      31.6,
+      25.5
+     ],
+     [
+      "Advertising circulars in your mailbox or inserted in the newspaper",
+      31.3,
+      27.2
+     ],
+     [
+      "Outdoor ad/sign/billboard/transit",
+      29.1,
+      23.6
+     ],
+     [
+      "Newspaper (print, online, mobile or tablet)",
+      26.6,
+      23.5
+     ],
+     [
+      "Ad on a podcast",
+      26.3,
+      22.7
+     ],
+     [
+      "Ads at movie theater",
+      25.4,
+      21.5
+     ],
+     [
+      "Magazine (print, online, mobile or on tablet)",
+      24.4,
+      21.5
+     ]
+    ]
+   }
+  }
+ }
+});
+</script>
+</body>
+</html>
