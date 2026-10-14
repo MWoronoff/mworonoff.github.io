@@ -88,7 +88,7 @@ def ncua():
         if not zc: sys.exit(f"NCUA branch file has no physical ZIP column: {list(d.columns)[:30]}")
         if tc:
             log("NCUA site types: " + ", ".join(f"{k} {v:,}" for k, v in d[tc].value_counts().items()))
-            d = d[~d[tc].fillna("").str.contains("ATM|Corporate|Administrative|Shared", case=False)]
+            d = d[~d[tc].fillna("").str.contains("ATM|Administrative|Shared", case=False)]
         d["zip"] = z5(d[zc])
         log(f"NCUA {y}-{m:02d}: {len(d):,} credit union branches ({name})")
         return f"{y}-{m:02d}", d.groupby("zip").size().rename("cu_br").to_frame()
@@ -105,7 +105,7 @@ def main():
     nb, nc = int(out.bank_br.sum()), int(out.cu_br.sum())
     log(f"Bank branches {nb:,}; credit union branches {nc:,}; ZIPs {len(out):,}")
     if not (60000 <= nb <= 95000): sys.exit(f"Bank branch total {nb:,} outside 60,000–95,000")
-    if not (12000 <= nc <= 30000): sys.exit(f"Credit union branch total {nc:,} outside 12,000–30,000")
+    if not (15000 <= nc <= 30000): sys.exit(f"Credit union branch total {nc:,} outside 12,000–30,000")
     os.makedirs(OUT, exist_ok=True)
     out.reset_index().to_csv(os.path.join(OUT, "zip_branches.csv.gz"), index=False, compression="gzip")
     json.dump({"fdicYear": fy, "ncuaQuarter": nq, "bankBranches": nb, "cuBranches": nc, "built": datetime.date.today().isoformat()},
