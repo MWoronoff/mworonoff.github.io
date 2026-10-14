@@ -25,7 +25,7 @@ Geography comes from data-build/geo (ZIP -> county, metro, DMA). Download helper
 import argparse, datetime, gzip, io, json, os, re, sys
 import numpy as np
 import pandas as pd
-from build_healthcare import cbp_years, zbp, cbp_county, pct, combine, fetch, zcta_land, validate_scores
+from build_healthcare import cbp_years, zbp, cbp_county, pct, combine, fetch, zcta_land, validate_scores, nat_or
 from county_level import county_frame, county_mask, county_checks, county_flag, county_names, mark_unranked, COUNTY_PARTS
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -382,8 +382,8 @@ def main():
     us = frame([("us", z)])
     for s in SUBCATS:
         i = s["id"]
-        us[f"est@{i}"] = co[co.naics.isin(s["naics"])].est.sum()            # includes statewide records
-        us[f"prev@{i}"] = co0[co0.naics.isin(s["naics"])].est.sum()
+        us[f"est@{i}"] = nat_or(y, s["naics"], co)           # Census's national file (matches published U.S. totals)
+        us[f"prev@{i}"] = nat_or(y - 1, s["naics"], co0)
         us[f"per10k@{i}"] = us[f"est@{i}"] / us.population * 1e4
         us[f"growth@{i}"] = (us[f"est@{i}"] - us[f"prev@{i}"]) / us[f"prev@{i}"]
     for k in ALL_EASI: us[f"easi_{k}_hh"] = us_hh[k]

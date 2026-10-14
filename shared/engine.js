@@ -153,6 +153,7 @@
     "Estimates for planning. Scores rank markets against each other; they don't forecast sales, leads or ad results.",
     "Census ACS figures are 5-year survey averages with margins of error, widest for small ZIPs and counties. IRS, mortgage, business and EASI figures are the newest year published, often one to three years old. Years are listed under Sources.",
     "Radius counts are modeled: selected traits are treated as independent within each ZIP.",
+    "Business counts: U.S. totals are Census's published national figures. Market counts come from Census's county file, which adds to 1–6% less because Census withholds some county detail.",
     "ZIPs under 500 residents, and ZIPs that are mostly group quarters (campuses, bases, prisons), are shown but not ranked." ] };
 
   /* ---------- URL state ---------- */

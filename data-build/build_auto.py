@@ -19,7 +19,7 @@ Geography comes from data-build/geo (ZIP -> county, metro, DMA).
 import argparse, datetime, json, os, re, sys
 import numpy as np
 import pandas as pd
-from build_healthcare import cbp_years, zbp, cbp_county, pct, combine, zcta_land, validate_scores
+from build_healthcare import cbp_years, zbp, cbp_county, pct, combine, zcta_land, validate_scores, nat_or
 from county_level import county_frame, county_mask, county_checks, county_flag, county_names, mark_unranked, COUNTY_PARTS
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -214,7 +214,7 @@ def main():
     us = frame([("us", z)])
     for s in SUBCATS:
         codes = NAICS[s["naics"]]; i = s["id"]
-        us[f"est@{i}"], us[f"prev@{i}"] = co[co.naics.isin(codes)].est.sum(), co0[co0.naics.isin(codes)].est.sum()
+        us[f"est@{i}"], us[f"prev@{i}"] = nat_or(y, codes, co), nat_or(y - 1, codes, co0)   # national file
         us[f"per10k@{i}"] = us[f"est@{i}"] / us.population * 1e4
         us[f"growth@{i}"] = (us[f"est@{i}"] - us[f"prev@{i}"]) / us[f"prev@{i}"]
     for e, lab in EASI.values():

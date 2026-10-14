@@ -16,7 +16,7 @@ Geography comes from data-build/geo (ZIP -> county, metro, DMA). Download helper
 import argparse, datetime, json, os, re, sys
 import numpy as np
 import pandas as pd
-from build_healthcare import cbp_years, zbp, cbp_county, pct, combine, zcta_land, validate_scores
+from build_healthcare import cbp_years, zbp, cbp_county, pct, combine, zcta_land, validate_scores, nat_or
 from county_level import county_frame, county_mask, county_checks, county_flag, county_names, mark_unranked, COUNTY_PARTS
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -179,7 +179,7 @@ def main():
     validate_scores(rep, z, co, [(x["id"], x["label"], NAICS) for x in SUBCATS],
                     [("DMAs", dma, "dma_code"), ("metros", met, "cbsa_code")], "law offices")
     us = frame([("us", z)])
-    us["est"], us["prev"] = nat, co0[co0.naics.isin(NAICS)].est.sum()
+    us["est"], us["prev"] = nat_or(y, NAICS, co), nat_or(y - 1, NAICS, co0)   # national file (matches published U.S. totals)
     us["per10k"] = us.est / us.population * 1e4
     us["growth"] = (us.est - us.prev) / us.prev
     us["easi_hh"], us["easi_total"], us["easi_idx"] = us_hh, us_hh * us.households, 100.0

@@ -186,6 +186,29 @@ def cbp_county(year, cache):
     return df[["county_fips", "naics", "est", "ap", "emp"]]
 
 
+_NAT = {}
+
+
+def nat_or(year, codes, county_df):
+    """U.S. establishments for these NAICS codes from Census's national CBP file, which matches Census's published
+    U.S. totals. The county file (used for every market) adds up to 1-6% less, because Census withholds some county
+    detail. Falls back to the county total if the national file can't be read (noted in the log)."""
+    if year not in _NAT:
+        try:
+            f = f"cbp{year % 100:02d}us.zip"
+            df = read_zip_table(fetch(f, CBP.format(y=year, f=f), None), ["naics", "lfo", "est"])
+            df = df[df.lfo.fillna("").str.strip().isin(["-", ""])].copy()
+            df["naics"] = naics_clean(df.naics); df["est"] = pd.to_numeric(df.est, errors="coerce")
+            _NAT[year] = df.groupby("naics").est.max()
+        except Exception as e:
+            print(f"National CBP file for {year} unavailable ({e}); U.S. counts use the county file", flush=True)
+            _NAT[year] = None
+    s = _NAT[year]; codes = list(codes)
+    if s is None or not any(c in s.index for c in codes):
+        return float(county_df[county_df.naics.isin(codes)].est.sum())
+    return float(s.reindex(codes).fillna(0).sum())
+
+
 def places_ids(cache):
     """Finds the PLACES ZCTA and county GIS-friendly datasets on data.cdc.gov: the newest release, plus the one before
     it (used where the newest release leaves a state out). Returns ({kind: [(year, id), ...] newest first}, year)."""
@@ -721,8 +744,8 @@ def main():
     us = frame([("us", z)])
     for s in SUBCATS:
         i = s["id"]
-        us[f"est@{i}"] = co[co.naics.isin(s["naics"])].est.sum()            # includes statewide records
-        us[f"prev@{i}"] = co0[co0.naics.isin(s["naics"])].est.sum()
+        us[f"est@{i}"] = nat_or(y, s["naics"], co)           # Census's national file (matches published U.S. totals)
+        us[f"prev@{i}"] = nat_or(y - 1, s["naics"], co0)
         us[f"per10k@{i}"] = us[f"est@{i}"] / us.population * 1e4
         us[f"growth@{i}"] = (us[f"est@{i}"] - us[f"prev@{i}"]) / us[f"prev@{i}"]
     for e, (col, _) in EASI_SPEND.items():
