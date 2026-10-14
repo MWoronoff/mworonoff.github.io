@@ -1,0 +1,42 @@
+name: Build HMDA mortgage data
+
+# Downloads the newest HMDA national loan-level file (FFIEC/CFPB) and the Census ZCTA-to-tract relationship file, counts
+# owner-occupied home purchase, refinance and home equity loans by ZIP, and saves data-build/master/zip_hmda.csv.gz for
+# the Financial analyzer. No API keys are needed. HMDA publishes each year's data in June or July, so it also runs
+# every August 1. Run "Build geography boundaries" afterward to rebuild the Financial analyzer with the new data.
+on:
+  workflow_dispatch:
+    inputs:
+      year:
+        description: "HMDA year (blank = newest published)"
+        required: false
+        default: ""
+  schedule:
+    - cron: "0 9 1 8 *"
+
+permissions:
+  contents: write
+
+jobs:
+  hmda:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install Python packages
+        run: pip install pandas
+      - name: Build HMDA data
+        run: |
+          if [ -n "${{ github.event.inputs.year }}" ]; then ARGS="--year ${{ github.event.inputs.year }}"; else ARGS=""; fi
+          python3 data-build/build_hmda.py $ARGS
+      - name: Commit results
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add data-build/master/zip_hmda.csv.gz data-build/master/hmda_facts.json
+          git diff --cached --quiet || git commit -m "Build HMDA mortgage data by ZIP"
+          git pull --rebase -q
+          git push
