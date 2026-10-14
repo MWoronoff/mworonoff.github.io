@@ -117,6 +117,36 @@
     this.refresh();
   };
 
+  // A full ZIP typed into search that isn't in the current list: open that ZIP inside its own market, keeping the
+  // market type in use (county, metro or DMA), or the DMA from the national views.
+  Analyzer.prototype.maybeFindZip = function () {
+    var self = this, s = this.state, q = s.query;
+    if (!this.cfg.levels.zip || !/^\d{5}$/.test(q)) return;
+    var cur = this.d(s.level);
+    if (s.level === "zip" && cur && cur.byId[q]) return;            // already listed here
+    if (!this.zipIndex) {
+      this.zipIndex = fetch(this.cfg.zipIndex || "../shared/geo/zip_market.json").then(function (r) {
+        if (!r.ok) throw new Error("HTTP " + r.status); return r.json();
+      });
+    }
+    this.zipIndex.then(function (ix) {
+      if (s.query !== q) return;                                      // the user kept typing
+      var e = ix[q];
+      if (!e) { self.zipMiss(q, "ZIP " + q + " wasn't found."); return; }
+      var want = s.level === "zip" && s.parent ? s.parent.level : (self.drillable(s.level) ? s.level : "dma");
+      var ids = { county: e[0], metro: e[1], dma: e[2] }, order = [want, "dma", "county", "metro"], lv = null;
+      for (var i = 0; i < order.length; i++) { var L0 = order[i]; if (ids[L0] && self.cfg.levels[L0] && (L0 !== "county" || self.cfg.levels.county)) { lv = L0; break; } }
+      if (!lv) { self.zipMiss(q, "ZIP " + q + " isn't in a market this site covers."); return; }
+      s.parent = { level: lv, id: ids[lv] };
+      s.level = "zip"; s.area = q; s.sortKey = null; s.query = ""; self.search.value = "";
+      self.refresh();
+    }).catch(function () { self.zipMiss(q, "The ZIP lookup didn't load; try again in a minute."); });
+  };
+  Analyzer.prototype.zipMiss = function (q, msg) {
+    if (this.state.query !== q) return;
+    var td = this.tbody.querySelector(".az-empty"); if (td) td.textContent = msg + " Clear the search to see all markets.";
+  };
+
   /* ---------- URL state ---------- */
   // Link to the Customer Market Analyzer with this analyzer's category, subcategory and selected DMA
   Analyzer.prototype.crmUrl = function () {
@@ -242,7 +272,7 @@
     this.showSel.value = String(this.state.show);
     controls.push(el("label", { class: "az-field az-only" }, [el("span", { text: "Show" }), this.showSel]));
     this.search = el("input", { type: "search", placeholder: "Find a market", "aria-label": "Find a market",
-      oninput: function () { self.state.query = this.value.trim().toLowerCase(); self.renderTable(); } });
+      oninput: function () { self.state.query = this.value.trim().toLowerCase(); self.renderTable(); self.maybeFindZip(); } });
     controls.push(el("label", { class: "az-field az-only" }, [el("span", { text: "Search" }), this.search]));
     controls.push(el("div", { class: "az-actions az-only" }, [
       el("button", { type: "button", class: "az-btn", text: "How scores work", onclick: function () { self.openMethod(); } }),

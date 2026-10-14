@@ -101,7 +101,9 @@ jobs:
         if: (inputs.target || 'all') == 'all'
         run: python3 data-build/build_engine_test.py
       - name: Build home page maps
-        run: python3 data-build/build_home_maps.py
+        run: |
+          python3 data-build/build_home_maps.py
+          python3 data-build/build_zip_index.py
       - name: Commit results
         run: |
           git config user.name "github-actions"
