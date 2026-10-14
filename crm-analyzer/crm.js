@@ -88,6 +88,12 @@
     if (/^\d{3,4}$/.test(s)) return ("00" + s).slice(-5);   // Excel dropped the leading zeros
     m = s.match(/^(\d{3,4})-\d{4}$/);
     if (m) return ("00" + m[1]).slice(-5);
+    // ZIP inside longer text, as ad platforms export it ("80222, Colorado, United States") or a full address:
+    // take the last standalone 5-digit group so a street number isn't mistaken for the ZIP
+    if (/[A-Za-z,]/.test(s)) {
+      var all = s.match(/(?:^|[^\d])(\d{5})(?:-\d{4})?(?=[^\d]|$)/g);
+      if (all) return all[all.length - 1].replace(/^[^\d]/, "").slice(0, 5);
+    }
     return null;
   }
   function csvCell(s) { s = s == null ? "" : String(s); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }
@@ -238,6 +244,13 @@
         var aoa = XLSX.utils.sheet_to_json(ws, { header: 1, raw: false, defval: "" });
         aoa = aoa.filter(function (row) { return row.some(function (c) { return String(c).trim() !== ""; }); });
         if (!aoa.length) throw new Error("the first sheet is empty");
+        // Reports often start with title lines ("Zip code report", a date range); use the first row in the top 15 that
+        // names a ZIP column and has at least two filled cells as the header, and drop the lines above it
+        var filled = function (row) { return row.filter(function (c) { return String(c).trim() !== ""; }).length; };
+        for (var hi = 0; hi < Math.min(15, aoa.length); hi++) {
+          if (filled(aoa[hi]) >= 2 && aoa[hi].some(function (c) { return /zip|postal/i.test(c) && !normZip(c); })) break;
+        }
+        if (hi > 0 && hi < Math.min(15, aoa.length)) aoa = aoa.slice(hi);
         var hasHeader = !aoa[0].some(function (c) { return normZip(c); }) || aoa[0].some(function (c) { return /zip|postal/i.test(c); });
         S.file = { name: file.name, header: hasHeader ? aoa[0].map(String) : aoa[0].map(function (c, i) { return "Column " + (i + 1); }),
                    rows: hasHeader ? aoa.slice(1) : aoa };
@@ -256,25 +269,40 @@
       var score = hits + (/zip|postal/i.test(name) ? 1000 : 0) - (/phone|id|account|number/i.test(name) && !/zip/i.test(name) ? 500 : 0);
       if (score > best) { best = score; zi = i; }
     });
-    h.forEach(function (name, i) { if (vi < 0 && i !== zi && /amount|revenue|sales|total|value|spend|price/i.test(name)) vi = i; });
-    mapColumns(zi, vi);
+    var numeric = function (i) { return rows.filter(function (r) { return r[i] !== "" && !isNaN(parseFloat(String(r[i]).replace(/[$,\s]/g, ""))); }).length >= rows.length * 0.8; };
+    // Sales amount: client revenue, not ad cost ("Amount spent", "Cost" and rates are skipped)
+    h.forEach(function (name, i) { if (vi < 0 && i !== zi && /amount|revenue|sales|total|value|price/i.test(name) && !/spent|cost|rate|per |%|count/i.test(name) && numeric(i)) vi = i; });
+    // Count: a summary report with one row per ZIP (ad platform conversions or leads by ZIP, sales counts by ZIP)
+    var ci = -1;
+    h.forEach(function (name, i) { if (ci < 0 && i !== zi && i !== vi && /conversion|\bconv\b|conv\.|lead|result|order|customer|count|transaction|purchase|patient|qty|quantity/i.test(name) && !/value|rate|cost|%|per |name|id\b/i.test(name) && numeric(i)) ci = i; });
+    // only treat it as a summary report if ZIPs mostly appear once
+    if (ci >= 0) {
+      var seen = {}, dup = 0, tot = 0;
+      S.file.rows.forEach(function (r) { var z = normZip(r[zi]); if (z) { tot++; if (seen[z]) dup++; seen[z] = 1; } });
+      if (tot && dup / tot > 0.2) ci = -1;
+    }
+    mapColumns(zi, vi, ci);
   }
 
-  function mapColumns(zi, vi) {
+  function mapColumns(zi, vi, ci) {
+    if (ci == null) ci = -1;
     var h = S.file.header, box = $("crm-setup");
     var opt = function (sel, none) {
       return [none ? el("option", { value: -1, text: "None" }) : null].concat(h.map(function (n, i) { return el("option", { value: i, text: n || "Column " + (i + 1), selected: i === sel }); }));
     };
     var zs = el("select", { id: "crm-zipcol" }, opt(zi, false));
     var vs = el("select", { id: "crm-valcol" }, opt(vi, true));
+    var cs = el("select", { id: "crm-cntcol" }, opt(ci, true));
     var fs = el("select", { id: "crm-filtcol", onchange: filterValues }, opt(-1, true));
     box.innerHTML = "";
     box.appendChild(el("section", { class: "az-panel crm-step" }, [
       el("h2", { text: "2. Check the columns and set up your market" }),
-      el("p", { class: "crm-note", text: S.file.name + ": " + NF0.format(S.file.rows.length) + " rows." }),
+      el("p", { class: "crm-note", text: S.file.name + ": " + NF0.format(S.file.rows.length) + " rows." +
+        (ci >= 0 ? " This looks like a summary report with one row per ZIP, so each ZIP's customers are taken from the " + (h[ci] || "count") + " column. Set the count column to None if each row is one customer." : "") }),
       el("div", { class: "az-controls crm-controls" }, [
         el("label", { class: "az-field" }, ["ZIP code column", zs]),
         el("label", { class: "az-field" }, ["Sales amount column (optional)", vs]),
+        el("label", { class: "az-field", title: "For summary reports with one row per ZIP, such as conversions or leads by ZIP from Google Ads or Meta" }, ["Count column (one row per ZIP)", cs]),
         el("label", { class: "az-field" }, ["Count only rows where (optional)", fs]),
         el("label", { class: "az-field", id: "crm-filtval-wrap", style: "display:none" }, ["equals", el("select", { id: "crm-filtval", multiple: true, size: 3 })])
       ]),
@@ -348,7 +376,7 @@
 
   /* ---------- step 3: analysis ---------- */
   function run() {
-    var zi = +$("crm-zipcol").value, vi = +$("crm-valcol").value, fc = +$("crm-filtcol").value;
+    var zi = +$("crm-zipcol").value, vi = +$("crm-valcol").value, fc = +$("crm-filtcol").value, ci = +$("crm-cntcol").value;
     var keepVals = fc >= 0 ? Array.prototype.map.call($("crm-filtval").selectedOptions, function (o) { return o.value; }) : null;
     var cust = {}, stats = { rows: 0, valid: 0, matched: 0, bad: 0, unknown: 0, unknownZips: {} };
     S.file.rows.forEach(function (r) {
@@ -358,13 +386,15 @@
       if (!z) { stats.bad++; return; }
       stats.valid++;
       if (!S.zips[z]) { stats.unknown++; stats.unknownZips[z] = (stats.unknownZips[z] || 0) + 1; return; }
-      stats.matched++;
+      var w = 1;
+      if (ci >= 0) { w = parseFloat(String(r[ci]).replace(/[$,\s]/g, "")); if (!(w > 0)) return; }   // ZIPs with zero count add nothing
+      stats.matched += w;
       var c = cust[z] || (cust[z] = { n: 0, v: 0 });
-      c.n++;
+      c.n += w;
       if (vi >= 0) { var v = parseFloat(String(r[vi]).replace(/[$,\s]/g, "")); if (!isNaN(v)) c.v += v; }
     });
     // Drop the file contents now that the counts are made
-    S.file.rows = []; S.cust = cust; S.stats = stats; S.hasValue = vi >= 0;
+    S.file.rows = []; S.cust = cust; S.stats = stats; S.hasValue = vi >= 0; S.countCol = ci >= 0; S.countName = ci >= 0 ? S.file.header[ci] : null;
     if (!stats.matched) { results(el("p", { class: "az-error", text: "None of the ZIP codes matched a residential ZIP. Check that the right column is selected." })); return; }
     var locs = $("crm-locs").value.split(/[\s,;]+/).map(normZip).filter(function (z) { return z && S.zips[z]; });
     var base = $("crm-base").value, radiusSel = $("crm-radius").value, searchSel = $("crm-search").value;
@@ -524,7 +554,7 @@
     wrap.appendChild(el("section", { class: "az-panel crm-summary" }, [
       el("h2", { text: "3. Results: within " + area }),
       el("div", { class: "crm-kpis" }, [
-        kpi(NF0.format(st.matched), "customers matched to ZIPs", skipped ? NF0.format(skipped) + " rows skipped (" + NF0.format(st.bad) + " missing or invalid ZIPs, " + NF0.format(st.unknown) + " PO box or non-residential ZIPs)" : "every row matched"),
+        kpi(NF0.format(st.matched), S.countCol ? (S.countName || "count").toLowerCase() + " matched to ZIPs" : "customers matched to ZIPs", skipped ? NF0.format(skipped) + (skipped === 1 ? " row" : " rows") + " skipped (" + NF0.format(st.bad) + " missing or invalid ZIP" + (st.bad === 1 ? "" : "s") + ", " + NF0.format(st.unknown) + " PO box or non-residential ZIP" + (st.unknown === 1 ? "" : "s") + ")" : "every row matched"),
         kpi(NF0.format(R.inMarket), "in the trade area", NF1.format(R.inMarket / st.matched * 100) + "% of matched customers; " + NF0.format(items.length) + " ZIPs"),
         kpi(NF1.format(R.inMarket / totB * 1000), "customers per 1,000 " + BASES[o.base].label.toLowerCase(), "across the trade area"),
         kpi(NF0.format(over.length), "over-performing ZIPs", NF0.format(over.reduce(function (s, it) { return s + it.A; }, 0)) + " customers"),
