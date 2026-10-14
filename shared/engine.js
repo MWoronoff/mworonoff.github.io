@@ -149,10 +149,10 @@
 
   var DISCLAIMER = "Estimates for planning. Scores and figures are modeled from public government and licensed third-party data.";
   var ABOUT_ESTIMATES = { title: "About these estimates", body: [
-    "Every figure here is an estimate built for planning. Scores rank markets against each other; they aren't forecasts of sales, leads or advertising results.",
-    "Sources differ in timing. Census American Community Survey figures are 5-year averages and, like all surveys, carry margins of error that are widest for small ZIPs and counties. IRS, mortgage, business-count and EASI figures are each the newest year published, so they may be one to three years old. Each source's year is listed under Sources.",
-    "Radius counts combine ZIP-level shares, assuming the traits you select are independent within a ZIP, so they're modeled estimates rather than counts of actual people.",
-    "ZIPs with fewer than 500 residents, and ZIPs that are mostly group quarters (campuses, bases, prisons), are shown but not ranked, because their rates rest on too few households." ] };
+    "Estimates for planning. Scores rank markets against each other; they don't forecast sales, leads or ad results.",
+    "Census ACS figures are 5-year survey averages with margins of error, widest for small ZIPs and counties. IRS, mortgage, business and EASI figures are the newest year published, often one to three years old. Years are listed under Sources.",
+    "Radius counts are modeled: selected traits are treated as independent within each ZIP.",
+    "ZIPs under 500 residents, and ZIPs that are mostly group quarters (campuses, bases, prisons), are shown but not ranked." ] };
 
   /* ---------- URL state ---------- */
   // Link to the Customer Market Analyzer with this analyzer's category, subcategory and selected DMA
