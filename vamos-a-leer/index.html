@@ -7,7 +7,7 @@
 <meta name="description" content="Lecciones de lectura en inglés para niños hispanohablantes, con la maestra Rachel Woronoff.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#E6F4EC; --card:#FFFFFF; --ink:#1E2A5A; --muted:#55618C; --line:#C9E3D4;
@@ -55,24 +55,56 @@ h2{font-size:clamp(1.8rem,6vw,2.6rem)}
 .pic{width:min(220px,48vw); height:auto}
 
 /* home */
-.hero{display:flex; align-items:center; gap:22px; flex-wrap:wrap; justify-content:center; text-align:left}
-.photo{width:clamp(140px,30vw,200px); aspect-ratio:1; border-radius:50%; object-fit:cover; border:8px solid var(--A); box-shadow:0 0 0 8px var(--C)}
-.bubble{position:relative; background:var(--bg); border-radius:26px; padding:16px 22px; max-width:30ch}
-.bubble p{margin:0; font-size:clamp(1.3rem,3.8vw,1.7rem); line-height:1.4}
-.bubble .name{display:block; color:var(--muted); font-size:1.05rem; margin-top:6px}
-.bubble .pill{margin-top:12px; font-size:1.1rem}
-.cheer{display:flex; align-items:center; gap:12px}
-.cheer img{width:64px; height:64px; border-radius:50%; object-fit:cover; border:4px solid var(--A)}
-.cheer span{font-size:1.3rem; font-weight:700}
-.mods{display:flex; gap:18px; flex-wrap:wrap; justify-content:center}
-.mod{border:3px solid var(--line); background:var(--card); border-radius:28px; padding:16px 22px 18px; width:220px;
-  display:flex; flex-direction:column; align-items:center; gap:8px}
-.mod:hover{border-color:var(--ink)}
-.mod svg{width:120px; height:120px}
-.mod small{color:var(--muted); font-size:1rem}
-.mod .word{font-size:2.6rem}
+.page.is-home{position:relative; overflow:hidden; justify-content:flex-start; gap:24px; padding-top:30px;
+  background:linear-gradient(160deg,#FFF3C4 0%,#FFE0EA 48%,#D6F0FF 100%)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .page.is-home{background:linear-gradient(160deg,#3A2E66 0%,#2A2C5E 50%,#163A55 100%)}}
+:root[data-theme="dark"] .page.is-home{background:linear-gradient(160deg,#3A2E66 0%,#2A2C5E 50%,#163A55 100%)}
+.deco{position:absolute; pointer-events:none; z-index:0}
+.page.is-home > :not(.deco){position:relative; z-index:1}
+.hero{display:flex; align-items:center; gap:30px; flex-wrap:wrap; justify-content:center}
+.ring{position:relative; padding:12px; border-radius:50%;
+  background:conic-gradient(#FF9AA8,#FFD45C,#8EDBA6,#9ED6F5,#C9A8FF,#FF9AA8); box-shadow:0 10px 0 rgba(30,42,90,.18)}
+.photo{display:block; width:clamp(230px,48vw,340px); aspect-ratio:1; border-radius:50%; object-fit:cover; border:7px solid #fff}
+.badge{position:absolute; right:-6px; top:14px; background:#FF6F82; color:#fff; font-family:"Baloo 2","Andika",sans-serif; font-weight:800;
+  font-size:1.5rem; padding:.1em .7em; border-radius:999px; transform:rotate(12deg); box-shadow:0 5px 0 rgba(30,42,90,.25); border:3px solid #fff}
+.bubble{position:relative; background:#fff; color:#1E2A5A; border:4px solid #1E2A5A; border-radius:30px; padding:20px 24px; width:min(360px,100%);
+  text-align:left; box-shadow:0 8px 0 rgba(30,42,90,.18)}
+.bubble::before,.bubble::after{content:""; position:absolute; top:50%; border-style:solid; transform:translateY(-50%)}
+.bubble::before{left:-26px; border-width:16px 26px 16px 0; border-color:transparent #1E2A5A transparent transparent}
+.bubble::after{left:-19px; border-width:12px 20px 12px 0; border-color:transparent #fff transparent transparent}
+@media (max-width:640px){
+  .bubble::before{left:50%; top:-26px; transform:translateX(-50%); border-width:0 16px 26px 16px; border-color:transparent transparent #1E2A5A transparent}
+  .bubble::after{left:50%; top:-18px; transform:translateX(-50%); border-width:0 12px 20px 12px; border-color:transparent transparent #fff transparent}
+}
+.bubble p{margin:0; font-size:clamp(1.45rem,4vw,1.95rem); line-height:1.35; font-weight:700}
+.bubble .name{display:block; color:#55618C; font-size:1.05rem; margin-top:8px}
+.bubble .pill{margin-top:14px; font-size:1.15rem; background:#FFD45C; border-color:#1E2A5A; color:#1E2A5A}
+.title-tiles{display:flex; flex-wrap:wrap; justify-content:center; gap:7px; margin:6px 0 0}
+.title-tiles span{display:inline-block; font-family:"Baloo 2","Andika",sans-serif; font-weight:800; font-size:clamp(2.2rem,8vw,3.8rem);
+  color:#1E2A5A; padding:0 .24em; border-radius:16px; box-shadow:0 5px 0 rgba(30,42,90,.25); line-height:1.25}
+.title-tiles span:nth-child(odd){transform:rotate(-5deg)}
+.title-tiles span:nth-child(even){transform:rotate(4deg)}
+.title-tiles .gap{width:.35em; box-shadow:none; background:none !important}
+.pickhint{margin:0; font-size:clamp(1.3rem,3.6vw,1.6rem); font-weight:700}
+.mods{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:24px; width:min(640px,100%); padding-bottom:10px}
+.mod{border:4px solid #1E2A5A; border-radius:34px; padding:18px 16px 22px; display:flex; flex-direction:column; align-items:center; gap:10px;
+  color:#1E2A5A; background:var(--mc); box-shadow:0 10px 0 rgba(30,42,90,.28); transition:transform .15s ease, box-shadow .15s ease;
+  animation:popin .5s cubic-bezier(.3,1.5,.6,1) both}
+.mod:nth-child(2){animation-delay:.12s}
+@keyframes popin{from{opacity:0; transform:scale(.85)}to{opacity:1; transform:none}}
+.mod:hover{transform:translateY(-5px) rotate(-1.5deg)}
+.mod:nth-child(even):hover{transform:translateY(-5px) rotate(1.5deg)}
+.mod:active{transform:translateY(5px); box-shadow:0 4px 0 rgba(30,42,90,.28)}
+.mod .num{background:#fff; border-radius:999px; padding:.15em .9em; font-weight:700; font-size:1.05rem; border:3px solid #1E2A5A}
+.mod .art{background:#fff; border-radius:50%; width:min(200px,52vw); aspect-ratio:1; display:grid; place-items:center; border:4px solid #1E2A5A}
+.mod .art svg{width:80%; height:80%}
+.mod .word{font-family:"Baloo 2","Andika",sans-serif; font-size:3.4rem; font-weight:800; line-height:1}
 .mini{display:flex; gap:6px}
-.mini span{font-weight:700; font-size:1.3rem; color:var(--tile-ink); border-radius:10px; padding:0 .4em}
+.mini span{font-weight:700; font-size:1.3rem; color:#1E2A5A; border-radius:10px; padding:0 .4em; border:2px solid #1E2A5A}
+.go{background:#1E2A5A; color:#fff; border-radius:999px; padding:.3em 1.3em; font-weight:700; font-size:1.25rem; margin-top:4px}
+.cheer{display:flex; align-items:center; gap:12px}
+.cheer img{width:72px; height:72px; border-radius:50%; object-fit:cover; border:4px solid var(--A)}
+.cheer span{font-size:1.3rem; font-weight:700}
 
 /* tiles */
 .trio{display:flex; gap:10px}
@@ -170,7 +202,7 @@ dialog p{margin:0 0 14px; color:var(--muted); line-height:1.5}
 .err[hidden]{display:none}
 
 @media (prefers-reduced-motion:reduce){
-  .page.turn,.shake,.burst i,#kid.singing{animation:none}
+  .page.turn,.shake,.burst i,#kid.singing,.mod{animation:none}
   .tile,.blend .trio{transition:none}
 }
 </style>
@@ -342,10 +374,10 @@ const LETTERS = {
 };
 
 const MODULES = [
-  { word: 'cat', es: 'gato', letters: ['C', 'A', 'T'],
+  { word: 'cat', es: 'gato', letters: ['C', 'A', 'T'], color: '#FF9AA8',
     first: [['cup', 'C'], ['car', 'C'], ['apple', 'A'], ['ant', 'A'], ['top', 'T'], ['ten', 'T']],
     distract: ['O', 'S', 'M', 'P', 'E', 'R', 'o', 's', 'm', 'e', 'r', 'u'] },
-  { word: 'dog', es: 'perro', letters: ['D', 'O', 'G'],
+  { word: 'dog', es: 'perro', letters: ['D', 'O', 'G'], color: '#9ED6F5',
     first: [['duck', 'D'], ['drum', 'D'], ['octopus', 'O'], ['olive', 'O'], ['gift', 'G'], ['guitar', 'G']],
     distract: ['b', 'p', 'q', 'B', 'P', 'Q', 'C', 'c', 'a', 'e', 'u', 'J'] },
 ];
@@ -613,22 +645,44 @@ function renderHome() {
   mi = -1;
   navEl.hidden = true; homeBtn.hidden = true;
   titleEl.textContent = 'Vamos a leer con la maestra Rachel';
-  pageEl.innerHTML = `<div class="hero">
-      <img class="photo" src="Rach.jpg" alt="La maestra Rachel Woronoff">
+  const cols = ['#FF9AA8', '#FFD45C', '#8EDBA6', '#9ED6F5', '#FFB37A', '#C9A8FF'];
+  let ci = 0;
+  const title = [...'Vamos a leer'].map(ch => ch === ' ' ? '<span class="gap"></span>' : `<span style="background:${cols[ci++ % cols.length]}">${ch}</span>`).join('');
+  pageEl.classList.add('is-home');
+  pageEl.innerHTML = decoHTML() + `<div class="hero">
+      <div class="ring"><img class="photo" src="Rach.jpg" alt="La maestra Rachel Woronoff"><span class="badge">¡Hola!</span></div>
       <div class="bubble"><p>¡Hola, amigos! Soy la maestra Rachel. ¿Qué vamos a leer hoy?</p>
         <span class="name">Rachel Woronoff, maestra de primaria</span>
         <button class="pill" data-act="greet">Escuchar</button></div>
     </div>
-    <h1>Vamos a leer</h1>
-    <p class="sub">Elige un módulo</p>
-    <div class="mods">${MODULES.map((m, i) => `<button class="mod" data-mod="${i}">
-      <small>Módulo ${i + 1}</small>${PIC[m.word]()}<span class="word">${m.word}</span>
-      <span class="mini">${m.letters.map(L => `<span style="background:${LCOL[L]}">${L}</span>`).join('')}</span></button>`).join('')}</div>`;
+    <h1 class="title-tiles" aria-label="Vamos a leer">${title}</h1>
+    <p class="pickhint">Toca un dibujo para empezar</p>
+    <div class="mods">${MODULES.map((m, i) => `<button class="mod" data-mod="${i}" style="--mc:${m.color}" aria-label="Módulo ${i + 1}: ${m.word}">
+      <span class="num">Módulo ${i + 1}</span>
+      <span class="art">${PIC[m.word]()}</span>
+      <span class="word">${m.word}</span>
+      <span class="mini">${m.letters.map(L => `<span style="background:${LCOL[L]}">${L}</span>`).join('')}</span>
+      <span class="go">¡Vamos!</span></button>`).join('')}</div>`;
   markTeach();
+}
+
+function decoHTML() {
+  const star = c => `<path d="M12 1 L15 9 L23 9 L17 14 L19 22 L12 17 L5 22 L7 14 L1 9 L9 9Z" fill="${c}"/>`;
+  const dot = c => `<circle cx="12" cy="12" r="10" fill="${c}"/>`;
+  const wave = c => `<path d="M1 14 Q6 4 12 14 T23 14" stroke="${c}" stroke-width="3.5" fill="none" stroke-linecap="round"/>`;
+  const tri = c => `<path d="M12 2 L22 21 L2 21Z" fill="${c}"/>`;
+  const items = [
+    [star, '#FFD45C', '3%', '4%', 46, -10], [dot, '#FF9AA8', '90%', '3%', 30, 0], [wave, '#8EDBA6', '80%', '14%', 54, 0],
+    [tri, '#C9A8FF', '6%', '30%', 30, 18], [dot, '#9ED6F5', '94%', '40%', 22, 0], [star, '#FF9AA8', '91%', '58%', 38, 14],
+    [wave, '#FFB37A', '2%', '56%', 50, 0], [dot, '#FFD45C', '5%', '80%', 26, 0], [star, '#8EDBA6', '88%', '86%', 42, -8],
+    [tri, '#FFB37A', '50%', '1%', 24, -12], [dot, '#C9A8FF', '30%', '94%', 18, 0], [star, '#9ED6F5', '66%', '93%', 30, 10],
+  ];
+  return items.map(([f, c, x, y, s, r]) => `<svg class="deco" viewBox="0 0 24 24" aria-hidden="true" style="left:${x}; top:${y}; width:${s}px; height:${s}px; transform:rotate(${r}deg)">${f(c)}</svg>`).join('');
 }
 
 function render(dir = 0) {
   stopAll();
+  pageEl.classList.remove('is-home');
   const m = mod(), P = pages(), p = P[cur];
   navEl.hidden = false; homeBtn.hidden = false;
   titleEl.textContent = `Módulo ${mi + 1}: ${m.word}`;
