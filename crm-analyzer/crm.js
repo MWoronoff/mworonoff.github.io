@@ -189,6 +189,13 @@
       el("h2", { text: "1. Add your customers" }),
       el("p", { class: "crm-privacy", text: "Your file is read inside this browser and never uploaded or stored. Only the ZIP code and amount columns are used; names, emails and other columns are dropped as soon as you pick the columns." }),
       input, drop,
+      el("details", { class: "crm-tests crm-howto" }, [
+        el("summary", { text: "Using an ad platform report (Google Ads or Meta)" }),
+        el("p", { class: "crm-note", text: "The tool reads ad platform exports as they download, title lines and total rows included, and treats conversions or leads as customers." }),
+        el("p", {}, [el("b", { text: "Google Ads: " }), "open the Locations report, switch to the view of where users were (user locations) rather than targeted locations, set the location level to postal code, add the Conversions column (and Conv. value if you want sales), and download it as CSV or Excel. A Report Editor report with \u201cPostal code (User location)\u201d and Conversions also works. Rows for every campaign can stay in; the tool adds them up by ZIP."]),
+        el("p", {}, [el("b", { text: "Meta: " }), "Ads Manager can't break results down by ZIP, so use a lead form download from Leads Center or the Page's forms. It works when the form asks for ZIP code; each row is one lead."]),
+        el("p", { class: "crm-note", text: "Menu names in both platforms change from time to time; look for a postal code (ZIP) breakdown of conversions." })
+      ]),
       el("div", { class: "crm-paste-row" }, [paste,
         el("div", { class: "crm-paste-actions" }, [
           el("button", { class: "az-btn", type: "button", text: "Use pasted ZIPs", onclick: function () {
@@ -234,6 +241,17 @@
     });
   }
 
+  // Column names that hold ZIPs in client files and ad platform exports ("Location" and "Postal code (User location)" in Google Ads, "zip_code" in Meta lead forms)
+  var ZIP_HDR = /zip|postal|^\s*location\s*$|^\s*(user|matched|targeted)\s+locations?\b/i;
+  // Columns that mark an ad platform performance report (one row per ZIP per campaign, ad group, device or day)
+  var AD_HDR = /^(impr\.?|impressions|clicks|cost|amount spent.*|campaign( name)?|ad group|ad set( name)?|ctr|avg\. cpc|cpc.*|reach)$/i;
+  function sourceOf(h) {
+    var has = function (re) { return h.some(function (n) { return re.test(String(n).trim()); }); };
+    if (has(/^zip_code$/i) && (has(/^(form_name|form_id)$/i) || has(/^is_organic$/i))) return "meta-leads";
+    if (has(/^(impr\.?|clicks)$/i) && (has(/^conversions$/i) || has(/conv\./i)) && has(ZIP_HDR)) return "google-ads";
+    if (h.some(function (n) { return AD_HDR.test(String(n).trim()); })) return "ad-report";
+    return null;
+  }
   function readFile(file) {
     S.test = null;
     var r = new FileReader();
@@ -248,12 +266,15 @@
         // names a ZIP column and has at least two filled cells as the header, and drop the lines above it
         var filled = function (row) { return row.filter(function (c) { return String(c).trim() !== ""; }).length; };
         for (var hi = 0; hi < Math.min(15, aoa.length); hi++) {
-          if (filled(aoa[hi]) >= 2 && aoa[hi].some(function (c) { return /zip|postal/i.test(c) && !normZip(c); })) break;
+          if (filled(aoa[hi]) >= 2 && aoa[hi].some(function (c) { return ZIP_HDR.test(c) && !normZip(c); })) break;
         }
         if (hi > 0 && hi < Math.min(15, aoa.length)) aoa = aoa.slice(hi);
-        var hasHeader = !aoa[0].some(function (c) { return normZip(c); }) || aoa[0].some(function (c) { return /zip|postal/i.test(c); });
+        var hasHeader = !aoa[0].some(function (c) { return normZip(c); }) || aoa[0].some(function (c) { return ZIP_HDR.test(c); });
+        // drop report total lines ("Total: Account", "Total: Campaigns", "Grand total")
+        aoa = aoa.filter(function (row, i) { return i === 0 || !/^\s*(grand\s+)?total\b/i.test(String(row[0])); });
         S.file = { name: file.name, header: hasHeader ? aoa[0].map(String) : aoa[0].map(function (c, i) { return "Column " + (i + 1); }),
                    rows: hasHeader ? aoa.slice(1) : aoa };
+        S.file.source = sourceOf(S.file.header);
         guessColumns();
       } catch (e) {
         $("crm-setup").innerHTML = ""; $("crm-setup").appendChild(el("p", { class: "az-error", text: "That file couldn't be read: " + e.message + ". Save it as CSV or .xlsx and try again." }));
@@ -263,12 +284,23 @@
   }
 
   function guessColumns() {
-    var h = S.file.header, rows = S.file.rows.slice(0, 200), zi = -1, vi = -1, best = 0;
+    var h = S.file.header, rows = S.file.rows.slice(0, 200), zi = -1, vi = -1, best = 0, anyZip = 0;
     h.forEach(function (name, i) {
       var hits = rows.filter(function (r) { return normZip(r[i]); }).length;
-      var score = hits + (/zip|postal/i.test(name) ? 1000 : 0) - (/phone|id|account|number/i.test(name) && !/zip/i.test(name) ? 500 : 0);
+      var score = hits + (ZIP_HDR.test(name) ? 1000 : 0) - (/phone|id|account|number/i.test(name) && !/zip/i.test(name) ? 500 : 0);
       if (score > best) { best = score; zi = i; }
+      // a column counts as holding ZIPs if it is named like one or most of its values are real ZIPs (numbers like impressions can look like ZIPs)
+      var real = rows.filter(function (r) { var z = normZip(r[i]); return z && S.zips[z]; }).length;
+      if (ZIP_HDR.test(name) || real >= rows.length * 0.5) anyZip = Math.max(anyZip, hits || 1);
     });
+    if (!anyZip) {
+      var region = h.some(function (n) { return /^(region|dma|country|state|city|designated market area)/i.test(String(n).trim()); });
+      $("crm-setup").innerHTML = "";
+      $("crm-setup").appendChild(el("p", { class: "az-error", text: "No ZIP codes were found in " + S.file.name + "." + (region
+        ? " This looks like a report broken down by region, DMA or city. Meta Ads Manager can't break results down by ZIP; use a lead form download (it includes zip_code when the form asks for it) or the client's own customer list. See \u201cUsing an ad platform report\u201d above."
+        : " The file needs a column of 5-digit ZIP codes.") }));
+      return;
+    }
     var numeric = function (i) { return rows.filter(function (r) { return r[i] !== "" && !isNaN(parseFloat(String(r[i]).replace(/[$,\s]/g, ""))); }).length >= rows.length * 0.8; };
     // Sales amount: client revenue, not ad cost ("Amount spent", "Cost" and rates are skipped)
     h.forEach(function (name, i) { if (vi < 0 && i !== zi && /amount|revenue|sales|total|value|price/i.test(name) && !/spent|cost|rate|per |%|count/i.test(name) && numeric(i)) vi = i; });
@@ -276,16 +308,25 @@
     var ci = -1;
     h.forEach(function (name, i) { if (ci < 0 && i !== zi && i !== vi && /conversion|\bconv\b|conv\.|lead|result|order|customer|count|transaction|purchase|patient|qty|quantity/i.test(name) && !/value|rate|cost|%|per |name|id\b/i.test(name) && numeric(i)) ci = i; });
     // only treat it as a summary report if ZIPs mostly appear once
-    if (ci >= 0) {
+    // (ad platform reports repeat each ZIP once per campaign, ad group or day, so their counts are kept and summed by ZIP)
+    if (ci >= 0 && !S.file.source) {
       var seen = {}, dup = 0, tot = 0;
       S.file.rows.forEach(function (r) { var z = normZip(r[zi]); if (z) { tot++; if (seen[z]) dup++; seen[z] = 1; } });
       if (tot && dup / tot > 0.2) ci = -1;
     }
-    mapColumns(zi, vi, ci);
+    var fi = -1, fkeep = null;
+    h.forEach(function (name, i) { if (fi < 0 && /^location type$/i.test(String(name).trim())) fi = i; });
+    if (fi >= 0) {
+      var vals = {}; S.file.rows.forEach(function (r) { vals[String(r[fi]).trim()] = 1; });
+      fkeep = Object.keys(vals).filter(function (v) { return /presence|physical|located in|people in/i.test(v); });
+      if (!fkeep.length) { fi = -1; fkeep = null; }
+    }
+    mapColumns(zi, vi, ci, fi, fkeep);
   }
 
-  function mapColumns(zi, vi, ci) {
+  function mapColumns(zi, vi, ci, fi, fkeep) {
     if (ci == null) ci = -1;
+    if (fi == null) fi = -1;
     var h = S.file.header, box = $("crm-setup");
     var opt = function (sel, none) {
       return [none ? el("option", { value: -1, text: "None" }) : null].concat(h.map(function (n, i) { return el("option", { value: i, text: n || "Column " + (i + 1), selected: i === sel }); }));
@@ -293,12 +334,13 @@
     var zs = el("select", { id: "crm-zipcol" }, opt(zi, false));
     var vs = el("select", { id: "crm-valcol" }, opt(vi, true));
     var cs = el("select", { id: "crm-cntcol" }, opt(ci, true));
-    var fs = el("select", { id: "crm-filtcol", onchange: filterValues }, opt(-1, true));
+    var fs = el("select", { id: "crm-filtcol", onchange: filterValues }, opt(fi, true));
     box.innerHTML = "";
     box.appendChild(el("section", { class: "az-panel crm-step" }, [
       el("h2", { text: "2. Check the columns and set up your market" }),
+      sourceNote(ci, fi, fkeep),
       el("p", { class: "crm-note", text: S.file.name + ": " + NF0.format(S.file.rows.length) + " rows." +
-        (ci >= 0 ? " This looks like a summary report with one row per ZIP, so each ZIP's customers are taken from the " + (h[ci] || "count") + " column. Set the count column to None if each row is one customer." : "") }),
+        (ci >= 0 && !S.file.source ? " This looks like a summary report with one row per ZIP, so each ZIP's customers are taken from the " + (h[ci] || "count") + " column. Set the count column to None if each row is one customer." : "") }),
       el("div", { class: "az-controls crm-controls" }, [
         el("label", { class: "az-field" }, ["ZIP code column", zs]),
         el("label", { class: "az-field" }, ["Sales amount column (optional)", vs]),
@@ -327,8 +369,32 @@
       categoryBase(S.params) ? el("p", { class: "crm-note", text: "Potential is set to " + BASES[categoryBase(S.params)].label.toLowerCase() +
         ", the core audience for " + (S.params.subl || S.params.from || "this category") + ", so expected customers reflect that audience rather than all households. You can change it." }) : null
     ]));
+    if (fi >= 0) {
+      filterValues();
+      Array.prototype.forEach.call($("crm-filtval").options, function (o) { o.selected = fkeep.indexOf(o.value) >= 0; });
+    }
+    ["crm-zipcol", "crm-cntcol"].forEach(function (id) { $(id).addEventListener("change", previewMatch); });
     previewMatch();
     zs.onchange = previewMatch;
+  }
+
+  // a short box naming the kind of report recognized and what the tool did with it
+  function sourceNote(ci, fi, fkeep) {
+    var src = S.file.source, h = S.file.header; if (!src) return null;
+    var lines = [];
+    if (src === "google-ads") {
+      lines.push(el("b", { text: "Google Ads location report recognized." }));
+      lines.push(" Each ZIP's " + (ci >= 0 ? h[ci].toLowerCase() : "conversions") + " are added up across campaigns" + (h.some(function (n) { return /date|day|week|month|device/i.test(n); }) ? ", dates and devices" : "") + ", and total lines are skipped.");
+      if (fi >= 0) lines.push(" Only rows where people were physically in the ZIP (" + fkeep.join(", ") + ") are counted; rows for people who were only interested in the area are left out. You can change this below.");
+    } else if (src === "meta-leads") {
+      lines.push(el("b", { text: "Meta lead form download recognized." }));
+      lines.push(" Each row is one lead, placed by the ZIP the person entered on the form. To leave out organic leads, choose is_organic below and select false.");
+    } else {
+      lines.push(el("b", { text: "Ad platform report recognized." }));
+      lines.push(ci >= 0 ? " Each ZIP's " + h[ci].toLowerCase() + " are added up across rows." : " No conversions or leads column was found, so each row counts as one; pick the count column below if there is one.");
+    }
+    if (ci >= 0) lines.push(" Results describe where " + h[ci].toLowerCase() + " came from, which reflects both the market and where the campaign was shown.");
+    return el("div", { class: "crm-source" }, lines);
   }
 
   function filterValues() {
@@ -343,8 +409,12 @@
   }
 
   function previewMatch() {
-    var zi = +$("crm-zipcol").value, top = {};
-    S.file.rows.forEach(function (r) { var z = normZip(r[zi]); if (z && S.zips[z]) top[z] = (top[z] || 0) + 1; });
+    var zi = +$("crm-zipcol").value, ci = $("crm-cntcol") ? +$("crm-cntcol").value : -1, top = {};
+    S.file.rows.forEach(function (r) {
+      var z = normZip(r[zi]); if (!z || !S.zips[z]) return;
+      var w = ci >= 0 ? parseFloat(String(r[ci]).replace(/[$,\s]/g, "")) : 1;
+      if (w > 0) top[z] = (top[z] || 0) + w;
+    });
     var best = Object.keys(top).sort(function (a, b) { return top[b] - top[a]; }).slice(0, 3);
     var hint = $("crm-locs-hint"); hint.innerHTML = "";
     if (!best.length) { hint.textContent = "No valid ZIP codes found in that column; pick the column that holds ZIP codes."; return; }
