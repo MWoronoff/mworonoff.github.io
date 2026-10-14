@@ -95,3 +95,50 @@
 .crm-test-answer h3 { margin: 0 0 4px; font-size: 16px; color: var(--navy); }
 .crm-answer { margin-top: 10px; }
 .crm-answer p { margin: 0 0 6px; max-width: 90ch; }
+
+/* ---------- printable one-page summary ---------- */
+.crm-print-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
+.crm-print-row input { flex: 0 1 320px; padding: 8px 10px; border: 1px solid #c9d5e0; border-radius: 8px; font: inherit; }
+.crm-print-row .crm-note { margin: 0; }
+.crm-print-only { display: none; }
+@media print {
+  @page { size: letter landscape; margin: 0.35in; }
+  html, body { background: #fff !important; }
+  body { -webkit-print-color-adjust: exact; print-color-adjust: exact; font-size: 9.5px; }
+  .az-header, .crm-step, .crm-context, .crm-summary, .crm-test-answer, .crm-profile, #crm-perf, #crm-sim,
+  .crm-seg, .az-seg, .leaflet-control-container, .crm-map-panel .crm-note, .crm-legend > small { display: none !important; }
+  .az-main { padding: 0 !important; max-width: none !important; }
+  .crm-results { display: block; }
+  .crm-print-only { display: block; }
+  .crm-maps { grid-template-columns: 1fr 1fr !important; gap: 10px !important; margin: 6px 0 0 !important; break-inside: avoid; }
+  .crm-map-panel, .crm-maps > section { padding: 6px 8px !important; box-shadow: none !important; border: 1px solid #d8e0e8 !important; }
+  .crm-map-head { margin-bottom: 4px !important; }
+  .crm-map-head h3 { font-size: 11.5px !important; }
+  body.crm-printing .crm-map, .crm-map { height: 3.55in !important; }
+  .crm-legend { font-size: 8.5px !important; gap: 2px 8px !important; margin-top: 4px !important; }
+  .crm-legend .crm-key i { width: 9px; height: 9px; }
+}
+body.crm-printing .crm-map { height: 3.55in; }
+.crm-p-head { display: flex; justify-content: space-between; align-items: center; background: #0f2742; color: #fff; padding: 8px 14px; border-radius: 8px; }
+.crm-p-head h1 { margin: 2px 0; font-size: 18px; color: #fff; }
+.crm-p-head img { height: 40px; }
+.crm-p-kicker { font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: #8fd3c8; font-weight: 700; }
+.crm-p-sub { font-size: 9.5px; color: #d6e2ee; }
+.crm-p-kpis { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 6px; }
+.crm-p-kpi { border: 1px solid #d8e0e8; border-radius: 6px; padding: 4px 8px; }
+.crm-p-kpi b { display: block; font-size: 15px; color: #0f2742; }
+.crm-p-kpi span { font-size: 8.5px; color: #44586c; }
+.crm-p-grid { display: grid; grid-template-columns: 1.35fr 1fr 1fr 1fr; gap: 10px; margin-top: 6px; }
+.crm-p-grid h3 { margin: 0 0 3px; font-size: 10.5px; color: #0f2742; }
+.crm-p-find ul { margin: 0; padding-left: 13px; font-size: 8.8px; line-height: 1.35; }
+.crm-p-find li { margin-bottom: 2px; }
+.crm-p-tbl table { width: 100%; border-collapse: collapse; font-size: 8.5px; }
+.crm-p-tbl th { text-align: right; color: #44586c; font-weight: 600; border-bottom: 1px solid #d8e0e8; padding: 1px 3px; }
+.crm-p-tbl th:first-child, .crm-p-tbl td:first-child { text-align: left; }
+.crm-p-tbl td { padding: 1.5px 3px; border-bottom: 1px solid #eef2f5; }
+.crm-p-tbl td.num { text-align: right; }
+.crm-p-foot { margin: 5px 0 0; font-size: 7.5px; color: #44586c; }
+/* While printing, give the maps their exact paper size (landscape letter, 0.35in margins = 10.3in wide) on screen too,
+   so Leaflet positions them at the same size the printer lays them out */
+body.crm-printing .crm-maps { width: 10.3in; grid-template-columns: 1fr 1fr; gap: 10px; }
+body.crm-printing .crm-maps > section { padding: 6px 8px; }

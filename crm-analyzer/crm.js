@@ -560,7 +560,12 @@
         kpi(NF0.format(over.length), "over-performing ZIPs", NF0.format(over.reduce(function (s, it) { return s + it.A; }, 0)) + " customers"),
         kpi(NF0.format(under.length), "under-performing ZIPs", NF0.format(Math.round(under.reduce(function (s, it) { return s + it.E - it.A; }, 0))) + " customers short of expected")
       ]),
-      R.useDist ? null : el("p", { class: "crm-warn", text: "No location ZIP was entered, so expected customers don't account for distance. ZIPs near your business will look stronger than they are. Add your location ZIPs above and analyze again for a fairer comparison." })
+      R.useDist ? null : el("p", { class: "crm-warn", text: "No location ZIP was entered, so expected customers don't account for distance. ZIPs near your business will look stronger than they are. Add your location ZIPs above and analyze again for a fairer comparison." }),
+      el("div", { class: "crm-print-row" }, [
+        el("input", { id: "crm-bizname", type: "text", placeholder: "Business name for the summary (optional)", "aria-label": "Business name for the printed summary",
+          value: S.test ? S.test.title : (S.bizName || ""), oninput: function () { S.bizName = this.value; } }),
+        el("button", { class: "az-btn primary", type: "button", text: "Print one-page summary", onclick: printSummary }),
+        el("span", { class: "crm-note", text: "Choose \u201cSave as PDF\u201d in the print dialog to email it." })])
     ]));
     if (S.test) {
       var t = S.test, ans = el("div", { class: "crm-answer", hidden: true }, [
@@ -573,7 +578,9 @@
         ans]));
     }
     // two linked maps: your customers (left) and market potential (right), then the profile
+    wrap.appendChild(el("section", { id: "crm-print-top", class: "crm-print-only" }));
     wrap.appendChild(el("div", { class: "crm-maps" }, [mapPanel("l"), mapPanel("r")]));
+    wrap.appendChild(el("section", { id: "crm-print-bottom", class: "crm-print-only" }));
     wrap.appendChild(profilePanel());
     wrap.appendChild(perfPanel());
     wrap.appendChild(simPanel());
@@ -787,7 +794,7 @@
     var syncing = false;
     ["l", "r"].forEach(function (side) {
       var M = MAPS[side];
-      M.map = L.map("crm-map-" + side, { scrollWheelZoom: false });
+      M.map = L.map("crm-map-" + side, { scrollWheelZoom: false, zoomSnap: 0.25 });
       L.tileLayer("https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png", { attribution: "© OpenStreetMap, © CARTO", subdomains: "abcd", maxZoom: 13 }).addTo(M.map);
       M.map.fitBounds(bounds);
       // when a pan or zoom on this map finishes, put the other map in the same place
@@ -871,6 +878,74 @@
       setTimeout(function () { l.setStyle({ color: "#ffffff", weight: 0.6 }); }, 2500);
     });
   }
+
+  /* ---------- one-page printable summary ---------- */
+  function areaText(o) {
+    return o.radius ? o.radius + " miles of " + (o.locs.length > 1 ? o.locs.length + " locations (" + o.locs.join(", ") + ")" : o.locs[0] + " " + S.zips[o.locs[0]].city)
+      : (o.dmas.length === 1 ? "the " + titleCase(S.list.find(function (z) { return z.dma === o.dmas[0]; }).dma_name) + " DMA" : o.dmas.length + " DMAs");
+  }
+  function zipName(z) { return z.zip + " " + titleCase(z.city); }
+  function buildPrint() {
+    var R = S.res, o = R.o, st = S.stats, items = R.items;
+    var totB = items.reduce(function (t, it) { return t + it.B; }, 0);
+    var over = items.filter(function (it) { return it.status === "over"; }).sort(function (a, b) { return (b.A - b.E) - (a.A - a.E); });
+    var under = items.filter(function (it) { return it.status === "under"; }).sort(function (a, b) { return (b.E - b.A) - (a.E - a.A); });
+    var opp = R.cand.filter(function (c) { return c.opp; }).slice(0, 8);
+    var traits = R.prof.filter(function (p) { return p.f.sim; }).sort(function (a, b) { return Math.abs(b.std) - Math.abs(a.std); }).slice(0, 5);
+    var unit = S.countCol ? (S.countName || "customers").toLowerCase() : "customers";
+    var name = ($("crm-bizname") && $("crm-bizname").value.trim()) || "Customer market analysis";
+    var top = $("crm-print-top"); top.innerHTML = "";
+    top.appendChild(el("div", { class: "crm-p-head" }, [
+      el("div", {}, [el("div", { class: "crm-p-kicker", text: "Adtaxi Customer Market Analysis" }), el("h1", { text: name }),
+        el("div", { class: "crm-p-sub", text: "Trade area: within " + areaText(o) + " \u00b7 Potential measured by " + BASES[o.base].label.toLowerCase() + " \u00b7 " + new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }) })]),
+      el("img", { src: "../shared/adtaxi-logo.svg", alt: "Adtaxi" })]));
+    var k = function (big, lab) { return el("div", { class: "crm-p-kpi" }, [el("b", { text: big }), el("span", { text: lab })]); };
+    top.appendChild(el("div", { class: "crm-p-kpis" }, [
+      k(NF0.format(R.inMarket), unit + " in the trade area"),
+      k(NF1.format(R.inMarket / totB * 1000), "per 1,000 " + BASES[o.base].label.toLowerCase()),
+      k(NF0.format(over.length), "over-performing ZIPs"),
+      k(NF0.format(under.length), "under-performing ZIPs"),
+      k(NF0.format(R.cand.filter(function (c) { return c.opp; }).length), "untapped look-alike ZIPs")]));
+    var bot = $("crm-print-bottom"); bot.innerHTML = "";
+    var find = [];
+    if (R.halfMiles) find.push("Your " + unit + " rate halves about every " + NF1.format(R.halfMiles) + " miles from your nearest location; expected " + unit + " account for this.");
+    if (traits.length) find.push((R.weakSignal ? "Tentatively, your" : "Your") + " strongest ZIPs stand out for " + traits.slice(0, 3).map(function (p) {
+      return p.f.label.toLowerCase() + " (" + fmt(p.strong, p.f.unit) + " vs. " + fmt(p.market, p.f.unit) + " across the area)"; }).join(", ") + ".");
+    if (under.length) find.push("The biggest gaps: " + under.slice(0, 3).map(function (it) { return zipName(it.z) + " (" + NF0.format(it.A) + " vs. " + NF0.format(it.E) + " expected)"; }).join("; ") + ".");
+    if (opp.length) find.push("Best untapped look-alikes: " + opp.slice(0, 4).map(function (c) { return zipName(c.z); }).join(", ") + ".");
+    if (R.weakSignal) find.push("Caution: the number of over-performing ZIPs is close to what chance alone would produce, so treat the profile as tentative.");
+    var tbl = function (title, head, rows) {
+      return el("div", { class: "crm-p-tbl" }, [el("h3", { text: title }), el("table", {}, [el("thead", {}, [el("tr", {}, head.map(function (h) { return el("th", { text: h }); }))]),
+        el("tbody", {}, rows.length ? rows.map(function (r) { return el("tr", {}, r.map(function (c, i) { return el("td", { class: i ? "num" : null, text: c }); })); }) : [el("tr", {}, [el("td", { colspan: head.length, text: "None" })])])])]);
+    };
+    bot.appendChild(el("div", { class: "crm-p-grid" }, [
+      el("div", { class: "crm-p-find" }, [el("h3", { text: "Key findings" }), el("ul", {}, find.map(function (t) { return el("li", { text: t }); }))]),
+      tbl("Over-performing ZIPs", ["ZIP", "Actual", "Expected", "Index"], over.slice(0, 5).map(function (it) { return [zipName(it.z), NF0.format(it.A), NF0.format(it.E), NF0.format(it.idx)]; })),
+      tbl("Under-performing ZIPs", ["ZIP", "Actual", "Expected", "Index"], under.slice(0, 5).map(function (it) { return [zipName(it.z), NF0.format(it.A), NF0.format(it.E), NF0.format(it.idx)]; })),
+      tbl("Untapped look-alike ZIPs", ["ZIP", "Similarity", "Miles", "Households"], opp.slice(0, 5).map(function (c) { return [zipName(c.z), NF0.format(c.sim), c.d == null ? "\u2014" : NF0.format(c.d), NF0.format(c.z.hh)]; }))]));
+    bot.appendChild(el("p", { class: "crm-p-foot", text: "Expected " + unit + " = each ZIP's potential \u00d7 your " + unit + " rate at its distance. Over/under-performing = index of 120+/80 or below and unlikely to be chance (97.5% confidence). Sources: U.S. Census Bureau ACS 5-year, IRS, Census Business Patterns and LEHD, USDA, CDC PLACES, FHFA, Deluxe. Customer data was analyzed in the browser and not stored." }));
+  }
+  var printSizing = false;
+  function fitMapsForPrint(on, done) {
+    document.body.classList.toggle("crm-printing", on);
+    // wait a frame for the new size to take effect, then resize and re-fit both maps to the trade area
+    setTimeout(function () {
+      var b = S.res && L.latLngBounds(S.res.items.map(function (it) { return [it.z.lat, it.z.lon]; }));
+      ["l", "r"].forEach(function (side) {
+        var M = MAPS[side]; if (!M.map) return;
+        M.map.invalidateSize({ pan: false, animate: false });
+        if (b) M.map.fitBounds(b, { animate: false, padding: on ? [6, 6] : [0, 0] });
+      });
+      if (done) setTimeout(done, 250);
+    }, 60);
+  }
+  function printSummary() {
+    buildPrint();
+    fitMapsForPrint(true, function () { window.print(); });   // let the maps redraw at print size first
+  }
+  window.addEventListener("beforeprint", function () { if (S.res && !document.body.classList.contains("crm-printing")) { buildPrint(); fitMapsForPrint(true); } });
+  window.addEventListener("afterprint", function () { if (document.body.classList.contains("crm-printing")) fitMapsForPrint(false); });
+  if (location.search.indexOf("debug=1") >= 0) window.__crmPrint = function () { return new Promise(function (res) { buildPrint(); fitMapsForPrint(true, res); }); };
 
   /* ---------- how it works ---------- */
   function method() {
