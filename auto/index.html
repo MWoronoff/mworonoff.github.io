@@ -574,53 +574,57 @@ AdtaxiAnalyzer.start({
   {
    "title": "Market Potential Score",
    "body": [
-    "Answers one question: where are an auto dealer's best prospects, and which geographies deserve the most ad dollars?",
-    "Market Potential Score = 40% Consumer Demand + 25% Category Spending + 15% Spending Power + 20% Competition. Each part is a percentile (0 to 100) against the other markets at the same level: DMAs against DMAs, metros against metros, ZIPs against the other ZIPs in the same market.",
-    "The used lines leave out Spending Power: used-vehicle buyers are spread across middle incomes, so rewarding high incomes would point away from them. Their other parts are re-weighted to 100%.",
-    "A score isn't computed when one of its parts has no data, rather than guessing."
+    "Where are an auto dealer's best prospects, and which geographies deserve the most ad dollars?",
+    "Score = 40% Consumer Demand + 25% Category Spending + 15% Spending Power + 20% Competition. Each part is a percentile (0–100) against markets at the same level. No score is shown when a part has no data.",
+    "Used lines leave out Spending Power (used buyers span middle incomes). Remaining parts keep their relative weights."
    ]
   },
   {
    "title": "Consumer Demand",
    "body": [
-    "Every line starts from the market's household vehicles: the cars, vans and trucks households keep, from the Census American Community Survey. Each line then adds what marks its buyers.",
-    "New cars: households earning $100K or more and the share of workers commuting by car.",
-    "New trucks and SUVs: households with 3 or more vehicles, the share of residents in small-town and rural ZIPs, and households with children.",
-    "Used cars: households earning $35K–$99K and the share commuting by car.",
-    "Used trucks and SUVs: households with 3 or more vehicles, the rural share and households earning $35K–$99K.",
-    "Vehicle registrations by model aren't published free, so Census vehicles available stand in for the vehicles on the road."
+    "Every line starts with household vehicles (Census ACS: cars, vans and trucks kept at home), then adds what marks its buyers.",
+    "New cars: households earning $100K+, share commuting by car. New trucks and SUVs: households with 3+ vehicles, share living in small-town and rural ZIPs, households with children. Used cars: households earning $35K–$99K, share commuting by car. Used trucks and SUVs: households with 3+ vehicles, rural share, households earning $35K–$99K.",
+    "Registrations by model aren't published free, so Census vehicles stand in for vehicles on the road. Rural ZIPs: USDA rural-urban commuting codes 4–10."
    ]
   },
   {
    "title": "Category Spending",
-   "body": "EASI 2025 estimates of household spending on new cars, new trucks, used cars and used trucks, each used for its own line. Half the weight goes to spending per household and half to the market's total (per household times this site's households). EASI's trucks include pickups, SUVs and vans. EASI counts Palm Springs inside Los Angeles, so the provisional Palm Springs DMA uses the Riverside–San Bernardino metro's rate. Not available by county or ZIP."
+   "body": "EASI 2025 household spending on new cars, new trucks, used cars and used trucks, each for its own line. Half per household, half market total. EASI trucks include pickups, SUVs and vans. Palm Springs uses the Riverside–San Bernardino metro's rate. Not available by county or ZIP."
   },
   {
    "title": "Spending Power",
-   "body": "Share of households earning $75K or more, from the Census American Community Survey. Used for the new lines only."
+   "body": "Share of households earning $75K+ (Census ACS). New lines only."
   },
   {
    "title": "Competition",
-   "body": "Dealers per 10,000 residents, reversed: markets with fewer competing dealers score higher. The new lines use new car dealers; the used lines use used car dealers. Census counts dealerships, not brands, and franchised new-car dealers' used lots are counted with them. Counts are Census County Business Patterns. Not used in ZIP scores, because Census hides ZIP counts under 3."
+   "body": "Dealers per 10,000 residents, reversed: fewer scores higher (Census County Business Patterns). New lines: new car dealers. Used lines: used car dealers (franchised dealers' used lots count with new car dealers). Census counts dealerships, not brands. Not used for ZIPs: Census hides ZIP counts under 3."
   },
   {
    "title": "Underserved",
-   "body": "Flags markets with strong prospect demand (70th percentile or higher) but few dealers per resident (30th percentile or lower). Shown, not scored."
+   "body": "Strong buyer demand (70th percentile+) with few dealers per resident (30th percentile or lower). Shown, not scored."
+  },
+  {
+   "title": "Dealer locations",
+   "body": "Circles sized by dealers in each market or ZIP: new car dealers for the new lines, used car dealers for the used lines (Census Business Patterns). Counts by area, not addresses. ZIPs with fewer than 3 show no circle."
+  },
+  {
+   "title": "Rank and map by",
+   "body": "Market Potential Score, the line's EASI spending (index and total), its key buyer measures, household vehicles, dealers per 10,000 residents and households per square mile."
   },
   {
    "title": "Households per square mile",
-   "body": "Households divided by land area from the Census Gazetteer. It isn't part of the score; use it to compare how many prospects a service area or radius can reach."
+   "body": "Households divided by land area (Census Gazetteer). Not scored; use it to compare reach."
   },
   {
    "title": "ZIPs in a market",
-   "body": "Pick a DMA, metro or county, then choose ZIPs in market. ZIP scores use Consumer Demand and Spending Power, reweighted to 73% and 27% (used lines: Consumer Demand only). ZIPs with fewer than 500 residents are shown but not ranked."
+   "body": "Pick a DMA, metro or county, then ZIPs in market. ZIP scores use Consumer Demand (73%) and Spending Power (27%); used lines use Consumer Demand only. ZIPs under 500 residents, or mostly group quarters, are shown but not ranked."
   },
   {
    "title": "Advertising response",
    "body": [
-    "In the Radius view, once you pick a center and a radius, a panel under the radius map shows the percent of the target group and of all U.S. adults who saw or heard an ad on each of 17 media that led them to take action in the past 30 days (AudienceSCAN). Percentages are based on everyone in each group, not only people who use that medium, and they are response rates, not reach. It's national data, so it's the same for every market. \"Vs. average\" is a percent difference, not percentage points.",
-    "New lines use AudienceSCAN's new car/truck shoppers; used lines use used car/truck shoppers. AudienceSCAN gives these groups' percentages only; the all-adults figures are the same national figures used for every other group.",
-    "It comes after the geography on purpose: first find where the prospects are, then see how that target group responds to advertising."
+    "Radius view only, after a center and radius are chosen: the percent of the target group and of all U.S. adults who acted on an ad in each of 17 media in the past 30 days (AudienceSCAN 2026). Rates cover everyone in each group, not just media users, and measure response, not reach. National data, the same for every market.",
+    "\"Vs. average\" is a percent difference: 53.5% vs. 36.7% is 46% more likely, not 17 points.",
+    "The panel follows the radius tool's \"Best prospects for\" preset. New lines use new car/truck shoppers; used lines use used car/truck shoppers. AudienceSCAN gives these groups' percentages only; the all-adults figures are the same national figures used everywhere."
    ]
   }
  ],

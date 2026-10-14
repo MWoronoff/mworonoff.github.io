@@ -528,60 +528,57 @@ AdtaxiAnalyzer.start({
   {
    "title": "Market Potential Score",
    "body": [
-    "Answers one question: where are an apartment advertiser's prospective residents, and which geographies deserve the most ad dollars?",
-    "Market Potential Score = 40% Consumer Demand + 25% Category Spending + 15% Spending Power + 20% Competition. Each part is a percentile (0 to 100) against the other markets at the same level: DMAs against DMAs, metros against metros, ZIPs against the other ZIPs in the same market. Affordable housing and Student housing leave out Spending Power, because those renters aren't defined by what they can pay; the remaining parts keep their relative weights.",
-    "A score isn't computed when one of its parts has no data, rather than guessing."
+    "Where are an apartment advertiser's prospective residents, and which geographies deserve the most ad dollars?",
+    "Score = 40% Consumer Demand + 25% Category Spending + 15% Spending Power + 20% Competition. Each part is a percentile (0–100) against markets at the same level. Affordable and Student housing leave out Spending Power (those renters aren't defined by what they can pay). No score is shown when a part has no data."
    ]
   },
   {
    "title": "Consumer Demand",
-   "body": "The size and concentration of each category's likely residents, from the Census American Community Survey. All apartments: renter households, the share of households renting, renters who moved in 2020 or later (turnover means leases to fill) and renters in buildings with 5+ units. Luxury / Class A: renters earning $100K+, renter householders 25–44 and apartment renters. Mid-market / workforce: renters earning $35K–$99K (count and share) and apartment renters. Affordable housing: renters earning under $35K (count and share) and renters paying 30% or more of income in rent. Student housing: college and graduate students (count and share of residents) and renter householders under 25. Active adult / 55+: renter householders 55+ (count and share of renters)."
+   "body": "Each category's likely residents (Census ACS). All apartments: renter households, share renting, renters who moved in 2020+ (leases to fill) and renters in 5+ unit buildings. Luxury: renters earning $100K+, renter householders 25–44, apartment renters. Mid-market: renters earning $35K–$99K (count and share), apartment renters. Affordable: renters earning under $35K (count and share), renters paying 30%+ of income in rent. Student: college and graduate students (count and share), renter householders under 25. Active adult 55+: renter householders 55+ (count and share of renters)."
   },
   {
    "title": "Category Spending",
-   "body": [
-    "Half the weight goes to EASI 2025 total rent spending (the size of the market in dollars, EASI's per-household figure times this site's household count) and half to Census rent per household (typical rent x 12 x the share of households renting), which measures how much households here spend on rent.",
-    "EASI's per-household rent varies little between markets and doesn't track Census rents closely, so EASI's per-household figure is shown for reference and not scored. Typical rents are Census median gross rents (rent plus utilities) by ZIP, from Adtaxi's Deluxe ZIP file; markets use the renter-weighted average of their ZIPs."
-   ]
+   "body": "Half EASI 2025 total rent spending (market size in dollars), half Census rent per household (median gross rent × 12 × share renting; ZIP rents via Deluxe, renter-weighted for markets). EASI's per-household rent varies little and doesn't track Census rents, so it's shown, not scored."
   },
   {
    "title": "Spending Power",
-   "body": "Share of renter households in the income range each category serves: $50K+ for All apartments, Mid-market and Active adult, and $100K+ for Luxury. Not used for Affordable housing or Student housing."
+   "body": "Share of renter households in each category's income range: $50K+ for All, Mid-market and Active adult; $100K+ for Luxury. Not used for Affordable or Student."
   },
   {
    "title": "Competition",
-   "body": "Residential landlords (lessors of residential buildings) and residential property managers per 10,000 renter households, reversed: markets with fewer of them score higher. The same competitor count applies to every category, since Census doesn't separate luxury, student or senior properties. Counts are Census County Business Patterns. Not used in ZIP scores, because Census hides ZIP counts under 3 businesses."
+   "body": "Residential landlords and property managers per 10,000 renter households, reversed: fewer scores higher (Census County Business Patterns). One count for every category: Census doesn't separate luxury, student or senior properties. Not used for ZIPs: Census hides ZIP counts under 3."
   },
   {
    "title": "Leasing pressure",
-   "body": "Rental vacancy, new apartment permits and Zillow rent change show where properties are working hardest to fill units: high vacancy, lots of new buildings in lease-up, or softening rents all push apartment ad budgets up. They're shown for every market but not counted in the score. Vacancy is Census ACS 5-year; permits are the Census Building Permits Survey's latest full year, units in new buildings with 5 or more units, by county; rent change is Zillow's Observed Rent Index over the past year, metros only."
+   "body": "Where properties work hardest to fill units: rental vacancy (Census ACS 5-year), new 5+ unit permits (Census Building Permits Survey, latest full year, by county) and past-year rent change (Zillow Observed Rent Index, metros only). Shown, not scored."
   },
   {
    "title": "Underserved",
-   "body": "Flags markets with strong renter demand (70th percentile or higher) but few landlords and property managers per renter household (30th percentile or lower). Shown, not counted in the score."
+   "body": "Strong renter demand (70th percentile+) with few landlords and managers per renter household (30th percentile or lower). Shown, not scored."
   },
   {
    "title": "Competitor locations",
-   "body": "Switch on Show competitor locations to put a circle on each market (or each ZIP in the ZIP view) sized by the number of residential landlords and property managers, from Census Business Patterns. These are counts by area; Census doesn't publish business addresses. In the ZIP view, Census doesn't publish a ZIP's count when it has fewer than 3 businesses, so those ZIPs show no circle."
+   "body": "Circles sized by residential landlords and property managers in each market or ZIP (Census Business Patterns). Counts by area, not addresses. ZIPs with fewer than 3 show no circle."
   },
   {
-   "title": "Measures shown for each category",
-   "body": "Rank and map by offers four choices, each answering a different question: the Market Potential Score (where to put the money overall), the rent spending index vs. U.S. (how much households here spend on rent), total rent spending (how big the market is in dollars) and households per square mile (how many prospects a service area can reach). Market details add the parts of the score, leasing pressure, and the renter measures that relate to the selected category."
+   "title": "Rank and map by",
+   "body": "Market Potential Score (where to spend), rent spending index (how much households spend on rent), total rent spending (market size in dollars) and households per square mile (prospects a service area can reach)."
   },
   {
    "title": "Households per square mile",
-   "body": "Households divided by land area from the Census Gazetteer, for each ZIP, metro and DMA. It isn't part of the score; use it to compare how many prospects a service area or radius can reach."
+   "body": "Households divided by land area (Census Gazetteer). Not scored; use it to compare reach."
   },
   {
    "title": "ZIPs in a market",
-   "body": "Pick a DMA, metro or county, then choose ZIPs in market. ZIP scores use Consumer Demand and Spending Power, reweighted to 73% and 27% (Consumer Demand only for Affordable and Student housing). ZIPs with fewer than 500 residents are shown but not ranked."
+   "body": "Pick a DMA, metro or county, then ZIPs in market. ZIP scores use Consumer Demand (73%) and Spending Power (27%) (Consumer Demand only for Affordable and Student). ZIPs under 500 residents, or mostly group quarters, are shown but not ranked."
   },
   {
    "title": "Advertising response",
    "body": [
-    "In the Radius view, once you pick a center and a radius, a panel under the radius map shows the percent of the target group and of all U.S. adults who saw or heard an ad on each of 17 media that led them to take action in the past 30 days (AudienceSCAN's \"responded last 30 days\"). Percentages are based on everyone in each group, not only people who use that medium, and they are response rates, not reach. It's national data, so it's the same for every market. \"Vs. average\" is a percent difference, not percentage points.",
-    "It comes after the geography on purpose: first find where the prospects are, then see how that target group responds to advertising. The panel follows the radius tool's \"Best prospects for\" preset. Student housing uses full-time students (the same group as the Higher Education analyzer). Every other category uses potential apartment switchers, the closest AudienceSCAN group for renters; it isn't specific to luxury, workforce, affordable or 55+ housing.",
-    "Why switchers rather than all renters: AudienceSCAN's renters group (every renter, including those who just signed a lease) is at or below all U.S. adults on almost every medium, from +1% on Mobile to −21% on Magazine. Potential apartment switchers, the renters actually in the market, run up to 19% above average on digital media (Pre-roll +19%, Social +15%, Mobile +14%). Renters as a whole don't respond much to advertising; the ones looking to move do, mostly on digital."
+    "Radius view only, after a center and radius are chosen: the percent of the target group and of all U.S. adults who acted on an ad in each of 17 media in the past 30 days (AudienceSCAN 2026). Rates cover everyone in each group, not just media users, and measure response, not reach. National data, the same for every market.",
+    "\"Vs. average\" is a percent difference: 53.5% vs. 36.7% is 46% more likely, not 17 points.",
+    "The panel follows the radius tool's \"Best prospects for\" preset. Student housing uses full-time students; every other category uses potential apartment switchers, the closest group for renters (not specific to luxury, workforce, affordable or 55+).",
+    "Why switchers, not all renters: renters as a whole sit at or below all adults on nearly every medium (+1% Mobile to −21% Magazine). Switchers, the renters actually looking, run up to 19% above average on digital (Pre-roll +19%, Social +15%, Mobile +14%)."
    ]
   }
  ],

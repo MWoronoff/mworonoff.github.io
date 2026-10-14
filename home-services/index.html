@@ -787,65 +787,68 @@ AdtaxiAnalyzer.start({
   {
    "title": "Market Potential Score",
    "body": [
-    "Answers one question: where are a home service company's potential customers, and which geographies deserve the most ad dollars?",
-    "Market Potential Score = 40% Consumer Demand + 25% Category Spending + 15% Spending Power + 20% Competition. Each part is a percentile (0 to 100) against the other markets at the same level: DMAs against DMAs, metros against metros, ZIPs against the other ZIPs in the same market.",
-    "A score isn't computed when one of its parts has no data, rather than guessing."
+    "Where are a home service company's customers, and which geographies deserve the most ad dollars?",
+    "Score = 40% Consumer Demand + 25% Category Spending + 15% Spending Power + 20% Competition. Each part is a percentile (0–100) against markets at the same level. No score is shown when a part has no data."
    ]
   },
   {
    "title": "Services covered",
-   "body": "The analyzer covers the home services with EASI household spending data: HVAC, roofing and gutters, plumbing, electrical, painting and wallpaper, and flooring, plus Any home service, which combines them all. Windows and doors, remodeling, landscaping and pest control aren't included, because EASI has no spending data for them."
+   "body": "Services with EASI spending data: HVAC, roofing and gutters, plumbing, electrical, painting and wallpaper, flooring, and Any home service (all combined). Windows and doors, remodeling, landscaping and pest control have no EASI data, so aren't included."
   },
   {
    "title": "Consumer Demand",
    "body": [
-    "The size and need of each service's customer base. Homeowners and home characteristics come from the Census American Community Survey; climate and hail come from NOAA.",
-    "HVAC: homeowners and heating or cooling need, whichever is greater in the market, so Minneapolis winters and Houston summers both count fully. Home age isn't used for HVAC, because systems wear out on a 15–20 year cycle in new and old homes alike. Roofing and gutters: owners of single-family detached homes, days a year with 1-inch or larger hail, and the share of owner homes built before 2000. Plumbing: homeowners and the share of owner homes built before 1980. Electrical: homeowners, the share of owner homes built before 1980 and the share worth $300K or more. Painting and wallpaper: homeowners, the share of owner homes worth $300K or more and the share of owners in their home since before 2010, the owners most likely to hire out repainting. Flooring: homeowners, the share of owner homes built before 2000 and the share of owners in their home since before 2010, when original floors get replaced. Any home service: homeowners, the share of owner homes built before 2000, the share that are single-family detached and the share of owners in their home since before 2010.",
-    "Heating and cooling need come from NOAA's county heating and cooling degree days (base 65°F), averaged over the last 10 complete years; each market is scored on the higher of its two percentiles. Hail days count the days with hail an inch or larger reported in the county by NOAA Storm Events over the same years. NOAA's county climate files don't cover Alaska or Hawaii, so their HVAC demand leaves degree days out; Washington, DC uses its two Maryland neighbors. NOAA reports Connecticut hail by its eight former counties, so Connecticut ZIPs use their average."
+    "Homeowners and home traits from Census ACS; climate and hail from NOAA.",
+    "HVAC: homeowners and heating or cooling need, whichever is greater (Minneapolis winters and Houston summers both count). Home age isn't used: systems wear out every 15–20 years regardless. Roofing: owners of single-family detached homes, days with 1-inch+ hail, share of owner homes built before 2000. Plumbing: homeowners, share built before 1980. Electrical: homeowners, share built before 1980, share worth $300K+. Painting: homeowners, share worth $300K+, share of owners in place since before 2010. Flooring: homeowners, share built before 2000, share in place since before 2010. Any: homeowners, share built before 2000, share single-family detached, share in place since before 2010.",
+    "Degree days: NOAA county heating and cooling degree days (base 65°F), 10-year average; each market scores on the higher percentile. Hail: days with 1-inch+ hail in NOAA Storm Events, same years. Alaska and Hawaii have no NOAA county climate files, so their HVAC demand omits degree days; DC uses its two Maryland neighbors; Connecticut ZIPs use the average of the state's eight former counties."
    ]
   },
   {
    "title": "Category Spending",
-   "body": "EASI 2025 estimates of household spending: heat, a/c and electrical work (used for HVAC and Electrical); roofing and gutters; plumbing and water heating; painting and papering (hired work, not supplies); flooring installation, repair and replacement in owned homes; and all five combined for Any home service. Half the weight goes to spending per household and half to the market's total, which is EASI's per-household spending times this site's household count. EASI publishes heating, roofing and plumbing by metro and micro area only, so a DMA's figure is the household-weighted average of the metro and micro areas inside it; the few DMAs with no metro or micro area use their state's average. EASI publishes painting and flooring by DMA only, so a metro's figure is the household-weighted average of the DMAs its ZIPs fall in. EASI counts Palm Springs inside Los Angeles, so the provisional Palm Springs DMA uses the Los Angeles painting and flooring rates. Paint and wallpaper supplies spending is shown for context but not scored, since it's mostly do-it-yourself buying. Not available by ZIP."
+   "body": [
+    "EASI 2025 household spending: heat, a/c and electrical work (HVAC and Electrical); roofing and gutters; plumbing and water heating; hired painting and papering; flooring in owned homes; all five combined for Any. Half per household, half market total.",
+    "EASI publishes heating, roofing and plumbing by metro and micro area only, so DMAs use the household-weighted average of their metro and micro areas (or the state average if none). Painting and flooring are DMA only, so metros use the household-weighted average of their DMAs. Palm Springs uses Los Angeles painting and flooring rates. Paint supplies spending is shown but not scored (mostly do-it-yourself). Not available by ZIP."
+   ]
   },
   {
    "title": "Spending Power",
-   "body": "Share of households earning $75K or more, from the Census American Community Survey. Kept at 15% because EASI spending already reflects income."
+   "body": "Share of households earning $75K+ (Census ACS). Held to 15% because EASI already reflects income."
   },
   {
    "title": "Competition",
-   "body": "Contractors per 10,000 residents, reversed: markets with fewer competing contractors score higher. Roofing; electrical; plumbing, heating and air-conditioning; painting and wall covering; and flooring contractors, from Census County Business Patterns, which counts every business. Census counts HVAC and plumbing contractors as one industry, so HVAC and Plumbing share a competitor count; Any home service counts all five industries. Not used in ZIP scores, because Census hides ZIP counts under 3 businesses."
+   "body": "Contractors per 10,000 residents, reversed: fewer contractors scores higher (Census County Business Patterns: roofing, electrical, plumbing/HVAC, painting, flooring). HVAC and Plumbing share one Census industry, so one count; Any counts all five. Not used for ZIPs: Census hides ZIP counts under 3."
   },
   {
    "title": "Underserved",
-   "body": "Flags markets with strong customer demand (70th percentile or higher) but few contractors per resident (30th percentile or lower). It's shown as a pitch for companies weighing a new location or service area, not counted in the score."
+   "body": "Strong customer demand (70th percentile+) with few contractors per resident (30th percentile or lower). Shown, not scored."
   },
   {
    "title": "Contractor locations",
-   "body": "Switch on Show contractor locations to put a circle on each market (or each ZIP in the ZIP view) sized by the number of contractors for the selected service, from Census Business Patterns. These are counts by area; Census doesn't publish business addresses. In the ZIP view, Census doesn't publish a ZIP's count when it has fewer than 3 businesses, so those ZIPs show no circle."
+   "body": "Circles sized by contractors for the selected service in each market or ZIP (Census Business Patterns). Counts by area, not addresses. ZIPs with fewer than 3 show no circle."
   },
   {
-   "title": "Measures shown for each service",
-   "body": "Rank and map by offers four choices, each answering a different question: the Market Potential Score (where to put the money overall), the spending index vs. U.S. (how intensely households spend on the service), total spending (how big the market is in dollars) and households per square mile (how many prospects a service area can reach). Market details add spending per household, Consumer Demand and the other parts of the score, and the home, climate, income and contractor measures that relate to the selected service."
+   "title": "Rank and map by",
+   "body": "Market Potential Score (where to spend), spending index (how intensely households spend), total spending (market size in dollars) and households per square mile (prospects a service area can reach)."
   },
   {
    "title": "Households per square mile",
-   "body": "Households divided by land area from the Census Gazetteer, for each ZIP, metro and DMA. It isn't part of the score; use it to compare how many prospects a service area or radius can reach."
+   "body": "Households divided by land area (Census Gazetteer). Not scored; use it to compare reach."
   },
   {
-   "title": "How the HVAC scoring was checked",
-   "body": "HVAC scores were tested against an independent benchmark: HVAC and plumbing contractor employees per 1,000 households, from Census Business Patterns, since contractors employ people where homeowners buy the work. Scoring climate on the greater of heating or cooling need, and leaving out home age, roughly doubled how well DMA scores line up with that benchmark. Giving climate extra weight, or cutting EASI spending's weight, didn't improve it, so HVAC uses the same weights as every other service. The check runs with every data build and appears in the build report."
+   "title": "How HVAC scoring was checked",
+   "body": "Tested against HVAC and plumbing contractor employees per 1,000 households (Census Business Patterns). Scoring climate on the greater of heating or cooling need, and dropping home age, roughly doubled the match at the DMA level. Extra climate weight or less EASI weight didn't help, so HVAC uses the standard weights. The check reruns with every build."
+  },
+  {
+   "title": "ZIPs in a market",
+   "body": "Pick a DMA, metro or county, then ZIPs in market. ZIP scores use Consumer Demand (73%) and Spending Power (27%). ZIPs under 500 residents, or mostly group quarters, are shown but not ranked."
   },
   {
    "title": "Advertising response",
    "body": [
-    "In the Radius view, once you pick a center and a radius, a panel under the radius map shows the percent of the target group (each service's audience) and of all U.S. adults who saw or heard an ad on each of 17 media that led them to take action in the past 30 days (AudienceSCAN's \"responded last 30 days\"). Percentages are based on everyone in each group, not only people who use that medium, and they are response rates, not reach. It's national data, so it's the same for every market. \"Vs. average\" is a percent difference: 53.5% vs. 36.7% is 46% more likely, not 17 points. Sorting by response lists the media with the highest response rates first; sorting by vs. average lists first the media where the target group's response rate is furthest above all U.S. adults.",
-    "It comes after the geography on purpose: first find where the prospects are, then see how that target group responds to advertising. The panel follows the radius tool's \"Best prospects for\" preset."
+    "Radius view only, after a center and radius are chosen: the percent of the target group and of all U.S. adults who acted on an ad in each of 17 media in the past 30 days (AudienceSCAN 2026). Rates cover everyone in each group, not just media users, and measure response, not reach. National data, the same for every market.",
+    "\"Vs. average\" is a percent difference: 53.5% vs. 36.7% is 46% more likely, not 17 points.",
+    "The panel follows the radius tool's \"Best prospects for\" preset."
    ]
-  },
-  {
-   "title": "ZIPs in a market",
-   "body": "Pick a DMA, metro or county, then choose ZIPs in market. ZIP scores use Consumer Demand and Spending Power, reweighted to 73% and 27%. ZIPs with fewer than 500 residents are shown but not ranked."
   }
  ],
  "sources": [
