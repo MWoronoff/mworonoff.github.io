@@ -326,3 +326,4 @@ a.az-btn { display: inline-block; text-decoration: none; text-align: center; }
 @media (max-width: 640px) { .rz-extra .az-ad-cols .az-ad-row { grid-template-columns: 1fr 58px 50px 58px; } }
 
 .az-disclaimer { font-size: 12px; color: var(--muted, #5b6672); font-style: italic; margin-top: 10px; }
+.az-version { font-size: 11px; color: var(--muted, #5b6672); margin-top: 4px; letter-spacing: .02em; }

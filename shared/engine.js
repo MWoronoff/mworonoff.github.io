@@ -147,6 +147,7 @@
     var td = this.tbody.querySelector(".az-empty"); if (td) td.textContent = msg + " Clear the search to see all markets.";
   };
 
+  var VERSION = "Fall 2026";
   var DISCLAIMER = "Estimates for planning. Scores and figures are modeled from public government and licensed third-party data.";
   var ABOUT_ESTIMATES = { title: "About these estimates", body: [
     "Estimates for planning. Scores rank markets against each other; they don't forecast sales, leads or ad results.",
@@ -320,7 +321,8 @@
     });
     this.sourcesNote = el("p", { text: cfg.sourcesNote || "" });
     var disclaimer = el("p", { class: "az-disclaimer", text: cfg.disclaimer || DISCLAIMER });
-    var sources = el("section", { class: "az-panel az-sources" }, [el("h2", { text: "Sources" }), el("p", null, srcLinks), this.sourcesNote, disclaimer]);
+    var version = el("p", { class: "az-version", text: "Adtaxi Market Analyzers \u00b7 " + (cfg.version || VERSION) });
+    var sources = el("section", { class: "az-panel az-sources" }, [el("h2", { text: "Sources" }), el("p", null, srcLinks), this.sourcesNote, disclaimer, version]);
 
     // Methodology dialog
     this.modalBody = el("div", { class: "az-modal-body" });
