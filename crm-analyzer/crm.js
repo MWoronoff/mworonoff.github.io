@@ -693,7 +693,9 @@
     r: { title: "Market potential", mode: "pot", modes: function () {
       return [["pot", BASES[S.res.o.base].label + " per ZIP"], ["sim", "Similarity to your strongest ZIPs"]]; } }
   };
-  var RAMP = ["#dff1ee", "#a9dcd4", "#5fb8ac", "#1f8f81", "#0b5d53"], NONE = "#eef2f5", OUTSIDE = "#f6f8fa";
+  // Teal for your customers (left map), navy-blue for market potential and similarity (right map)
+  var RAMPS = { l: ["#dff1ee", "#a9dcd4", "#5fb8ac", "#1f8f81", "#0b5d53"], r: ["#e3eaf4", "#b5c7e0", "#7b98c2", "#3f629a", "#173a6b"] };
+  var RAMP = RAMPS.l, NONE = "#eef2f5", OUTSIDE = "#f6f8fa";
   function mapPanel(side) {
     var M = MAPS[side];
     M.mode = M.modes()[0][0];
@@ -724,7 +726,7 @@
     return [0.2, 0.4, 0.6, 0.8].map(function (q) { return v[Math.min(v.length - 1, Math.floor(q * v.length))]; });
   }
   function colorFor(side, zip) {
-    var M = MAPS[side], e = S.byZip[zip];
+    var M = MAPS[side], e = S.byZip[zip], RAMP = RAMPS[side];
     if (M.mode === "status") return e && e.it ? STATUS[e.it.status].color : OUTSIDE;
     var v = mapValue(zip, M.mode);
     if (v == null) return OUTSIDE;
@@ -770,6 +772,7 @@
         syncing = false;
       });
     });
+    MAPS.r.map.setView(MAPS.l.map.getCenter(), MAPS.l.map.getZoom(), { animate: false });   // start both in the same place
     var dmas = {}; R.cand.concat(R.items).forEach(function (c) { if (c.z.dma) dmas[c.z.dma] = true; });
     Promise.all(Object.keys(dmas).map(function (d) {
       return fetch(GEO.replace("{id}", d)).then(function (r) { return r.ok ? r.json() : null; }).then(function (t) {
@@ -811,6 +814,7 @@
     return h + "</div>";
   }
   function legend(side) {
+    var RAMP = RAMPS[side];
     var M = MAPS[side], box = $("crm-legend-" + side); if (!box) return; box.innerHTML = "";
     var f = M.mode === "spend" ? function (v) { return "$" + NF1.format(v); } : M.mode === "pen" ? function (v) { return NF1.format(v); } : function (v) { return NF0.format(v); };
     var rows;
