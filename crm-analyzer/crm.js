@@ -257,11 +257,18 @@
   function readFile(file) {
     S.test = null;
     var r = new FileReader();
+    // CSV and text files don't need the spreadsheet library: if it didn't load (a blocked or slow CDN), read them directly
+    var asText = typeof XLSX === "undefined" && /\.(csv|txt|tsv)$/i.test(file.name);
     r.onload = function () {
       try {
-        var wb = XLSX.read(new Uint8Array(r.result), { type: "array", raw: false });
-        var ws = wb.Sheets[wb.SheetNames[0]];
-        var aoa = XLSX.utils.sheet_to_json(ws, { header: 1, raw: false, defval: "" });
+        var aoa;
+        if (asText) aoa = parseDelimited(String(r.result));
+        else if (typeof XLSX === "undefined") throw new Error("the Excel reader didn't load (check the connection and refresh, or save the file as CSV)");
+        else {
+          var wb = XLSX.read(new Uint8Array(r.result), { type: "array", raw: false });
+          var ws = wb.Sheets[wb.SheetNames[0]];
+          aoa = XLSX.utils.sheet_to_json(ws, { header: 1, raw: false, defval: "" });
+        }
         aoa = aoa.filter(function (row) { return row.some(function (c) { return String(c).trim() !== ""; }); });
         if (!aoa.length) throw new Error("the first sheet is empty");
         // Reports often start with title lines ("Zip code report", a date range); use the first row in the top 15 that
@@ -282,7 +289,27 @@
         $("crm-setup").innerHTML = ""; $("crm-setup").appendChild(el("p", { class: "az-error", text: "That file couldn't be read: " + e.message + ". Save it as CSV or .xlsx and try again." }));
       }
     };
-    r.readAsArrayBuffer(file);
+    if (asText) r.readAsText(file); else r.readAsArrayBuffer(file);
+  }
+  // Minimal CSV/TSV reader (quoted fields, doubled quotes, commas and line breaks inside quotes)
+  function parseDelimited(txt) {
+    txt = txt.replace(/^\uFEFF/, "");
+    var first = txt.split(/\r?\n/, 1)[0], sep = (first.split("\t").length > first.split(",").length) ? "\t" : ",";
+    var rows = [], row = [], cell = "", q = false;
+    for (var i = 0; i < txt.length; i++) {
+      var ch = txt[i];
+      if (q) {
+        if (ch === '"') { if (txt[i + 1] === '"') { cell += '"'; i++; } else q = false; }
+        else cell += ch;
+      } else if (ch === '"') q = true;
+      else if (ch === sep) { row.push(cell); cell = ""; }
+      else if (ch === "\n" || ch === "\r") {
+        if (ch === "\r" && txt[i + 1] === "\n") i++;
+        row.push(cell); rows.push(row); row = []; cell = "";
+      } else cell += ch;
+    }
+    if (cell !== "" || row.length) { row.push(cell); rows.push(row); }
+    return rows;
   }
 
   function guessColumns() {
