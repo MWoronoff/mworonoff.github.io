@@ -86,11 +86,14 @@ h2{font-size:clamp(1.8rem,6vw,2.6rem)}
 .title-tiles span:nth-child(even){transform:rotate(4deg)}
 .title-tiles .gap{width:.35em; box-shadow:none; background:none !important}
 .pickhint{margin:0; font-size:clamp(1.3rem,3.6vw,1.6rem); font-weight:700}
-.mods{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:24px; width:min(640px,100%); padding-bottom:10px}
+.mods{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:24px; width:min(860px,100%); padding-bottom:10px}
 .mod{border:4px solid #1E2A5A; border-radius:34px; padding:18px 16px 22px; display:flex; flex-direction:column; align-items:center; gap:10px;
   color:#1E2A5A; background:var(--mc); box-shadow:0 10px 0 rgba(30,42,90,.28); transition:transform .15s ease, box-shadow .15s ease;
   animation:popin .5s cubic-bezier(.3,1.5,.6,1) both}
 .mod:nth-child(2){animation-delay:.12s}
+.mod:nth-child(3){animation-delay:.24s}
+.mod:nth-child(4){animation-delay:.36s}
+.mod:nth-child(5){animation-delay:.48s}
 @keyframes popin{from{opacity:0; transform:scale(.85)}to{opacity:1; transform:none}}
 .mod:hover{transform:translateY(-5px) rotate(-1.5deg)}
 .mod:nth-child(even):hover{transform:translateY(-5px) rotate(1.5deg)}
@@ -99,12 +102,38 @@ h2{font-size:clamp(1.8rem,6vw,2.6rem)}
 .mod .art{background:#fff; border-radius:50%; width:min(200px,52vw); aspect-ratio:1; display:grid; place-items:center; border:4px solid #1E2A5A}
 .mod .art svg{width:80%; height:80%}
 .mod .word{font-family:"Baloo 2","Andika",sans-serif; font-size:3.4rem; font-weight:800; line-height:1}
-.mini{display:flex; gap:6px}
+.mod .word.sm{font-size:clamp(1.9rem,5vw,2.3rem); text-align:center; line-height:1.05}
+.mod .es-sub{font-weight:700; font-size:1.05rem; margin-top:-4px}
+.mini{display:flex; gap:6px; flex-wrap:wrap; justify-content:center}
 .mini span{font-weight:700; font-size:1.3rem; color:#1E2A5A; border-radius:10px; padding:0 .4em; border:2px solid #1E2A5A}
 .go{background:#1E2A5A; color:#fff; border-radius:999px; padding:.3em 1.3em; font-weight:700; font-size:1.25rem; margin-top:4px}
 .cheer{display:flex; align-items:center; gap:12px}
 .cheer img{width:72px; height:72px; border-radius:50%; object-fit:cover; border:4px solid var(--A)}
 .cheer span{font-size:1.3rem; font-weight:700}
+
+/* word modules */
+.wcard{font-family:"Baloo 2","Andika",sans-serif; font-weight:800; font-size:clamp(4.6rem,20vw,8.5rem); line-height:1.1; color:#1E2A5A;
+  background:var(--mc); border:4px solid #1E2A5A; border-radius:32px; padding:.02em .45em .06em; box-shadow:0 8px 0 rgba(30,42,90,.25)}
+.wcard.sm{font-size:clamp(3.4rem,13vw,5.4rem)}
+.mean{margin:0; font-size:clamp(1.25rem,3.8vw,1.55rem); color:var(--muted)}
+.mean b{color:var(--ink)}
+.pics{display:flex; gap:14px; justify-content:center}
+.pics svg{width:min(150px,36vw); height:auto}
+.ex{border:3px dashed var(--line); background:var(--card); border-radius:20px; padding:.25em 1em; font-size:clamp(1.6rem,5vw,2.3rem); font-weight:700;
+  display:inline-flex; align-items:center; gap:.5em}
+.ex svg{width:24px; height:24px; flex:none; color:var(--muted)}
+.ex mark{background:var(--hl); color:#1E2A5A; border-radius:8px; padding:0 .15em}
+.chips{display:flex; flex-wrap:wrap; gap:9px; justify-content:center; max-width:36em}
+.chips button{font-family:"Baloo 2","Andika",sans-serif; font-weight:800; font-size:1.6rem; color:#1E2A5A; background:#fff;
+  border:3px solid #1E2A5A; border-radius:14px; padding:0 .55em; box-shadow:0 4px 0 rgba(30,42,90,.22)}
+.opts{display:grid; grid-template-columns:repeat(2,1fr); gap:14px; width:min(440px,100%)}
+.opt{font-family:"Baloo 2","Andika",sans-serif; font-weight:800; font-size:clamp(2.4rem,9vw,3.4rem); line-height:1.3; border:4px solid var(--line);
+  background:var(--card); border-radius:24px; padding:.05em 0}
+.opt.ok{background:var(--good); border-color:var(--good); color:#fff}
+.picopts{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; width:min(480px,100%)}
+.picopt{border:4px solid var(--line); background:#fff; border-radius:24px; padding:8px; line-height:0}
+.picopt svg{width:100%; height:auto}
+.picopt.ok{border-color:var(--good); box-shadow:0 0 0 4px var(--good)}
 
 /* tiles */
 .trio{display:flex; gap:10px}
@@ -251,7 +280,8 @@ dialog p{margin:0 0 14px; color:var(--muted); line-height:1.5}
 
 <script>
 const INK = '#1E2A5A';
-const LCOL = { C: '#FF9AA8', A: '#FFD45C', T: '#8EDBA6', D: '#9ED6F5', O: '#FFB37A', G: '#C9A8FF' };
+const LCOL = { C: '#FF9AA8', A: '#FFD45C', T: '#8EDBA6', D: '#9ED6F5', O: '#FFB37A', G: '#C9A8FF',
+  S: '#7FD8D0', U: '#FFB37A', N: '#FF9AA8', B: '#9ED6F5', E: '#B5E36B', P: '#F7A6E0', M: '#9ED6F5' };
 
 /* ---------- Pictures ---------- */
 const box = (inner, alt) => `<svg viewBox="0 0 120 120" role="img" aria-label="${alt}" xmlns="http://www.w3.org/2000/svg">${inner}</svg>`;
@@ -349,7 +379,72 @@ const PIC = {
     + `<circle cx="61" cy="72" r="19" fill="#FFA94D"/><circle cx="61" cy="94" r="25" fill="#FFA94D"/>`
     + `<circle cx="61" cy="82" r="8" fill="#5A3420"/><rect x="50" y="102" width="22" height="5" rx="2" fill="#5A3420"/>`
     + `<path d="M59 16 V102 M63 16 V102" stroke="#fff" stroke-width=".8"/>`, 'una guitarra (guitar)'),
+  sun: () => box(
+    [0, 45, 90, 135, 180, 225, 270, 315].map(a => `<rect x="56" y="4" width="8" height="20" rx="4" fill="#FFB020" transform="rotate(${a} 60 60)"/>`).join('')
+    + `<circle cx="60" cy="60" r="31" fill="#FFD45C"/>`
+    + `<circle cx="50" cy="55" r="3.6" fill="${INK}"/><circle cx="70" cy="55" r="3.6" fill="${INK}"/>`
+    + `<circle cx="44" cy="66" r="5" fill="#FF8FA3" opacity=".55"/><circle cx="76" cy="66" r="5" fill="#FF8FA3" opacity=".55"/>`
+    + `<path d="M50 68 Q60 78 70 68" stroke="${INK}" stroke-width="3" fill="none" stroke-linecap="round"/>`, 'el sol (sun)'),
+  bat: () => box(
+    `<path d="M58 56 Q40 34 6 42 Q16 52 12 64 Q24 60 28 72 Q38 64 44 76 Q50 66 58 70Z" fill="#7A6AB0"/>`
+    + `<path d="M62 56 Q80 34 114 42 Q104 52 108 64 Q96 60 92 72 Q82 64 76 76 Q70 66 62 70Z" fill="#7A6AB0"/>`
+    + `<path d="M50 46 L47 26 L58 40Z M70 46 L73 26 L62 40Z" fill="#574A7E"/>`
+    + `<ellipse cx="60" cy="62" rx="16" ry="22" fill="#574A7E"/>`
+    + `<circle cx="54" cy="54" r="5" fill="#fff"/><circle cx="66" cy="54" r="5" fill="#fff"/>`
+    + `<circle cx="54" cy="55" r="2.5" fill="${INK}"/><circle cx="66" cy="55" r="2.5" fill="${INK}"/>`
+    + `<path d="M54 64 Q60 69 66 64" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round"/>`
+    + `<path d="M56 65 L57.5 69 L59 65.6Z M64 65 L62.5 69 L61 65.6Z" fill="#fff"/>`, 'un murciélago (bat)'),
+  pen: () => box(
+    `<g transform="rotate(35 60 60)"><rect x="50" y="8" width="20" height="80" rx="5" fill="#4C7BF4"/>`
+    + `<rect x="50" y="8" width="20" height="18" rx="5" fill="#2F55C4"/><rect x="67" y="12" width="5" height="36" rx="2.5" fill="#C9D3EA"/>`
+    + `<path d="M50 88 L70 88 L60 110Z" fill="#F4D3A8"/><path d="M56.5 102 L63.5 102 L60 110Z" fill="${INK}"/></g>`, 'una pluma (pen)'),
+  bug: () => box(
+    `<path d="M50 30 Q42 14 32 12 M70 30 Q78 14 88 12" stroke="${INK}" stroke-width="3" fill="none" stroke-linecap="round"/>`
+    + `<circle cx="32" cy="12" r="4.5" fill="${INK}"/><circle cx="88" cy="12" r="4.5" fill="${INK}"/>`
+    + `<path d="M28 62 L12 56 M26 80 L10 84 M32 96 L18 106 M92 62 L108 56 M94 80 L110 84 M88 96 L102 106" stroke="${INK}" stroke-width="3.5" stroke-linecap="round"/>`
+    + `<circle cx="60" cy="40" r="18" fill="#2B2B3A"/>`
+    + `<ellipse cx="60" cy="76" rx="36" ry="34" fill="#FF5A5A"/>`
+    + `<path d="M60 44 V110" stroke="#2B2B3A" stroke-width="4"/>`
+    + `<circle cx="42" cy="66" r="6" fill="#2B2B3A"/><circle cx="78" cy="66" r="6" fill="#2B2B3A"/><circle cx="44" cy="90" r="5.5" fill="#2B2B3A"/><circle cx="76" cy="90" r="5.5" fill="#2B2B3A"/>`
+    + `<circle cx="53" cy="32" r="4" fill="#fff"/><circle cx="67" cy="32" r="4" fill="#fff"/>`, 'un bicho (bug)'),
+  map: () => box(
+    `<path d="M12 28 L42 18 L78 28 L108 18 V94 L78 104 L42 94 L12 104Z" fill="#FFF1C9" stroke="#C9A36B" stroke-width="3" stroke-linejoin="round"/>`
+    + `<path d="M42 18 V94 M78 28 V104" stroke="#E2C893" stroke-width="3"/>`
+    + `<path d="M24 46 Q34 34 46 44 Q54 52 46 60 Q36 66 28 58Z" fill="#8EDBA6"/><path d="M80 66 Q92 58 100 68 Q98 82 86 80Z" fill="#8EDBA6"/>`
+    + `<path d="M26 86 Q46 76 58 82 T88 54" stroke="#FF5A5A" stroke-width="3.5" fill="none" stroke-dasharray="6 6" stroke-linecap="round"/>`
+    + `<path d="M82 42 L94 54 M94 42 L82 54" stroke="#FF5A5A" stroke-width="5" stroke-linecap="round"/>`, 'un mapa (map)'),
+  happy: () => box(
+    `<circle cx="60" cy="60" r="46" fill="#FFD45C"/>`
+    + `<path d="M40 50 Q46 42 52 50 M68 50 Q74 42 80 50" stroke="${INK}" stroke-width="4.5" fill="none" stroke-linecap="round"/>`
+    + `<path d="M36 66 Q60 98 84 66Z" fill="#7A2E3A"/><path d="M48 82 Q60 90 72 82 Q60 76 48 82Z" fill="#FF8FA3"/>`
+    + `<circle cx="32" cy="64" r="7" fill="#FF8FA3" opacity=".5"/><circle cx="88" cy="64" r="7" fill="#FF8FA3" opacity=".5"/>`, 'una cara feliz (happy)'),
+  heart: () => box(
+    `<path d="M60 102 C20 74 10 52 22 34 C34 18 54 22 60 38 C66 22 86 18 98 34 C110 52 100 74 60 102Z" fill="#FF6F82"/>`
+    + `<ellipse cx="38" cy="44" rx="6" ry="10" fill="#fff" opacity=".45" transform="rotate(-30 38 44)"/>`, 'un corazón (nice)'),
+  boy: () => box(person(60, 64, 1.3, '#4C7BF4', '#2B1B12', '#C68A5E', false), 'un niño (he)'),
+  girl: () => box(person(60, 64, 1.3, '#FF6F82', '#4A2A1A', '#F1C27D', true), 'una niña (she)'),
+  they: () => box(person(26, 70, .82, '#8EDBA6', '#2B1B12', '#8D5524', false) + person(94, 70, .82, '#C9A8FF', '#7A4A2A', '#F1C27D', true)
+    + person(60, 64, .9, '#FFB37A', '#2B1B12', '#C68A5E', true), 'ellos (they)'),
+  we: () => box(`<path d="M60 22 C50 14 40 22 48 30 L60 40 L72 30 C80 22 70 14 60 22Z" fill="#FF6F82"/>`
+    + person(36, 74, .95, '#FFD45C', '#2B1B12', '#C68A5E', true) + person(84, 74, .95, '#9ED6F5', '#4A2A1A', '#F1C27D', false)
+    + `<path d="M50 72 Q60 80 70 72" stroke="#C68A5E" stroke-width="6" fill="none" stroke-linecap="round"/>`, 'nosotros (we)'),
+  sight: () => box(
+    card(32, 38, -12, '#FF9AA8', 'the') + card(88, 52, 10, '#9ED6F5', 'and') + card(56, 92, -4, '#FFD45C', 'is'), 'palabras de vista (sight words)'),
 };
+function person(cx, cy, sc, shirt, hair, skin, girl) {
+  return `<g transform="translate(${cx} ${cy}) scale(${sc})">`
+    + `<rect x="-11" y="20" width="9" height="19" rx="4" fill="#3D5A99"/><rect x="2" y="20" width="9" height="19" rx="4" fill="#3D5A99"/>`
+    + `<rect x="-14" y="-11" width="28" height="35" rx="11" fill="${shirt}"/>`
+    + (girl ? `<circle cx="-17" cy="-23" r="7" fill="${hair}"/><circle cx="17" cy="-23" r="7" fill="${hair}"/>` : '')
+    + `<circle cx="0" cy="-26" r="15" fill="${skin}"/>`
+    + `<path d="M-15 -28 A15 15 0 0 1 15 -28 Q8 -38 0 -35 Q-8 -39 -15 -28Z" fill="${hair}"/>`
+    + `<circle cx="-5" cy="-26" r="2.2" fill="${INK}"/><circle cx="5" cy="-26" r="2.2" fill="${INK}"/>`
+    + `<path d="M-5 -19 Q0 -14 5 -19" stroke="${INK}" stroke-width="2" fill="none" stroke-linecap="round"/></g>`;
+}
+function card(x, y, r, c, t) {
+  return `<g transform="rotate(${r} ${x} ${y})"><rect x="${x - 27}" y="${y - 19}" width="54" height="38" rx="9" fill="${c}" stroke="${INK}" stroke-width="3"/>`
+    + `<text x="${x}" y="${y + 9}" text-anchor="middle" font-family="Baloo 2, Andika, sans-serif" font-weight="800" font-size="24" fill="${INK}">${t}</text></g>`;
+}
 
 /* ---------- Content ---------- */
 const LETTERS = {
@@ -371,6 +466,14 @@ const LETTERS = {
   G: { lower: 'g', sym: '/g/', keys: ['gift', 'guitar'], fallback: 'gift',
        tip: 'La <b>G</b> suena <span class="sym">/g/</span>, como la g de <i>gato</i>.',
        say: 'La G suena como la g de gato.' },
+  // Extra letters used by the CVC words module (sound buttons and blending)
+  S: { lower: 's', sym: '/s/', keys: [], fallback: 'sock', tip: '', say: '' },
+  U: { lower: 'u', sym: '/ʌ/', keys: [], fallback: 'up', tip: '', say: '' },
+  N: { lower: 'n', sym: '/n/', keys: [], fallback: 'nest', tip: '', say: '' },
+  B: { lower: 'b', sym: '/b/', keys: [], fallback: 'ball', tip: '', say: '' },
+  E: { lower: 'e', sym: '/ɛ/', keys: [], fallback: 'egg', tip: '', say: '' },
+  P: { lower: 'p', sym: '/p/', keys: [], fallback: 'pig', tip: '', say: '' },
+  M: { lower: 'm', sym: '/m/', keys: [], fallback: 'moon', tip: '', say: '' },
 };
 
 const MODULES = [
@@ -380,6 +483,46 @@ const MODULES = [
   { word: 'dog', es: 'perro', letters: ['D', 'O', 'G'], color: '#9ED6F5',
     first: [['duck', 'D'], ['drum', 'D'], ['octopus', 'O'], ['olive', 'O'], ['gift', 'G'], ['guitar', 'G']],
     distract: ['b', 'p', 'q', 'B', 'P', 'Q', 'C', 'c', 'a', 'e', 'u', 'J'] },
+  { kind: 'words', title: 'Sight words', esTitle: 'Palabras de vista', art: 'sight', color: '#FFD45C', letters: [],
+    intro: 'Estas palabras salen en casi todos los libros. ¡Vamos a reconocerlas rápido, a primera vista!',
+    words: [
+      { w: 'a', es: 'un, una', ex: 'a cat', pics: ['cat'] },
+      { w: 'I', es: 'yo', ex: 'I see a dog.', pics: ['dog'] },
+      { w: 'at', es: 'a, en', ex: 'Look at the sun.', pics: ['sun'] },
+      { w: 'it', es: 'eso, lo', ex: 'It is a duck.', pics: ['duck'] },
+      { w: 'in', es: 'en, dentro de', ex: 'The ant is in the cup.', pics: ['ant', 'cup'] },
+      { w: 'is', es: 'es, está', ex: 'The car is red.', pics: ['car'] },
+      { w: 'on', es: 'sobre, encima de', ex: 'The bug is on the map.', pics: ['bug', 'map'] },
+      { w: 'to', es: 'a, hacia', ex: 'I go to school.' },
+      { w: 'and', es: 'y', ex: 'a cat and a dog', pics: ['cat', 'dog'] },
+      { w: 'the', es: 'el, la, los, las', ex: 'the apple', pics: ['apple'] },
+      { w: 'he', es: 'él', ex: 'He is a boy.', pics: ['boy'] },
+      { w: 'we', es: 'nosotros', ex: 'We are friends.', pics: ['we'] },
+      { w: 'are', es: 'son, están, eres', ex: 'You are my friend.', pics: ['heart'] },
+      { w: 'you', es: 'tú, usted', ex: 'I see you!' },
+    ] },
+  { kind: 'words', cvc: true, title: 'CVC words', esTitle: 'Palabras para sonar', art: 'sun', color: '#8EDBA6',
+    letters: ['S', 'U', 'N', 'B', 'A', 'T', 'P', 'E', 'G', 'M'],
+    intro: 'Estas palabras tienen tres letras. Di el sonido de cada letra y júntalos para leer la palabra.',
+    words: [
+      { w: 'sun', es: 'sol', pics: ['sun'] },
+      { w: 'bat', es: 'murciélago', pics: ['bat'] },
+      { w: 'pen', es: 'pluma', pics: ['pen'] },
+      { w: 'bug', es: 'bicho', pics: ['bug'] },
+      { w: 'map', es: 'mapa', pics: ['map'] },
+    ] },
+  { kind: 'words', title: 'Pronouns and verbs', esTitle: 'Pronombres y verbos', art: 'they', color: '#C9A8FF', letters: [],
+    intro: 'Con estas palabras decimos quién es y qué hace. ¡Son las piezas para hacer oraciones!',
+    words: [
+      { w: 'am', es: 'soy, estoy', ex: 'I am happy.', pics: ['happy'] },
+      { w: 'be', es: 'ser, estar', ex: 'Be nice.', pics: ['heart'] },
+      { w: 'do', es: 'hacer', ex: 'I can do it!' },
+      { w: 'have', es: 'tener', ex: 'I have a dog.', pics: ['dog'] },
+      { w: 'he', es: 'él', ex: 'He is a boy.', pics: ['boy'] },
+      { w: 'she', es: 'ella', ex: 'She is a girl.', pics: ['girl'] },
+      { w: 'they', es: 'ellos, ellas', ex: 'They are friends.', pics: ['they'] },
+      { w: 'we', es: 'nosotros', ex: 'We are friends.', pics: ['we'] },
+    ] },
 ];
 
 /* ---------- ABC song (traditional, public domain) ---------- */
@@ -634,7 +777,13 @@ const listenBtn = document.getElementById('listen'), dotsEl = document.getElemen
 const autoEl = document.getElementById('auto'), homeBtn = document.getElementById('homeBtn'), titleEl = document.getElementById('title');
 let mi = -1, cur = 0, game = {};
 const mod = () => MODULES[mi];
-const pages = () => ['song', 'intro', ...mod().letters, 'find', 'first', 'blend', 'finale'];
+const pages = () => mod().kind === 'words'
+  ? ['song', 'intro', ...mod().words.map((_, i) => 'w' + i), 'hear', ...(mod().cvc ? ['read'] : []), 'finale']
+  : ['song', 'intro', ...mod().letters, 'find', 'first', 'blend', 'finale'];
+const isWordPage = p => /^w\d+$/.test(p);
+const wordAt = p => mod().words[+p.slice(1)];
+const findWord = t => (mod() && mod().words || []).find(x => x.w === t);
+const SPK = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 9v6h4l5 4V5L7 9H3zm13.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4z"/></svg>';
 const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const tile = (L, text, attrs = '') => `<button class="tile" style="background:${LCOL[L]}" ${attrs}>${text}</button>`;
 
@@ -657,11 +806,14 @@ function renderHome() {
     </div>
     <h1 class="title-tiles" aria-label="Vamos a leer">${title}</h1>
     <p class="pickhint">Toca un dibujo para empezar</p>
-    <div class="mods">${MODULES.map((m, i) => `<button class="mod" data-mod="${i}" style="--mc:${m.color}" aria-label="Módulo ${i + 1}: ${m.word}">
+    <div class="mods">${MODULES.map((m, i) => `<button class="mod" data-mod="${i}" style="--mc:${m.color}" aria-label="Módulo ${i + 1}: ${m.title || m.word}">
       <span class="num">Módulo ${i + 1}</span>
-      <span class="art">${PIC[m.word]()}</span>
-      <span class="word">${m.word}</span>
-      <span class="mini">${m.letters.map(L => `<span style="background:${LCOL[L]}">${L}</span>`).join('')}</span>
+      <span class="art">${PIC[m.art || m.word]()}</span>
+      ${m.kind === 'words'
+        ? `<span class="word sm">${m.title}</span><span class="es-sub">${m.esTitle}</span>
+      <span class="mini">${m.words.slice(0, 3).map(x => `<span style="background:#fff">${x.w}</span>`).join('')}</span>`
+        : `<span class="word">${m.word}</span>
+      <span class="mini">${m.letters.map(L => `<span style="background:${LCOL[L]}">${L}</span>`).join('')}</span>`}
       <span class="go">¡Vamos!</span></button>`).join('')}</div>`;
   markTeach();
 }
@@ -685,7 +837,7 @@ function render(dir = 0) {
   pageEl.classList.remove('is-home');
   const m = mod(), P = pages(), p = P[cur];
   navEl.hidden = false; homeBtn.hidden = false;
-  titleEl.textContent = `Módulo ${mi + 1}: ${m.word}`;
+  titleEl.textContent = `Módulo ${mi + 1}: ${m.title || m.word}`;
   if (!dotsEl.children.length || dotsEl.children.length !== P.length) dotsEl.innerHTML = P.map(() => '<span class="dot"></span>').join('');
   let h = '';
   if (p === 'song') {
@@ -693,6 +845,8 @@ function render(dir = 0) {
       <div class="songbox">${songSVG(m)}</div>
       <p class="lyric" id="lyric"></p>
       <button class="big" id="singBtn" data-act="sing">Cantar</button>`;
+  } else if (m.kind === 'words') {
+    h = wordsPage(m, p);
   } else if (p === 'intro') {
     h = `<div class="pic">${PIC[m.word]()}</div>
       <h1>${m.word}</h1>
@@ -742,12 +896,118 @@ function prompt() {
   if (mi < 0) return;
   const m = mod(), p = pages()[cur], Ls = m.letters.join(', ');
   if (p === 'song') speak([es('¡Cantemos el abecedario en inglés! Mira las letras y canta conmigo.')], () => { if (pages()[cur] === 'song') sing(); });
+  else if (m.kind === 'words') promptWords(m, p);
   else if (p === 'intro') speak([es('Hoy aprendemos las letras'), en(Ls + '.'), es('y leemos la palabra'), en(m.word + '.')]);
   else if (LETTERS[p]) speak([es('Esta es la letra'), en(p), es(LETTERS[p].say)]);
   else if (p === 'find') speak([es('Encuentra todas las'), en(game.targets[game.round] + '.')]);
   else if (p === 'first') { const it = game.items[game.i]; if (it) speak([es('¿Con qué letra empieza'), en(it[0], 0.65), es('?')]); }
   else if (p === 'blend') speak([es('Toca cada letra y di su sonido. Luego toca Juntar.')]);
   else if (p === 'finale') speak([es('¡Muy bien! Leíste'), en(m.word + '.'), es(`${m.word} quiere decir ${m.es}.`)]);
+}
+
+/* ----- Word modules (sight words, CVC words, pronouns & verbs) ----- */
+const hiWord = (ex, w) => ex.replace(new RegExp(`\\b${w}\\b`, 'i'), x => `<mark>${x}</mark>`);
+function wordsPage(m, p) {
+  if (p === 'intro') {
+    game = {};
+    return `<div class="pic">${PIC[m.art]()}</div>
+      <h2>${m.title}</h2>
+      <p class="sub">${m.intro}</p>
+      <div class="chips">${m.words.map(x => `<button data-w="${x.w}">${x.w}</button>`).join('')}</div>
+      <button class="big" data-act="next">Empezar</button>`;
+  }
+  if (isWordPage(p)) {
+    const x = wordAt(p);
+    if (m.cvc) {
+      const Ls = x.w.toUpperCase().split('');
+      return `<div class="pic">${PIC[x.pics[0]]()}</div>
+        <div class="blend"><h2>Toca cada letra</h2>
+        <div class="trio" id="blendRow">${Ls.map(L => tile(L, LETTERS[L].lower, `data-sound="${L}"`)).join('')}</div>
+        <div class="syms">${Ls.map(L => `<span>${LETTERS[L].sym}</span>`).join('')}</div>
+        <button class="big" data-act="blend" data-letters="${Ls.join('')}" data-bw="${x.w}">Juntar</button></div>
+        <p class="mean">En español: <b>${x.es}</b></p>`;
+    }
+    return `<button class="wcard" style="--mc:${m.color}" data-w="${x.w}" aria-label="Escuchar ${x.w}">${x.w}</button>
+      <p class="mean">En español: <b>${x.es}</b></p>
+      ${x.pics ? `<div class="pics">${x.pics.map(k => PIC[k]()).join('')}</div>` : ''}
+      <button class="ex" data-ex="${x.ex}">${SPK}<span>${hiWord(x.ex, x.w)}</span></button>`;
+  }
+  if (p === 'hear') { game = { i: 0, items: shuffle(m.words).slice(0, 6), locked: false }; return hearHTML(); }
+  if (p === 'read') { game = { i: 0, items: shuffle(m.words), locked: false }; return readHTML(); }
+  if (p === 'finale') {
+    const nextMod = mi + 1 < MODULES.length;
+    return `<div class="finale"><div class="burst" id="burst"></div>
+      <div class="pic">${PIC[m.art]()}</div>
+      <h2>¡Aprendiste ${m.words.length} palabras!</h2>
+      <div class="chips">${m.words.map(x => `<button data-w="${x.w}">${x.w}</button>`).join('')}</div>
+      <div class="cheer"><img src="Rach.jpg" alt="La maestra Rachel"><span>¡Muy bien! Estoy muy orgullosa de ti.</span></div>
+      <div class="btns"><button class="pill" data-act="sayAll">Escuchar todas</button>
+      ${nextMod ? `<button class="pill" data-act="nextMod">Siguiente módulo</button>` : `<button class="pill" data-act="home">Módulos</button>`}</div></div>`;
+  }
+  return '';
+}
+function promptWords(m, p) {
+  if (p === 'intro') return speak([es(m.intro)]);
+  if (isWordPage(p)) {
+    const x = wordAt(p);
+    if (m.cvc) return speak([es('Toca cada letra y di su sonido. Luego toca Juntar para leer la palabra.')]);
+    return speak([es('Esta palabra es'), en(x.w, 0.7), es(`Quiere decir: ${x.es}.`), en(x.ex, 0.7)]);
+  }
+  if (p === 'hear') { const it = game.items[game.i]; if (it) speak([es('Escucha y toca la palabra'), en(it.w, 0.65)]); return; }
+  if (p === 'read') { if (game.items[game.i]) speak([es('Lee la palabra y toca el dibujo.')]); return; }
+  if (p === 'finale') return speak([es(`¡Muy bien! Aprendiste ${m.words.length} palabras nuevas.`)]);
+}
+function hearHTML() {
+  const m = mod();
+  if (game.i >= game.items.length)
+    return `<h2>¡Excelente!</h2><div class="pic">${PIC[m.art]()}</div><p class="sub">Encontraste todas las palabras.</p>`;
+  const x = game.items[game.i];
+  game.opts = shuffle([x.w, ...shuffle(m.words.filter(o => o.w !== x.w)).slice(0, 3).map(o => o.w)]);
+  return `<h2>Escucha y toca la palabra</h2>
+    <button class="listen" data-act="hearAgain">${SPK}<span>Otra vez</span></button>
+    <div class="opts">${game.opts.map(o => `<button class="opt" data-hopt="${o}">${o}</button>`).join('')}</div>
+    <p class="score">Palabra ${game.i + 1} de ${game.items.length}</p>`;
+}
+function hearPick(btn) {
+  if (game.locked) return;
+  const x = game.items[game.i];
+  if (btn.dataset.hopt === x.w) {
+    game.locked = true; btn.classList.add('ok');
+    speak([es('¡Sí!'), en(x.w, 0.65)], () => setTimeout(() => {
+      if (pages()[cur] !== 'hear') return;
+      game.i++; game.locked = false; pageEl.innerHTML = hearHTML();
+      if (game.i >= game.items.length) speak([es('¡Excelente! Lo hiciste muy bien.')]); else prompt();
+    }, 600));
+  } else {
+    btn.classList.remove('shake'); void btn.offsetWidth; btn.classList.add('shake');
+    speak([es('Escucha otra vez.'), en(x.w, 0.6)]);
+  }
+}
+function readHTML() {
+  const m = mod();
+  if (game.i >= game.items.length)
+    return `<h2>¡Excelente!</h2><div class="pic">${PIC[m.art]()}</div><p class="sub">¡Leíste todas las palabras solito!</p>`;
+  const x = game.items[game.i];
+  game.opts = shuffle([x, ...shuffle(m.words.filter(o => o.w !== x.w)).slice(0, 2)]);
+  return `<h2>Lee la palabra. ¿Cuál es el dibujo?</h2>
+    <div class="wcard sm" style="--mc:${m.color}">${x.w}</div>
+    <div class="picopts">${game.opts.map(o => `<button class="picopt" data-rpic="${o.w}">${PIC[o.pics[0]]()}</button>`).join('')}</div>
+    <p class="score">Palabra ${game.i + 1} de ${game.items.length}</p>`;
+}
+function readPick(btn) {
+  if (game.locked) return;
+  const x = game.items[game.i];
+  if (btn.dataset.rpic === x.w) {
+    game.locked = true; btn.classList.add('ok');
+    speak([es('¡Sí!'), en(x.w, 0.65)], () => setTimeout(() => {
+      if (pages()[cur] !== 'read') return;
+      game.i++; game.locked = false; pageEl.innerHTML = readHTML();
+      if (game.i >= game.items.length) speak([es('¡Excelente! Leíste todas las palabras.')]); else prompt();
+    }, 600));
+  } else {
+    btn.classList.remove('shake'); void btn.offsetWidth; btn.classList.add('shake');
+    speak([es('Esa no. Di el sonido de cada letra y prueba otra vez.')]);
+  }
 }
 
 /* ----- Find the letter ----- */
@@ -812,16 +1072,17 @@ function pick(btn) {
 /* ----- Blend ----- */
 async function blend(btn) {
   const m = mod(), row = document.getElementById('blendRow'), page = cur;
+  const Ls = btn.dataset.letters ? btn.dataset.letters.split('') : m.letters, word = btn.dataset.bw || m.word;
   btn.disabled = true; row.classList.remove('joined');
   const tiles = [...row.children];
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < Ls.length; i++) {
     tiles.forEach((t, k) => t.classList.toggle('lit', k === i));
-    await playSound(m.letters[i], true);
+    await playSound(Ls[i], true);
     if (cur !== page || !document.body.contains(row)) return;
   }
   tiles.forEach(t => t.classList.remove('lit'));
   row.classList.add('joined');
-  speak([en(m.word, 0.65)], () => { btn.disabled = false; btn.textContent = 'Otra vez'; });
+  speak([en(word, 0.65)], () => { btn.disabled = false; btn.textContent = 'Otra vez'; });
 }
 
 function burst() {
@@ -858,6 +1119,12 @@ pageEl.addEventListener('click', e => {
   if (a === 'nextMod') return openModule(mi + 1);
   if (a === 'sayWord') return speak([en(mod().word, 0.65), es(mod().es)]);
   if (a === 'blend') return blend(b);
+  if (a === 'sayAll') return speak(mod().words.map(x => en(x.w, 0.7)));
+  if (a === 'hearAgain') { const it = game.items && game.items[game.i]; if (it) speak([en(it.w, 0.6)]); return; }
+  if (b.dataset.w) return speak([en(b.dataset.w, 0.65)]);
+  if (b.dataset.ex) return speak([en(b.dataset.ex, 0.7)]);
+  if (b.dataset.hopt) return hearPick(b);
+  if (b.dataset.rpic) return readPick(b);
   if (b.dataset.name) return speak([en(b.dataset.name)]);
   if (b.dataset.sound) { b.classList.add('lit'); return playSound(b.dataset.sound, pages()[cur] === 'blend').then(() => b.classList.remove('lit')); }
   if (b.dataset.word) return speak([en(b.dataset.word, 0.65)]);
