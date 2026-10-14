@@ -1,0 +1,1 @@
+Held for the Auto analyzer (supplied Oct 14 2026): EASI 2025 spending on new cars, new trucks, used cars and used trucks by metro and DMA, and AudienceSCAN ad response for new and used car/truck shoppers.

@@ -131,6 +131,8 @@
   };
   Analyzer.prototype.readHash = function () {
     var h = (location.hash || "").replace(/^#/, "");
+    this.ptLayers = this.cfg.pointLayers || (this.cfg.pointLayer ? [this.cfg.pointLayer] : []);
+    this.state.pts = this.state.pts || {};
     if (!h) return;
     var p = {};
     h.split("&").forEach(function (kv) { var a = kv.split("="); if (a[0]) p[a[0]] = decodeURIComponent(a[1] || ""); });
@@ -146,7 +148,11 @@
     if ((cfg.subcategories || []).some(function (s) { return s.id === p.sub; })) this.state.sub = p.sub;
     if ((cfg.rankBy || []).indexOf(p.rank) >= 0) this.state.rank = p.rank;
     if (p.area) this.state.area = p.area;
-    if (p.pts === "1" && cfg.pointLayer) this.state.points = true;
+    this.state.pts = {};
+    if (p.pts) {
+      var on = p.pts === "1" ? [this.ptLayers[0] && this.ptLayers[0].key] : p.pts.split(",");
+      this.ptLayers.forEach(function (L0) { if (on.indexOf(L0.key) >= 0) this.state.pts[L0.key] = true; }, this);
+    }
   };
   Analyzer.prototype.writeHash = function () {
     var s = this.state, parts = ["level=" + (this.mode === "radius" ? "radius" : s.level)];
@@ -161,7 +167,8 @@
     if (s.rank) parts.push("rank=" + encodeURIComponent(s.rank));
     if (s.level === "zip" && s.parent) parts.push("in=" + s.parent.level + ":" + encodeURIComponent(s.parent.id));
     if (s.area && s.level !== "us") parts.push("area=" + encodeURIComponent(s.area));
-    if (s.points) parts.push("pts=1");
+    var onPts = (this.ptLayers || []).filter(function (L0) { return s.pts && s.pts[L0.key]; }).map(function (L0) { return L0.key; });
+    if (onPts.length) parts.push("pts=" + (this.cfg.pointLayers ? onPts.join(",") : "1"));
     var h = "#" + parts.join("&");
     if (location.hash !== h) history.replaceState(null, "", h);
   };
@@ -567,12 +574,16 @@
     this.mapHead.appendChild(el("b", { text: (m ? m.label : "") + (m && m.perSub && this.subLabel() ? ": " + this.subLabel() : "") }));
     this.mapHead.appendChild(el("span", { text: lv === "zip" ? "ZIPs in " + this.parentName() + ", ranked within this market." :
       "By " + this.levelLabel(lv) + (s.level === "us" ? ". Click a market to rank at that level." : ". Click a market for details.") }));
-    var P0 = this.cfg.pointLayer, pm = P0 && this.measure(P0.key);
-    if (P0 && (!pm || this.relevant(pm))) {      // no toggle for a category without that count
-      var box = el("input", { type: "checkbox", onchange: function () { s.points = this.checked; self.renderPoints(d); self.writeHash(); } });
-      box.checked = !!s.points;
-      this.mapHead.appendChild(el("label", { class: "az-pt-toggle" }, [box, " " + (P0.label || "Show locations")]));
-    }
+    (this.ptLayers || []).forEach(function (P0) {
+      var pm = self.measure(P0.key);
+      if (pm && !self.relevant(pm)) return;      // no toggle for a category without that count
+      var box = el("input", { type: "checkbox", onchange: function () { s.pts[P0.key] = this.checked; self.renderPoints(d); self.writeHash(); } });
+      box.checked = !!s.pts[P0.key];
+      var lab = [box, " "];
+      if (P0.color) lab.push(el("span", { class: "az-pt-dot", style: "background:" + P0.color }));
+      lab.push(" " + (P0.label || "Show locations"));
+      self.mapHead.appendChild(el("label", { class: "az-pt-toggle" }, lab));
+    });
     this.legend.innerHTML = "";
     if (br.length) {
       var lo = values.filter(function (x) { return typeof x === "number"; });
@@ -589,28 +600,35 @@
   };
   // Optional overlay: a circle on each area sized by a count (e.g. competing businesses), switched on and off by the user
   Analyzer.prototype.renderPoints = function (d) {
-    var self = this, P0 = this.cfg.pointLayer, s = this.state;
+    var self = this, s = this.state;
     if (this.pointsLayer) { this.map.removeLayer(this.pointsLayer); this.pointsLayer = null; }
-    if (this.ptLegend) { this.ptLegend.remove(); this.ptLegend = null; }
-    if (!P0 || !s.points || !this.layerById) return;
-    var m = this.measure(P0.key); if (!m || !this.relevant(m)) return;
+    (this.ptLegends || []).forEach(function (x) { x.remove(); }); this.ptLegends = [];
+    if (!this.layerById) return;
+    var layers = (this.ptLayers || []).filter(function (P0) { var m = self.measure(P0.key); return s.pts && s.pts[P0.key] && m && self.relevant(m); });
+    if (!layers.length) return;
+    // One size scale across the layers that are on, so a bank circle and a credit union circle of the same size mean the same count
     var pts = [], max = 0;
-    Object.keys(this.layerById).forEach(function (id) {
-      var row = d.byId[id], v = row ? self.val(row, m) : null;
-      if (typeof v !== "number" || v <= 0) return;
-      var b = self.layerById[id].getBounds(); if (!b.isValid()) return;
-      pts.push([b.getCenter(), v, row.name]); if (v > max) max = v;
+    layers.forEach(function (P0) {
+      var m = self.measure(P0.key);
+      Object.keys(self.layerById).forEach(function (id) {
+        var row = d.byId[id], v = row ? self.val(row, m) : null;
+        if (typeof v !== "number" || v <= 0) return;
+        var b = self.layerById[id].getBounds(); if (!b.isValid()) return;
+        pts.push([b.getCenter(), v, row.name, P0, m]); if (v > max) max = v;
+      });
     });
     var big = this.mapLevel === "zip" ? 16 : 22;
     pts.sort(function (a, b) { return b[1] - a[1]; });   // big circles first, so small ones stay clickable on top
     this.pointsLayer = L.layerGroup(pts.map(function (p) {
-      var r = Math.max(2.5, Math.sqrt(p[1] / max) * big);
-      return L.circleMarker(p[0], { radius: r, color: "#ffffff", weight: 1, fillColor: cssVar("--pt") || "#e07b24", fillOpacity: 0.85 })
-        .bindTooltip('<div class="az-tip"><b>' + p[2] + "</b><br>" + fmt(p[1], m.format) + " " + (P0.unit || "") + "</div>", { direction: "top", opacity: 0.97 });
+      var r = Math.max(2.5, Math.sqrt(p[1] / max) * big), P0 = p[3];
+      return L.circleMarker(p[0], { radius: r, color: "#ffffff", weight: 1, fillColor: P0.color || cssVar("--pt") || "#e07b24", fillOpacity: 0.85 })
+        .bindTooltip('<div class="az-tip"><b>' + p[2] + "</b><br>" + fmt(p[1], p[4].format) + " " + (P0.unit || "") + "</div>", { direction: "top", opacity: 0.97 });
     })).addTo(this.map);
-    this.ptLegend = el("div", { class: "az-legend-row az-pt-legend" }, [el("span", { class: "az-pt-dot" }),
-      el("span", { text: (P0.legend || "Circle size = count") + (this.mapLevel === "zip" && P0.zipNote ? " " + P0.zipNote : "") })]);
-    this.legend.appendChild(this.ptLegend);
+    layers.forEach(function (P0) {
+      var row = el("div", { class: "az-legend-row az-pt-legend" }, [el("span", { class: "az-pt-dot", style: P0.color ? "background:" + P0.color : null }),
+        el("span", { text: (P0.legend || "Circle size = count") + (self.mapLevel === "zip" && P0.zipNote ? " " + P0.zipNote : "") })]);
+      self.legend.appendChild(row); self.ptLegends.push(row);
+    });
   };
   Analyzer.prototype.highlight = function () {
     var self = this;

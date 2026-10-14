@@ -36,6 +36,9 @@ MIN_POP = 500
 # Market Potential Score. Each part is a percentile (0-100). Category Spending (EASI) is added once Adtaxi's files are in
 # data-build/sources; until then scores blend the other parts, re-weighted to 100%.
 WEIGHTS = {"demand": 0.40, "category": 0.25, "spend": 0.15, "comp": 0.20}
+# EASI 2025 measures used as Category Spending, by line (Adtaxi's files in data-build/sources/easi_finance_spend_*.csv)
+EASI = {"wealth": ("ret_value", "Value of retirement plans"), "retire": ("ret_change", "Change in value of retirement plans")}
+PALM_SPRINGS, RIVERSIDE_METRO = "804", "40140"
 NAICS = {"tax": ["541213"], "advice": ["523920", "523930"], "mortgage": ["522292", "522310"]}
 SUBCATS = [
     {"id": "tax", "label": "Tax preparation", "naics": "tax", "spend": False,
@@ -132,6 +135,16 @@ def load_inputs(rep):
     has_acs = z.own_units.notna()
     for c in ("purch", "refi", "equity"): z.loc[has_acs, c] = z.loc[has_acs, c].fillna(0)
     z["refieq"] = z.refi + z.equity
+    # Bank and credit union branches (build_branches.py); shown on the map, not scored. Optional: skipped if not built yet.
+    bp = os.path.join(MASTER, "zip_branches.csv.gz")
+    if os.path.exists(bp):
+        br = pd.read_csv(bp, dtype={"zip": str})
+        z = z.merge(br[["zip", "bank_br", "bank_dep", "cu_br"]], on="zip", how="left")
+        for c in ("bank_br", "bank_dep", "cu_br"): z[c] = z[c].fillna(0)
+        bf = json.load(open(os.path.join(MASTER, "branches_facts.json")))
+        rep.append(("Bank and credit union branches", "INFO", f"FDIC {bf['fdicYear']}: {bf['bankBranches']:,} bank branches; NCUA {bf['ncuaQuarter']}: {bf['cuBranches']:,} credit union branches"))
+    else:
+        rep.append(("Bank and credit union branches", "INFO", "not built yet (run the \"Build bank and credit union branches\" action)"))
     irs_facts = open(os.path.join(MASTER, "master_report.md")).read()
     ty = re.search(r"IRS income tax statistics \| built \| tax year (\d{4})", irs_facts)
     return z, aud, hf, (ty.group(1) if ty else "")
@@ -142,6 +155,7 @@ def main():
     rep = [("Formula tests", "PASS", self_test())]
     built = datetime.date.today().isoformat()
     z, aud, hf, irs_year = load_inputs(rep)
+    BR = [c for c in ("bank_br", "bank_dep", "cu_br") if c in z.columns]
     rep.append(("HMDA mortgage data", "INFO", f"{hf['year']}: {hf['purchase']:,} purchase, {hf['refinance']:,} refinance and {hf['equity']:,} home equity loans on owner-occupied homes; "
                 f"{hf['no_tract_share']:.1%} had no census tract and aren't placed"))
     rep.append(("IRS tax year", "INFO", irs_year or "unknown"))
@@ -173,6 +187,7 @@ def main():
     def agg(g):
         r = {c: g[c].sum(min_count=1) for c in SUMS if c in g}
         r["adults"] = r.get("adults18")
+        for c in BR: r[c] = g[c].sum()
         land = g.land.where(g.land > 0).sum()
         r["density"] = g.households.where(g.land > 0, 0).sum() / land if land > 0 else np.nan
         irs_ok = g.returns.notna()
@@ -193,7 +208,7 @@ def main():
     def frame(groups):
         return pd.DataFrame.from_dict({k: agg(g) for k, g in groups}, orient="index")
 
-    def score(df, parts=tuple(p for p in WEIGHTS if p != "category"), mask=None):
+    def score(df, parts=tuple(WEIGHTS), mask=None):
         if mask is None: mask = pd.Series(True, index=df.index)
         P = lambda s: pct(s.where(mask))
         dem = {k: P(df[k]) for k in DEMAND_LABELS if k in df.columns}
@@ -205,8 +220,10 @@ def main():
             df[f"growth@{i}"] = ((est - prev) / prev).where(prev >= 3)
             ins = [dem[k] for k in s["demand"] if k in dem and df[k].notna().any()]
             df[f"demand@{i}"] = combine(ins, [1] * len(ins)) if ins else np.nan
-            df[f"category@{i}"] = np.nan
-            use = [c for c in parts if c != "category" and not (c == "spend" and not s.get("spend", True))]
+            e = EASI.get(i, (None,))[0]
+            has_cat = "category" in parts and e is not None and f"easi_{e}_hh" in df.columns
+            df[f"category@{i}"] = combine([P(df[f"easi_{e}_hh"]), P(df[f"easi_{e}_total"])], [0.5, 0.5]) if has_cat else np.nan
+            use = [c for c in parts if not (c == "category" and not has_cat) and not (c == "spend" and not s.get("spend", True))]
             df[f"spend@{i}"] = spend if "spend" in use else np.nan
             df[f"comp@{i}"] = P(-df[f"per10k@{i}"]) if "comp" in use else np.nan
             cols = [df[f"{c}@{i}"] for c in use]
@@ -218,10 +235,39 @@ def main():
             df[f"under@{i}"] = np.where(under & known, "Yes", np.where(known, "No", None))
         return df
 
+    # EASI: per-household spending by DMA and metro; totals = per household x this site's households
+    src = os.path.join(HERE, "sources")
+    sd = pd.read_csv(os.path.join(src, "easi_finance_spend_dma.csv"))
+    xw = pd.read_csv(os.path.join(src, "easi_dma_crosswalk.csv"), dtype={"dma_code": str})
+    sd = sd.merge(xw[["easi_market", "dma_code"]], left_on="market", right_on="easi_market", how="left")
+    if sd.dma_code.isna().any(): sys.exit("easi_dma_crosswalk.csv is missing EASI DMAs: " + ", ".join(sd[sd.dma_code.isna()].market))
+    sm = pd.read_csv(os.path.join(src, "easi_finance_spend_metro.csv"))
+    em = pd.read_csv(os.path.join(src, "easi_metro_2025.csv"), dtype={"cbsa_code": str})
+    key = lambda t: re.sub(r"[^a-z0-9]", "", str(t).lower())
+    sm["cbsa_code"] = sm.market.map(key).map(dict(zip(em.metro.map(key), em.cbsa_code)))
+    us_hh = {}
+    for e, lab in EASI.values():
+        us_hh[e] = sd[f"{e}_total"].sum() / sd.households.sum()
+        rep.append((f"EASI U.S. {lab.lower()} per household", "INFO", f"${us_hh[e]:,.2f}"))
+
+    def add_easi(df, table, idcol, label):
+        t = table.dropna(subset=[idcol]).set_index(idcol)
+        for e, lab in EASI.values():
+            per = t[f"{e}_per_hh"].copy()
+            if idcol == "dma_code" and PALM_SPRINGS not in per.index:
+                pm = sm.dropna(subset=["cbsa_code"]).set_index("cbsa_code")[f"{e}_per_hh"]
+                if RIVERSIDE_METRO in pm.index: per.loc[PALM_SPRINGS] = pm.loc[RIVERSIDE_METRO]
+            df[f"easi_{e}_hh"] = df.index.map(per).astype(float)
+            df[f"easi_{e}_total"] = df[f"easi_{e}_hh"] * df.households
+            df[f"easi_{e}_idx"] = (df[f"easi_{e}_hh"] / us_hh[e] * 100).round(0)
+        miss = [str(i) for i in df.index if df.at[i, f"easi_{e}_hh"] != df.at[i, f"easi_{e}_hh"]]
+        rep.append((f"EASI finance matched to {label}", "PASS" if len(miss) <= (2 if label == "metros" else 0) else "FAIL",
+                    f"{len(df) - len(miss)} of {len(df)}" + (f"; missing {miss[:8]}" if miss else "")))
+
     zd = z[z.dma_code != "0"]
-    dma = score(frame(zd.groupby("dma_code")))
+    dma = frame(zd.groupby("dma_code")); add_easi(dma, sd, "dma_code", "DMAs"); dma = score(dma)
     zm = z[z.cbsa_code.isin(metros)]
-    met = score(frame(zm.groupby("cbsa_code")))
+    met = frame(zm.groupby("cbsa_code")); add_easi(met, sm, "cbsa_code", "metros"); met = score(met)
     cty = county_frame(z, frame); cty = score(cty, parts=COUNTY_PARTS, mask=county_mask(cty))
     validate_scores(rep, z, co, [(s["id"], s["label"], NAICS[s["naics"]]) for s in SUBCATS],
                     [("DMAs", dma, "dma_code"), ("metros", met, "cbsa_code")], "category businesses")
@@ -231,6 +277,11 @@ def main():
         us[f"est@{i}"], us[f"prev@{i}"] = co[co.naics.isin(codes)].est.sum(), co0[co0.naics.isin(codes)].est.sum()
         us[f"per10k@{i}"] = us[f"est@{i}"] / us.population * 1e4
         us[f"growth@{i}"] = (us[f"est@{i}"] - us[f"prev@{i}"]) / us[f"prev@{i}"]
+    for e, lab in EASI.values():
+        us[f"easi_{e}_hh"], us[f"easi_{e}_idx"] = us_hh[e], 100.0
+        us[f"easi_{e}_total"] = us_hh[e] * us.households
+        r_ = dma[f"easi_{e}_total"].sum() / sd[f"{e}_total"].sum()
+        rep.append((f"EASI {lab.lower()}, DMAs vs. EASI's own total", "PASS" if 0.95 <= r_ <= 1.05 else "FAIL", f"{r_:.1%}"))
 
     # ---------------- Checks ----------------
     U = lambda k: float(us[k].iloc[0])
@@ -261,10 +312,10 @@ def main():
     if failed: sys.exit("A check failed; the Financial data was not updated. See financial/data/financial_report.md.")
 
     # ---------------- Write ----------------
-    keep = COUNTS + RATES + ["density"]
+    keep = COUNTS + BR + RATES + ["density"] + [f"easi_{e}_{k}" for e, _ in EASI.values() for k in ("hh", "total", "idx")]
     per_sub = ["score", "demand", "category", "spend", "comp", "under", "est", "per10k", "growth"]
     SCORE_KEYS = ("score", "demand", "category", "spend", "comp")
-    INTS = set(COUNTS) | {"est"}
+    INTS = set(COUNTS) | set(BR) | {"est"} | {f"easi_{e}_total" for e, _ in EASI.values()}
 
     def clean(v):
         if v is None: return None
@@ -313,6 +364,7 @@ def main():
     zf = pd.DataFrame(index=zz.index)
     for c in SUMS: zf[c] = zz[c]
     zf["adults"] = zz.adults18
+    for c in BR: zf[c] = zz[c]
     zf["density"] = (zz.households / zz.land).where(zz.land > 0)
     for k, (n, d) in RATE_PARTS.items(): zf[k] = (zz[n] / zz[d]).where(zz[d] > 0)
     for k, (n, d, mult) in PER_K.items(): zf[k] = (zz[n] / zz[d] * mult).where(zz[d] > 0)

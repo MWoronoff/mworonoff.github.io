@@ -22,7 +22,7 @@ window.ADTAXI_RADIUS = {
     { id: "tax", label: "Tax preparation", note: "Adults in households that pay a preparer to file their taxes.", sel: { taxprep: true } },
     { id: "wealth", label: "Wealth management", note: "Adults 45 and older in households with dividend income.", sel: { age: ["45_54", "55p"], invest: true } },
     { id: "retire", label: "Retirement planning", note: "Adults 55 and older with household income of $75K or more.", sel: { age: ["55p"], income: ["75_100", "100_150", "150_200", "200p"] } },
-    { id: "purchase", label: "Home purchase mortgage", note: "Renters 25–44 with household income of $75K or more: likely first-time buyers.", sel: { age: ["25_34", "35_44"], rinc: ["75_100", "100_150", "150p"] } },
+    { id: "purchase", label: "Home purchase mortgage", note: "Adults 25–54 with household income of $75K or more, owners or renters: the buyers most likely to need a purchase mortgage.", sel: { age: ["25_34", "35_44", "45_54"], income: ["75_100", "100_150", "150_200", "200p"] } },
     { id: "refi", label: "Refinance and home equity", note: "Homeowners 35 and older with a mortgage or home equity loan.", sel: { age: ["35_44", "45_54", "55p"], mortg: ["with"] } }
   ],
   methodology: [

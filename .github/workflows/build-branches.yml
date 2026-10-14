@@ -1,0 +1,39 @@
+name: Build bank and credit union branches
+
+# Downloads FDIC Summary of Deposits bank branches and NCUA credit union branches, counts them by ZIP and saves
+# data-build/master/zip_branches.csv.gz for the Financial analyzer's map toggles. No API keys are needed.
+# Runs quarterly (after NCUA posts each quarter's call report data); run "Build geography boundaries" afterward.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 9 15 3,6,9,12 *"
+
+permissions:
+  contents: write
+
+jobs:
+  branches:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install Python packages
+        run: pip install pandas
+      - name: Build branch data
+        run: |
+          set -o pipefail
+          python3 data-build/build_branches.py 2>&1 | tee branches.log || {
+            msg=$(tail -n 25 branches.log | sed ':a;N;$!ba;s/%/%25/g;s/\n/%0A/g')
+            echo "::error title=Branch build::$msg"; exit 1; }
+          echo "::notice title=Branch build::$(tail -n 8 branches.log | sed ':a;N;$!ba;s/%/%25/g;s/\n/%0A/g')"
+      - name: Commit results
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add data-build/master/zip_branches.csv.gz data-build/master/branches_facts.json
+          git diff --cached --quiet || git commit -m "Build bank and credit union branches by ZIP"
+          git pull --rebase -q
+          git push

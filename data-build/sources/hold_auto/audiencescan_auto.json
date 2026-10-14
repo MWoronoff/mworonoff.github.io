@@ -1,0 +1,43 @@
+{
+ "source": "2026 AudienceSCAN study, Advertising Response Past 30 Days (target group % only; supplied Oct 14 2026 as screenshots)",
+ "groups": {
+  "new_car_truck_shoppers": {
+   "Streaming TV advertising (such as Hulu, Pluto TV or YouTube TV)": 53.1,
+   "Ad on a social network": 51.6,
+   "Mobile phone app or text message": 50.9,
+   "Ad on search results pages (like on Google, Yahoo or Bing)": 50.2,
+   "Television (traditional, including cable or satellite subscription)": 49.3,
+   "Ad that plays before or during the video you want to watch": 44.9,
+   "Online display ads (banners and pop-up ads)": 44.5,
+   "Text link ad on a website": 41.2,
+   "Emailed ad or newsletter": 40.8,
+   "Ads/Coupons in your mailbox": 39.7,
+   "Ad on a podcast": 38.2,
+   "Radio (over-the-air, online, mobile or tablet)": 38.0,
+   "Advertising circulars in your mailbox or inserted in the newspaper": 37.6,
+   "Newspaper (print, online, mobile or tablet)": 37.0,
+   "Outdoor ad/sign/billboard/transit": 36.7,
+   "Ads at movie theater": 35.7,
+   "Magazine (print, online, mobile or on tablet)": 34.4
+  },
+  "used_car_truck_shoppers": {
+   "Streaming TV advertising (such as Hulu, Pluto TV or YouTube TV)": 45.6,
+   "Mobile phone app or text message": 45.4,
+   "Ad on a social network": 44.2,
+   "Ad on search results pages (like on Google, Yahoo or Bing)": 41.9,
+   "Television (traditional, including cable or satellite subscription)": 40.0,
+   "Ad that plays before or during the video you want to watch": 39.6,
+   "Online display ads (banners and pop-up ads)": 36.0,
+   "Ads/Coupons in your mailbox": 34.9,
+   "Emailed ad or newsletter": 33.5,
+   "Text link ad on a website": 32.5,
+   "Radio (over-the-air, online, mobile or tablet)": 31.6,
+   "Advertising circulars in your mailbox or inserted in the newspaper": 31.3,
+   "Outdoor ad/sign/billboard/transit": 29.1,
+   "Newspaper (print, online, mobile or tablet)": 26.6,
+   "Ad on a podcast": 26.3,
+   "Ads at movie theater": 25.4,
+   "Magazine (print, online, mobile or on tablet)": 24.4
+  }
+ }
+}
