@@ -10,15 +10,41 @@
   var NF1 = new Intl.NumberFormat("en-US", { maximumFractionDigits: 1, minimumFractionDigits: 1 });
   var BANDS = [0, 2, 5, 10, 15, 20, 30, 50, 75, 100, 150, 250, 100000];
   var SHRINK = 2;   // customers' worth of "average" added to every ZIP before the index is computed
+  var pc = function (f, keys) { if (!f) return null; var t = 0; for (var i = 0; i < keys.length; i++) { if (f[keys[i]] == null) return null; t += f[keys[i]]; } return t / 100; };
   var BASES = {
-    hh: { label: "Households", get: function (z, f) { return z.hh; } },
-    pop: { label: "Population", get: function (z, f) { return z.pop; } },
-    own: { label: "Homeowner households", get: function (z, f) { return f && f.own != null ? z.hh * f.own / 100 : null; } },
-    inc100: { label: "Households with income $100K+", get: function (z, f) {
-      return f && f.inc_100_150 != null ? z.hh * (f.inc_100_150 + f.inc_150_200 + f.inc_200p) / 100 : null; } },
-    kids: { label: "Households with children", get: function (z, f) { return f && f.hh_kids != null ? z.hh * f.hh_kids / 100 : null; } },
-    age65: { label: "Adults 65+", get: function (z, f) { return f && f.age_65p != null ? z.pop * f.age_65p / 100 : null; } }
+    hh: { label: "Households", get: function (z) { return z.hh; } },
+    pop: { label: "Population", get: function (z) { return z.pop; } },
+    adults: { label: "Adults 18+", get: function (z, f) { var u = pc(f, ["age_u18"]); return u == null ? null : z.pop * (1 - u); } },
+    a18_34: { label: "Adults 18–34", get: function (z, f) { var v = pc(f, ["age_18_34"]); return v == null ? null : z.pop * v; } },
+    a35_64: { label: "Adults 35–64", get: function (z, f) { var v = pc(f, ["age_35_54", "age_55_64"]); return v == null ? null : z.pop * v; } },
+    a55p: { label: "Adults 55+", get: function (z, f) { var v = pc(f, ["age_55_64", "age_65p"]); return v == null ? null : z.pop * v; } },
+    age65: { label: "Adults 65+", get: function (z, f) { var v = pc(f, ["age_65p"]); return v == null ? null : z.pop * v; } },
+    kids5: { label: "Children under 5", get: function (z, f) { var v = pc(f, ["kids_u5"]); return v == null ? null : z.pop * v; } },
+    kids: { label: "Households with children", get: function (z, f) { var v = pc(f, ["hh_kids"]); return v == null ? null : z.hh * v; } },
+    married: { label: "Married-couple households", get: function (z, f) { var v = pc(f, ["hh_married"]); return v == null ? null : z.hh * v; } },
+    own: { label: "Homeowner households", get: function (z, f) { var v = pc(f, ["own"]); return v == null ? null : z.hh * v; } },
+    rent: { label: "Renter households", get: function (z, f) { var v = pc(f, ["own"]); return v == null ? null : z.hh * (1 - v); } },
+    inclt50: { label: "Households with income under $50K", get: function (z, f) { var v = pc(f, ["inc_lt35", "inc_35_50"]); return v == null ? null : z.hh * v; } },
+    inc100: { label: "Households with income $100K+", get: function (z, f) { var v = pc(f, ["inc_100_150", "inc_150_200", "inc_200p"]); return v == null ? null : z.hh * v; } },
+    bach: { label: "Adults with a bachelor's degree (approx.)", get: function (z, f) { var u = pc(f, ["age_u18"]), b = pc(f, ["ed_bachelors"]); return u == null || b == null ? null : z.pop * (1 - u) * b; } },
+    somecol: { label: "Adults with some college, no degree (approx.)", get: function (z, f) { var u = pc(f, ["age_u18"]), b = pc(f, ["ed_some_college"]); return u == null || b == null ? null : z.pop * (1 - u) * b; } }
   };
+  // Each category analyzer's core audience, used as the default potential when the tool is opened from that analyzer
+  var CATEGORY_BASE = {
+    healthcare: { "": "pop", urgent: "pop", pharmacy: "pop", dental: "pop", hearing: "age65", eye: "pop", chiro: "a35_64", behavioral: "adults", medspa: "a35_64", senior: "age65" },
+    legal: { "": "adults", pi: "adults", family: "married", estate: "a55p", bankruptcy: "inclt50", employment: "adults" },
+    "higher-ed": { "": "a18_34", fouryear: "a18_34", community: "a18_34", trade: "a18_34", graduate: "bach", adult: "somecol" },
+    "home-services": { "": "own" },
+    furniture: { "": "hh", outdoor: "own", baby: "kids5" },
+    apartments: { "": "rent", senior: "a55p" }
+  };
+  function categoryBase(p) {
+    var cat = (p.category || "").toLowerCase(), map = CATEGORY_BASE[cat] || CATEGORY_BASE[cat.replace(/-analyzer$/, "")];
+    if (!map && /apart/.test(cat)) map = CATEGORY_BASE.apartments;
+    if (!map && /furn/.test(cat)) map = CATEGORY_BASE.furniture;
+    if (!map) return null;
+    return map[p.sub || ""] || map[""];
+  }
   var STATUS = {
     over: { label: "Over-performing", color: "#0b5d53" },
     inline: { label: "In line", color: "#c9d3dc" },
@@ -227,7 +253,7 @@
           el("option", { value: "dma", text: "Whole DMA", selected: !!S.params.dma })
         ].flat())]),
         el("label", { class: "az-field" }, ["Measure potential by", el("select", { id: "crm-base" },
-          Object.keys(BASES).map(function (k) { return el("option", { value: k, text: BASES[k].label }); }))]),
+          Object.keys(BASES).map(function (k) { return el("option", { value: k, text: BASES[k].label, selected: k === (categoryBase(S.params) || "hh") }); }))]),
         el("label", { class: "az-field" }, ["Search for similar ZIPs in", el("select", { id: "crm-search" }, [
           el("option", { value: "1.5", text: "Trade area plus 50%", selected: true }),
           el("option", { value: "2", text: "Twice the trade area" }),
@@ -235,7 +261,9 @@
           el("option", { value: "state", text: "The whole state(s)" })])]),
         el("div", { class: "az-actions" }, [el("button", { class: "az-btn primary", type: "button", text: "Analyze customers", onclick: run })])
       ]),
-      el("p", { class: "crm-note", id: "crm-locs-hint" })
+      el("p", { class: "crm-note", id: "crm-locs-hint" }),
+      categoryBase(S.params) ? el("p", { class: "crm-note", text: "Potential is set to " + BASES[categoryBase(S.params)].label.toLowerCase() +
+        ", the core audience for " + (S.params.subl || S.params.from || "this category") + ", so expected customers reflect that audience rather than all households. You can change it." }) : null
     ]));
     previewMatch();
     zs.onchange = previewMatch;
@@ -709,7 +737,7 @@
         el("h3", { text: "Your data stays with you" }),
         el("p", { text: "The customer file is read by your browser. Only ZIP codes and amounts are kept, and only in this page's memory; nothing is sent to a server. Closing the page clears it." }),
         el("h3", { text: "Expected customers" }),
-        el("p", { text: "Each ZIP's potential is its households (or the base you choose, such as homeowners or households earning $100K+). When you give your location ZIPs, the tool fits a smooth curve to your own data showing how your customer rate falls with distance from your nearest location (or finds that distance doesn't matter). A ZIP's expected customers are its potential times the rate on that curve for its distance. This keeps far-away ZIPs from being marked weak just because they're far away." }),
+        el("p", { text: "Each ZIP's potential is its households, or the audience you choose, such as homeowners, renters, adults 65+ or households earning $100K+. When you open the tool from a category analyzer, potential starts at that category's core audience (adults 65+ for hearing care, homeowners for home services, renters for apartments and so on). When you give your location ZIPs, the tool fits a smooth curve to your own data showing how your customer rate falls with distance from your nearest location (or finds that distance doesn't matter). A ZIP's expected customers are its potential times the rate on that curve for its distance. This keeps far-away ZIPs from being marked weak just because they're far away." }),
         el("h3", { text: "Performance index" }),
         el("p", { text: "Index = customers ÷ expected × 100, after adding two customers' worth of 'average' to both, so ZIPs with only a handful of customers aren't over-read. Over-performing means an index of 120+ and a customer count that would happen by chance less than 2.5% of the time if the ZIP were average (an exact Poisson test); under-performing means an index of 80 or below on the same test. ZIPs expecting fewer than 1.5 customers with fewer than 3 actual are marked too few to judge." }),
         el("h3", { text: "What your strongest ZIPs have in common" }),
