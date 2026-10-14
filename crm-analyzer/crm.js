@@ -88,26 +88,12 @@
     return Math.min(1, sum);
   }
   var ALPHA = 0.025;   // one-sided, about 97.5% confidence
-  // Pool-adjacent-violators: make customer rates fall (or stay level) with distance, weighted by potential
-  function decreasing(vals, wts) {
-    var blocks = [];
-    vals.forEach(function (v, i) {
-      blocks.push({ v: v, w: wts[i], n: 1 });
-      while (blocks.length > 1 && blocks[blocks.length - 2].v < blocks[blocks.length - 1].v) {
-        var b = blocks.pop(), a = blocks.pop(), w = a.w + b.w;
-        blocks.push({ v: w > 0 ? (a.v * a.w + b.v * b.w) / w : 0, w: w, n: a.n + b.n });
-      }
-    });
-    var out = [];
-    blocks.forEach(function (b) { for (var i = 0; i < b.n; i++) out.push(b.v); });
-    return out;
-  }
-
   /* ---------- app ---------- */
   var S = { zips: {}, list: [], fields: [], fmeta: {}, stFiles: {}, file: null, cust: null, res: null, params: {} };
 
   function boot() {
     new URLSearchParams(location.search).forEach(function (v, k) { S.params[k] = v; });
+    if (S.params.debug) window.__crm = S;   // test hook: lets automated tests read the results
     Promise.all([fetch("data/zips.json").then(function (r) { return r.json(); }), fetch("data/fields.json").then(function (r) { return r.json(); })])
       .then(function (a) {
         var c = a[0].cols;
@@ -368,19 +354,34 @@
       var c = cust[z.zip] || { n: 0, v: 0 };
       return { z: z, f: z.f, A: c.n, V: c.v, B: base.get(z, z.f) || 0, d: z.d };
     }).filter(function (it) { return it.B > 0; });
-    var inMarket = items.reduce(function (s, it) { return s + it.A; }, 0);
-    // expected customers: overall rate, by distance band when locations are known (rates forced to fall with distance)
+    var inMarket = items.reduce(function (t, it) { return t + it.A; }, 0);
+    // Expected customers: potential x a customer rate that falls smoothly with distance from the nearest location,
+    // rate(d) = a * exp(-d / s). The scale s is chosen by maximum (Poisson) likelihood over all trade-area ZIPs, so a
+    // handful of ZIPs near the store can't distort it; "no distance effect" is one of the candidates.
     var useDist = o.locs.length > 0 && o.radius;
-    var nb = BANDS.length - 1, A = new Array(nb).fill(0), B = new Array(nb).fill(0);
-    var band = function (d) { for (var i = 0; i < nb; i++) if (d < BANDS[i + 1]) return i; return nb - 1; };
-    items.forEach(function (it) { it.b = useDist ? band(it.d) : 0; A[it.b] += it.A; B[it.b] += it.B; });
-    var used = [], rates = [], wts = [];
-    for (var i = 0; i < nb; i++) if (B[i] > 0) { used.push(i); rates.push(A[i] / B[i]); wts.push(B[i]); }
-    var fitted = decreasing(rates, wts), rateOf = {};
-    used.forEach(function (b, k) { rateOf[b] = fitted[k]; });
-    var bandRows = used.map(function (b, k) { return { from: BANDS[b], to: BANDS[b + 1], A: A[b], B: B[b], raw: rates[k], fit: fitted[k] }; });
+    var totA = items.reduce(function (t, it) { return t + it.A; }, 0);
+    var fit = function (sc) {
+      var w = function (it) { return sc ? Math.exp(-it.d / sc) : 1; };
+      var den = items.reduce(function (t, it) { return t + it.B * w(it); }, 0), a = den > 0 ? totA / den : 0, ll = 0;
+      items.forEach(function (it) { var lam = a * it.B * w(it); if (lam > 0) ll += it.A * Math.log(lam) - lam; });
+      return { s: sc, a: a, ll: ll };
+    };
+    var best = fit(0);
+    if (useDist) for (var sc = 1; sc <= 400; sc *= 1.15) { var f = fit(sc); if (f.ll > best.ll + 1e-9) best = f; }
+    var rateAt = function (d) { return best.a * (best.s ? Math.exp(-d / best.s) : 1); };
+    items.forEach(function (it) { it.E = it.B * rateAt(useDist ? it.d : 0); });
+    // for the chart: observed rate by distance band next to the fitted curve
+    var bandRows = [];
+    if (useDist) {
+      var edges = BANDS.filter(function (b) { return b < o.radius; }).concat([o.radius]);
+      for (var i = 0; i < edges.length - 1; i++) {
+        var lo = edges[i], hi = edges[i + 1], inB = items.filter(function (it) { return it.d >= lo && it.d < hi; });
+        var bA = inB.reduce(function (t, it) { return t + it.A; }, 0), bB = inB.reduce(function (t, it) { return t + it.B; }, 0);
+        if (bB > 0) bandRows.push({ from: lo, to: hi, A: bA, B: bB, raw: bA / bB, fit: rateAt((lo + hi) / 2) });
+      }
+    }
+    var halfMiles = best.s ? best.s * Math.LN2 : null;
     items.forEach(function (it) {
-      it.E = it.B * rateOf[it.b];
       it.idx = (it.A + SHRINK) / (it.E + SHRINK) * 100;
       it.pHigh = 1 - poisCdf(it.A - 1, it.E);   // chance of this many or more if the ZIP were average
       it.pLow = poisCdf(it.A, it.E);            // chance of this few or fewer
@@ -394,6 +395,11 @@
       strong = ranked.slice(0, Math.max(5, Math.ceil(ranked.length * 0.2)));
       strongLabel = "top-performing fifth of ZIPs";
     }
+    // How many over-performing ZIPs would chance alone produce? (each judged ZIP has at most a 2.5% chance)
+    var judged = items.filter(function (it) { return it.status !== "few"; }).length;
+    var nOver = items.filter(function (it) { return it.status === "over"; }).length;
+    var chanceOver = judged * ALPHA;
+    var weakSignal = nOver <= Math.max(3, 2 * chanceOver);
     var prof = S.fields.map(function (f) {
       var mm = wmean(items, f.key, "B"), ms = wmean(strong, f.key, "B"), sd = mm == null ? null : wsd(items, f.key, "B", mm);
       var cw = wmean(items, f.key, "A");
@@ -410,7 +416,7 @@
       return sxx && syy ? sxy / Math.sqrt(sxx * syy) : 0;
     };
     var simKeys = [];
-    prof.filter(function (p) { return p.f.sim && Math.abs(p.std) >= 0.2; })
+    prof.filter(function (p) { return p.f.sim && Math.abs(p.std) >= 0.3; })
       .sort(function (a, b) { return Math.abs(b.std) - Math.abs(a.std); })
       .forEach(function (p) {
         if (simKeys.length >= 10) return;
@@ -425,7 +431,9 @@
       simKeys.forEach(function (p) {
         var w = Math.abs(p.std); tw += w;
         var v = z.f[p.f.key]; if (v == null) return;
-        var dz = (v - p.strong) / p.sd; sq += w * dz * dz; sw += w;
+        var dz = (v - p.strong) / p.sd;
+        if ((p.std > 0 && dz > 0) || (p.std < 0 && dz < 0)) dz = 0;   // even further in the strong ZIPs' direction: no penalty
+        sq += w * dz * dz; sw += w;
       });
       if (!sw || sw < 0.7 * tw) return null;
       var it = byZip[z.zip], c = cust[z.zip] || { n: 0 };
@@ -434,7 +442,8 @@
         inMarket: !!it, opp: sim >= 60 && z.hh >= 200 && (!it ? c.n === 0 : (it.status === "under" || (it.status !== "over" && it.idx < 90))) };
     }).filter(Boolean).sort(function (a, b) { return b.sim - a.sim; });
     S.res = { o: o, items: items, strong: strong, strongLabel: strongLabel, prof: prof, simKeys: simKeys, cand: cand,
-              bands: bandRows, inMarket: inMarket, useDist: useDist };
+              bands: bandRows, inMarket: inMarket, useDist: useDist, halfMiles: halfMiles, weakSignal: weakSignal,
+              nOver: nOver, chanceOver: chanceOver };
     showResults();
   }
 
@@ -491,6 +500,9 @@
     var draw = function () {
       box.innerHTML = "";
       box.appendChild(el("h3", { text: "What your strongest ZIPs have in common" }));
+      if (R.weakSignal) box.appendChild(el("p", { class: "crm-warn", text: "Treat this profile as tentative: " + NF0.format(R.nOver) +
+        " ZIPs over-perform, and chance alone would produce about " + NF0.format(Math.max(1, Math.round(R.chanceOver))) +
+        ". Your customers may simply follow population, or the list may be too small to show a clear pattern." }));
       box.appendChild(el("p", { class: "crm-note", text: "Your " + R.strongLabel + " (" + NF0.format(R.strong.length) + ") compared with your whole trade area. Bars show how far apart they are, in standard deviations across the trade area's ZIPs." }));
       var list = R.prof.slice().filter(function (p) { return showAll || p.f.sim; }).sort(function (a, b) { return Math.abs(b.std) - Math.abs(a.std); });
       if (!showAll) list = list.slice(0, 12);
@@ -510,13 +522,16 @@
         el("button", { class: "crm-linkbtn", type: "button", text: showAll ? "Show the top 12" : "Show all characteristics, including health estimates", onclick: function () { showAll = !showAll; draw(); } })]));
       if (R.bands.length > 1) {
         box.appendChild(el("h4", { text: "How distance affects your customers" }));
+        box.appendChild(el("p", { class: "crm-note", text: R.halfMiles
+          ? "Your customer rate halves about every " + NF1.format(R.halfMiles) + " miles from your nearest location. Bars show your actual rate at each distance; the line shows the smooth curve used for expected customers."
+          : "Distance from your locations makes little difference to your customer rate, so every ZIP gets the same expected rate." }));
+        var max = Math.max.apply(null, R.bands.map(function (b) { return Math.max(b.raw, b.fit); })) || 1;
         box.appendChild(el("div", { class: "crm-bands" }, R.bands.map(function (b) {
-          var max = R.bands[0].fit || 1;
-          return el("div", { class: "crm-band" }, [el("span", { text: b.from + (b.to >= 100000 ? "+" : "–" + b.to) + " mi" }),
-            el("span", { class: "crm-bar pos" }, [el("i", { style: "width:" + Math.round(b.fit / max * 100) + "%" })]),
-            el("span", { class: "num", text: NF1.format(b.fit * 1000) + " per 1,000" })]);
+          return el("div", { class: "crm-band" }, [el("span", { text: b.from + "–" + b.to + " mi" }),
+            el("span", { class: "crm-bar pos crm-fitbar" }, [el("i", { style: "width:" + Math.round(b.raw / max * 100) + "%" }),
+              el("b", { class: "crm-fitmark", style: "left:" + Math.round(b.fit / max * 100) + "%", title: "Expected: " + NF1.format(b.fit * 1000) + " per 1,000" })]),
+            el("span", { class: "num", text: NF1.format(b.raw * 1000) + " per 1,000" })]);
         })));
-        box.appendChild(el("p", { class: "crm-note", text: "Expected customers in each ZIP use these rates, so a far-away ZIP isn't marked as weak just for being far away." }));
       }
     };
     draw();
@@ -694,13 +709,13 @@
         el("h3", { text: "Your data stays with you" }),
         el("p", { text: "The customer file is read by your browser. Only ZIP codes and amounts are kept, and only in this page's memory; nothing is sent to a server. Closing the page clears it." }),
         el("h3", { text: "Expected customers" }),
-        el("p", { text: "Each ZIP's potential is its households (or the base you choose, such as homeowners or households earning $100K+). When you give your location ZIPs, the tool measures your customer rate at each distance from your nearest location, using your own data, and makes it fall (or stay level) as distance grows. A ZIP's expected customers are its potential times the rate for its distance. This keeps far-away ZIPs from being marked weak just because they're far away." }),
+        el("p", { text: "Each ZIP's potential is its households (or the base you choose, such as homeowners or households earning $100K+). When you give your location ZIPs, the tool fits a smooth curve to your own data showing how your customer rate falls with distance from your nearest location (or finds that distance doesn't matter). A ZIP's expected customers are its potential times the rate on that curve for its distance. This keeps far-away ZIPs from being marked weak just because they're far away." }),
         el("h3", { text: "Performance index" }),
         el("p", { text: "Index = customers ÷ expected × 100, after adding two customers' worth of 'average' to both, so ZIPs with only a handful of customers aren't over-read. Over-performing means an index of 120+ and a customer count that would happen by chance less than 2.5% of the time if the ZIP were average (an exact Poisson test); under-performing means an index of 80 or below on the same test. ZIPs expecting fewer than 1.5 customers with fewer than 3 actual are marked too few to judge." }),
         el("h3", { text: "What your strongest ZIPs have in common" }),
-        el("p", { text: "The over-performing ZIPs (or, if there are fewer than five, the top fifth by index) are compared with the whole trade area on every characteristic, weighted by potential. Differences are measured in standard deviations across the trade area's ZIPs, so characteristics with different units can be ranked together." }),
+        el("p", { text: "The over-performing ZIPs (or, if there are fewer than five, the top fifth by index) are compared with the whole trade area on every characteristic, weighted by potential. Differences are measured in standard deviations across the trade area's ZIPs, so characteristics with different units can be ranked together. If there are no more over-performing ZIPs than chance would produce, the profile is marked tentative." }),
         el("h3", { text: "Similar ZIPs" }),
-        el("p", { text: "The up-to-10 characteristics that most set your strongest ZIPs apart (at least 0.2 standard deviations) form a profile. Every ZIP in the search area gets a similarity score from 0 to 100 based on its weighted distance from that profile. Health estimates and home-price trends are shown but not used for similarity. Race and ethnicity are not included anywhere in this tool." }),
+        el("p", { text: "Up to 10 characteristics that set your strongest ZIPs apart by at least 0.3 standard deviations form a profile; closely related measures count once, and no group (income, housing and so on) gets more than three. Every ZIP in the search area gets a similarity score from 0 to 100 based on how far it falls short of that profile. Going further in the same direction (more homeowners, say, when homeowners are a strength) is not counted against it. Health estimates and home-price trends are shown but not used for similarity. Race and ethnicity are not included anywhere in this tool." }),
         el("h3", { text: "Things to keep in mind" }),
         el("p", { text: "ZIPs are the unit, so results describe neighborhoods, not individual customers. Census figures are 5-year averages. PO box and business-only ZIPs can't be matched to residents and are skipped. A customer list reflects past marketing as well as demand, so an under-performing ZIP may simply be one you haven't reached yet." }),
         el("h3", { text: "Sources" }),

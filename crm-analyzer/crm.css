@@ -77,3 +77,5 @@
   .crm-kpi { border-right: 0; margin-right: 0; padding: 6px 0; border-bottom: 1px solid var(--line); }
   .crm-map { height: 420px; }
 }
+.crm-fitbar { position: relative; overflow: visible; }
+.crm-fitmark { position: absolute; top: -3px; width: 2px; height: 14px; background: var(--navy); transform: translateX(-1px); }
