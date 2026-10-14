@@ -147,6 +147,13 @@
     var td = this.tbody.querySelector(".az-empty"); if (td) td.textContent = msg + " Clear the search to see all markets.";
   };
 
+  var DISCLAIMER = "Estimates for planning. Scores and figures are modeled from public government data and licensed third-party data and may differ from actual results. They show where prospects are concentrated; they don't guarantee advertising performance.";
+  var ABOUT_ESTIMATES = { title: "About these estimates", body: [
+    "Every figure here is an estimate built for planning. Scores rank markets against each other; they aren't forecasts of sales, leads or advertising results.",
+    "Sources differ in timing. Census American Community Survey figures are 5-year averages and, like all surveys, carry margins of error that are widest for small ZIPs and counties. IRS, mortgage, business-count and EASI figures are each the newest year published, so they may be one to three years old. Each source's year is listed under Sources.",
+    "Radius counts combine ZIP-level shares, assuming the traits you select are independent within a ZIP, so they're modeled estimates rather than counts of actual people.",
+    "ZIPs with fewer than 500 residents, and ZIPs that are mostly group quarters (campuses, bases, prisons), are shown but not ranked, because their rates rest on too few households." ] };
+
   /* ---------- URL state ---------- */
   // Link to the Customer Market Analyzer with this analyzer's category, subcategory and selected DMA
   Analyzer.prototype.crmUrl = function () {
@@ -312,7 +319,8 @@
       return el("span", null, [i ? " · " : "", s.url ? el("a", { href: s.url, target: "_blank", rel: "noopener", text: s.label }) : s.label]);
     });
     this.sourcesNote = el("p", { text: cfg.sourcesNote || "" });
-    var sources = el("section", { class: "az-panel az-sources" }, [el("h2", { text: "Sources" }), el("p", null, srcLinks), this.sourcesNote]);
+    var disclaimer = el("p", { class: "az-disclaimer", text: cfg.disclaimer || DISCLAIMER });
+    var sources = el("section", { class: "az-panel az-sources" }, [el("h2", { text: "Sources" }), el("p", null, srcLinks), this.sourcesNote, disclaimer]);
 
     // Methodology dialog
     this.modalBody = el("div", { class: "az-modal-body" });
@@ -829,7 +837,7 @@
     b.innerHTML = "";
     b.appendChild(el("button", { type: "button", class: "az-modal-close", "aria-label": "Close", text: "×", onclick: function () { self.modal.close(); } }));
     b.appendChild(el("h2", { id: "az-method-title", text: "How scores work" }));
-    (this.cfg.methodology || []).forEach(function (sec) {
+    (this.cfg.methodology || []).concat([ABOUT_ESTIMATES]).forEach(function (sec) {
       b.appendChild(el("h3", { text: sec.title }));
       (Array.isArray(sec.body) ? sec.body : [sec.body]).forEach(function (p) { b.appendChild(el("p", { text: p })); });
     });
