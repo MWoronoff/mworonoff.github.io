@@ -31,7 +31,11 @@ jobs:
       - name: Build HMDA data
         run: |
           if [ -n "${{ github.event.inputs.year }}" ]; then ARGS="--year ${{ github.event.inputs.year }}"; else ARGS=""; fi
-          python3 data-build/build_hmda.py $ARGS
+          set -o pipefail
+          python3 data-build/build_hmda.py $ARGS 2>&1 | tee hmda.log || {
+            msg=$(tail -n 25 hmda.log | sed ':a;N;$!ba;s/%/%25/g;s/\n/%0A/g')
+            echo "::error title=HMDA build::$msg"; exit 1; }
+          echo "::notice title=HMDA build::$(tail -n 6 hmda.log | sed ':a;N;$!ba;s/%/%25/g;s/\n/%0A/g')"
       - name: Commit results
         run: |
           git config user.name "github-actions"
