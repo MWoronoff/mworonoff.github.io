@@ -1,10 +1,23 @@
 name: Build geography boundaries
 
-# Run manually from the Actions tab. Downloads Census boundary files and tables, builds the map shapes, the radius
-# tool's audience data, the Healthcare, Legal, Higher Education, Home Services, Apartment, Furniture and Financial analyzer data and the engine test data, commits the results, and republishes
-# the site. No API keys are needed.
+# Run manually from the Actions tab (Run workflow), choosing what to build:
+#   all       - the full rebuild (about 40 minutes): Census map boundaries, the radius tool's audience data, every
+#               analyzer, the engine test page and the hub maps. Use it when shared data changes.
+#   one name  - just that analyzer plus the hub maps (about 5-10 minutes). The shared boundaries and audience data
+#               already in the repo are reused.
+# Commits the results and republishes the site. No API keys are needed. Only one run at a time: a second run waits.
 on:
   workflow_dispatch:
+    inputs:
+      target:
+        description: "What to build"
+        type: choice
+        default: all
+        options: [all, healthcare, legal, higher-ed, home-services, apartments, furniture, financial]
+
+concurrency:
+  group: analyzer-data
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -13,7 +26,7 @@ permissions:
 jobs:
   boundaries:
     runs-on: ubuntu-24.04
-    timeout-minutes: 90
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -25,42 +38,51 @@ jobs:
       - name: Install Python packages
         run: pip install pandas shapely
       - name: Build boundary files
+        if: (inputs.target || 'all') == 'all'
         run: bash data-build/build_boundaries.sh
       - name: Build radius audience data
+        if: (inputs.target || 'all') == 'all'
         run: |
           set -o pipefail
           python3 data-build/build_audience.py 2>&1 | tee audience.log || {
             msg=$(tail -n 25 audience.log | sed ':a;N;$!ba;s/%/%25/g;s/\n/%0A/g')
             echo "::error title=Audience build::$msg"; exit 1; }
       - name: Build Healthcare data
+        if: (inputs.target || 'all') == 'all' || inputs.target == 'healthcare'
         run: python3 data-build/build_healthcare.py
       - name: Build Legal data
+        if: (inputs.target || 'all') == 'all' || inputs.target == 'legal'
         run: python3 data-build/build_legal.py
       - name: Build Higher Education data
+        if: (inputs.target || 'all') == 'all' || inputs.target == 'higher-ed'
         run: |
           set -o pipefail
           python3 data-build/build_higher_ed.py 2>&1 | tee higher_ed.log || {
             msg=$(grep -v '^\[PASS\]' higher_ed.log | tail -n 25 | sed ':a;N;$!ba;s/%/%25/g;s/\n/%0A/g')
             echo "::error title=Higher Education build::$msg"; exit 1; }
       - name: Build Home Services data
+        if: (inputs.target || 'all') == 'all' || inputs.target == 'home-services'
         run: |
           set -o pipefail
           python3 data-build/build_home_services.py 2>&1 | tee home_services.log || {
             msg=$(grep -v '^\[PASS\]' home_services.log | tail -n 25 | sed ':a;N;$!ba;s/%/%25/g;s/\n/%0A/g')
             echo "::error title=Home Services build::$msg"; exit 1; }
       - name: Build Apartment data
+        if: (inputs.target || 'all') == 'all' || inputs.target == 'apartments'
         run: |
           set -o pipefail
           python3 data-build/build_apartment.py 2>&1 | tee apartment.log || {
             msg=$(grep -v '^\[PASS\]' apartment.log | tail -n 25 | sed ':a;N;$!ba;s/%/%25/g;s/\n/%0A/g')
             echo "::error title=Apartment build::$msg"; exit 1; }
       - name: Build Furniture data
+        if: (inputs.target || 'all') == 'all' || inputs.target == 'furniture'
         run: |
           set -o pipefail
           python3 data-build/build_furniture.py 2>&1 | tee furniture.log || {
             msg=$(grep -v '^\[PASS\]' furniture.log | tail -n 25 | sed ':a;N;$!ba;s/%/%25/g;s/\n/%0A/g')
             echo "::error title=Furniture build::$msg"; exit 1; }
       - name: Build Financial data
+        if: (inputs.target || 'all') == 'all' || inputs.target == 'financial'
         run: |
           set -o pipefail
           python3 data-build/build_financial.py 2>&1 | tee financial.log || {
@@ -68,6 +90,7 @@ jobs:
             echo "::error title=Financial build::$msg"; exit 1; }
           echo "::notice title=Financial build::$(grep -v '^\[PASS\]' financial.log | tail -n 14 | sed ':a;N;$!ba;s/%/%25/g;s/\n/%0A/g')"
       - name: Build engine test page data
+        if: (inputs.target || 'all') == 'all'
         run: python3 data-build/build_engine_test.py
       - name: Build home page maps
         run: python3 data-build/build_home_maps.py
@@ -76,8 +99,8 @@ jobs:
           git config user.name "github-actions"
           git config user.email "github-actions@users.noreply.github.com"
           git add data-build/geo/county_names.csv shared/geo shared/audience engine-test/data healthcare/data legal/data higher-ed/data home-services/data apartment-analyzer/data furniture-analyzer/data financial/data analyzers/home-maps.json
-          git diff --cached --quiet || git commit -m "Build geography, audience, Healthcare, Legal, Higher Education, Home Services and test data"
-          git push
+          git diff --cached --quiet || git commit -m "Build analyzer data (${{ inputs.target || 'all' }})"
+          for i in 1 2 3; do git pull --rebase -q && git push && break; sleep 15; done
       - name: Republish the site
         run: gh api -X POST "repos/${{ github.repository }}/pages/builds"
         env:
