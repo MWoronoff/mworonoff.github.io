@@ -884,13 +884,18 @@ def main():
                 for c in FILL_TEXT: f[f"{k}_c{c}"] = (df[f"{k}_fill"] == c).astype(float)
             for s in SUBCATS:
                 f[f"est@{s['id']}"] = df[f"est_{s['id']}"]; f[f"prev@{s['id']}"] = df[f"est_prev_{s['id']}"]
-            ok = f.population >= MIN_POP
+            # Mostly group quarters (dorms, bases, prisons): households under 15% of residents. Per-household rates
+            # there rest on a handful of homes, so these ZIPs are shown but not ranked.
+            gq = f.households.fillna(0) < 0.15 * f.population
+            ok = (f.population >= MIN_POP) & ~gq
             f = score(f, parts=ZIP_PARTS, mask=ok)
             city = df.city.fillna("")
             out = rows(f, lambda i: f"{i} {city.get(i, '')}".strip())
             for row in out:
                 if f.loc[row["id"], "population"] < MIN_POP:
                     row["u"] = 1; row["f"].append(f"Fewer than {MIN_POP} residents, so this ZIP isn't ranked.")
+                elif gq.get(row["id"], False):
+                    row["u"] = 1; row["f"].append("Mostly group quarters (a campus, base or institution, with few households), so this ZIP isn't ranked.")
                 for s in SUBCATS: row["v"].pop(f"category@{s['id']}", None); row["v"].pop(f"comp@{s['id']}", None)
             # no build date in ZIP files, so a rebuild with unchanged data doesn't rewrite all of them
             json.dump({"level": "zip", "parent": {"level": level, "id": code}, "rows": out},
