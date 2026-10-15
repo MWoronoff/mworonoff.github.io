@@ -360,6 +360,22 @@ dialog p{margin:0 0 14px; color:var(--muted); line-height:1.5}
 .blk svg{width:44%; height:auto; margin-top:4px}
 .blk.done::after{content:"★"; position:absolute; top:-14px; right:-12px; width:36px; height:36px; border-radius:50%; background:#FFD45C;
   border:3px solid #1E2A5A; display:grid; place-items:center; font-size:1.3rem; line-height:1}
+.prog{display:flex; align-items:center; gap:12px; width:min(640px,100%); font-family:"Fredoka","Baloo 2",sans-serif; font-weight:700; font-size:clamp(1.2rem,3vw,1.6rem)}
+.pbar{flex:1; height:24px; border:3px solid #1E2A5A; border-radius:999px; background:#fff; overflow:hidden}
+.pbar i{display:block; width:0; height:100%; background:linear-gradient(90deg,#FFD45C,#FF9AA8,#C9A8FF); transition:width 1s ease}
+.mapbox{width:100%; border:5px solid #1E2A5A; border-radius:26px; overflow:hidden; background:#BDE7A6; box-shadow:0 10px 0 rgba(30,42,90,.22); line-height:0}
+.mapbox svg{display:block; width:100%; height:auto}
+.stop{cursor:pointer; outline:none}
+.stop:focus-visible .face{stroke:#2F6BFF; stroke-width:7}
+.stop .lt2{transform-box:fill-box; transform-origin:center; transition:transform .15s}
+.stop:hover .lt2{transform:scale(1.1) rotate(-4deg)}
+.stop:active .lt2{transform:scale(.94)}
+.stop .ring{transform-box:fill-box; transform-origin:center; animation:ring 1.4s ease-out infinite}
+@keyframes ring{from{transform:scale(.85); opacity:1}to{transform:scale(1.4); opacity:0}}
+#marker{transition:transform 1.6s cubic-bezier(.45,0,.3,1)}
+#marker .bob{animation:bob 1.2s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-8px)}}
+@media (prefers-reduced-motion:reduce){.stop .ring,#marker .bob{animation:none} #marker{transition:none}}
 .shelfhead{margin:26px 0 0; font-size:clamp(1.9rem,5vw,3rem); text-align:center}
 .backcover{margin-top:12px}
 
@@ -440,6 +456,8 @@ dialog p{margin:0 0 14px; color:var(--muted); line-height:1.5}
   <p>Recordings made here play on this device only. To make them play for every child, tap Download on each one and upload the files to the <b>sounds</b> folder of the GitHub repo.</p>
   <div id="recRows"></div>
   <p class="err" id="recErr" hidden></p>
+  <p style="margin-top:16px"><b>Letter map:</b> stars are saved on each device. Clear them here when a new child starts on this device.</p>
+  <button class="pill" id="resetProg">Reset letter progress</button>
   <button class="big" id="closeTeach" style="margin-top:10px">Listo</button>
 </dialog>
 
@@ -1363,9 +1381,9 @@ function worldHTML() {
     <div class="wctrl"><button class="sing" id="singBtn" data-act="sing">Cantar</button>
       <button class="sing alt" id="skipBtn" data-act="skip">Ver las letras ▼</button></div>
     <section id="blocks" hidden>
-      <h2 class="bhead">¡Toca una letra!</h2>
-      <div class="blockgrid">${ABC.map((L, i) => `<button class="blk${done.includes(L) ? ' done' : ''}" style="--bc:${LCOL[L]}; --i:${i}" data-letter="${L}" aria-label="Letra ${L}">`
-        + `<span class="ltr">${L}<small>${LETTERS[L].lower}</small></span>${PIC[LETTERS[L].keys[0]]()}</button>`).join('')}</div>
+      <h2 class="bhead">¡El camino de las letras!</h2>
+      <div class="prog"><span aria-hidden="true">⭐</span><div class="pbar"><i id="pbar"></i></div><span id="pcount">0 de 26</span></div>
+      <div class="mapbox" id="mapbox"></div>
       <h2 class="shelfhead">¡Ahora lee palabras!</h2>
       <div class="mods">${wordCards()}</div>
       <button class="wbtn backcover" data-act="cover">${BOOK} Volver a la portada</button>
@@ -1381,7 +1399,8 @@ function showWorld(o = {}) {
   if (o.reveal) {
     const b = document.getElementById('blocks'); b.hidden = false;
     document.getElementById('skipBtn').hidden = true;
-    if (o.scroll) requestAnimationFrame(() => b.scrollIntoView({ block: 'start' }));
+    const j = justDone; justDone = null;
+    requestAnimationFrame(() => { const c = renderMap(j); if (o.scroll && !j && c) c(false); });
   }
 }
 const renderHome = () => showWorld({ reveal: true, scroll: true });
@@ -1389,7 +1408,7 @@ const renderHome = () => showWorld({ reveal: true, scroll: true });
 function revealBlocks(say) {
   const b = document.getElementById('blocks'); if (!b) return;
   const skip = document.getElementById('skipBtn'); if (skip) skip.hidden = true;
-  if (b.hidden) { b.hidden = false; b.classList.add('show'); }
+  if (b.hidden) { b.hidden = false; b.classList.add('show'); renderMap(); }
   b.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion:reduce)').matches ? 'auto' : 'smooth', block: 'start' });
   if (say) speak([es('¡Muy bien! Ahora toca una letra para empezar.')]);
 }
@@ -1461,6 +1480,7 @@ function letterMod(m, p) {
     return `<div class="finale"><div class="burst" id="burst"></div>
       ${block(L)}
       <h2>¡Ya conoces la letra ${L}!</h2>
+      <p class="sub">⭐ ¡Ganaste una estrella en el mapa!</p>
       <div class="keys">${keyBtns(L)}</div>
       <div class="cheer"><img src="Rach.jpg" alt="La maestra Rachel"><span>¡Muy bien! Estoy muy orgullosa de ti.</span></div>
       <div class="btns"><button class="homebig" data-act="home">${HOUSE} Volver a las letras</button>
@@ -1581,6 +1601,108 @@ function drawGuide() {
   tr.n = 0;
 }
 
+
+/* ---------- Letter journey map ---------- */
+let justDone = null, mapTimer = null;
+function mapGeom() {
+  const box = document.getElementById('mapbox');
+  const w = (box && box.clientWidth) || 1000;
+  const cols = w < 520 ? 3 : w < 860 ? 5 : 7;
+  const n = ABC.length + 2, rows = Math.ceil(n / cols);
+  const W = cols * 150, m = 80, dx = (W - 2 * m) / (cols - 1), dy = 160, top = 124;
+  const pos = i => { const r = Math.floor(i / cols); let c = i % cols; if (r % 2) c = cols - 1 - c; return { x: m + c * dx, y: top + r * dy }; };
+  return { cols, rows, W, H: top + (rows - 1) * dy + 110, dx, dy, top, m, n, pos };
+}
+const nextIndex = () => { const d = getDone(), i = ABC.findIndex(L => !d.includes(L)); return i < 0 ? ABC.length + 1 : i + 1; };
+
+function mapSVG(G, markerAt) {
+  const done = getDone(), P = Array.from({ length: G.n }, (_, i) => G.pos(i)), nx = nextIndex();
+  let d = `M${P[0].x} ${P[0].y}`;
+  for (let i = 0; i < P.length - 1; i++) {
+    const p0 = P[i - 1] || P[i], p1 = P[i], p2 = P[i + 1], p3 = P[i + 2] || p2;
+    d += ` C${(p1.x + (p2.x - p0.x) / 6).toFixed(1)} ${(p1.y + (p2.y - p0.y) / 6).toFixed(1)} ${(p2.x - (p3.x - p1.x) / 6).toFixed(1)} ${(p2.y - (p3.y - p1.y) / 6).toFixed(1)} ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`;
+  }
+  const tree = (x, y) => `<rect x="${x - 6}" y="${y - 6}" width="12" height="30" rx="4" fill="#8A5230"/><circle cx="${x}" cy="${y - 18}" r="24" fill="#5DB45D"/><circle cx="${x - 12}" cy="${y - 8}" r="14" fill="#6CC46C"/><circle cx="${x + 10}" cy="${y - 26}" r="5" fill="#FF5A5A"/>`;
+  const bloom = (x, y, c) => [0, 72, 144, 216, 288].map(a => `<circle cx="${(x + Math.cos(a * Math.PI / 180) * 7).toFixed(1)}" cy="${(y + Math.sin(a * Math.PI / 180) * 7).toFixed(1)}" r="6" fill="${c}"/>`).join('') + `<circle cx="${x}" cy="${y}" r="5" fill="#FFD45C"/>`;
+  const bush = (x, y) => `<ellipse cx="${x}" cy="${y}" rx="26" ry="16" fill="#4FA34A"/><ellipse cx="${x - 14}" cy="${y - 6}" rx="16" ry="13" fill="#5DB45D"/><ellipse cx="${x + 14}" cy="${y - 8}" rx="15" ry="12" fill="#6CC46C"/>`;
+  const cols9 = ['#FF9AA8', '#C9A8FF', '#FFB37A', '#9ED6F5'];
+  let deco = '';
+  for (let r = 0; r < G.rows - 1; r++) for (let k = 0; k < G.cols - 1; k++) {
+    const x = G.m + G.dx * (k + .5), y = G.top + r * G.dy + G.dy / 2, t = (r * 7 + k * 3) % 4;
+    deco += t === 0 ? tree(x, y + 10) : t === 1 ? bloom(x - 14, y, cols9[(r + k) % 4]) + bloom(x + 16, y + 10, cols9[(r + k + 1) % 4]) : t === 2 ? bush(x, y + 6) : bloom(x, y + 4, cols9[(r + k + 2) % 4]);
+  }
+  const s = P[0], e = P[G.n - 1];
+  const start = `<g transform="translate(${s.x} ${s.y})">
+      <rect x="-34" y="-30" width="68" height="50" fill="#FFD45C" stroke="${INK}" stroke-width="3"/>
+      <path d="M-44 -26 L0 -62 L44 -26Z" fill="#FF6F82" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>
+      <rect x="-9" y="-6" width="18" height="26" rx="3" fill="#A0623A"/>
+      <rect x="-26" y="-20" width="12" height="12" fill="#9ED6F5"/><rect x="14" y="-20" width="12" height="12" fill="#9ED6F5"/>
+      <rect x="-40" y="28" width="80" height="26" rx="8" fill="#fff" stroke="${INK}" stroke-width="3"/>
+      <text y="47" text-anchor="middle" font-family="Fredoka, 'Baloo 2', sans-serif" font-weight="700" font-size="18" fill="${INK}">¡Inicio!</text></g>`;
+  const allDone = done.length >= 26;
+  const castle = `<g transform="translate(${e.x} ${e.y})">
+      ${allDone ? `<circle r="70" fill="#FFF3A8" opacity=".8"/>` : ''}
+      <rect x="-46" y="-34" width="92" height="56" fill="#C9A8FF" stroke="${INK}" stroke-width="3"/>
+      <rect x="-56" y="-62" width="28" height="84" fill="#B28DFF" stroke="${INK}" stroke-width="3"/><rect x="28" y="-62" width="28" height="84" fill="#B28DFF" stroke="${INK}" stroke-width="3"/>
+      <path d="M-56 -62 h7 v-9 h7 v9 h7 v-9 h7 v9 M28 -62 h7 v-9 h7 v9 h7 v-9 h7 v9" fill="#B28DFF" stroke="${INK}" stroke-width="3"/>
+      <path d="M-12 22 V-2 A12 12 0 0 1 12 -2 V22Z" fill="#7A4A2A"/>
+      <path d="M42 -71 V-100" stroke="${INK}" stroke-width="3"/><path d="M42 -100 L66 -92 L42 -84Z" fill="#FF6F82"/>
+      <rect x="-40" y="28" width="80" height="26" rx="8" fill="#fff" stroke="${INK}" stroke-width="3"/>
+      <text y="47" text-anchor="middle" font-family="Fredoka, 'Baloo 2', sans-serif" font-weight="700" font-size="18" fill="${INK}">${allDone ? '¡Ganaste!' : '¡Fin!'}</text></g>`;
+  const stops = ABC.map((L, i) => {
+    const p = P[i + 1], isDone = done.includes(L), isNext = nx === i + 1;
+    return `<g class="stop${isDone ? ' done' : ''}${isNext ? ' next' : ''}" data-letter="${L}" role="button" tabindex="0" aria-label="Letra ${L}${isDone ? ', completada' : ''}" transform="translate(${p.x.toFixed(1)} ${p.y.toFixed(1)})">
+      ${isNext ? `<circle class="ring" r="44" fill="none" stroke="#FFD45C" stroke-width="8"/>` : ''}
+      <ellipse cx="0" cy="40" rx="34" ry="8" fill="rgba(30,42,90,.18)"/>
+      <g class="lt2"><rect class="face" x="-36" y="-36" width="72" height="72" rx="17" fill="${isDone || isNext ? LCOL[L] : '#FFFDF6'}" stroke="${INK}" stroke-width="4"/>
+      <rect x="-29" y="-29" width="58" height="58" rx="12" fill="none" stroke="#fff" stroke-width="4" opacity="${isDone || isNext ? .6 : 0}"/>
+      <text y="14" text-anchor="middle" font-family="Andika, sans-serif" font-weight="700" font-size="38" fill="${isDone || isNext ? INK : '#8A93B8'}">${L}<tspan font-size="28">${L.toLowerCase()}</tspan></text></g>
+      ${isDone ? `<g transform="translate(30 -32)"><circle r="16" fill="#FFD45C" stroke="${INK}" stroke-width="3"/><path d="M0 -9 L2.6 -3 L9 -3 L4 1.4 L5.8 8 L0 4.2 L-5.8 8 L-4 1.4 L-9 -3 L-2.6 -3Z" fill="#fff"/></g>` : ''}
+    </g>`;
+  }).join('');
+  const mp = P[markerAt];
+  const marker = `<g id="marker" style="transform:translate(${mp.x}px, ${mp.y - 70}px)"><g class="bob">
+      <path d="M-11 18 L0 34 L11 18Z" fill="#FF6F82" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>
+      <circle r="27" fill="#fff" stroke="#FF6F82" stroke-width="6"/>
+      <clipPath id="mclip"><circle r="22"/></clipPath>
+      <image href="Rach.jpg" x="-24" y="-24" width="48" height="48" clip-path="url(#mclip)" preserveAspectRatio="xMidYMid slice"/></g></g>`;
+  return `<svg viewBox="0 0 ${G.W} ${G.H}" role="group" aria-label="Mapa de las letras" xmlns="http://www.w3.org/2000/svg">
+    <rect width="${G.W}" height="${G.H}" fill="#BDE7A6"/>
+    ${deco}
+    <path d="${d}" stroke="#E2C38A" stroke-width="40" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="${d}" stroke="#F6E1B0" stroke-width="30" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="${d}" stroke="#fff" stroke-width="4" stroke-dasharray="2 16" fill="none" stroke-linecap="round" opacity=".9"/>
+    ${start}${castle}${stops}${marker}
+  </svg>`;
+}
+
+function renderMap(animate) {
+  const box = document.getElementById('mapbox'); if (!box) return;
+  clearTimeout(mapTimer);
+  const G = mapGeom(), nx = nextIndex(), d = getDone();
+  const from = animate ? ABC.indexOf(animate) + 1 : nx;
+  box.innerHTML = mapSVG(G, from);
+  const n = d.length, bar = document.getElementById('pbar'), cnt = document.getElementById('pcount');
+  if (bar) bar.style.width = (n / 26 * 100) + '%';
+  if (cnt) cnt.textContent = `${n} de 26`;
+  const mk = document.getElementById('marker');
+  const center = smooth => mk && mk.scrollIntoView({ block: 'center', behavior: smooth && !matchMedia('(prefers-reduced-motion:reduce)').matches ? 'smooth' : 'auto' });
+  if (animate && from !== nx) {
+    center(false);
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      const t = G.pos(nx); mk.style.transform = `translate(${t.x}px, ${t.y - 70}px)`;
+    }));
+    mapTimer = setTimeout(() => {
+      center(true);
+      const target = document.querySelector(nx <= 26 ? `.stop[data-letter="${ABC[nx - 1]}"]` : '#marker');
+      if (target) burstAt(target);
+      if (nx > 26) speak([es('¡Llegaste al castillo! ¡Terminaste todo el abecedario! ¡Felicidades!')]);
+      else speak([es('¡Muy bien! Avanzaste en el mapa. Ahora sigue la letra'), en(ABC[nx - 1] + '.')]);
+    }, 1700);
+  }
+  return center;
+}
+
 /* ---------- Navigation & rendering ---------- */
 const pageEl = document.getElementById('page'), navEl = document.getElementById('nav');
 const prevBtn = document.getElementById('prev'), nextBtn = document.getElementById('next');
@@ -1661,7 +1783,11 @@ function render(dir = 0) {
   prevBtn.disabled = cur === 0;
   nextBtn.disabled = cur === P.length - 1;
   dotsEl.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('on', i === cur));
-  if (p === 'finale') { burst(); if (m.kind === 'letter') addDone(m.L); }
+  if (p === 'finale') { burst(); if (m.kind === 'letter') {
+    const d = getDone();
+    if (!d.includes(m.L) && ABC.find(L => !d.includes(L)) === m.L) justDone = m.L;
+    addDone(m.L);
+  } }
   if (p === 'trace') initTrace();
   if (dir && autoEl.checked) setTimeout(prompt, 400);
 }
@@ -2018,6 +2144,8 @@ recRows.addEventListener('click', async e => {
 document.getElementById('enterBtn').onclick = enterWorld;
 document.getElementById('greetBtn').onclick = () => { ensureAC(); greet(); };
 worldEl.addEventListener('click', e => {
+  const stop = e.target.closest('.stop');
+  if (stop) { ensureAC(); return openModule(WORD_MODS + ABC.indexOf(stop.dataset.letter)); }
   const cell = e.target.closest('.ch');
   if (cell && !song.playing) {
     const L = cell.dataset.ch; pointAt(L); speak([en(L)]);
@@ -2033,6 +2161,17 @@ worldEl.addEventListener('click', e => {
   if (a === 'cover') return showCover();
   if (a === 'teach') return openTeach();
 });
+worldEl.addEventListener('keydown', e => {
+  const stop = e.target.closest && e.target.closest('.stop');
+  if (stop && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); ensureAC(); openModule(WORD_MODS + ABC.indexOf(stop.dataset.letter)); }
+});
+let rzT;
+addEventListener('resize', () => { clearTimeout(rzT); rzT = setTimeout(() => { const b = document.getElementById('blocks'); if (!worldEl.hidden && b && !b.hidden) renderMap(); }, 250); });
+document.getElementById('resetProg').onclick = () => {
+  if (!confirm('Reset letter progress on this device? All stars on the map will be cleared.')) return;
+  try { localStorage.removeItem(DONE_KEY); } catch (e) {}
+  const b = document.getElementById('blocks'); if (!worldEl.hidden && b && !b.hidden) renderMap();
+};
 loadRecs();
 showView('cover');
 </script>
