@@ -468,6 +468,7 @@ body.talking .gmouth{animation:talk .22s ease-in-out infinite alternate}
 .pbar i{display:block; width:0; height:100%; background:linear-gradient(90deg,#FFD45C,#FF9AA8,#C9A8FF); transition:width 1s ease}
 .mapbox{width:100%; border:4px solid #1E2A5A; border-radius:22px; overflow:hidden; background:#F3FAFF; box-shadow:0 10px 0 rgba(30,42,90,.18); line-height:0}
 .mapbox svg{display:block; width:100%; height:auto}
+.mapbox.safari{margin-top:28px; border-color:#3E2614; background:#2E7D4F}
 .stop,.goalstop{cursor:pointer; outline:none}
 .stop:focus-visible circle{stroke:#2F6BFF}
 .stop .lt2{transform-box:fill-box; transform-origin:center; transition:transform .15s}
@@ -2362,8 +2363,8 @@ function numMod(m, p) {
   if (p === 'match') { game = { round: 0, locked: false }; return nmatchHTML(); }
   if (p === 'finale') {
     return `<div class="finale"><div class="burst" id="burst"></div>${numBlock(m)}${objRow(m, m.n, 'still')}
-      <div class="cheer"><img src="Rach.jpg" alt=""><span>⭐ ${T().star}</span></div>
-      <div class="btns"><button class="homebig" data-act="home" aria-label="${T().mapTitle}">${ICON.map}</button></div></div>`;
+      <div class="cheer"><img src="Rach.jpg" alt=""><span>${ANIMALS[m.n - 1]} ${T().sStar}</span></div>
+      <div class="btns"><button class="homebig" data-act="home" aria-label="${T().sTitle}">${ICON.map}</button></div></div>`;
   }
   return '';
 }
@@ -2424,7 +2425,7 @@ function promptNum(m, p) {
   if (p === 'trace') { speak(t.nTrace(m.w)); return setHint(() => nextBtn, 14000); }
   if (p === 'find') return speak(t.nFind(m.w));
   if (p === 'match') { if (game.round < 2) speak(t.nMatch(m.w)); return; }
-  if (p === 'finale') { cheer(); speak([...t.nKnow(m.w), N(t.proud), N(t.star), N(t.tapHome)]); return setHint(() => pageEl.querySelector('.homebig'), 800); }
+  if (p === 'finale') { cheer(); speak([...t.nKnow(m.w), N(t.proud), N(t.sStar), N(t.sTapHome)]); return setHint(() => pageEl.querySelector('.homebig'), 800); }
 }
 function numHint(m, p) {
   const P = pageEl, sel = s => P.querySelector(s);
@@ -2477,6 +2478,7 @@ function worldHTML() {
       <button class="sing alt" id="skipBtn" data-act="skip" aria-label="${t.mapTitle}">${ICON.map}${ICON.down}</button></div>
     <section id="blocks" hidden>
       <div class="mapbox" id="mapbox"></div>
+      <div class="mapbox safari" id="mapboxN"></div>
       <h2 class="shelfhead">${W().shelf}</h2><div class="mods">${wordCards()}</div>
     </section>`;
 }
@@ -2497,7 +2499,7 @@ function showWorld(o = {}) {
       if (js) {
         const st = document.querySelector(`.stop[data-line="${js.line}"][data-key="${js.key}"]`);
         if (st) { st.scrollIntoView({ block: 'center' }); setTimeout(() => burstAt(st), 300); }
-        speak([N(T().star)]);
+        speak([N(js.line === 'N' ? T().sStar : T().star)]);
       }
       if (!j) setHint(() => document.querySelector('.stop.next'), 2500);
     });
@@ -2683,7 +2685,7 @@ const HOME_M = {
 Object.keys(HOME_M).forEach(l => Object.assign(HOME[l], HOME_M[l]));
 Object.assign(COVER_EN.h, { mKicker: 'Numbers in English, 1 to 10', mH: 'Counting in English, one step at a time.', mLead: 'Children learn to recognize, count, trace and say the numbers 1 to 10 in English, with pictures they can tap and count.', mCta: 'Start numbers', numsH: 'Numbers, 1 to 10' });
 Object.assign(COVER_EN.t, { cLead: 'With \u27E6T\u27E7, children learn the 26 letters of the English alphabet, their sounds and their first words through songs, games and a train journey.',
-  cS3t: 'Ride the train', cS3: 'Every finished lesson earns a star and moves the train to the next station.' });
+  cS3t: 'Ride the train, go on safari', cS3: 'Every finished letter moves the train to its next station, and every finished number takes the jeep deeper into the jungle.' });
 const H = () => HOME[LANG] || HOME.es;
 const doneFor = l => { try { return JSON.parse(localStorage.getItem(l === 'es' ? 'vamos-a-leer-done' : 'vamos-a-leer-done-' + l) || '[]').length; } catch (e) { return 0; } };
 const langNameIn = l => { try { const n = new Intl.DisplayNames([PL], { type: 'language' }).of(l); return n.charAt(0).toLocaleUpperCase(PL) + n.slice(1); } catch (e) { return STR[l].langName; } };
@@ -3151,8 +3153,8 @@ function mapGeom() {
     const pos = i => { const r = Math.floor(i / cols); let c = i % cols; if (r % 2) c = cols - 1 - c; return { x: m + c * dx, y: top + r * dy }; };
     return { rows, pos, top, bottom: top + (rows - 1) * dy };
   };
-  const L = block(28, 262), labelN = L.bottom + 104, Nb = block(12, labelN + 144);
-  return { cols, W, H: Nb.bottom + 110, m, dx, dy, L, N: Nb, labelL: 118, labelN };
+  const L = block(28, 262);
+  return { cols, W, H: L.bottom + 140, m, dx, dy, L, labelL: 118 };
 }
 // a transit-style path with rounded corners through the station points
 function railPath(P, r = 34) {
@@ -3226,31 +3228,28 @@ function stationsSVG(G, id, t) {
       <text x="${Math.max(220, name.length * 13 + 110) - 18}" y="27" text-anchor="end" font-family="Fredoka, sans-serif" font-weight="700" font-size="18" fill="#fff">${done.length} / ${n}</text></g>`;
   return { svg: `${sleepers}${rails}${head}${startSt}${goalSt}${stops}`, P };
 }
-function mapSVG(G, fromL, fromN) {
-  const t = T(), A = stationsSVG(G, 'L', t), B = stationsSVG(G, 'N', t);
-  const tl = trainXY(A.P[fromL]), tn = trainXY(B.P[fromN]);
-  const trees = [];
-  for (let k = 0; k < 9; k++) { const x = 40 + ((k * 397) % (G.W - 80)), y = G.labelN - 34 + ((k * 53) % 20); if (k < 5) trees.push(tree(x, y, 16 + (k % 3) * 3)); }
-  const hills = `<path d="M0 ${G.H} Q${G.W * .2} ${G.H - 70} ${G.W * .45} ${G.H - 30} T${G.W} ${G.H - 50} V${G.H}Z" fill="#CDEBB8"/>`;
+function mapSVG(G, fromL) {
+  const t = T(), A = stationsSVG(G, 'L', t), tl = trainXY(A.P[fromL]);
+  const hills = `<path d="M0 ${G.H} Q${G.W * .2} ${G.H - 60} ${G.W * .45} ${G.H - 26} T${G.W} ${G.H - 44} V${G.H}Z" fill="#CDEBB8"/>`;
   return `<svg viewBox="0 0 ${G.W} ${G.H}" role="group" aria-label="${t.mapTitle}" xmlns="http://www.w3.org/2000/svg">
     <rect width="${G.W}" height="${G.H}" fill="#F3FAFF"/>
     <g opacity=".5">${Array.from({ length: Math.ceil(G.W / 40) }, (_, i) => `<path d="M${i * 40} 0 V${G.H}" stroke="#E1EEF8"/>`).join('')}${Array.from({ length: Math.ceil(G.H / 40) }, (_, i) => `<path d="M0 ${i * 40} H${G.W}" stroke="#E1EEF8"/>`).join('')}</g>
-    ${hills}${trees.join('')}
+    ${hills}
     <g transform="translate(${G.W / 2} 62)"><rect x="${-Math.min(G.W - 60, 560) / 2}" y="-30" width="${Math.min(G.W - 60, 560)}" height="60" rx="30" fill="${INK}"/>
       <text y="10" text-anchor="middle" font-family="Fredoka, 'Baloo 2', sans-serif" font-weight="700" font-size="${G.cols === 5 ? 22 : 28}" fill="#fff">🚂 ${t.mapTitle}</text></g>
-    ${A.svg}${B.svg}
+    ${A.svg}
     <g class="tmove" id="moveL" style="transform:translate(${tl.x}px, ${tl.y}px)">${trainSVG('L', LINES.L.color, LINES.L.dark)}</g>
-    <g class="tmove" id="moveN" style="transform:translate(${tn.x}px, ${tn.y}px)">${trainSVG('N', LINES.N.color, LINES.N.dark)}</g>
   </svg>`;
 }
 function renderMap(animate) {
-  const box = document.getElementById('mapbox'); if (!box) return;
+  const box = document.getElementById('mapbox'), boxN = document.getElementById('mapboxN'); if (!box) return;
   clearTimeout(mapTimer);
-  const G = mapGeom(), nl = lineNext('L'), nn = lineNext('N');
+  const G = mapGeom(), S = safariGeom(), nl = lineNext('L'), nn = lineNext('N');
   const keyIdx = (id, k) => LINES[id].keys.indexOf(k) + 1;
   const fromL = animate && animate.line === 'L' ? keyIdx('L', animate.key) : nl;
   const fromN = animate && animate.line === 'N' ? keyIdx('N', animate.key) : nn;
-  box.innerHTML = mapSVG(G, fromL, fromN);
+  box.innerHTML = mapSVG(G, fromL);
+  if (boxN) boxN.innerHTML = safariSVG(S, fromN);
   const id = animate ? animate.line : (getDone().length || !getNumDone().length ? 'L' : 'N');
   const mk = document.getElementById('move' + id);
   const center = smooth => mk && mk.scrollIntoView({ block: 'center', behavior: smooth && !matchMedia('(prefers-reduced-motion:reduce)').matches ? 'smooth' : 'auto' });
@@ -3258,7 +3257,7 @@ function renderMap(animate) {
     const to = animate.line === 'L' ? nl : nn, from = animate.line === 'L' ? fromL : fromN;
     if (from !== to) {
       center(false);
-      const B = G[animate.line], tp = trainXY(B.pos(to));
+      const tp = animate.line === 'L' ? trainXY(G.L.pos(to)) : jeepXY(S.pos(to));
       requestAnimationFrame(() => requestAnimationFrame(() => { mk.style.transform = `translate(${tp.x}px, ${tp.y}px)`; }));
       mapTimer = setTimeout(() => {
         center(true);
@@ -3276,6 +3275,120 @@ function renderMap(animate) {
     }
   }
   return center;
+}
+
+/* ---------- The jungle safari map for numbers ---------- */
+const ANIMALS = ['🦁', '🐘', '🦒', '🐒', '🦜', '🦓', '🐊', '🦛', '🐍', '🐅'];
+const SSTR = {
+  es: { sTitle: 'Safari de los números', sStart: 'Entrada', sGoal: 'Campamento', sStar: '¡Encontraste un animal nuevo en el safari!', sTapHome: 'Toca el botón del mapa para volver al safari.',
+    nAdvance: w => [N('¡Muy bien! El jeep avanzó en la selva. Ahora sigue el número'), E(w + '.')], nAllDone: '¡Llegaste al campamento! ¡Terminaste el safari de los números del 1 al 10!',
+    cS3t: 'Tren y safari', cS3: 'Cada letra completada lleva el tren a la siguiente estación, y cada número completado adentra el jeep en la selva.' },
+  fr: { sTitle: 'Safari des nombres', sStart: 'Entrée', sGoal: 'Campement', sStar: 'Tu as trouvé un nouvel animal pendant le safari !', sTapHome: 'Touche le bouton de la carte pour revenir au safari.',
+    nAdvance: w => [N('Très bien ! La jeep avance dans la jungle. Maintenant, le nombre'), E(w + '.')], nAllDone: 'Tu es arrivé au campement ! Tu as fini le safari des nombres de 1 à 10 !',
+    cS3t: 'Train et safari', cS3: 'Chaque lettre terminée fait avancer le train jusqu’à la gare suivante, et chaque nombre terminé emmène la jeep plus loin dans la jungle.' },
+  de: { sTitle: 'Zahlen-Safari', sStart: 'Eingang', sGoal: 'Camp', sStar: 'Du hast ein neues Tier auf der Safari entdeckt!', sTapHome: 'Tippe auf den Kartenknopf, um zur Safari zurückzugehen.',
+    nAdvance: w => [N('Sehr gut! Der Jeep fährt weiter durch den Dschungel. Jetzt kommt die Zahl'), E(w + '.')], nAllDone: 'Du bist im Camp angekommen! Du hast die Zahlen-Safari von 1 bis 10 geschafft!',
+    cS3t: 'Zug und Safari', cS3: 'Jeder fertige Buchstabe bringt den Zug zum nächsten Bahnhof, und jede fertige Zahl fährt den Jeep tiefer in den Dschungel.' },
+  it: { sTitle: 'Safari dei numeri', sStart: 'Ingresso', sGoal: 'Accampamento', sStar: 'Hai trovato un nuovo animale nel safari!', sTapHome: 'Tocca il pulsante della mappa per tornare al safari.',
+    nAdvance: w => [N('Bravissimo! La jeep va avanti nella giungla. Ora tocca al numero'), E(w + '.')], nAllDone: "Sei arrivato all'accampamento! Hai finito il safari dei numeri da 1 a 10!",
+    cS3t: 'Treno e safari', cS3: 'Ogni lettera completata porta il treno alla stazione successiva, e ogni numero completato porta la jeep più avanti nella giungla.' },
+  pt: { sTitle: 'Safári dos números', sStart: 'Entrada', sGoal: 'Acampamento', sStar: 'Você encontrou um animal novo no safári!', sTapHome: 'Toque no botão do mapa para voltar ao safári.',
+    nAdvance: w => [N('Muito bem! O jipe avançou na selva. Agora vem o número'), E(w + '.')], nAllDone: 'Você chegou ao acampamento! Você terminou o safári dos números de 1 a 10!',
+    cS3t: 'Trem e safári', cS3: 'Cada letra concluída leva o trem à próxima estação, e cada número concluído leva o jipe mais fundo na selva.' },
+  ja: { sTitle: 'かずの ジャングル サファリ', sStart: 'いりぐち', sGoal: 'キャンプ', sStar: 'サファリで あたらしい どうぶつを みつけたよ！', sTapHome: 'ちずの ボタンを タッチして サファリに もどろう。',
+    nAdvance: w => [N('よく できたね！ ジープが ジャングルを すすんだよ。 つぎの かずは'), E(w), N('だよ。')], nAllDone: 'キャンプに ついたよ！ 1から 10までの サファリ、ぜんぶ おわったね！',
+    cS3t: '電車とサファリ', cS3: '文字を1つ終えるごとに電車が次の駅へ、数字を1つ終えるごとにジープがジャングルの奥へ進みます。' },
+  zh: { sTitle: '数字丛林探险', sStart: '入口', sGoal: '营地', sStar: '你在探险中发现了一只新动物！', sTapHome: '点地图按钮，回到丛林探险。',
+    nAdvance: w => [N('真棒！吉普车在丛林里前进了。下一个数字是'), E(w + '.')], nAllDone: '你到达营地了！你完成了1到10的数字探险！',
+    cS3t: '火车与丛林探险', cS3: '每学完一个字母，火车开到下一站；每学完一个数字，吉普车就更深入丛林。' },
+  ko: { sTitle: '숫자 정글 사파리', sStart: '입구', sGoal: '캠프', sStar: '사파리에서 새 동물을 찾았어요!', sTapHome: '지도 버튼을 눌러 사파리로 돌아가요.',
+    nAdvance: w => [N('잘했어요! 지프가 정글 속으로 나아갔어요. 다음 숫자는'), E(w + '.')], nAllDone: '캠프에 도착했어요! 1부터 10까지 숫자 사파리를 다 끝냈어요!',
+    cS3t: '기차와 사파리', cS3: '글자를 하나 끝낼 때마다 기차가 다음 역으로, 숫자를 하나 끝낼 때마다 지프가 정글 속으로 들어갑니다.' },
+};
+Object.keys(SSTR).forEach(l => Object.assign(STR[l], SSTR[l]));
+
+function safariGeom() {
+  const box = document.getElementById('mapboxN');
+  const w = (box && box.clientWidth) || 1000;
+  const cols = w < 520 ? 4 : w < 860 ? 6 : 7;
+  const dx = 132, m = 84, W = m * 2 + dx * (cols - 1), dy = 168, top = 210;
+  const rows = Math.ceil(12 / cols);
+  const pos = i => { const r = Math.floor(i / cols); let c = i % cols; if (r % 2) c = cols - 1 - c; return { x: m + c * dx, y: top + r * dy + (c % 2 ? 18 : -10) }; };
+  return { cols, W, H: top + (rows - 1) * dy + 130, pos, rows, dx, dy, top };
+}
+function smoothPath(P) {
+  let d = `M${P[0].x} ${P[0].y}`;
+  for (let i = 0; i < P.length - 1; i++) {
+    const p0 = P[i - 1] || P[i], p1 = P[i], p2 = P[i + 1], p3 = P[i + 2] || p2;
+    d += ` C${(p1.x + (p2.x - p0.x) / 5).toFixed(1)} ${(p1.y + (p2.y - p0.y) / 5).toFixed(1)} ${(p2.x - (p3.x - p1.x) / 5).toFixed(1)} ${(p2.y - (p3.y - p1.y) / 5).toFixed(1)} ${p2.x} ${p2.y}`;
+  }
+  return d;
+}
+function jeepSVG() {
+  return `<g id="jeep" class="train"><g class="bob">
+    <circle cx="-44" cy="0" r="13" fill="#2B2B2B" stroke="${INK}" stroke-width="2.5"/><circle cx="-44" cy="0" r="5" fill="#C9A86A"/>
+    <path d="M-40 -2 h78 l10 -16 h8 v30 a6 6 0 0 1 -6 6 h-96 a6 6 0 0 1 -6 -6 v-12 a6 6 0 0 1 6 -6Z" fill="#E2B13C" stroke="${INK}" stroke-width="3"/>
+    <path d="M-36 6 h86" stroke="#2F5E2E" stroke-width="4"/>
+    <path d="M-30 -2 v-30 h46 l18 30" fill="none" stroke="${INK}" stroke-width="4" stroke-linejoin="round"/>
+    <rect x="-24" y="-26" width="30" height="22" rx="4" fill="#fff" stroke="${INK}" stroke-width="2.5"/>
+    <clipPath id="jclip"><rect x="-22" y="-24" width="26" height="18" rx="3"/></clipPath>
+    <image href="Rach.jpg" x="-22" y="-32" width="26" height="30" clip-path="url(#jclip)" preserveAspectRatio="xMidYMin slice"/>
+    <rect x="50" y="-12" width="6" height="8" rx="2" fill="#FFF3A8" stroke="${INK}" stroke-width="2"/>
+    ${[-26, 34].map(x => `<circle cx="${x}" cy="20" r="11" fill="#2B2B2B" stroke="${INK}" stroke-width="2.5"/><circle cx="${x}" cy="20" r="4.5" fill="#C9A86A"/>`).join('')}
+  </g></g>`;
+}
+const jeepXY = p => ({ x: p.x, y: p.y - 54 });
+function safariSVG(S, from) {
+  const t = T(), done = getNumDone(), nx = lineNext('N'), fin = done.length >= 10;
+  const P = Array.from({ length: 12 }, (_, i) => S.pos(i)), d = smoothPath(P);
+  const leaf = (x, y, r, rot, c) => `<path transform="translate(${x} ${y}) rotate(${rot}) scale(${r})" d="M0 0 C 20 -30 60 -30 80 0 C 60 30 20 30 0 0Z M4 0 H76" fill="${c}" stroke="#1F4D2C" stroke-width="2"/>`;
+  const palm = (x, y, s = 1) => `<g transform="translate(${x} ${y}) scale(${s})"><path d="M0 40 Q6 10 0 -30" stroke="#7A5230" stroke-width="8" fill="none" stroke-linecap="round"/>
+      ${[-150, -110, -60, -20, 25].map(a => `<path transform="translate(0 -30) rotate(${a})" d="M0 0 Q22 -14 46 -2 Q22 4 0 0Z" fill="#3E9E5A" stroke="#1F4D2C" stroke-width="2"/>`).join('')}</g>`;
+  const bush = (x, y, s = 1) => `<g transform="translate(${x} ${y}) scale(${s})"><circle cx="-14" cy="4" r="14" fill="#4FA36B"/><circle cx="8" cy="-4" r="17" fill="#5DB477"/><circle cx="22" cy="6" r="12" fill="#4FA36B"/></g>`;
+  let deco = '';
+  for (let r = 0; r < S.rows; r++) for (let k = 0; k < S.cols - 1; k++) {
+    const x = 84 + S.dx * (k + .5), y = S.top + r * S.dy + S.dy * .5, v = (r * 3 + k * 5) % 4;
+    if (r === S.rows - 1) continue;
+    deco += v === 0 ? palm(x, y - 6, .8) : v === 1 ? bush(x, y + 10, .8) : v === 2 ? `<ellipse cx="${x}" cy="${y + 8}" rx="34" ry="12" fill="#6EC3E8" stroke="#2F7FA8" stroke-width="2"/>` : palm(x, y - 4, .65);
+  }
+  const label = (x, y, txt) => `<g transform="translate(${x} ${y})"><rect x="${-Math.max(42, txt.length * 5.6)}" y="0" width="${Math.max(84, txt.length * 11.2)}" height="26" rx="6" fill="#F3D9A4" stroke="#5A3A1E" stroke-width="2"/>
+      <text y="18" text-anchor="middle" font-family="Fredoka, 'Baloo 2', sans-serif" font-weight="700" font-size="15" fill="#3E2614">${txt}</text></g>`;
+  const s0 = P[0], g = P[11];
+  const gate = `<g transform="translate(${s0.x} ${s0.y})"><rect x="-34" y="-50" width="10" height="66" rx="3" fill="#7A5230" stroke="#3E2614" stroke-width="2.5"/><rect x="24" y="-50" width="10" height="66" rx="3" fill="#7A5230" stroke="#3E2614" stroke-width="2.5"/>
+      <rect x="-40" y="-62" width="80" height="22" rx="5" fill="#C9883D" stroke="#3E2614" stroke-width="2.5"/>${leaf(-44, -64, .35, -30, '#4FA36B')}${leaf(18, -70, .35, 20, '#5DB477')}</g>${label(s0.x, s0.y + 26, t.sStart)}`;
+  const camp = `<g class="goalstop${fin ? ' open' : ''}" data-line="N" role="button" tabindex="0" aria-label="${t.sGoal}" transform="translate(${g.x} ${g.y})">
+      ${fin ? `<circle class="ring" r="52" fill="none" stroke="#FFD45C" stroke-width="8"/><circle r="46" fill="#FFF3A8" opacity=".8"/>` : ''}
+      <path d="M-40 20 L0 -40 L40 20Z" fill="#E07A3E" stroke="#5A3A1E" stroke-width="3" stroke-linejoin="round"/><path d="M0 -40 L-12 20 H12Z" fill="#5A3A1E"/>
+      <path d="M0 -40 V-58" stroke="#5A3A1E" stroke-width="3"/><path d="M0 -58 L18 -52 L0 -46Z" fill="#E0475B"/>
+      ${fin ? `<text x="0" y="-66" text-anchor="middle" font-size="26">⭐</text>` : ''}</g>${label(g.x, g.y + 30, t.sGoal)}`;
+  const stops = NUMS.map((x, i) => {
+    const p = P[i + 1], isDone = done.includes(x.n), isNext = nx === i + 1;
+    return `<g class="stop${isDone ? ' done' : ''}${isNext ? ' next' : ''}" data-line="N" data-key="${x.n}" role="button" tabindex="0" aria-label="${x.n}" transform="translate(${p.x} ${p.y})">
+      ${isNext ? `<circle class="ring" r="42" fill="none" stroke="#FFD45C" stroke-width="8"/>` : ''}
+      <circle r="33" fill="${isDone ? '#2F8A4E' : '#F3D9A4'}" stroke="#5A3A1E" stroke-width="5"/>
+      <circle r="25" fill="none" stroke="${isDone ? '#9FDDB2' : '#C9A86A'}" stroke-width="2" stroke-dasharray="3 4"/>
+      <text y="12" text-anchor="middle" font-family="Andika, sans-serif" font-weight="700" font-size="32" fill="${isDone ? '#fff' : '#3E2614'}">${x.n}</text>
+      ${isDone ? `<g transform="translate(30 -30)"><circle r="20" fill="#fff" stroke="#5A3A1E" stroke-width="2.5"/><text y="9" text-anchor="middle" font-size="24">${ANIMALS[i]}</text></g>`
+        : `<g transform="translate(30 -28)">${bush(0, 0, .55)}</g>`}
+    </g>`;
+  }).join('');
+  const jp = jeepXY(P[from]);
+  const tw = Math.min(S.W - 60, 560);
+  return `<svg viewBox="0 0 ${S.W} ${S.H}" role="group" aria-label="${t.sTitle}" xmlns="http://www.w3.org/2000/svg">
+    <defs><linearGradient id="jungle" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2E7D4F"/><stop offset="1" stop-color="#57A86E"/></linearGradient></defs>
+    <rect width="${S.W}" height="${S.H}" fill="url(#jungle)"/>
+    ${leaf(-20, 30, .9, 20, '#3E9E5A')}${leaf(S.W + 10, 40, .9, 160, '#3E9E5A')}${leaf(-10, S.H - 20, .8, -25, '#4FA36B')}${leaf(S.W, S.H - 30, .8, -155, '#4FA36B')}
+    ${deco}
+    <path d="${d}" stroke="#A57A45" stroke-width="40" fill="none" stroke-linecap="round" opacity=".55"/>
+    <path d="${d}" stroke="#D9B47A" stroke-width="30" fill="none" stroke-linecap="round"/>
+    <path d="${d}" stroke="#B88A55" stroke-width="3" fill="none" stroke-dasharray="8 10" transform="translate(0 -7)"/>
+    <path d="${d}" stroke="#B88A55" stroke-width="3" fill="none" stroke-dasharray="8 10" transform="translate(0 7)"/>
+    <g transform="translate(${S.W / 2} 66)"><rect x="${-tw / 2}" y="-30" width="${tw}" height="60" rx="12" fill="#F3D9A4" stroke="#5A3A1E" stroke-width="4"/>
+      <text y="10" text-anchor="middle" font-family="Fredoka, 'Baloo 2', sans-serif" font-weight="700" font-size="${S.cols === 4 ? 21 : 27}" fill="#3E2614">🌴 ${t.sTitle}</text>
+      <text x="${tw / 2 - 16}" y="10" text-anchor="end" font-family="Fredoka, sans-serif" font-weight="700" font-size="18" fill="#3E2614">${done.length}/10</text></g>
+    ${gate}${camp}${stops}
+    <g class="tmove" id="moveN" style="transform:translate(${jp.x}px, ${jp.y}px)">${jeepSVG()}</g>
+  </svg>`;
 }
 
 
