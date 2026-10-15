@@ -7,7 +7,7 @@
 <meta name="description" content="Lecciones de lectura en inglés para niños hispanohablantes, con la maestra Rachel Woronoff.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Baloo+2:wght@700;800&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Baloo+2:wght@700;800&family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#E6F4EC; --card:#FFFFFF; --ink:#1E2A5A; --muted:#55618C; --line:#C9E3D4;
@@ -235,199 +235,261 @@ dialog p{margin:0 0 14px; color:var(--muted); line-height:1.5}
   .tile,.blend .trio{transition:none}
 }
 
-/* ================= Storybook redesign ================= */
+/* ================= Vamos a leer · Lettervale ================= */
 .view[hidden]{display:none !important}
-.fun,h1,h2{font-family:"Fredoka","Baloo 2","Andika",sans-serif; font-weight:700; letter-spacing:.01em}
+h1,h2,.fun{font-family:"Fredoka","Baloo 2","Andika",sans-serif; font-weight:700; letter-spacing:.01em}
 
-/* ---------- Cover: an open storybook ---------- */
-#cover{min-height:100vh; min-height:100dvh; display:grid; place-items:center; padding:clamp(12px,2.4vw,30px);
-  background:#8A5A33 repeating-linear-gradient(176deg,rgba(255,255,255,.05) 0 3px,rgba(0,0,0,.05) 3px 9px,transparent 9px 22px);
-  overflow:hidden}
-.sbook{position:relative; width:min(100%,1440px); height:calc(100dvh - 2*clamp(12px,2.4vw,30px)); min-height:560px;
-  display:grid; grid-template-columns:1fr 2fr; background:#FFF8E8; border-radius:18px;
-  box-shadow:0 0 0 5px #F3E6C8,0 0 0 9px #E6D3A8,0 0 0 13px #F3E6C8,0 0 0 22px #7A2E2A,0 26px 50px rgba(0,0,0,.45)}
-.pg-left{position:relative; overflow:hidden; border-radius:16px 0 0 16px; background:#F3E6C8}
-.pg-left img{display:block; width:100%; height:100%; object-fit:cover; object-position:center 22%}
-.pg-left::after{content:""; position:absolute; inset:14px; border:6px solid rgba(255,248,232,.9); border-radius:22px;
-  box-shadow:inset 0 0 0 3px rgba(255,111,130,.55); pointer-events:none}
-.pg-left::before{content:""; position:absolute; top:0; right:0; bottom:0; width:40px; z-index:1; pointer-events:none;
-  background:linear-gradient(to right,transparent,rgba(60,30,10,.28))}
-.ribbon{position:absolute; left:50%; bottom:34px; transform:translateX(-50%) rotate(-3deg); z-index:2; white-space:nowrap;
-  background:#FF6F82; color:#fff; font-family:"Fredoka","Baloo 2",sans-serif; font-weight:700; font-size:clamp(1.3rem,2.4vw,2rem);
-  padding:.2em 1.1em; border-radius:14px; border:4px solid #fff; box-shadow:0 6px 0 rgba(30,42,90,.3)}
-.pg-right{position:relative; overflow:hidden; border-radius:0 16px 16px 0; display:flex; flex-direction:column; align-items:center; justify-content:center;
-  gap:clamp(12px,2.2vh,26px); padding:clamp(20px,4vw,56px); text-align:center; color:#1E2A5A;
-  background:linear-gradient(to right,rgba(60,30,10,.16),transparent 7%),#FFF8E8}
-.pg-right > *{position:relative; z-index:1}
-.bigtitle{margin:0; font-family:"Fredoka","Baloo 2",sans-serif; font-weight:700; line-height:1; font-size:clamp(3rem,7.2vw,7.6rem);
-  display:flex; flex-wrap:wrap; justify-content:center; gap:0 .04em}
-.bigtitle span{display:inline-block; -webkit-text-stroke:.045em #1E2A5A; paint-order:stroke fill; text-shadow:0 .07em 0 rgba(30,42,90,.22);
-  animation:wob 2.6s ease-in-out infinite; animation-delay:calc(var(--i) * .12s)}
-.bigtitle .tw{display:inline-flex; white-space:nowrap; animation:none; -webkit-text-stroke:0; text-shadow:none; margin:0 .14em}
-@keyframes wob{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-.08em) rotate(3deg)}}
-.subtitle{margin:0; font-family:"Fredoka","Baloo 2",sans-serif; font-weight:600; font-size:clamp(1.6rem,3.3vw,3rem); color:#C2465A}
-.once{margin:0; font-size:clamp(1.25rem,2.1vw,1.85rem); line-height:1.45; max-width:30ch; font-weight:700}
-.enter{border:5px solid #1E2A5A; background:#FF6F82; color:#fff; font-family:"Fredoka","Baloo 2",sans-serif; font-weight:700;
-  font-size:clamp(2.2rem,4.8vw,3.8rem); padding:.22em 1.3em .26em; border-radius:999px; box-shadow:0 .2em 0 #1E2A5A;
-  display:inline-flex; align-items:center; gap:.35em; animation:boing 1.6s ease-in-out infinite}
-.enter svg{width:.8em; height:.8em}
-.enter:hover{background:#FF5470}
-.enter:active{transform:translateY(.12em); box-shadow:0 .08em 0 #1E2A5A; animation:none}
-@keyframes boing{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
-.hear{border:3px solid #1E2A5A; background:#FFD45C; color:#1E2A5A; border-radius:999px; padding:.3em 1.1em; font-weight:700;
-  font-size:clamp(1.05rem,1.6vw,1.3rem); display:inline-flex; align-items:center; gap:.4em}
-.hear svg{width:1.1em; height:1.1em}
-.floaty{position:absolute; z-index:0 !important; font-family:"Fredoka","Baloo 2",sans-serif; font-weight:700; opacity:.28; pointer-events:none;
-  animation:floaty 6s ease-in-out infinite}
-@keyframes floaty{0%,100%{transform:translateY(0) rotate(var(--r))}50%{transform:translateY(-16px) rotate(calc(var(--r) * -1))}}
-@media (max-width:760px){
-  .sbook{grid-template-columns:1fr; grid-template-rows:33dvh auto; height:auto; min-height:calc(100dvh - 24px)}
-  .pg-left{border-radius:16px 16px 0 0}
-  .pg-left::before{top:auto; left:0; width:auto; height:30px; background:linear-gradient(to bottom,transparent,rgba(60,30,10,.25))}
-  .pg-right{border-radius:0 0 16px 16px; background:#FFF8E8; padding:22px 16px 30px}
-  .ribbon{bottom:18px}
+/* ---------- Cover: professional landing page ---------- */
+#cover{min-height:100vh; background:#fff; color:#1E2A5A; font-family:"Nunito","Andika","Segoe UI",system-ui,sans-serif; color-scheme:light}
+.cwrap{max-width:1180px; margin:0 auto; padding:0 clamp(18px,4vw,40px)}
+.cnav{position:sticky; top:0; z-index:20; background:rgba(255,255,255,.92); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); border-bottom:1px solid #EEF0F6}
+.cnav-in{display:flex; align-items:center; gap:24px; height:68px}
+.logo{display:flex; align-items:center; gap:10px; color:#1E2A5A; text-decoration:none; font-family:"Fredoka",sans-serif; font-weight:700; font-size:1.35rem}
+.logomark{display:flex; gap:3px}
+.logomark i{font-style:normal; font-family:"Andika",sans-serif; width:26px; height:26px; display:grid; place-items:center; border-radius:7px; border:2px solid #1E2A5A; font-size:.9rem}
+.clinks{display:flex; gap:22px; margin-left:auto}
+.clinks a{color:#55618C; text-decoration:none; font-weight:700}
+.clinks a:hover{color:#C2465A}
+.clang{font:inherit; font-weight:700; color:#1E2A5A; border:2px solid #E3E6F0; border-radius:999px; padding:.35em .9em; background:#fff}
+.hero{background:radial-gradient(1200px 500px at 85% 20%,#FFE7EC 0,transparent 60%),radial-gradient(900px 500px at 10% 90%,#E3F3FF 0,transparent 60%),#FFFBF5}
+.hero-in{display:grid; grid-template-columns:1.1fr .9fr; gap:clamp(24px,5vw,64px); align-items:center; padding-top:clamp(36px,6vw,80px); padding-bottom:clamp(40px,6vw,88px)}
+.eyebrow{margin:0 0 14px; display:inline-block; background:#fff; border:1px solid #F1D7DD; color:#C2465A; font-weight:800; font-size:.95rem; padding:.35em .9em; border-radius:999px}
+.h1{margin:0; font-size:clamp(2.4rem,5.2vw,4.3rem); line-height:1.05; font-weight:600; color:#1E2A5A}
+.lead{margin:18px 0 0; font-size:clamp(1.08rem,1.6vw,1.25rem); line-height:1.6; color:#4A557D; max-width:36em}
+.ctas{display:flex; align-items:center; gap:14px; margin-top:28px; flex-wrap:wrap}
+.enter{border:0; background:#FF6F82; color:#fff; font-family:"Fredoka",sans-serif; font-weight:700; font-size:clamp(1.3rem,2.4vw,1.7rem);
+  padding:.62em 1.4em; border-radius:999px; display:inline-flex; align-items:center; gap:.5em; box-shadow:0 10px 24px rgba(255,111,130,.35),0 4px 0 #D9475C; cursor:pointer}
+.enter svg{width:1em; height:1em}
+.enter:hover{background:#FF5D73}
+.enter:active{transform:translateY(3px); box-shadow:0 6px 14px rgba(255,111,130,.35),0 1px 0 #D9475C}
+.hear{width:58px; height:58px; border-radius:50%; border:2px solid #E3E6F0; background:#fff; color:#1E2A5A; display:grid; place-items:center; cursor:pointer}
+.hear svg{width:26px; height:26px}
+.badges{list-style:none; padding:0; margin:28px 0 0; display:flex; flex-wrap:wrap; gap:10px 22px; color:#4A557D; font-weight:700; font-size:.98rem}
+.badges li{display:flex; align-items:center; gap:8px}
+.hphoto{position:relative; justify-self:center; width:min(380px,82vw)}
+.blob{position:absolute; border-radius:46% 54% 60% 40%/50% 42% 58% 50%; z-index:0}
+.b1{inset:-26px -30px auto auto; width:78%; height:78%; background:#FFD45C; opacity:.55}
+.b2{inset:auto auto -26px -30px; width:70%; height:70%; background:#9ED6F5; opacity:.55}
+.pcard{position:relative; z-index:1; margin:0; background:#fff; border-radius:28px; padding:12px; box-shadow:0 24px 60px rgba(30,42,90,.18)}
+.pcard img{display:block; width:100%; height:auto; aspect-ratio:1; object-fit:cover; border-radius:20px}
+.pcard figcaption{display:flex; flex-direction:column; gap:2px; padding:12px 8px 4px}
+.pcard figcaption b{font-family:"Fredoka",sans-serif; font-size:1.25rem}
+.pcard figcaption span{color:#55618C; font-weight:700; font-size:.95rem}
+.fchip{position:absolute; z-index:2; display:grid; place-items:center; width:58px; height:58px; border-radius:18px; background:#fff; font-family:"Andika",sans-serif; font-weight:700; font-size:1.5rem;
+  box-shadow:0 10px 24px rgba(30,42,90,.16); animation:floaty 5s ease-in-out infinite}
+.f1{left:-24px; top:18%; color:#C2465A; --r:-8deg}
+.f2{right:-22px; top:46%; color:#6A5BD8; --r:8deg; animation-delay:-1.5s}
+.f3{right:-14px; bottom:-20px; color:#E2A62A; --r:6deg; animation-delay:-3s}
+@keyframes floaty{0%,100%{transform:translateY(0) rotate(var(--r))}50%{transform:translateY(-10px) rotate(calc(var(--r) * -1))}}
+.csec{padding:clamp(48px,7vw,88px) 0}
+.csec h2{margin:0 0 26px; font-size:clamp(1.8rem,3.4vw,2.6rem); font-weight:600}
+.steps{display:grid; grid-template-columns:repeat(3,1fr); gap:20px}
+.step{position:relative; background:#FFFBF5; border:1px solid #F1E6D6; border-radius:24px; padding:26px 22px}
+.step svg{width:64px; height:64px}
+.step h3{margin:14px 0 6px; font-family:"Fredoka",sans-serif; font-size:1.3rem}
+.step p{margin:0; color:#4A557D; line-height:1.55}
+.snum{position:absolute; top:18px; right:20px; font-family:"Fredoka",sans-serif; font-weight:700; color:#C9CFE3; font-size:2rem}
+.about{background:#F3F8FF}
+.about-in{display:grid; grid-template-columns:auto 1fr; gap:clamp(20px,4vw,48px); align-items:center}
+.about-in img{width:clamp(140px,18vw,200px); height:auto; aspect-ratio:1; object-fit:cover; border-radius:50%; border:6px solid #fff; box-shadow:0 12px 30px rgba(30,42,90,.15)}
+.about-in p{margin:0; font-size:1.15rem; line-height:1.7; color:#4A557D; max-width:40em}
+.tips{list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(3,1fr); gap:16px}
+.tips li{background:#fff; border:1px solid #EEF0F6; border-radius:18px; padding:18px 20px; line-height:1.5; color:#4A557D; font-weight:600}
+.langs{margin:26px 0 0; display:flex; flex-wrap:wrap; align-items:center; gap:8px; color:#55618C; font-weight:700}
+.lchip{border:2px solid #E3E6F0; background:#fff; color:#1E2A5A; border-radius:999px; padding:.3em .9em; font:inherit; font-weight:700; cursor:pointer}
+.lchip:hover{border-color:#FF6F82}
+.cfoot{border-top:1px solid #EEF0F6; padding:24px 0; color:#8A93B8; font-size:.92rem}
+@media (max-width:860px){
+  .hero-in{grid-template-columns:1fr; padding-top:22px} .hphoto{order:-1; width:min(220px,58vw)} .fchip{width:44px; height:44px; font-size:1.15rem} .logotext{font-size:1.1rem; white-space:nowrap}
+  .steps,.tips{grid-template-columns:1fr} .clinks{display:none} .about-in{grid-template-columns:1fr; justify-items:center; text-align:center}
 }
 
 /* ---------- Curtain ---------- */
-.curtain{position:fixed; inset:0; z-index:60; pointer-events:none; transform:translateY(-112%);
-  transition:transform .75s cubic-bezier(.55,0,.35,1); display:grid; place-items:center}
+.curtain{position:fixed; inset:0; z-index:60; pointer-events:none; transform:translateY(-112%); transition:transform .75s cubic-bezier(.55,0,.35,1); display:grid; place-items:center}
 .curtain.down{transform:none; pointer-events:auto}
 .curtain.up{transform:translateY(-112%); transition:transform 2.3s cubic-bezier(.6,0,.35,1)}
-.drape{position:absolute; inset:0;
-  background:linear-gradient(to bottom,rgba(0,0,0,.25),transparent 18%,transparent 80%,rgba(0,0,0,.3)),
-    repeating-linear-gradient(90deg,#7E0D1F 0,#B81A33 3%,#E0384F 5.5%,#C21F38 8%,#7E0D1F 11%)}
-.valance{position:absolute; top:0; left:0; right:0; height:70px; background:#9B1428;
-  box-shadow:inset 0 -10px 0 #F5C842,0 6px 12px rgba(0,0,0,.35)}
-.fringe{position:absolute; left:0; right:0; bottom:-22px; height:24px;
-  background:radial-gradient(circle at 50% 0,#F5C842 0 11px,transparent 12px) 0 0/28px 24px repeat-x}
-.welcome{position:relative; font-family:"Fredoka","Baloo 2",sans-serif; font-weight:700; color:#FFE27A; font-size:clamp(2.6rem,8vw,6rem);
-  text-shadow:0 6px 0 rgba(0,0,0,.35); transform:rotate(-3deg)}
+.drape{position:absolute; inset:0; background:linear-gradient(to bottom,rgba(0,0,0,.25),transparent 18%,transparent 80%,rgba(0,0,0,.3)),repeating-linear-gradient(90deg,#7E0D1F 0,#B81A33 3%,#E0384F 5.5%,#C21F38 8%,#7E0D1F 11%)}
+.valance{position:absolute; top:0; left:0; right:0; height:70px; background:#9B1428; box-shadow:inset 0 -10px 0 #F5C842,0 6px 12px rgba(0,0,0,.35)}
+.fringe{position:absolute; left:0; right:0; bottom:-22px; height:24px; background:radial-gradient(circle at 50% 0,#F5C842 0 11px,transparent 12px) 0 0/28px 24px repeat-x}
+.welcome{position:relative; font-family:"Fredoka","Baloo 2",sans-serif; font-weight:700; color:#FFE27A; font-size:clamp(2.6rem,8vw,6rem); text-shadow:0 6px 0 rgba(0,0,0,.35); transform:rotate(-3deg)}
 
-/* ---------- Storybook world ---------- */
-#world{min-height:100vh; min-height:100dvh; color:#1E2A5A;
-  background:linear-gradient(#9FD8FF 0,#D7F0FF 46%,#E8F8D8 70%,#CDEBB8 100%)}
+/* ---------- Lettervale & university ---------- */
+#world,#uni{min-height:100vh; min-height:100dvh; color:#1E2A5A; background:linear-gradient(#9FD8FF 0,#D7F0FF 46%,#E8F8D8 70%,#CDEBB8 100%); color-scheme:light}
 .wwrap{max-width:1280px; margin:0 auto; padding:12px clamp(10px,2vw,24px) 40px; display:flex; flex-direction:column; align-items:center; gap:14px}
-.wbar{width:100%; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap}
-.wtitle{margin:0; font-size:clamp(1.5rem,3.6vw,2.8rem); text-align:center; flex:1;
-  -webkit-text-stroke:.03em #fff; paint-order:stroke fill; color:#C2465A}
-.wbtn{border:3px solid #1E2A5A; background:#fff; color:#1E2A5A; border-radius:999px; padding:.3em 1em; font-weight:700; font-size:1.05rem;
-  display:inline-flex; align-items:center; gap:.4em; box-shadow:0 4px 0 rgba(30,42,90,.25)}
-.wbtn[hidden]{display:none}
-.wbtn.missing{position:relative}
-.wbtn.missing::after{content:""; position:absolute; top:-3px; right:-3px; width:12px; height:12px; border-radius:50%; background:#FF6F82}
-.scene{width:min(100%,calc(66dvh * 5 / 3)); border-radius:26px; overflow:hidden; border:5px solid #1E2A5A; box-shadow:0 10px 0 rgba(30,42,90,.22); background:#BFE6FF; line-height:0}
+.wbar{width:100%; display:grid; grid-template-columns:56px 1fr 56px; align-items:center; gap:10px}
+.wtitle{text-align:center; display:flex; flex-direction:column; line-height:1.05}
+.wtitle b{font-family:"Fredoka","Baloo 2",sans-serif; font-size:clamp(1.8rem,4.6vw,3.2rem); color:#C2465A; -webkit-text-stroke:.03em #fff; paint-order:stroke fill;
+  text-shadow:0 4px 0 rgba(30,42,90,.15)}
+.wtitle small{font-family:"Fredoka",sans-serif; font-weight:600; font-size:clamp(1rem,2.2vw,1.35rem); color:#1E2A5A}
+.wbtn{border:3px solid #1E2A5A; background:#fff; color:#1E2A5A; border-radius:999px; padding:.3em 1em; font-weight:700; font-size:1.05rem; display:inline-flex; align-items:center; gap:.4em; box-shadow:0 4px 0 rgba(30,42,90,.25)}
+.wbtn.iconly{width:56px; height:56px; padding:0; justify-content:center}
+.wbtn.iconly svg{width:32px; height:32px}
+.gear{width:46px; height:46px; justify-self:end; border-radius:50%; border:2px solid rgba(30,42,90,.25); background:rgba(255,255,255,.7); color:#55618C; display:grid; place-items:center; touch-action:none; -webkit-user-select:none; user-select:none; position:relative}
+.gear svg{width:24px; height:24px}
+.gear.holding{animation:spinhold .75s linear}
+@keyframes spinhold{to{transform:rotate(180deg)}}
+.geartip{position:fixed; z-index:80; background:#1E2A5A; color:#fff; font-weight:700; font-size:.92rem; padding:.45em .8em; border-radius:10px; pointer-events:none}
+.scene{width:min(100%,calc(66dvh * 1200 / 650)); border-radius:26px; overflow:hidden; border:5px solid #1E2A5A; box-shadow:0 10px 0 rgba(30,42,90,.22); background:#BFE6FF; line-height:0}
+#uni .scene{width:min(100%,calc(60dvh * 1200 / 560))}
 .scene svg{display:block; width:100%; height:auto}
-.cloud{animation:drift 26s linear infinite}
-.cloud.c2{animation-duration:34s; animation-delay:-12s}
-.cloud.c3{animation-duration:40s; animation-delay:-25s}
-@keyframes drift{from{transform:translateX(-260px)}to{transform:translateX(1100px)}}
+.cloud{animation:drift 30s linear infinite}
+.cloud.c2{animation-duration:38s; animation-delay:-14s}
+.cloud.c3{animation-duration:46s; animation-delay:-28s}
+@keyframes drift{from{transform:translateX(-260px)}to{transform:translateX(1320px)}}
 .sunrays{transform-box:fill-box; transform-origin:center; animation:spin 18s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .blink{transform-box:fill-box; transform-origin:center; animation:blink 4.5s infinite}
 @keyframes blink{0%,94%,100%{transform:scaleY(1)}96%{transform:scaleY(.1)}}
+.balloon{animation:bobb 6s ease-in-out infinite}
+@keyframes bobb{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+.fw{transform-box:fill-box; transform-origin:center; animation:fw 3s ease-out infinite; opacity:0}
+@keyframes fw{0%{transform:scale(.2); opacity:0}12%{opacity:1}45%{transform:scale(1.2); opacity:0}100%{opacity:0}}
+.tw{transform-box:fill-box; transform-origin:center; animation:tw 2.2s ease-in-out infinite}
+@keyframes tw{0%,100%{transform:scale(.4); opacity:.3}50%{transform:scale(1.15); opacity:1}}
+.smoke{animation:smoke 4s ease-in-out infinite; transform-box:fill-box; transform-origin:bottom}
+@keyframes smoke{0%,100%{transform:translateY(0); opacity:.9}50%{transform:translateY(-6px); opacity:.5}}
+.shimmer{animation:shim 3s ease-in-out infinite}
+@keyframes shim{50%{opacity:.3}}
+.conf{animation:conf 3s ease-in-out infinite}
+@keyframes conf{50%{transform:translateY(10px)}}
 .ch .glow{opacity:0; transition:opacity .1s}
 .ch.now .glow{opacity:1}
 .ch g.lt{transform-box:fill-box; transform-origin:center; transition:transform .12s}
-.ch.now g.lt{transform:scale(1.18)}
-#beam{transition:opacity .15s}
+.ch.now g.lt{transform:scale(1.2)}
 #beam{animation:beam .5s linear infinite}
 @keyframes beam{to{stroke-dashoffset:-24}}
+#kid{transform-box:fill-box; transform-origin:50% 100%}
+.gmouth{transform-box:fill-box; transform-origin:center}
+body.talking .gmouth{animation:talk .22s ease-in-out infinite alternate}
+@keyframes talk{to{transform:scaleY(3.2)}}
 .wlyric{margin:0; font-family:"Fredoka","Baloo 2",sans-serif; font-weight:700; font-size:clamp(1.7rem,4.6vw,3rem); min-height:1.35em; text-align:center}
 .wlyric .lw{padding:0 .12em; border-radius:12px}
 .wlyric .lw.on{background:#FFE27A}
-.wctrl{display:flex; gap:12px; flex-wrap:wrap; justify-content:center}
-.sing{border:4px solid #1E2A5A; background:#FFD45C; color:#1E2A5A; font-family:"Fredoka","Baloo 2",sans-serif; font-weight:700; font-size:clamp(1.4rem,3vw,2rem);
-  padding:.2em 1.2em; border-radius:999px; box-shadow:0 6px 0 rgba(30,42,90,.3); display:inline-flex; align-items:center; gap:.4em}
-.sing.alt{background:#fff}
+.wctrl{display:flex; gap:14px; flex-wrap:wrap; justify-content:center}
+.sing{border:4px solid #1E2A5A; background:#FFD45C; color:#1E2A5A; width:84px; height:84px; border-radius:50%; box-shadow:0 6px 0 rgba(30,42,90,.3); display:inline-flex; align-items:center; justify-content:center; gap:2px}
+.sing svg{width:40px; height:40px}
+.sing.alt{background:#fff; width:auto; padding:0 18px; border-radius:999px}
+.sing.alt svg{width:36px; height:36px}
 .sing[hidden]{display:none}
 .sing:active{transform:translateY(4px); box-shadow:0 2px 0 rgba(30,42,90,.3)}
-
-/* ---------- Letter blocks ---------- */
 #blocks{width:100%; display:flex; flex-direction:column; align-items:center; gap:16px; scroll-margin-top:12px}
 #blocks[hidden]{display:none}
-.bhead{margin:6px 0 0; font-size:clamp(2.2rem,6vw,4rem); color:#1E2A5A; text-align:center}
-.blockgrid{width:100%; display:grid; grid-template-columns:repeat(auto-fill,minmax(clamp(104px,15vw,150px),1fr)); gap:clamp(12px,1.8vw,22px)}
-.blk{position:relative; aspect-ratio:1; border:4px solid #1E2A5A; border-radius:22px; background:var(--bc); color:#1E2A5A;
-  display:flex; flex-direction:column; align-items:center; justify-content:center; padding:6px; line-height:1;
-  box-shadow:inset 0 0 0 6px rgba(255,255,255,.55),0 9px 0 rgba(30,42,90,.3); transition:transform .15s}
-#blocks.show .blk{animation:drop .55s cubic-bezier(.3,1.6,.55,1) both; animation-delay:calc(var(--i) * .05s)}
-@keyframes drop{from{opacity:0; transform:translateY(-60px) scale(.6) rotate(-12deg)}to{opacity:1; transform:none}}
-.blk:hover{transform:translateY(-6px) rotate(-3deg)}
-.blk:nth-child(even):hover{transform:translateY(-6px) rotate(3deg)}
-.blk:active{transform:translateY(6px); box-shadow:inset 0 0 0 6px rgba(255,255,255,.55),0 3px 0 rgba(30,42,90,.3)}
-.blk .ltr{font-family:"Andika",sans-serif; font-weight:700; font-size:clamp(2.6rem,5.4vw,4.2rem)}
-.blk .ltr small{font-size:.72em}
-.blk svg{width:44%; height:auto; margin-top:4px}
-.blk.done::after{content:"★"; position:absolute; top:-14px; right:-12px; width:36px; height:36px; border-radius:50%; background:#FFD45C;
-  border:3px solid #1E2A5A; display:grid; place-items:center; font-size:1.3rem; line-height:1}
+.bhead{margin:6px 0 0; font-size:clamp(1.8rem,5vw,3.2rem); color:#1E2A5A; text-align:center}
 .prog{display:flex; align-items:center; gap:12px; width:min(640px,100%); font-family:"Fredoka","Baloo 2",sans-serif; font-weight:700; font-size:clamp(1.2rem,3vw,1.6rem)}
 .pbar{flex:1; height:24px; border:3px solid #1E2A5A; border-radius:999px; background:#fff; overflow:hidden}
 .pbar i{display:block; width:0; height:100%; background:linear-gradient(90deg,#FFD45C,#FF9AA8,#C9A8FF); transition:width 1s ease}
-.mapbox{width:100%; border:5px solid #1E2A5A; border-radius:26px; overflow:hidden; background:#BDE7A6; box-shadow:0 10px 0 rgba(30,42,90,.22); line-height:0}
+.mapbox{width:100%; border:5px solid #6B4A2A; border-radius:22px; overflow:hidden; background:#F6E4B8; box-shadow:0 10px 0 rgba(74,46,24,.28); line-height:0}
 .mapbox svg{display:block; width:100%; height:auto}
-.stop{cursor:pointer; outline:none}
-.stop:focus-visible .face{stroke:#2F6BFF; stroke-width:7}
+.stop,.unistop,.cheststop{cursor:pointer; outline:none}
+.stop:focus-visible circle,.unistop:focus-visible rect{stroke:#2F6BFF}
 .stop .lt2{transform-box:fill-box; transform-origin:center; transition:transform .15s}
 .stop:hover .lt2{transform:scale(1.1) rotate(-4deg)}
 .stop:active .lt2{transform:scale(.94)}
-.stop .ring{transform-box:fill-box; transform-origin:center; animation:ring 1.4s ease-out infinite}
+.ring{transform-box:fill-box; transform-origin:center; animation:ring 1.4s ease-out infinite}
 @keyframes ring{from{transform:scale(.85); opacity:1}to{transform:scale(1.4); opacity:0}}
 #marker{transition:transform 1.6s cubic-bezier(.45,0,.3,1)}
 #marker .bob{animation:bob 1.2s ease-in-out infinite}
 @keyframes bob{50%{transform:translateY(-8px)}}
-@media (prefers-reduced-motion:reduce){.stop .ring,#marker .bob{animation:none} #marker{transition:none}}
-.shelfhead{margin:26px 0 0; font-size:clamp(1.9rem,5vw,3rem); text-align:center}
-.backcover{margin-top:12px}
+.shelfhead{margin:26px 0 0; font-size:clamp(1.8rem,5vw,3rem); text-align:center}
+.diploma{display:flex; align-items:center; gap:18px; background:#FFF8E8; border:4px double #B8860B; border-radius:18px; padding:16px 22px; box-shadow:0 8px 0 rgba(74,46,24,.2); max-width:760px; width:100%}
+.diploma .seal{flex:none; width:70px; height:70px; border-radius:50%; background:#C2465A; color:#FFD45C; display:grid; place-items:center; font-size:2.2rem; border:4px solid #FFD45C}
+.diploma b{font-family:"Fredoka",sans-serif; font-size:clamp(1.4rem,3vw,2rem); display:block}
+.diploma small{color:#55618C; font-weight:700}
+.dletters{display:flex; flex-wrap:wrap; gap:4px; margin-top:8px}
+.dletters span{width:26px; height:26px; display:grid; place-items:center; border-radius:7px; font-family:"Andika",sans-serif; font-weight:700; background:#EEE6D2; color:#A89878}
+.dletters span.on{background:#FFD45C; color:#1E2A5A}
+.doors{width:min(100%,900px); display:grid; grid-template-columns:repeat(4,1fr); gap:18px; margin-top:8px}
+@media (max-width:640px){.doors{grid-template-columns:repeat(2,1fr)}}
+.door{display:flex; flex-direction:column; align-items:center; gap:8px}
+.dbody{position:relative; width:100%; aspect-ratio:3/4; border:4px solid #1E2A5A; border-radius:999px 999px 18px 18px; background:var(--dc); color:#1E2A5A;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; box-shadow:inset 0 0 0 8px rgba(255,255,255,.45),0 8px 0 rgba(30,42,90,.25); transition:transform .15s}
+.dbody::after{content:""; position:absolute; right:10%; top:74%; width:12px; height:12px; border-radius:50%; background:#FFD45C; border:2px solid #1E2A5A}
+.dbody:active,.dbody.wiggle{animation:wig .5s}
+@keyframes wig{25%{transform:rotate(-4deg)}75%{transform:rotate(4deg)}}
+.dbody .hi{font-family:"Fredoka",sans-serif; font-weight:700; font-size:clamp(1.15rem,2.4vw,1.7rem); padding:0 10px; text-align:center; word-break:keep-all; line-height:1.15}
+.dbody .ln{font-weight:700; font-size:1rem; color:#33406E}
+.dbody .here{position:absolute; top:-12px; background:#1E2A5A; color:#fff; font-size:.8rem; font-weight:700; padding:.2em .7em; border-radius:999px}
+.dopen{border:2px solid #1E2A5A; background:#fff; color:#1E2A5A; border-radius:999px; font-weight:700; font-size:.85rem; padding:.25em .8em}
+.unipick{color:#55618C; font-weight:700; margin:0}
 
-/* ---------- Letter modules ---------- */
+/* ---------- Book (lesson) view ---------- */
+.top{display:grid; grid-template-columns:auto 1fr auto auto; align-items:center; gap:12px; padding:2px 4px 10px}
+.iconbtn{width:64px; height:64px; border-radius:50%; border:3px solid var(--ink); background:#FFD45C; color:#1E2A5A; display:grid; place-items:center; box-shadow:0 5px 0 rgba(30,42,90,.25)}
+.iconbtn svg{width:34px; height:34px}
+#title{font-family:"Fredoka",sans-serif; font-size:1.3rem; color:var(--ink)}
+.rguide{width:clamp(100px,14vw,150px); height:clamp(124px,17.5vw,186px); margin-bottom:-26px; position:relative; z-index:2; filter:drop-shadow(0 6px 0 rgba(30,42,90,.15))}
+.rguide svg{width:100%; height:100%}
+.rguide.cheer svg{animation:hop .45s ease-in-out 2}
+.rguide.cheer::after{content:"★ ★"; position:absolute; top:-6px; left:50%; transform:translateX(-50%); color:#FFD45C; font-size:1.4rem; -webkit-text-stroke:1px #1E2A5A; white-space:nowrap; animation:pop2 .9s ease-out forwards}
+@keyframes hop{50%{transform:translateY(-12px) rotate(-4deg)}}
+@keyframes pop2{from{opacity:1; transform:translate(-50%,0) scale(.6)}to{opacity:0; transform:translate(-50%,-26px) scale(1.3)}}
 .page{background:#FFFBF0}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .page{background:var(--card)}}
 :root[data-theme="dark"] .page{background:var(--card)}
+#listen,.listen[data-act="hearOpts"]{width:86px; height:86px; padding:0; border-radius:50%; justify-content:center}
+#listen svg,.listen[data-act="hearOpts"] svg{width:40px; height:40px}
+.round#next{background:#8EDBA6; width:78px; height:78px}
+.round#next svg{width:36px; height:36px}
 .bigblock{font-family:"Andika",sans-serif; font-weight:700; line-height:1; font-size:clamp(6rem,24vw,11rem); color:#1E2A5A; padding:.08em .3em .14em;
   border:5px solid #1E2A5A; border-radius:40px; box-shadow:inset 0 0 0 9px rgba(255,255,255,.55),0 12px 0 rgba(30,42,90,.28); animation:wob 2.4s ease-in-out infinite}
 .bigblock small{font-size:.75em}
-.homebig{border:4px solid #1E2A5A; background:#FF6F82; color:#fff; font-family:"Fredoka","Baloo 2",sans-serif; font-weight:700; font-size:clamp(1.5rem,4vw,2.1rem);
-  padding:.2em 1.1em; border-radius:999px; box-shadow:0 7px 0 #1E2A5A; display:inline-flex; align-items:center; gap:.4em}
-.homebig:active{transform:translateY(5px); box-shadow:0 2px 0 #1E2A5A}
+@keyframes wob{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-.08em) rotate(3deg)}}
+.gobig{width:110px; height:110px; border-radius:50%; border:5px solid #1E2A5A; background:#8EDBA6; color:#1E2A5A; display:grid; place-items:center; box-shadow:0 8px 0 rgba(30,42,90,.3)}
+.gobig svg{width:54px; height:54px; margin-left:8px}
+.gobig:active{transform:translateY(5px); box-shadow:0 3px 0 rgba(30,42,90,.3)}
+.homebig{width:96px; height:96px; border-radius:50%; border:4px solid #1E2A5A; background:#F3DFAF; display:grid; place-items:center; box-shadow:0 7px 0 rgba(74,46,24,.35)}
+.homebig svg{width:56px; height:56px}
+.nextl{display:inline-flex; align-items:center; gap:10px; border:4px solid #1E2A5A; background:#fff; border-radius:999px; padding:8px 18px 8px 8px; box-shadow:0 7px 0 rgba(30,42,90,.25); color:#1E2A5A}
+.nextl span{font-family:"Andika",sans-serif; font-weight:700; font-size:2rem; border-radius:16px; padding:0 .3em; border:3px solid #1E2A5A}
+.nextl svg{width:36px; height:36px}
 .key span i{display:block; font-style:normal; font-size:1rem; color:var(--muted); margin-top:2px}
+.iconsnd{display:inline-flex; align-items:center; gap:.4em; font-size:1.5rem !important; padding:.3em .9em !important}
+.iconsnd svg{width:34px; height:34px}
 .tracebox{width:min(560px,100%); line-height:0}
 #trace{width:100%; aspect-ratio:6/5; background:#fff; border:4px dashed var(--line); border-radius:28px; touch-action:none; cursor:crosshair}
-.pillrow{display:flex; gap:10px; flex-wrap:wrap; justify-content:center}
+.pillrow{display:flex; gap:12px; flex-wrap:wrap; justify-content:center}
+.pillrow .pill{font-size:1.8rem; min-width:72px; justify-content:center; font-family:"Andika",sans-serif}
 .pill.on{background:var(--hl); color:#1E2A5A; border-color:#1E2A5A}
+.pill.iconly svg{width:34px; height:34px}
+.stars{display:flex; gap:8px; font-size:2.6rem; line-height:1}
+.stars span{color:#E3E6F0; -webkit-text-stroke:2px #C9CFE3}
+.stars span.on{color:#FFD45C; -webkit-text-stroke:2px #B8860B; animation:pop3 .4s}
+@keyframes pop3{50%{transform:scale(1.35)}}
+.pickq{display:flex; align-items:center; gap:8px; font-size:2.6rem; font-weight:700; color:var(--muted)}
 .picopt{display:flex; flex-direction:column; align-items:center; gap:4px; line-height:1}
 .picopt b{font-size:1.25rem; color:#1E2A5A}
+.pdots{justify-content:center}
+
+/* ---------- Pointing hand hint ---------- */
+.hand{position:fixed; z-index:70; width:44px; height:56px; pointer-events:none; animation:tap 1s ease-in-out infinite; filter:drop-shadow(0 4px 4px rgba(0,0,0,.25))}
+.hand svg{width:100%; height:100%}
+@keyframes tap{0%,100%{transform:translateY(8px)}50%{transform:translateY(-6px)}}
+.pulse{animation:pulseb 1.1s ease-in-out infinite !important}
+@keyframes pulseb{0%,100%{box-shadow:0 0 0 0 rgba(255,212,92,.9)}50%{box-shadow:0 0 0 14px rgba(255,212,92,0)}}
+
+/* ---------- Grown-up dialog ---------- */
+#adult h3{margin:0 0 14px; font-family:"Fredoka",sans-serif}
+.adrow{display:flex; align-items:center; gap:10px; margin:14px 0; font-weight:700}
+.adrow select{font:inherit; padding:.3em .6em; border-radius:10px; border:2px solid var(--line)}
+.adbtns{display:flex; flex-wrap:wrap; gap:10px; margin:14px 0}
 @media (prefers-reduced-motion:reduce){
-  .bigtitle span,.enter,.floaty,.cloud,.sunrays,.blink,#beam,.bigblock,#blocks.show .blk{animation:none}
+  .cloud,.sunrays,.blink,.balloon,.fw,.tw,.smoke,.shimmer,.conf,#beam,.ring,#marker .bob,.bigblock,.hand,.pulse,.fchip,body.talking .gmouth{animation:none !important}
+  .fw{opacity:1} #marker{transition:none}
   .curtain,.curtain.up{transition-duration:.01s}
 }
 </style>
 </head>
 <body>
-<section id="cover" class="view">
-  <div class="sbook">
-    <div class="pg-left"><img src="Rach.jpg" alt="La maestra Rachel Woronoff"><span class="ribbon">Maestra Rachel</span></div>
-    <div class="pg-right" id="coverRight">
-      <h1 class="bigtitle" id="bigtitle" aria-label="¡Vamos a leer!"></h1>
-      <p class="subtitle">con la maestra Rachel</p>
-      <p class="once">Érase una vez un mundo mágico lleno de letras, canciones y amigos. ¿Quieres entrar?</p>
-      <button class="enter" id="enterBtn">¡Entrar! <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4v16l13-8z"/></svg></button>
-      <button class="hear" id="greetBtn"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 9v6h4l5 4V5L7 9H3zm13.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4z"/></svg> Escuchar a la maestra</button>
-    </div>
-  </div>
-</section>
-
+<section id="cover" class="view"></section>
 <section id="world" class="view" hidden><div class="wwrap" id="worldIn"></div></section>
+<section id="uni" class="view" hidden><div class="wwrap" id="uniIn"></div></section>
 
 <main class="book view" id="book" hidden>
   <div class="top">
-    <div class="top-l">
-      <button class="chip" id="homeBtn">🏠 Letras</button>
-      <strong id="title">Vamos a leer con la maestra Rachel</strong>
-    </div>
-    <div class="top-r">
-      <label class="switch"><input type="checkbox" id="auto" checked> Hablar al pasar la página</label>
-      <button class="chip" id="teachBtn" hidden>Maestra</button>
-    </div>
+    <button class="iconbtn" id="homeBtn" aria-label="Mapa"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 6l6-3 8 3 6-3v15l-6 3-8-3-6 3z" fill="#F3DFAF" stroke="#1E2A5A" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 3v15M16 6v15" stroke="#1E2A5A" stroke-width="1.4"/><path d="M11 10l3 3M14 10l-3 3" stroke="#C2465A" stroke-width="2" stroke-linecap="round"/></svg></button>
+    <strong id="title"></strong>
+    <div class="rguide" id="rguide" aria-hidden="true"></div>
+    <button class="gear" data-gear="1" aria-label="Para adultos"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M19.4 13a7.5 7.5 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.6 7.6 0 0 0-1.7-1L15 3.3h-4l-.4 2.6a7.6 7.6 0 0 0-1.7 1l-2.5-1-2 3.5L6.6 11a7.5 7.5 0 0 0 0 2l-2.2 1.6 2 3.5 2.5-1a7.6 7.6 0 0 0 1.7 1l.4 2.6h4l.4-2.6a7.6 7.6 0 0 0 1.7-1l2.5 1 2-3.5zM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z"/></svg></button>
   </div>
 
   <section class="page" id="page" aria-live="polite"></section>
@@ -437,9 +499,8 @@ dialog p{margin:0 0 14px; color:var(--muted); line-height:1.5}
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
     </button>
     <div class="mid">
-      <button class="listen" id="listen">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 4V5L7 9H3zm13.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4z"/></svg>
-        <span>Escuchar</span>
+      <button class="listen" id="listen" aria-label="▶">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 9v6h4l5 4V5L7 9H3zm13.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4z"/></svg>
       </button>
       <div class="dots" id="dots"></div>
     </div>
@@ -450,14 +511,21 @@ dialog p{margin:0 0 14px; color:var(--muted); line-height:1.5}
   <p class="notice" id="notice" hidden></p>
 </main>
 
+<dialog id="adult">
+  <h3 id="adT"></h3>
+  <label class="switch"><input type="checkbox" id="auto" checked> <span id="adAuto"></span></label>
+  <label class="adrow"><span id="adLang"></span> <select id="langSel"></select></label>
+  <div class="adbtns"><button class="pill" id="adCover"></button><button class="pill" id="adReset"></button><button class="pill" id="teachBtn" hidden>Maestra</button></div>
+  <button class="big" id="adClose"></button>
+</dialog>
+
 <dialog id="teacher">
   <h3>Teacher: record the letter sounds</h3>
   <p>Computer voices can say letter names and words, but not single letter sounds. Record each sound once so the Sonido buttons and blending play your voice. Say just the sound, short and clean, with no "uh" after it (/k/ not "kuh").</p>
   <p>Recordings made here play on this device only. To make them play for every child, tap Download on each one and upload the files to the <b>sounds</b> folder of the GitHub repo.</p>
+  <p><b>Children's chorus (optional):</b> record up to three groups of children singing the ABC song. When you tap Record, the song plays so the children stay in time, and recording stops when the song ends. Their voices then play along every time the song is sung. Get written permission from parents before recording children.</p>
   <div id="recRows"></div>
   <p class="err" id="recErr" hidden></p>
-  <p style="margin-top:16px"><b>Letter map:</b> stars are saved on each device. Clear them here when a new child starts on this device.</p>
-  <button class="pill" id="resetProg">Reset letter progress</button>
   <button class="big" id="closeTeach" style="margin-top:10px">Listo</button>
 </dialog>
 
@@ -937,6 +1005,337 @@ const SAYW = { yoyo: 'yo-yo' };
 const showW = w => SAYW[w] || w;
 const sayW = w => SAYW[w] || w;
 
+/* ---------- Languages ---------- */
+const BRAND = 'Lettervale';
+const LANGS = ['es', 'fr', 'de', 'it', 'pt', 'ja', 'zh', 'ko'];
+const VOICE_PREF = { es: /MX|US|419/i, fr: /FR/i, de: /DE/i, it: /IT/i, pt: /BR/i, ja: /JP/i, zh: /CN|Hans/i, ko: /KR/i };
+const VOICE_TAG = { es: 'es-MX', fr: 'fr-FR', de: 'de-DE', it: 'it-IT', pt: 'pt-BR', ja: 'ja-JP', zh: 'zh-CN', ko: 'ko-KR', en: 'en-US' };
+const N = (t, r) => ({ t, l: LANG, r });          // native-language speech part
+const E = (t, r) => ({ t, l: 'en', r });          // English speech part
+const tipT = (L, s, w) => `<b>${L}</b>|<span class="sym">${s}</span>|<i>${w}</i>`;
+
+const STR = {
+  es: {
+    langName: 'Español', hello: '¡Hola!', world: 'el Valle de las Letras', uniTitle: 'Universidad de los Idiomas', curtain: '¡Bienvenidos!',
+    wHello: '¡Hola, amigos! Soy la maestra Rachel. ¡Bienvenidos a Lettervale, el Valle de las Letras! ¡Cantemos el abecedario juntos!',
+    wAfter: '¡Muy bien! Ahora sigue el mapa del tesoro. Toca la letra que brilla.',
+    mapTitle: 'Mapa del tesoro de las letras', start: 'Inicio', treasure: 'Tesoro', uniShort: 'Universidad',
+    locked: 'Primero termina todas las letras del mapa. ¡Tú puedes!',
+    allDone: '¡Encontraste el tesoro! ¡Terminaste todo el abecedario! Ahora vamos a la Universidad de los Idiomas.',
+    yes: '¡Sí!', no: 'Esa no. Prueba otra vez.', great: '¡Excelente! Lo hiciste muy bien.', traceOk: '¡Muy bien! ¡Qué bonita letra!',
+    foundAll: '¡Lo lograste! Encontraste todas.', proud: '¡Estoy muy orgullosa de ti!', star: '¡Ganaste una estrella en el mapa!',
+    tapHome: 'Toca la casita para volver al mapa.', soundIn: 'Escucha su sonido en la palabra',
+    coverHello: '¡Hola, amigos! Soy la maestra Rachel. Toca el botón grande para entrar.',
+    uniHello: '¡Felicidades! Terminaste todo el abecedario. Bienvenidos a la Universidad de los Idiomas. Aquí aprenden niños de todo el mundo. ¡Toca una puerta para escuchar cómo saludan!',
+    uniPick: 'Para adultos: elija el idioma de las instrucciones', uniOpen: 'Abrir', diploma: 'Diploma del abecedario', here: 'Estás aquí',
+    adult: 'Para adultos', hold: 'Para adultos: mantenga presionado', autoVoice: 'Hablar al pasar la página', language: 'Idioma', coverBtn: 'Portada',
+    reset: 'Reiniciar progreso', resetQ: '¿Borrar las estrellas del mapa en este dispositivo?', teacher: 'Maestra', close: 'Listo',
+    noVoice: 'Este dispositivo no tiene una voz para este idioma. Agréguela en los ajustes de voz del sistema.',
+    noSpeech: 'Este navegador no puede hablar. Abra la lección en Chrome, Safari o Edge.',
+    cEyebrow: 'Inglés para niños de 4 y 5 años que hablan español', cH1: 'Aprender a leer en inglés, jugando.',
+    cLead: 'Con la maestra Rachel, los niños conocen las 26 letras del abecedario en inglés, sus sonidos y sus primeras palabras, con canciones, juegos y un mapa del tesoro.',
+    cCta: 'Entrar a Lettervale', cHow: 'Cómo funciona', cNavT: 'La maestra', cNavF: 'Familias',
+    cB1: '26 lecciones con juegos', cB2: 'Voz y canciones en cada página', cB3: 'Instrucciones en español',
+    cS1t: 'Se abre el telón', cS1: 'El niño entra a Lettervale, un mundo mágico de castillos, lagos y bosques.',
+    cS2t: 'Canta con la maestra Rachel', cS2: 'Rachel señala cada letra mientras cantan juntos el abecedario.',
+    cS3t: 'Sigue el mapa del tesoro', cS3: 'Cada letra completada gana una estrella y acerca al niño al tesoro.',
+    cAboutT: 'Conoce a la maestra Rachel', cAbout: 'Rachel Woronoff es maestra de primaria. En cada lección guía a los niños con su voz, sus canciones y mucho cariño.',
+    cRole: 'Maestra de primaria', cFamT: 'Para familias y maestros', cF1: 'Funciona mejor en sesiones cortas, con un adulto cerca.',
+    cF2: 'Suba el volumen: la maestra Rachel da cada instrucción en voz alta.', cF3: 'El progreso se guarda en este dispositivo.',
+    cLangs: 'También disponible en', cFoot: 'Hecho con cariño para pequeños lectores.',
+    today: L => [N('¡Hoy aprendemos la letra'), E(L + '!')], thisIs: L => [N('Esta es la letra'), E(L)],
+    trace: L => [N('Traza la letra'), E(L), N('con tu dedo. ¡Sigue la línea!')],
+    find: L => [N('Encuentra todas las letras'), E(L + '.'), N('Grandes y chiquitas.')],
+    pick: (L, end) => [N(end ? '¿Cuál termina con la letra' : '¿Cuál empieza con la letra'), E(L), N('?')],
+    findNo: L => [N('Esa no. Busca la letra'), E(L + '.')], know: L => [N('¡Muy bien! Ya conoces la letra'), E(L + '.')],
+    advance: L => [N('¡Muy bien! Avanzaste en el mapa. Ahora sigue la letra'), E(L + '.')],
+    tip: null,
+  },
+  fr: {
+    langName: 'Français', hello: 'Bonjour !', world: 'la Vallée des Lettres', uniTitle: 'Université des Langues', curtain: 'Bienvenue !',
+    wHello: "Bonjour les amis ! Je suis la maîtresse Rachel. Bienvenue à Lettervale, la Vallée des Lettres ! Chantons l'alphabet ensemble !",
+    wAfter: 'Très bien ! Maintenant, suis la carte au trésor. Touche la lettre qui brille.',
+    mapTitle: 'La carte au trésor des lettres', start: 'Départ', treasure: 'Trésor', uniShort: 'Université',
+    locked: "D'abord, termine toutes les lettres de la carte. Tu peux le faire !",
+    allDone: "Tu as trouvé le trésor ! Tu as fini tout l'alphabet ! Allons à l'Université des Langues.",
+    yes: 'Oui !', no: 'Pas celle-là. Essaie encore.', great: 'Excellent ! Tu as très bien réussi.', traceOk: 'Très bien ! Quelle jolie lettre !',
+    foundAll: 'Bravo ! Tu les as toutes trouvées.', proud: 'Je suis très fière de toi !', star: 'Tu as gagné une étoile sur la carte !',
+    tapHome: 'Touche la petite maison pour revenir à la carte.', soundIn: 'Écoute son son dans le mot',
+    coverHello: 'Bonjour les amis ! Je suis la maîtresse Rachel. Touche le grand bouton pour entrer.',
+    uniHello: "Félicitations ! Tu as fini tout l'alphabet. Bienvenue à l'Université des Langues. Ici, des enfants du monde entier apprennent. Touche une porte pour écouter comment ils disent bonjour !",
+    uniPick: 'Pour les adultes : choisissez la langue des consignes', uniOpen: 'Ouvrir', diploma: "Diplôme de l'alphabet", here: 'Tu es ici',
+    adult: 'Pour les adultes', hold: 'Pour les adultes : appui long', autoVoice: 'Lire à voix haute en tournant la page', language: 'Langue', coverBtn: 'Accueil',
+    reset: 'Réinitialiser la progression', resetQ: 'Effacer les étoiles de la carte sur cet appareil ?', teacher: 'Enseignante', close: 'OK',
+    noVoice: "Cet appareil n'a pas de voix pour cette langue. Ajoutez-la dans les réglages vocaux du système.",
+    noSpeech: 'Ce navigateur ne peut pas parler. Ouvrez la leçon dans Chrome, Safari ou Edge.',
+    cEyebrow: "L'anglais pour les enfants de 4 et 5 ans qui parlent français", cH1: 'Apprendre à lire en anglais, en jouant.',
+    cLead: "Avec la maîtresse Rachel, les enfants découvrent les 26 lettres de l'alphabet anglais, leurs sons et leurs premiers mots, avec des chansons, des jeux et une carte au trésor.",
+    cCta: 'Entrer à Lettervale', cHow: 'Comment ça marche', cNavT: 'La maîtresse', cNavF: 'Familles',
+    cB1: '26 leçons avec des jeux', cB2: 'Voix et chansons à chaque page', cB3: 'Consignes en français',
+    cS1t: 'Le rideau se lève', cS1: "L'enfant entre à Lettervale, un monde magique de châteaux, de lacs et de forêts.",
+    cS2t: 'On chante avec Rachel', cS2: "Rachel montre chaque lettre pendant qu'on chante l'alphabet ensemble.",
+    cS3t: 'On suit la carte au trésor', cS3: "Chaque lettre terminée gagne une étoile et rapproche l'enfant du trésor.",
+    cAboutT: 'Rencontrez la maîtresse Rachel', cAbout: "Rachel Woronoff est enseignante en école primaire. À chaque leçon, elle guide les enfants avec sa voix, ses chansons et beaucoup de tendresse.",
+    cRole: 'Enseignante en primaire', cFamT: 'Pour les familles et les enseignants', cF1: 'Idéal en séances courtes, avec un adulte à proximité.',
+    cF2: 'Montez le son : Rachel donne chaque consigne à voix haute.', cF3: 'La progression est enregistrée sur cet appareil.',
+    cLangs: 'Aussi disponible en', cFoot: 'Fait avec tendresse pour les petits lecteurs.',
+    today: L => [N("Aujourd'hui, on apprend la lettre"), E(L + '!')], thisIs: L => [N('Voici la lettre'), E(L)],
+    trace: L => [N('Trace la lettre'), E(L), N('avec ton doigt. Suis la ligne !')],
+    find: L => [N('Trouve toutes les lettres'), E(L + '.'), N('Les grandes et les petites.')],
+    pick: (L, end) => [N(end ? 'Quel mot finit par la lettre' : 'Quel mot commence par la lettre'), E(L), N('?')],
+    findNo: L => [N('Pas celle-là. Cherche la lettre'), E(L)], know: L => [N('Très bien ! Tu connais la lettre'), E(L + '.')],
+    advance: L => [N('Très bien ! Tu avances sur la carte. Maintenant, la lettre'), E(L)],
+    tip: (L, s, w) => `La lettre <b>${L}</b> fait le son <span class="sym">${s}</span>, comme dans <i>${w}</i>.`,
+  },
+  de: {
+    langName: 'Deutsch', hello: 'Hallo!', world: 'das Buchstabental', uniTitle: 'Universität der Sprachen', curtain: 'Willkommen!',
+    wHello: 'Hallo, Freunde! Ich bin Lehrerin Rachel. Willkommen in Lettervale, dem Buchstabental! Lasst uns zusammen das ABC singen!',
+    wAfter: 'Sehr gut! Jetzt folge der Schatzkarte. Tippe auf den Buchstaben, der leuchtet.',
+    mapTitle: 'Die Schatzkarte der Buchstaben', start: 'Start', treasure: 'Schatz', uniShort: 'Universität',
+    locked: 'Zuerst schaffst du alle Buchstaben auf der Karte. Du kannst das!',
+    allDone: 'Du hast den Schatz gefunden! Du kannst jetzt das ganze ABC! Jetzt gehen wir zur Universität der Sprachen.',
+    yes: 'Ja!', no: 'Nicht dieses. Versuch es noch mal.', great: 'Ausgezeichnet! Das hast du toll gemacht.', traceOk: 'Sehr gut! Was für ein schöner Buchstabe!',
+    foundAll: 'Geschafft! Du hast alle gefunden.', proud: 'Ich bin sehr stolz auf dich!', star: 'Du hast einen Stern auf der Karte gewonnen!',
+    tapHome: 'Tippe auf das Häuschen, um zur Karte zurückzugehen.', soundIn: 'Hör seinen Laut im Wort',
+    coverHello: 'Hallo, Freunde! Ich bin Lehrerin Rachel. Tippe auf den großen Knopf, um hineinzugehen.',
+    uniHello: 'Herzlichen Glückwunsch! Du kannst jetzt das ganze ABC. Willkommen in der Universität der Sprachen. Hier lernen Kinder aus der ganzen Welt. Tippe auf eine Tür und hör, wie sie Hallo sagen!',
+    uniPick: 'Für Erwachsene: Sprache der Anleitungen wählen', uniOpen: 'Öffnen', diploma: 'ABC-Diplom', here: 'Du bist hier',
+    adult: 'Für Erwachsene', hold: 'Für Erwachsene: lange drücken', autoVoice: 'Beim Umblättern vorlesen', language: 'Sprache', coverBtn: 'Startseite',
+    reset: 'Fortschritt zurücksetzen', resetQ: 'Die Sterne auf der Karte auf diesem Gerät löschen?', teacher: 'Lehrerin', close: 'OK',
+    noVoice: 'Dieses Gerät hat keine Stimme für diese Sprache. Fügen Sie sie in den Spracheinstellungen des Systems hinzu.',
+    noSpeech: 'Dieser Browser kann nicht sprechen. Öffnen Sie die Lektion in Chrome, Safari oder Edge.',
+    cEyebrow: 'Englisch für deutschsprachige Kinder von 4 und 5 Jahren', cH1: 'Spielend Englisch lesen lernen.',
+    cLead: 'Mit Lehrerin Rachel lernen Kinder die 26 Buchstaben des englischen Alphabets, ihre Laute und ihre ersten Wörter – mit Liedern, Spielen und einer Schatzkarte.',
+    cCta: 'Lettervale betreten', cHow: "So funktioniert's", cNavT: 'Die Lehrerin', cNavF: 'Familien',
+    cB1: '26 Lektionen mit Spielen', cB2: 'Stimme und Lieder auf jeder Seite', cB3: 'Anleitungen auf Deutsch',
+    cS1t: 'Der Vorhang hebt sich', cS1: 'Das Kind betritt Lettervale, eine Zauberwelt mit Schlössern, Seen und Wäldern.',
+    cS2t: 'Singen mit Lehrerin Rachel', cS2: 'Rachel zeigt auf jeden Buchstaben, während alle zusammen das ABC singen.',
+    cS3t: 'Der Schatzkarte folgen', cS3: 'Jeder geschaffte Buchstabe bringt einen Stern und führt näher zum Schatz.',
+    cAboutT: 'Lernen Sie Lehrerin Rachel kennen', cAbout: 'Rachel Woronoff ist Grundschullehrerin. In jeder Lektion begleitet sie die Kinder mit ihrer Stimme, ihren Liedern und viel Herz.',
+    cRole: 'Grundschullehrerin', cFamT: 'Für Familien und Lehrkräfte', cF1: 'Am besten in kurzen Einheiten, mit einem Erwachsenen in der Nähe.',
+    cF2: 'Ton einschalten: Rachel spricht jede Anleitung laut vor.', cF3: 'Der Fortschritt wird auf diesem Gerät gespeichert.',
+    cLangs: 'Auch verfügbar auf', cFoot: 'Mit Liebe gemacht für kleine Leser.',
+    today: L => [N('Heute lernen wir den Buchstaben'), E(L + '!')], thisIs: L => [N('Das ist der Buchstabe'), E(L)],
+    trace: L => [N('Fahre den Buchstaben'), E(L), N('mit dem Finger nach. Folge der Linie!')],
+    find: L => [N('Finde alle Buchstaben'), E(L + '.'), N('Große und kleine.')],
+    pick: (L, end) => [N(end ? 'Welches Wort endet mit dem Buchstaben' : 'Welches Wort fängt mit dem Buchstaben'), E(L), N(end ? '?' : 'an?')],
+    findNo: L => [N('Nicht dieser. Suche den Buchstaben'), E(L)], know: L => [N('Sehr gut! Jetzt kennst du den Buchstaben'), E(L + '.')],
+    advance: L => [N('Sehr gut! Du bist auf der Karte weitergekommen. Jetzt kommt der Buchstabe'), E(L)],
+    tip: (L, s, w) => `Der Buchstabe <b>${L}</b> klingt <span class="sym">${s}</span>, wie in <i>${w}</i>.`,
+  },
+  it: {
+    langName: 'Italiano', hello: 'Ciao!', world: 'la Valle delle Lettere', uniTitle: 'Università delle Lingue', curtain: 'Benvenuti!',
+    wHello: "Ciao, amici! Sono la maestra Rachel. Benvenuti a Lettervale, la Valle delle Lettere! Cantiamo insieme l'alfabeto!",
+    wAfter: 'Molto bene! Ora segui la mappa del tesoro. Tocca la lettera che brilla.',
+    mapTitle: 'La mappa del tesoro delle lettere', start: 'Partenza', treasure: 'Tesoro', uniShort: 'Università',
+    locked: 'Prima finisci tutte le lettere della mappa. Ce la puoi fare!',
+    allDone: "Hai trovato il tesoro! Hai finito tutto l'alfabeto! Ora andiamo all'Università delle Lingue.",
+    yes: 'Sì!', no: 'Non questa. Riprova.', great: 'Eccellente! Hai fatto benissimo.', traceOk: 'Molto bene! Che bella lettera!',
+    foundAll: "Ce l'hai fatta! Le hai trovate tutte.", proud: 'Sono molto orgogliosa di te!', star: 'Hai vinto una stella sulla mappa!',
+    tapHome: 'Tocca la casetta per tornare alla mappa.', soundIn: 'Ascolta il suo suono nella parola',
+    coverHello: 'Ciao, amici! Sono la maestra Rachel. Tocca il pulsante grande per entrare.',
+    uniHello: "Congratulazioni! Hai finito tutto l'alfabeto. Benvenuti all'Università delle Lingue. Qui imparano bambini di tutto il mondo. Tocca una porta per sentire come si salutano!",
+    uniPick: 'Per gli adulti: scegliete la lingua delle istruzioni', uniOpen: 'Apri', diploma: "Diploma dell'alfabeto", here: 'Sei qui',
+    adult: 'Per gli adulti', hold: 'Per gli adulti: tenere premuto', autoVoice: 'Leggere ad alta voce a ogni pagina', language: 'Lingua', coverBtn: 'Home',
+    reset: 'Azzera i progressi', resetQ: 'Cancellare le stelle della mappa su questo dispositivo?', teacher: 'Maestra', close: 'OK',
+    noVoice: 'Questo dispositivo non ha una voce per questa lingua. Aggiungila nelle impostazioni vocali del sistema.',
+    noSpeech: 'Questo browser non può parlare. Apri la lezione in Chrome, Safari o Edge.',
+    cEyebrow: "L'inglese per bambini di 4 e 5 anni che parlano italiano", cH1: 'Imparare a leggere in inglese, giocando.',
+    cLead: "Con la maestra Rachel, i bambini scoprono le 26 lettere dell'alfabeto inglese, i loro suoni e le prime parole, con canzoni, giochi e una mappa del tesoro.",
+    cCta: 'Entra a Lettervale', cHow: 'Come funziona', cNavT: 'La maestra', cNavF: 'Famiglie',
+    cB1: '26 lezioni con giochi', cB2: 'Voce e canzoni in ogni pagina', cB3: 'Istruzioni in italiano',
+    cS1t: 'Si apre il sipario', cS1: 'Il bambino entra a Lettervale, un mondo magico di castelli, laghi e boschi.',
+    cS2t: 'Si canta con la maestra Rachel', cS2: "Rachel indica ogni lettera mentre tutti cantano insieme l'alfabeto.",
+    cS3t: 'Si segue la mappa del tesoro', cS3: 'Ogni lettera completata vale una stella e avvicina al tesoro.',
+    cAboutT: 'Conoscete la maestra Rachel', cAbout: 'Rachel Woronoff è una maestra di scuola primaria. In ogni lezione guida i bambini con la sua voce, le sue canzoni e tanto affetto.',
+    cRole: 'Maestra di scuola primaria', cFamT: 'Per famiglie e insegnanti', cF1: 'Ideale in sessioni brevi, con un adulto vicino.',
+    cF2: 'Alzate il volume: Rachel dà ogni istruzione ad alta voce.', cF3: 'I progressi vengono salvati su questo dispositivo.',
+    cLangs: 'Disponibile anche in', cFoot: 'Fatto con amore per i piccoli lettori.',
+    today: L => [N('Oggi impariamo la lettera'), E(L + '!')], thisIs: L => [N('Questa è la lettera'), E(L)],
+    trace: L => [N('Ripassa la lettera'), E(L), N('con il dito. Segui la linea!')],
+    find: L => [N('Trova tutte le lettere'), E(L + '.'), N('Grandi e piccole.')],
+    pick: (L, end) => [N(end ? 'Quale parola finisce con la lettera' : 'Quale parola comincia con la lettera'), E(L), N('?')],
+    findNo: L => [N('Non questa. Cerca la lettera'), E(L)], know: L => [N('Molto bene! Ora conosci la lettera'), E(L + '.')],
+    advance: L => [N('Ottimo lavoro! Un passo avanti sulla mappa. Adesso tocca alla lettera'), E(L)],
+    tip: (L, s, w) => `La lettera <b>${L}</b> fa il suono <span class="sym">${s}</span>, come in <i>${w}</i>.`,
+  },
+  pt: {
+    langName: 'Português', hello: 'Olá!', world: 'o Vale das Letras', uniTitle: 'Universidade dos Idiomas', curtain: 'Bem-vindos!',
+    wHello: 'Olá, amigos! Eu sou a professora Rachel. Bem-vindos a Lettervale, o Vale das Letras! Vamos cantar o alfabeto juntos!',
+    wAfter: 'Muito bem! Agora siga o mapa do tesouro. Toque na letra que brilha.',
+    mapTitle: 'Mapa do tesouro das letras', start: 'Início', treasure: 'Tesouro', uniShort: 'Universidade',
+    locked: 'Primeiro termine todas as letras do mapa. Você consegue!',
+    allDone: 'Você encontrou o tesouro! Terminou todo o alfabeto! Agora vamos para a Universidade dos Idiomas.',
+    yes: 'Isso!', no: 'Essa não. Tente de novo.', great: 'Excelente! Você foi muito bem.', traceOk: 'Muito bem! Que letra bonita!',
+    foundAll: 'Conseguiu! Você encontrou todas.', proud: 'Estou muito orgulhosa de você!', star: 'Você ganhou uma estrela no mapa!',
+    tapHome: 'Toque na casinha para voltar ao mapa.', soundIn: 'Escute o som na palavra',
+    coverHello: 'Olá, amigos! Eu sou a professora Rachel. Toque no botão grande para entrar.',
+    uniHello: 'Parabéns! Você terminou todo o alfabeto. Bem-vindos à Universidade dos Idiomas. Aqui aprendem crianças do mundo inteiro. Toque numa porta para ouvir como elas dizem olá!',
+    uniPick: 'Para adultos: escolha o idioma das instruções', uniOpen: 'Abrir', diploma: 'Diploma do alfabeto', here: 'Você está aqui',
+    adult: 'Para adultos', hold: 'Para adultos: mantenha pressionado', autoVoice: 'Falar ao virar a página', language: 'Idioma', coverBtn: 'Início',
+    reset: 'Reiniciar progresso', resetQ: 'Apagar as estrelas do mapa neste aparelho?', teacher: 'Professora', close: 'OK',
+    noVoice: 'Este aparelho não tem voz para este idioma. Adicione-a nas configurações de voz do sistema.',
+    noSpeech: 'Este navegador não consegue falar. Abra a lição no Chrome, Safari ou Edge.',
+    cEyebrow: 'Inglês para crianças de 4 e 5 anos que falam português', cH1: 'Aprender a ler em inglês, brincando.',
+    cLead: 'Com a professora Rachel, as crianças conhecem as 26 letras do alfabeto inglês, seus sons e suas primeiras palavras, com músicas, jogos e um mapa do tesouro.',
+    cCta: 'Entrar em Lettervale', cHow: 'Como funciona', cNavT: 'A professora', cNavF: 'Famílias',
+    cB1: '26 lições com jogos', cB2: 'Voz e músicas em cada página', cB3: 'Instruções em português',
+    cS1t: 'A cortina se abre', cS1: 'A criança entra em Lettervale, um mundo mágico de castelos, lagos e florestas.',
+    cS2t: 'Cantar com a professora Rachel', cS2: 'Rachel aponta cada letra enquanto todos cantam o alfabeto juntos.',
+    cS3t: 'Seguir o mapa do tesouro', cS3: 'Cada letra concluída ganha uma estrela e leva a criança mais perto do tesouro.',
+    cAboutT: 'Conheça a professora Rachel', cAbout: 'Rachel Woronoff é professora do ensino fundamental. Em cada lição, ela guia as crianças com sua voz, suas músicas e muito carinho.',
+    cRole: 'Professora do ensino fundamental', cFamT: 'Para famílias e professores', cF1: 'Funciona melhor em sessões curtas, com um adulto por perto.',
+    cF2: 'Aumente o volume: Rachel dá cada instrução em voz alta.', cF3: 'O progresso fica salvo neste aparelho.',
+    cLangs: 'Também disponível em', cFoot: 'Feito com carinho para pequenos leitores.',
+    today: L => [N('Hoje vamos aprender a letra'), E(L + '!')], thisIs: L => [N('Esta é a letra'), E(L)],
+    trace: L => [N('Contorne a letra'), E(L), N('com o dedo. Siga a linha!')],
+    find: L => [N('Encontre todas as letras'), E(L + '.'), N('Grandes e pequenas.')],
+    pick: (L, end) => [N(end ? 'Qual palavra termina com a letra' : 'Qual palavra começa com a letra'), E(L), N('?')],
+    findNo: L => [N('Essa não. Procure a letra'), E(L)], know: L => [N('Muito bem! Agora você conhece a letra'), E(L + '.')],
+    advance: L => [N('Muito bem! Você avançou no mapa. Agora é a vez da letra'), E(L)],
+    tip: (L, s, w) => `A letra <b>${L}</b> tem o som <span class="sym">${s}</span>, como em <i>${w}</i>.`,
+  },
+  ja: {
+    langName: '日本語', hello: 'こんにちは！', world: 'もじの たに', uniTitle: 'ことばの だいがく', curtain: 'ようこそ！',
+    wHello: 'こんにちは、みんな！ レイチェル せんせい だよ。 もじの たに、レターベールへ ようこそ！ いっしょに エービーシーの うたを うたおう！',
+    wAfter: 'よく できたね！ つぎは たからの ちずを すすもう。 ひかっている もじを タッチしてね。',
+    mapTitle: 'もじの たからの ちず', start: 'スタート', treasure: 'たから', uniShort: 'だいがく',
+    locked: 'さきに ちずの もじを ぜんぶ おわらせよう。 きみなら できるよ！',
+    allDone: 'たからを みつけたね！ エービーシーが ぜんぶ おわったよ！ ことばの だいがくへ いこう！',
+    yes: 'そう！', no: 'それじゃないよ。 もう いちど やってみよう。', great: 'すばらしい！ とても よく できたね。', traceOk: 'じょうず！ きれいな もじだね！',
+    foundAll: 'やったね！ ぜんぶ みつけたよ。', proud: 'せんせいは とても うれしいよ！', star: 'ちずに ほしが ついたよ！',
+    tapHome: 'おうちの ボタンを タッチして ちずに もどろう。', soundIn: 'この ことばで おとを きいてね。',
+    coverHello: 'こんにちは、みんな！ レイチェル せんせい だよ。 おおきな ボタンを タッチして はいってね。',
+    uniHello: 'おめでとう！ エービーシーが ぜんぶ おわったね。 ことばの だいがくへ ようこそ。 ここでは せかいじゅうの こどもたちが まなんでいるよ。 ドアを タッチして あいさつを きいてみよう！',
+    uniPick: '保護者の方へ：説明の言語を選んでください', uniOpen: '開く', diploma: 'ABC ディプロマ', here: 'いま ここ',
+    adult: '保護者の方へ', hold: '保護者の方へ：長押ししてください', autoVoice: 'ページをめくると読み上げる', language: '言語', coverBtn: 'トップ',
+    reset: '進み具合をリセット', resetQ: 'この端末の地図の星を消去しますか？', teacher: '先生用', close: 'OK',
+    noVoice: 'この端末には日本語の音声がありません。システムの音声設定で追加してください。',
+    noSpeech: 'このブラウザは音声に対応していません。Chrome、Safari、Edgeで開いてください。',
+    cEyebrow: '日本語を話す4〜5歳の子どものための英語', cH1: '遊びながら、英語を読もう。',
+    cLead: 'レイチェル先生といっしょに、英語のアルファベット26文字とその音、はじめての単語を、歌やゲーム、宝の地図で楽しく学びます。',
+    cCta: 'Lettervale へ入る', cHow: '使い方', cNavT: '先生について', cNavF: 'ご家庭の方へ',
+    cB1: 'ゲーム付きの26レッスン', cB2: '全ページに音声と歌', cB3: '説明は日本語',
+    cS1t: '幕が上がる', cS1: 'お城や湖、森がある魔法の世界「Lettervale」へ入ります。',
+    cS2t: 'レイチェル先生と歌う', cS2: 'みんなでABCの歌を歌いながら、先生が文字を一つずつ指します。',
+    cS3t: '宝の地図をすすむ', cS3: '文字を一つ終えるごとに星がもらえ、宝物に近づきます。',
+    cAboutT: 'レイチェル先生の紹介', cAbout: 'レイチェル・ウォロノフは小学校の先生です。毎回のレッスンで、声と歌とたくさんの愛情で子どもたちを導きます。',
+    cRole: '小学校の先生', cFamT: 'ご家庭・先生方へ', cF1: '大人がそばにいる短い時間での利用がおすすめです。',
+    cF2: '音を出してください。先生がすべての説明を声で伝えます。', cF3: '進み具合はこの端末に保存されます。',
+    cLangs: 'ほかの言語', cFoot: '小さな読み手のために、心をこめて。',
+    today: L => [N('きょうの もじは'), E(L), N('だよ！')], thisIs: L => [N('この もじは'), E(L), N('だよ。')],
+    trace: L => [N('もじ'), E(L), N('を ゆびで なぞってね。 せんの うえを なぞろう！')],
+    find: L => [N('もじ'), E(L), N('を ぜんぶ みつけてね。 おおきいのも ちいさいのも。')],
+    pick: (L, end) => [N('どれが'), E(L), N(end ? 'の おとで おわるかな？' : 'の おとで はじまるかな？')],
+    findNo: L => [N('それじゃないよ。'), E(L), N('を さがしてね。')], know: L => [N('よく できたね！ これで'), E(L), N('が わかったね。')],
+    advance: L => [N('よく できたね！ ちずを すすんだよ。 つぎの もじは'), E(L), N('だよ。')],
+    tip: (L, s, w) => `<b>${L}</b> は <span class="sym">${s}</span> の おと。 れい：<i>${w}</i>`,
+  },
+  zh: {
+    langName: '中文', hello: '你好！', world: '字母谷', uniTitle: '语言大学', curtain: '欢迎！',
+    wHello: '小朋友们好！我是瑞秋老师。欢迎来到字母谷！我们一起唱字母歌吧！',
+    wAfter: '真棒！现在跟着藏宝图走吧。点一点发光的字母。',
+    mapTitle: '字母藏宝图', start: '起点', treasure: '宝藏', uniShort: '大学',
+    locked: '先完成地图上所有的字母吧。你一定可以的！',
+    allDone: '你找到宝藏了！你学完了全部字母！我们去语言大学吧。',
+    yes: '对！', no: '不是这个，再试一次。', great: '太棒了！你做得非常好。', traceOk: '真棒！好漂亮的字母！',
+    foundAll: '成功了！你全都找到了。', proud: '老师为你骄傲！', star: '你在地图上得到了一颗星星！',
+    tapHome: '点一点小房子，回到地图。', soundIn: '听听这个单词里的发音：',
+    coverHello: '小朋友们好！我是瑞秋老师。点一下大按钮就能进去了。',
+    uniHello: '恭喜你！你学完了全部字母。欢迎来到语言大学。这里有来自世界各地的小朋友。点一扇门，听听他们怎么打招呼吧！',
+    uniPick: '家长请选择说明语言', uniOpen: '打开', diploma: '字母毕业证书', here: '你在这里',
+    adult: '家长专区', hold: '家长专区：请长按', autoVoice: '翻页时自动朗读', language: '语言', coverBtn: '首页',
+    reset: '重置进度', resetQ: '要清除这台设备上地图的星星吗？', teacher: '老师', close: '好',
+    noVoice: '这台设备没有中文语音。请在系统语音设置中添加。', noSpeech: '此浏览器无法朗读。请在 Chrome、Safari 或 Edge 中打开。',
+    cEyebrow: '为说中文的4至5岁儿童设计的英语启蒙', cH1: '边玩边学，读懂英语。',
+    cLead: '跟着瑞秋老师，孩子们通过儿歌、游戏和藏宝图，认识英语的26个字母、字母的发音和最初的单词。',
+    cCta: '进入字母谷', cHow: '如何使用', cNavT: '关于老师', cNavF: '家长须知',
+    cB1: '26节互动课', cB2: '每页都有语音和儿歌', cB3: '中文说明',
+    cS1t: '大幕拉开', cS1: '孩子走进字母谷 Lettervale，一个有城堡、湖泊和森林的魔法世界。',
+    cS2t: '和瑞秋老师一起唱', cS2: '大家一起唱字母歌，老师逐一指出每个字母。',
+    cS3t: '跟着藏宝图前进', cS3: '每完成一个字母就得到一颗星星，离宝藏更近一步。',
+    cAboutT: '认识瑞秋老师', cAbout: '瑞秋·沃罗诺夫（Rachel Woronoff）是一名小学老师。在每节课中，她用声音、儿歌和满满的爱心带领孩子们学习。',
+    cRole: '小学老师', cFamT: '给家长和老师', cF1: '建议在大人陪伴下进行短时间学习。',
+    cF2: '请打开声音：老师会大声说出每一条指示。', cF3: '学习进度保存在这台设备上。',
+    cLangs: '其他语言', cFoot: '用心为小读者打造。',
+    today: L => [N('今天我们学字母'), E(L)], thisIs: L => [N('这是字母'), E(L)],
+    trace: L => [N('用手指描一描字母'), E(L), N('。沿着线走！')],
+    find: L => [N('找出所有的字母'), E(L), N('，大写和小写都要找。')],
+    pick: (L, end) => [N(end ? '哪一个的结尾是字母' : '哪一个的开头是字母'), E(L), N('的音？')],
+    findNo: L => [N('不是这个。找一找字母'), E(L)], know: L => [N('真棒！你认识字母'), E(L), N('了。')],
+    advance: L => [N('真棒！你在地图上前进了。下一个字母是'), E(L)],
+    tip: (L, s, w) => `字母 <b>${L}</b> 发 <span class="sym">${s}</span> 的音，例如 <i>${w}</i>。`,
+  },
+  ko: {
+    langName: '한국어', hello: '안녕하세요!', world: '글자 골짜기', uniTitle: '언어 대학교', curtain: '환영해요!',
+    wHello: '친구들, 안녕! 나는 레이첼 선생님이야. 글자 골짜기 레터베일에 온 걸 환영해! 다 같이 알파벳 노래를 불러 보자!',
+    wAfter: '잘했어! 이제 보물 지도를 따라가 보자. 반짝이는 글자를 눌러 봐.',
+    mapTitle: '글자 보물 지도', start: '출발', treasure: '보물', uniShort: '대학교',
+    locked: '먼저 지도에 있는 글자를 모두 끝내 보자. 너는 할 수 있어!',
+    allDone: '보물을 찾았어! 알파벳을 전부 끝냈어! 이제 언어 대학교로 가 보자.',
+    yes: '맞아!', no: '그건 아니야. 다시 해 보자.', great: '훌륭해! 정말 잘했어.', traceOk: '잘했어! 정말 예쁜 글자야!',
+    foundAll: '해냈어! 모두 찾았어.', proud: '선생님은 네가 정말 자랑스러워!', star: '지도에서 별을 받았어!',
+    tapHome: '작은 집 버튼을 눌러서 지도로 돌아가자.', soundIn: '이 낱말에서 소리를 들어 봐.',
+    coverHello: '친구들, 안녕! 나는 레이첼 선생님이야. 큰 버튼을 눌러서 들어와 봐.',
+    uniHello: '축하해! 알파벳을 전부 끝냈어. 언어 대학교에 온 걸 환영해. 여기서는 전 세계 친구들이 공부해. 문을 눌러서 친구들이 어떻게 인사하는지 들어 봐!',
+    uniPick: '보호자용: 안내 언어를 선택하세요', uniOpen: '열기', diploma: '알파벳 수료증', here: '여기예요',
+    adult: '보호자용', hold: '보호자용: 길게 누르세요', autoVoice: '페이지를 넘기면 읽어 주기', language: '언어', coverBtn: '처음 화면',
+    reset: '진도 초기화', resetQ: '이 기기에서 지도의 별을 지울까요?', teacher: '선생님용', close: '확인',
+    noVoice: '이 기기에는 한국어 음성이 없습니다. 시스템 음성 설정에서 추가하세요.', noSpeech: '이 브라우저는 음성을 지원하지 않습니다. Chrome, Safari, Edge에서 여세요.',
+    cEyebrow: '한국어를 쓰는 4~5세 아이를 위한 영어', cH1: '놀면서 배우는 영어 읽기.',
+    cLead: '레이첼 선생님과 함께 아이들이 노래와 게임, 보물 지도로 영어 알파벳 26자와 소리, 첫 단어를 익힙니다.',
+    cCta: 'Lettervale로 들어가기', cHow: '이용 방법', cNavT: '선생님 소개', cNavF: '보호자 안내',
+    cB1: '게임이 있는 26개 수업', cB2: '모든 페이지에 음성과 노래', cB3: '한국어 안내',
+    cS1t: '막이 올라가요', cS1: '아이는 성과 호수, 숲이 있는 마법의 세계 Lettervale로 들어갑니다.',
+    cS2t: '레이첼 선생님과 노래해요', cS2: '모두 함께 알파벳 노래를 부르는 동안 선생님이 글자를 하나씩 가리킵니다.',
+    cS3t: '보물 지도를 따라가요', cS3: '글자를 하나 끝낼 때마다 별을 받고 보물에 더 가까워집니다.',
+    cAboutT: '레이첼 선생님을 소개합니다', cAbout: '레이첼 워로노프는 초등학교 선생님입니다. 수업마다 목소리와 노래, 따뜻한 마음으로 아이들을 이끕니다.',
+    cRole: '초등학교 선생님', cFamT: '보호자와 선생님께', cF1: '어른이 곁에 있는 짧은 시간에 가장 좋습니다.',
+    cF2: '소리를 켜 주세요. 선생님이 모든 안내를 소리 내어 말합니다.', cF3: '진도는 이 기기에 저장됩니다.',
+    cLangs: '다른 언어', cFoot: '어린 독자를 위해 정성껏 만들었습니다.',
+    today: L => [N('오늘 배울 글자는 바로'), E(L)], thisIs: L => [N('이 글자는'), E(L)],
+    trace: L => [N('손가락으로 글자'), E(L), N('따라 그려 봐. 선을 따라가 보자!')],
+    find: L => [N('글자'), E(L), N('모두 찾아 봐. 큰 글자도, 작은 글자도.')],
+    pick: (L, end) => [N('어느 것이 글자'), E(L), N(end ? '소리로 끝날까?' : '소리로 시작할까?')],
+    findNo: L => [N('그건 아니야. 글자'), E(L), N('찾아 봐.')], know: L => [N('잘했어! 이제 글자'), E(L), N('알게 됐어.')],
+    advance: L => [N('잘했어! 지도에서 앞으로 갔어. 다음 글자는 바로'), E(L)],
+    tip: (L, s, w) => `<b>${L}</b>는 <span class="sym">${s}</span> 소리가 나요. 예: <i>${w}</i>`,
+  },
+};
+
+/* Keyword translations (Spanish lives in KEYW) */
+const KWORDS = 'apple ant ball bat cup car duck drum egg elephant fish fox gift guitar hat house igloo iguana jellyfish juice kite key lion leaf moon map nest nine octopus olive pig pen queen quilt rabbit rainbow sun sock top ten umbrella up van violin watermelon worm box six yoyo yarn zebra zero'.split(' ');
+const KWL = {
+  fr: 'pomme|fourmi|ballon|chauve-souris|tasse|voiture|canard|tambour|œuf|éléphant|poisson|renard|cadeau|guitare|chapeau|maison|igloo|iguane|méduse|jus|cerf-volant|clé|lion|feuille|lune|carte|nid|neuf|pieuvre|olive|cochon|stylo|reine|courtepointe|lapin|arc-en-ciel|soleil|chaussette|toupie|dix|parapluie|en haut|camionnette|violon|pastèque|ver|boîte|six|yo-yo|pelote de laine|zèbre|zéro',
+  de: 'Apfel|Ameise|Ball|Fledermaus|Tasse|Auto|Ente|Trommel|Ei|Elefant|Fisch|Fuchs|Geschenk|Gitarre|Hut|Haus|Iglu|Leguan|Qualle|Saft|Drachen|Schlüssel|Löwe|Blatt|Mond|Karte|Nest|neun|Krake|Olive|Schwein|Stift|Königin|Steppdecke|Hase|Regenbogen|Sonne|Socke|Kreisel|zehn|Regenschirm|nach oben|Lieferwagen|Geige|Wassermelone|Wurm|Kiste|sechs|Jo-Jo|Wollknäuel|Zebra|null',
+  it: 'mela|formica|palla|pipistrello|tazza|macchina|papera|tamburo|uovo|elefante|pesce|volpe|regalo|chitarra|cappello|casa|igloo|iguana|medusa|succo|aquilone|chiave|leone|foglia|luna|mappa|nido|nove|polpo|oliva|maiale|penna|regina|trapunta|coniglio|arcobaleno|sole|calzino|trottola|dieci|ombrello|su|furgone|violino|anguria|verme|scatola|sei|yo-yo|gomitolo|zebra|zero',
+  pt: 'maçã|formiga|bola|morcego|xícara|carro|pato|tambor|ovo|elefante|peixe|raposa|presente|violão|chapéu|casa|iglu|iguana|água-viva|suco|pipa|chave|leão|folha|lua|mapa|ninho|nove|polvo|azeitona|porco|caneta|rainha|colcha|coelho|arco-íris|sol|meia|pião|dez|guarda-chuva|para cima|van|violino|melancia|minhoca|caixa|seis|ioiô|novelo|zebra|zero',
+  ja: 'りんご|あり|ボール|こうもり|カップ|くるま|あひる|たいこ|たまご|ぞう|さかな|きつね|プレゼント|ギター|ぼうし|いえ|イグルー|イグアナ|くらげ|ジュース|カイト|かぎ|ライオン|はっぱ|つき|ちず|とりのす|きゅう|たこ|オリーブ|ぶた|ペン|じょおう|キルト|うさぎ|にじ|たいよう|くつした|こま|じゅう|かさ|うえ|バン|バイオリン|すいか|みみず|はこ|ろく|ヨーヨー|けいと|しまうま|ゼロ',
+  zh: '苹果|蚂蚁|球|蝙蝠|杯子|汽车|鸭子|鼓|鸡蛋|大象|鱼|狐狸|礼物|吉他|帽子|房子|冰屋|鬣蜥|水母|果汁|风筝|钥匙|狮子|叶子|月亮|地图|鸟窝|九|章鱼|橄榄|猪|笔|女王|被子|兔子|彩虹|太阳|袜子|陀螺|十|雨伞|上|面包车|小提琴|西瓜|蚯蚓|盒子|六|悠悠球|毛线|斑马|零',
+  ko: '사과|개미|공|박쥐|컵|자동차|오리|북|달걀|코끼리|물고기|여우|선물|기타|모자|집|이글루|이구아나|해파리|주스|연|열쇠|사자|나뭇잎|달|지도|둥지|아홉|문어|올리브|돼지|펜|여왕|퀼트|토끼|무지개|해|양말|팽이|열|우산|위|승합차|바이올린|수박|지렁이|상자|여섯|요요|털실|얼룩말|영',
+};
+const KWMAP = Object.fromEntries(Object.entries(KWL).map(([k, v]) => { const a = v.split('|'); return [k, Object.fromEntries(KWORDS.map((w, i) => [w, a[i]]))]; }));
+
+let LANG = (() => {
+  const q = new URLSearchParams(location.search).get('lang');
+  if (q && LANGS.includes(q)) return q;
+  try { const s = localStorage.getItem('vamos-a-leer-lang'); if (s && LANGS.includes(s)) return s; } catch (e) {}
+  return 'es';
+})();
+const T = () => STR[LANG];
+const KW = w => LANG === 'es' ? KEYW[w] : (KWMAP[LANG] && KWMAP[LANG][w]) || '';
+const doneKey = () => LANG === 'es' ? 'vamos-a-leer-done' : 'vamos-a-leer-done-' + LANG;
+function tipHTML(L) {
+  const d = LETTERS[L];
+  if (LANG === 'es') return d.tip;
+  return T().tip(L, d.sym, showW(d.keys[0]));
+}
+function letterSay(L) {
+  const d = LETTERS[L];
+  if (LANG === 'es') return [N('Esta es la letra'), E(L), N(d.say)];
+  return [...T().thisIs(L), N(T().soundIn), E(sayW(d.keys[0]), .7)];
+}
+
 const MODULES = [
   { word: 'cat', es: 'gato', letters: ['C', 'A', 'T'], color: '#FF9AA8',
     first: [['cup', 'C'], ['car', 'C'], ['apple', 'A'], ['ant', 'A'], ['top', 'T'], ['ten', 'T']],
@@ -1049,39 +1448,43 @@ function songSVG(mod) {
   </svg>`;
 }
 
-/* ---------- Speech ---------- */
+/* ---------- Speech (any language) ---------- */
 const synth = 'speechSynthesis' in window ? speechSynthesis : null;
 const notice = document.getElementById('notice');
-let vEs = null, vEn = null, speakId = 0;
+const VOICES = {}; let speakId = 0, talking = false;
+function setTalking(v) { talking = v; document.body.classList.toggle('talking', v); }
 function pickVoices() {
   if (!synth) return;
   const vs = synth.getVoices();
-  const es_ = vs.filter(v => /^es/i.test(v.lang)), en_ = vs.filter(v => /^en/i.test(v.lang));
-  vEs = es_.find(v => /MX|US|419/i.test(v.lang)) || es_[0] || null;
-  vEn = en_.find(v => /US/i.test(v.lang)) || en_[0] || null;
-  if (vs.length && (!vEs || !vEn)) {
-    notice.textContent = `Este dispositivo no tiene una voz en ${!vEs ? 'español' : 'inglés'}. Agrégala en los ajustes de voz o accesibilidad del sistema.`;
-    notice.hidden = false;
-  } else notice.hidden = true;
+  ['en', ...LANGS].forEach(l => {
+    const c = vs.filter(v => (v.lang || '').toLowerCase().replace('_', '-').startsWith(l));
+    const pref = l === 'en' ? /US/i : VOICE_PREF[l];
+    VOICES[l] = c.find(v => pref.test(v.lang)) || c[0] || null;
+  });
+  if (vs.length && (!VOICES[LANG] || !VOICES.en)) { notice.textContent = T().noVoice; notice.hidden = false; } else notice.hidden = true;
 }
-if (!synth) { notice.textContent = 'Este navegador no puede hablar. Abre la lección en Chrome, Safari o Edge.'; notice.hidden = false; }
+if (!synth) { notice.textContent = T().noSpeech; notice.hidden = false; }
 else { pickVoices(); synth.onvoiceschanged = pickVoices; }
 
 function speak(parts, onend) {
   stopAudio();
   const id = ++speakId;
-  if (!synth) { onend && onend(); return; }
-  synth.cancel();
+  let fired = false;
+  const fin = () => { if (fired || id !== speakId) return; fired = true; setTalking(false); if (onend) onend(); };
+  if (!synth) { setTalking(false); if (onend) onend(); return; }
+  synth.cancel(); setTalking(true);
+  const est = parts.reduce((a, p) => a + p.t.length * 110 / (p.r || .9), 0) + 2500;
+  setTimeout(fin, est);
   setTimeout(() => {
     if (id !== speakId) return;
     parts.forEach((p, i) => {
       const u = new SpeechSynthesisUtterance(p.t);
-      const v = p.l === 'en' ? vEn : vEs;
-      u.lang = v ? v.lang : (p.l === 'en' ? 'en-US' : 'es-MX');
+      const v = VOICES[p.l];
+      u.lang = v ? v.lang : (VOICE_TAG[p.l] || p.l);
       if (v) u.voice = v;
       u.rate = p.r || (p.l === 'en' ? 0.75 : 0.9);
       u.pitch = 1.1;
-      if (i === parts.length - 1) u.onend = u.onerror = () => { if (id === speakId && onend) onend(); };
+      if (i === parts.length - 1) u.onend = u.onerror = fin;
       synth.speak(u);
     });
   }, 60);
@@ -1111,8 +1514,20 @@ function tone(dest, f, t, d) {
 }
 function setSingBtn() {
   const b = document.getElementById('singBtn');
-  if (b) b.textContent = song.playing ? 'Parar' : 'Cantar';
+  if (!b) return;
+  if (b.classList.contains('sing')) b.innerHTML = song.playing ? ICON.stop : ICON.music;
+  else b.textContent = song.playing ? 'Parar' : 'Cantar';
 }
+let chorus = [];
+function startChorus() {
+  stopChorus();
+  ['kids1', 'kids2', 'kids3'].forEach(k => {
+    const b = getRec(k); if (!b) return;
+    const a = new Audio(URL.createObjectURL(b)); a.volume = .95;
+    a.play().catch(() => {}); chorus.push(a);
+  });
+}
+function stopChorus() { chorus.forEach(a => { try { a.pause(); URL.revokeObjectURL(a.src); } catch (e) {} }); chorus = []; }
 function showLine(li, tokIdx) {
   const el = document.getElementById('lyric'); if (!el) return;
   const toks = SONG[li].filter(e => e[2]).map(e => e[2]);
@@ -1126,12 +1541,13 @@ function pointAt(L) {
     const g = document.querySelector(`.ch[data-ch="${L}"]`); if (g) g.classList.add('now');
   } else { goal.x = RIG.rest.x; goal.y = RIG.rest.y; pointing = false; }
 }
-function sing(after) {
+function sing(after, noChorus) {
   stopSong();
   if (!ensureAC()) return;
   const id = ++song.id;
   song.playing = true; setSingBtn();
   const master = ac.createGain(); master.gain.value = .9; master.connect(ac.destination); song.master = master;
+  if (!noChorus) startChorus();
   document.getElementById('kid')?.classList.add('singing');
   const lead = .35, t0 = ac.currentTime + lead;
   let t = 0;
@@ -1159,6 +1575,7 @@ function sing(after) {
   }, (lead + t) * 1000 + 500));
 }
 function stopSong() {
+  stopChorus();
   song.id++; song.timers.forEach(clearTimeout); song.timers = []; song.playing = false;
   if (song.master) { try { song.master.gain.setValueAtTime(0, ac.currentTime); song.master.disconnect(); } catch (e) {} song.master = null; }
   document.getElementById('kid')?.classList.remove('singing');
@@ -1197,7 +1614,7 @@ requestAnimationFrame(drawPointer);
 /* ---------- Teacher recordings (IndexedDB, this device only) ---------- */
 const rec = {};
 let audioEl = null;
-function stopAudio() { if (audioEl) { audioEl.pause(); audioEl = null; } }
+function stopAudio() { if (audioEl) { audioEl.pause(); audioEl = null; setTalking(false); } }
 function idb() {
   return new Promise((res, rej) => {
     const r = indexedDB.open('vamos-a-leer', 1);
@@ -1213,7 +1630,7 @@ async function dbDo(mode, fn) {
   });
 }
 const repo = {};
-const REC_KEYS = () => ['greet', ...Object.keys(LETTERS)];
+const REC_KEYS = () => ['greet', ...Object.keys(LETTERS), 'kids1', 'kids2', 'kids3'];
 const getRec = k => rec[k] || repo[k];
 async function loadRecs() {
   for (const k of REC_KEYS()) { try { const b = await dbDo('readonly', s => s.get(k)); if (b) rec[k] = b; } catch (e) {} }
@@ -1234,8 +1651,8 @@ function playBlob(b) {
   return new Promise(res => {
     if (synth) synth.cancel(); speakId++; stopAudio();
     const url = URL.createObjectURL(b);
-    audioEl = new Audio(url);
-    const done = () => { URL.revokeObjectURL(url); res(); };
+    audioEl = new Audio(url); setTalking(true);
+    const done = () => { URL.revokeObjectURL(url); setTalking(false); res(); };
     audioEl.onended = done; audioEl.onerror = done;
     audioEl.play().catch(done);
   });
@@ -1247,23 +1664,53 @@ function playSound(L, silentFallback) {
 }
 
 
-/* ---------- Pointer rigs (kid in the word-module song, Ms. Rachel in the world) ---------- */
+
+/* ---------- Icons ---------- */
+const ICON = {
+  play: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v16l13-8z" fill="currentColor"/></svg>',
+  next: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M12 5l7 7-7 7"/></svg>',
+  house: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 12h3v8h5v-5h4v5h5v-8h3z" fill="currentColor"/></svg>',
+  mouth: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12c3-4 6-5 10-3 4-2 7-1 10 3-3 5-7 7-10 7S5 17 2 12z" fill="#FF6F82" stroke="#1E2A5A" stroke-width="1.4"/><path d="M5.5 12.2c3 1.2 10 1.2 13 0" stroke="#fff" stroke-width="1.6" fill="none"/></svg>',
+  eraser: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3l7 7-10 10H5l-3-3z" fill="#FF9AA8" stroke="#1E2A5A" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 9l7 7" stroke="#1E2A5A" stroke-width="1.6"/><path d="M12 21h9" stroke="#1E2A5A" stroke-width="1.8" stroke-linecap="round"/></svg>',
+  gear: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M19.4 13a7.5 7.5 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.6 7.6 0 0 0-1.7-1L15 3.3h-4l-.4 2.6a7.6 7.6 0 0 0-1.7 1l-2.5-1-2 3.5L6.6 11a7.5 7.5 0 0 0 0 2l-2.2 1.6 2 3.5 2.5-1a7.6 7.6 0 0 0 1.7 1l.4 2.6h4l.4-2.6a7.6 7.6 0 0 0 1.7-1l2.5 1 2-3.5zM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z"/></svg>',
+  map: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 6l6-3 8 3 6-3v15l-6 3-8-3-6 3z" fill="#F3DFAF" stroke="#1E2A5A" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 3v15M16 6v15" stroke="#1E2A5A" stroke-width="1.4"/><path d="M11 10l3 3M14 10l-3 3" stroke="#C2465A" stroke-width="2" stroke-linecap="round"/></svg>',
+  music: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l11-2v13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/><circle cx="6.5" cy="18" r="3" fill="currentColor"/><circle cx="17.5" cy="16" r="3" fill="currentColor"/></svg>',
+  stop: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2.5" fill="currentColor"/></svg>',
+  down: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v15M5 12l7 7 7-7"/></svg>',
+  hand: '<svg viewBox="0 0 64 80" aria-hidden="true"><path d="M26 6c4 0 7 3 7 7v20l2-1c3-1 6 0 7 2 3-1 6 0 7 3 3 0 6 2 6 6v14c0 12-8 20-20 20h-4c-8 0-13-4-17-10L5 50c-2-3-1-7 2-8 3-2 6-1 8 1l4 5V13c0-4 3-7 7-7z" fill="#FFE0C2" stroke="#1E2A5A" stroke-width="3.5" stroke-linejoin="round"/><path d="M33 33v12M42 35v10M51 39v8" stroke="#1E2A5A" stroke-width="3" stroke-linecap="round"/></svg>',
+};
+
+/* ---------- Pointer rigs (kid in the word-module song, Ms. Rachel in Lettervale) ---------- */
+const ROFF = { x: -40, y: 90 };
 const KID_RIG = { sh: { x: 122, y: 196 }, rest: { x: 176, y: 300 }, arm: 56, trim: 22, dy: 8, pos: L => letterPos(L) };
-const RACHEL_RIG = { sh: { x: 228, y: 286 }, rest: { x: 270, y: 382 }, arm: 66, wand: 46, dy: 0, pos: L => worldPos(L) };
+const RACHEL_RIG = { sh: { x: 228, y: 286 }, rest: { x: 270, y: 382 }, arm: 66, wand: 46, dy: 0,
+  pos: L => { const p = worldPos(L); return { x: p.x - ROFF.x, y: p.y - ROFF.y }; } };
 let RIG = KID_RIG, pointing = false;
 function useRig(r) { RIG = r; ptr.x = goal.x = r.rest.x; ptr.y = goal.y = r.rest.y; pointing = false; }
 function worldPos(L) {
   const i = L.charCodeAt(0) - 65, r = Math.floor(i / 7), c = i % 7, off = r === 3 ? 1 : 0;
-  return { x: 351 + 84 * (c + off + .5), y: 163 + 86 * r };
+  return { x: 268 + 72 * (c + off + .5), y: 368 + 66 * r };
 }
 
 /* ---------- Cartoon Ms. Rachel ---------- */
-function rachelSVG() {
+function rachelSVG(o = {}) {
   const sk = '#F6CDB0', hair = '#5A3424', hl = '#B98252', blouse = '#F8EDE0';
   const flowers = [[146, 288], [196, 282], [170, 318], [218, 324], [142, 352], [188, 358], [226, 372], [160, 388], [208, 394]]
     .map(([x, y], i) => `<ellipse cx="${x + 9}" cy="${y + 5}" rx="6" ry="2.8" fill="#8DB87A" transform="rotate(30 ${x + 9} ${y + 5})"/>`
       + `<circle cx="${x}" cy="${y}" r="7.5" fill="${i % 2 ? '#E58FA0' : '#C9607E'}"/><circle cx="${x}" cy="${y}" r="2.8" fill="#FFE27A"/>`).join('');
-  return `<g id="kid">
+  const rightArm = o.ids
+    ? `<line id="arm" x1="${RACHEL_RIG.sh.x}" y1="${RACHEL_RIG.sh.y}" stroke="${sk}" stroke-width="20" stroke-linecap="round"/>
+       <line id="stick" stroke="#8A5230" stroke-width="7" stroke-linecap="round"/>
+       <circle id="hand" r="12" fill="${sk}"/>
+       <g id="wstar"><path d="M0 -17 L5 -5.5 L17 -5.5 L7.5 2.8 L11 15 L0 7.5 L-11 15 L-7.5 2.8 L-17 -5.5 L-5 -5.5Z" fill="#FFD45C" stroke="#F5A623" stroke-width="2.5" stroke-linejoin="round"/></g>`
+    : o.wave
+      ? `<path d="M226 280 Q262 238 266 196" stroke="${sk}" stroke-width="20" fill="none" stroke-linecap="round"/><circle cx="266" cy="190" r="13" fill="${sk}"/>`
+      : `<path d="M226 276 Q252 326 248 380" stroke="${sk}" stroke-width="20" fill="none" stroke-linecap="round"/><circle cx="248" cy="386" r="12" fill="${sk}"/>`;
+  const cap = o.cap ? `<path d="M180 72 L252 94 L180 116 L108 94Z" fill="#1E2A5A"/><path d="M150 100 H210 V118 Q180 128 150 118Z" fill="#2B3A75"/>
+      <path d="M240 98 Q246 112 242 132" stroke="#FFD45C" stroke-width="3" fill="none"/><circle cx="242" cy="135" r="5.5" fill="#FFD45C"/>` : '';
+  const scroll = o.diploma ? `<g transform="rotate(-20 112 384)"><rect x="70" y="374" width="84" height="22" rx="11" fill="#FFF8E8" stroke="#C9A36B" stroke-width="3"/>
+      <rect x="104" y="372" width="12" height="26" fill="#C2465A"/></g>` : '';
+  return `<g ${o.ids ? 'id="kid"' : 'class="rach"'}>
     <path d="M116 176 Q108 102 180 96 Q252 102 244 176 Q258 236 248 292 Q262 336 238 362 Q214 376 200 350 L160 350 Q146 376 122 362 Q98 336 112 292 Q102 236 116 176Z" fill="${hair}"/>
     <path d="M122 214 Q110 258 126 300 Q114 330 130 354 M238 214 Q250 258 234 300 Q246 330 230 354" stroke="${hl}" stroke-width="7" fill="none" stroke-linecap="round" opacity=".9"/>
     <rect x="150" y="462" width="17" height="74" rx="7" fill="${sk}"/><rect x="193" y="462" width="17" height="74" rx="7" fill="${sk}"/>
@@ -1272,10 +1719,8 @@ function rachelSVG() {
     <path d="M146 404 L136 466 M180 406 V474 M214 404 L224 466" stroke="#2F6A96" stroke-width="3" opacity=".6"/>
     <path d="M134 272 Q106 322 112 380" stroke="${sk}" stroke-width="20" fill="none" stroke-linecap="round"/>
     <circle cx="112" cy="386" r="12" fill="${sk}"/>
-    <line id="arm" x1="${RACHEL_RIG.sh.x}" y1="${RACHEL_RIG.sh.y}" stroke="${sk}" stroke-width="20" stroke-linecap="round"/>
-    <line id="stick" stroke="#8A5230" stroke-width="7" stroke-linecap="round"/>
-    <circle id="hand" r="12" fill="${sk}"/>
-    <g id="wstar"><path d="M0 -17 L5 -5.5 L17 -5.5 L7.5 2.8 L11 15 L0 7.5 L-11 15 L-7.5 2.8 L-17 -5.5 L-5 -5.5Z" fill="#FFD45C" stroke="#F5A623" stroke-width="2.5" stroke-linejoin="round"/></g>
+    ${scroll}
+    ${rightArm}
     <path d="M128 262 Q180 250 232 262 Q246 330 242 402 Q180 412 118 402 Q114 330 128 262Z" fill="${blouse}"/>
     ${flowers}
     <rect x="168" y="222" width="24" height="38" fill="${sk}"/>
@@ -1285,6 +1730,7 @@ function rachelSVG() {
     <path d="M180 114 Q142 126 133 198 Q122 170 127 148 Q136 112 180 108Z" fill="${hair}"/>
     <path d="M180 114 Q218 126 227 198 Q238 170 233 148 Q224 112 180 108Z" fill="${hair}"/>
     <path d="M146 130 Q136 150 136 176 M214 130 Q224 150 224 176" stroke="${hl}" stroke-width="5" fill="none" stroke-linecap="round" opacity=".9"/>
+    ${cap}
     <path d="M150 158 Q162 150 174 157 M186 157 Q198 150 210 158" stroke="#4A2A1A" stroke-width="4.5" fill="none" stroke-linecap="round"/>
     <g class="blink">
       <ellipse cx="162" cy="177" rx="11" ry="12" fill="#fff"/><ellipse cx="198" cy="177" rx="11" ry="12" fill="#fff"/>
@@ -1296,69 +1742,143 @@ function rachelSVG() {
     <path d="M180 184 Q175 198 184 199" stroke="#D99A80" stroke-width="3" fill="none" stroke-linecap="round"/>
     <circle cx="148" cy="204" r="10" fill="#FF8FA3" opacity=".4"/><circle cx="212" cy="204" r="10" fill="#FF8FA3" opacity=".4"/>
     <path d="M159 207 Q180 232 201 207 Q180 213 159 207Z" fill="#fff" stroke="#C8556A" stroke-width="3.5" stroke-linejoin="round"/>
-    <ellipse id="mouth" cx="180" cy="217" rx="11" ry="3" fill="#9E3A4E"/>
+    <ellipse ${o.ids ? 'id="mouth" ' : ''}class="gmouth" cx="180" cy="217" rx="11" ry="3" fill="#9E3A4E"/>
   </g>`;
 }
+const rachelBust = () => `<svg viewBox="96 86 168 220" aria-hidden="true">${rachelSVG({})}</svg>`;
 
-/* ---------- The storybook world scene ---------- */
+/* ---------- Lettervale: the wonderland scene ---------- */
+function tree(x, y, r, c1 = '#5DB45D', c2 = '#6CC46C') {
+  return `<rect x="${x - r * .14}" y="${y}" width="${r * .28}" height="${r * 1.1}" rx="4" fill="#8A5230"/>`
+    + `<circle cx="${x - r * .5}" cy="${y + r * .1}" r="${r * .7}" fill="${c1}"/><circle cx="${x + r * .5}" cy="${y + r * .05}" r="${r * .72}" fill="${c1}"/>`
+    + `<circle cx="${x}" cy="${y - r * .45}" r="${r}" fill="${c2}"/>`;
+}
+function cottage(x, y, s, door) {
+  return `<g transform="translate(${x} ${y}) scale(${s})">
+    <rect x="15" y="-62" width="10" height="20" fill="#A79F90"/>
+    <g class="smoke"><circle cx="20" cy="-70" r="5" fill="#fff" opacity=".8"/><circle cx="25" cy="-80" r="7" fill="#fff" opacity=".6"/><circle cx="20" cy="-93" r="9" fill="#fff" opacity=".4"/></g>
+    <path d="M-30 16 V-18 H30 V16Z" fill="#DDD6C8"/>
+    <ellipse cx="-18" cy="10" rx="7" ry="4" fill="#C2B9A8"/><ellipse cx="0" cy="12" rx="8" ry="4" fill="#CFC6B5"/><ellipse cx="20" cy="9" rx="7" ry="4" fill="#C2B9A8"/>
+    <ellipse cx="22" cy="-6" rx="6" ry="4" fill="#CFC6B5"/><ellipse cx="-22" cy="-10" rx="6" ry="3.5" fill="#C2B9A8"/>
+    <path d="M-38 -12 Q-34 -52 0 -60 Q34 -52 38 -12 Q0 -22 -38 -12Z" fill="#E7B54A"/>
+    <path d="M-28 -18 Q-22 -42 -10 -52 M-13 -17 Q-8 -42 0 -56 M4 -18 Q8 -42 14 -52 M20 -17 Q26 -36 28 -44" stroke="#C9902C" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <path d="M-8 16 V0 A8 8 0 0 1 8 0 V16Z" fill="${door}"/><circle cx="4" cy="8" r="1.4" fill="#FFD45C"/>
+    <circle cx="-19" cy="-1" r="6" fill="#9ED6F5" stroke="#fff" stroke-width="2"/><circle cx="19" cy="-3" r="5" fill="#9ED6F5" stroke="#fff" stroke-width="2"/>
+    <rect x="-27" y="5" width="16" height="5" rx="1" fill="#8A5230"/><circle cx="-24" cy="4" r="2.5" fill="#FF6F82"/><circle cx="-19" cy="3.5" r="2.5" fill="#FFD45C"/><circle cx="-14" cy="4" r="2.5" fill="#C9A8FF"/>
+  </g>`;
+}
+function castle(cx, by) {
+  const tower = (x, w, h, roof) => `<rect x="${x}" y="${by - h}" width="${w}" height="${h}" fill="#FCE6F5" stroke="${INK}" stroke-width="3"/>`
+    + `<path d="M${x - 8} ${by - h + 2} L${x + w / 2} ${by - h - w * 1.9} L${x + w + 8} ${by - h + 2}Z" fill="${roof}" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>`
+    + `<path d="M${x + w / 2} ${by - h - w * 1.9} v-22" stroke="${INK}" stroke-width="2.5"/><path d="M${x + w / 2} ${by - h - w * 1.9 - 22} l20 6 -20 6Z" fill="#FFD45C" stroke="${INK}" stroke-width="2"/>`
+    + `<path d="M${x + w / 2 - 6} ${by - h + 34} v-8 a6 6 0 0 1 12 0 v8Z" fill="#8F6CFF"/>`;
+  return `<g>
+    ${tower(cx - 130, 48, 150, '#8F6CFF')}${tower(cx + 82, 48, 150, '#8F6CFF')}
+    <rect x="${cx - 86}" y="${by - 110}" width="172" height="110" fill="#FFF0FA" stroke="${INK}" stroke-width="3"/>
+    <path d="M${cx - 86} ${by - 110} ${Array.from({ length: 8 }, (_, i) => `h${i % 2 ? 22 : 21.5} v${i % 2 ? 12 : -12}`).join(' ')}" fill="none" stroke="${INK}" stroke-width="3"/>
+    ${tower(cx - 30, 60, 200, '#FF7FB6')}
+    ${tower(cx - 74, 34, 128, '#FF7FB6')}${tower(cx + 40, 34, 128, '#FF7FB6')}
+    <path d="M${cx - 22} ${by} V${by - 40} A22 22 0 0 1 ${cx + 22} ${by - 40} V${by}Z" fill="#8A5FB8" stroke="${INK}" stroke-width="3"/>
+    <path d="M${cx - 22} ${by - 30} H${cx + 22} M${cx - 22} ${by - 18} H${cx + 22} M${cx} ${by - 62} V${by}" stroke="#6B47A0" stroke-width="2"/>
+    <circle cx="${cx}" cy="${by - 140}" r="13" fill="#FFD45C" stroke="${INK}" stroke-width="2.5"/>
+  </g>`;
+}
+function balloon(x, y, c1, c2, d) {
+  return `<g class="balloon" style="animation-delay:${d}s"><g transform="translate(${x} ${y})">
+    <path d="M0 -40 C24 -40 30 -14 16 6 L6 18 H-6 L-16 6 C-30 -14 -24 -40 0 -40Z" fill="${c1}" stroke="${INK}" stroke-width="2"/>
+    <path d="M0 -40 C10 -40 12 -14 6 6 L3 18 H-3 L-6 6 C-12 -14 -10 -40 0 -40Z" fill="${c2}"/>
+    <path d="M-6 18 L-7 28 M6 18 L7 28" stroke="#8A5230" stroke-width="1.6"/><rect x="-8" y="28" width="16" height="11" rx="2" fill="#A0623A"/></g></g>`;
+}
+function firework(x, y, c, d) {
+  return `<g transform="translate(${x} ${y})"><g class="fw" style="animation-delay:${d}s">`
+    + Array.from({ length: 12 }, (_, i) => { const a = i / 12 * Math.PI * 2; return `<path d="M${(Math.cos(a) * 8).toFixed(1)} ${(Math.sin(a) * 8).toFixed(1)} L${(Math.cos(a) * 24).toFixed(1)} ${(Math.sin(a) * 24).toFixed(1)}" stroke="${c}" stroke-width="3.5" stroke-linecap="round"/>`; }).join('')
+    + `<circle r="4" fill="#fff"/></g></g>`;
+}
+const twinkle = (x, y, s, d) => `<path class="tw" style="animation-delay:${d}s" d="M${x} ${y - s} Q${x} ${y} ${x + s} ${y} Q${x} ${y} ${x} ${y + s} Q${x} ${y} ${x - s} ${y} Q${x} ${y} ${x} ${y - s}Z" fill="#FFF6B0"/>`;
+const flower = (x, y, c) => `<path d="M${x} ${y} v14" stroke="#4E9A45" stroke-width="3"/>`
+  + [0, 72, 144, 216, 288].map(a => `<circle cx="${(x + Math.cos(a * Math.PI / 180) * 6).toFixed(1)}" cy="${(y + Math.sin(a * Math.PI / 180) * 6).toFixed(1)}" r="5" fill="${c}"/>`).join('')
+  + `<circle cx="${x}" cy="${y}" r="4" fill="#FFD45C"/>`;
+const cloudG = (x, y, s, cls) => `<g class="cloud ${cls}"><g transform="translate(${x} ${y}) scale(${s})">`
+  + `<ellipse cx="0" cy="0" rx="46" ry="22" fill="#fff"/><circle cx="-18" cy="-12" r="20" fill="#fff"/><circle cx="14" cy="-18" r="24" fill="#fff"/></g></g>`;
+const swan = (x, y) => `<g transform="translate(${x} ${y})"><ellipse cx="0" cy="0" rx="16" ry="8" fill="#fff"/><path d="M10 -2 Q16 -22 8 -24" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M8 -25 l-7 2 7 2Z" fill="#FF9A3C"/><circle cx="10" cy="-25" r="1.5" fill="${INK}"/></g>`;
+
 function worldSVG() {
-  const cloud = (x, y, s, cls) => `<g class="cloud ${cls}"><g transform="translate(${x} ${y}) scale(${s})">`
-    + `<ellipse cx="0" cy="0" rx="46" ry="22" fill="#fff"/><circle cx="-18" cy="-12" r="20" fill="#fff"/><circle cx="14" cy="-18" r="24" fill="#fff"/></g></g>`;
-  const flower = (x, y, c) => `<path d="M${x} ${y} v14" stroke="#4E9A45" stroke-width="3"/>`
-    + [0, 72, 144, 216, 288].map(a => `<circle cx="${(x + Math.cos(a * Math.PI / 180) * 6).toFixed(1)}" cy="${(y + Math.sin(a * Math.PI / 180) * 6).toFixed(1)}" r="5" fill="${c}"/>`).join('')
-    + `<circle cx="${x}" cy="${y}" r="4" fill="#FFD45C"/>`;
   let cells = '';
   for (let i = 0; i < 26; i++) {
     const L = String.fromCharCode(65 + i), p = worldPos(L);
-    cells += `<g class="ch" data-ch="${L}" style="cursor:pointer"><circle class="glow" cx="${p.x}" cy="${p.y}" r="47" fill="#FFF3A8"/>`
-      + `<g class="lt"><rect x="${p.x - 34}" y="${p.y - 34}" width="68" height="68" rx="16" fill="${LCOL[L]}" stroke="${INK}" stroke-width="3"/>`
-      + `<text x="${p.x}" y="${p.y + 14}" text-anchor="middle" font-family="Andika, sans-serif" font-weight="700" font-size="40" fill="${INK}">${L}<tspan font-size="30">${L.toLowerCase()}</tspan></text></g></g>`;
+    cells += `<g class="ch" data-ch="${L}" style="cursor:pointer"><circle class="glow" cx="${p.x}" cy="${p.y}" r="40" fill="#FFF3A8"/>`
+      + `<g class="lt"><rect x="${p.x - 29}" y="${p.y - 29}" width="58" height="58" rx="14" fill="${LCOL[L]}" stroke="${INK}" stroke-width="3"/>`
+      + `<text x="${p.x}" y="${p.y + 12}" text-anchor="middle" font-family="Andika, sans-serif" font-weight="700" font-size="34" fill="${INK}">${L}<tspan font-size="26">${L.toLowerCase()}</tspan></text></g></g>`;
   }
-  return `<svg viewBox="0 0 1000 600" role="img" aria-label="La maestra Rachel señala las letras del abecedario con una varita mágica" xmlns="http://www.w3.org/2000/svg">
-    <defs><linearGradient id="wsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8FD0FF"/><stop offset="1" stop-color="#E6F6FF"/></linearGradient></defs>
-    <rect width="1000" height="600" fill="url(#wsky)"/>
-    <g transform="translate(66 62)"><g class="sunrays">${[0, 45, 90, 135, 180, 225, 270, 315].map(a => `<rect x="-5" y="-50" width="10" height="18" rx="5" fill="#FFB020" transform="rotate(${a})"/>`).join('')}</g>
+  const rainbow = ['#FF5A5A', '#FFA94D', '#FFD45C', '#5BBF7A', '#4C9EF5', '#6A5BD8', '#B28DFF']
+    .map((c, i) => { const r = 300 - i * 15; return `<path d="M${600 - r} 320 A${r} ${r} 0 0 1 ${600 + r} 320" stroke="${c}" stroke-width="15" fill="none" opacity=".85"/>`; }).join('');
+  let forest = '';
+  for (let x = -10; x < 1220; x += 44) forest += tree(x, 318 + (x % 3) * 4, 22 + (x % 5) * 2, x % 88 ? '#3E9E4E' : '#4FA34A', x % 88 ? '#4FB35C' : '#5DB45D');
+  return `<svg viewBox="0 0 1200 650" role="img" aria-label="Lettervale" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="wsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5DB8FF"/><stop offset=".55" stop-color="#BDE6FF"/><stop offset="1" stop-color="#FFE3F1"/></linearGradient>
+      <linearGradient id="wlake" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5CC2FF"/><stop offset="1" stop-color="#2E8FE0"/></linearGradient>
+    </defs>
+    <rect width="1200" height="650" fill="url(#wsky)"/>
+    <g transform="translate(78 66)"><g class="sunrays">${[0, 45, 90, 135, 180, 225, 270, 315].map(a => `<rect x="-5" y="-50" width="10" height="18" rx="5" fill="#FFB020" transform="rotate(${a})"/>`).join('')}</g>
       <circle r="28" fill="#FFD45C"/><circle cx="-9" cy="-4" r="3" fill="${INK}"/><circle cx="9" cy="-4" r="3" fill="${INK}"/>
       <path d="M-9 7 Q0 15 9 7" stroke="${INK}" stroke-width="2.5" fill="none" stroke-linecap="round"/></g>
-    ${cloud(0, 70, 1, 'c1')}${cloud(0, 150, .8, 'c2')}${cloud(0, 30, .7, 'c3')}
-    <path d="M0 440 Q180 380 380 430 T760 420 T1000 410 V600 H0Z" fill="#A8DC8F"/>
-    <rect x="38" y="300" width="22" height="170" rx="6" fill="#8A5230"/>
-    <circle cx="20" cy="320" r="34" fill="#5DB45D"/><circle cx="84" cy="316" r="36" fill="#5DB45D"/><circle cx="50" cy="286" r="46" fill="#6CC46C"/>
-    <circle cx="36" cy="276" r="6" fill="#FF5A5A"/><circle cx="70" cy="300" r="6" fill="#FF5A5A"/><circle cx="56" cy="262" r="6" fill="#FF5A5A"/>
-    <path d="M0 520 Q250 486 520 510 T1000 500 V600 H0Z" fill="#8BCF78"/>
-    ${flower(24, 560, '#FF9AA8')}${flower(76, 578, '#C9A8FF')}${flower(292, 556, '#FFB37A')}${flower(336, 582, '#FF9AA8')}
-    ${flower(612, 580, '#9ED6F5')}${flower(940, 560, '#C9A8FF')}${flower(976, 584, '#FF9AA8')}${flower(760, 586, '#FFD45C')}
-    <path d="M420 470 L394 574 M880 470 L906 574 M650 470 V560" stroke="#8A5230" stroke-width="13" stroke-linecap="round"/>
-    <rect x="334" y="36" width="632" height="448" rx="24" fill="#7A2E2A"/>
-    <rect x="346" y="48" width="608" height="424" rx="16" fill="#FFF8E8"/>
-    <rect x="358" y="60" width="584" height="400" rx="12" fill="none" stroke="#F5C842" stroke-width="4" stroke-dasharray="1 11" stroke-linecap="round"/>
-    <text x="650" y="104" text-anchor="middle" font-family="Fredoka, 'Baloo 2', sans-serif" font-weight="700" font-size="36" fill="#C2465A">¡Canta el ABC!</text>
+    ${rainbow}
+    ${cloudG(0, 70, 1, 'c1')}${cloudG(0, 160, .8, 'c2')}${cloudG(0, 36, .7, 'c3')}
+    <path d="M0 320 L90 250 L170 300 L280 220 L380 290 L470 250 L560 300 L700 290 L800 230 L900 290 L1010 240 L1110 300 L1200 260 V380 H0Z" fill="#A9B4EE"/>
+    <path d="M280 220 L300 236 L262 234Z M800 230 L820 246 L782 245Z M1010 240 L1028 254 L994 254Z" fill="#fff"/>
+    ${forest}
+    ${firework(460, 70, '#FFD45C', 0)}${firework(745, 58, '#FF9AA8', .9)}${firework(612, 26, '#9ED6F5', 1.7)}${firework(390, 150, '#C9A8FF', 2.4)}
+    ${castle(600, 300)}
+    ${twinkle(520, 120, 9, 0)}${twinkle(690, 140, 8, .7)}${twinkle(560, 60, 7, 1.3)}${twinkle(660, 90, 10, 1.9)}${twinkle(430, 220, 7, .4)}${twinkle(790, 200, 8, 1.1)}
+    <path d="M0 362 Q150 330 300 346 Q450 304 600 298 Q750 304 900 346 Q1050 330 1200 352 V650 H0Z" fill="#8FD27A"/>
+    <path d="M0 430 Q300 400 600 430 T1200 420 V650 H0Z" fill="#7CC86A" opacity=".6"/>
+    <path d="M600 300 C670 318 770 326 850 352 C940 382 960 414 920 446 C872 484 852 560 880 650" stroke="#E2A62A" stroke-width="40" fill="none" stroke-linecap="round"/>
+    <path d="M600 300 C670 318 770 326 850 352 C940 382 960 414 920 446 C872 484 852 560 880 650" stroke="#FFD45C" stroke-width="32" fill="none" stroke-linecap="round"/>
+    <path d="M600 300 C670 318 770 326 850 352 C940 382 960 414 920 446 C872 484 852 560 880 650" stroke="#E9B23A" stroke-width="30" fill="none" stroke-dasharray="2 13"/>
+    ${cottage(1150, 338, .7, '#4C9EF5')}${cottage(1010, 372, .95, '#C2465A')}${cottage(872, 404, 1, '#6A5BD8')}${cottage(1120, 422, 1, '#2E9E5B')}
+    <path d="M960 476 Q1060 446 1180 474 Q1222 524 1184 584 Q1086 616 984 590 Q930 546 960 476Z" fill="url(#wlake)" stroke="#2477C4" stroke-width="3"/>
+    <path d="M990 500 h40 M1060 520 h50 M1000 560 h36 M1120 560 h40" stroke="#BFE8FF" stroke-width="3" stroke-linecap="round" class="shimmer"/>
+    ${swan(1050, 538)}${swan(1128, 506)}
+    <circle cx="1000" cy="532" r="9" fill="#5BBF7A"/><circle cx="1150" cy="574" r="8" fill="#5BBF7A"/><circle cx="1154" cy="570" r="3" fill="#FF9AA8"/>
+    ${tree(1188, 470, 30)}${tree(948, 470, 22)}
+    ${tree(30, 380, 42, '#3E9E4E', '#4FB35C')}${tree(120, 350, 36)}${tree(210, 392, 40, '#3E9E4E', '#4FB35C')}
+    ${balloon(330, 120, '#FF6F82', '#FFD45C', 0)}${balloon(1010, 140, '#9ED6F5', '#C9A8FF', 1.5)}${balloon(890, 70, '#8EDBA6', '#FFB37A', .8)}
+    ${flower(20, 610, '#FF9AA8')}${flower(820, 612, '#C9A8FF')}${flower(960, 628, '#FFB37A')}${flower(1060, 630, '#FF9AA8')}${flower(1180, 622, '#9ED6F5')}
+    <rect x="250" y="302" width="540" height="350" rx="22" fill="#7A2E2A" stroke="${INK}" stroke-width="3"/>
+    <rect x="262" y="314" width="516" height="330" rx="14" fill="#FFF8E8"/>
+    <rect x="272" y="324" width="496" height="310" rx="10" fill="none" stroke="#F5C842" stroke-width="4" stroke-dasharray="1 11" stroke-linecap="round"/>
+    <rect x="450" y="286" width="140" height="34" rx="17" fill="#FF6F82" stroke="${INK}" stroke-width="3"/>
+    <text x="520" y="311" text-anchor="middle" font-family="Fredoka, 'Baloo 2', sans-serif" font-weight="700" font-size="24" fill="#fff" letter-spacing="4">ABC</text>
     ${cells}
-    ${rachelSVG()}
-    <line id="beam" stroke="#FFE27A" stroke-width="7" stroke-dasharray="4 8" stroke-linecap="round" opacity="0"/>
+    <g transform="translate(${ROFF.x} ${ROFF.y})">${rachelSVG({ ids: true })}
+      <line id="beam" stroke="#FFE27A" stroke-width="7" stroke-dasharray="4 8" stroke-linecap="round" opacity="0"/></g>
   </svg>`;
 }
 
-/* ---------- Views: cover → curtain → world → modules ---------- */
+/* ---------- Views ---------- */
 const coverEl = document.getElementById('cover'), worldEl = document.getElementById('world'), worldIn = document.getElementById('worldIn');
-const bookEl = document.getElementById('book'), curtainEl = document.getElementById('curtain');
+const bookEl = document.getElementById('book'), uniEl = document.getElementById('uni'), uniIn = document.getElementById('uniIn');
+const curtainEl = document.getElementById('curtain');
 const ABC = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 const WORD_MODS = MODULES.length;
 ABC.forEach(L => MODULES.push({ kind: 'letter', L, letters: [L], word: L, color: LCOL[L] }));
 const MAESTRA = /maestra/i.test(location.search + location.hash);
-const HOUSE = '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M12 3 2 12h3v8h5v-5h4v5h5v-8h3z"/></svg>';
-const BOOK = '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M3 5c3-1.5 6-1.5 9 .5 3-2 6-2 9-.5v14c-3-1.5-6-1.5-9 .5-3-2-6-2-9-.5z"/></svg>';
+const HOUSE = ICON.house;
 
 function showView(v) {
-  coverEl.hidden = v !== 'cover'; worldEl.hidden = v !== 'world'; bookEl.hidden = v !== 'book';
+  coverEl.hidden = v !== 'cover'; worldEl.hidden = v !== 'world'; bookEl.hidden = v !== 'book'; uniEl.hidden = v !== 'uni';
   if (v !== 'world') worldIn.innerHTML = '';
+  if (v !== 'uni') uniIn.innerHTML = '';
   window.scrollTo(0, 0);
 }
-function showCover() { stopAll(); mi = -1; showView('cover'); }
+function showCover() { stopAll(); mi = -1; renderCover(); showView('cover'); scheduleCoverHint(); }
 
-const DONE_KEY = 'vamos-a-leer-done';
-function getDone() { try { return JSON.parse(localStorage.getItem(DONE_KEY) || '[]'); } catch (e) { return []; } }
-function addDone(L) { const d = getDone(); if (!d.includes(L)) { d.push(L); try { localStorage.setItem(DONE_KEY, JSON.stringify(d)); } catch (e) {} } }
+function getDone() { try { return JSON.parse(localStorage.getItem(doneKey()) || '[]'); } catch (e) { return []; } }
+function addDone(L) { const d = getDone(); if (!d.includes(L)) { d.push(L); try { localStorage.setItem(doneKey(), JSON.stringify(d)); } catch (e) {} } }
+const allDone = () => ABC.every(L => getDone().includes(L));
+
+const gearBtn = () => `<button class="gear" data-gear="1" aria-label="${T().adult}">${ICON.gear}</button>`;
 
 function wordCards() {
   return MODULES.slice(0, WORD_MODS).map((m, i) => `<button class="mod" data-mod="${i}" style="--mc:${m.color}" aria-label="${m.title || m.word}">
@@ -1368,25 +1888,21 @@ function wordCards() {
       <span class="mini">${m.words.slice(0, 3).map(x => `<span style="background:#fff">${x.w}</span>`).join('')}</span>`
         : `<span class="word">${m.word}</span>
       <span class="mini">${m.letters.map(L => `<span style="background:${LCOL[L]}">${L}</span>`).join('')}</span>`}
-      <span class="go">¡Vamos!</span></button>`).join('');
+      <span class="go">${ICON.play}</span></button>`).join('');
 }
 
 function worldHTML() {
-  const done = getDone();
-  return `<div class="wbar"><button class="wbtn" data-act="cover">${BOOK} Portada</button>
-      <h1 class="wtitle">El mundo de la maestra Rachel</h1>
-      <button class="wbtn teach" data-act="teach" ${MAESTRA ? '' : 'hidden'}>Maestra</button></div>
+  const t = T();
+  return `<div class="wbar"><span class="wspacer"></span>
+      <div class="wtitle"><b>${BRAND}</b><small>${t.world}</small></div>${gearBtn()}</div>
     <div class="scene">${worldSVG()}</div>
     <p class="wlyric" id="lyric"></p>
-    <div class="wctrl"><button class="sing" id="singBtn" data-act="sing">Cantar</button>
-      <button class="sing alt" id="skipBtn" data-act="skip">Ver las letras ▼</button></div>
+    <div class="wctrl"><button class="sing" id="singBtn" data-act="sing" aria-label="ABC">${ICON.music}</button>
+      <button class="sing alt" id="skipBtn" data-act="skip" aria-label="${t.mapTitle}">${ICON.map}${ICON.down}</button></div>
     <section id="blocks" hidden>
-      <h2 class="bhead">¡El camino de las letras!</h2>
-      <div class="prog"><span aria-hidden="true">⭐</span><div class="pbar"><i id="pbar"></i></div><span id="pcount">0 de 26</span></div>
+      <div class="prog"><span aria-hidden="true">⭐</span><div class="pbar"><i id="pbar"></i></div><span id="pcount">0 / 26</span></div>
       <div class="mapbox" id="mapbox"></div>
-      <h2 class="shelfhead">¡Ahora lee palabras!</h2>
-      <div class="mods">${wordCards()}</div>
-      <button class="wbtn backcover" data-act="cover">${BOOK} Volver a la portada</button>
+      ${LANG === 'es' ? `<h2 class="shelfhead">¡Ahora lee palabras!</h2><div class="mods">${wordCards()}</div>` : ''}
     </section>`;
 }
 
@@ -1400,7 +1916,11 @@ function showWorld(o = {}) {
     const b = document.getElementById('blocks'); b.hidden = false;
     document.getElementById('skipBtn').hidden = true;
     const j = justDone; justDone = null;
-    requestAnimationFrame(() => { const c = renderMap(j); if (o.scroll && !j && c) c(false); });
+    requestAnimationFrame(() => {
+      const c = renderMap(j);
+      if (o.scroll && !j && c) c(false);
+      if (!j) setHint(() => document.querySelector('.stop.next, .unistop.open'), 2500);
+    });
   }
 }
 const renderHome = () => showWorld({ reveal: true, scroll: true });
@@ -1408,9 +1928,11 @@ const renderHome = () => showWorld({ reveal: true, scroll: true });
 function revealBlocks(say) {
   const b = document.getElementById('blocks'); if (!b) return;
   const skip = document.getElementById('skipBtn'); if (skip) skip.hidden = true;
-  if (b.hidden) { b.hidden = false; b.classList.add('show'); renderMap(); }
-  b.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion:reduce)').matches ? 'auto' : 'smooth', block: 'start' });
-  if (say) speak([es('¡Muy bien! Ahora toca una letra para empezar.')]);
+  if (b.hidden) { b.hidden = false; renderMap(); }
+  const nx = document.querySelector('.stop.next, .unistop.open') || b;
+  nx.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion:reduce)').matches ? 'auto' : 'smooth', block: 'center' });
+  if (say) speak([N(T().wAfter)]);
+  setHint(() => document.querySelector('.stop.next, .unistop.open'), 1200);
 }
 
 function unlockSpeech() {
@@ -1426,6 +1948,7 @@ let entering = false;
 function enterWorld() {
   if (entering) return; entering = true;
   ensureAC(); unlockSpeech(); stopAll();
+  curtainEl.querySelector('.welcome').textContent = T().curtain;
   curtainEl.classList.remove('up'); curtainEl.classList.add('down');
   chime([392, 523.25, 659.25], .12);
   setTimeout(() => showWorld(), 800);
@@ -1436,35 +1959,162 @@ function enterWorld() {
   setTimeout(() => {
     curtainEl.classList.remove('up'); entering = false;
     if (worldEl.hidden) return;
-    speak([es('¡Hola, amigos! Bienvenidos a mi mundo de cuentos. ¡Cantemos el abecedario juntos!')], () => {
+    speak([N(T().wHello)], () => {
       if (!worldEl.hidden && document.getElementById('blocks')?.hidden) sing(() => revealBlocks(true));
     });
   }, 3900);
 }
 
+/* ---------- Cover (for parents and educators) ---------- */
+function renderCover() {
+  const t = T();
+  const opts = LANGS.map(l => `<option value="${l}"${l === LANG ? ' selected' : ''}>${STR[l].langName}</option>`).join('');
+  const stepIcon = [
+    `<svg viewBox="0 0 64 64" aria-hidden="true"><rect x="4" y="6" width="56" height="10" rx="3" fill="#C2465A"/><path d="M8 16h22c-2 14-8 30-22 40z" fill="#E0384F"/><path d="M56 16H34c2 14 8 30 22 40z" fill="#E0384F"/><path d="M26 58l6-14 6 14z" fill="#FFD45C"/></svg>`,
+    `<svg viewBox="0 0 64 64" aria-hidden="true"><rect x="6" y="10" width="20" height="20" rx="5" fill="#FFD45C" stroke="#1E2A5A" stroke-width="3"/><text x="16" y="26" text-anchor="middle" font-family="Andika,sans-serif" font-weight="700" font-size="15" fill="#1E2A5A">A</text><rect x="22" y="32" width="20" height="20" rx="5" fill="#9ED6F5" stroke="#1E2A5A" stroke-width="3"/><text x="32" y="48" text-anchor="middle" font-family="Andika,sans-serif" font-weight="700" font-size="15" fill="#1E2A5A">B</text><path d="M44 30V10l14-3v18" fill="none" stroke="#C2465A" stroke-width="3.5"/><circle cx="41" cy="31" r="4.5" fill="#C2465A"/><circle cx="55" cy="26" r="4.5" fill="#C2465A"/></svg>`,
+    `<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M6 14l16-7 20 7 16-7v43l-16 7-20-7-16 7z" fill="#F3DFAF" stroke="#1E2A5A" stroke-width="3" stroke-linejoin="round"/><path d="M14 44c8-4 10-14 20-14s10 6 16-4" stroke="#C2465A" stroke-width="3" stroke-dasharray="2 5" fill="none" stroke-linecap="round"/><path d="M45 18l6 6M51 18l-6 6" stroke="#C2465A" stroke-width="3.5" stroke-linecap="round"/></svg>`];
+  coverEl.innerHTML = `
+  <header class="cnav"><div class="cwrap cnav-in">
+    <a class="logo" href="#top" aria-label="Vamos a leer"><span class="logomark" aria-hidden="true"><i style="background:#FFD45C">A</i><i style="background:#FF9AA8">B</i><i style="background:#9ED6F5">C</i></span><span class="logotext">Vamos a leer</span></a>
+    <nav class="clinks"><a href="#c-how">${t.cHow}</a><a href="#c-teacher">${t.cNavT}</a><a href="#c-fam">${t.cNavF}</a></nav>
+    <select class="clang" id="coverLang" aria-label="${t.language}">${opts}</select>
+  </div></header>
+  <section class="hero" id="top"><div class="cwrap hero-in">
+    <div class="htext">
+      <p class="eyebrow">${t.cEyebrow}</p>
+      <h1 class="h1">${t.cH1}</h1>
+      <p class="lead">${t.cLead}</p>
+      <div class="ctas">
+        <button class="enter" id="enterBtn">${ICON.play}<span>${t.cCta}</span></button>
+        <button class="hear" id="greetBtn" aria-label="${t.hello}">${SPK}</button>
+      </div>
+      <ul class="badges"><li><span aria-hidden="true">⭐</span>${t.cB1}</li><li><span aria-hidden="true">🎵</span>${t.cB2}</li><li><span aria-hidden="true">💬</span>${t.cB3}</li></ul>
+    </div>
+    <div class="hphoto">
+      <span class="blob b1"></span><span class="blob b2"></span>
+      <figure class="pcard"><img src="Rach.jpg" width="400" height="400" alt="Rachel Woronoff" decoding="async">
+        <figcaption><b>Rachel Woronoff</b><span>${t.cRole}</span></figcaption></figure>
+      <span class="fchip f1" aria-hidden="true">Aa</span><span class="fchip f2" aria-hidden="true">♪</span><span class="fchip f3" aria-hidden="true">★</span>
+    </div>
+  </div></section>
+  <section class="csec" id="c-how"><div class="cwrap">
+    <h2>${t.cHow}</h2>
+    <div class="steps">${[[t.cS1t, t.cS1], [t.cS2t, t.cS2], [t.cS3t, t.cS3]].map(([h, p], i) => `<article class="step"><span class="snum">${i + 1}</span>${stepIcon[i]}<h3>${h}</h3><p>${p}</p></article>`).join('')}</div>
+  </div></section>
+  <section class="csec about" id="c-teacher"><div class="cwrap about-in">
+    <img src="Rach.jpg" width="400" height="400" alt="" decoding="async">
+    <div><h2>${t.cAboutT}</h2><p>${t.cAbout}</p></div>
+  </div></section>
+  <section class="csec" id="c-fam"><div class="cwrap">
+    <h2>${t.cFamT}</h2>
+    <ul class="tips"><li>${t.cF1}</li><li>${t.cF2}</li><li>${t.cF3}</li></ul>
+    <p class="langs"><span>${t.cLangs}:</span> ${LANGS.filter(l => l !== LANG).map(l => `<button class="lchip" data-lang="${l}">${STR[l].langName}</button>`).join('')}</p>
+  </div></section>
+  <footer class="cfoot"><div class="cwrap">© 2026 Vamos a leer · Rachel Woronoff · ${t.cFoot}</div></footer>`;
+}
+
+function setLang(l) {
+  if (!LANGS.includes(l)) return;
+  LANG = l;
+  try { localStorage.setItem('vamos-a-leer-lang', l); } catch (e) {}
+  document.documentElement.lang = l;
+  const u = new URL(location.href); u.searchParams.set('lang', l); history.replaceState(null, '', u);
+  pickVoices(); fillAdult();
+}
+
+/* ---------- Hints for pre-readers: a pointing hand ---------- */
+let hintEl = null, hintTimer = null, hintRaf = 0, hintGet = null;
+function clearHint() {
+  clearTimeout(hintTimer); cancelAnimationFrame(hintRaf);
+  if (hintEl) { hintEl.remove(); hintEl = null; }
+  document.querySelectorAll('.pulse').forEach(e => e.classList.remove('pulse'));
+}
+function showHint(el) {
+  clearHint();
+  if (!el || !el.isConnected) return;
+  el.classList.add('pulse');
+  hintEl = document.createElement('div'); hintEl.className = 'hand'; hintEl.innerHTML = ICON.hand; hintEl.setAttribute('aria-hidden', 'true');
+  document.body.appendChild(hintEl);
+  const place = () => {
+    if (!hintEl || !el.isConnected) return clearHint();
+    const r = el.getBoundingClientRect();
+    hintEl.style.left = (r.left + r.width / 2 - 22) + 'px';
+    hintEl.style.top = Math.min(r.bottom - 8, window.innerHeight - 70) + 'px';
+    hintRaf = requestAnimationFrame(place);
+  };
+  place();
+}
+function setHint(get, extra = 1800) {
+  hintGet = get; clearTimeout(hintTimer);
+  const tick = () => { if (talking || song.playing) { hintTimer = setTimeout(tick, 300); return; } hintTimer = setTimeout(() => { const el = hintGet && hintGet(); if (el) showHint(el); }, extra); };
+  hintTimer = setTimeout(tick, 350);
+}
+document.addEventListener('pointerdown', e => {
+  if (e.target.closest && e.target.closest('dialog')) return;
+  clearHint();
+  if (hintGet) { const g = hintGet; setTimeout(() => { if (hintGet === g) setHint(g, 9000); }, 50); }
+}, true);
+function scheduleCoverHint() { setHint(() => document.getElementById('enterBtn'), 3500); }
+
+/* ---------- Ms. Rachel the guide ---------- */
+function cheer() {
+  document.querySelectorAll('.rguide').forEach(g => { g.classList.remove('cheer'); void g.offsetWidth; g.classList.add('cheer'); });
+}
+
+/* ---------- Grown-up controls behind a long press ---------- */
+const adultDlg = document.getElementById('adult');
+function fillAdult() {
+  const t = T();
+  document.getElementById('adT').textContent = t.adult;
+  document.getElementById('adAuto').textContent = t.autoVoice;
+  document.getElementById('adLang').textContent = t.language;
+  document.getElementById('langSel').innerHTML = LANGS.map(l => `<option value="${l}"${l === LANG ? ' selected' : ''}>${STR[l].langName}</option>`).join('');
+  document.getElementById('adCover').textContent = t.coverBtn;
+  document.getElementById('adReset').textContent = t.reset;
+  document.getElementById('adClose').textContent = t.close;
+  document.getElementById('teachBtn').textContent = t.teacher;
+}
+function openAdult() { stopAll(); fillAdult(); adultDlg.showModal(); }
+let gearT = null;
+function gearTip(btn) {
+  const tip = document.createElement('div'); tip.className = 'geartip'; tip.textContent = T().hold;
+  const r = btn.getBoundingClientRect();
+  tip.style.top = (r.bottom + 6) + 'px'; tip.style.right = Math.max(8, window.innerWidth - r.right) + 'px';
+  document.body.appendChild(tip); setTimeout(() => tip.remove(), 1800);
+}
+document.addEventListener('pointerdown', e => {
+  const g = e.target.closest && e.target.closest('[data-gear]'); if (!g) return;
+  e.preventDefault();
+  g.classList.add('holding');
+  gearT = setTimeout(() => { gearT = null; g.classList.remove('holding'); openAdult(); }, 750);
+  const cancel = () => { g.classList.remove('holding'); if (gearT) { clearTimeout(gearT); gearT = null; gearTip(g); } g.removeEventListener('pointerup', cancel); g.removeEventListener('pointerleave', cancel); };
+  g.addEventListener('pointerup', cancel); g.addEventListener('pointerleave', cancel);
+});
+document.addEventListener('contextmenu', e => { if (e.target.closest && e.target.closest('[data-gear]')) e.preventDefault(); });
+
 /* ---------- Letter modules (A–Z) ---------- */
 const keyLabel = (w, L) => { const s = showW(w); return LETTERS[L].end ? `${s.slice(0, -1)}<b>${s.slice(-1)}</b>` : `<b>${s[0]}</b>${s.slice(1)}`; };
-const keyBtns = L => LETTERS[L].keys.map(w => `<button class="key" data-word="${w}">${PIC[w]()}<span>${keyLabel(w, L)}<i>${KEYW[w]}</i></span></button>`).join('');
-const block = (L, extra = '') => `<div class="bigblock" style="background:${LCOL[L]}${extra}">${L}<small>${LETTERS[L].lower}</small></div>`;
+const keyBtns = L => LETTERS[L].keys.map(w => `<button class="key" data-word="${w}" aria-label="${showW(w)}">${PIC[w]()}<span>${keyLabel(w, L)}<i>${KW(w)}</i></span></button>`).join('');
+const block = L => `<div class="bigblock" style="background:${LCOL[L]}">${L}<small>${LETTERS[L].lower}</small></div>`;
 const chip = L => `<span class="tile" style="background:${LCOL[L]}; display:inline-block; font-size:2.4rem; vertical-align:middle">${L}${LETTERS[L].lower}</span>`;
 const sndGroup = l => 'ckq'.includes(l) ? 'k' : l;
 const CONF = { b: 'dpq', d: 'bpq', p: 'bdq', q: 'bdp', m: 'nw', n: 'mhu', u: 'nv', w: 'mv', i: 'jt', j: 'ig', l: 't', e: 'ac', a: 'eo', o: 'ac',
   c: 'eo', h: 'nb', f: 't', t: 'f', v: 'wy', y: 'vg', g: 'qy', k: 'hx', s: 'zc', z: 's', x: 'kz', r: 'n' };
+const goBtn = `<button class="gobig" data-act="next" aria-label="▶">${ICON.play}</button>`;
+let advanceT = null;
+function autoAdvance(page, ms) { clearTimeout(advanceT); advanceT = setTimeout(() => { if (mi >= 0 && pages()[cur] === page && !bookEl.hidden) go(1); }, ms); }
 
 function letterMod(m, p) {
   const L = m.L, d = LETTERS[L], lo = d.lower;
   if (p === 'intro') {
     game = {};
-    return `${block(L)}<h1>¡La letra ${L}!</h1>
-      <div class="keys">${keyBtns(L)}</div>
-      <button class="big" data-act="next">¡Empezar!</button>`;
+    return `${block(L)}<div class="keys">${keyBtns(L)}</div>${goBtn}`;
   }
   if (p === 'trace') {
     game = { tcase: 'U', praised: false };
-    return `<h2>Traza la letra con tu dedo</h2>
-      <div class="tracebox"><canvas id="trace" role="img" aria-label="Traza la letra ${L}"></canvas></div>
-      <div class="pillrow"><button class="pill on" data-tcase="U">${L}</button><button class="pill" data-tcase="l">${lo}</button>
-      <button class="pill" data-act="clear">Borrar</button></div>`;
+    return `<div class="tracebox"><canvas id="trace" role="img" aria-label="${L}"></canvas></div>
+      <div class="pillrow"><button class="pill on" data-tcase="U" aria-label="${L}">${L}</button><button class="pill" data-tcase="l" aria-label="${lo}">${lo}</button>
+      <button class="pill iconly" data-act="clear" aria-label="⌫">${ICON.eraser}</button></div>`;
   }
   if (p === 'find') {
     const conf = [...(CONF[lo] || '')];
@@ -1479,55 +2129,53 @@ function letterMod(m, p) {
     const nextL = ABC[ABC.indexOf(L) + 1];
     return `<div class="finale"><div class="burst" id="burst"></div>
       ${block(L)}
-      <h2>¡Ya conoces la letra ${L}!</h2>
-      <p class="sub">⭐ ¡Ganaste una estrella en el mapa!</p>
       <div class="keys">${keyBtns(L)}</div>
-      <div class="cheer"><img src="Rach.jpg" alt="La maestra Rachel"><span>¡Muy bien! Estoy muy orgullosa de ti.</span></div>
-      <div class="btns"><button class="homebig" data-act="home">${HOUSE} Volver a las letras</button>
-      ${nextL ? `<button class="pill" data-act="nextLetter">Siguiente: ${nextL}${LETTERS[nextL].lower}</button>` : ''}</div></div>`;
+      <div class="cheer"><img src="Rach.jpg" alt=""><span>⭐ ${T().star}</span></div>
+      <div class="btns"><button class="homebig" data-act="home" aria-label="${T().mapTitle}">${ICON.map}</button>
+      ${nextL ? `<button class="nextl" data-act="nextLetter" aria-label="${nextL}"><span style="background:${LCOL[nextL]}">${nextL}${LETTERS[nextL].lower}</span>${ICON.next}</button>` : ''}</div></div>`;
   }
   return '';
 }
 function promptLetter(m, p) {
-  const L = m.L, d = LETTERS[L];
-  if (p === 'intro') return speak([es('¡Hoy aprendemos la letra'), en(L + '!')]);
-  if (p === 'trace') return speak([es('Traza la letra'), en(L), es('con tu dedo. ¡Sigue la línea!')]);
-  if (p === 'find') return speak([es('Encuentra todas las letras'), en(L + '.'), es('Grandes y chiquitas.')]);
+  const L = m.L, d = LETTERS[L], t = T();
+  if (p === 'intro') { speak(t.today(L)); return setHint(() => pageEl.querySelector('.gobig'), 1200); }
+  if (p === 'trace') { speak(t.trace(L)); return setHint(() => nextBtn, 14000); }
+  if (p === 'find') { speak(t.find(L)); return setHint(() => [...pageEl.querySelectorAll('[data-lcell]')].find(b => !b.classList.contains('ok') && game.grid[+b.dataset.lcell].toUpperCase() === L), 9000); }
   if (p === 'pick') {
     if (!game.opts || game.i >= game.items.length) return;
-    return speak([es(d.end ? '¿Cuál termina con la letra' : '¿Cuál empieza con la letra'), en(L), es('?'), ...game.opts.map(o => en(sayW(o), .7))]);
+    speak([...t.pick(L, d.end), ...game.opts.map(o => E(sayW(o), .7))]);
+    return setHint(() => pageEl.querySelector('[data-act="hearOpts"]'), 9000);
   }
-  if (p === 'finale') return speak([es('¡Muy bien! Ya conoces la letra'), en(L + '.'), es('¡Estoy muy orgullosa de ti!')]);
+  if (p === 'finale') { cheer(); speak([...t.know(L), N(t.proud), N(t.star), N(t.tapHome)]); return setHint(() => pageEl.querySelector('.homebig'), 800); }
 }
 
+function starsHTML(n) { return `<div class="stars" id="score" aria-label="${n}/4">${[0, 1, 2, 3].map(i => `<span class="${i < n ? 'on' : ''}">★</span>`).join('')}</div>`; }
 function lfindHTML() {
   const L = mod().L;
-  return `<div class="target">Encuentra todas las ${tile(L, L, 'tabindex="-1"')}${tile(L, LETTERS[L].lower, 'tabindex="-1"')}</div>
+  return `<div class="target">${tile(L, L, 'tabindex="-1"')}${tile(L, LETTERS[L].lower, 'tabindex="-1"')}</div>
     <div class="grid">${game.grid.map((x, i) => `<button class="cell" data-lcell="${i}">${x}</button>`).join('')}</div>
-    <p class="score" id="score">Encontradas: 0 de 4</p>`;
+    ${starsHTML(0)}`;
 }
 function tapLCell(btn) {
   const L = mod().L, x = game.grid[+btn.dataset.lcell];
   if (btn.classList.contains('ok') || game.found >= 4) return;
   if (x.toUpperCase() === L) {
     btn.classList.add('ok'); game.found++;
-    const sc = document.getElementById('score');
+    document.getElementById('score').outerHTML = starsHTML(game.found);
     if (game.found === 4) {
-      sc.outerHTML = '<button class="big" data-act="next">¡Siguiente!</button>';
-      burstAt(btn);
-      speak([es('¡Lo lograste! Encontraste todas las'), en(L + '.')]);
-    } else { sc.textContent = `Encontradas: ${game.found} de 4`; speak([en(x === L ? L : LETTERS[L].lower)]); }
+      burstAt(btn); cheer();
+      speak([N(T().foundAll)]);
+      autoAdvance('find', 2600);
+    } else speak([E(x === L ? L : LETTERS[L].lower)]);
   } else {
     btn.classList.remove('shake'); void btn.offsetWidth; btn.classList.add('shake');
-    speak([es('Esa no. Busca la'), en(L + '.')]);
+    speak(T().findNo(L));
   }
 }
 
 function lpickHTML() {
   const L = mod().L, d = LETTERS[L];
-  if (game.i >= game.items.length)
-    return `<h2>¡Excelente!</h2>${block(L)}<p class="sub">Encontraste los dibujos con la letra ${L}.</p>
-      <button class="big" data-act="next">¡Siguiente!</button>`;
+  if (game.i >= game.items.length) return `${block(L)}`;
   const w = game.items[game.i];
   const pool = ABC.filter(x => x !== L).flatMap(x => LETTERS[x].keys).filter(k => {
     const f = k[0];
@@ -1536,28 +2184,29 @@ function lpickHTML() {
     return true;
   });
   game.opts = shuffle([w, ...shuffle(pool).slice(0, 2)]);
-  return `<h2>¿Cuál ${d.end ? 'termina' : 'empieza'} con ${chip(L)}?</h2>
-    <button class="listen" data-act="hearOpts">${SPK}<span>Escuchar</span></button>
+  return `<div class="pickq">${d.end ? '…' : ''}${chip(L)}${d.end ? '' : '…'}</div>
+    <button class="listen" data-act="hearOpts" aria-label="▶">${SPK}</button>
     <div class="picopts">${game.opts.map(o => `<button class="picopt" data-lpick="${o}" aria-label="${showW(o)}">${PIC[o]()}<b>${showW(o)}</b></button>`).join('')}</div>
     <p class="reveal" id="reveal">&nbsp;</p>
-    <p class="score">Dibujo ${game.i + 1} de ${game.items.length}</p>`;
+    <div class="dots pdots">${game.items.map((_, i) => `<span class="dot${i <= game.i ? ' on' : ''}"></span>`).join('')}</div>`;
 }
 function lpick(btn) {
   if (game.locked) return;
   const L = mod().L, w = game.items[game.i], o = btn.dataset.lpick;
   if (o === w) {
-    game.locked = true; btn.classList.add('ok');
+    game.locked = true; btn.classList.add('ok'); cheer();
     document.getElementById('reveal').innerHTML = keyLabel(w, L);
-    speak([es('¡Sí!'), en(sayW(w), .65)], () => setTimeout(() => {
+    speak([N(T().yes), E(sayW(w), .65)], () => setTimeout(() => {
       if (pages()[cur] !== 'pick') return;
       game.i++; game.locked = false; pageEl.innerHTML = lpickHTML();
-      if (game.i >= game.items.length) speak([es('¡Excelente! Lo hiciste muy bien.')]); else prompt();
+      if (game.i >= game.items.length) { burst2(); speak([N(T().great)]); autoAdvance('pick', 2600); } else prompt();
     }, 700));
   } else {
     btn.classList.remove('shake'); void btn.offsetWidth; btn.classList.add('shake');
-    speak([en(sayW(o), .65), es('Esa no. Prueba otra vez.')]);
+    speak([E(sayW(o), .65), N(T().no)]);
   }
 }
+function burst2() { const b = pageEl.querySelector('.bigblock'); if (b) burstAt(b); }
 function burstAt(el) {
   const r = el.getBoundingClientRect(), cols = Object.values(LCOL);
   for (let i = 0; i < 12; i++) {
@@ -1588,11 +2237,11 @@ function initTrace() {
   c.onpointermove = e => { if (!tr.drawing) return; const p = pt(e); seg(tr.last, p); tr.last = p; };
   c.onpointerup = c.onpointercancel = () => {
     if (!tr.drawing) return; tr.drawing = false;
-    if (tr.n > 70 && !game.praised) { game.praised = true; speak([es('¡Muy bien! ¡Qué bonita letra!')]); burstAt(c); }
+    if (tr.n > 70 && !game.praised) { game.praised = true; cheer(); burstAt(c); speak([N(T().traceOk)]); setHint(() => nextBtn, 1500); }
   };
 }
 function drawGuide() {
-  if (!tr) return;
+  if (!tr || !tr.c.isConnected || mi < 0 || !mod() || mod().kind !== 'letter') return;
   const { ctx, w, h } = tr, L = mod().L, ch = game.tcase === 'U' ? L : LETTERS[L].lower;
   ctx.clearRect(0, 0, w, h);
   ctx.font = `700 ${Math.round(h * .8)}px Andika, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
@@ -1601,78 +2250,97 @@ function drawGuide() {
   tr.n = 0;
 }
 
-
-/* ---------- Letter journey map ---------- */
+/* ---------- The treasure map ---------- */
 let justDone = null, mapTimer = null;
 function mapGeom() {
   const box = document.getElementById('mapbox');
   const w = (box && box.clientWidth) || 1000;
   const cols = w < 520 ? 3 : w < 860 ? 5 : 7;
-  const n = ABC.length + 2, rows = Math.ceil(n / cols);
-  const W = cols * 150, m = 80, dx = (W - 2 * m) / (cols - 1), dy = 160, top = 124;
+  const n = ABC.length + 3, rows = Math.ceil(n / cols);
+  const W = cols * 150, m = 80, dx = (W - 2 * m) / (cols - 1), dy = 165, top = cols === 3 ? 176 : 196;
   const pos = i => { const r = Math.floor(i / cols); let c = i % cols; if (r % 2) c = cols - 1 - c; return { x: m + c * dx, y: top + r * dy }; };
-  return { cols, rows, W, H: top + (rows - 1) * dy + 110, dx, dy, top, m, n, pos };
+  return { cols, rows, W, H: top + (rows - 1) * dy + 120, dx, dy, top, m, n, pos };
 }
-const nextIndex = () => { const d = getDone(), i = ABC.findIndex(L => !d.includes(L)); return i < 0 ? ABC.length + 1 : i + 1; };
+const CHEST = 27, UNI = 28;
+let chestAbove = true;
+const markerXY = (p, i) => i === UNI && chestAbove ? { x: p.x + 82, y: p.y - 20 } : { x: p.x, y: p.y - 72 };
+const nextIndex = () => { const d = getDone(), i = ABC.findIndex(L => !d.includes(L)); return i < 0 ? UNI : i + 1; };
 
 function mapSVG(G, markerAt) {
-  const done = getDone(), P = Array.from({ length: G.n }, (_, i) => G.pos(i)), nx = nextIndex();
+  const t = T(), done = getDone(), P = Array.from({ length: G.n }, (_, i) => G.pos(i)), nx = nextIndex(), fin = done.length >= 26;
+  chestAbove = Math.abs(P[CHEST].x - P[UNI].x) < 1;
   let d = `M${P[0].x} ${P[0].y}`;
   for (let i = 0; i < P.length - 1; i++) {
     const p0 = P[i - 1] || P[i], p1 = P[i], p2 = P[i + 1], p3 = P[i + 2] || p2;
     d += ` C${(p1.x + (p2.x - p0.x) / 6).toFixed(1)} ${(p1.y + (p2.y - p0.y) / 6).toFixed(1)} ${(p2.x - (p3.x - p1.x) / 6).toFixed(1)} ${(p2.y - (p3.y - p1.y) / 6).toFixed(1)} ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`;
   }
-  const tree = (x, y) => `<rect x="${x - 6}" y="${y - 6}" width="12" height="30" rx="4" fill="#8A5230"/><circle cx="${x}" cy="${y - 18}" r="24" fill="#5DB45D"/><circle cx="${x - 12}" cy="${y - 8}" r="14" fill="#6CC46C"/><circle cx="${x + 10}" cy="${y - 26}" r="5" fill="#FF5A5A"/>`;
-  const bloom = (x, y, c) => [0, 72, 144, 216, 288].map(a => `<circle cx="${(x + Math.cos(a * Math.PI / 180) * 7).toFixed(1)}" cy="${(y + Math.sin(a * Math.PI / 180) * 7).toFixed(1)}" r="6" fill="${c}"/>`).join('') + `<circle cx="${x}" cy="${y}" r="5" fill="#FFD45C"/>`;
-  const bush = (x, y) => `<ellipse cx="${x}" cy="${y}" rx="26" ry="16" fill="#4FA34A"/><ellipse cx="${x - 14}" cy="${y - 6}" rx="16" ry="13" fill="#5DB45D"/><ellipse cx="${x + 14}" cy="${y - 8}" rx="15" ry="12" fill="#6CC46C"/>`;
-  const cols9 = ['#FF9AA8', '#C9A8FF', '#FFB37A', '#9ED6F5'];
-  let deco = '';
+  const mountain = (x, y) => `<path d="M${x - 34} ${y + 18} L${x - 8} ${y - 26} L${x + 6} ${y - 6} L${x + 16} ${y - 18} L${x + 38} ${y + 18}Z" fill="#B88A5A" stroke="#6B4A2A" stroke-width="2.5" stroke-linejoin="round"/><path d="M${x - 16} ${y - 12} L${x - 8} ${y - 26} L${x} ${y - 14}Z" fill="#fff"/>`;
+  const palm = (x, y) => `<path d="M${x} ${y + 20} Q${x + 4} ${y} ${x - 2} ${y - 18}" stroke="#8A5A33" stroke-width="5" fill="none"/><path d="M${x - 2} ${y - 18} q-18 -6 -26 4 M${x - 2} ${y - 18} q18 -8 26 2 M${x - 2} ${y - 18} q-8 -16 -20 -14 M${x - 2} ${y - 18} q10 -16 22 -12" stroke="#3E8E4A" stroke-width="6" fill="none" stroke-linecap="round"/>`;
+  const woods = (x, y) => [[-18, 4], [0, -6], [18, 4]].map(([a, b]) => `<path d="M${x + a} ${y + b - 22} l12 26 h-24Z" fill="#4E8E4A" stroke="#2F5E2E" stroke-width="2"/><rect x="${x + a - 2}" y="${y + b + 4}" width="4" height="8" fill="#6B4A2A"/>`).join('');
+  const sea = (x, y) => `<ellipse cx="${x}" cy="${y}" rx="40" ry="18" fill="#8CCBE8" stroke="#4A90B8" stroke-width="2.5"/><path d="M${x - 24} ${y} q6 -5 12 0 t12 0 M${x} ${y + 6} q6 -5 12 0" stroke="#fff" stroke-width="2" fill="none"/>`;
+  const ship = (x, y) => `<path d="M${x - 26} ${y} h52 l-8 12 h-36Z" fill="#8A5A33" stroke="#4A2E18" stroke-width="2"/><path d="M${x} ${y} V${y - 34}" stroke="#4A2E18" stroke-width="3"/><path d="M${x + 2} ${y - 32} q20 12 0 28Z" fill="#FFF8E8" stroke="#4A2E18" stroke-width="2"/><path d="M${x} ${y - 34} l10 4 -10 4Z" fill="#C2465A"/>`;
+  const decoF = [mountain, palm, woods, sea, mountain, woods, palm];
+  let deco = '', shipped = false;
   for (let r = 0; r < G.rows - 1; r++) for (let k = 0; k < G.cols - 1; k++) {
-    const x = G.m + G.dx * (k + .5), y = G.top + r * G.dy + G.dy / 2, t = (r * 7 + k * 3) % 4;
-    deco += t === 0 ? tree(x, y + 10) : t === 1 ? bloom(x - 14, y, cols9[(r + k) % 4]) + bloom(x + 16, y + 10, cols9[(r + k + 1) % 4]) : t === 2 ? bush(x, y + 6) : bloom(x, y + 4, cols9[(r + k + 2) % 4]);
+    const x = G.m + G.dx * (k + .5), y = G.top + r * G.dy + G.dy / 2, ti = (r * 5 + k * 3) % decoF.length;
+    if (!shipped && decoF[ti] === sea && r > 0) { deco += sea(x, y) + ship(x + 4, y - 2); shipped = true; } else deco += decoF[ti](x, y);
   }
-  const s = P[0], e = P[G.n - 1];
-  const start = `<g transform="translate(${s.x} ${s.y})">
-      <rect x="-34" y="-30" width="68" height="50" fill="#FFD45C" stroke="${INK}" stroke-width="3"/>
-      <path d="M-44 -26 L0 -62 L44 -26Z" fill="#FF6F82" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>
-      <rect x="-9" y="-6" width="18" height="26" rx="3" fill="#A0623A"/>
-      <rect x="-26" y="-20" width="12" height="12" fill="#9ED6F5"/><rect x="14" y="-20" width="12" height="12" fill="#9ED6F5"/>
-      <rect x="-40" y="28" width="80" height="26" rx="8" fill="#fff" stroke="${INK}" stroke-width="3"/>
-      <text y="47" text-anchor="middle" font-family="Fredoka, 'Baloo 2', sans-serif" font-weight="700" font-size="18" fill="${INK}">¡Inicio!</text></g>`;
-  const allDone = done.length >= 26;
-  const castle = `<g transform="translate(${e.x} ${e.y})">
-      ${allDone ? `<circle r="70" fill="#FFF3A8" opacity=".8"/>` : ''}
-      <rect x="-46" y="-34" width="92" height="56" fill="#C9A8FF" stroke="${INK}" stroke-width="3"/>
-      <rect x="-56" y="-62" width="28" height="84" fill="#B28DFF" stroke="${INK}" stroke-width="3"/><rect x="28" y="-62" width="28" height="84" fill="#B28DFF" stroke="${INK}" stroke-width="3"/>
-      <path d="M-56 -62 h7 v-9 h7 v9 h7 v-9 h7 v9 M28 -62 h7 v-9 h7 v9 h7 v-9 h7 v9" fill="#B28DFF" stroke="${INK}" stroke-width="3"/>
-      <path d="M-12 22 V-2 A12 12 0 0 1 12 -2 V22Z" fill="#7A4A2A"/>
-      <path d="M42 -71 V-100" stroke="${INK}" stroke-width="3"/><path d="M42 -100 L66 -92 L42 -84Z" fill="#FF6F82"/>
-      <rect x="-40" y="28" width="80" height="26" rx="8" fill="#fff" stroke="${INK}" stroke-width="3"/>
-      <text y="47" text-anchor="middle" font-family="Fredoka, 'Baloo 2', sans-serif" font-weight="700" font-size="18" fill="${INK}">${allDone ? '¡Ganaste!' : '¡Fin!'}</text></g>`;
+  const label = (x, y, txt) => `<g transform="translate(${x} ${y})"><rect x="${-Math.max(44, txt.length * 5.5)}" y="0" width="${Math.max(88, txt.length * 11)}" height="26" rx="6" fill="#FFF8E8" stroke="#6B4A2A" stroke-width="2.5"/>
+      <text y="19" text-anchor="middle" font-family="Fredoka, 'Baloo 2', sans-serif" font-weight="700" font-size="16" fill="#4A2E18">${txt}</text></g>`;
+  const s = P[0], ch = P[CHEST], un = P[UNI];
+  const start = `<g transform="translate(${s.x} ${s.y - 6}) scale(.9)">${cottage(0, 0, 1, '#C2465A').replace(/<g class="smoke">[\s\S]*?<\/g>/, '')}</g>${label(s.x, s.y + 26, t.start)}`;
+  const chest = `<g class="cheststop" role="button" tabindex="0" aria-label="${t.treasure}" transform="translate(${ch.x} ${ch.y})">
+      <path d="M-26 22 L26 46 M26 22 L-26 46" stroke="#C2465A" stroke-width="7" stroke-linecap="round"/>
+      ${fin ? `<circle r="56" fill="#FFF3A8" opacity=".85"/><path d="M-30 -10 L-36 -40 L36 -40 L30 -10Z" fill="#8A5A33" stroke="#4A2E18" stroke-width="3"/>
+        <circle cx="-12" cy="-16" r="8" fill="#FFD45C" stroke="#B8860B" stroke-width="2"/><circle cx="6" cy="-20" r="8" fill="#FFD45C" stroke="#B8860B" stroke-width="2"/><circle cx="16" cy="-12" r="7" fill="#FFD45C" stroke="#B8860B" stroke-width="2"/>`
+        : `<path d="M-32 -10 Q0 -40 32 -10Z" fill="#9C6A3C" stroke="#4A2E18" stroke-width="3"/>`}
+      <rect x="-32" y="-10" width="64" height="38" rx="5" fill="#A0703F" stroke="#4A2E18" stroke-width="3"/>
+      <rect x="-32" y="-2" width="64" height="7" fill="#FFD45C"/><rect x="-6" y="-6" width="12" height="16" rx="2" fill="#FFD45C" stroke="#B8860B" stroke-width="2"/>
+    </g>${label(ch.x, ch.y + 52, t.treasure)}`;
+  const uni = `<g class="unistop${fin ? ' open' : ''}" role="button" tabindex="0" aria-label="${t.uniTitle}" transform="translate(${un.x} ${un.y})">
+      ${fin ? `<circle class="ring" r="58" fill="none" stroke="#FFD45C" stroke-width="8"/>` : ''}
+      <path d="M-44 -14 L0 -42 L44 -14Z" fill="#8F6CFF" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M-20 -28 Q0 -62 20 -28Z" fill="#FFD45C" stroke="${INK}" stroke-width="3"/>
+      <rect x="-42" y="-14" width="84" height="44" fill="#FFF8E8" stroke="${INK}" stroke-width="3"/>
+      ${[-30, -15, 0, 15, 30].map(x => `<rect x="${x - 3}" y="-10" width="6" height="36" fill="#E6D3A8"/>`).join('')}
+      <rect x="-48" y="28" width="96" height="8" fill="#E6D3A8" stroke="${INK}" stroke-width="2.5"/>
+      ${fin ? '' : `<g transform="translate(30 -36)"><rect x="-11" y="-2" width="22" height="18" rx="4" fill="#FFD45C" stroke="${INK}" stroke-width="2.5"/><path d="M-6 -2 V-8 A6 6 0 0 1 6 -8 V-2" fill="none" stroke="${INK}" stroke-width="3"/></g>`}
+    </g>${label(un.x, un.y + 42, t.uniShort)}`;
   const stops = ABC.map((L, i) => {
     const p = P[i + 1], isDone = done.includes(L), isNext = nx === i + 1;
-    return `<g class="stop${isDone ? ' done' : ''}${isNext ? ' next' : ''}" data-letter="${L}" role="button" tabindex="0" aria-label="Letra ${L}${isDone ? ', completada' : ''}" transform="translate(${p.x.toFixed(1)} ${p.y.toFixed(1)})">
-      ${isNext ? `<circle class="ring" r="44" fill="none" stroke="#FFD45C" stroke-width="8"/>` : ''}
-      <ellipse cx="0" cy="40" rx="34" ry="8" fill="rgba(30,42,90,.18)"/>
-      <g class="lt2"><rect class="face" x="-36" y="-36" width="72" height="72" rx="17" fill="${isDone || isNext ? LCOL[L] : '#FFFDF6'}" stroke="${INK}" stroke-width="4"/>
-      <rect x="-29" y="-29" width="58" height="58" rx="12" fill="none" stroke="#fff" stroke-width="4" opacity="${isDone || isNext ? .6 : 0}"/>
-      <text y="14" text-anchor="middle" font-family="Andika, sans-serif" font-weight="700" font-size="38" fill="${isDone || isNext ? INK : '#8A93B8'}">${L}<tspan font-size="28">${L.toLowerCase()}</tspan></text></g>
-      ${isDone ? `<g transform="translate(30 -32)"><circle r="16" fill="#FFD45C" stroke="${INK}" stroke-width="3"/><path d="M0 -9 L2.6 -3 L9 -3 L4 1.4 L5.8 8 L0 4.2 L-5.8 8 L-4 1.4 L-9 -3 L-2.6 -3Z" fill="#fff"/></g>` : ''}
+    const face = isDone ? `<circle r="35" fill="#FFD45C" stroke="#B8860B" stroke-width="4"/><circle r="28" fill="none" stroke="#FFF3A8" stroke-width="3"/>`
+      : isNext ? `<circle r="35" fill="${LCOL[L]}" stroke="${INK}" stroke-width="4"/><circle r="28" fill="none" stroke="#fff" stroke-width="3" opacity=".7"/>`
+        : `<circle r="35" fill="#FBF0D2" stroke="#8A5A33" stroke-width="3" stroke-dasharray="6 5"/>`;
+    return `<g class="stop${isDone ? ' done' : ''}${isNext ? ' next' : ''}" data-letter="${L}" role="button" tabindex="0" aria-label="${L}" transform="translate(${p.x.toFixed(1)} ${p.y.toFixed(1)})">
+      ${isNext ? `<circle class="ring" r="42" fill="none" stroke="#FFD45C" stroke-width="8"/>` : ''}
+      <ellipse cx="0" cy="38" rx="30" ry="7" fill="rgba(74,46,24,.22)"/>
+      <g class="lt2">${face}<text class="face" y="12" text-anchor="middle" font-family="Andika, sans-serif" font-weight="700" font-size="32" fill="${isDone || isNext ? INK : '#8A5A33'}">${L}<tspan font-size="24">${L.toLowerCase()}</tspan></text></g>
+      ${isDone ? `<g transform="translate(28 -28)"><circle r="14" fill="#C2465A" stroke="#fff" stroke-width="3"/><path d="M0 -8 L2.4 -2.6 L8 -2.6 L3.6 1.2 L5.2 7 L0 3.6 L-5.2 7 L-3.6 1.2 L-8 -2.6 L-2.4 -2.6Z" fill="#fff"/></g>` : ''}
     </g>`;
   }).join('');
-  const mp = P[markerAt];
-  const marker = `<g id="marker" style="transform:translate(${mp.x}px, ${mp.y - 70}px)"><g class="bob">
+  const mp = markerXY(P[markerAt], markerAt);
+  const marker = `<g id="marker" style="transform:translate(${mp.x}px, ${mp.y}px)"><g class="bob">
       <path d="M-11 18 L0 34 L11 18Z" fill="#FF6F82" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>
       <circle r="27" fill="#fff" stroke="#FF6F82" stroke-width="6"/>
       <clipPath id="mclip"><circle r="22"/></clipPath>
       <image href="Rach.jpg" x="-24" y="-24" width="48" height="48" clip-path="url(#mclip)" preserveAspectRatio="xMidYMid slice"/></g></g>`;
-  return `<svg viewBox="0 0 ${G.W} ${G.H}" role="group" aria-label="Mapa de las letras" xmlns="http://www.w3.org/2000/svg">
-    <rect width="${G.W}" height="${G.H}" fill="#BDE7A6"/>
+  const bw = Math.min(G.W - 60, 700), fs = G.cols === 3 ? 19 : 26;
+  const banner = `<g transform="translate(${G.W / 2} 56)">
+      <path d="M${-bw / 2 - 26} 10 l26 -18 v40 l-26 -4 l12 -9Z M${bw / 2 + 26} 10 l-26 -18 v40 l26 -4 l-12 -9Z" fill="#C2465A" stroke="#7A2E2A" stroke-width="2.5"/>
+      <rect x="${-bw / 2}" y="-24" width="${bw}" height="52" rx="6" fill="#E0384F" stroke="#7A2E2A" stroke-width="3"/>
+      <text y="${fs * .35 + 2}" text-anchor="middle" font-family="Fredoka, 'Baloo 2', sans-serif" font-weight="700" font-size="${fs}" fill="#FFF8E8">${t.mapTitle}</text></g>`;
+  const compass = G.cols > 3 ? `<g transform="translate(${G.W - 64} ${G.H - 64})" opacity=".85">
+      <circle r="38" fill="#FBF0D2" stroke="#6B4A2A" stroke-width="3"/><path d="M0 -34 L7 0 L0 34 L-7 0Z" fill="#C2465A"/><path d="M-34 0 L0 -7 L34 0 L0 7Z" fill="#6B4A2A"/>
+      <text y="-40" text-anchor="middle" font-family="Fredoka, sans-serif" font-weight="700" font-size="14" fill="#4A2E18">N</text></g>` : '';
+  return `<svg viewBox="0 0 ${G.W} ${G.H}" role="group" aria-label="${t.mapTitle}" xmlns="http://www.w3.org/2000/svg">
+    <defs><radialGradient id="parch" cx="50%" cy="45%" r="75%"><stop offset=".55" stop-color="#F6E4B8"/><stop offset="1" stop-color="#D9AE6A"/></radialGradient></defs>
+    <rect width="${G.W}" height="${G.H}" fill="url(#parch)"/>
+    <rect x="12" y="12" width="${G.W - 24}" height="${G.H - 24}" rx="10" fill="none" stroke="#8A5A33" stroke-width="3"/>
+    <rect x="20" y="20" width="${G.W - 40}" height="${G.H - 40}" rx="8" fill="none" stroke="#8A5A33" stroke-width="1.5" stroke-dasharray="6 6"/>
     ${deco}
-    <path d="${d}" stroke="#E2C38A" stroke-width="40" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="${d}" stroke="#F6E1B0" stroke-width="30" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="${d}" stroke="#fff" stroke-width="4" stroke-dasharray="2 16" fill="none" stroke-linecap="round" opacity=".9"/>
-    ${start}${castle}${stops}${marker}
+    <path d="${d}" stroke="#E9CF98" stroke-width="24" fill="none" stroke-linecap="round" opacity=".8"/>
+    <path d="${d}" stroke="#B33A3A" stroke-width="5" fill="none" stroke-dasharray="3 13" stroke-linecap="round"/>
+    ${banner}${compass}${start}${chest}${uni}${stops}${marker}
   </svg>`;
 }
 
@@ -1684,23 +2352,76 @@ function renderMap(animate) {
   box.innerHTML = mapSVG(G, from);
   const n = d.length, bar = document.getElementById('pbar'), cnt = document.getElementById('pcount');
   if (bar) bar.style.width = (n / 26 * 100) + '%';
-  if (cnt) cnt.textContent = `${n} de 26`;
+  if (cnt) cnt.textContent = `${n} / 26`;
   const mk = document.getElementById('marker');
   const center = smooth => mk && mk.scrollIntoView({ block: 'center', behavior: smooth && !matchMedia('(prefers-reduced-motion:reduce)').matches ? 'smooth' : 'auto' });
   if (animate && from !== nx) {
     center(false);
     requestAnimationFrame(() => requestAnimationFrame(() => {
-      const t = G.pos(nx); mk.style.transform = `translate(${t.x}px, ${t.y - 70}px)`;
+      const t = markerXY(G.pos(nx), nx); mk.style.transform = `translate(${t.x}px, ${t.y}px)`;
     }));
     mapTimer = setTimeout(() => {
       center(true);
-      const target = document.querySelector(nx <= 26 ? `.stop[data-letter="${ABC[nx - 1]}"]` : '#marker');
-      if (target) burstAt(target);
-      if (nx > 26) speak([es('¡Llegaste al castillo! ¡Terminaste todo el abecedario! ¡Felicidades!')]);
-      else speak([es('¡Muy bien! Avanzaste en el mapa. Ahora sigue la letra'), en(ABC[nx - 1] + '.')]);
+      if (nx === UNI) {
+        const c = document.querySelector('.cheststop'); if (c) burstAt(c);
+        speak([N(T().allDone)]);
+        setHint(() => document.querySelector('.unistop'), 800);
+      } else {
+        const target = document.querySelector(`.stop[data-letter="${ABC[nx - 1]}"]`);
+        if (target) burstAt(target);
+        speak(T().advance(ABC[nx - 1]));
+        setHint(() => document.querySelector('.stop.next'), 800);
+      }
     }, 1700);
   }
   return center;
+}
+
+/* ---------- The university (after the treasure) ---------- */
+const DOORC = ['#FF9AA8', '#9ED6F5', '#FFD45C', '#8EDBA6', '#FFB37A', '#C9A8FF', '#7FD8D0', '#F7A6E0'];
+function uniSVG() {
+  const cols = [-150, -100, -50, 0, 50, 100, 150];
+  let confetti = '';
+  for (let i = 0; i < 40; i++) confetti += `<rect class="conf" style="animation-delay:${(i % 10) * .3}s" x="${(i * 97) % 1200}" y="${(i * 53) % 220}" width="8" height="14" rx="2" fill="${DOORC[i % 8]}" transform="rotate(${(i * 37) % 180} ${(i * 97) % 1200} ${(i * 53) % 220})"/>`;
+  return `<svg viewBox="0 0 1200 560" role="img" aria-label="${T().uniTitle}" xmlns="http://www.w3.org/2000/svg">
+    <defs><linearGradient id="usky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5DB8FF"/><stop offset="1" stop-color="#FFE9F3"/></linearGradient></defs>
+    <rect width="1200" height="560" fill="url(#usky)"/>
+    ${cloudG(0, 70, 1, 'c1')}${cloudG(0, 130, .8, 'c2')}
+    ${firework(240, 80, '#FFD45C', 0)}${firework(980, 70, '#FF9AA8', .8)}${firework(1100, 160, '#9ED6F5', 1.6)}
+    <path d="M0 400 Q300 360 600 380 T1200 370 V560 H0Z" fill="#8FD27A"/>
+    ${tree(30, 360, 40)}${tree(1170, 350, 44, '#3E9E4E', '#4FB35C')}${tree(1080, 380, 32)}
+    <g transform="translate(700 0)">
+      <path d="M-260 170 L0 92 L260 170Z" fill="#8F6CFF" stroke="${INK}" stroke-width="4" stroke-linejoin="round"/>
+      <path d="M-90 112 Q0 -10 90 112Z" fill="#FFD45C" stroke="${INK}" stroke-width="4"/>
+      <path d="M0 10 V-22" stroke="${INK}" stroke-width="3"/><path d="M0 -22 l28 8 -28 8Z" fill="#FF6F82" stroke="${INK}" stroke-width="2"/>
+      <rect x="-250" y="170" width="500" height="200" fill="#FFF8E8" stroke="${INK}" stroke-width="4"/>
+      <rect x="-262" y="160" width="524" height="20" fill="#F3E3C0" stroke="${INK}" stroke-width="3"/>
+      ${cols.map(x => `<rect x="${x - 13}" y="182" width="26" height="176" fill="#F3E3C0" stroke="${INK}" stroke-width="2.5"/>`).join('')}
+      <path d="M-34 370 V300 A34 34 0 0 1 34 300 V370Z" fill="#8A5FB8" stroke="${INK}" stroke-width="3"/>
+      ${[-280, -296, -312].map((y, i) => `<rect x="${-270 - i * 14}" y="${370 + i * 12}" width="${540 + i * 28}" height="12" fill="#E6D3A8" stroke="${INK}" stroke-width="2"/>`).join('')}
+      ${['#FF9AA8', '#9ED6F5', '#FFD45C', '#8EDBA6'].map((c, i) => `<path d="M${-200 + i * 120} 182 h34 v70 l-17 -12 -17 12Z" fill="${c}" stroke="${INK}" stroke-width="2.5"/>`).join('')}
+    </g>
+    ${confetti}
+    <g transform="translate(20 40) scale(.86)">${rachelSVG({ cap: true, wave: true, diploma: true })}</g>
+  </svg>`;
+}
+function showUni() {
+  stopAll(); mi = -1;
+  showView('uni');
+  const t = T(), d = getDone();
+  uniIn.innerHTML = `<div class="wbar"><button class="wbtn iconly" data-act="map" aria-label="${t.mapTitle}">${ICON.map}</button>
+      <div class="wtitle"><b>${t.uniTitle}</b><small>${BRAND}</small></div>${gearBtn()}</div>
+    <div class="scene">${uniSVG()}</div>
+    <div class="diploma"><span class="seal" aria-hidden="true">★</span><div><b>${t.diploma}</b><small>${BRAND} · ${t.world}</small>
+      <div class="dletters">${ABC.map(L => `<span class="${d.includes(L) ? 'on' : ''}">${L}</span>`).join('')}</div></div></div>
+    <div class="doors">${LANGS.map((l, i) => `<div class="door" style="--dc:${DOORC[i]}">
+      <button class="dbody" data-greet="${l}" aria-label="${STR[l].hello}"><span class="hi">${STR[l].hello}</span><span class="ln">${STR[l].langName}</span>
+        ${l === LANG ? `<span class="here">${t.here}</span>` : ''}</button>
+      <button class="dopen" data-open="${l}">${t.uniOpen} · ${STR[l].langName}</button></div>`).join('')}</div>
+    <p class="unipick">${t.uniPick}</p>`;
+  cheer();
+  if (ensureAC()) chime([523.25, 659.25, 783.99, 1046.5, 783.99, 1046.5], .14);
+  speak([N(t.uniHello)]);
 }
 
 /* ---------- Navigation & rendering ---------- */
@@ -1722,14 +2443,14 @@ const SPK = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><pa
 const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const tile = (L, text, attrs = '') => `<button class="tile" style="background:${LCOL[L]}" ${attrs}>${text}</button>`;
 
-function stopAll() { speakId++; if (synth) synth.cancel(); stopAudio(); stopSong(); }
+function stopAll() { speakId++; if (synth) synth.cancel(); stopAudio(); stopSong(); setTalking(false); clearHint(); hintGet = null; clearTimeout(advanceT); }
 
 function render(dir = 0) {
   stopAll();
   pageEl.classList.remove('is-home');
   const m = mod(), P = pages(), p = P[cur];
   navEl.hidden = false; homeBtn.hidden = false;
-  titleEl.textContent = m.kind === 'letter' ? `Letra ${m.L}${LETTERS[m.L].lower}` : `${m.title || m.word}`;
+  titleEl.textContent = m.kind === 'letter' ? '' : `${m.title || m.word}`;
   if (!dotsEl.children.length || dotsEl.children.length !== P.length) dotsEl.innerHTML = P.map(() => '<span class="dot"></span>').join('');
   let h = '';
   if (m.kind === 'letter' && !LETTERS[p]) {
@@ -1750,8 +2471,8 @@ function render(dir = 0) {
   } else if (LETTERS[p]) {
     const d = LETTERS[p];
     h = `<div class="glyphs" style="background:${LCOL[p]}"><span>${p}</span><span>${d.lower}</span></div>
-      <div class="btns"><button class="pill" data-name="${p}">Nombre</button><button class="pill" data-sound="${p}">Sonido ${d.sym}</button></div>
-      <p class="tip">${d.tip}</p>
+      <div class="btns"><button class="pill iconsnd" data-name="${p}" aria-label="${p}">${SPK}<span>${p}${d.lower}</span></button><button class="pill iconsnd" data-sound="${p}" aria-label="${d.sym}">${ICON.mouth}<span>${d.sym}</span></button></div>
+      <p class="tip">${tipHTML(p)}</p>
       <div class="keys">${keyBtns(p)}</div>`;
   } else if (p === 'find') {
     game = { round: 0, targets: shuffle(m.letters) };
@@ -1773,7 +2494,7 @@ function render(dir = 0) {
       <div class="cheer"><img src="Rach.jpg" alt="La maestra Rachel"><span>¡Muy bien! Estoy muy orgullosa de ti.</span></div>
       <p class="sub"><b>${m.word}</b> = ${m.es}</p>
       <div class="btns"><button class="pill" data-act="sayWord">Escuchar ${m.word}</button>
-      <button class="homebig" data-act="home">${HOUSE} Volver a las letras</button>
+      <button class="homebig" data-act="home" aria-label="Mapa">${ICON.map}</button>
       ${nextMod ? `<button class="pill" data-act="nextMod">Siguiente módulo</button>` : ''}</div></div>`;
   }
   pageEl.innerHTML = h;
@@ -1799,7 +2520,7 @@ function prompt() {
   if (p === 'song') speak([es('¡Cantemos el abecedario en inglés! Mira las letras y canta conmigo.')], () => { if (pages()[cur] === 'song') sing(); });
   else if (m.kind === 'words') promptWords(m, p);
   else if (p === 'intro') speak([es('Hoy aprendemos las letras'), en(Ls + '.'), es('y leemos la palabra'), en(m.word + '.')]);
-  else if (LETTERS[p]) speak([es('Esta es la letra'), en(p), es(LETTERS[p].say)]);
+  else if (LETTERS[p]) { speak(letterSay(p)); setHint(() => nextBtn, 7000); }
   else if (p === 'find') speak([es('Encuentra todas las'), en(game.targets[game.round] + '.')]);
   else if (p === 'first') { const it = game.items[game.i]; if (it) speak([es('¿Con qué letra empieza'), en(it[0], 0.65), es('?')]); }
   else if (p === 'blend') speak([es('Toca cada letra y di su sonido. Luego toca Juntar.')]);
@@ -1843,7 +2564,7 @@ function wordsPage(m, p) {
       <div class="chips">${m.words.map(x => `<button data-w="${x.w}">${x.w}</button>`).join('')}</div>
       <div class="cheer"><img src="Rach.jpg" alt="La maestra Rachel"><span>¡Muy bien! Estoy muy orgullosa de ti.</span></div>
       <div class="btns"><button class="pill" data-act="sayAll">Escuchar todas</button>
-      <button class="homebig" data-act="home">${HOUSE} Volver a las letras</button>
+      <button class="homebig" data-act="home" aria-label="Mapa">${ICON.map}</button>
       ${nextMod ? `<button class="pill" data-act="nextMod">Siguiente módulo</button>` : ''}</div></div>`;
   }
   return '';
@@ -1998,8 +2719,8 @@ function burst() {
 }
 
 function greet() {
-  if (getRec('greet')) return playBlob(getRec('greet'));
-  speak([es('¡Hola, amigos! Bienvenidos a Vamos a leer con la maestra Rachel. ¿Qué vamos a leer hoy? ¡Toca el botón Entrar para comenzar!')]);
+  if (LANG === 'es' && getRec('greet')) return playBlob(getRec('greet'));
+  speak([N(T().coverHello)]);
 }
 
 /* ---------- Events ---------- */
@@ -2060,9 +2781,9 @@ const dlg = document.getElementById('teacher'), recRows = document.getElementByI
 const teachBtn = document.getElementById('teachBtn');
 let recorder = null, recTimer = null;
 const panelLetters = () => mi >= 0 ? mod().letters : Object.keys(LETTERS);
-const panelKeys = () => ['greet', ...panelLetters()];
+const panelKeys = () => ['greet', ...panelLetters(), 'kids1', 'kids2', 'kids3'];
 function markTeach() {
-  const miss = panelKeys().some(k => !getRec(k));
+  const miss = ['greet', ...panelLetters()].some(k => !getRec(k));
   teachBtn.classList.toggle('missing', miss);
   document.querySelectorAll('.wbtn.teach').forEach(b => b.classList.toggle('missing', miss));
 }
@@ -2070,12 +2791,13 @@ if (MAESTRA) teachBtn.hidden = false;
 function recLabel(k) {
   const src = rec[k] ? 'recorded on this device' : repo[k] ? 'loaded from the website' : null;
   if (k === 'greet') return `Welcome message: ${src || 'not recorded yet (computer voice plays instead)'}`;
+  if (/^kids/.test(k)) return `Children's chorus ${k.slice(4)}: ${src || 'not recorded yet'}`;
   return `Sound ${LETTERS[k].sym}: ${src || 'not recorded yet (plays “' + LETTERS[k].fallback + '” instead)'}`;
 }
 function extFor(b) { const t = b.type || ''; return /mp4|m4a|aac/.test(t) ? 'm4a' : /ogg/.test(t) ? 'ogg' : /mpeg/.test(t) ? 'mp3' : /wav/.test(t) ? 'wav' : 'webm'; }
 function drawRows() {
   recRows.innerHTML = panelKeys().map(L => `<div class="rec">
-    ${L === 'greet' ? '<span class="tile" style="background:var(--A); font-size:1.4rem">Hola</span>' : `<span class="tile" style="background:${LCOL[L]}">${L}</span>`}
+    ${L === 'greet' ? '<span class="tile" style="background:var(--A); font-size:1.4rem">Hola</span>' : /^kids/.test(L) ? `<span class="tile" style="background:#C9A8FF; font-size:1.4rem">♪${L.slice(4)}</span>` : `<span class="tile" style="background:${LCOL[L]}">${L}</span>`}
     <div class="rec-r"><small>${recLabel(L)}</small>
       <div class="rec-b">
         <button data-r="${L}" class="${recorder && recorder.L === L ? 'on' : ''}">${recorder && recorder.L === L ? 'Stop' : 'Record'}</button>
@@ -2086,7 +2808,7 @@ function drawRows() {
 }
 function openTeach() { stopAll(); drawRows(); recErr.hidden = true; dlg.showModal(); }
 teachBtn.onclick = openTeach;
-document.getElementById('closeTeach').onclick = () => { if (recorder) recorder.stop(); dlg.close(); };
+document.getElementById('closeTeach').onclick = () => { if (recorder) recorder.stop(); stopSong(); dlg.close(); };
 recRows.addEventListener('click', async e => {
   const b = e.target.closest('button'); if (!b) return;
   recErr.hidden = true;
@@ -2119,7 +2841,8 @@ recRows.addEventListener('click', async e => {
         markTeach(); drawRows(); playBlob(blob);
       };
       recorder.start();
-      recTimer = setTimeout(() => recorder && recorder.stop(), L === 'greet' ? 15000 : 2500);
+      if (/^kids/.test(L)) { sing(() => setTimeout(() => recorder && recorder.stop(), 700), true); recTimer = setTimeout(() => recorder && recorder.stop(), 60000); }
+      else recTimer = setTimeout(() => recorder && recorder.stop(), L === 'greet' ? 15000 : 2500);
       drawRows();
     } catch (err) {
       recorder = null;
@@ -2129,51 +2852,70 @@ recRows.addEventListener('click', async e => {
   }
 });
 
-/* ---------- Cover & world events ---------- */
-(() => {
-  const t = document.getElementById('bigtitle');
-  let ci = 0;
-  let k = 0;
-  t.innerHTML = '¡Vamos a leer!'.split(' ').map(w => `<span class="tw">${[...w].map(ch =>
-    `<span style="color:${PAL9[ci++ % 6]}; --i:${k++}" aria-hidden="true">${ch}</span>`).join('')}</span>`).join('');
-  const box = document.getElementById('coverRight');
-  [['A', 6, 8, 70, -12], ['b', 88, 6, 58, 10], ['C', 92, 70, 66, 8], ['d', 4, 78, 54, -8], ['E', 48, 2, 44, 6], ['f', 80, 90, 48, -6], ['g', 16, 40, 40, 12]]
-    .forEach(([ch, x, y, s, r], i) => box.insertAdjacentHTML('beforeend',
-      `<span class="floaty" aria-hidden="true" style="left:${x}%; top:${y}%; font-size:${s}px; color:${PAL9[i % 9]}; --r:${r}deg; animation-delay:${-i * .8}s">${ch}</span>`));
-})();
-document.getElementById('enterBtn').onclick = enterWorld;
-document.getElementById('greetBtn').onclick = () => { ensureAC(); greet(); };
+/* ---------- Cover, Lettervale & university events ---------- */
+document.getElementById('rguide').innerHTML = rachelBust();
+coverEl.addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.id === 'enterBtn') return enterWorld();
+  if (b.id === 'greetBtn') { ensureAC(); return greet(); }
+  if (b.dataset.lang) { setLang(b.dataset.lang); return showCover(); }
+});
+coverEl.addEventListener('change', e => { if (e.target.id === 'coverLang') { setLang(e.target.value); showCover(); } });
+function mapTap(el) {
+  if (el.classList.contains('stop')) { ensureAC(); return openModule(WORD_MODS + ABC.indexOf(el.dataset.letter)); }
+  if (el.classList.contains('unistop')) { ensureAC(); return allDone() ? showUni() : speak([N(T().locked)]); }
+  if (el.classList.contains('cheststop')) { ensureAC(); if (allDone()) { burstAt(el); speak([N(T().allDone)]); setHint(() => document.querySelector('.unistop'), 800); } else speak([N(T().locked)]); }
+}
 worldEl.addEventListener('click', e => {
-  const stop = e.target.closest('.stop');
-  if (stop) { ensureAC(); return openModule(WORD_MODS + ABC.indexOf(stop.dataset.letter)); }
+  const st = e.target.closest('.stop, .unistop, .cheststop');
+  if (st) return mapTap(st);
   const cell = e.target.closest('.ch');
   if (cell && !song.playing) {
-    const L = cell.dataset.ch; pointAt(L); speak([en(L)]);
+    const L = cell.dataset.ch; pointAt(L); speak([E(L)]);
     clearTimeout(worldEl._pt); worldEl._pt = setTimeout(() => { if (!song.playing) pointAt(null); }, 1400);
     return;
   }
   const b = e.target.closest('button'); if (!b) return;
   const a = b.dataset.act;
-  if (b.dataset.letter) { ensureAC(); return openModule(WORD_MODS + ABC.indexOf(b.dataset.letter)); }
   if (b.dataset.mod) { ensureAC(); return openModule(+b.dataset.mod); }
   if (a === 'sing') { ensureAC(); return song.playing ? stopSong() : (stopAll(), sing(() => revealBlocks(true))); }
   if (a === 'skip') { stopAll(); return revealBlocks(true); }
-  if (a === 'cover') return showCover();
-  if (a === 'teach') return openTeach();
 });
-worldEl.addEventListener('keydown', e => {
-  const stop = e.target.closest && e.target.closest('.stop');
-  if (stop && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); ensureAC(); openModule(WORD_MODS + ABC.indexOf(stop.dataset.letter)); }
+[worldEl, uniEl].forEach(v => v.addEventListener('keydown', e => {
+  const st = e.target.closest && e.target.closest('.stop, .unistop, .cheststop');
+  if (st && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); mapTap(st); }
+}));
+uniEl.addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.act === 'map') return renderHome();
+  if (b.dataset.greet) {
+    const l = b.dataset.greet;
+    b.classList.remove('wiggle'); void b.offsetWidth; b.classList.add('wiggle');
+    return speak([{ t: STR[l].hello, l }]);
+  }
+  if (b.dataset.open) { setLang(b.dataset.open); return enterWorld(); }
 });
 let rzT;
 addEventListener('resize', () => { clearTimeout(rzT); rzT = setTimeout(() => { const b = document.getElementById('blocks'); if (!worldEl.hidden && b && !b.hidden) renderMap(); }, 250); });
-document.getElementById('resetProg').onclick = () => {
-  if (!confirm('Reset letter progress on this device? All stars on the map will be cleared.')) return;
-  try { localStorage.removeItem(DONE_KEY); } catch (e) {}
-  const b = document.getElementById('blocks'); if (!worldEl.hidden && b && !b.hidden) renderMap();
+function refreshView() {
+  if (!coverEl.hidden) return showCover();
+  if (!worldEl.hidden) return renderHome();
+  if (!uniEl.hidden) return showUni();
+  if (mi >= 0) return render(0);
+}
+document.getElementById('langSel').onchange = e => { setLang(e.target.value); adultDlg.close(); refreshView(); };
+document.getElementById('adCover').onclick = () => { adultDlg.close(); showCover(); };
+document.getElementById('adReset').onclick = () => {
+  if (!confirm(T().resetQ)) return;
+  try { localStorage.removeItem(doneKey()); } catch (e) {}
+  adultDlg.close(); refreshView();
 };
+document.getElementById('adClose').onclick = () => adultDlg.close();
+document.getElementById('teachBtn').onclick = () => { adultDlg.close(); openTeach(); };
 loadRecs();
-showView('cover');
+document.documentElement.lang = LANG;
+fillAdult();
+showCover();
 </script>
 </body>
 </html>
