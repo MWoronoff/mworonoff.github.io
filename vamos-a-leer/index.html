@@ -2685,6 +2685,7 @@ const HOME_M = {
 Object.keys(HOME_M).forEach(l => Object.assign(HOME[l], HOME_M[l]));
 Object.assign(COVER_EN.h, { mKicker: 'Numbers in English, 1 to 10', mH: 'Counting in English, one step at a time.', mLead: 'Children learn to recognize, count, trace and say the numbers 1 to 10 in English, with pictures they can tap and count.', mCta: 'Start numbers', numsH: 'Numbers, 1 to 10' });
 Object.assign(COVER_EN.t, { cLead: 'With \u27E6T\u27E7, children learn the 26 letters of the English alphabet, their sounds and their first words through songs, games and a train journey.',
+  coverHello: "Hi, friends! I'm \u27E6T\u27E7. Tap the big button to come in.",
   cS3t: 'Ride the train, go on safari', cS3: 'Every finished letter moves the train to its next station, and every finished number takes the jeep deeper into the jungle.' });
 const H = () => HOME[LANG] || HOME.es;
 const doneFor = l => { try { return JSON.parse(localStorage.getItem(l === 'es' ? 'vamos-a-leer-done' : 'vamos-a-leer-done-' + l) || '[]').length; } catch (e) { return 0; } };
@@ -3698,8 +3699,11 @@ function burst() {
 }
 
 function greet() {
-  if (LANG === 'es' && getRec('greet')) return playBlob(getRec('greet'));
-  speak([N(T().coverHello)]);
+  // On the home page the greeting follows the page language (English by default).
+  if (!coverEl.hidden && PL === 'en') return speak([{ t: COVER_EN.t.coverHello, l: 'en', r: .85 }]);
+  const l = coverEl.hidden ? LANG : PL;
+  if (l === 'es' && getRec('greet')) return playBlob(getRec('greet'));
+  speak([{ t: STR[l].coverHello, l }]);
 }
 
 /* ---------- Events ---------- */
