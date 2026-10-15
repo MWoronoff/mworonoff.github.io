@@ -1830,13 +1830,27 @@ const synth = 'speechSynthesis' in window ? speechSynthesis : null;
 const notice = document.getElementById('notice');
 const VOICES = {}; let speakId = 0, talking = false;
 function setTalking(v) { talking = v; document.body.classList.toggle('talking', v); }
+// Rachel Marie is a woman, so prefer female voices in every language, then natural-sounding ones, then the regional accent.
+const FEMALE_V = /samantha|ava|allison|susan|zoe|nicky|karen|moira|tessa|fiona|victoria|serena|kate|zira|aria|jenny|michelle|ana\b|emma|sonia|libby|natasha|clara|female|woman|google us english|google uk english female|paulina|m[oó]nica|marisol|sabina|helena|dalia|elvira|laura|paloma|amelie|am[ée]lie|audrey|aurelie|marie|julie|hortense|denise|sylvie|brigitte|anna|petra|helena|hedda|katja|amala|seraphina|alice|elsa|federica|isabella|paola|luciana|joana|catarina|maria|francisca|raquel|leila|kyoko|o-ren|haruka|ayumi|nanami|sayaka|ting-?ting|mei-?jia|sin-?ji|huihui|xiaoxiao|xiaoyi|yaoyao|hanhan|yuna|sora|heami|sunhi|seoyeon|jimin/i;
+const MALE_V = /\b(david|mark|guy|alex|daniel|fred|thomas|tom|aaron|arthur|oliver|rishi|george|james|ryan|eddy|reed|rocko|grandpa|ralph|albert|bruce|junior|diego|jorge|juan|pablo|ra[uú]l|alvaro|carlos|henri|paul|claude|remy|stefan|conrad|markus|killian|cosimo|luca|diego|giorgio|felipe|antonio|daniel|ichiro|keita|otoya|hattori|kangkang|yunyang|yunxi|injoon|hyunsu|male|man)\b/i;
+function voiceScore(v, l) {
+  const n = (v.name || '') + ' ' + (v.voiceURI || '');
+  let s = 0;
+  if (FEMALE_V.test(n)) s += 100;
+  if (MALE_V.test(n)) s -= 200;
+  if (/natural|neural|online|enhanced|premium|siri/i.test(n)) s += 15;
+  if (/google/i.test(n)) s += 8;
+  const pref = l === 'en' ? /US/i : VOICE_PREF[l];
+  if (pref && pref.test(v.lang || '')) s += 20;
+  if (v.localService) s += 2;
+  return s;
+}
 function pickVoices() {
   if (!synth) return;
   const vs = synth.getVoices();
-  ['en', ...LANGS].forEach(l => {
+  LANGS.forEach(l => {
     const c = vs.filter(v => (v.lang || '').toLowerCase().replace('_', '-').startsWith(l));
-    const pref = l === 'en' ? /US/i : VOICE_PREF[l];
-    VOICES[l] = c.find(v => pref.test(v.lang)) || c[0] || null;
+    VOICES[l] = c.slice().sort((a, b) => voiceScore(b, l) - voiceScore(a, l))[0] || null;
   });
   if (vs.length && (!VOICES[LANG] || !VOICES.en)) { notice.textContent = T().noVoice; notice.hidden = false; } else notice.hidden = true;
 }
