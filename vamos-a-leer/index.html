@@ -282,6 +282,15 @@ h1,h2,.fun{font-family:"Fredoka","Baloo 2","Andika",sans-serif; font-weight:700;
 .f3{right:-14px; bottom:-20px; color:#E2A62A; --r:6deg; animation-delay:-3s}
 @keyframes floaty{0%,100%{transform:translateY(0) rotate(var(--r))}50%{transform:translateY(-10px) rotate(calc(var(--r) * -1))}}
 .csec{padding:clamp(48px,7vw,88px) 0}
+.langpick{margin-top:22px; background:#fff; border:1px solid #EEE3E6; border-radius:20px; padding:14px 16px; box-shadow:0 8px 22px rgba(30,42,90,.06)}
+.langpick > span{display:block; font-weight:800; color:#55618C; font-size:.95rem; margin-bottom:10px}
+.lpchips{display:grid; grid-template-columns:repeat(4,1fr); gap:8px}
+.lp{border:2px solid #E3E6F0; background:#FFFBF5; border-radius:14px; padding:8px 6px; display:flex; flex-direction:column; align-items:center; gap:2px; cursor:pointer; color:#1E2A5A}
+.lp b{font-family:"Fredoka",sans-serif; font-size:1.05rem; white-space:nowrap}
+.lp small{color:#55618C; font-weight:700; font-size:.78rem}
+.lp:hover{border-color:#FF9AA8}
+.lp.on{border-color:#FF6F82; background:#FFE7EC; box-shadow:0 0 0 3px rgba(255,111,130,.18)}
+@media (max-width:420px){.lpchips{grid-template-columns:repeat(2,1fr)}}
 .libcard{padding:10px}
 .libcard svg{display:block; width:100%; height:auto; border-radius:20px}
 .floatL{animation:floatL 3.4s ease-in-out infinite}
@@ -504,7 +513,6 @@ body.talking .gmouth{animation:talk .22s ease-in-out infinite alternate}
 <body>
 <section id="cover" class="view"></section>
 <section id="world" class="view" hidden><div class="wwrap" id="worldIn"></div></section>
-<section id="uni" class="view" hidden><div class="wwrap" id="uniIn"></div></section>
 
 <main class="book view" id="book" hidden>
   <div class="top">
@@ -1043,7 +1051,7 @@ const STR = {
     wAfter: '¡Muy bien! Ahora sigue el mapa del tesoro. Toca la letra que brilla.',
     mapTitle: 'Mapa del tesoro de las letras', start: 'Inicio', treasure: 'Tesoro', uniShort: 'Universidad',
     locked: 'Primero termina todas las letras del mapa. ¡Tú puedes!',
-    allDone: '¡Encontraste el tesoro! ¡Terminaste todo el abecedario! Ahora vamos a la Universidad de los Idiomas.',
+    allDone: '¡Encontraste el tesoro! ¡Terminaste todo el abecedario! ¡Felicidades!',
     yes: '¡Sí!', no: 'Esa no. Prueba otra vez.', great: '¡Excelente! Lo hiciste muy bien.', traceOk: '¡Muy bien! ¡Qué bonita letra!',
     foundAll: '¡Lo lograste! Encontraste todas.', proud: '¡Estoy muy orgullosa de ti!', star: '¡Ganaste una estrella en el mapa!',
     tapHome: 'Toca la casita para volver al mapa.', soundIn: 'Escucha su sonido en la palabra',
@@ -1079,7 +1087,7 @@ const STR = {
     wAfter: 'Très bien ! Maintenant, suis la carte au trésor. Touche la lettre qui brille.',
     mapTitle: 'La carte au trésor des lettres', start: 'Départ', treasure: 'Trésor', uniShort: 'Université',
     locked: "D'abord, termine toutes les lettres de la carte. Tu peux le faire !",
-    allDone: "Tu as trouvé le trésor ! Tu as fini tout l'alphabet ! Allons à l'Université des Langues.",
+    allDone: "Tu as trouvé le trésor ! Tu as fini tout l'alphabet ! Félicitations !",
     yes: 'Oui !', no: 'Pas celle-là. Essaie encore.', great: 'Excellent ! Tu as très bien réussi.', traceOk: 'Très bien ! Quelle jolie lettre !',
     foundAll: 'Bravo ! Tu les as toutes trouvées.', proud: 'Je suis très fière de toi !', star: 'Tu as gagné une étoile sur la carte !',
     tapHome: 'Touche la petite maison pour revenir à la carte.', soundIn: 'Écoute son son dans le mot',
@@ -1115,7 +1123,7 @@ const STR = {
     wAfter: 'Sehr gut! Jetzt folge der Schatzkarte. Tippe auf den Buchstaben, der leuchtet.',
     mapTitle: 'Die Schatzkarte der Buchstaben', start: 'Start', treasure: 'Schatz', uniShort: 'Universität',
     locked: 'Zuerst schaffst du alle Buchstaben auf der Karte. Du kannst das!',
-    allDone: 'Du hast den Schatz gefunden! Du kannst jetzt das ganze ABC! Jetzt gehen wir zur Universität der Sprachen.',
+    allDone: 'Du hast den Schatz gefunden! Du kannst jetzt das ganze ABC! Herzlichen Glückwunsch!',
     yes: 'Ja!', no: 'Nicht dieses. Versuch es noch mal.', great: 'Ausgezeichnet! Das hast du toll gemacht.', traceOk: 'Sehr gut! Was für ein schöner Buchstabe!',
     foundAll: 'Geschafft! Du hast alle gefunden.', proud: 'Ich bin sehr stolz auf dich!', star: 'Du hast einen Stern auf der Karte gewonnen!',
     tapHome: 'Tippe auf das Häuschen, um zur Karte zurückzugehen.', soundIn: 'Hör seinen Laut im Wort',
@@ -1151,7 +1159,7 @@ const STR = {
     wAfter: 'Molto bene! Ora segui la mappa del tesoro. Tocca la lettera che brilla.',
     mapTitle: 'La mappa del tesoro delle lettere', start: 'Partenza', treasure: 'Tesoro', uniShort: 'Università',
     locked: 'Prima finisci tutte le lettere della mappa. Ce la puoi fare!',
-    allDone: "Hai trovato il tesoro! Hai finito tutto l'alfabeto! Ora andiamo all'Università delle Lingue.",
+    allDone: "Hai trovato il tesoro! Hai finito tutto l'alfabeto! Congratulazioni!",
     yes: 'Sì!', no: 'Non questa. Riprova.', great: 'Eccellente! Hai fatto benissimo.', traceOk: 'Molto bene! Che bella lettera!',
     foundAll: "Ce l'hai fatta! Le hai trovate tutte.", proud: 'Sono molto orgogliosa di te!', star: 'Hai vinto una stella sulla mappa!',
     tapHome: 'Tocca la casetta per tornare alla mappa.', soundIn: 'Ascolta il suo suono nella parola',
@@ -1187,7 +1195,7 @@ const STR = {
     wAfter: 'Muito bem! Agora siga o mapa do tesouro. Toque na letra que brilha.',
     mapTitle: 'Mapa do tesouro das letras', start: 'Início', treasure: 'Tesouro', uniShort: 'Universidade',
     locked: 'Primeiro termine todas as letras do mapa. Você consegue!',
-    allDone: 'Você encontrou o tesouro! Terminou todo o alfabeto! Agora vamos para a Universidade dos Idiomas.',
+    allDone: 'Você encontrou o tesouro! Terminou todo o alfabeto! Parabéns!',
     yes: 'Isso!', no: 'Essa não. Tente de novo.', great: 'Excelente! Você foi muito bem.', traceOk: 'Muito bem! Que letra bonita!',
     foundAll: 'Conseguiu! Você encontrou todas.', proud: 'Estou muito orgulhosa de você!', star: 'Você ganhou uma estrela no mapa!',
     tapHome: 'Toque na casinha para voltar ao mapa.', soundIn: 'Escute o som na palavra',
@@ -1223,7 +1231,7 @@ const STR = {
     wAfter: 'よく できたね！ つぎは たからの ちずを すすもう。 ひかっている もじを タッチしてね。',
     mapTitle: 'もじの たからの ちず', start: 'スタート', treasure: 'たから', uniShort: 'だいがく',
     locked: 'さきに ちずの もじを ぜんぶ おわらせよう。 きみなら できるよ！',
-    allDone: 'たからを みつけたね！ エービーシーが ぜんぶ おわったよ！ ことばの だいがくへ いこう！',
+    allDone: 'たからを みつけたね！ エービーシーが ぜんぶ おわったよ！ おめでとう！',
     yes: 'そう！', no: 'それじゃないよ。 もう いちど やってみよう。', great: 'すばらしい！ とても よく できたね。', traceOk: 'じょうず！ きれいな もじだね！',
     foundAll: 'やったね！ ぜんぶ みつけたよ。', proud: 'せんせいは とても うれしいよ！', star: 'ちずに ほしが ついたよ！',
     tapHome: 'おうちの ボタンを タッチして ちずに もどろう。', soundIn: 'この ことばで おとを きいてね。',
@@ -1259,7 +1267,7 @@ const STR = {
     wAfter: '真棒！现在跟着藏宝图走吧。点一点发光的字母。',
     mapTitle: '字母藏宝图', start: '起点', treasure: '宝藏', uniShort: '大学',
     locked: '先完成地图上所有的字母吧。你一定可以的！',
-    allDone: '你找到宝藏了！你学完了全部字母！我们去语言大学吧。',
+    allDone: '你找到宝藏了！你学完了全部字母！恭喜你！',
     yes: '对！', no: '不是这个，再试一次。', great: '太棒了！你做得非常好。', traceOk: '真棒！好漂亮的字母！',
     foundAll: '成功了！你全都找到了。', proud: '老师为你骄傲！', star: '你在地图上得到了一颗星星！',
     tapHome: '点一点小房子，回到地图。', soundIn: '听听这个单词里的发音：',
@@ -1294,7 +1302,7 @@ const STR = {
     wAfter: '잘했어! 이제 보물 지도를 따라가 보자. 반짝이는 글자를 눌러 봐.',
     mapTitle: '글자 보물 지도', start: '출발', treasure: '보물', uniShort: '대학교',
     locked: '먼저 지도에 있는 글자를 모두 끝내 보자. 너는 할 수 있어!',
-    allDone: '보물을 찾았어! 알파벳을 전부 끝냈어! 이제 언어 대학교로 가 보자.',
+    allDone: '보물을 찾았어! 알파벳을 전부 끝냈어! 축하해!',
     yes: '맞아!', no: '그건 아니야. 다시 해 보자.', great: '훌륭해! 정말 잘했어.', traceOk: '잘했어! 정말 예쁜 글자야!',
     foundAll: '해냈어! 모두 찾았어.', proud: '선생님은 네가 정말 자랑스러워!', star: '지도에서 별을 받았어!',
     tapHome: '작은 집 버튼을 눌러서 지도로 돌아가자.', soundIn: '이 낱말에서 소리를 들어 봐.',
@@ -1923,7 +1931,7 @@ function worldSVG() {
 
 /* ---------- Views ---------- */
 const coverEl = document.getElementById('cover'), worldEl = document.getElementById('world'), worldIn = document.getElementById('worldIn');
-const bookEl = document.getElementById('book'), uniEl = document.getElementById('uni'), uniIn = document.getElementById('uniIn');
+const bookEl = document.getElementById('book');
 const curtainEl = document.getElementById('curtain');
 const ABC = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 const WORD_MODS = MODULES.length;
@@ -1932,9 +1940,8 @@ const MAESTRA = /maestra/i.test(location.search + location.hash);
 const HOUSE = ICON.house;
 
 function showView(v) {
-  coverEl.hidden = v !== 'cover'; worldEl.hidden = v !== 'world'; bookEl.hidden = v !== 'book'; uniEl.hidden = v !== 'uni';
+  coverEl.hidden = v !== 'cover'; worldEl.hidden = v !== 'world'; bookEl.hidden = v !== 'book';
   if (v !== 'world') worldIn.innerHTML = '';
-  if (v !== 'uni') uniIn.innerHTML = '';
   window.scrollTo(0, 0);
 }
 function showCover() { stopAll(); hintPage(); mi = -1; renderCover(); showView('cover'); scheduleCoverHint(); }
@@ -1989,7 +1996,7 @@ function showWorld(o = {}) {
         if (st) { st.scrollIntoView({ block: 'center' }); setTimeout(() => burstAt(st), 300); }
         speak([N(T().star)]);
       }
-      if (!j) setHint(() => document.querySelector('.stop.next, .unistop.open'), 2500);
+      if (!j) setHint(() => document.querySelector('.stop.next'), 2500);
     });
   }
 }
@@ -1999,10 +2006,10 @@ function revealBlocks(say) {
   const b = document.getElementById('blocks'); if (!b) return;
   const skip = document.getElementById('skipBtn'); if (skip) skip.hidden = true;
   if (b.hidden) { b.hidden = false; renderMap(); }
-  const nx = document.querySelector('.stop.next, .unistop.open') || b;
+  const nx = document.querySelector('.stop.next') || b;
   nx.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion:reduce)').matches ? 'auto' : 'smooth', block: 'center' });
   if (say) speak([N(T().wAfter)]);
-  setHint(() => document.querySelector('.stop.next, .unistop.open'), 1200);
+  setHint(() => document.querySelector('.stop.next'), 1200);
 }
 
 function unlockSpeech() {
@@ -2038,56 +2045,56 @@ function enterWorld() {
 
 /* ---------- Cover: Ms. Rachel in the Lettervale library ---------- */
 const EDU = {
-  es: { libName: 'Biblioteca de Lettervale', cLearnT: 'Lo que aprenden',
+  es: { libName: 'Biblioteca de Lettervale', langPick: 'Elija el idioma de las instrucciones', cLearnT: 'Lo que aprenden',
     l: [['Reconocer las letras', 'Las 26 letras en mayúscula y minúscula, con juegos para encontrarlas.'],
         ['Los sonidos del inglés', 'El sonido de cada letra, con consejos pensados para quienes hablan español.'],
         ['Primeras palabras', '52 palabras con dibujos, de apple a zebra, con su significado en español.'],
         ['Trazar con el dedo', 'Trazar cada letra ayuda a recordarla y prepara la mano para escribir.']],
     cPathT: 'Un camino de 26 lecciones', cPath: 'Cada lección sigue los mismos pasos: conocer la letra, escuchar su sonido, trazarla, encontrarla y jugar con palabras.',
     steps: ['Conocer', 'Escuchar', 'Trazar', 'Encontrar', 'Jugar'] },
-  fr: { libName: 'Bibliothèque de Lettervale', cLearnT: 'Ce que les enfants apprennent',
+  fr: { libName: 'Bibliothèque de Lettervale', langPick: 'Choisissez la langue des consignes', cLearnT: 'Ce que les enfants apprennent',
     l: [['Reconnaître les lettres', 'Les 26 lettres en majuscule et en minuscule, avec des jeux pour les retrouver.'],
         ["Les sons de l'anglais", 'Le son de chaque lettre, avec des exemples clairs.'],
         ['Premiers mots', '52 mots illustrés, de apple à zebra, avec leur sens en français.'],
         ['Tracer avec le doigt', "Tracer chaque lettre aide à la mémoriser et prépare la main à l'écriture."]],
     cPathT: 'Un parcours de 26 leçons', cPath: 'Chaque leçon suit les mêmes étapes : découvrir la lettre, écouter son son, la tracer, la retrouver et jouer avec des mots.',
     steps: ['Découvrir', 'Écouter', 'Tracer', 'Trouver', 'Jouer'] },
-  de: { libName: 'Bibliothek von Lettervale', cLearnT: 'Was Kinder lernen',
+  de: { libName: 'Bibliothek von Lettervale', langPick: 'Sprache der Anleitungen wählen', cLearnT: 'Was Kinder lernen',
     l: [['Buchstaben erkennen', 'Alle 26 Buchstaben, groß und klein, mit Spielen zum Wiederfinden.'],
         ['Die Laute des Englischen', 'Der Laut jedes Buchstabens, mit klaren Beispielen.'],
         ['Erste Wörter', '52 Bildwörter von apple bis zebra, mit ihrer Bedeutung auf Deutsch.'],
         ['Mit dem Finger nachfahren', 'Das Nachfahren hilft beim Merken und bereitet die Hand aufs Schreiben vor.']],
     cPathT: 'Ein Weg mit 26 Lektionen', cPath: 'Jede Lektion folgt denselben Schritten: Buchstaben kennenlernen, Laut hören, nachfahren, wiederfinden und mit Wörtern spielen.',
     steps: ['Kennenlernen', 'Hören', 'Nachfahren', 'Finden', 'Spielen'] },
-  it: { libName: 'Biblioteca di Lettervale', cLearnT: 'Che cosa imparano',
+  it: { libName: 'Biblioteca di Lettervale', langPick: 'Scegliete la lingua delle istruzioni', cLearnT: 'Che cosa imparano',
     l: [['Riconoscere le lettere', 'Le 26 lettere maiuscole e minuscole, con giochi per ritrovarle.'],
         ["I suoni dell'inglese", 'Il suono di ogni lettera, con esempi chiari.'],
         ['Prime parole', '52 parole illustrate, da apple a zebra, con il loro significato in italiano.'],
         ['Ripassare con il dito', 'Ripassare ogni lettera aiuta a ricordarla e prepara la mano alla scrittura.']],
     cPathT: 'Un percorso di 26 lezioni', cPath: 'Ogni lezione segue gli stessi passi: conoscere la lettera, ascoltarne il suono, ripassarla, ritrovarla e giocare con le parole.',
     steps: ['Conoscere', 'Ascoltare', 'Ripassare', 'Trovare', 'Giocare'] },
-  pt: { libName: 'Biblioteca de Lettervale', cLearnT: 'O que as crianças aprendem',
+  pt: { libName: 'Biblioteca de Lettervale', langPick: 'Escolha o idioma das instruções', cLearnT: 'O que as crianças aprendem',
     l: [['Reconhecer as letras', 'As 26 letras maiúsculas e minúsculas, com jogos para encontrá-las.'],
         ['Os sons do inglês', 'O som de cada letra, com exemplos claros.'],
         ['Primeiras palavras', '52 palavras ilustradas, de apple a zebra, com o significado em português.'],
         ['Contornar com o dedo', 'Contornar cada letra ajuda a memorizá-la e prepara a mão para escrever.']],
     cPathT: 'Um caminho de 26 lições', cPath: 'Cada lição segue os mesmos passos: conhecer a letra, ouvir o som, contorná-la, encontrá-la e brincar com palavras.',
     steps: ['Conhecer', 'Ouvir', 'Contornar', 'Encontrar', 'Brincar'] },
-  ja: { libName: 'Lettervale としょかん', cLearnT: '学べること',
+  ja: { libName: 'Lettervale としょかん', langPick: '説明の言語を選んでください', cLearnT: '学べること',
     l: [['文字を見分ける', '大文字と小文字の26文字を、さがすゲームで覚えます。'],
         ['英語の音', 'それぞれの文字の音を、わかりやすい例といっしょに学びます。'],
         ['はじめての単語', 'apple から zebra まで、絵つきの52語を日本語の意味といっしょに。'],
         ['指でなぞる', '文字をなぞることで覚えやすくなり、書く準備にもなります。']],
     cPathT: '26レッスンの道のり', cPath: '各レッスンは同じ流れです：文字を知る、音を聞く、なぞる、さがす、ことばで遊ぶ。',
     steps: ['知る', '聞く', 'なぞる', 'さがす', '遊ぶ'] },
-  zh: { libName: '字母谷图书馆', cLearnT: '孩子们学到什么',
+  zh: { libName: '字母谷图书馆', langPick: '选择说明语言', cLearnT: '孩子们学到什么',
     l: [['认识字母', '26个大写和小写字母，通过游戏找出它们。'],
         ['英语的发音', '每个字母的发音，配有清楚的例子。'],
         ['最初的单词', '从 apple 到 zebra，52个带图的单词，并附中文意思。'],
         ['用手指描字母', '描一描字母，帮助记忆，也为书写做准备。']],
     cPathT: '26节课的学习之路', cPath: '每节课都是同样的步骤：认识字母、听发音、描一描、找一找、玩单词。',
     steps: ['认识', '听一听', '描一描', '找一找', '玩一玩'] },
-  ko: { libName: '레터베일 도서관', cLearnT: '아이들이 배우는 것',
+  ko: { libName: '레터베일 도서관', langPick: '안내 언어를 선택하세요', cLearnT: '아이들이 배우는 것',
     l: [['글자 알아보기', '대문자와 소문자 26자를 찾기 게임으로 익힙니다.'],
         ['영어의 소리', '글자마다 소리를 알기 쉬운 예와 함께 배웁니다.'],
         ['첫 단어', 'apple부터 zebra까지 그림 단어 52개를 한국어 뜻과 함께.'],
@@ -2206,6 +2213,8 @@ function renderCover() {
       <p class="eyebrow">${t.cEyebrow}</p>
       <h1 class="h1">${t.cH1}</h1>
       <p class="lead">${t.cLead}</p>
+      <div class="langpick"><span>${(EDU[LANG] || EDU.es).langPick}</span>
+        <div class="lpchips">${LANGS.map(l => `<button class="lp${l === LANG ? ' on' : ''}" data-lang="${l}" aria-pressed="${l === LANG}"><b>${STR[l].hello}</b><small>${STR[l].langName}</small></button>`).join('')}</div></div>
       <div class="ctas">
         <button class="enter" id="enterBtn">${ICON.play}<span>${t.cCta}</span></button>
         <button class="hear" id="greetBtn" aria-label="${t.hello}">${SPK}</button>
@@ -2230,7 +2239,6 @@ function renderCover() {
   <section class="csec" id="c-fam"><div class="cwrap">
     <h2>${t.cFamT}</h2>
     <ul class="tips"><li>${t.cF1}</li><li>${t.cF2}</li><li>${t.cF3}</li></ul>
-    <p class="langs"><span>${t.cLangs}:</span> ${LANGS.filter(l => l !== LANG).map(l => `<button class="lchip" data-lang="${l}">${STR[l].langName}</button>`).join('')}</p>
   </div></section>
   <footer class="cfoot"><div class="cwrap">© 2026 Vamos a leer · Rachel Woronoff · ${t.cFoot}</div></footer>`;
 }
@@ -2286,11 +2294,7 @@ function hintTarget() {
   if (!worldEl.hidden) {
     const b = q('#blocks');
     if (b && b.hidden) return q('#skipBtn');
-    return q('.stop.next') || q('.unistop.open');
-  }
-  if (!uniEl.hidden) {
-    const g = hs.greeted || new Set();
-    return [...document.querySelectorAll('.dbody')].find(d => !g.has(d.dataset.greet)) || q('#uni [data-act="map"]');
+    return q('.stop.next');
   }
   if (mi < 0 || bookEl.hidden) return null;
   const m = mod(), p = pages()[cur], P = pageEl, sel = s => P.querySelector(s);
@@ -2577,19 +2581,17 @@ function mapGeom() {
   const box = document.getElementById('mapbox');
   const w = (box && box.clientWidth) || 1000;
   const cols = w < 520 ? 3 : w < 860 ? 5 : 7;
-  const n = ABC.length + 3, rows = Math.ceil(n / cols);
+  const n = ABC.length + 2, rows = Math.ceil(n / cols);
   const W = cols * 150, m = 80, dx = (W - 2 * m) / (cols - 1), dy = 165, top = cols === 3 ? 176 : 196;
   const pos = i => { const r = Math.floor(i / cols); let c = i % cols; if (r % 2) c = cols - 1 - c; return { x: m + c * dx, y: top + r * dy }; };
   return { cols, rows, W, H: top + (rows - 1) * dy + 120, dx, dy, top, m, n, pos };
 }
-const CHEST = 27, UNI = 28;
-let chestAbove = true;
-const markerXY = (p, i) => i === UNI && chestAbove ? { x: p.x + 82, y: p.y - 20 } : { x: p.x, y: p.y - 72 };
-const nextIndex = () => { const d = getDone(), i = ABC.findIndex(L => !d.includes(L)); return i < 0 ? UNI : i + 1; };
+const CHEST = 27;
+const markerXY = (p, i) => i === CHEST ? { x: p.x + 70, y: p.y - 50 } : { x: p.x, y: p.y - 72 };
+const nextIndex = () => { const d = getDone(), i = ABC.findIndex(L => !d.includes(L)); return i < 0 ? CHEST : i + 1; };
 
 function mapSVG(G, markerAt) {
   const t = T(), done = getDone(), P = Array.from({ length: G.n }, (_, i) => G.pos(i)), nx = nextIndex(), fin = done.length >= 26;
-  chestAbove = Math.abs(P[CHEST].x - P[UNI].x) < 1;
   let d = `M${P[0].x} ${P[0].y}`;
   for (let i = 0; i < P.length - 1; i++) {
     const p0 = P[i - 1] || P[i], p1 = P[i], p2 = P[i + 1], p3 = P[i + 2] || p2;
@@ -2608,9 +2610,10 @@ function mapSVG(G, markerAt) {
   }
   const label = (x, y, txt) => `<g transform="translate(${x} ${y})"><rect x="${-Math.max(44, txt.length * 5.5)}" y="0" width="${Math.max(88, txt.length * 11)}" height="26" rx="6" fill="#FFF8E8" stroke="#6B4A2A" stroke-width="2.5"/>
       <text y="19" text-anchor="middle" font-family="Fredoka, 'Baloo 2', sans-serif" font-weight="700" font-size="16" fill="#4A2E18">${txt}</text></g>`;
-  const s = P[0], ch = P[CHEST], un = P[UNI];
+  const s = P[0], ch = P[CHEST];
   const start = `<g transform="translate(${s.x} ${s.y - 6}) scale(.9)">${cottage(0, 0, 1, '#C2465A').replace(/<g class="smoke">[\s\S]*?<\/g>/, '')}</g>${label(s.x, s.y + 26, t.start)}`;
-  const chest = `<g class="cheststop" role="button" tabindex="0" aria-label="${t.treasure}" transform="translate(${ch.x} ${ch.y})">
+  const chest = `<g class="cheststop${fin ? ' open' : ''}" role="button" tabindex="0" aria-label="${t.treasure}" transform="translate(${ch.x} ${ch.y})">
+      ${fin ? `<circle class="ring" r="60" fill="none" stroke="#FFD45C" stroke-width="8"/>` : ''}
       <path d="M-26 22 L26 46 M26 22 L-26 46" stroke="#C2465A" stroke-width="7" stroke-linecap="round"/>
       ${fin ? `<circle r="56" fill="#FFF3A8" opacity=".85"/><path d="M-30 -10 L-36 -40 L36 -40 L30 -10Z" fill="#8A5A33" stroke="#4A2E18" stroke-width="3"/>
         <circle cx="-12" cy="-16" r="8" fill="#FFD45C" stroke="#B8860B" stroke-width="2"/><circle cx="6" cy="-20" r="8" fill="#FFD45C" stroke="#B8860B" stroke-width="2"/><circle cx="16" cy="-12" r="7" fill="#FFD45C" stroke="#B8860B" stroke-width="2"/>`
@@ -2618,15 +2621,7 @@ function mapSVG(G, markerAt) {
       <rect x="-32" y="-10" width="64" height="38" rx="5" fill="#A0703F" stroke="#4A2E18" stroke-width="3"/>
       <rect x="-32" y="-2" width="64" height="7" fill="#FFD45C"/><rect x="-6" y="-6" width="12" height="16" rx="2" fill="#FFD45C" stroke="#B8860B" stroke-width="2"/>
     </g>${label(ch.x, ch.y + 52, t.treasure)}`;
-  const uni = `<g class="unistop${fin ? ' open' : ''}" role="button" tabindex="0" aria-label="${t.uniTitle}" transform="translate(${un.x} ${un.y})">
-      ${fin ? `<circle class="ring" r="58" fill="none" stroke="#FFD45C" stroke-width="8"/>` : ''}
-      <path d="M-44 -14 L0 -42 L44 -14Z" fill="#8F6CFF" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>
-      <path d="M-20 -28 Q0 -62 20 -28Z" fill="#FFD45C" stroke="${INK}" stroke-width="3"/>
-      <rect x="-42" y="-14" width="84" height="44" fill="#FFF8E8" stroke="${INK}" stroke-width="3"/>
-      ${[-30, -15, 0, 15, 30].map(x => `<rect x="${x - 3}" y="-10" width="6" height="36" fill="#E6D3A8"/>`).join('')}
-      <rect x="-48" y="28" width="96" height="8" fill="#E6D3A8" stroke="${INK}" stroke-width="2.5"/>
-      ${fin ? '' : `<g transform="translate(30 -36)"><rect x="-11" y="-2" width="22" height="18" rx="4" fill="#FFD45C" stroke="${INK}" stroke-width="2.5"/><path d="M-6 -2 V-8 A6 6 0 0 1 6 -8 V-2" fill="none" stroke="${INK}" stroke-width="3"/></g>`}
-    </g>${label(un.x, un.y + 42, t.uniShort)}`;
+
   const stops = ABC.map((L, i) => {
     const p = P[i + 1], isDone = done.includes(L), isNext = nx === i + 1;
     const face = isDone ? `<circle r="35" fill="#FFD45C" stroke="#B8860B" stroke-width="4"/><circle r="28" fill="none" stroke="#FFF3A8" stroke-width="3"/>`
@@ -2661,7 +2656,7 @@ function mapSVG(G, markerAt) {
     ${deco}
     <path d="${d}" stroke="#E9CF98" stroke-width="24" fill="none" stroke-linecap="round" opacity=".8"/>
     <path d="${d}" stroke="#B33A3A" stroke-width="5" fill="none" stroke-dasharray="3 13" stroke-linecap="round"/>
-    ${banner}${compass}${start}${chest}${uni}${stops}${marker}
+    ${banner}${compass}${start}${chest}${stops}${marker}
   </svg>`;
 }
 
@@ -2683,10 +2678,9 @@ function renderMap(animate) {
     }));
     mapTimer = setTimeout(() => {
       center(true);
-      if (nx === UNI) {
-        const c = document.querySelector('.cheststop'); if (c) burstAt(c);
-        speak([N(T().allDone)]);
-        setHint(() => document.querySelector('.unistop'), 800);
+      if (nx === CHEST) {
+        const c = document.querySelector('.cheststop'); if (c) { burstAt(c); setTimeout(() => burstAt(c), 700); }
+        cheer(); speak([N(T().allDone)]);
       } else {
         const target = document.querySelector(`.stop[data-letter="${ABC[nx - 1]}"]`);
         if (target) burstAt(target);
@@ -2698,52 +2692,6 @@ function renderMap(animate) {
   return center;
 }
 
-/* ---------- The university (after the treasure) ---------- */
-const DOORC = ['#FF9AA8', '#9ED6F5', '#FFD45C', '#8EDBA6', '#FFB37A', '#C9A8FF', '#7FD8D0', '#F7A6E0'];
-function uniSVG() {
-  const cols = [-150, -100, -50, 0, 50, 100, 150];
-  let confetti = '';
-  for (let i = 0; i < 40; i++) confetti += `<rect class="conf" style="animation-delay:${(i % 10) * .3}s" x="${(i * 97) % 1200}" y="${(i * 53) % 220}" width="8" height="14" rx="2" fill="${DOORC[i % 8]}" transform="rotate(${(i * 37) % 180} ${(i * 97) % 1200} ${(i * 53) % 220})"/>`;
-  return `<svg viewBox="0 0 1200 560" role="img" aria-label="${T().uniTitle}" xmlns="http://www.w3.org/2000/svg">
-    <defs><linearGradient id="usky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5DB8FF"/><stop offset="1" stop-color="#FFE9F3"/></linearGradient></defs>
-    <rect width="1200" height="560" fill="url(#usky)"/>
-    ${cloudG(0, 70, 1, 'c1')}${cloudG(0, 130, .8, 'c2')}
-    ${firework(240, 80, '#FFD45C', 0)}${firework(980, 70, '#FF9AA8', .8)}${firework(1100, 160, '#9ED6F5', 1.6)}
-    <path d="M0 400 Q300 360 600 380 T1200 370 V560 H0Z" fill="#8FD27A"/>
-    ${tree(30, 360, 40)}${tree(1170, 350, 44, '#3E9E4E', '#4FB35C')}${tree(1080, 380, 32)}
-    <g transform="translate(700 0)">
-      <path d="M-260 170 L0 92 L260 170Z" fill="#8F6CFF" stroke="${INK}" stroke-width="4" stroke-linejoin="round"/>
-      <path d="M-90 112 Q0 -10 90 112Z" fill="#FFD45C" stroke="${INK}" stroke-width="4"/>
-      <path d="M0 10 V-22" stroke="${INK}" stroke-width="3"/><path d="M0 -22 l28 8 -28 8Z" fill="#FF6F82" stroke="${INK}" stroke-width="2"/>
-      <rect x="-250" y="170" width="500" height="200" fill="#FFF8E8" stroke="${INK}" stroke-width="4"/>
-      <rect x="-262" y="160" width="524" height="20" fill="#F3E3C0" stroke="${INK}" stroke-width="3"/>
-      ${cols.map(x => `<rect x="${x - 13}" y="182" width="26" height="176" fill="#F3E3C0" stroke="${INK}" stroke-width="2.5"/>`).join('')}
-      <path d="M-34 370 V300 A34 34 0 0 1 34 300 V370Z" fill="#8A5FB8" stroke="${INK}" stroke-width="3"/>
-      ${[-280, -296, -312].map((y, i) => `<rect x="${-270 - i * 14}" y="${370 + i * 12}" width="${540 + i * 28}" height="12" fill="#E6D3A8" stroke="${INK}" stroke-width="2"/>`).join('')}
-      ${['#FF9AA8', '#9ED6F5', '#FFD45C', '#8EDBA6'].map((c, i) => `<path d="M${-200 + i * 120} 182 h34 v70 l-17 -12 -17 12Z" fill="${c}" stroke="${INK}" stroke-width="2.5"/>`).join('')}
-    </g>
-    ${confetti}
-    <g transform="translate(20 40) scale(.86)">${rachelSVG({ cap: true, wave: true, diploma: true })}</g>
-  </svg>`;
-}
-function showUni() {
-  stopAll(); hintPage(); mi = -1;
-  showView('uni');
-  const t = T(), d = getDone();
-  uniIn.innerHTML = `<div class="wbar"><button class="wbtn iconly" data-act="map" aria-label="${t.mapTitle}">${ICON.map}</button>
-      <div class="wtitle"><b>${t.uniTitle}</b><small>${BRAND}</small></div>${gearBtn()}</div>
-    <div class="scene">${uniSVG()}</div>
-    <div class="diploma"><span class="seal" aria-hidden="true">★</span><div><b>${t.diploma}</b><small>${BRAND} · ${t.world}</small>
-      <div class="dletters">${ABC.map(L => `<span class="${d.includes(L) ? 'on' : ''}">${L}</span>`).join('')}</div></div></div>
-    <div class="doors">${LANGS.map((l, i) => `<div class="door" style="--dc:${DOORC[i]}">
-      <button class="dbody" data-greet="${l}" aria-label="${STR[l].hello}"><span class="hi">${STR[l].hello}</span><span class="ln">${STR[l].langName}</span>
-        ${l === LANG ? `<span class="here">${t.here}</span>` : ''}</button>
-      <button class="dopen" data-open="${l}">${t.uniOpen} · ${STR[l].langName}</button></div>`).join('')}</div>
-    <p class="unipick">${t.uniPick}</p>`;
-  cheer();
-  if (ensureAC()) chime([523.25, 659.25, 783.99, 1046.5, 783.99, 1046.5], .14);
-  speak([N(t.uniHello)]);
-}
 
 /* ---------- Navigation & rendering ---------- */
 const pageEl = document.getElementById('page'), navEl = document.getElementById('nav');
@@ -3180,16 +3128,15 @@ coverEl.addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
   if (b.id === 'enterBtn') return enterWorld();
   if (b.id === 'greetBtn') { ensureAC(); return greet(); }
-  if (b.dataset.lang) { setLang(b.dataset.lang); return showCover(); }
+  if (b.dataset.lang) { const l = b.dataset.lang; setLang(l); showCover(); ensureAC(); return speak([{ t: STR[l].hello, l }]); }
 });
 coverEl.addEventListener('change', e => { if (e.target.id === 'coverLang') { setLang(e.target.value); showCover(); } });
 function mapTap(el) {
   if (el.classList.contains('stop')) { ensureAC(); return openModule(WORD_MODS + ABC.indexOf(el.dataset.letter)); }
-  if (el.classList.contains('unistop')) { ensureAC(); return allDone() ? showUni() : speak([N(T().locked)]); }
-  if (el.classList.contains('cheststop')) { ensureAC(); if (allDone()) { burstAt(el); speak([N(T().allDone)]); setHint(() => document.querySelector('.unistop'), 800); } else speak([N(T().locked)]); }
+  if (el.classList.contains('cheststop')) { ensureAC(); if (allDone()) { burstAt(el); setTimeout(() => burstAt(el), 600); speak([N(T().allDone)]); } else speak([N(T().locked)]); }
 }
 worldEl.addEventListener('click', e => {
-  const st = e.target.closest('.stop, .unistop, .cheststop');
+  const st = e.target.closest('.stop, .cheststop');
   if (st) return mapTap(st);
   const cell = e.target.closest('.ch');
   if (cell && !song.playing) {
@@ -3203,26 +3150,15 @@ worldEl.addEventListener('click', e => {
   if (a === 'sing') { ensureAC(); return song.playing ? stopSong() : (stopAll(), sing(() => revealBlocks(true))); }
   if (a === 'skip') { stopAll(); return revealBlocks(true); }
 });
-[worldEl, uniEl].forEach(v => v.addEventListener('keydown', e => {
-  const st = e.target.closest && e.target.closest('.stop, .unistop, .cheststop');
+[worldEl].forEach(v => v.addEventListener('keydown', e => {
+  const st = e.target.closest && e.target.closest('.stop, .cheststop');
   if (st && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); mapTap(st); }
 }));
-uniEl.addEventListener('click', e => {
-  const b = e.target.closest('button'); if (!b) return;
-  if (b.dataset.act === 'map') return renderHome();
-  if (b.dataset.greet) {
-    const l = b.dataset.greet;
-    b.classList.remove('wiggle'); void b.offsetWidth; b.classList.add('wiggle');
-    return speak([{ t: STR[l].hello, l }]);
-  }
-  if (b.dataset.open) { setLang(b.dataset.open); return enterWorld(); }
-});
 let rzT;
 addEventListener('resize', () => { clearTimeout(rzT); rzT = setTimeout(() => { const b = document.getElementById('blocks'); if (!worldEl.hidden && b && !b.hidden) renderMap(); }, 250); });
 function refreshView() {
   if (!coverEl.hidden) return showCover();
   if (!worldEl.hidden) return renderHome();
-  if (!uniEl.hidden) return showUni();
   if (mi >= 0) return render(0);
 }
 document.getElementById('langSel').onchange = e => { setLang(e.target.value); adultDlg.close(); refreshView(); };
