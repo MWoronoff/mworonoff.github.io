@@ -2367,13 +2367,11 @@ const COVER_EN = {
     lettersH: 'The alphabet, A to Z', wordsH: 'Reading modules', done: 'completed', instr: 'Lesson language', start: 'Start', cur: 'Current lesson language' },
   mods: { cat: 'Your first word: C, A, T', dog: 'Your second word: D, O, G', sight: 'Common words to know at a glance', sun: 'Three-letter words to sound out', they: 'The building blocks of sentences' },
 };
-function setPageLang(l) { PL = l; try { localStorage.setItem('vamos-a-leer-page', l); } catch (e) {} }
-let PL = (() => {
-  try { const s = localStorage.getItem('vamos-a-leer-page'); if (s === 'en' || LANGS.includes(s)) return s; } catch (e) {}
-  const q = new URLSearchParams(location.search).get('lang');
-  return q && LANGS.includes(q) ? q : 'en';    // a shared ?lang= link opens in that language the first time
-})();
-setPageLang(PL);
+// The home page always opens in English. The menu, or a shared ?lang= link, changes it for this visit only.
+function setPageLang(l) { PL = l; }
+let PL = (() => { const q = new URLSearchParams(location.search).get('lang'); return q && LANGS.includes(q) ? q : 'en'; })();
+try { localStorage.removeItem('vamos-a-leer-page'); } catch (e) {}
+if (/[?&]lang=/.test(location.search)) { const u = new URL(location.href); u.searchParams.delete('lang'); history.replaceState(null, '', u); }
 
 /* ---------- Home page ---------- */
 const HOME = {
@@ -2526,7 +2524,6 @@ function setLang(l) {
   LANG = l;
   try { localStorage.setItem('vamos-a-leer-lang', l); } catch (e) {}
   document.documentElement.lang = l;
-  const u = new URL(location.href); u.searchParams.set('lang', l); history.replaceState(null, '', u);
   pickVoices(); fillAdult();
 }
 
