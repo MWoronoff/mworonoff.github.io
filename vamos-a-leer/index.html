@@ -7,7 +7,7 @@
 <meta name="description" content="Lecciones de lectura en inglés para niños hispanohablantes, con la maestra Rachel Woronoff.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Baloo+2:wght@700;800&family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Baloo+2:wght@700;800&family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&family=Lexend:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#E6F4EC; --card:#FFFFFF; --ink:#1E2A5A; --muted:#55618C; --line:#C9E3D4;
@@ -243,105 +243,141 @@ dialog p{margin:0 0 14px; color:var(--muted); line-height:1.5}
 h1,h2,.fun{font-family:"Fredoka","Baloo 2","Andika",sans-serif; font-weight:700; letter-spacing:.01em}
 
 /* ---------- Cover: professional landing page ---------- */
-#cover{min-height:100vh; background:#fff; color:#1E2A5A; font-family:"Plus Jakarta Sans","Segoe UI",system-ui,sans-serif; color-scheme:light; --ink:#1E2A5A; --muted:#4F5B82; --line:#E6E9F2; --accent:#E0475B; --soft:#F6F7FB}
-#cover h1,#cover h2,#cover h3{font-family:"Plus Jakarta Sans","Segoe UI",system-ui,sans-serif}
-.cwrap{max-width:1180px; margin:0 auto; padding:0 clamp(18px,4vw,40px)}
-.cnav{position:sticky; top:0; z-index:20; background:rgba(255,255,255,.94); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); border-bottom:1px solid var(--line)}
-.cnav-in{display:flex; align-items:center; gap:24px; height:68px}
-.logo{display:flex; align-items:center; gap:10px; color:var(--ink); text-decoration:none; font-family:"Plus Jakarta Sans",sans-serif; font-weight:600; font-size:1.3rem}
-.logomark{display:flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:9px; background:var(--ink); color:#fff; font-family:Georgia,"Times New Roman",serif; font-weight:700; font-size:1.05rem; letter-spacing:-.02em}
-.logomark b{color:#FFD45C}
-.clinks{display:flex; gap:26px; margin-left:auto}
-.clinks a{color:var(--muted); text-decoration:none; font-weight:700; font-size:.98rem}
-.clinks a:hover{color:var(--accent)}
-.clang{font:inherit; font-weight:700; color:var(--ink); border:1px solid #D5DAE8; border-radius:10px; padding:.4em .8em; background:#fff}
-.hero{background:linear-gradient(180deg,#FFF7F0 0,#FFFFFF 100%); border-bottom:1px solid var(--line)}
-.hero-in{display:grid; grid-template-columns:1fr 1fr; gap:clamp(28px,6vw,80px); align-items:center; padding-top:clamp(40px,6vw,84px); padding-bottom:clamp(44px,6vw,90px)}
-.eyebrow{margin:0 0 16px; color:var(--accent); font-weight:800; font-size:.92rem; letter-spacing:.06em; text-transform:uppercase}
-.h1{margin:0; font-size:clamp(2.2rem,4vw,3.4rem); line-height:1.1; font-weight:800; letter-spacing:-.025em; color:var(--ink); max-width:14em}
-.lead{margin:20px 0 0; font-size:clamp(1.06rem,1.5vw,1.2rem); line-height:1.65; color:var(--muted); max-width:34em}
-.ctas{display:flex; align-items:center; gap:12px; margin-top:30px; flex-wrap:wrap}
-.enter{border:0; background:var(--accent); color:#fff; font-family:"Plus Jakarta Sans",sans-serif; font-weight:600; font-size:clamp(1.1rem,1.8vw,1.3rem); padding:.75em 1.4em; border-radius:12px; display:inline-flex; align-items:center; gap:.55em; box-shadow:0 8px 20px rgba(224,71,91,.28); cursor:pointer}
-.enter svg{width:.95em; height:.95em}
-.enter:hover{background:#CC3A4E}
-.ghost{display:inline-flex; align-items:center; padding:.75em 1.3em; border-radius:12px; border:1px solid #CFD5E6; color:var(--ink); background:#fff; font-weight:800; text-decoration:none; font-size:clamp(1rem,1.6vw,1.12rem)}
-.ghost:hover{border-color:var(--ink)}
-.hear{width:52px; height:52px; border-radius:12px; border:1px solid #CFD5E6; background:#fff; color:var(--ink); display:grid; place-items:center; cursor:pointer}
-.hear svg{width:24px; height:24px}
-.stats{display:grid; grid-template-columns:repeat(3,auto); justify-content:start; gap:clamp(18px,3.5vw,44px); margin:38px 0 0; padding:22px 0 0; border-top:1px solid var(--line); flex-wrap:wrap}
-.stats div{display:flex; flex-direction:column}
-.stats dt{font-family:"Plus Jakarta Sans",sans-serif; font-weight:600; font-size:2rem; line-height:1; color:var(--ink)}
-.stats dd{margin:6px 0 0; color:var(--muted); font-weight:700; font-size:.92rem}
-.portrait{margin:0; justify-self:end; width:min(560px,100%)}
-.pframe{position:relative}
-.pframe::before{content:""; position:absolute; inset:18px -18px -18px 18px; border-radius:24px; background:#FFD45C; z-index:0}
-.pframe img{position:relative; z-index:1; display:block; width:100%; height:auto; aspect-ratio:1; object-fit:cover; border-radius:24px; box-shadow:0 22px 50px rgba(30,42,90,.18)}
-.portrait figcaption{margin-top:30px; display:flex; align-items:center; justify-content:space-between; gap:16px}
-.portrait figcaption div{display:flex; flex-direction:column; gap:2px}
-.portrait figcaption b{font-family:"Plus Jakarta Sans",sans-serif; font-weight:600; font-size:1.2rem}
-.portrait figcaption span{color:var(--muted); font-weight:700}
-.csec{padding:clamp(52px,7vw,92px) 0}
-.csec h2{margin:0 0 12px; font-size:clamp(1.7rem,3vw,2.3rem); font-weight:800; letter-spacing:-.02em}
-.shead{max-width:46em; margin-bottom:30px}
-.shead p{margin:0; color:var(--muted); line-height:1.65; font-size:1.08rem}
-.langsec{background:var(--soft)}
-.lgrid2{display:grid; grid-template-columns:repeat(4,1fr); gap:16px}
-.lcard2{background:#fff; border:1px solid var(--line); border-radius:18px; padding:20px; display:flex; flex-direction:column; transition:box-shadow .2s,border-color .2s}
-.lcard2:hover{box-shadow:0 12px 28px rgba(30,42,90,.10); border-color:#D5DAE8}
-.lcard2.on{border:2px solid var(--accent); padding:19px}
-.lc-top{display:flex; justify-content:space-between; align-items:center}
-.lc-hello{color:var(--accent); font-weight:800}
-.lc-cur{width:24px; height:24px; border-radius:50%; background:var(--accent); color:#fff; display:grid; place-items:center; font-size:.8rem; font-weight:800}
-.lcard2 h3{margin:10px 0 2px; font-size:1.45rem; font-weight:600}
-.lc-sub{margin:0; color:var(--muted); font-weight:700; font-size:.92rem; min-height:1.4em}
-.lc-prog{margin-top:16px; height:6px; border-radius:6px; background:#EDEFF6; overflow:hidden}
-.lc-prog i{display:block; height:100%; background:#3E9E6A; border-radius:6px}
-.lc-count{margin:6px 0 16px; color:var(--muted); font-size:.85rem; font-weight:700}
-.lc-go{margin-top:auto; border:0; border-radius:10px; background:var(--ink); color:#fff; font:inherit; font-weight:800; font-size:1rem; padding:.7em 1em; display:flex; align-items:center; justify-content:center; gap:.5em; cursor:pointer}
-.lc-go svg{width:.85em; height:.85em}
-.lc-go:hover{background:#2C3B78}
-.lcard2.on .lc-go{background:var(--accent)}
-.subh{margin:8px 0 14px; font-size:1.15rem; font-weight:600; color:var(--ink)}
-.ltiles{display:grid; grid-template-columns:repeat(13,1fr); gap:10px; margin-bottom:34px}
-.ltile{position:relative; border:1px solid var(--line); background:#fff; border-radius:14px; padding:10px 4px 6px; display:flex; flex-direction:column; align-items:center; gap:4px; cursor:pointer; color:var(--ink); border-top:5px solid var(--lc)}
-.ltile b{font-family:"Andika",sans-serif; font-size:1.25rem}
-.ltile span svg{width:40px; height:40px; display:block}
-.ltile i{position:absolute; top:3px; right:5px; font-style:normal; color:#E2A62A; font-size:.85rem}
-.ltile:hover{box-shadow:0 8px 20px rgba(30,42,90,.12); transform:translateY(-2px)}
-.ltile.done{background:#FFFBEF}
-.wtiles{display:grid; grid-template-columns:repeat(5,1fr); gap:14px}
-.wtile{display:flex; align-items:center; gap:12px; border:1px solid var(--line); background:#fff; border-radius:16px; padding:12px; cursor:pointer; color:var(--ink); text-align:left; border-left:6px solid var(--mc)}
-.wtile:hover{box-shadow:0 8px 20px rgba(30,42,90,.12)}
-.wt-art svg{width:52px; height:52px; display:block}
-.wt-txt{display:flex; flex-direction:column; min-width:0}
-.wt-txt b{font-family:"Plus Jakarta Sans",sans-serif; font-weight:600; font-size:1.08rem}
-.wt-txt small{color:var(--muted); font-weight:700; font-size:.85rem}
-.lsteps2{list-style:none; padding:0; margin:34px 0 0; display:flex; flex-wrap:wrap; gap:10px; color:var(--muted); font-weight:700}
-.lsteps2 li{display:flex; align-items:center; gap:8px; border:1px solid var(--line); border-radius:999px; padding:.35em 1em .35em .4em; background:var(--soft)}
-.lsteps2 b{width:26px; height:26px; border-radius:50%; background:var(--ink); color:#fff; display:grid; place-items:center; font-size:.85rem}
-.howsec{background:var(--soft)}
-.steps{display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin-top:24px}
-.step{position:relative; background:#fff; border:1px solid var(--line); border-radius:18px; padding:24px 22px}
-.snum{display:grid; place-items:center; width:38px; height:38px; border-radius:50%; background:#FFE8EB; color:var(--accent); font-family:"Plus Jakarta Sans",sans-serif; font-weight:600; font-size:1.15rem}
-.step h3{margin:14px 0 6px; font-size:1.2rem; font-weight:600}
-.step p{margin:0; color:var(--muted); line-height:1.6}
-.lgrid{display:grid; grid-template-columns:repeat(4,1fr); gap:18px; margin-top:24px}
-.lcard{border-top:3px solid var(--accent); padding:16px 4px 0}
-.lcard h3{margin:0 0 8px; font-size:1.15rem; font-weight:600}
-.lcard p{margin:0; color:var(--muted); line-height:1.6}
-.about{background:#F3F6FC}
-.about-in{display:grid; grid-template-columns:auto 1fr; gap:clamp(20px,4vw,48px); align-items:center}
-.about-in img{width:clamp(140px,18vw,200px); height:auto; aspect-ratio:1; object-fit:cover; border-radius:50%; border:6px solid #fff; box-shadow:0 12px 30px rgba(30,42,90,.15)}
-.about-in p{margin:0; font-size:1.12rem; line-height:1.7; color:var(--muted); max-width:40em}
-.tips{list-style:none; margin:24px 0 0; padding:0; display:grid; grid-template-columns:repeat(3,1fr); gap:16px}
-.tips li{background:var(--soft); border-radius:14px; padding:18px 20px; line-height:1.55; color:var(--muted); font-weight:700}
-.cfoot{border-top:1px solid var(--line); padding:24px 0; color:#8A93B8; font-size:.92rem}
-@media (max-width:1020px){ .ltiles{grid-template-columns:repeat(9,1fr)} .wtiles{grid-template-columns:repeat(3,1fr)} .lgrid2{grid-template-columns:repeat(2,1fr)} }
-@media (max-width:860px){
-  .hero-in{grid-template-columns:1fr; padding-top:26px} .portrait{width:min(520px,100%); justify-self:center} .logotext{font-size:1.1rem; white-space:nowrap}
-  .steps,.tips{grid-template-columns:1fr} .lgrid{grid-template-columns:1fr 1fr} .clinks{display:none} .about-in{grid-template-columns:1fr; justify-items:center; text-align:center}
+#cover{--ink:#1B2A4A; --ink2:#4A5878; --line:#DCE2EC; --paper:#F3F5F9; --pencil:#F2C14E; --leaf:#2F7D5B;
+  min-height:100vh; background:#fff; color:var(--ink); font-family:"Lexend","Segoe UI",system-ui,sans-serif; font-weight:300; font-size:17px; line-height:1.6; color-scheme:light}
+#cover h1,#cover h2,#cover h3{font-family:"Lexend","Segoe UI",system-ui,sans-serif; color:var(--ink)}
+#cover :focus-visible{outline:3px solid var(--pencil); outline-offset:3px}
+.cwrap{max-width:1200px; margin:0 auto; padding:0 clamp(20px,4.5vw,48px)}
+.cnav{position:sticky; top:0; z-index:20; background:rgba(255,255,255,.96); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); border-bottom:1px solid var(--line)}
+.cnav-in{display:flex; align-items:center; gap:32px; height:72px}
+.logo{display:flex; align-items:center; gap:12px; color:var(--ink); text-decoration:none; font-weight:500; font-size:1.15rem; letter-spacing:-.01em}
+.logomark{width:34px; height:34px; display:grid; place-items:center; background:var(--pencil); color:var(--ink); border-radius:8px; font-family:"Andika",sans-serif; font-weight:700; font-size:1.45rem; line-height:1; padding-bottom:3px}
+.clinks{display:flex; gap:28px; margin-left:auto}
+.clinks a{color:var(--ink2); text-decoration:none; font-weight:400; font-size:.95rem}
+.clinks a:hover{color:var(--ink); text-decoration:underline; text-underline-offset:6px; text-decoration-thickness:1px}
+.clang{font:inherit; font-size:.92rem; font-weight:400; color:var(--ink); border:1px solid var(--line); border-radius:8px; padding:.45em .7em; background:#fff}
+
+.hero-in{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:clamp(32px,6vw,96px); align-items:center; padding-top:clamp(48px,7vw,104px); padding-bottom:clamp(56px,7vw,112px)}
+.kicker{margin:0 0 20px; color:var(--ink2); font-size:1rem; font-weight:400}
+.h1{margin:0; font-size:clamp(2.6rem,5.2vw,4.6rem); line-height:1.02; font-weight:600; letter-spacing:-.035em; max-width:11em}
+.lead{margin:28px 0 0; font-size:clamp(1.05rem,1.45vw,1.2rem); line-height:1.7; color:var(--ink2); max-width:32em}
+.ctas{display:flex; align-items:center; gap:28px; margin-top:40px; flex-wrap:wrap}
+.btn-primary{border:0; background:var(--ink); color:#fff; font:inherit; font-weight:500; font-size:1.05rem; padding:1em 1.8em; border-radius:999px; cursor:pointer}
+.btn-primary:hover{background:#2A3D66}
+.btn-text{color:var(--ink); font-weight:500; text-decoration:underline; text-underline-offset:7px; text-decoration-thickness:2px; text-decoration-color:var(--pencil)}
+.btn-text:hover{text-decoration-color:var(--ink)}
+.hlangs{margin:44px 0 0; padding-top:20px; border-top:1px solid var(--line); display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 18px; font-size:.95rem}
+.hlangs > span{color:var(--ink2); margin-right:4px}
+.hl{border:0; background:none; padding:0; font:inherit; color:var(--ink); cursor:pointer}
+.hl:hover{text-decoration:underline; text-underline-offset:5px}
+.hl.on{font-weight:500; text-decoration:underline; text-decoration-color:var(--pencil); text-decoration-thickness:3px; text-underline-offset:5px}
+.portrait{position:relative; margin:0; justify-self:end; width:min(540px,100%); padding:0 0 0 clamp(36px,5vw,72px)}
+.bigA{position:absolute; left:0; bottom:20px; z-index:2; font-family:"Andika",sans-serif; font-weight:700; font-size:clamp(8rem,13vw,12rem); line-height:.8; color:var(--pencil); pointer-events:none; user-select:none; text-shadow:0 10px 30px rgba(27,42,74,.25)}
+.portrait img{position:relative; z-index:1; display:block; width:100%; height:auto; aspect-ratio:4/5; object-fit:cover; object-position:50% 30%; border-radius:220px 220px 16px 16px}
+.portrait figcaption{position:relative; z-index:3; padding-left:clamp(56px,7vw,96px); display:flex; align-items:center; justify-content:space-between; gap:16px; margin-top:20px; color:var(--ink2); font-size:.95rem}
+.portrait figcaption > span{display:flex; flex-direction:column}
+.portrait figcaption b{color:var(--ink); font-weight:500; font-size:1.05rem}
+.hear{width:48px; height:48px; border-radius:50%; border:1px solid var(--line); background:#fff; color:var(--ink); display:grid; place-items:center; cursor:pointer; flex:none}
+.hear:hover{border-color:var(--ink)}
+.hear svg{width:20px; height:20px}
+
+.band{padding:clamp(64px,8vw,120px) 0}
+.paper{background:var(--paper)}
+.band h2{margin:0; font-size:clamp(1.9rem,3.2vw,2.75rem); line-height:1.12; font-weight:600; letter-spacing:-.025em; max-width:20em}
+.shead{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:24px 64px; align-items:end; margin-bottom:48px}
+.shead p{margin:0; color:var(--ink2); line-height:1.7; max-width:34em}
+
+.preview{background:var(--ink); color:#E6EAF2}
+#cover .preview h2{color:#fff}
+.prev-in{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.05fr); gap:clamp(36px,6vw,96px); align-items:center}
+.prev-copy p{margin:20px 0 0; color:#C3CBDD; line-height:1.7; max-width:30em}
+.seq{list-style:none; padding:0; margin:36px 0 0; counter-reset:s}
+.seq li{counter-increment:s; display:flex; align-items:baseline; gap:20px; padding:14px 0; border-top:1px solid rgba(255,255,255,.14); font-size:1.08rem; color:#fff}
+.seq li:last-child{border-bottom:1px solid rgba(255,255,255,.14)}
+.seq li::before{content:counter(s); width:1.6em; color:var(--pencil); font-weight:500}
+.device{background:#fff; border-radius:28px; box-shadow:0 40px 80px rgba(0,0,0,.35); overflow:hidden; color:var(--ink); max-width:540px; justify-self:end; width:100%}
+.dv-top{display:flex; gap:7px; padding:16px 20px; border-bottom:1px solid var(--line)}
+.dv-dot{width:10px; height:10px; border-radius:50%; background:var(--line)}
+.dv-body{padding:clamp(24px,4vw,40px)}
+.dv-glyph{display:flex; align-items:baseline; gap:.15em; font-family:"Andika",sans-serif; font-weight:700; font-size:clamp(5rem,10vw,8rem); line-height:1}
+.dv-glyph span:last-child{color:var(--leaf)}
+.dv-row{display:flex; align-items:center; justify-content:space-between; gap:16px; margin-top:20px; padding-top:20px; border-top:1px solid var(--line)}
+.dv-sym{font-size:1.6rem; font-weight:400}
+.dv-key{display:flex; align-items:center; gap:12px}
+.dv-key svg{width:56px; height:56px}
+.dv-key b{font-family:"Andika",sans-serif; font-size:1.4rem; font-weight:700}
+.dv-key i{font-style:normal; color:var(--ink2); font-size:.95rem}
+.dv-steps{list-style:none; padding:0; margin:28px 0 0; display:grid; grid-template-columns:repeat(5,1fr); gap:6px; font-size:.78rem; color:var(--ink2)}
+.dv-steps li{border-top:4px solid var(--line); padding-top:8px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.dv-steps li.past{border-color:var(--leaf)}
+.dv-steps li.on{border-color:var(--pencil); color:var(--ink); font-weight:500}
+
+.lrows{list-style:none; margin:0; padding:0; border-top:1px solid var(--line)}
+.lrow{display:grid; grid-template-columns:minmax(150px,1.1fr) minmax(0,1.3fr) minmax(140px,1fr) 10em; align-items:center; gap:24px; padding:20px 0; border-bottom:1px solid var(--line)}
+.lr-name{font-size:1.5rem; font-weight:500; letter-spacing:-.015em}
+.lr-meta{color:var(--ink2)}
+.lr-prog{display:flex; align-items:center; gap:12px; color:var(--ink2); font-size:.9rem; font-variant-numeric:tabular-nums}
+.lr-bar{flex:1; height:4px; border-radius:4px; background:var(--line); overflow:hidden}
+.lr-bar i{display:block; height:100%; background:var(--leaf)}
+.lr-go{border:1px solid var(--ink); background:#fff; color:var(--ink); font:inherit; font-weight:500; padding:.6em 1.2em; border-radius:999px; cursor:pointer; width:100%}
+.lr-go:hover,.lrow.on .lr-go{background:var(--ink); color:#fff}
+.lrow.on .lr-name{text-decoration:underline; text-decoration-color:var(--pencil); text-decoration-thickness:4px; text-underline-offset:8px}
+
+.subh{margin:0 0 18px; font-size:1.05rem; font-weight:500}
+.abcgrid{display:grid; grid-template-columns:repeat(13,1fr); gap:0; background:#fff; border:1px solid var(--line); border-radius:14px; overflow:hidden; margin-bottom:56px}
+.glyph{position:relative; border:0; box-shadow:inset -1px -1px 0 var(--line); background:#fff; width:100%; height:clamp(58px,7vw,84px); font-family:"Andika",sans-serif; font-weight:700; font-size:clamp(1.1rem,2vw,1.6rem); color:var(--ink); cursor:pointer; display:flex; align-items:center; justify-content:center; gap:.08em}
+.glyph span{color:var(--ink2); font-weight:400}
+.glyph:hover{background:#FFF6DC}
+.glyph.done::after{content:""; position:absolute; left:28%; right:28%; bottom:14%; height:3px; border-radius:3px; background:var(--leaf)}
+.wrows{list-style:none; margin:0; padding:0; border-top:1px solid var(--line)}
+.wrow{width:100%; display:grid; grid-template-columns:minmax(150px,1fr) minmax(0,1.2fr) minmax(0,1.2fr); gap:24px; align-items:baseline; text-align:left; border:0; border-bottom:1px solid var(--line); background:none; padding:18px 0; font:inherit; color:var(--ink); cursor:pointer}
+.wrow b{font-family:"Andika",sans-serif; font-size:1.35rem; font-weight:700}
+.wrow span{color:var(--ink2)}
+.wrow em{font-style:normal; font-family:"Andika",sans-serif; color:var(--ink2); text-align:right}
+.wrow:hover b{text-decoration:underline; text-decoration-color:var(--pencil); text-decoration-thickness:3px; text-underline-offset:6px}
+
+.how{list-style:none; padding:0; margin:48px 0 0; display:grid; grid-template-columns:repeat(3,1fr); gap:clamp(24px,4vw,56px); counter-reset:h}
+.how li{counter-increment:h; border-top:2px solid var(--ink); padding-top:20px}
+.how li::before{content:counter(h); display:block; font-size:2.6rem; font-weight:600; letter-spacing:-.03em; color:var(--pencil); line-height:1; margin-bottom:18px}
+.how h3,.learn h3{margin:0 0 8px; font-size:1.15rem; font-weight:500}
+.how p,.learn p{margin:0; color:var(--ink2); line-height:1.7}
+.learn{display:grid; grid-template-columns:repeat(4,1fr); gap:clamp(24px,4vw,48px); margin-top:48px}
+.learn svg{width:36px; height:36px; fill:none; stroke:var(--ink); stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; margin-bottom:18px}
+
+.about-in{display:grid; grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr); gap:clamp(32px,6vw,96px); align-items:center}
+.about-in > img{width:100%; height:auto; aspect-ratio:1; object-fit:cover; border-radius:16px}
+.about-in p{margin:20px 0 0; font-size:1.12rem; line-height:1.75; color:var(--ink2); max-width:34em}
+.about-in h3{margin:40px 0 0; font-size:1.05rem; font-weight:500}
+.tips{list-style:none; margin:12px 0 0; padding:0}
+.tips li{padding:12px 0 12px 28px; border-bottom:1px solid var(--line); color:var(--ink2); position:relative}
+.tips li::before{content:""; position:absolute; left:2px; top:1.15em; width:10px; height:10px; border-radius:50%; background:var(--pencil)}
+
+.cfoot{background:var(--ink); color:#C3CBDD; padding:56px 0}
+.foot-in{display:grid; grid-template-columns:auto 1fr; gap:24px 48px; align-items:center}
+.cfoot .logo{color:#fff}
+.cfoot nav{display:flex; flex-wrap:wrap; gap:28px; justify-content:flex-end}
+.cfoot nav a{color:#E6EAF2; text-decoration:none; font-size:.95rem}
+.cfoot nav a:hover{text-decoration:underline; text-underline-offset:5px}
+.cfoot p{grid-column:1/-1; margin:16px 0 0; padding-top:24px; border-top:1px solid rgba(255,255,255,.14); font-size:.88rem}
+
+@media (max-width:1020px){
+  .abcgrid{grid-template-columns:repeat(9,1fr)} .learn{grid-template-columns:repeat(2,1fr)}
+  .lrow{grid-template-columns:minmax(120px,1fr) minmax(0,1fr) 9em} .lr-meta{display:none}
 }
-@media (max-width:560px){ .pframe{margin-right:12px} .pframe::before{inset:12px -12px -12px 12px} .stats{display:grid; grid-template-columns:repeat(3,1fr); gap:12px} .ltiles{grid-template-columns:repeat(5,1fr)} .wtiles{grid-template-columns:1fr} .lgrid2{grid-template-columns:1fr 1fr; gap:10px} .lcard2{padding:14px} .lcard2.on{padding:13px} .lgrid{grid-template-columns:1fr} .stats dt{font-size:1.6rem} .lc-go{font-size:.92rem} }
+@media (max-width:860px){
+  .clinks{display:none} .hero-in,.prev-in,.about-in,.shead{grid-template-columns:1fr}
+  .portrait{justify-self:center; width:min(440px,100%); padding-left:36px; margin-top:24px}
+  .bigA{font-size:min(30vw,8rem)} .device{justify-self:stretch} .how{grid-template-columns:1fr}
+  .about-in > img{max-width:360px}
+}
+@media (max-width:560px){
+  #cover{font-size:16px} .cnav-in{gap:16px} .logotext{font-size:1.02rem; white-space:nowrap}
+  .abcgrid{grid-template-columns:repeat(6,1fr)} .learn{grid-template-columns:1fr}
+  .lrow{grid-template-columns:1fr auto; gap:6px 16px; padding:16px 0} .lr-prog{grid-column:1; grid-row:2} .lr-go{grid-row:1/3; grid-column:2; width:7.6em; padding:.6em .4em}
+  .wrow{grid-template-columns:1fr; gap:2px} .wrow em{text-align:left}
+  .dv-steps{font-size:.68rem} .foot-in{grid-template-columns:1fr} .cfoot nav{justify-content:flex-start}
+}
+@media (prefers-reduced-motion:reduce){ #cover *{transition:none !important; animation:none !important} }
 
 /* ---------- Curtain ---------- */
 .curtain{position:fixed; inset:0; z-index:60; pointer-events:none; transform:translateY(-112%); transition:transform .75s cubic-bezier(.55,0,.35,1); display:grid; place-items:center}
@@ -2312,107 +2348,142 @@ const HOME = {
   es: { navLangs: 'Idiomas', navLessons: 'Lecciones', cta2: 'Elegir idioma', langsT: 'Elija el idioma del niño',
     langsP: 'La maestra Ro da las instrucciones en el idioma del niño, y las lecciones enseñan a leer en inglés. El progreso de cada idioma se guarda por separado.',
     lessonsT: 'Todas las lecciones', lessonsP: 'Abra cualquier lección directamente. Las instrucciones serán en el idioma elegido arriba.',
-    lettersH: 'El abecedario, de la A a la Z', wordsH: 'Módulos de lectura', sL: 'lecciones de letras', sM: 'módulos de lectura', sG: 'idiomas de instrucción', done: 'completadas' },
+    lettersH: 'El abecedario, de la A a la Z', wordsH: 'Módulos de lectura', done: 'completadas', instr: 'Instrucciones en' },
   fr: { navLangs: 'Langues', navLessons: 'Leçons', cta2: 'Choisir une langue', langsT: "Choisissez la langue de l'enfant",
     langsP: "La maîtresse Ro donne les consignes dans la langue de l'enfant, et les leçons apprennent à lire en anglais. La progression de chaque langue est enregistrée séparément.",
     lessonsT: 'Toutes les leçons', lessonsP: 'Ouvrez directement n’importe quelle leçon. Les consignes seront dans la langue choisie en haut.',
-    lettersH: "L'alphabet, de A à Z", wordsH: 'Modules de lecture', sL: 'leçons de lettres', sM: 'modules de lecture', sG: 'langues de consignes', done: 'terminées' },
+    lettersH: "L'alphabet, de A à Z", wordsH: 'Modules de lecture', done: 'terminées', instr: 'Consignes en' },
   de: { navLangs: 'Sprachen', navLessons: 'Lektionen', cta2: 'Sprache wählen', langsT: 'Wählen Sie die Sprache des Kindes',
     langsP: 'Lehrerin Ro gibt die Anleitungen in der Sprache des Kindes, und die Lektionen lehren das Lesen auf Englisch. Der Fortschritt wird für jede Sprache getrennt gespeichert.',
     lessonsT: 'Alle Lektionen', lessonsP: 'Öffnen Sie jede Lektion direkt. Die Anleitungen kommen in der oben gewählten Sprache.',
-    lettersH: 'Das Alphabet von A bis Z', wordsH: 'Lesemodule', sL: 'Buchstaben-Lektionen', sM: 'Lesemodule', sG: 'Sprachen für Anleitungen', done: 'geschafft' },
+    lettersH: 'Das Alphabet von A bis Z', wordsH: 'Lesemodule', done: 'geschafft', instr: 'Anleitungen auf' },
   it: { navLangs: 'Lingue', navLessons: 'Lezioni', cta2: 'Scegli la lingua', langsT: 'Scegliete la lingua del bambino',
     langsP: 'La maestra Ro dà le istruzioni nella lingua del bambino, e le lezioni insegnano a leggere in inglese. I progressi di ogni lingua vengono salvati separatamente.',
     lessonsT: 'Tutte le lezioni', lessonsP: 'Aprite direttamente qualsiasi lezione. Le istruzioni saranno nella lingua scelta in alto.',
-    lettersH: "L'alfabeto dalla A alla Z", wordsH: 'Moduli di lettura', sL: 'lezioni sulle lettere', sM: 'moduli di lettura', sG: 'lingue per le istruzioni', done: 'completate' },
+    lettersH: "L'alfabeto dalla A alla Z", wordsH: 'Moduli di lettura', done: 'completate', instr: 'Istruzioni in' },
   pt: { navLangs: 'Idiomas', navLessons: 'Lições', cta2: 'Escolher idioma', langsT: 'Escolha o idioma da criança',
     langsP: 'A professora Ro dá as instruções no idioma da criança, e as lições ensinam a ler em inglês. O progresso de cada idioma é salvo separadamente.',
     lessonsT: 'Todas as lições', lessonsP: 'Abra qualquer lição diretamente. As instruções serão no idioma escolhido acima.',
-    lettersH: 'O alfabeto de A a Z', wordsH: 'Módulos de leitura', sL: 'lições de letras', sM: 'módulos de leitura', sG: 'idiomas de instrução', done: 'concluídas' },
+    lettersH: 'O alfabeto de A a Z', wordsH: 'Módulos de leitura', done: 'concluídas', instr: 'Instruções em' },
   ja: { navLangs: '言語', navLessons: 'レッスン', cta2: '言語を選ぶ', langsT: 'お子さまの言語を選んでください',
     langsP: 'ロー先生がお子さまの言語で説明し、レッスンでは英語の読み方を学びます。進み具合は言語ごとに保存されます。',
     lessonsT: 'すべてのレッスン', lessonsP: 'どのレッスンにも直接進めます。説明は上で選んだ言語になります。',
-    lettersH: 'アルファベット A〜Z', wordsH: '読みのモジュール', sL: '文字のレッスン', sM: '読みのモジュール', sG: '説明の言語', done: '完了' },
+    lettersH: 'アルファベット A〜Z', wordsH: '読みのモジュール', done: '完了', instr: '説明の言語' },
   zh: { navLangs: '语言', navLessons: '课程', cta2: '选择语言', langsT: '请选择孩子的语言',
     langsP: '罗老师用孩子的语言讲解，课程教孩子读英语。每种语言的学习进度分别保存。',
     lessonsT: '全部课程', lessonsP: '可以直接打开任何一课。说明语言为上方选择的语言。',
-    lettersH: '字母 A 到 Z', wordsH: '阅读单元', sL: '字母课', sM: '阅读单元', sG: '说明语言', done: '已完成' },
+    lettersH: '字母 A 到 Z', wordsH: '阅读单元', done: '已完成', instr: '说明语言' },
   ko: { navLangs: '언어', navLessons: '수업', cta2: '언어 선택', langsT: '아이의 언어를 선택하세요',
     langsP: '로 선생님이 아이의 언어로 안내하고, 수업에서는 영어 읽기를 배웁니다. 진도는 언어별로 따로 저장됩니다.',
     lessonsT: '전체 수업', lessonsP: '원하는 수업을 바로 열 수 있습니다. 안내는 위에서 선택한 언어로 나옵니다.',
-    lettersH: '알파벳 A부터 Z까지', wordsH: '읽기 모듈', sL: '글자 수업', sM: '읽기 모듈', sG: '안내 언어', done: '완료' },
+    lettersH: '알파벳 A부터 Z까지', wordsH: '읽기 모듈', done: '완료', instr: '안내 언어' },
 };
 const H = () => HOME[LANG] || HOME.es;
 const doneFor = l => { try { return JSON.parse(localStorage.getItem(l === 'es' ? 'vamos-a-leer-done' : 'vamos-a-leer-done-' + l) || '[]').length; } catch (e) { return 0; } };
 const langNameIn = l => { try { const n = new Intl.DisplayNames([LANG], { type: 'language' }).of(l); return n.charAt(0).toLocaleUpperCase(LANG) + n.slice(1); } catch (e) { return STR[l].langName; } };
+const LINE = {
+  letters: '<svg viewBox="0 0 32 32" aria-hidden="true"><rect x="3" y="6" width="12" height="16" rx="2"/><path d="M7 18l2-8 2 8M7.7 15.5h2.6"/><rect x="17" y="10" width="12" height="16" rx="2"/><circle cx="23" cy="19" r="2.6"/><path d="M25.6 16.4V22"/></svg>',
+  sound: '<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M5 12v8h5l7 6V6l-7 6z"/><path d="M21 11.5a6 6 0 010 9M24.5 8a11 11 0 010 16"/></svg>',
+  words: '<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M4 8c4-2 8-2 12 1v16c-4-3-8-3-12-1zM28 8c-4-2-8-2-12 1v16c4-3 8-3 12-1z"/></svg>',
+  trace: '<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M8 26l4-18 4 18M9.5 19h5" stroke-dasharray="2.5 2.5"/><path d="M20 27l7-7-2.5-2.5-7 7-1 3.5z"/></svg>',
+};
+
+function lessonPreview() {
+  const d = LETTERS.A, e = EDU[LANG] || EDU.es;
+  return `<div class="device" aria-hidden="true">
+    <div class="dv-top"><span class="dv-dot"></span><span class="dv-dot"></span><span class="dv-dot"></span></div>
+    <div class="dv-body">
+      <div class="dv-glyph"><span>A</span><span>a</span></div>
+      <div class="dv-row"><span class="dv-sym">${d.sym}</span><span class="dv-key">${PIC.apple()}<b>apple</b><i>${KW('apple')}</i></span></div>
+      <ol class="dv-steps">${e.steps.map((s, i) => `<li class="${i === 1 ? 'on' : i < 1 ? 'past' : ''}">${s}</li>`).join('')}</ol>
+    </div></div>`;
+}
 
 function renderCover() {
   const t = T(), h = H(), e = EDU[LANG] || EDU.es;
   const opts = LANGS.map(l => `<option value="${l}"${l === LANG ? ' selected' : ''}>${STR[l].langName}</option>`).join('');
-  const langCards = LANGS.map(l => {
+  const langRows = LANGS.map(l => {
     const n = doneFor(l), pct = Math.round(n / 26 * 100);
-    return `<article class="lcard2${l === LANG ? ' on' : ''}" lang="${l}">
-      <div class="lc-top"><span class="lc-hello">${STR[l].hello}</span>${l === LANG ? '<span class="lc-cur" aria-hidden="true">✓</span>' : ''}</div>
-      <h3>${STR[l].langName}</h3><p class="lc-sub" lang="${LANG}">${l === LANG ? STR[l].cB3 : langNameIn(l)}</p>
-      <div class="lc-prog" aria-label="${n}/26"><i style="width:${pct}%"></i></div><p class="lc-count" lang="${LANG}">${n} / 26 ${h.done}</p>
-      <button class="lc-go" data-start="${l}">${(WS[l] || WS.es).start}${ICON.play}</button></article>`;
+    return `<li class="lrow${l === LANG ? ' on' : ''}">
+      <span class="lr-name" lang="${l}">${STR[l].langName}</span>
+      <span class="lr-meta">${l === LANG ? STR[l].cB3 : langNameIn(l)}</span>
+      <span class="lr-prog"><span class="lr-bar"><i style="width:${pct}%"></i></span><span>${n}/26</span></span>
+      <button class="lr-go" data-start="${l}" lang="${l}">${(WS[l] || WS.es).start}</button></li>`;
   }).join('');
   const done = getDone();
-  const letterTiles = ABC.map((L, i) => `<button class="ltile${done.includes(L) ? ' done' : ''}" data-open="${WORD_MODS + i}" style="--lc:${LCOL[L]}" aria-label="${L}">
-      <b>${L}${LETTERS[L].lower}</b><span>${PIC[LETTERS[L].keys[0]]()}</span>${done.includes(L) ? '<i aria-hidden="true">★</i>' : ''}</button>`).join('');
-  const wordTiles = MODULES.slice(0, WORD_MODS).map((m, i) => `<button class="wtile" data-open="${i}" style="--mc:${m.color}">
-      <span class="wt-art">${PIC[m.art || m.word]()}</span><span class="wt-txt"><b>${m.kind === 'words' ? m.title : m.word}</b><small>${m.kind === 'words' ? modSub(m) : meanOf(m.word)}</small></span></button>`).join('');
+  const letterTiles = ABC.map((L, i) => `<button class="glyph${done.includes(L) ? ' done' : ''}" data-open="${WORD_MODS + i}" aria-label="${L}">${L}<span>${LETTERS[L].lower}</span></button>`).join('');
+  const wordRows = MODULES.slice(0, WORD_MODS).map((m, i) => `<li><button class="wrow" data-open="${i}">
+      <b>${m.kind === 'words' ? m.title : m.word}</b><span>${m.kind === 'words' ? modSub(m) : meanOf(m.word)}</span>
+      <em>${m.kind === 'words' ? m.words.slice(0, 4).map(x => x.w).join(', ') : m.letters.join(' ')}</em></button></li>`).join('');
   coverEl.innerHTML = `
   <header class="cnav"><div class="cwrap cnav-in">
-    <a class="logo" href="#top" aria-label="Vamos a leer"><span class="logomark" aria-hidden="true">A<b>a</b></span><span class="logotext">Vamos a leer</span></a>
+    <a class="logo" href="#top"><span class="logomark" aria-hidden="true">a</span><span class="logotext">Vamos a leer</span></a>
     <nav class="clinks"><a href="#c-langs">${h.navLangs}</a><a href="#c-lessons">${h.navLessons}</a><a href="#c-how">${t.cHow}</a><a href="#c-teacher">${t.cNavT}</a></nav>
     <select class="clang" id="coverLang" aria-label="${t.language}">${opts}</select>
   </div></header>
+  <main>
   <section class="hero" id="top"><div class="cwrap hero-in">
     <div class="htext">
-      <p class="eyebrow">${t.cEyebrow}</p>
+      <p class="kicker">${t.cEyebrow}</p>
       <h1 class="h1">${t.cH1}</h1>
       <p class="lead">${t.cLead}</p>
       <div class="ctas">
-        <button class="enter" id="enterBtn">${ICON.play}<span>${t.cCta}</span></button>
-        <a class="ghost" href="#c-langs">${h.cta2}</a>
+        <button class="btn-primary" id="enterBtn">${t.cCta}</button>
+        <a class="btn-text" href="#c-langs">${h.cta2}</a>
       </div>
-      <dl class="stats"><div><dt>26</dt><dd>${h.sL}</dd></div><div><dt>${WORD_MODS}</dt><dd>${h.sM}</dd></div><div><dt>${LANGS.length}</dt><dd>${h.sG}</dd></div></dl>
+      <p class="hlangs"><span>${h.instr}</span>${LANGS.map(l => `<button class="hl${l === LANG ? ' on' : ''}" data-lang="${l}" lang="${l}">${STR[l].langName}</button>`).join('')}</p>
     </div>
     <figure class="portrait">
-      <div class="pframe"><img src="Rach.jpg" width="1200" height="1200" alt="Rachel Woronoff" decoding="async"></div>
-      <figcaption><div><b>Rachel Woronoff</b><span>${t.cRole}</span></div><button class="hear" id="greetBtn" aria-label="${t.hello}">${SPK}</button></figcaption>
+      <span class="bigA" aria-hidden="true">a</span>
+      <img src="Rach.jpg" width="1200" height="1200" alt="Rachel Woronoff" decoding="async">
+      <figcaption><span><b>Rachel Woronoff</b>${t.cRole}</span><button class="hear" id="greetBtn" aria-label="${t.hello}">${SPK}</button></figcaption>
     </figure>
   </div></section>
-  <section class="csec langsec" id="c-langs"><div class="cwrap">
-    <div class="shead"><h2>${h.langsT}</h2><p>${h.langsP}</p></div>
-    <div class="lgrid2">${langCards}</div>
+
+  <section class="band preview"><div class="cwrap prev-in">
+    <div class="prev-copy">
+      <h2>${e.cPathT}</h2>
+      <p>${e.cPath}</p>
+      <ol class="seq">${e.steps.map(s => `<li>${s}</li>`).join('')}</ol>
+    </div>
+    ${lessonPreview()}
   </div></section>
-  <section class="csec lessonsec" id="c-lessons"><div class="cwrap">
+
+  <section class="band" id="c-langs"><div class="cwrap">
+    <div class="shead"><h2>${h.langsT}</h2><p>${h.langsP}</p></div>
+    <ul class="lrows">${langRows}</ul>
+  </div></section>
+
+  <section class="band paper" id="c-lessons"><div class="cwrap">
     <div class="shead"><h2>${h.lessonsT}</h2><p>${h.lessonsP}</p></div>
     <h3 class="subh">${h.lettersH}</h3>
-    <div class="ltiles">${letterTiles}</div>
+    <div class="abcgrid">${letterTiles}</div>
     <h3 class="subh">${h.wordsH}</h3>
-    <div class="wtiles">${wordTiles}</div>
-    <ol class="lsteps2" aria-label="${e.cPathT}">${e.steps.map((s, i) => `<li><b>${i + 1}</b>${s}</li>`).join('')}</ol>
+    <ul class="wrows">${wordRows}</ul>
   </div></section>
-  <section class="csec howsec" id="c-how"><div class="cwrap">
+
+  <section class="band" id="c-how"><div class="cwrap">
     <h2>${t.cHow}</h2>
-    <div class="steps">${[[t.cS1t, t.cS1], [t.cS2t, t.cS2], [t.cS3t, t.cS3]].map(([a, p], i) => `<article class="step"><span class="snum">${i + 1}</span><h3>${a}</h3><p>${p}</p></article>`).join('')}</div>
+    <ol class="how">${[[t.cS1t, t.cS1], [t.cS2t, t.cS2], [t.cS3t, t.cS3]].map(([a, p]) => `<li><h3>${a}</h3><p>${p}</p></li>`).join('')}</ol>
   </div></section>
-  <section class="csec learnsec" id="c-learn"><div class="cwrap">
+
+  <section class="band paper" id="c-learn"><div class="cwrap">
     <h2>${e.cLearnT}</h2>
-    <div class="lgrid">${e.l.map(([a, p]) => `<article class="lcard"><h3>${a}</h3><p>${p}</p></article>`).join('')}</div>
+    <div class="learn">${e.l.map(([a, p], i) => `<article>${LINE[['letters', 'sound', 'words', 'trace'][i]]}<h3>${a}</h3><p>${p}</p></article>`).join('')}</div>
   </div></section>
-  <section class="csec about" id="c-teacher"><div class="cwrap about-in">
+
+  <section class="band" id="c-teacher"><div class="cwrap about-in">
     <img src="Rach.jpg" width="1200" height="1200" alt="" decoding="async" loading="lazy">
-    <div><h2>${t.cAboutT}</h2><p>${t.cAbout}</p></div>
+    <div><h2>${t.cAboutT}</h2><p>${t.cAbout}</p>
+      <h3>${t.cFamT}</h3>
+      <ul class="tips"><li>${t.cF1}</li><li>${t.cF2}</li><li>${t.cF3}</li></ul></div>
   </div></section>
-  <section class="csec" id="c-fam"><div class="cwrap">
-    <h2>${t.cFamT}</h2>
-    <ul class="tips"><li>${t.cF1}</li><li>${t.cF2}</li><li>${t.cF3}</li></ul>
-  </div></section>
-  <footer class="cfoot"><div class="cwrap">© 2026 Vamos a leer · Rachel Woronoff · ${t.cFoot}</div></footer>`;
+  </main>
+  <footer class="cfoot"><div class="cwrap foot-in">
+    <div class="logo"><span class="logomark" aria-hidden="true">a</span><span class="logotext">Vamos a leer</span></div>
+    <nav><a href="#c-langs">${h.navLangs}</a><a href="#c-lessons">${h.navLessons}</a><a href="#c-how">${t.cHow}</a><a href="#c-teacher">${t.cNavT}</a></nav>
+    <p>© 2026 Rachel Woronoff. ${t.cFoot}</p>
+  </div></footer>`;
 }
 
 function setLang(l) {
@@ -2462,7 +2533,7 @@ function showHint(el) {
 }
 function hintTarget() {
   const q = s => document.querySelector(s);
-  if (!coverEl.hidden) return q('#enterBtn');
+  if (!coverEl.hidden) return null;            // the parent-facing home page shows no child hints
   if (!worldEl.hidden) {
     const b = q('#blocks');
     if (b && b.hidden) return q('#skipBtn');
