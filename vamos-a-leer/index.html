@@ -107,6 +107,9 @@ h2{font-size:clamp(1.8rem,6vw,2.6rem)}
 .mini{display:flex; gap:6px; flex-wrap:wrap; justify-content:center}
 .mini span{font-weight:700; font-size:1.3rem; color:#1E2A5A; border-radius:10px; padding:0 .4em; border:2px solid #1E2A5A}
 .go{background:#1E2A5A; color:#fff; border-radius:999px; padding:.3em 1.3em; font-weight:700; font-size:1.25rem; margin-top:4px}
+.go{display:inline-flex; align-items:center; justify-content:center}
+.go svg{width:1.6em; height:1.6em; display:block}
+html:lang(ja) body, html:lang(ko) body{word-break:keep-all; overflow-wrap:anywhere}
 .cheer{display:flex; align-items:center; gap:12px}
 .cheer img{width:72px; height:72px; border-radius:50%; object-fit:cover; border:4px solid var(--A)}
 .cheer span{font-size:1.3rem; font-weight:700}
@@ -1354,16 +1357,250 @@ let LANG = (() => {
 })();
 const T = () => STR[LANG];
 const KW = w => LANG === 'es' ? KEYW[w] : (KWMAP[LANG] && KWMAP[LANG][w]) || '';
+/* ---------- Word shelf in every language ---------- */
+const MWORDS = 'cat dog a I at it in is on to and the he we are you sun bat pen bug map am be do have she they'.split(' ');
+const MEANL = {
+  es: 'gato|perro|un, una|yo|a, en|eso, lo|en, dentro de|es, está|sobre, encima de|a, hacia|y|el, la, los, las|él|nosotros|son, están, eres|tú, usted|sol|murciélago|pluma|bicho|mapa|soy, estoy|ser, estar|hacer|tener|ella|ellos, ellas',
+  fr: 'chat|chien|un, une|je|à|il, elle, ça|dans|est|sur|à, vers|et|le, la, les|il|nous|sont, es, êtes|tu, vous|soleil|chauve-souris|stylo|insecte|carte|suis|être|faire|avoir|elle|ils, elles',
+  de: 'Katze|Hund|ein, eine|ich|an, bei|es|in|ist|auf|zu, nach|und|der, die, das|er|wir|sind, bist|du, Sie|Sonne|Fledermaus|Stift|Käfer|Karte|bin|sein|tun, machen|haben|sie|sie (viele)',
+  it: 'gatto|cane|un, una|io|a, in|esso, lo|in, dentro|è|su, sopra|a, verso|e|il, la, i, le|lui|noi|sono, siete, sei|tu, voi|sole|pipistrello|penna|insetto|mappa|sono|essere|fare|avere|lei|loro',
+  pt: 'gato|cachorro|um, uma|eu|em|isso, ele|em, dentro de|é, está|sobre, em cima de|para|e|o, a, os, as|ele|nós|são, estão, é|você|sol|morcego|caneta|inseto|mapa|sou, estou|ser, estar|fazer|ter|ela|eles, elas',
+  ja: 'ねこ|いぬ|ひとつの|わたし|〜で、〜を|それ|〜のなかに|〜です、〜にいる|〜のうえに|〜へ|〜と|その|かれ|わたしたち|〜です、〜にいる|あなた|たいよう|こうもり|ペン|むし|ちず|〜です|〜である、〜になる|する|もっている|かのじょ|かれら',
+  zh: '猫|狗|一个|我|在|它|在……里面|是，在|在……上面|到，去|和|这个，那个|他|我们|是，在|你|太阳|蝙蝠|笔|虫子|地图|是|是，成为|做|有|她|他们',
+  ko: '고양이|개|하나의|나|~에서, ~을|그것|~ 안에|~이다, 있다|~ 위에|~에게, ~로|그리고|그|그 남자|우리|~이다, 있다|너, 당신|해|박쥐|펜|벌레|지도|~이다|~이다, 되다|하다|가지고 있다|그 여자|그들',
+};
+const MEAN = Object.fromEntries(Object.entries(MEANL).map(([k, v]) => { const a = v.split('|'); return [k, Object.fromEntries(MWORDS.map((w, i) => [w, a[i]]))]; }));
+const meanOf = w => (MEAN[LANG] && MEAN[LANG][w]) || MEAN.es[w] || '';
+
+const WS = {
+  es: { shelf: '¡Ahora lee palabras!', song: '¡Cantemos el abecedario!', sing: 'Cantar', stop: 'Parar',
+    songSay: '¡Cantemos el abecedario en inglés! Mira las letras y canta conmigo.',
+    introSub: 'Hoy aprendemos tres letras y leemos una palabra en inglés.', introA: 'Hoy aprendemos las letras', introB: 'y leemos la palabra',
+    start: 'Empezar', tapEach: 'Toca cada letra', join: 'Juntar', again: 'Otra vez',
+    blendSay: 'Toca cada letra y di su sonido. Luego toca Juntar.', cvcSay: 'Toca cada letra y di su sonido. Luego toca Juntar para leer la palabra.',
+    findAll: 'Encuentra todas las', found: (n, r) => `Encontradas: ${n} de 3 · Ronda ${r} de 3`, gotThree: '¡Lo lograste! Ya conoces las tres letras.',
+    veryGood: '¡Muy bien!', lookFor: 'Esa no. Busca la', firstQ: '¿Con qué letra empieza?', firstQSay: ['¿Con qué letra empieza', '?'], hearWord: 'Escuchar la palabra',
+    firstDone: 'Escuchaste el primer sonido de seis palabras.', wordOf: (i, n) => `Palabra ${i} de ${n}`, excellent: '¡Excelente!',
+    firstWord: '¡Leíste tu primera palabra!', otherWord: '¡Leíste otra palabra!', listen: 'Escuchar', nextMod: 'Siguiente módulo',
+    readSay: '¡Muy bien! Leíste', means: (w, m) => `${w} quiere decir ${m}.`, learned: n => `¡Aprendiste ${n} palabras!`, listenAll: 'Escuchar todas',
+    learnedSay: n => `¡Muy bien! Aprendiste ${n} palabras nuevas.`, inLang: 'En español:', thisWord: 'Esta palabra es', meansSay: m => `Quiere decir: ${m}.`,
+    hearT: 'Escucha y toca la palabra', allFound: 'Encontraste todas las palabras.', listenAgain: 'Escucha otra vez.',
+    readT: 'Lee la palabra. ¿Cuál es el dibujo?', readAll: '¡Leíste todas las palabras solito!', readAllSay: '¡Excelente! Leíste todas las palabras.',
+    readTry: 'Lee la palabra y toca el dibujo.', readNo: 'Esa no. Di el sonido de cada letra y prueba otra vez.', alt: 'La maestra Rachel',
+    tSight: 'Palabras de vista', tCvc: 'Palabras para sonar', tPron: 'Pronombres y verbos',
+    iSight: 'Estas palabras salen en casi todos los libros. ¡Vamos a reconocerlas rápido, a primera vista!',
+    iCvc: 'Estas palabras tienen tres letras. Di el sonido de cada letra y júntalos para leer la palabra.',
+    iPron: 'Con estas palabras decimos quién es y qué hace. ¡Son las piezas para hacer oraciones!' },
+  fr: { shelf: 'Maintenant, lis des mots !', song: "Chantons l'alphabet !", sing: 'Chanter', stop: 'Arrêter',
+    songSay: "Chantons l'alphabet en anglais ! Regarde les lettres et chante avec moi.",
+    introSub: "Aujourd'hui, on apprend trois lettres et on lit un mot en anglais.", introA: "Aujourd'hui, on apprend les lettres", introB: 'et on lit le mot',
+    start: 'Commencer', tapEach: 'Touche chaque lettre', join: 'Assembler', again: 'Encore',
+    blendSay: 'Touche chaque lettre et dis son son. Ensuite, touche Assembler.', cvcSay: 'Touche chaque lettre et dis son son. Ensuite, touche Assembler pour lire le mot.',
+    findAll: 'Trouve toutes les', found: (n, r) => `Trouvées : ${n} sur 3 · Manche ${r} sur 3`, gotThree: 'Tu as réussi ! Tu connais les trois lettres.',
+    veryGood: 'Très bien !', lookFor: 'Pas celle-là. Cherche la lettre', firstQ: 'Par quelle lettre ça commence ?', firstQSay: ['Par quelle lettre commence', '?'], hearWord: 'Écouter le mot',
+    firstDone: 'Tu as entendu le premier son de six mots.', wordOf: (i, n) => `Mot ${i} sur ${n}`, excellent: 'Excellent !',
+    firstWord: 'Tu as lu ton premier mot !', otherWord: 'Tu as lu un autre mot !', listen: 'Écouter', nextMod: 'Module suivant',
+    readSay: 'Très bien ! Tu as lu', means: (w, m) => `${w} veut dire ${m}.`, learned: n => `Tu as appris ${n} mots !`, listenAll: 'Tout écouter',
+    learnedSay: n => `Très bien ! Tu as appris ${n} nouveaux mots.`, inLang: 'En français :', thisWord: 'Ce mot, c’est', meansSay: m => `Ça veut dire : ${m}.`,
+    hearT: 'Écoute et touche le mot', allFound: 'Tu as trouvé tous les mots.', listenAgain: 'Écoute encore.',
+    readT: "Lis le mot. Quel est le dessin ?", readAll: 'Tu as lu tous les mots tout seul !', readAllSay: 'Excellent ! Tu as lu tous les mots.',
+    readTry: 'Lis le mot et touche le dessin.', readNo: 'Pas celui-là. Dis le son de chaque lettre et essaie encore.', alt: 'La maîtresse Rachel',
+    tSight: 'Mots à reconnaître', tCvc: 'Mots à déchiffrer', tPron: 'Pronoms et verbes',
+    iSight: "Ces mots sont dans presque tous les livres. Apprenons à les reconnaître d'un seul coup d'œil !",
+    iCvc: 'Ces mots ont trois lettres. Dis le son de chaque lettre, puis assemble-les pour lire le mot.',
+    iPron: 'Avec ces mots, on dit qui c’est et ce qu’il fait. Ce sont les pièces pour faire des phrases !' },
+  de: { shelf: 'Jetzt lies Wörter!', song: 'Singen wir das ABC!', sing: 'Singen', stop: 'Stopp',
+    songSay: 'Singen wir das ABC auf Englisch! Schau auf die Buchstaben und sing mit mir.',
+    introSub: 'Heute lernen wir drei Buchstaben und lesen ein Wort auf Englisch.', introA: 'Heute lernen wir die Buchstaben', introB: 'und lesen das Wort',
+    start: 'Los geht’s', tapEach: 'Tippe jeden Buchstaben an', join: 'Zusammen', again: 'Nochmal',
+    blendSay: 'Tippe jeden Buchstaben an und sag seinen Laut. Dann tippe auf Zusammen.', cvcSay: 'Tippe jeden Buchstaben an und sag seinen Laut. Dann tippe auf Zusammen und lies das Wort.',
+    findAll: 'Finde alle', found: (n, r) => `Gefunden: ${n} von 3 · Runde ${r} von 3`, gotThree: 'Geschafft! Jetzt kennst du die drei Buchstaben.',
+    veryGood: 'Sehr gut!', lookFor: 'Der nicht. Suche das', firstQ: 'Mit welchem Buchstaben fängt es an?', firstQSay: ['Mit welchem Buchstaben fängt', 'an?'], hearWord: 'Wort anhören',
+    firstDone: 'Du hast den ersten Laut von sechs Wörtern gehört.', wordOf: (i, n) => `Wort ${i} von ${n}`, excellent: 'Super!',
+    firstWord: 'Du hast dein erstes Wort gelesen!', otherWord: 'Du hast noch ein Wort gelesen!', listen: 'Anhören', nextMod: 'Nächstes Modul',
+    readSay: 'Sehr gut! Du hast gelesen:', means: (w, m) => `${w} heißt ${m}.`, learned: n => `Du hast ${n} Wörter gelernt!`, listenAll: 'Alle anhören',
+    learnedSay: n => `Sehr gut! Du hast ${n} neue Wörter gelernt.`, inLang: 'Auf Deutsch:', thisWord: 'Dieses Wort heißt', meansSay: m => `Das bedeutet: ${m}.`,
+    hearT: 'Hör zu und tippe das Wort an', allFound: 'Du hast alle Wörter gefunden.', listenAgain: 'Hör noch einmal zu.',
+    readT: 'Lies das Wort. Welches Bild passt?', readAll: 'Du hast alle Wörter ganz allein gelesen!', readAllSay: 'Super! Du hast alle Wörter gelesen.',
+    readTry: 'Lies das Wort und tippe das Bild an.', readNo: 'Das nicht. Sag den Laut von jedem Buchstaben und versuch es nochmal.', alt: 'Lehrerin Rachel',
+    tSight: 'Blickwörter', tCvc: 'Lautierwörter', tPron: 'Pronomen und Verben',
+    iSight: 'Diese Wörter stehen in fast jedem Buch. Lernen wir, sie auf einen Blick zu erkennen!',
+    iCvc: 'Diese Wörter haben drei Buchstaben. Sag den Laut von jedem Buchstaben und zieh sie zusammen.',
+    iPron: 'Mit diesen Wörtern sagen wir, wer jemand ist und was er tut. Daraus bauen wir Sätze!' },
+  it: { shelf: 'Ora leggi le parole!', song: "Cantiamo l'alfabeto!", sing: 'Canta', stop: 'Ferma',
+    songSay: "Cantiamo l'alfabeto in inglese! Guarda le lettere e canta con me.",
+    introSub: 'Oggi impariamo tre lettere e leggiamo una parola in inglese.', introA: 'Oggi impariamo le lettere', introB: 'e leggiamo la parola',
+    start: 'Iniziamo', tapEach: 'Tocca ogni lettera', join: 'Unisci', again: 'Ancora',
+    blendSay: 'Tocca ogni lettera e di’ il suo suono. Poi tocca Unisci.', cvcSay: 'Tocca ogni lettera e di’ il suo suono. Poi tocca Unisci per leggere la parola.',
+    findAll: 'Trova tutte le', found: (n, r) => `Trovate: ${n} su 3 · Turno ${r} di 3`, gotThree: 'Ce l’hai fatta! Ora conosci le tre lettere.',
+    veryGood: 'Bravissimo!', lookFor: 'Non quella. Cerca la', firstQ: 'Con quale lettera comincia?', firstQSay: ['Con quale lettera comincia', '?'], hearWord: 'Ascolta la parola',
+    firstDone: 'Hai sentito il primo suono di sei parole.', wordOf: (i, n) => `Parola ${i} di ${n}`, excellent: 'Eccellente!',
+    firstWord: 'Hai letto la tua prima parola!', otherWord: 'Hai letto un’altra parola!', listen: 'Ascolta', nextMod: 'Modulo successivo',
+    readSay: 'Bravissimo! Hai letto', means: (w, m) => `${w} vuol dire ${m}.`, learned: n => `Hai imparato ${n} parole!`, listenAll: 'Ascolta tutte',
+    learnedSay: n => `Bravissimo! Hai imparato ${n} parole nuove.`, inLang: 'In italiano:', thisWord: 'Questa parola è', meansSay: m => `Vuol dire: ${m}.`,
+    hearT: 'Ascolta e tocca la parola', allFound: 'Hai trovato tutte le parole.', listenAgain: 'Ascolta ancora.',
+    readT: 'Leggi la parola. Qual è il disegno?', readAll: 'Hai letto tutte le parole da solo!', readAllSay: 'Eccellente! Hai letto tutte le parole.',
+    readTry: 'Leggi la parola e tocca il disegno.', readNo: 'Non quello. Di’ il suono di ogni lettera e riprova.', alt: 'La maestra Rachel',
+    tSight: 'Parole a colpo d’occhio', tCvc: 'Parole da sillabare', tPron: 'Pronomi e verbi',
+    iSight: 'Queste parole sono in quasi tutti i libri. Impariamo a riconoscerle subito, a colpo d’occhio!',
+    iCvc: 'Queste parole hanno tre lettere. Di’ il suono di ogni lettera e uniscili per leggere la parola.',
+    iPron: 'Con queste parole diciamo chi è e che cosa fa. Sono i pezzi per costruire le frasi!' },
+  pt: { shelf: 'Agora leia palavras!', song: 'Vamos cantar o alfabeto!', sing: 'Cantar', stop: 'Parar',
+    songSay: 'Vamos cantar o alfabeto em inglês! Olhe as letras e cante comigo.',
+    introSub: 'Hoje aprendemos três letras e lemos uma palavra em inglês.', introA: 'Hoje aprendemos as letras', introB: 'e lemos a palavra',
+    start: 'Começar', tapEach: 'Toque em cada letra', join: 'Juntar', again: 'De novo',
+    blendSay: 'Toque em cada letra e diga o som dela. Depois toque em Juntar.', cvcSay: 'Toque em cada letra e diga o som dela. Depois toque em Juntar para ler a palavra.',
+    findAll: 'Encontre todas as letras', found: (n, r) => `Encontradas: ${n} de 3 · Rodada ${r} de 3`, gotThree: 'Você conseguiu! Agora você conhece as três letras.',
+    veryGood: 'Muito bem!', lookFor: 'Essa não. Procure a letra', firstQ: 'Com que letra começa?', firstQSay: ['Com que letra começa', '?'], hearWord: 'Ouvir a palavra',
+    firstDone: 'Você ouviu o primeiro som de seis palavras.', wordOf: (i, n) => `Palavra ${i} de ${n}`, excellent: 'Excelente!',
+    firstWord: 'Você leu sua primeira palavra!', otherWord: 'Você leu mais uma palavra!', listen: 'Ouvir', nextMod: 'Próximo módulo',
+    readSay: 'Muito bem! Você leu', means: (w, m) => `${w} quer dizer ${m}.`, learned: n => `Você aprendeu ${n} palavras!`, listenAll: 'Ouvir todas',
+    learnedSay: n => `Muito bem! Você aprendeu ${n} palavras novas.`, inLang: 'Em português:', thisWord: 'Esta palavra é', meansSay: m => `Quer dizer: ${m}.`,
+    hearT: 'Ouça e toque na palavra', allFound: 'Você encontrou todas as palavras.', listenAgain: 'Ouça de novo.',
+    readT: 'Leia a palavra. Qual é o desenho?', readAll: 'Você leu todas as palavras sozinho!', readAllSay: 'Excelente! Você leu todas as palavras.',
+    readTry: 'Leia a palavra e toque no desenho.', readNo: 'Esse não. Diga o som de cada letra e tente de novo.', alt: 'A professora Rachel',
+    tSight: 'Palavras de visão', tCvc: 'Palavras para soletrar', tPron: 'Pronomes e verbos',
+    iSight: 'Estas palavras aparecem em quase todos os livros. Vamos reconhecê-las rapidinho, só de olhar!',
+    iCvc: 'Estas palavras têm três letras. Diga o som de cada letra e junte tudo para ler a palavra.',
+    iPron: 'Com estas palavras dizemos quem é e o que faz. São as peças para montar frases!' },
+  ja: { shelf: 'こんどは ことばを よもう！', song: 'ABCの うたを うたおう！', sing: 'うたう', stop: 'とめる',
+    songSay: 'えいごで ABCの うたを うたおう！ もじを みながら いっしょに うたってね。',
+    introSub: 'きょうは みっつの もじを ならって、えいごの ことばを ひとつ よむよ。', introA: 'きょう ならう もじは', introB: 'よむ ことばは',
+    start: 'はじめる', tapEach: 'もじを ひとつずつ さわってね', join: 'くっつける', again: 'もういちど',
+    blendSay: 'もじを ひとつずつ さわって、おとを いってね。それから「くっつける」を さわってね。', cvcSay: 'もじを ひとつずつ さわって、おとを いってね。それから「くっつける」で ことばを よもう。',
+    findAll: 'ぜんぶ みつけてね：', found: (n, r) => `みつけた：${n}/3 ・ ${r}かいめ/3`, gotThree: 'できたね！ みっつの もじを おぼえたよ。',
+    veryGood: 'じょうず！', lookFor: 'それじゃないよ。さがすのは', firstQ: 'さいしょの もじは どれ？', firstQSay: ['', 'この ことばの さいしょの もじは どれかな？'], hearWord: 'ことばを きく',
+    firstDone: 'むっつの ことばの さいしょの おとを ききとれたね。', wordOf: (i, n) => `ことば ${i}/${n}`, excellent: 'すばらしい！',
+    firstWord: 'はじめての ことばを よめたね！', otherWord: 'また ことばを よめたね！', listen: 'きく', nextMod: 'つぎの レッスン',
+    readSay: 'じょうず！ よめたね：', means: (w, m) => `${w} は 「${m}」 という いみだよ。`, learned: n => `${n}この ことばを おぼえたね！`, listenAll: 'ぜんぶ きく',
+    learnedSay: n => `じょうず！ あたらしい ことばを ${n}こ おぼえたね。`, inLang: 'にほんごで：', thisWord: 'この ことばは', meansSay: m => `いみは 「${m}」 だよ。`,
+    hearT: 'きいて、ことばを さわってね', allFound: 'ぜんぶの ことばを みつけたね。', listenAgain: 'もういちど きいてね。',
+    readT: 'ことばを よんでね。どの えかな？', readAll: 'ぜんぶ ひとりで よめたね！', readAllSay: 'すばらしい！ ぜんぶの ことばを よめたね。',
+    readTry: 'ことばを よんで、えを さわってね。', readNo: 'それじゃないよ。もじの おとを ひとつずつ いって、もういちど やってみよう。', alt: 'レイチェルせんせい',
+    tSight: 'みて おぼえる ことば', tCvc: 'おとで よむ ことば', tPron: 'だいめいしと どうし',
+    iSight: 'これは ほとんどの えほんに でてくる ことばだよ。みた しゅんかんに わかるように なろう！',
+    iCvc: 'みっつの もじの ことばだよ。もじの おとを ひとつずつ いって、くっつけて よもう。',
+    iPron: 'だれが なにを するかを いう ことばだよ。ぶんを つくる ための ぶひんだね！' },
+  zh: { shelf: '现在来读单词吧！', song: '一起唱字母歌！', sing: '唱歌', stop: '停止',
+    songSay: '我们用英语唱字母歌吧！看着字母，跟我一起唱。',
+    introSub: '今天我们学三个字母，读一个英语单词。', introA: '今天我们学字母', introB: '读单词',
+    start: '开始', tapEach: '点一点每个字母', join: '拼起来', again: '再来一次',
+    blendSay: '点一点每个字母，说出它的音。然后点“拼起来”。', cvcSay: '点一点每个字母，说出它的音。然后点“拼起来”，读出这个单词。',
+    findAll: '找出所有的', found: (n, r) => `找到：${n}/3 · 第${r}轮，共3轮`, gotThree: '你做到了！你认识这三个字母了。',
+    veryGood: '真棒！', lookFor: '不是这个。找一找', firstQ: '它是哪个字母开头的？', firstQSay: ['', '这个词是哪个字母开头的？'], hearWord: '听单词',
+    firstDone: '你听出了六个单词的第一个音。', wordOf: (i, n) => `第${i}个单词，共${n}个`, excellent: '太棒了！',
+    firstWord: '你读出了第一个单词！', otherWord: '你又读出了一个单词！', listen: '听', nextMod: '下一课',
+    readSay: '真棒！你读出了', means: (w, m) => `${w} 的意思是“${m}”。`, learned: n => `你学会了${n}个单词！`, listenAll: '全部听一遍',
+    learnedSay: n => `真棒！你学会了${n}个新单词。`, inLang: '中文意思：', thisWord: '这个单词是', meansSay: m => `意思是：${m}。`,
+    hearT: '听一听，点出这个单词', allFound: '你找到了所有的单词。', listenAgain: '再听一遍。',
+    readT: '读一读这个单词。哪张图对？', readAll: '你自己读出了所有的单词！', readAllSay: '太棒了！你读出了所有的单词。',
+    readTry: '读一读这个单词，点出对的图。', readNo: '不是这个。说出每个字母的音，再试一次。', alt: 'Rachel 老师',
+    tSight: '高频识读词', tCvc: '拼读单词', tPron: '代词和动词',
+    iSight: '几乎每本书里都有这些词。我们来学着一眼就认出它们！',
+    iCvc: '这些单词有三个字母。说出每个字母的音，再把音拼在一起读出单词。',
+    iPron: '用这些词可以说“是谁”和“做什么”。它们是组成句子的积木！' },
+  ko: { shelf: '이제 단어를 읽어요!', song: '알파벳 노래를 불러요!', sing: '노래하기', stop: '멈추기',
+    songSay: '영어로 알파벳 노래를 불러요! 글자를 보면서 같이 불러요.',
+    introSub: '오늘은 글자 세 개를 배우고 영어 단어 하나를 읽어요.', introA: '오늘 배울 글자는', introB: '읽을 단어는',
+    start: '시작하기', tapEach: '글자를 하나씩 눌러요', join: '합치기', again: '다시',
+    blendSay: '글자를 하나씩 누르고 소리를 말해요. 그다음 합치기를 눌러요.', cvcSay: '글자를 하나씩 누르고 소리를 말해요. 그다음 합치기를 눌러 단어를 읽어요.',
+    findAll: '모두 찾아요:', found: (n, r) => `찾음: ${n}/3 · ${r}번째 판/3`, gotThree: '해냈어요! 이제 글자 세 개를 알아요.',
+    veryGood: '잘했어요!', lookFor: '그게 아니에요. 이 글자를 찾아요:', firstQ: '어떤 글자로 시작할까요?', firstQSay: ['', '이 단어는 어떤 글자로 시작할까요?'], hearWord: '단어 듣기',
+    firstDone: '단어 여섯 개의 첫소리를 들었어요.', wordOf: (i, n) => `단어 ${i}/${n}`, excellent: '최고예요!',
+    firstWord: '첫 번째 단어를 읽었어요!', otherWord: '단어를 또 읽었어요!', listen: '듣기', nextMod: '다음 수업',
+    readSay: '잘했어요! 읽은 단어는', means: (w, m) => `${w}는 "${m}"라는 뜻이에요.`, learned: n => `단어 ${n}개를 배웠어요!`, listenAll: '모두 듣기',
+    learnedSay: n => `잘했어요! 새 단어 ${n}개를 배웠어요.`, inLang: '한국어로:', thisWord: '이 단어는', meansSay: m => `뜻은 "${m}"예요.`,
+    hearT: '듣고 단어를 눌러요', allFound: '단어를 모두 찾았어요.', listenAgain: '다시 들어 봐요.',
+    readT: '단어를 읽어요. 어떤 그림일까요?', readAll: '혼자서 단어를 모두 읽었어요!', readAllSay: '최고예요! 단어를 모두 읽었어요.',
+    readTry: '단어를 읽고 그림을 눌러요.', readNo: '그게 아니에요. 글자 소리를 하나씩 말하고 다시 해 봐요.', alt: '레이첼 선생님',
+    tSight: '한눈에 읽는 단어', tCvc: '소리 내어 읽는 단어', tPron: '대명사와 동사',
+    iSight: '거의 모든 책에 나오는 단어예요. 보자마자 바로 알아보도록 연습해요!',
+    iCvc: '글자가 세 개인 단어예요. 글자마다 소리를 말하고 합쳐서 단어를 읽어요.',
+    iPron: '누가 무엇을 하는지 말하는 단어예요. 문장을 만드는 블록이에요!' },
+};
+const W = () => WS[LANG] || WS.es;
+const MODKEY = { sight: ['tSight', 'iSight'], sun: ['tCvc', 'iCvc'], they: ['tPron', 'iPron'] };
+const modSub = m => W()[MODKEY[m.art][0]];
+const modIntro = m => W()[MODKEY[m.art][1]];
+
+/* ---------- Letter coaching for the sounds each language finds hard ---------- */
+const COACH = {
+  fr: {
+    A: "Attention : ce n'est pas le « a » de « papa ». Ouvre grand la bouche, comme pour sourire.",
+    H: "En anglais, le H se prononce ! Souffle doucement, comme sur une vitre froide : hhh.",
+    I: "C'est un « i » très court et détendu, pas le « i » de « lit ».",
+    J: "Le J anglais se dit « dj », comme dans « djembé ».",
+    R: "Le R anglais ne se fait pas dans la gorge. Arrondis les lèvres et recule la langue, sans la toucher au palais.",
+    U: "Ici, le U se dit « eu » court, comme dans « up ». Ce n'est pas le « u » de « lune ».",
+    W: "Le W se dit comme « ou » très rapide, comme dans « oui ».",
+  },
+  de: {
+    A: "Nicht das deutsche A! Mund weit öffnen, fast wie bei einem Ä.",
+    J: "Das englische J klingt wie »dsch« in »Dschungel«, nicht wie das deutsche J.",
+    S: "Am Wortanfang ist das englische S scharf und stimmlos, wie in »Haus«.",
+    V: "Das englische V ist stimmhaft wie das W in »Wasser«, nicht wie das F in »Vater«.",
+    W: "Das englische W ist kein deutsches W! Lippen rund wie bei »u« und dann öffnen: w.",
+    Y: "Das Y am Wortanfang klingt wie das deutsche J in »ja«.",
+    Z: "Das englische Z summt wie eine Biene: zzz. Es ist kein »ts« wie in »Zahn«.",
+  },
+  it: {
+    A: "Non è la « a » di « casa ». Apri bene la bocca, come in un sorriso.",
+    H: "In inglese la H si pronuncia! Soffia piano, come per appannare un vetro: hhh.",
+    I: "È una « i » corta e rilassata, non la « i » di « riso ».",
+    J: "La J inglese suona come « gi » in « gioco ».",
+    R: "La R inglese non si arrotola. Arrotonda le labbra e tira indietro la lingua, senza toccare il palato.",
+    U: "Qui la U suona come una « a » corta e morbida, come in « up ».",
+    Z: "La Z inglese ronza come un'ape: zzz. Non è la « z » di « pizza ».",
+  },
+  pt: {
+    A: "Não é o « a » de « casa ». Abra bem a boca, como num sorriso.",
+    H: "Em inglês o H tem som! É como o « r » de « rato »: um sopro leve.",
+    I: "É um « i » curto e relaxado, não o « i » de « vida ».",
+    J: "O J inglês soa como « dj », como em « Djavan ».",
+    R: "O R inglês não vibra nem sai da garganta. Arredonde os lábios e puxe a língua para trás.",
+    U: "Aqui o U soa como um « a » curto e fechado, como em « up ».",
+    W: "O W soa como um « u » rápido, como em « uau ».",
+  },
+  ja: {
+    B: "くちびるを しっかり とじてから、ぱっと ひらいてね。",
+    F: "うえの はを したの くちびるに かるく あてて、ふーっと いきを だしてね。「ふ」とは ちがうよ。",
+    L: "したの さきを うえの はの うらに ぴったり つけてね。「ら」とは ちがうよ。",
+    R: "したは どこにも つけないで、くちびるを まるくしてね。L とは ちがう おとだよ。",
+    S: "「す」の あとに 「う」を つけないでね。sss と ながく いってみよう。",
+    T: "「と」の 「お」は いらないよ。いきを つよく だして t。",
+    V: "うえの はを したの くちびるに あてて、こえを だしながら vvv。B とは ちがうよ。",
+  },
+  zh: {
+    A: "这个音嘴巴要张得很大，像在笑。和中文的 a 不一样。",
+    I: "这是一个很短、很放松的 i，不是“衣”那样的长音。",
+    U: "这里的 U 读成短短的“阿”，像 up 里的音。",
+    R: "英语的 R 嘴唇要圆，舌头往后卷，但不碰到上颚。和拼音的 r 不一样。",
+    V: "上牙轻轻碰下嘴唇，同时发声：vvv。不是 w 的音。",
+    Z: "英语的 Z 像蜜蜂嗡嗡叫：zzz。不是拼音 z 的音。",
+  },
+  ko: {
+    F: "윗니를 아랫입술에 살짝 대고 바람을 내보내요. 'ㅍ' 소리가 아니에요.",
+    L: "혀끝을 윗니 뒤에 딱 붙여요. R과 다른 소리예요.",
+    A: "입을 크게 벌리고 웃듯이 말해요. 우리말 '아'와 달라요.",
+    I: "짧고 편하게 '이'를 말해요. 길게 끌지 않아요.",
+    R: "혀를 어디에도 대지 말고 입술을 동그랗게 해요. L과 다른 소리예요.",
+    V: "윗니를 아랫입술에 대고 목소리를 내요: vvv. 'ㅂ' 소리가 아니에요.",
+    Z: "벌처럼 윙윙 소리를 내요: zzz. 'ㅈ' 소리가 아니에요.",
+  },
+};
+const coach = L => (COACH[LANG] && COACH[LANG][L]) || '';
 const doneKey = () => LANG === 'es' ? 'vamos-a-leer-done' : 'vamos-a-leer-done-' + LANG;
 function tipHTML(L) {
   const d = LETTERS[L];
   if (LANG === 'es') return d.tip;
-  return T().tip(L, d.sym, showW(d.keys[0]));
+  const c = coach(L);
+  return T().tip(L, d.sym, showW(d.keys[0])) + (c ? ' ' + c : '');
 }
 function letterSay(L) {
   const d = LETTERS[L];
   if (LANG === 'es') return [N('Esta es la letra'), E(L), N(d.say)];
-  return [...T().thisIs(L), N(T().soundIn), E(sayW(d.keys[0]), .7)];
+  const c = coach(L);
+  return [...T().thisIs(L), N(T().soundIn), E(sayW(d.keys[0]), .7), ...(c ? [N(c)] : [])];
 }
 
 const MODULES = [
@@ -1546,7 +1783,7 @@ function setSingBtn() {
   const b = document.getElementById('singBtn');
   if (!b) return;
   if (b.classList.contains('sing')) b.innerHTML = song.playing ? ICON.stop : ICON.music;
-  else b.textContent = song.playing ? 'Parar' : 'Cantar';
+  else b.textContent = song.playing ? W().stop : W().sing;
 }
 let chorus = [];
 function startChorus() {
@@ -1601,7 +1838,7 @@ function sing(after, noChorus) {
     if (id !== song.id) return;
     song.playing = false; hs.sang = true; setSingBtn(); pointAt(null); showLine(0, -1);
     document.getElementById('kid')?.classList.remove('singing');
-    if (after) after(); else speak([es('¡Muy bien! Ahora vamos a aprender.')]);
+    if (after) after(); else speak([N(LANG === 'es' ? '¡Muy bien! Ahora vamos a aprender.' : W().veryGood)]);
   }, (lead + t) * 1000 + 500));
 }
 function stopSong() {
@@ -1956,7 +2193,7 @@ function wordCards() {
   return MODULES.slice(0, WORD_MODS).map((m, i) => `<button class="mod" data-mod="${i}" style="--mc:${m.color}" aria-label="${m.title || m.word}">
       <span class="art">${PIC[m.art || m.word]()}</span>
       ${m.kind === 'words'
-        ? `<span class="word sm">${m.title}</span><span class="es-sub">${m.esTitle}</span>
+        ? `<span class="word sm">${m.title}</span><span class="es-sub">${modSub(m)}</span>
       <span class="mini">${m.words.slice(0, 3).map(x => `<span style="background:#fff">${x.w}</span>`).join('')}</span>`
         : `<span class="word">${m.word}</span>
       <span class="mini">${m.letters.map(L => `<span style="background:${LCOL[L]}">${L}</span>`).join('')}</span>`}
@@ -1974,7 +2211,7 @@ function worldHTML() {
     <section id="blocks" hidden>
       <div class="prog"><span aria-hidden="true">⭐</span><div class="pbar"><i id="pbar"></i></div><span id="pcount">0 / 26</span></div>
       <div class="mapbox" id="mapbox"></div>
-      ${LANG === 'es' ? `<h2 class="shelfhead">¡Ahora lee palabras!</h2><div class="mods">${wordCards()}</div>` : ''}
+      <h2 class="shelfhead">${W().shelf}</h2><div class="mods">${wordCards()}</div>
     </section>`;
 }
 
@@ -2725,18 +2962,18 @@ function render(dir = 0) {
   if (m.kind === 'letter' && !LETTERS[p]) {
     h = letterMod(m, p);
   } else if (p === 'song') {
-    h = `<h2>¡Cantemos el abecedario!</h2>
+    h = `<h2>${W().song}</h2>
       <div class="songbox">${songSVG(m)}</div>
       <p class="lyric" id="lyric"></p>
-      <button class="big" id="singBtn" data-act="sing">Cantar</button>`;
+      <button class="big" id="singBtn" data-act="sing">${W().sing}</button>`;
   } else if (m.kind === 'words') {
     h = wordsPage(m, p);
   } else if (p === 'intro') {
     h = `<div class="pic">${PIC[m.word]()}</div>
       <h1>${m.word}</h1>
       <div class="trio">${m.letters.map(L => tile(L, L, `data-name="${L}"`)).join('')}</div>
-      <p class="sub">Hoy aprendemos tres letras y leemos una palabra en inglés.</p>
-      <button class="big" data-act="next">Empezar</button>`;
+      <p class="sub">${W().introSub}</p>
+      <button class="big" data-act="next">${W().start}</button>`;
   } else if (LETTERS[p]) {
     const d = LETTERS[p];
     h = `<div class="glyphs" style="background:${LCOL[p]}"><span>${p}</span><span>${d.lower}</span></div>
@@ -2750,21 +2987,21 @@ function render(dir = 0) {
     game = { i: 0, items: shuffle(m.first), locked: false };
     h = firstHTML();
   } else if (p === 'blend') {
-    h = `<div class="blend"><h2>Toca cada letra</h2>
+    h = `<div class="blend"><h2>${W().tapEach}</h2>
       <div class="trio" id="blendRow">${m.letters.map(L => tile(L, LETTERS[L].lower, `data-sound="${L}"`)).join('')}</div>
       <div class="syms">${m.letters.map(L => `<span>${LETTERS[L].sym}</span>`).join('')}</div>
-      <button class="big" data-act="blend">Juntar</button></div>`;
+      <button class="big" data-act="blend">${W().join}</button></div>`;
   } else if (p === 'finale') {
     const nextMod = mi + 1 < WORD_MODS;
     h = `<div class="finale"><div class="burst" id="burst"></div>
       <div class="pic">${PIC[m.word]()}</div>
       <p class="bigword">${m.word}</p>
-      <h2>${mi === 0 ? '¡Leíste tu primera palabra!' : '¡Leíste otra palabra!'}</h2>
-      <div class="cheer"><img src="Rach.jpg" alt="La maestra Rachel"><span>¡Muy bien! Estoy muy orgullosa de ti.</span></div>
-      <p class="sub"><b>${m.word}</b> = ${m.es}</p>
-      <div class="btns"><button class="pill" data-act="sayWord">Escuchar ${m.word}</button>
+      <h2>${mi === 0 ? W().firstWord : W().otherWord}</h2>
+      <div class="cheer"><img src="Rach.jpg" alt="${W().alt}"><span>${W().veryGood} ${T().proud}</span></div>
+      <p class="sub"><b>${m.word}</b> = ${meanOf(m.word)}</p>
+      <div class="btns"><button class="pill" data-act="sayWord">${W().listen} ${m.word}</button>
       <button class="homebig" data-act="home" aria-label="Mapa">${ICON.map}</button>
-      ${nextMod ? `<button class="pill" data-act="nextMod">Siguiente módulo</button>` : ''}</div></div>`;
+      ${nextMod ? `<button class="pill" data-act="nextMod">${W().nextMod}</button>` : ''}</div></div>`;
   }
   pageEl.innerHTML = h;
   if (p === 'song') showLine(0, -1);
@@ -2787,14 +3024,14 @@ function prompt() {
   if (mi < 0) return;
   const m = mod(), p = pages()[cur], Ls = m.letters.join(', ');
   if (m.kind === 'letter' && !LETTERS[p]) return promptLetter(m, p);
-  if (p === 'song') speak([es('¡Cantemos el abecedario en inglés! Mira las letras y canta conmigo.')], () => { if (pages()[cur] === 'song') sing(); });
+  if (p === 'song') speak([N(W().songSay)], () => { if (pages()[cur] === 'song') sing(); });
   else if (m.kind === 'words') promptWords(m, p);
-  else if (p === 'intro') speak([es('Hoy aprendemos las letras'), en(Ls + '.'), es('y leemos la palabra'), en(m.word + '.')]);
+  else if (p === 'intro') speak([N(W().introA), en(Ls + '.'), N(W().introB), en(m.word + '.')]);
   else if (LETTERS[p]) { speak(letterSay(p)); setHint(() => nextBtn, 7000); }
-  else if (p === 'find') speak([es('Encuentra todas las'), en(game.targets[game.round] + '.')]);
-  else if (p === 'first') { const it = game.items[game.i]; if (it) speak([es('¿Con qué letra empieza'), en(it[0], 0.65), es('?')]); }
-  else if (p === 'blend') speak([es('Toca cada letra y di su sonido. Luego toca Juntar.')]);
-  else if (p === 'finale') speak([es('¡Muy bien! Leíste'), en(m.word + '.'), es(`${m.word} quiere decir ${m.es}.`)]);
+  else if (p === 'find') speak([N(W().findAll), en(game.targets[game.round] + '.')]);
+  else if (p === 'first') { const it = game.items[game.i]; if (it) { const q = W().firstQSay; speak([...(q[0] ? [N(q[0])] : []), en(it[0], 0.65), ...(q[1] ? [N(q[1])] : [])]); } }
+  else if (p === 'blend') speak([N(W().blendSay)]);
+  else if (p === 'finale') speak([N(W().readSay), en(m.word + '.'), N(W().means(m.word, meanOf(m.word)))]);
 }
 
 /* ----- Word modules (sight words, CVC words, pronouns & verbs) ----- */
@@ -2804,23 +3041,23 @@ function wordsPage(m, p) {
     game = {};
     return `<div class="pic">${PIC[m.art]()}</div>
       <h2>${m.title}</h2>
-      <p class="sub">${m.intro}</p>
+      <p class="sub">${modIntro(m)}</p>
       <div class="chips">${m.words.map(x => `<button data-w="${x.w}">${x.w}</button>`).join('')}</div>
-      <button class="big" data-act="next">Empezar</button>`;
+      <button class="big" data-act="next">${W().start}</button>`;
   }
   if (isWordPage(p)) {
     const x = wordAt(p);
     if (m.cvc) {
       const Ls = x.w.toUpperCase().split('');
       return `<div class="pic">${PIC[x.pics[0]]()}</div>
-        <div class="blend"><h2>Toca cada letra</h2>
+        <div class="blend"><h2>${W().tapEach}</h2>
         <div class="trio" id="blendRow">${Ls.map(L => tile(L, LETTERS[L].lower, `data-sound="${L}"`)).join('')}</div>
         <div class="syms">${Ls.map(L => `<span>${LETTERS[L].sym}</span>`).join('')}</div>
-        <button class="big" data-act="blend" data-letters="${Ls.join('')}" data-bw="${x.w}">Juntar</button></div>
-        <p class="mean">En español: <b>${x.es}</b></p>`;
+        <button class="big" data-act="blend" data-letters="${Ls.join('')}" data-bw="${x.w}">${W().join}</button></div>
+        <p class="mean">${W().inLang} <b>${meanOf(x.w)}</b></p>`;
     }
-    return `<button class="wcard" style="--mc:${m.color}" data-w="${x.w}" aria-label="Escuchar ${x.w}">${x.w}</button>
-      <p class="mean">En español: <b>${x.es}</b></p>
+    return `<button class="wcard" style="--mc:${m.color}" data-w="${x.w}" aria-label="${W().listen} ${x.w}">${x.w}</button>
+      <p class="mean">${W().inLang} <b>${meanOf(x.w)}</b></p>
       ${x.pics ? `<div class="pics">${x.pics.map(k => PIC[k]()).join('')}</div>` : ''}
       <button class="ex" data-ex="${x.ex}">${SPK}<span>${hiWord(x.ex, x.w)}</span></button>`;
   }
@@ -2830,76 +3067,76 @@ function wordsPage(m, p) {
     const nextMod = mi + 1 < WORD_MODS;
     return `<div class="finale"><div class="burst" id="burst"></div>
       <div class="pic">${PIC[m.art]()}</div>
-      <h2>¡Aprendiste ${m.words.length} palabras!</h2>
+      <h2>${W().learned(m.words.length)}</h2>
       <div class="chips">${m.words.map(x => `<button data-w="${x.w}">${x.w}</button>`).join('')}</div>
-      <div class="cheer"><img src="Rach.jpg" alt="La maestra Rachel"><span>¡Muy bien! Estoy muy orgullosa de ti.</span></div>
-      <div class="btns"><button class="pill" data-act="sayAll">Escuchar todas</button>
+      <div class="cheer"><img src="Rach.jpg" alt="${W().alt}"><span>${W().veryGood} ${T().proud}</span></div>
+      <div class="btns"><button class="pill" data-act="sayAll">${W().listenAll}</button>
       <button class="homebig" data-act="home" aria-label="Mapa">${ICON.map}</button>
-      ${nextMod ? `<button class="pill" data-act="nextMod">Siguiente módulo</button>` : ''}</div></div>`;
+      ${nextMod ? `<button class="pill" data-act="nextMod">${W().nextMod}</button>` : ''}</div></div>`;
   }
   return '';
 }
 function promptWords(m, p) {
-  if (p === 'intro') return speak([es(m.intro)]);
+  if (p === 'intro') return speak([N(modIntro(m))]);
   if (isWordPage(p)) {
     const x = wordAt(p);
-    if (m.cvc) return speak([es('Toca cada letra y di su sonido. Luego toca Juntar para leer la palabra.')]);
-    return speak([es('Esta palabra es'), en(x.w, 0.7), es(`Quiere decir: ${x.es}.`), en(x.ex, 0.7)]);
+    if (m.cvc) return speak([N(W().cvcSay)]);
+    return speak([N(W().thisWord), en(x.w, 0.7), N(W().meansSay(meanOf(x.w))), en(x.ex, 0.7)]);
   }
-  if (p === 'hear') { const it = game.items[game.i]; if (it) speak([es('Escucha y toca la palabra'), en(it.w, 0.65)]); return; }
-  if (p === 'read') { if (game.items[game.i]) speak([es('Lee la palabra y toca el dibujo.')]); return; }
-  if (p === 'finale') return speak([es(`¡Muy bien! Aprendiste ${m.words.length} palabras nuevas.`)]);
+  if (p === 'hear') { const it = game.items[game.i]; if (it) speak([N(W().hearT), en(it.w, 0.65)]); return; }
+  if (p === 'read') { if (game.items[game.i]) speak([N(W().readTry)]); return; }
+  if (p === 'finale') return speak([N(W().learnedSay(m.words.length))]);
 }
 function hearHTML() {
   const m = mod();
   if (game.i >= game.items.length)
-    return `<h2>¡Excelente!</h2><div class="pic">${PIC[m.art]()}</div><p class="sub">Encontraste todas las palabras.</p>`;
+    return `<h2>${W().excellent}</h2><div class="pic">${PIC[m.art]()}</div><p class="sub">${W().allFound}</p>`;
   const x = game.items[game.i];
   game.opts = shuffle([x.w, ...shuffle(m.words.filter(o => o.w !== x.w)).slice(0, 3).map(o => o.w)]);
-  return `<h2>Escucha y toca la palabra</h2>
-    <button class="listen" data-act="hearAgain">${SPK}<span>Otra vez</span></button>
+  return `<h2>${W().hearT}</h2>
+    <button class="listen" data-act="hearAgain">${SPK}<span>${W().again}</span></button>
     <div class="opts">${game.opts.map(o => `<button class="opt" data-hopt="${o}">${o}</button>`).join('')}</div>
-    <p class="score">Palabra ${game.i + 1} de ${game.items.length}</p>`;
+    <p class="score">${W().wordOf(game.i + 1, game.items.length)}</p>`;
 }
 function hearPick(btn) {
   if (game.locked) return;
   const x = game.items[game.i];
   if (btn.dataset.hopt === x.w) {
     game.locked = true; btn.classList.add('ok');
-    speak([es('¡Sí!'), en(x.w, 0.65)], () => setTimeout(() => {
+    speak([N(T().yes), en(x.w, 0.65)], () => setTimeout(() => {
       if (pages()[cur] !== 'hear') return;
       game.i++; game.locked = false; pageEl.innerHTML = hearHTML();
-      if (game.i >= game.items.length) speak([es('¡Excelente! Lo hiciste muy bien.')]); else prompt();
+      if (game.i >= game.items.length) speak([N(T().great)]); else prompt();
     }, 600));
   } else {
     btn.classList.remove('shake'); void btn.offsetWidth; btn.classList.add('shake'); noteWrong();
-    speak([es('Escucha otra vez.'), en(x.w, 0.6)]);
+    speak([N(W().listenAgain), en(x.w, 0.6)]);
   }
 }
 function readHTML() {
   const m = mod();
   if (game.i >= game.items.length)
-    return `<h2>¡Excelente!</h2><div class="pic">${PIC[m.art]()}</div><p class="sub">¡Leíste todas las palabras solito!</p>`;
+    return `<h2>${W().excellent}</h2><div class="pic">${PIC[m.art]()}</div><p class="sub">${W().readAll}</p>`;
   const x = game.items[game.i];
   game.opts = shuffle([x, ...shuffle(m.words.filter(o => o.w !== x.w)).slice(0, 2)]);
-  return `<h2>Lee la palabra. ¿Cuál es el dibujo?</h2>
+  return `<h2>${W().readT}</h2>
     <div class="wcard sm" style="--mc:${m.color}">${x.w}</div>
     <div class="picopts">${game.opts.map(o => `<button class="picopt" data-rpic="${o.w}">${PIC[o.pics[0]]()}</button>`).join('')}</div>
-    <p class="score">Palabra ${game.i + 1} de ${game.items.length}</p>`;
+    <p class="score">${W().wordOf(game.i + 1, game.items.length)}</p>`;
 }
 function readPick(btn) {
   if (game.locked) return;
   const x = game.items[game.i];
   if (btn.dataset.rpic === x.w) {
     game.locked = true; btn.classList.add('ok');
-    speak([es('¡Sí!'), en(x.w, 0.65)], () => setTimeout(() => {
+    speak([N(T().yes), en(x.w, 0.65)], () => setTimeout(() => {
       if (pages()[cur] !== 'read') return;
       game.i++; game.locked = false; pageEl.innerHTML = readHTML();
-      if (game.i >= game.items.length) speak([es('¡Excelente! Leíste todas las palabras.')]); else prompt();
+      if (game.i >= game.items.length) speak([N(W().readAllSay)]); else prompt();
     }, 600));
   } else {
     btn.classList.remove('shake'); void btn.offsetWidth; btn.classList.add('shake'); noteWrong();
-    speak([es('Esa no. Di el sonido de cada letra y prueba otra vez.')]);
+    speak([N(W().readNo)]);
   }
 }
 
@@ -2910,26 +3147,26 @@ function findHTML() {
   const others = m.letters.filter(x => x !== L).flatMap(x => [x, LETTERS[x].lower]);
   const pool = shuffle(m.distract.concat(others).filter(x => x.toUpperCase() !== L)).slice(0, 6);
   game.grid = shuffle(matches.concat(pool)); game.found = 0;
-  return `<div class="target">Encuentra todas las ${tile(L, L)}${tile(L, lo)}</div>
+  return `<div class="target">${W().findAll} ${tile(L, L)}${tile(L, lo)}</div>
     <div class="grid">${game.grid.map((x, i) => `<button class="cell" data-cell="${i}">${x}</button>`).join('')}</div>
-    <p class="score" id="score">Encontradas: 0 de 3 · Ronda ${game.round + 1} de 3</p>`;
+    <p class="score" id="score">${W().found(0, game.round + 1)}</p>`;
 }
 function tapCell(btn) {
   const L = game.targets[game.round], x = game.grid[+btn.dataset.cell];
   if (btn.classList.contains('ok')) return;
   if (x.toUpperCase() === L) {
     btn.classList.add('ok'); game.found++;
-    document.getElementById('score').textContent = `Encontradas: ${game.found} de 3 · Ronda ${game.round + 1} de 3`;
+    document.getElementById('score').textContent = W().found(game.found, game.round + 1);
     if (game.found === 3) {
       const last = game.round === 2;
-      speak([es(last ? '¡Lo lograste! Ya conoces las tres letras.' : '¡Muy bien!')], () => {
+      speak([N(last ? W().gotThree : W().veryGood)], () => {
         if (last || pages()[cur] !== 'find') return;
         game.round++; pageEl.innerHTML = findHTML(); prompt();
       });
     } else speak([en(L)]);
   } else {
     btn.classList.remove('shake'); void btn.offsetWidth; btn.classList.add('shake'); noteWrong();
-    speak([es('Esa no. Busca la'), en(L + '.')]);
+    speak([N(W().lookFor), en(L + '.')]);
   }
 }
 
@@ -2937,13 +3174,13 @@ function tapCell(btn) {
 function firstHTML() {
   const m = mod();
   if (game.i >= game.items.length)
-    return `<h2>¡Excelente!</h2><div class="pic">${PIC[m.word]()}</div><p class="sub">Escuchaste el primer sonido de seis palabras.</p>`;
+    return `<h2>${W().excellent}</h2><div class="pic">${PIC[m.word]()}</div><p class="sub">${W().firstDone}</p>`;
   const [w] = game.items[game.i];
-  return `<h2>¿Con qué letra empieza?</h2>
-    <button class="key" data-word="${w}" aria-label="Escuchar la palabra">${PIC[w]()}</button>
+  return `<h2>${W().firstQ}</h2>
+    <button class="key" data-word="${w}" aria-label="${W().hearWord}">${PIC[w]()}</button>
     <p class="reveal" id="reveal">&nbsp;</p>
     <div class="trio">${m.letters.map(L => tile(L, L, `data-pick="${L}"`)).join('')}</div>
-    <p class="score">Palabra ${game.i + 1} de ${game.items.length}</p>`;
+    <p class="score">${W().wordOf(game.i + 1, game.items.length)}</p>`;
 }
 function pick(btn) {
   if (game.locked) return;
@@ -2951,14 +3188,14 @@ function pick(btn) {
   if (btn.dataset.pick === L) {
     game.locked = true;
     document.getElementById('reveal').innerHTML = `<b>${w[0]}</b>${w.slice(1)}`;
-    speak([es('¡Sí!'), en(w, 0.65)], () => setTimeout(() => {
+    speak([N(T().yes), en(w, 0.65)], () => setTimeout(() => {
       if (pages()[cur] !== 'first') return;
       game.i++; game.locked = false; pageEl.innerHTML = firstHTML();
-      if (game.i >= game.items.length) speak([es('¡Excelente! Lo hiciste muy bien.')]); else prompt();
+      if (game.i >= game.items.length) speak([N(T().great)]); else prompt();
     }, 700));
   } else {
     btn.classList.remove('shake'); void btn.offsetWidth; btn.classList.add('shake'); noteWrong();
-    speak([es('Escucha otra vez.'), en(w, 0.6)]);
+    speak([N(W().listenAgain), en(w, 0.6)]);
   }
 }
 
@@ -2975,7 +3212,7 @@ async function blend(btn) {
   }
   tiles.forEach(t => t.classList.remove('lit'));
   row.classList.add('joined');
-  speak([en(word, 0.65)], () => { btn.disabled = false; btn.textContent = 'Otra vez'; });
+  speak([en(word, 0.65)], () => { btn.disabled = false; btn.textContent = W().again; });
 }
 
 function burst() {
@@ -3020,7 +3257,7 @@ pageEl.addEventListener('click', e => {
   if (a === 'home') return renderHome();
   if (a === 'greet') return greet();
   if (a === 'nextMod') return openModule(mi + 1);
-  if (a === 'sayWord') return speak([en(mod().word, 0.65), es(mod().es)]);
+  if (a === 'sayWord') return speak([en(mod().word, 0.65), N(meanOf(mod().word))]);
   if (a === 'blend') return blend(b);
   if (a === 'sayAll') return speak(mod().words.map(x => en(x.w, 0.7)));
   if (a === 'hearAgain') { const it = game.items && game.items[game.i]; if (it) speak([en(it.w, 0.6)]); return; }
