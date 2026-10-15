@@ -464,6 +464,7 @@ body.talking .gmouth{animation:talk .22s ease-in-out infinite alternate}
 .hand{position:fixed; z-index:70; width:44px; height:56px; pointer-events:none; animation:tap 1s ease-in-out infinite; filter:drop-shadow(0 4px 4px rgba(0,0,0,.25))}
 .hand svg{width:100%; height:100%}
 @keyframes tap{0%,100%{transform:translateY(8px)}50%{transform:translateY(-6px)}}
+.hand.down svg{transform:rotate(180deg)}
 .pulse{animation:pulseb 1.1s ease-in-out infinite !important}
 @keyframes pulseb{0%,100%{box-shadow:0 0 0 0 rgba(255,212,92,.9)}50%{box-shadow:0 0 0 14px rgba(255,212,92,0)}}
 
@@ -1569,7 +1570,7 @@ function sing(after, noChorus) {
   });
   song.timers.push(setTimeout(() => {
     if (id !== song.id) return;
-    song.playing = false; setSingBtn(); pointAt(null); showLine(0, -1);
+    song.playing = false; hs.sang = true; setSingBtn(); pointAt(null); showLine(0, -1);
     document.getElementById('kid')?.classList.remove('singing');
     if (after) after(); else speak([es('¡Muy bien! Ahora vamos a aprender.')]);
   }, (lead + t) * 1000 + 500));
@@ -1692,60 +1693,103 @@ function worldPos(L) {
   return { x: 268 + 72 * (c + off + .5), y: 368 + 66 * r };
 }
 
-/* ---------- Cartoon Ms. Rachel ---------- */
+/* ---------- Cartoon Ms. Rachel (v3: softer, more realistic, cuter) ---------- */
+let rachelUid = 0;
 function rachelSVG(o = {}) {
-  const sk = '#F6CDB0', hair = '#5A3424', hl = '#B98252', blouse = '#F8EDE0';
-  const flowers = [[146, 288], [196, 282], [170, 318], [218, 324], [142, 352], [188, 358], [226, 372], [160, 388], [208, 394]]
-    .map(([x, y], i) => `<ellipse cx="${x + 9}" cy="${y + 5}" rx="6" ry="2.8" fill="#8DB87A" transform="rotate(30 ${x + 9} ${y + 5})"/>`
-      + `<circle cx="${x}" cy="${y}" r="7.5" fill="${i % 2 ? '#E58FA0' : '#C9607E'}"/><circle cx="${x}" cy="${y}" r="2.8" fill="#FFE27A"/>`).join('');
+  const u = 'r' + (++rachelUid);
+  const sk = `url(#${u}sk)`, skS = '#F0C1A3', hairG = `url(#${u}hr)`;
+  const lineH = '#3B2016';
+  const flower = (x, y, s, c) => `<g transform="translate(${x} ${y}) scale(${s})">${[0, 72, 144, 216, 288].map(a =>
+      `<ellipse cx="0" cy="-5" rx="3.6" ry="5" fill="${c}" transform="rotate(${a})"/>`).join('')}<circle r="2.4" fill="#F6C860"/></g>`;
+  const leaf = (x, y, r) => `<ellipse cx="${x}" cy="${y}" rx="5" ry="2.2" fill="#9DBB86" transform="rotate(${r} ${x} ${y})"/>`;
+  const pattern = [[146, 286, '#E07A93'], [196, 280, '#C95C7C'], [170, 316, '#E9A3B2'], [218, 318, '#E07A93'], [140, 350, '#C95C7C'],
+    [186, 356, '#E07A93'], [228, 366, '#E9A3B2'], [158, 388, '#E07A93'], [208, 392, '#C95C7C']]
+    .map(([x, y, c], i) => leaf(x + 8, y + 6, 30 + i * 20) + leaf(x - 8, y + 4, -30) + flower(x, y, 1, c)).join('');
   const rightArm = o.ids
-    ? `<line id="arm" x1="${RACHEL_RIG.sh.x}" y1="${RACHEL_RIG.sh.y}" stroke="${sk}" stroke-width="20" stroke-linecap="round"/>
-       <line id="stick" stroke="#8A5230" stroke-width="7" stroke-linecap="round"/>
-       <circle id="hand" r="12" fill="${sk}"/>
-       <g id="wstar"><path d="M0 -17 L5 -5.5 L17 -5.5 L7.5 2.8 L11 15 L0 7.5 L-11 15 L-7.5 2.8 L-17 -5.5 L-5 -5.5Z" fill="#FFD45C" stroke="#F5A623" stroke-width="2.5" stroke-linejoin="round"/></g>`
+    ? `<line id="arm" x1="${RACHEL_RIG.sh.x}" y1="${RACHEL_RIG.sh.y}" stroke="${skS}" stroke-width="19" stroke-linecap="round"/>
+       <line id="stick" stroke="#8A5230" stroke-width="6.5" stroke-linecap="round"/>
+       <circle id="hand" r="11.5" fill="#F0C1A3"/>
+       <g id="wstar"><path d="M0 -17 L5 -5.5 L17 -5.5 L7.5 2.8 L11 15 L0 7.5 L-11 15 L-7.5 2.8 L-17 -5.5 L-5 -5.5Z" fill="#FFD45C" stroke="#F5A623" stroke-width="2.5" stroke-linejoin="round"/>
+         <circle cx="-4" cy="-4" r="2.5" fill="#fff" opacity=".8"/></g>`
     : o.wave
-      ? `<path d="M226 280 Q262 238 266 196" stroke="${sk}" stroke-width="20" fill="none" stroke-linecap="round"/><circle cx="266" cy="190" r="13" fill="${sk}"/>`
-      : `<path d="M226 276 Q252 326 248 380" stroke="${sk}" stroke-width="20" fill="none" stroke-linecap="round"/><circle cx="248" cy="386" r="12" fill="${sk}"/>`;
-  const cap = o.cap ? `<path d="M180 72 L252 94 L180 116 L108 94Z" fill="#1E2A5A"/><path d="M150 100 H210 V118 Q180 128 150 118Z" fill="#2B3A75"/>
-      <path d="M240 98 Q246 112 242 132" stroke="#FFD45C" stroke-width="3" fill="none"/><circle cx="242" cy="135" r="5.5" fill="#FFD45C"/>` : '';
+      ? `<path d="M226 280 Q262 238 266 196" stroke="${skS}" stroke-width="19" fill="none" stroke-linecap="round"/><circle cx="266" cy="190" r="12.5" fill="#F0C1A3"/>`
+      : `<path d="M226 276 Q250 326 246 378" stroke="${skS}" stroke-width="19" fill="none" stroke-linecap="round"/><circle cx="246" cy="384" r="11.5" fill="#F0C1A3"/>`;
+  const cap = o.cap ? `<path d="M180 74 L254 96 L180 118 L106 96Z" fill="#22305F"/><path d="M148 102 H212 V120 Q180 131 148 120Z" fill="#2E3F7A"/>
+      <path d="M242 100 Q248 114 244 134" stroke="#FFD45C" stroke-width="3" fill="none"/><circle cx="244" cy="137" r="5.5" fill="#FFD45C"/>` : '';
   const scroll = o.diploma ? `<g transform="rotate(-20 112 384)"><rect x="70" y="374" width="84" height="22" rx="11" fill="#FFF8E8" stroke="#C9A36B" stroke-width="3"/>
       <rect x="104" y="372" width="12" height="26" fill="#C2465A"/></g>` : '';
   return `<g ${o.ids ? 'id="kid"' : 'class="rach"'}>
-    <path d="M116 176 Q108 102 180 96 Q252 102 244 176 Q258 236 248 292 Q262 336 238 362 Q214 376 200 350 L160 350 Q146 376 122 362 Q98 336 112 292 Q102 236 116 176Z" fill="${hair}"/>
-    <path d="M122 214 Q110 258 126 300 Q114 330 130 354 M238 214 Q250 258 234 300 Q246 330 230 354" stroke="${hl}" stroke-width="7" fill="none" stroke-linecap="round" opacity=".9"/>
-    <rect x="150" y="462" width="17" height="74" rx="7" fill="${sk}"/><rect x="193" y="462" width="17" height="74" rx="7" fill="${sk}"/>
-    <ellipse cx="155" cy="540" rx="19" ry="9" fill="#C2465A"/><ellipse cx="207" cy="540" rx="19" ry="9" fill="#C2465A"/>
-    <path d="M120 396 H240 L260 470 Q180 486 100 470Z" fill="#3E7FB0"/>
-    <path d="M146 404 L136 466 M180 406 V474 M214 404 L224 466" stroke="#2F6A96" stroke-width="3" opacity=".6"/>
-    <path d="M134 272 Q106 322 112 380" stroke="${sk}" stroke-width="20" fill="none" stroke-linecap="round"/>
-    <circle cx="112" cy="386" r="12" fill="${sk}"/>
+    <defs>
+      <radialGradient id="${u}sk" cx="45%" cy="38%" r="70%"><stop offset="0" stop-color="#FCE0CC"/><stop offset=".7" stop-color="#F6CDB2"/><stop offset="1" stop-color="#EDB696"/></radialGradient>
+      <linearGradient id="${u}hr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3A2116"/><stop offset=".45" stop-color="#55301F"/><stop offset=".78" stop-color="#8A5A36"/><stop offset="1" stop-color="#C08A58"/></linearGradient>
+      <radialGradient id="${u}ir" cx="45%" cy="40%" r="60%"><stop offset="0" stop-color="#A6B868"/><stop offset=".7" stop-color="#6E7F3A"/><stop offset="1" stop-color="#4A5626"/></radialGradient>
+      <radialGradient id="${u}bl" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#FF8FA3" stop-opacity=".55"/><stop offset="1" stop-color="#FF8FA3" stop-opacity="0"/></radialGradient>
+      <linearGradient id="${u}fh" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#43261A"/><stop offset=".55" stop-color="#5E3622"/><stop offset=".85" stop-color="#9A6840"/><stop offset="1" stop-color="#C8925E"/></linearGradient>
+      <linearGradient id="${u}bz" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FBF3EA"/><stop offset="1" stop-color="#EFE2D2"/></linearGradient>
+    </defs>
+    <!-- hair, back layer: long waves with lighter ends -->
+    <path d="M114 172 Q104 100 180 94 Q256 100 246 172 Q262 214 250 250 Q268 286 252 320 Q268 352 242 374 Q222 390 204 366 L156 366 Q138 390 118 374 Q92 352 108 320 Q92 286 110 250 Q98 214 114 172Z" fill="${hairG}"/>
+    <!-- legs, skirt -->
+    <path d="M152 462 L150 532 M208 462 L210 532" stroke="${skS}" stroke-width="16" stroke-linecap="round"/>
+    <path d="M136 540 Q140 528 156 530 Q170 532 170 542 Z M190 542 Q190 532 204 530 Q220 528 224 540 Z" fill="#C2465A"/>
+    <path d="M122 396 H238 L258 468 Q180 486 102 468Z" fill="#35689A"/>
+    <path d="M122 396 H238 L242 412 Q180 420 118 412Z" fill="#2B5884"/>
+    <path d="M150 414 L140 466 M180 418 V474 M210 414 L220 466" stroke="#24507A" stroke-width="2.5" opacity=".5"/>
+    <!-- left arm -->
+    <path d="M136 272 Q108 322 114 378" stroke="${skS}" stroke-width="19" fill="none" stroke-linecap="round"/>
+    <circle cx="114" cy="384" r="11.5" fill="#F0C1A3"/>
     ${scroll}
     ${rightArm}
-    <path d="M128 262 Q180 250 232 262 Q246 330 242 402 Q180 412 118 402 Q114 330 128 262Z" fill="${blouse}"/>
-    ${flowers}
-    <rect x="168" y="222" width="24" height="38" fill="${sk}"/>
-    <rect x="162" y="246" width="36" height="17" rx="8" fill="${blouse}" stroke="#E8D5BE" stroke-width="2"/>
-    <ellipse cx="180" cy="176" rx="50" ry="58" fill="${sk}"/>
-    <path d="M128 168 Q126 106 180 102 Q234 106 232 168 Q214 126 180 124 Q146 126 128 168Z" fill="${hair}"/>
-    <path d="M180 114 Q142 126 133 198 Q122 170 127 148 Q136 112 180 108Z" fill="${hair}"/>
-    <path d="M180 114 Q218 126 227 198 Q238 170 233 148 Q224 112 180 108Z" fill="${hair}"/>
-    <path d="M146 130 Q136 150 136 176 M214 130 Q224 150 224 176" stroke="${hl}" stroke-width="5" fill="none" stroke-linecap="round" opacity=".9"/>
+    <!-- sleeveless high-neck floral blouse -->
+    <path d="M130 264 Q180 250 230 264 Q244 330 240 402 Q180 412 120 402 Q116 330 130 264Z" fill="url(#${u}bz)"/>
+    <path d="M130 264 Q126 300 128 330 M230 264 Q234 300 232 330" stroke="#E2D0BC" stroke-width="3" fill="none"/>
+    ${pattern}
+    <!-- neck -->
+    <path d="M166 220 Q166 246 162 256 H198 Q194 246 194 220Z" fill="${sk}"/>
+    <path d="M166 232 Q180 242 194 232" stroke="${skS}" stroke-width="5" fill="none" opacity=".7"/>
+    <path d="M158 248 Q180 242 202 248 L204 266 Q180 260 156 266Z" fill="url(#${u}bz)" stroke="#E2D0BC" stroke-width="1.5"/>
+    ${flower(180, 256, .8, '#E07A93')}
+    <!-- face -->
+    <path d="M132 158 Q132 110 180 108 Q228 110 228 158 Q228 200 212 220 Q198 238 180 238 Q162 238 148 220 Q132 200 132 158Z" fill="${sk}"/>
+    <ellipse cx="180" cy="232" rx="16" ry="4" fill="${skS}" opacity=".5"/>
+    <!-- hair, front: center part and soft curtain waves over the shoulders -->
+    <path d="M130 166 Q126 104 180 100 Q234 104 230 166 Q216 126 187 120 L180 111 L173 120 Q144 126 130 166Z" fill="#4A2A1C"/>
+    <path d="M178 106 Q140 112 132 162 Q128 198 136 230 Q130 262 142 300 Q146 318 136 336 Q118 316 118 286 Q106 256 114 226 Q106 192 116 160 Q126 106 178 102Z" fill="url(#${u}fh)"/>
+    <path d="M182 106 Q220 112 228 162 Q232 198 224 230 Q230 262 218 300 Q214 318 224 336 Q242 316 242 286 Q254 256 246 226 Q254 192 244 160 Q234 106 182 102Z" fill="url(#${u}fh)"/>
+    <path d="M150 116 Q134 140 132 176 Q130 210 138 238 M210 116 Q226 140 228 176 Q230 210 222 238" stroke="#7A4E30" stroke-width="2.6" fill="none" stroke-linecap="round" opacity=".75"/>
+    <path d="M124 250 Q118 278 128 306 M236 250 Q242 278 232 306" stroke="#D6A06A" stroke-width="3" fill="none" stroke-linecap="round" opacity=".7"/>
     ${cap}
-    <path d="M150 158 Q162 150 174 157 M186 157 Q198 150 210 158" stroke="#4A2A1A" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+    <!-- brows -->
+    <path d="M147 153 Q160 146 174 151" stroke="#53301F" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M186 151 Q200 146 213 153" stroke="#53301F" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <!-- eyes -->
     <g class="blink">
-      <ellipse cx="162" cy="177" rx="11" ry="12" fill="#fff"/><ellipse cx="198" cy="177" rx="11" ry="12" fill="#fff"/>
-      <circle cx="163" cy="178" r="7.5" fill="#7A8A45"/><circle cx="197" cy="178" r="7.5" fill="#7A8A45"/>
-      <circle cx="163" cy="178" r="3.8" fill="${INK}"/><circle cx="197" cy="178" r="3.8" fill="${INK}"/>
-      <circle cx="165.5" cy="175" r="2.2" fill="#fff"/><circle cx="199.5" cy="175" r="2.2" fill="#fff"/>
-      <path d="M150 170 L146 165 M174 170 L178 165 M186 170 L182 165 M210 170 L214 165" stroke="#4A2A1A" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M146 172 Q160 158 176 171 Q161 185 146 172Z" fill="#fff"/>
+      <path d="M184 171 Q200 158 214 172 Q199 185 184 171Z" fill="#fff"/>
+      <circle cx="161.5" cy="172" r="8.6" fill="url(#${u}ir)"/><circle cx="198.5" cy="172" r="8.6" fill="url(#${u}ir)"/>
+      <circle cx="161.5" cy="172.5" r="4.2" fill="#1E1410"/><circle cx="198.5" cy="172.5" r="4.2" fill="#1E1410"/>
+      <circle cx="164.5" cy="168.6" r="2.8" fill="#fff"/><circle cx="201.5" cy="168.6" r="2.8" fill="#fff"/>
+      <circle cx="159" cy="176" r="1.2" fill="#fff" opacity=".85"/><circle cx="196" cy="176" r="1.2" fill="#fff" opacity=".85"/>
+      <path d="M145 172 Q160 156 177 170" stroke="#2E1A12" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+      <path d="M183 170 Q200 156 215 172" stroke="#2E1A12" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+      <path d="M146 170 l-4.5 -2.5 M148.5 166.5 l-3.5 -3.5 M214 170 l4.5 -2.5 M211.5 166.5 l3.5 -3.5" stroke="#2E1A12" stroke-width="1.8" stroke-linecap="round"/>
     </g>
-    <path d="M180 184 Q175 198 184 199" stroke="#D99A80" stroke-width="3" fill="none" stroke-linecap="round"/>
-    <circle cx="148" cy="204" r="10" fill="#FF8FA3" opacity=".4"/><circle cx="212" cy="204" r="10" fill="#FF8FA3" opacity=".4"/>
-    <path d="M159 207 Q180 232 201 207 Q180 213 159 207Z" fill="#fff" stroke="#C8556A" stroke-width="3.5" stroke-linejoin="round"/>
-    <ellipse ${o.ids ? 'id="mouth" ' : ''}class="gmouth" cx="180" cy="217" rx="11" ry="3" fill="#9E3A4E"/>
+    <!-- nose -->
+    <path d="M178 189 Q175 195 179 197 Q183 197 185 195" stroke="#D49A80" stroke-width="2.1" fill="none" stroke-linecap="round"/>
+
+    <ellipse cx="149" cy="198" rx="13" ry="9" fill="url(#${u}bl)"/><ellipse cx="211" cy="198" rx="13" ry="9" fill="url(#${u}bl)"/>
+    <!-- smile -->
+    <path d="M160 205 Q180 233 200 205 Q180 211 160 205Z" fill="#B23A55"/>
+    <ellipse ${o.ids ? 'id="mouth" ' : ''}class="gmouth" cx="180" cy="216" rx="11" ry="4" fill="#8E3446"/>
+    <ellipse cx="180" cy="220" rx="6" ry="2.4" fill="#E77A8E"/>
+    <path d="M163.5 206.5 Q180 212.5 196.5 206.5 Q194 214 180 215 Q166 214 163.5 206.5Z" fill="#fff"/>
+    <path d="M160 205 Q180 211 200 205" stroke="#C8556A" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+    <path d="M157 204 Q159 202 162 204 M198 204 Q201 202 203 204" stroke="#D49A80" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+ peeking -->
+    <circle cx="137" cy="208" r="2.6" fill="#F6C860" stroke="#C99A3A" stroke-width="1"/><circle cx="223" cy="208" r="2.6" fill="#F6C860" stroke="#C99A3A" stroke-width="1"/>
   </g>`;
 }
-const rachelBust = () => `<svg viewBox="96 86 168 220" aria-hidden="true">${rachelSVG({})}</svg>`;
+const rachelBust = () => `<svg viewBox="100 92 160 200" aria-hidden="true">${rachelSVG({})}</svg>`;
 
 /* ---------- Lettervale: the wonderland scene ---------- */
 function tree(x, y, r, c1 = '#5DB45D', c2 = '#6CC46C') {
@@ -1872,7 +1916,7 @@ function showView(v) {
   if (v !== 'uni') uniIn.innerHTML = '';
   window.scrollTo(0, 0);
 }
-function showCover() { stopAll(); mi = -1; renderCover(); showView('cover'); scheduleCoverHint(); }
+function showCover() { stopAll(); hintPage(); mi = -1; renderCover(); showView('cover'); scheduleCoverHint(); }
 
 function getDone() { try { return JSON.parse(localStorage.getItem(doneKey()) || '[]'); } catch (e) { return []; } }
 function addDone(L) { const d = getDone(); if (!d.includes(L)) { d.push(L); try { localStorage.setItem(doneKey(), JSON.stringify(d)); } catch (e) {} } }
@@ -1907,7 +1951,7 @@ function worldHTML() {
 }
 
 function showWorld(o = {}) {
-  stopAll(); mi = -1;
+  stopAll(); hintPage(); mi = -1;
   showView('world');
   useRig(RACHEL_RIG);
   worldIn.innerHTML = worldHTML();
@@ -2022,39 +2066,127 @@ function setLang(l) {
   pickVoices(); fillAdult();
 }
 
-/* ---------- Hints for pre-readers: a pointing hand ---------- */
-let hintEl = null, hintTimer = null, hintRaf = 0, hintGet = null;
+/* ---------- Hints for pre-readers: a pointing hand on every screen ---------- */
+// Whenever Ms. Rachel is quiet and the child has not acted, the hand points at what to tap next.
+let hintEl = null, hintRaf = 0, hintCur = null, hintGet = null, hs = {};
+let lastTap = 0, lastQuiet = 0, lastPage = 0, wasBusy = false;
 function clearHint() {
-  clearTimeout(hintTimer); cancelAnimationFrame(hintRaf);
+  cancelAnimationFrame(hintRaf);
   if (hintEl) { hintEl.remove(); hintEl = null; }
-  document.querySelectorAll('.pulse').forEach(e => e.classList.remove('pulse'));
+  if (hintCur && hintCur.classList) hintCur.classList.remove('pulse');
+  hintCur = null;
+}
+function hintPage() { clearHint(); hs = {}; lastPage = performance.now(); }
+function setHint() {}              // kept for older calls; the watcher below decides
+function scheduleCoverHint() {}
+function noteWrong() { if (hs.wrongI !== game.i) { hs.wrongI = game.i; hs.wrong = 0; } hs.wrong++; }
+function inView(el) {
+  if (!el || !el.isConnected || !el.getClientRects().length) return false;
+  const r = el.getBoundingClientRect();
+  return r.width > 0 && r.bottom > 0 && r.top < window.innerHeight && r.right > 0 && r.left < window.innerWidth;
 }
 function showHint(el) {
   clearHint();
-  if (!el || !el.isConnected) return;
-  el.classList.add('pulse');
+  hintCur = el;
+  if (el.classList) el.classList.add('pulse');
   hintEl = document.createElement('div'); hintEl.className = 'hand'; hintEl.innerHTML = ICON.hand; hintEl.setAttribute('aria-hidden', 'true');
   document.body.appendChild(hintEl);
   const place = () => {
-    if (!hintEl || !el.isConnected) return clearHint();
-    const r = el.getBoundingClientRect();
+    if (!hintEl) return;
+    if (!el.isConnected) return clearHint();
+    const r = el.getBoundingClientRect(), below = r.bottom + 62 < window.innerHeight;
+    hintEl.classList.toggle('down', !below);
     hintEl.style.left = (r.left + r.width / 2 - 22) + 'px';
-    hintEl.style.top = Math.min(r.bottom - 8, window.innerHeight - 70) + 'px';
+    hintEl.style.top = (below ? r.bottom - 10 : r.top - 50) + 'px';
     hintRaf = requestAnimationFrame(place);
   };
   place();
 }
-function setHint(get, extra = 1800) {
-  hintGet = get; clearTimeout(hintTimer);
-  const tick = () => { if (talking || song.playing) { hintTimer = setTimeout(tick, 300); return; } hintTimer = setTimeout(() => { const el = hintGet && hintGet(); if (el) showHint(el); }, extra); };
-  hintTimer = setTimeout(tick, 350);
+function hintTarget() {
+  const q = s => document.querySelector(s);
+  if (!coverEl.hidden) return q('#enterBtn');
+  if (!worldEl.hidden) {
+    const b = q('#blocks');
+    if (b && b.hidden) return q('#skipBtn');
+    return q('.stop.next') || q('.unistop.open');
+  }
+  if (!uniEl.hidden) {
+    const g = hs.greeted || new Set();
+    return [...document.querySelectorAll('.dbody')].find(d => !g.has(d.dataset.greet)) || q('#uni [data-act="map"]');
+  }
+  if (mi < 0 || bookEl.hidden) return null;
+  const m = mod(), p = pages()[cur], P = pageEl, sel = s => P.querySelector(s);
+  const wrongs = hs.wrongI === game.i ? (hs.wrong || 0) : 0;
+  const done = () => game.items && game.i >= game.items.length;
+  if (p === 'finale') return sel('.homebig');
+  if (p === 'song') return hs.sang ? nextBtn : sel('#singBtn');
+  if (p === 'intro') return sel('.gobig') || sel('[data-act="next"]');
+  if (LETTERS[p]) return hs.heardSound ? nextBtn : sel('[data-sound]');
+  if (m.kind === 'letter') {
+    if (p === 'trace') return game.praised ? nextBtn : sel('#trace');
+    if (p === 'find') return game.found >= 4 ? null : [...P.querySelectorAll('[data-lcell]')].find(b => !b.classList.contains('ok') && game.grid[+b.dataset.lcell].toUpperCase() === m.L);
+    if (p === 'pick') {
+      if (done()) return null;
+      if (!hs.heard) return sel('[data-act="hearOpts"]');
+      return wrongs >= 2 ? sel(`[data-lpick="${game.items[game.i]}"]`) : sel('.picopts');
+    }
+  }
+  if (p === 'find') {
+    const L = game.targets && game.targets[game.round];
+    return [...P.querySelectorAll('[data-cell]')].find(b => !b.classList.contains('ok') && game.grid[+b.dataset.cell].toUpperCase() === L) || nextBtn;
+  }
+  if (p === 'first') {
+    if (done()) return nextBtn;
+    if (!hs.heard) return sel('.key[data-word]');
+    return wrongs >= 2 ? sel(`[data-pick="${game.items[game.i][1]}"]`) : sel('.trio');
+  }
+  if (p === 'blend') return hs.blended ? nextBtn : sel('[data-act="blend"]');
+  if (isWordPage(p)) {
+    if (m.cvc) return hs.blended ? nextBtn : sel('[data-act="blend"]');
+    return hs.heardWord ? nextBtn : sel('.wcard');
+  }
+  if (p === 'hear') {
+    if (done()) return nextBtn;
+    if (!hs.heard) return sel('[data-act="hearAgain"]');
+    return wrongs >= 2 ? sel(`[data-hopt="${game.items[game.i].w}"]`) : sel('.opts');
+  }
+  if (p === 'read') {
+    if (done()) return nextBtn;
+    return wrongs >= 2 ? sel(`[data-rpic="${game.items[game.i].w}"]`) : sel('.picopts');
+  }
+  return nextBtn;
 }
+function hintTick() {
+  const now = performance.now();
+  const busy = talking || song.playing || entering || !!document.querySelector('dialog[open]') || (tr && tr.drawing);
+  if (busy) { wasBusy = true; if (hintEl) clearHint(); return; }
+  if (wasBusy) { wasBusy = false; lastQuiet = now; return; }
+  const base = Math.max(lastPage, lastQuiet), tapped = lastTap > base;
+  if (now - Math.max(base, lastTap) < (tapped ? 5000 : 1200)) return;
+  let el = null;
+  try { el = hintTarget(); } catch (e) { el = null; }
+  if (el && !el.disabled && !inView(el) && coverEl.hidden && el.isConnected && el.getClientRects().length && el !== hintCur) {
+    el.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion:reduce)').matches ? 'auto' : 'smooth', block: 'nearest' });
+    return;
+  }
+  if (el && (el.disabled || !inView(el))) el = null;
+  if (el !== hintCur) { clearHint(); if (el) showHint(el); }
+}
+setInterval(hintTick, 300);
 document.addEventListener('pointerdown', e => {
   if (e.target.closest && e.target.closest('dialog')) return;
-  clearHint();
-  if (hintGet) { const g = hintGet; setTimeout(() => { if (hintGet === g) setHint(g, 9000); }, 50); }
+  lastTap = performance.now(); clearHint();
 }, true);
-function scheduleCoverHint() { setHint(() => document.getElementById('enterBtn'), 3500); }
+document.addEventListener('click', e => {
+  const b = e.target.closest && e.target.closest('button'); if (!b) return;
+  const a = b.dataset.act;
+  if (b.dataset.sound || b.dataset.name) hs.heardSound = true;
+  if (a === 'hearOpts' || a === 'hearAgain' || b.dataset.word) hs.heard = true;
+  if (a === 'blend') hs.blended = true;
+  if (b.dataset.w) hs.heardWord = true;
+  if (a === 'sing') hs.sang = true;
+  if (b.dataset.greet) (hs.greeted = hs.greeted || new Set()).add(b.dataset.greet);
+}, true);
 
 /* ---------- Ms. Rachel the guide ---------- */
 function cheer() {
@@ -2168,7 +2300,7 @@ function tapLCell(btn) {
       autoAdvance('find', 2600);
     } else speak([E(x === L ? L : LETTERS[L].lower)]);
   } else {
-    btn.classList.remove('shake'); void btn.offsetWidth; btn.classList.add('shake');
+    btn.classList.remove('shake'); void btn.offsetWidth; btn.classList.add('shake'); noteWrong();
     speak(T().findNo(L));
   }
 }
@@ -2198,11 +2330,11 @@ function lpick(btn) {
     document.getElementById('reveal').innerHTML = keyLabel(w, L);
     speak([N(T().yes), E(sayW(w), .65)], () => setTimeout(() => {
       if (pages()[cur] !== 'pick') return;
-      game.i++; game.locked = false; pageEl.innerHTML = lpickHTML();
+      game.i++; game.locked = false; pageEl.innerHTML = lpickHTML(); clearHint();
       if (game.i >= game.items.length) { burst2(); speak([N(T().great)]); autoAdvance('pick', 2600); } else prompt();
     }, 700));
   } else {
-    btn.classList.remove('shake'); void btn.offsetWidth; btn.classList.add('shake');
+    btn.classList.remove('shake'); void btn.offsetWidth; btn.classList.add('shake'); noteWrong();
     speak([E(sayW(o), .65), N(T().no)]);
   }
 }
@@ -2406,7 +2538,7 @@ function uniSVG() {
   </svg>`;
 }
 function showUni() {
-  stopAll(); mi = -1;
+  stopAll(); hintPage(); mi = -1;
   showView('uni');
   const t = T(), d = getDone();
   uniIn.innerHTML = `<div class="wbar"><button class="wbtn iconly" data-act="map" aria-label="${t.mapTitle}">${ICON.map}</button>
@@ -2443,10 +2575,10 @@ const SPK = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><pa
 const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const tile = (L, text, attrs = '') => `<button class="tile" style="background:${LCOL[L]}" ${attrs}>${text}</button>`;
 
-function stopAll() { speakId++; if (synth) synth.cancel(); stopAudio(); stopSong(); setTalking(false); clearHint(); hintGet = null; clearTimeout(advanceT); }
+function stopAll() { speakId++; if (synth) synth.cancel(); stopAudio(); stopSong(); setTalking(false); clearHint(); clearTimeout(advanceT); }
 
 function render(dir = 0) {
-  stopAll();
+  stopAll(); hintPage();
   pageEl.classList.remove('is-home');
   const m = mod(), P = pages(), p = P[cur];
   navEl.hidden = false; homeBtn.hidden = false;
@@ -2602,7 +2734,7 @@ function hearPick(btn) {
       if (game.i >= game.items.length) speak([es('¡Excelente! Lo hiciste muy bien.')]); else prompt();
     }, 600));
   } else {
-    btn.classList.remove('shake'); void btn.offsetWidth; btn.classList.add('shake');
+    btn.classList.remove('shake'); void btn.offsetWidth; btn.classList.add('shake'); noteWrong();
     speak([es('Escucha otra vez.'), en(x.w, 0.6)]);
   }
 }
@@ -2628,7 +2760,7 @@ function readPick(btn) {
       if (game.i >= game.items.length) speak([es('¡Excelente! Leíste todas las palabras.')]); else prompt();
     }, 600));
   } else {
-    btn.classList.remove('shake'); void btn.offsetWidth; btn.classList.add('shake');
+    btn.classList.remove('shake'); void btn.offsetWidth; btn.classList.add('shake'); noteWrong();
     speak([es('Esa no. Di el sonido de cada letra y prueba otra vez.')]);
   }
 }
@@ -2658,7 +2790,7 @@ function tapCell(btn) {
       });
     } else speak([en(L)]);
   } else {
-    btn.classList.remove('shake'); void btn.offsetWidth; btn.classList.add('shake');
+    btn.classList.remove('shake'); void btn.offsetWidth; btn.classList.add('shake'); noteWrong();
     speak([es('Esa no. Busca la'), en(L + '.')]);
   }
 }
@@ -2687,7 +2819,7 @@ function pick(btn) {
       if (game.i >= game.items.length) speak([es('¡Excelente! Lo hiciste muy bien.')]); else prompt();
     }, 700));
   } else {
-    btn.classList.remove('shake'); void btn.offsetWidth; btn.classList.add('shake');
+    btn.classList.remove('shake'); void btn.offsetWidth; btn.classList.add('shake'); noteWrong();
     speak([es('Escucha otra vez.'), en(w, 0.6)]);
   }
 }
