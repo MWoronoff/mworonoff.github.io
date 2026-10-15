@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Vamos a leer con la maestra Rachel</title>
+<title>Vamos a leer con la maestra Ro</title>
 <meta name="description" content="Lecciones de lectura en inglés para niños hispanohablantes, con la maestra Rachel Woronoff.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Baloo+2:wght@700;800&family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Baloo+2:wght@700;800&family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#E6F4EC; --card:#FFFFFF; --ink:#1E2A5A; --muted:#55618C; --line:#C9E3D4;
@@ -243,99 +243,104 @@ dialog p{margin:0 0 14px; color:var(--muted); line-height:1.5}
 h1,h2,.fun{font-family:"Fredoka","Baloo 2","Andika",sans-serif; font-weight:700; letter-spacing:.01em}
 
 /* ---------- Cover: professional landing page ---------- */
-#cover{min-height:100vh; background:#fff; color:#1E2A5A; font-family:"Nunito","Andika","Segoe UI",system-ui,sans-serif; color-scheme:light}
+#cover{min-height:100vh; background:#fff; color:#1E2A5A; font-family:"Plus Jakarta Sans","Segoe UI",system-ui,sans-serif; color-scheme:light; --ink:#1E2A5A; --muted:#4F5B82; --line:#E6E9F2; --accent:#E0475B; --soft:#F6F7FB}
+#cover h1,#cover h2,#cover h3{font-family:"Plus Jakarta Sans","Segoe UI",system-ui,sans-serif}
 .cwrap{max-width:1180px; margin:0 auto; padding:0 clamp(18px,4vw,40px)}
-.cnav{position:sticky; top:0; z-index:20; background:rgba(255,255,255,.92); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); border-bottom:1px solid #EEF0F6}
+.cnav{position:sticky; top:0; z-index:20; background:rgba(255,255,255,.94); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); border-bottom:1px solid var(--line)}
 .cnav-in{display:flex; align-items:center; gap:24px; height:68px}
-.logo{display:flex; align-items:center; gap:10px; color:#1E2A5A; text-decoration:none; font-family:"Fredoka",sans-serif; font-weight:700; font-size:1.35rem}
-.logomark{display:flex; gap:3px}
-.logomark i{font-style:normal; font-family:"Andika",sans-serif; width:26px; height:26px; display:grid; place-items:center; border-radius:7px; border:2px solid #1E2A5A; font-size:.9rem}
-.clinks{display:flex; gap:22px; margin-left:auto}
-.clinks a{color:#55618C; text-decoration:none; font-weight:700}
-.clinks a:hover{color:#C2465A}
-.clang{font:inherit; font-weight:700; color:#1E2A5A; border:2px solid #E3E6F0; border-radius:999px; padding:.35em .9em; background:#fff}
-.hero{overflow:hidden; background:radial-gradient(1200px 500px at 85% 20%,#FFE7EC 0,transparent 60%),radial-gradient(900px 500px at 10% 90%,#E3F3FF 0,transparent 60%),#FFFBF5}
-.hero-in{display:grid; grid-template-columns:1.1fr .9fr; gap:clamp(24px,5vw,64px); align-items:center; padding-top:clamp(36px,6vw,80px); padding-bottom:clamp(40px,6vw,88px)}
-.eyebrow{margin:0 0 14px; display:inline-block; background:#fff; border:1px solid #F1D7DD; color:#C2465A; font-weight:800; font-size:.95rem; padding:.35em .9em; border-radius:999px}
-.h1{margin:0; font-size:clamp(2.4rem,5.2vw,4.3rem); line-height:1.05; font-weight:600; color:#1E2A5A}
-.lead{margin:18px 0 0; font-size:clamp(1.08rem,1.6vw,1.25rem); line-height:1.6; color:#4A557D; max-width:36em}
-.ctas{display:flex; align-items:center; gap:14px; margin-top:28px; flex-wrap:wrap}
-.enter{border:0; background:#FF6F82; color:#fff; font-family:"Fredoka",sans-serif; font-weight:700; font-size:clamp(1.3rem,2.4vw,1.7rem);
-  padding:.62em 1.4em; border-radius:999px; display:inline-flex; align-items:center; gap:.5em; box-shadow:0 10px 24px rgba(255,111,130,.35),0 4px 0 #D9475C; cursor:pointer}
-.enter svg{width:1em; height:1em}
-.enter:hover{background:#FF5D73}
-.enter:active{transform:translateY(3px); box-shadow:0 6px 14px rgba(255,111,130,.35),0 1px 0 #D9475C}
-.hear{width:58px; height:58px; border-radius:50%; border:2px solid #E3E6F0; background:#fff; color:#1E2A5A; display:grid; place-items:center; cursor:pointer}
-.hear svg{width:26px; height:26px}
-.badges{list-style:none; padding:0; margin:28px 0 0; display:flex; flex-wrap:wrap; gap:10px 22px; color:#4A557D; font-weight:700; font-size:.98rem}
-.badges li{display:flex; align-items:center; gap:8px}
-.hphoto{position:relative; justify-self:center; width:min(540px,92vw)}
-.blob{position:absolute; border-radius:46% 54% 60% 40%/50% 42% 58% 50%; z-index:0}
-.b1{inset:-26px -30px auto auto; width:78%; height:78%; background:#FFD45C; opacity:.55}
-.b2{inset:auto auto -26px -30px; width:70%; height:70%; background:#9ED6F5; opacity:.55}
-.pcard{position:relative; z-index:1; margin:0; background:#fff; border-radius:28px; padding:12px; box-shadow:0 24px 60px rgba(30,42,90,.18)}
-.pcard img{display:block; width:100%; height:auto; aspect-ratio:1; object-fit:cover; border-radius:20px}
-.pcard figcaption{display:flex; flex-direction:column; gap:2px; padding:12px 8px 4px}
-.pcard figcaption b{font-family:"Fredoka",sans-serif; font-size:1.25rem}
-.pcard figcaption span{color:#55618C; font-weight:700; font-size:.95rem}
-.fchip{position:absolute; z-index:2; display:grid; place-items:center; width:58px; height:58px; border-radius:18px; background:#fff; font-family:"Andika",sans-serif; font-weight:700; font-size:1.5rem;
-  box-shadow:0 10px 24px rgba(30,42,90,.16); animation:floaty 5s ease-in-out infinite}
-.f1{left:-24px; top:18%; color:#C2465A; --r:-8deg}
-.f2{right:-22px; top:46%; color:#6A5BD8; --r:8deg; animation-delay:-1.5s}
-.f3{right:-14px; bottom:-20px; color:#E2A62A; --r:6deg; animation-delay:-3s}
-@keyframes floaty{0%,100%{transform:translateY(0) rotate(var(--r))}50%{transform:translateY(-10px) rotate(calc(var(--r) * -1))}}
-.csec{padding:clamp(48px,7vw,88px) 0}
-.langpick{margin-top:22px; background:#fff; border:1px solid #EEE3E6; border-radius:20px; padding:14px 16px; box-shadow:0 8px 22px rgba(30,42,90,.06)}
-.langpick > span{display:block; font-weight:800; color:#55618C; font-size:.95rem; margin-bottom:10px}
-.lpchips{display:grid; grid-template-columns:repeat(4,1fr); gap:8px}
-.lp{border:2px solid #E3E6F0; background:#FFFBF5; border-radius:14px; padding:8px 6px; display:flex; flex-direction:column; align-items:center; gap:2px; cursor:pointer; color:#1E2A5A}
-.lp b{font-family:"Fredoka",sans-serif; font-size:1.05rem; white-space:nowrap}
-.lp small{color:#55618C; font-weight:700; font-size:.78rem}
-.lp:hover{border-color:#FF9AA8}
-.lp.on{border-color:#FF6F82; background:#FFE7EC; box-shadow:0 0 0 3px rgba(255,111,130,.18)}
-@media (max-width:420px){.lpchips{grid-template-columns:repeat(2,1fr)}}
-.libcard{padding:10px}
-.libcard svg{display:block; width:100%; height:auto; border-radius:20px}
-.floatL{animation:floatL 3.4s ease-in-out infinite}
-@keyframes floatL{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
-.learn{background:#FFFDF8 repeating-linear-gradient(#FFFDF8 0 31px,#DCE8F7 31px 32px); position:relative}
-.learn::before{content:""; position:absolute; top:0; bottom:0; left:clamp(10px,4vw,48px); width:2px; background:#F2B8C0}
-.lgrid{display:grid; grid-template-columns:repeat(4,1fr); gap:18px}
-.lcard{background:#fff; border:1px solid #E7ECF5; border-radius:22px; padding:22px 20px; box-shadow:0 8px 22px rgba(30,42,90,.07)}
-.lcard svg{width:52px; height:52px}
-.lcard h3{margin:12px 0 6px; font-family:"Fredoka",sans-serif; font-size:1.2rem}
-.lcard p{margin:0; color:#4A557D; line-height:1.55}
-.pathsec{background:#F6EFE4}
-.chalk{background:#2F5A46; border:14px solid #8A5A33; border-radius:18px; box-shadow:inset 0 0 40px rgba(0,0,0,.35),0 14px 30px rgba(74,46,24,.25); padding:clamp(22px,4vw,40px); color:#F4F6F0; text-align:center}
-.chalk h2{color:#FFF6D8; margin-bottom:18px}
-.chalk p{margin:18px auto 0; max-width:46em; line-height:1.6; font-size:1.08rem; color:#E3EDE6}
-.chalkabc{display:flex; flex-wrap:wrap; justify-content:center; gap:6px 12px; font-family:"Andika",sans-serif; font-weight:700; font-size:clamp(1.3rem,2.6vw,1.9rem)}
-.chalkabc span{color:var(--c); text-shadow:0 0 1px rgba(255,255,255,.6); opacity:.95}
-.lsteps{list-style:none; padding:0; margin:22px 0 0; display:flex; flex-wrap:wrap; justify-content:center; gap:10px}
-.lsteps li{display:flex; align-items:center; gap:8px; background:rgba(255,255,255,.1); border:2px dashed rgba(255,255,255,.45); border-radius:999px; padding:.35em 1em .35em .4em; font-weight:700}
-.lsteps b{width:28px; height:28px; border-radius:50%; background:#FFD45C; color:#1E2A5A; display:grid; place-items:center}
-@media (max-width:560px){.lgrid{grid-template-columns:1fr !important}}
-.csec h2{margin:0 0 26px; font-size:clamp(1.8rem,3.4vw,2.6rem); font-weight:600}
-.steps{display:grid; grid-template-columns:repeat(3,1fr); gap:20px}
-.step{position:relative; background:#FFFBF5; border:1px solid #F1E6D6; border-radius:24px; padding:26px 22px}
-.step svg{width:64px; height:64px}
-.step h3{margin:14px 0 6px; font-family:"Fredoka",sans-serif; font-size:1.3rem}
-.step p{margin:0; color:#4A557D; line-height:1.55}
-.snum{position:absolute; top:18px; right:20px; font-family:"Fredoka",sans-serif; font-weight:700; color:#C9CFE3; font-size:2rem}
-.about{background:#F3F8FF}
+.logo{display:flex; align-items:center; gap:10px; color:var(--ink); text-decoration:none; font-family:"Plus Jakarta Sans",sans-serif; font-weight:600; font-size:1.3rem}
+.logomark{display:flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:9px; background:var(--ink); color:#fff; font-family:Georgia,"Times New Roman",serif; font-weight:700; font-size:1.05rem; letter-spacing:-.02em}
+.logomark b{color:#FFD45C}
+.clinks{display:flex; gap:26px; margin-left:auto}
+.clinks a{color:var(--muted); text-decoration:none; font-weight:700; font-size:.98rem}
+.clinks a:hover{color:var(--accent)}
+.clang{font:inherit; font-weight:700; color:var(--ink); border:1px solid #D5DAE8; border-radius:10px; padding:.4em .8em; background:#fff}
+.hero{background:linear-gradient(180deg,#FFF7F0 0,#FFFFFF 100%); border-bottom:1px solid var(--line)}
+.hero-in{display:grid; grid-template-columns:1.25fr .75fr; gap:clamp(28px,6vw,80px); align-items:center; padding-top:clamp(40px,6vw,84px); padding-bottom:clamp(44px,6vw,90px)}
+.eyebrow{margin:0 0 16px; color:var(--accent); font-weight:800; font-size:.92rem; letter-spacing:.06em; text-transform:uppercase}
+.h1{margin:0; font-size:clamp(2.2rem,4.4vw,3.6rem); line-height:1.1; font-weight:800; letter-spacing:-.025em; color:var(--ink); max-width:14em}
+.lead{margin:20px 0 0; font-size:clamp(1.06rem,1.5vw,1.2rem); line-height:1.65; color:var(--muted); max-width:34em}
+.ctas{display:flex; align-items:center; gap:12px; margin-top:30px; flex-wrap:wrap}
+.enter{border:0; background:var(--accent); color:#fff; font-family:"Plus Jakarta Sans",sans-serif; font-weight:600; font-size:clamp(1.1rem,1.8vw,1.3rem); padding:.75em 1.4em; border-radius:12px; display:inline-flex; align-items:center; gap:.55em; box-shadow:0 8px 20px rgba(224,71,91,.28); cursor:pointer}
+.enter svg{width:.95em; height:.95em}
+.enter:hover{background:#CC3A4E}
+.ghost{display:inline-flex; align-items:center; padding:.75em 1.3em; border-radius:12px; border:1px solid #CFD5E6; color:var(--ink); background:#fff; font-weight:800; text-decoration:none; font-size:clamp(1rem,1.6vw,1.12rem)}
+.ghost:hover{border-color:var(--ink)}
+.hear{width:52px; height:52px; border-radius:12px; border:1px solid #CFD5E6; background:#fff; color:var(--ink); display:grid; place-items:center; cursor:pointer}
+.hear svg{width:24px; height:24px}
+.stats{display:flex; gap:clamp(20px,4vw,48px); margin:38px 0 0; padding:22px 0 0; border-top:1px solid var(--line); flex-wrap:wrap}
+.stats div{display:flex; flex-direction:column}
+.stats dt{font-family:"Plus Jakarta Sans",sans-serif; font-weight:600; font-size:2rem; line-height:1; color:var(--ink)}
+.stats dd{margin:6px 0 0; color:var(--muted); font-weight:700; font-size:.92rem}
+.portrait{margin:0; justify-self:center; width:min(400px,100%)}
+.pframe{position:relative}
+.pframe::before{content:""; position:absolute; inset:18px -18px -18px 18px; border-radius:24px; background:#FFD45C; z-index:0}
+.pframe img{position:relative; z-index:1; display:block; width:100%; height:auto; aspect-ratio:1; object-fit:cover; border-radius:24px; box-shadow:0 22px 50px rgba(30,42,90,.18)}
+.portrait figcaption{margin-top:30px; display:flex; flex-direction:column; gap:2px}
+.portrait figcaption b{font-family:"Plus Jakarta Sans",sans-serif; font-weight:600; font-size:1.2rem}
+.portrait figcaption span{color:var(--muted); font-weight:700}
+.csec{padding:clamp(52px,7vw,92px) 0}
+.csec h2{margin:0 0 12px; font-size:clamp(1.7rem,3vw,2.3rem); font-weight:800; letter-spacing:-.02em}
+.shead{max-width:46em; margin-bottom:30px}
+.shead p{margin:0; color:var(--muted); line-height:1.65; font-size:1.08rem}
+.langsec{background:var(--soft)}
+.lgrid2{display:grid; grid-template-columns:repeat(4,1fr); gap:16px}
+.lcard2{background:#fff; border:1px solid var(--line); border-radius:18px; padding:20px; display:flex; flex-direction:column; transition:box-shadow .2s,border-color .2s}
+.lcard2:hover{box-shadow:0 12px 28px rgba(30,42,90,.10); border-color:#D5DAE8}
+.lcard2.on{border:2px solid var(--accent); padding:19px}
+.lc-top{display:flex; justify-content:space-between; align-items:center}
+.lc-hello{color:var(--accent); font-weight:800}
+.lc-cur{width:24px; height:24px; border-radius:50%; background:var(--accent); color:#fff; display:grid; place-items:center; font-size:.8rem; font-weight:800}
+.lcard2 h3{margin:10px 0 2px; font-size:1.45rem; font-weight:600}
+.lc-sub{margin:0; color:var(--muted); font-weight:700; font-size:.92rem; min-height:1.4em}
+.lc-prog{margin-top:16px; height:6px; border-radius:6px; background:#EDEFF6; overflow:hidden}
+.lc-prog i{display:block; height:100%; background:#3E9E6A; border-radius:6px}
+.lc-count{margin:6px 0 16px; color:var(--muted); font-size:.85rem; font-weight:700}
+.lc-go{margin-top:auto; border:0; border-radius:10px; background:var(--ink); color:#fff; font:inherit; font-weight:800; font-size:1rem; padding:.7em 1em; display:flex; align-items:center; justify-content:center; gap:.5em; cursor:pointer}
+.lc-go svg{width:.85em; height:.85em}
+.lc-go:hover{background:#2C3B78}
+.lcard2.on .lc-go{background:var(--accent)}
+.subh{margin:8px 0 14px; font-size:1.15rem; font-weight:600; color:var(--ink)}
+.ltiles{display:grid; grid-template-columns:repeat(13,1fr); gap:10px; margin-bottom:34px}
+.ltile{position:relative; border:1px solid var(--line); background:#fff; border-radius:14px; padding:10px 4px 6px; display:flex; flex-direction:column; align-items:center; gap:4px; cursor:pointer; color:var(--ink); border-top:5px solid var(--lc)}
+.ltile b{font-family:"Andika",sans-serif; font-size:1.25rem}
+.ltile span svg{width:40px; height:40px; display:block}
+.ltile i{position:absolute; top:3px; right:5px; font-style:normal; color:#E2A62A; font-size:.85rem}
+.ltile:hover{box-shadow:0 8px 20px rgba(30,42,90,.12); transform:translateY(-2px)}
+.ltile.done{background:#FFFBEF}
+.wtiles{display:grid; grid-template-columns:repeat(5,1fr); gap:14px}
+.wtile{display:flex; align-items:center; gap:12px; border:1px solid var(--line); background:#fff; border-radius:16px; padding:12px; cursor:pointer; color:var(--ink); text-align:left; border-left:6px solid var(--mc)}
+.wtile:hover{box-shadow:0 8px 20px rgba(30,42,90,.12)}
+.wt-art svg{width:52px; height:52px; display:block}
+.wt-txt{display:flex; flex-direction:column; min-width:0}
+.wt-txt b{font-family:"Plus Jakarta Sans",sans-serif; font-weight:600; font-size:1.08rem}
+.wt-txt small{color:var(--muted); font-weight:700; font-size:.85rem}
+.lsteps2{list-style:none; padding:0; margin:34px 0 0; display:flex; flex-wrap:wrap; gap:10px; color:var(--muted); font-weight:700}
+.lsteps2 li{display:flex; align-items:center; gap:8px; border:1px solid var(--line); border-radius:999px; padding:.35em 1em .35em .4em; background:var(--soft)}
+.lsteps2 b{width:26px; height:26px; border-radius:50%; background:var(--ink); color:#fff; display:grid; place-items:center; font-size:.85rem}
+.howsec{background:var(--soft)}
+.steps{display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin-top:24px}
+.step{position:relative; background:#fff; border:1px solid var(--line); border-radius:18px; padding:24px 22px}
+.snum{display:grid; place-items:center; width:38px; height:38px; border-radius:50%; background:#FFE8EB; color:var(--accent); font-family:"Plus Jakarta Sans",sans-serif; font-weight:600; font-size:1.15rem}
+.step h3{margin:14px 0 6px; font-size:1.2rem; font-weight:600}
+.step p{margin:0; color:var(--muted); line-height:1.6}
+.lgrid{display:grid; grid-template-columns:repeat(4,1fr); gap:18px; margin-top:24px}
+.lcard{border-top:3px solid var(--accent); padding:16px 4px 0}
+.lcard h3{margin:0 0 8px; font-size:1.15rem; font-weight:600}
+.lcard p{margin:0; color:var(--muted); line-height:1.6}
+.about{background:#F3F6FC}
 .about-in{display:grid; grid-template-columns:auto 1fr; gap:clamp(20px,4vw,48px); align-items:center}
 .about-in img{width:clamp(140px,18vw,200px); height:auto; aspect-ratio:1; object-fit:cover; border-radius:50%; border:6px solid #fff; box-shadow:0 12px 30px rgba(30,42,90,.15)}
-.about-in p{margin:0; font-size:1.15rem; line-height:1.7; color:#4A557D; max-width:40em}
-.tips{list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(3,1fr); gap:16px}
-.tips li{background:#fff; border:1px solid #EEF0F6; border-radius:18px; padding:18px 20px; line-height:1.5; color:#4A557D; font-weight:600}
-.langs{margin:26px 0 0; display:flex; flex-wrap:wrap; align-items:center; gap:8px; color:#55618C; font-weight:700}
-.lchip{border:2px solid #E3E6F0; background:#fff; color:#1E2A5A; border-radius:999px; padding:.3em .9em; font:inherit; font-weight:700; cursor:pointer}
-.lchip:hover{border-color:#FF6F82}
-.cfoot{border-top:1px solid #EEF0F6; padding:24px 0; color:#8A93B8; font-size:.92rem}
+.about-in p{margin:0; font-size:1.12rem; line-height:1.7; color:var(--muted); max-width:40em}
+.tips{list-style:none; margin:24px 0 0; padding:0; display:grid; grid-template-columns:repeat(3,1fr); gap:16px}
+.tips li{background:var(--soft); border-radius:14px; padding:18px 20px; line-height:1.55; color:var(--muted); font-weight:700}
+.cfoot{border-top:1px solid var(--line); padding:24px 0; color:#8A93B8; font-size:.92rem}
+@media (max-width:1020px){ .ltiles{grid-template-columns:repeat(9,1fr)} .wtiles{grid-template-columns:repeat(3,1fr)} .lgrid2{grid-template-columns:repeat(2,1fr)} }
 @media (max-width:860px){
-  .hero-in{grid-template-columns:1fr; padding-top:22px} .hphoto{width:min(460px,94vw)} .lgrid{grid-template-columns:1fr 1fr !important} .fchip{width:44px; height:44px; font-size:1.15rem} .logotext{font-size:1.1rem; white-space:nowrap}
-  .steps,.tips{grid-template-columns:1fr} .clinks{display:none} .about-in{grid-template-columns:1fr; justify-items:center; text-align:center}
+  .hero-in{grid-template-columns:1fr; padding-top:26px} .portrait{width:min(300px,80vw)} .logotext{font-size:1.1rem; white-space:nowrap}
+  .steps,.tips{grid-template-columns:1fr} .lgrid{grid-template-columns:1fr 1fr} .clinks{display:none} .about-in{grid-template-columns:1fr; justify-items:center; text-align:center}
 }
+@media (max-width:560px){ .stats{display:grid; grid-template-columns:repeat(3,1fr); gap:12px} .ltiles{grid-template-columns:repeat(5,1fr)} .wtiles{grid-template-columns:1fr} .lgrid2{grid-template-columns:1fr 1fr; gap:10px} .lcard2{padding:14px} .lcard2.on{padding:13px} .lgrid{grid-template-columns:1fr} .stats dt{font-size:1.6rem} .lc-go{font-size:.92rem} }
 
 /* ---------- Curtain ---------- */
 .curtain{position:fixed; inset:0; z-index:60; pointer-events:none; transform:translateY(-112%); transition:transform .75s cubic-bezier(.55,0,.35,1); display:grid; place-items:center}
@@ -346,8 +351,8 @@ h1,h2,.fun{font-family:"Fredoka","Baloo 2","Andika",sans-serif; font-weight:700;
 .fringe{position:absolute; left:0; right:0; bottom:-22px; height:24px; background:radial-gradient(circle at 50% 0,#F5C842 0 11px,transparent 12px) 0 0/28px 24px repeat-x}
 .welcome{position:relative; font-family:"Fredoka","Baloo 2",sans-serif; font-weight:700; color:#FFE27A; font-size:clamp(2.6rem,8vw,6rem); text-shadow:0 6px 0 rgba(0,0,0,.35); transform:rotate(-3deg)}
 
-/* ---------- Lettervale & university ---------- */
-#world,#uni{min-height:100vh; min-height:100dvh; color:#1E2A5A; background:linear-gradient(#9FD8FF 0,#D7F0FF 46%,#E8F8D8 70%,#CDEBB8 100%); color-scheme:light}
+/* ---------- Lettervale ---------- */
+#world{min-height:100vh; min-height:100dvh; color:#1E2A5A; background:linear-gradient(#9FD8FF 0,#D7F0FF 46%,#E8F8D8 70%,#CDEBB8 100%); color-scheme:light}
 .wwrap{max-width:1280px; margin:0 auto; padding:12px clamp(10px,2vw,24px) 40px; display:flex; flex-direction:column; align-items:center; gap:14px}
 .wbar{width:100%; display:grid; grid-template-columns:56px 1fr 56px; align-items:center; gap:10px}
 .wtitle{text-align:center; display:flex; flex-direction:column; line-height:1.05}
@@ -363,7 +368,6 @@ h1,h2,.fun{font-family:"Fredoka","Baloo 2","Andika",sans-serif; font-weight:700;
 @keyframes spinhold{to{transform:rotate(180deg)}}
 .geartip{position:fixed; z-index:80; background:#1E2A5A; color:#fff; font-weight:700; font-size:.92rem; padding:.45em .8em; border-radius:10px; pointer-events:none}
 .scene{width:min(100%,calc(66dvh * 1200 / 650)); border-radius:26px; overflow:hidden; border:5px solid #1E2A5A; box-shadow:0 10px 0 rgba(30,42,90,.22); background:#BFE6FF; line-height:0}
-#uni .scene{width:min(100%,calc(60dvh * 1200 / 560))}
 .scene svg{display:block; width:100%; height:auto}
 .cloud{animation:drift 30s linear infinite}
 .cloud.c2{animation-duration:38s; animation-delay:-14s}
@@ -413,8 +417,8 @@ body.talking .gmouth{animation:talk .22s ease-in-out infinite alternate}
 .pbar i{display:block; width:0; height:100%; background:linear-gradient(90deg,#FFD45C,#FF9AA8,#C9A8FF); transition:width 1s ease}
 .mapbox{width:100%; border:5px solid #6B4A2A; border-radius:22px; overflow:hidden; background:#F6E4B8; box-shadow:0 10px 0 rgba(74,46,24,.28); line-height:0}
 .mapbox svg{display:block; width:100%; height:auto}
-.stop,.unistop,.cheststop{cursor:pointer; outline:none}
-.stop:focus-visible circle,.unistop:focus-visible rect{stroke:#2F6BFF}
+.stop,.cheststop{cursor:pointer; outline:none}
+.stop:focus-visible circle{stroke:#2F6BFF}
 .stop .lt2{transform-box:fill-box; transform-origin:center; transition:transform .15s}
 .stop:hover .lt2{transform:scale(1.1) rotate(-4deg)}
 .stop:active .lt2{transform:scale(.94)}
@@ -424,26 +428,6 @@ body.talking .gmouth{animation:talk .22s ease-in-out infinite alternate}
 #marker .bob{animation:bob 1.2s ease-in-out infinite}
 @keyframes bob{50%{transform:translateY(-8px)}}
 .shelfhead{margin:26px 0 0; font-size:clamp(1.8rem,5vw,3rem); text-align:center}
-.diploma{display:flex; align-items:center; gap:18px; background:#FFF8E8; border:4px double #B8860B; border-radius:18px; padding:16px 22px; box-shadow:0 8px 0 rgba(74,46,24,.2); max-width:760px; width:100%}
-.diploma .seal{flex:none; width:70px; height:70px; border-radius:50%; background:#C2465A; color:#FFD45C; display:grid; place-items:center; font-size:2.2rem; border:4px solid #FFD45C}
-.diploma b{font-family:"Fredoka",sans-serif; font-size:clamp(1.4rem,3vw,2rem); display:block}
-.diploma small{color:#55618C; font-weight:700}
-.dletters{display:flex; flex-wrap:wrap; gap:4px; margin-top:8px}
-.dletters span{width:26px; height:26px; display:grid; place-items:center; border-radius:7px; font-family:"Andika",sans-serif; font-weight:700; background:#EEE6D2; color:#A89878}
-.dletters span.on{background:#FFD45C; color:#1E2A5A}
-.doors{width:min(100%,900px); display:grid; grid-template-columns:repeat(4,1fr); gap:18px; margin-top:8px}
-@media (max-width:640px){.doors{grid-template-columns:repeat(2,1fr)}}
-.door{display:flex; flex-direction:column; align-items:center; gap:8px}
-.dbody{position:relative; width:100%; aspect-ratio:3/4; border:4px solid #1E2A5A; border-radius:999px 999px 18px 18px; background:var(--dc); color:#1E2A5A;
-  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; box-shadow:inset 0 0 0 8px rgba(255,255,255,.45),0 8px 0 rgba(30,42,90,.25); transition:transform .15s}
-.dbody::after{content:""; position:absolute; right:10%; top:74%; width:12px; height:12px; border-radius:50%; background:#FFD45C; border:2px solid #1E2A5A}
-.dbody:active,.dbody.wiggle{animation:wig .5s}
-@keyframes wig{25%{transform:rotate(-4deg)}75%{transform:rotate(4deg)}}
-.dbody .hi{font-family:"Fredoka",sans-serif; font-weight:700; font-size:clamp(1.15rem,2.4vw,1.7rem); padding:0 10px; text-align:center; word-break:keep-all; line-height:1.15}
-.dbody .ln{font-weight:700; font-size:1rem; color:#33406E}
-.dbody .here{position:absolute; top:-12px; background:#1E2A5A; color:#fff; font-size:.8rem; font-weight:700; padding:.2em .7em; border-radius:999px}
-.dopen{border:2px solid #1E2A5A; background:#fff; color:#1E2A5A; border-radius:999px; font-weight:700; font-size:.85rem; padding:.25em .8em}
-.unipick{color:#55618C; font-weight:700; margin:0}
 
 /* ---------- Book (lesson) view ---------- */
 .top{display:grid; grid-template-columns:auto 1fr auto auto; align-items:center; gap:12px; padding:2px 4px 10px}
@@ -1049,32 +1033,30 @@ const tipT = (L, s, w) => `<b>${L}</b>|<span class="sym">${s}</span>|<i>${w}</i>
 
 const STR = {
   es: {
-    langName: 'Español', hello: '¡Hola!', world: 'el Valle de las Letras', uniTitle: 'Universidad de los Idiomas', curtain: '¡Bienvenidos!',
-    wHello: '¡Hola, amigos! Soy la maestra Rachel. ¡Bienvenidos a Lettervale, el Valle de las Letras! ¡Cantemos el abecedario juntos!',
+    langName: 'Español', hello: '¡Hola!', world: 'el Valle de las Letras', curtain: '¡Bienvenidos!',
+    wHello: '¡Hola, amigos! Soy la maestra Ro. ¡Bienvenidos a Lettervale, el Valle de las Letras! ¡Cantemos el abecedario juntos!',
     wAfter: '¡Muy bien! Ahora sigue el mapa del tesoro. Toca la letra que brilla.',
-    mapTitle: 'Mapa del tesoro de las letras', start: 'Inicio', treasure: 'Tesoro', uniShort: 'Universidad',
+    mapTitle: 'Mapa del tesoro de las letras', start: 'Inicio', treasure: 'Tesoro',
     locked: 'Primero termina todas las letras del mapa. ¡Tú puedes!',
     allDone: '¡Encontraste el tesoro! ¡Terminaste todo el abecedario! ¡Felicidades!',
     yes: '¡Sí!', no: 'Esa no. Prueba otra vez.', great: '¡Excelente! Lo hiciste muy bien.', traceOk: '¡Muy bien! ¡Qué bonita letra!',
     foundAll: '¡Lo lograste! Encontraste todas.', proud: '¡Estoy muy orgullosa de ti!', star: '¡Ganaste una estrella en el mapa!',
     tapHome: 'Toca la casita para volver al mapa.', soundIn: 'Escucha su sonido en la palabra',
-    coverHello: '¡Hola, amigos! Soy la maestra Rachel. Toca el botón grande para entrar.',
-    uniHello: '¡Felicidades! Terminaste todo el abecedario. Bienvenidos a la Universidad de los Idiomas. Aquí aprenden niños de todo el mundo. ¡Toca una puerta para escuchar cómo saludan!',
-    uniPick: 'Para adultos: elija el idioma de las instrucciones', uniOpen: 'Abrir', diploma: 'Diploma del abecedario', here: 'Estás aquí',
+    coverHello: '¡Hola, amigos! Soy la maestra Ro. Toca el botón grande para entrar.',
     adult: 'Para adultos', hold: 'Para adultos: mantenga presionado', autoVoice: 'Hablar al pasar la página', language: 'Idioma', coverBtn: 'Portada',
     reset: 'Reiniciar progreso', resetQ: '¿Borrar las estrellas del mapa en este dispositivo?', teacher: 'Maestra', close: 'Listo',
     noVoice: 'Este dispositivo no tiene una voz para este idioma. Agréguela en los ajustes de voz del sistema.',
     noSpeech: 'Este navegador no puede hablar. Abra la lección en Chrome, Safari o Edge.',
     cEyebrow: 'Inglés para niños de 4 y 5 años que hablan español', cH1: 'Aprender a leer en inglés, jugando.',
-    cLead: 'Con la maestra Rachel, los niños conocen las 26 letras del abecedario en inglés, sus sonidos y sus primeras palabras, con canciones, juegos y un mapa del tesoro.',
+    cLead: 'Con la maestra Ro, los niños conocen las 26 letras del abecedario en inglés, sus sonidos y sus primeras palabras, con canciones, juegos y un mapa del tesoro.',
     cCta: 'Entrar a Lettervale', cHow: 'Cómo funciona', cNavT: 'La maestra', cNavF: 'Familias',
     cB1: '26 lecciones con juegos', cB2: 'Voz y canciones en cada página', cB3: 'Instrucciones en español',
     cS1t: 'Se abre el telón', cS1: 'El niño entra a Lettervale, un mundo mágico de castillos, lagos y bosques.',
-    cS2t: 'Canta con la maestra Rachel', cS2: 'Rachel señala cada letra mientras cantan juntos el abecedario.',
+    cS2t: 'Canta con la maestra Ro', cS2: 'La maestra Ro señala cada letra mientras cantan juntos el abecedario.',
     cS3t: 'Sigue el mapa del tesoro', cS3: 'Cada letra completada gana una estrella y acerca al niño al tesoro.',
-    cAboutT: 'Conoce a la maestra Rachel', cAbout: 'Rachel Woronoff es maestra de primaria. En cada lección guía a los niños con su voz, sus canciones y mucho cariño.',
+    cAboutT: 'Conoce a la maestra Ro', cAbout: 'Rachel Woronoff es maestra de primaria. En cada lección guía a los niños con su voz, sus canciones y mucho cariño.',
     cRole: 'Maestra de primaria', cFamT: 'Para familias y maestros', cF1: 'Funciona mejor en sesiones cortas, con un adulto cerca.',
-    cF2: 'Suba el volumen: la maestra Rachel da cada instrucción en voz alta.', cF3: 'El progreso se guarda en este dispositivo.',
+    cF2: 'Suba el volumen: la maestra Ro da cada instrucción en voz alta.', cF3: 'El progreso se guarda en este dispositivo.',
     cLangs: 'También disponible en', cFoot: 'Hecho con cariño para pequeños lectores.',
     today: L => [N('¡Hoy aprendemos la letra'), E(L + '!')], thisIs: L => [N('Esta es la letra'), E(L)],
     trace: L => [N('Traza la letra'), E(L), N('con tu dedo. ¡Sigue la línea!')],
@@ -1085,32 +1067,30 @@ const STR = {
     tip: null,
   },
   fr: {
-    langName: 'Français', hello: 'Bonjour !', world: 'la Vallée des Lettres', uniTitle: 'Université des Langues', curtain: 'Bienvenue !',
-    wHello: "Bonjour les amis ! Je suis la maîtresse Rachel. Bienvenue à Lettervale, la Vallée des Lettres ! Chantons l'alphabet ensemble !",
+    langName: 'Français', hello: 'Bonjour !', world: 'la Vallée des Lettres', curtain: 'Bienvenue !',
+    wHello: "Bonjour les amis ! Je suis la maîtresse Ro. Bienvenue à Lettervale, la Vallée des Lettres ! Chantons l'alphabet ensemble !",
     wAfter: 'Très bien ! Maintenant, suis la carte au trésor. Touche la lettre qui brille.',
-    mapTitle: 'La carte au trésor des lettres', start: 'Départ', treasure: 'Trésor', uniShort: 'Université',
+    mapTitle: 'La carte au trésor des lettres', start: 'Départ', treasure: 'Trésor',
     locked: "D'abord, termine toutes les lettres de la carte. Tu peux le faire !",
     allDone: "Tu as trouvé le trésor ! Tu as fini tout l'alphabet ! Félicitations !",
     yes: 'Oui !', no: 'Pas celle-là. Essaie encore.', great: 'Excellent ! Tu as très bien réussi.', traceOk: 'Très bien ! Quelle jolie lettre !',
     foundAll: 'Bravo ! Tu les as toutes trouvées.', proud: 'Je suis très fière de toi !', star: 'Tu as gagné une étoile sur la carte !',
     tapHome: 'Touche la petite maison pour revenir à la carte.', soundIn: 'Écoute son son dans le mot',
-    coverHello: 'Bonjour les amis ! Je suis la maîtresse Rachel. Touche le grand bouton pour entrer.',
-    uniHello: "Félicitations ! Tu as fini tout l'alphabet. Bienvenue à l'Université des Langues. Ici, des enfants du monde entier apprennent. Touche une porte pour écouter comment ils disent bonjour !",
-    uniPick: 'Pour les adultes : choisissez la langue des consignes', uniOpen: 'Ouvrir', diploma: "Diplôme de l'alphabet", here: 'Tu es ici',
+    coverHello: 'Bonjour les amis ! Je suis la maîtresse Ro. Touche le grand bouton pour entrer.',
     adult: 'Pour les adultes', hold: 'Pour les adultes : appui long', autoVoice: 'Lire à voix haute en tournant la page', language: 'Langue', coverBtn: 'Accueil',
     reset: 'Réinitialiser la progression', resetQ: 'Effacer les étoiles de la carte sur cet appareil ?', teacher: 'Enseignante', close: 'OK',
     noVoice: "Cet appareil n'a pas de voix pour cette langue. Ajoutez-la dans les réglages vocaux du système.",
     noSpeech: 'Ce navigateur ne peut pas parler. Ouvrez la leçon dans Chrome, Safari ou Edge.',
     cEyebrow: "L'anglais pour les enfants de 4 et 5 ans qui parlent français", cH1: 'Apprendre à lire en anglais, en jouant.',
-    cLead: "Avec la maîtresse Rachel, les enfants découvrent les 26 lettres de l'alphabet anglais, leurs sons et leurs premiers mots, avec des chansons, des jeux et une carte au trésor.",
+    cLead: "Avec la maîtresse Ro, les enfants découvrent les 26 lettres de l'alphabet anglais, leurs sons et leurs premiers mots, avec des chansons, des jeux et une carte au trésor.",
     cCta: 'Entrer à Lettervale', cHow: 'Comment ça marche', cNavT: 'La maîtresse', cNavF: 'Familles',
     cB1: '26 leçons avec des jeux', cB2: 'Voix et chansons à chaque page', cB3: 'Consignes en français',
     cS1t: 'Le rideau se lève', cS1: "L'enfant entre à Lettervale, un monde magique de châteaux, de lacs et de forêts.",
-    cS2t: 'On chante avec Rachel', cS2: "Rachel montre chaque lettre pendant qu'on chante l'alphabet ensemble.",
+    cS2t: 'On chante avec la maîtresse Ro', cS2: "La maîtresse Ro montre chaque lettre pendant qu'on chante l'alphabet ensemble.",
     cS3t: 'On suit la carte au trésor', cS3: "Chaque lettre terminée gagne une étoile et rapproche l'enfant du trésor.",
-    cAboutT: 'Rencontrez la maîtresse Rachel', cAbout: "Rachel Woronoff est enseignante en école primaire. À chaque leçon, elle guide les enfants avec sa voix, ses chansons et beaucoup de tendresse.",
+    cAboutT: 'Rencontrez la maîtresse Ro', cAbout: "Rachel Woronoff est enseignante en école primaire. À chaque leçon, elle guide les enfants avec sa voix, ses chansons et beaucoup de tendresse.",
     cRole: 'Enseignante en primaire', cFamT: 'Pour les familles et les enseignants', cF1: 'Idéal en séances courtes, avec un adulte à proximité.',
-    cF2: 'Montez le son : Rachel donne chaque consigne à voix haute.', cF3: 'La progression est enregistrée sur cet appareil.',
+    cF2: 'Montez le son : la maîtresse Ro donne chaque consigne à voix haute.', cF3: 'La progression est enregistrée sur cet appareil.',
     cLangs: 'Aussi disponible en', cFoot: 'Fait avec tendresse pour les petits lecteurs.',
     today: L => [N("Aujourd'hui, on apprend la lettre"), E(L + '!')], thisIs: L => [N('Voici la lettre'), E(L)],
     trace: L => [N('Trace la lettre'), E(L), N('avec ton doigt. Suis la ligne !')],
@@ -1121,32 +1101,30 @@ const STR = {
     tip: (L, s, w) => `La lettre <b>${L}</b> fait le son <span class="sym">${s}</span>, comme dans <i>${w}</i>.`,
   },
   de: {
-    langName: 'Deutsch', hello: 'Hallo!', world: 'das Buchstabental', uniTitle: 'Universität der Sprachen', curtain: 'Willkommen!',
-    wHello: 'Hallo, Freunde! Ich bin Lehrerin Rachel. Willkommen in Lettervale, dem Buchstabental! Lasst uns zusammen das ABC singen!',
+    langName: 'Deutsch', hello: 'Hallo!', world: 'das Buchstabental', curtain: 'Willkommen!',
+    wHello: 'Hallo, Freunde! Ich bin Lehrerin Ro. Willkommen in Lettervale, dem Buchstabental! Lasst uns zusammen das ABC singen!',
     wAfter: 'Sehr gut! Jetzt folge der Schatzkarte. Tippe auf den Buchstaben, der leuchtet.',
-    mapTitle: 'Die Schatzkarte der Buchstaben', start: 'Start', treasure: 'Schatz', uniShort: 'Universität',
+    mapTitle: 'Die Schatzkarte der Buchstaben', start: 'Start', treasure: 'Schatz',
     locked: 'Zuerst schaffst du alle Buchstaben auf der Karte. Du kannst das!',
     allDone: 'Du hast den Schatz gefunden! Du kannst jetzt das ganze ABC! Herzlichen Glückwunsch!',
     yes: 'Ja!', no: 'Nicht dieses. Versuch es noch mal.', great: 'Ausgezeichnet! Das hast du toll gemacht.', traceOk: 'Sehr gut! Was für ein schöner Buchstabe!',
     foundAll: 'Geschafft! Du hast alle gefunden.', proud: 'Ich bin sehr stolz auf dich!', star: 'Du hast einen Stern auf der Karte gewonnen!',
     tapHome: 'Tippe auf das Häuschen, um zur Karte zurückzugehen.', soundIn: 'Hör seinen Laut im Wort',
-    coverHello: 'Hallo, Freunde! Ich bin Lehrerin Rachel. Tippe auf den großen Knopf, um hineinzugehen.',
-    uniHello: 'Herzlichen Glückwunsch! Du kannst jetzt das ganze ABC. Willkommen in der Universität der Sprachen. Hier lernen Kinder aus der ganzen Welt. Tippe auf eine Tür und hör, wie sie Hallo sagen!',
-    uniPick: 'Für Erwachsene: Sprache der Anleitungen wählen', uniOpen: 'Öffnen', diploma: 'ABC-Diplom', here: 'Du bist hier',
+    coverHello: 'Hallo, Freunde! Ich bin Lehrerin Ro. Tippe auf den großen Knopf, um hineinzugehen.',
     adult: 'Für Erwachsene', hold: 'Für Erwachsene: lange drücken', autoVoice: 'Beim Umblättern vorlesen', language: 'Sprache', coverBtn: 'Startseite',
     reset: 'Fortschritt zurücksetzen', resetQ: 'Die Sterne auf der Karte auf diesem Gerät löschen?', teacher: 'Lehrerin', close: 'OK',
     noVoice: 'Dieses Gerät hat keine Stimme für diese Sprache. Fügen Sie sie in den Spracheinstellungen des Systems hinzu.',
     noSpeech: 'Dieser Browser kann nicht sprechen. Öffnen Sie die Lektion in Chrome, Safari oder Edge.',
     cEyebrow: 'Englisch für deutschsprachige Kinder von 4 und 5 Jahren', cH1: 'Spielend Englisch lesen lernen.',
-    cLead: 'Mit Lehrerin Rachel lernen Kinder die 26 Buchstaben des englischen Alphabets, ihre Laute und ihre ersten Wörter – mit Liedern, Spielen und einer Schatzkarte.',
+    cLead: 'Mit Lehrerin Ro lernen Kinder die 26 Buchstaben des englischen Alphabets, ihre Laute und ihre ersten Wörter – mit Liedern, Spielen und einer Schatzkarte.',
     cCta: 'Lettervale betreten', cHow: "So funktioniert's", cNavT: 'Die Lehrerin', cNavF: 'Familien',
     cB1: '26 Lektionen mit Spielen', cB2: 'Stimme und Lieder auf jeder Seite', cB3: 'Anleitungen auf Deutsch',
     cS1t: 'Der Vorhang hebt sich', cS1: 'Das Kind betritt Lettervale, eine Zauberwelt mit Schlössern, Seen und Wäldern.',
-    cS2t: 'Singen mit Lehrerin Rachel', cS2: 'Rachel zeigt auf jeden Buchstaben, während alle zusammen das ABC singen.',
+    cS2t: 'Singen mit Lehrerin Ro', cS2: 'Lehrerin Ro zeigt auf jeden Buchstaben, während alle zusammen das ABC singen.',
     cS3t: 'Der Schatzkarte folgen', cS3: 'Jeder geschaffte Buchstabe bringt einen Stern und führt näher zum Schatz.',
-    cAboutT: 'Lernen Sie Lehrerin Rachel kennen', cAbout: 'Rachel Woronoff ist Grundschullehrerin. In jeder Lektion begleitet sie die Kinder mit ihrer Stimme, ihren Liedern und viel Herz.',
+    cAboutT: 'Lernen Sie Lehrerin Ro kennen', cAbout: 'Rachel Woronoff ist Grundschullehrerin. In jeder Lektion begleitet sie die Kinder mit ihrer Stimme, ihren Liedern und viel Herz.',
     cRole: 'Grundschullehrerin', cFamT: 'Für Familien und Lehrkräfte', cF1: 'Am besten in kurzen Einheiten, mit einem Erwachsenen in der Nähe.',
-    cF2: 'Ton einschalten: Rachel spricht jede Anleitung laut vor.', cF3: 'Der Fortschritt wird auf diesem Gerät gespeichert.',
+    cF2: 'Ton einschalten: Lehrerin Ro spricht jede Anleitung laut vor.', cF3: 'Der Fortschritt wird auf diesem Gerät gespeichert.',
     cLangs: 'Auch verfügbar auf', cFoot: 'Mit Liebe gemacht für kleine Leser.',
     today: L => [N('Heute lernen wir den Buchstaben'), E(L + '!')], thisIs: L => [N('Das ist der Buchstabe'), E(L)],
     trace: L => [N('Fahre den Buchstaben'), E(L), N('mit dem Finger nach. Folge der Linie!')],
@@ -1157,32 +1135,30 @@ const STR = {
     tip: (L, s, w) => `Der Buchstabe <b>${L}</b> klingt <span class="sym">${s}</span>, wie in <i>${w}</i>.`,
   },
   it: {
-    langName: 'Italiano', hello: 'Ciao!', world: 'la Valle delle Lettere', uniTitle: 'Università delle Lingue', curtain: 'Benvenuti!',
-    wHello: "Ciao, amici! Sono la maestra Rachel. Benvenuti a Lettervale, la Valle delle Lettere! Cantiamo insieme l'alfabeto!",
+    langName: 'Italiano', hello: 'Ciao!', world: 'la Valle delle Lettere', curtain: 'Benvenuti!',
+    wHello: "Ciao, amici! Sono la maestra Ro. Benvenuti a Lettervale, la Valle delle Lettere! Cantiamo insieme l'alfabeto!",
     wAfter: 'Molto bene! Ora segui la mappa del tesoro. Tocca la lettera che brilla.',
-    mapTitle: 'La mappa del tesoro delle lettere', start: 'Partenza', treasure: 'Tesoro', uniShort: 'Università',
+    mapTitle: 'La mappa del tesoro delle lettere', start: 'Partenza', treasure: 'Tesoro',
     locked: 'Prima finisci tutte le lettere della mappa. Ce la puoi fare!',
     allDone: "Hai trovato il tesoro! Hai finito tutto l'alfabeto! Congratulazioni!",
     yes: 'Sì!', no: 'Non questa. Riprova.', great: 'Eccellente! Hai fatto benissimo.', traceOk: 'Molto bene! Che bella lettera!',
     foundAll: "Ce l'hai fatta! Le hai trovate tutte.", proud: 'Sono molto orgogliosa di te!', star: 'Hai vinto una stella sulla mappa!',
     tapHome: 'Tocca la casetta per tornare alla mappa.', soundIn: 'Ascolta il suo suono nella parola',
-    coverHello: 'Ciao, amici! Sono la maestra Rachel. Tocca il pulsante grande per entrare.',
-    uniHello: "Congratulazioni! Hai finito tutto l'alfabeto. Benvenuti all'Università delle Lingue. Qui imparano bambini di tutto il mondo. Tocca una porta per sentire come si salutano!",
-    uniPick: 'Per gli adulti: scegliete la lingua delle istruzioni', uniOpen: 'Apri', diploma: "Diploma dell'alfabeto", here: 'Sei qui',
+    coverHello: 'Ciao, amici! Sono la maestra Ro. Tocca il pulsante grande per entrare.',
     adult: 'Per gli adulti', hold: 'Per gli adulti: tenere premuto', autoVoice: 'Leggere ad alta voce a ogni pagina', language: 'Lingua', coverBtn: 'Home',
     reset: 'Azzera i progressi', resetQ: 'Cancellare le stelle della mappa su questo dispositivo?', teacher: 'Maestra', close: 'OK',
     noVoice: 'Questo dispositivo non ha una voce per questa lingua. Aggiungila nelle impostazioni vocali del sistema.',
     noSpeech: 'Questo browser non può parlare. Apri la lezione in Chrome, Safari o Edge.',
     cEyebrow: "L'inglese per bambini di 4 e 5 anni che parlano italiano", cH1: 'Imparare a leggere in inglese, giocando.',
-    cLead: "Con la maestra Rachel, i bambini scoprono le 26 lettere dell'alfabeto inglese, i loro suoni e le prime parole, con canzoni, giochi e una mappa del tesoro.",
+    cLead: "Con la maestra Ro, i bambini scoprono le 26 lettere dell'alfabeto inglese, i loro suoni e le prime parole, con canzoni, giochi e una mappa del tesoro.",
     cCta: 'Entra a Lettervale', cHow: 'Come funziona', cNavT: 'La maestra', cNavF: 'Famiglie',
     cB1: '26 lezioni con giochi', cB2: 'Voce e canzoni in ogni pagina', cB3: 'Istruzioni in italiano',
     cS1t: 'Si apre il sipario', cS1: 'Il bambino entra a Lettervale, un mondo magico di castelli, laghi e boschi.',
-    cS2t: 'Si canta con la maestra Rachel', cS2: "Rachel indica ogni lettera mentre tutti cantano insieme l'alfabeto.",
+    cS2t: 'Si canta con la maestra Ro', cS2: "La maestra Ro indica ogni lettera mentre tutti cantano insieme l'alfabeto.",
     cS3t: 'Si segue la mappa del tesoro', cS3: 'Ogni lettera completata vale una stella e avvicina al tesoro.',
-    cAboutT: 'Conoscete la maestra Rachel', cAbout: 'Rachel Woronoff è una maestra di scuola primaria. In ogni lezione guida i bambini con la sua voce, le sue canzoni e tanto affetto.',
+    cAboutT: 'Conoscete la maestra Ro', cAbout: 'Rachel Woronoff è una maestra di scuola primaria. In ogni lezione guida i bambini con la sua voce, le sue canzoni e tanto affetto.',
     cRole: 'Maestra di scuola primaria', cFamT: 'Per famiglie e insegnanti', cF1: 'Ideale in sessioni brevi, con un adulto vicino.',
-    cF2: 'Alzate il volume: Rachel dà ogni istruzione ad alta voce.', cF3: 'I progressi vengono salvati su questo dispositivo.',
+    cF2: 'Alzate il volume: la maestra Ro dà ogni istruzione ad alta voce.', cF3: 'I progressi vengono salvati su questo dispositivo.',
     cLangs: 'Disponibile anche in', cFoot: 'Fatto con amore per i piccoli lettori.',
     today: L => [N('Oggi impariamo la lettera'), E(L + '!')], thisIs: L => [N('Questa è la lettera'), E(L)],
     trace: L => [N('Ripassa la lettera'), E(L), N('con il dito. Segui la linea!')],
@@ -1193,32 +1169,30 @@ const STR = {
     tip: (L, s, w) => `La lettera <b>${L}</b> fa il suono <span class="sym">${s}</span>, come in <i>${w}</i>.`,
   },
   pt: {
-    langName: 'Português', hello: 'Olá!', world: 'o Vale das Letras', uniTitle: 'Universidade dos Idiomas', curtain: 'Bem-vindos!',
-    wHello: 'Olá, amigos! Eu sou a professora Rachel. Bem-vindos a Lettervale, o Vale das Letras! Vamos cantar o alfabeto juntos!',
+    langName: 'Português', hello: 'Olá!', world: 'o Vale das Letras', curtain: 'Bem-vindos!',
+    wHello: 'Olá, amigos! Eu sou a professora Ro. Bem-vindos a Lettervale, o Vale das Letras! Vamos cantar o alfabeto juntos!',
     wAfter: 'Muito bem! Agora siga o mapa do tesouro. Toque na letra que brilha.',
-    mapTitle: 'Mapa do tesouro das letras', start: 'Início', treasure: 'Tesouro', uniShort: 'Universidade',
+    mapTitle: 'Mapa do tesouro das letras', start: 'Início', treasure: 'Tesouro',
     locked: 'Primeiro termine todas as letras do mapa. Você consegue!',
     allDone: 'Você encontrou o tesouro! Terminou todo o alfabeto! Parabéns!',
     yes: 'Isso!', no: 'Essa não. Tente de novo.', great: 'Excelente! Você foi muito bem.', traceOk: 'Muito bem! Que letra bonita!',
     foundAll: 'Conseguiu! Você encontrou todas.', proud: 'Estou muito orgulhosa de você!', star: 'Você ganhou uma estrela no mapa!',
     tapHome: 'Toque na casinha para voltar ao mapa.', soundIn: 'Escute o som na palavra',
-    coverHello: 'Olá, amigos! Eu sou a professora Rachel. Toque no botão grande para entrar.',
-    uniHello: 'Parabéns! Você terminou todo o alfabeto. Bem-vindos à Universidade dos Idiomas. Aqui aprendem crianças do mundo inteiro. Toque numa porta para ouvir como elas dizem olá!',
-    uniPick: 'Para adultos: escolha o idioma das instruções', uniOpen: 'Abrir', diploma: 'Diploma do alfabeto', here: 'Você está aqui',
+    coverHello: 'Olá, amigos! Eu sou a professora Ro. Toque no botão grande para entrar.',
     adult: 'Para adultos', hold: 'Para adultos: mantenha pressionado', autoVoice: 'Falar ao virar a página', language: 'Idioma', coverBtn: 'Início',
     reset: 'Reiniciar progresso', resetQ: 'Apagar as estrelas do mapa neste aparelho?', teacher: 'Professora', close: 'OK',
     noVoice: 'Este aparelho não tem voz para este idioma. Adicione-a nas configurações de voz do sistema.',
     noSpeech: 'Este navegador não consegue falar. Abra a lição no Chrome, Safari ou Edge.',
     cEyebrow: 'Inglês para crianças de 4 e 5 anos que falam português', cH1: 'Aprender a ler em inglês, brincando.',
-    cLead: 'Com a professora Rachel, as crianças conhecem as 26 letras do alfabeto inglês, seus sons e suas primeiras palavras, com músicas, jogos e um mapa do tesouro.',
+    cLead: 'Com a professora Ro, as crianças conhecem as 26 letras do alfabeto inglês, seus sons e suas primeiras palavras, com músicas, jogos e um mapa do tesouro.',
     cCta: 'Entrar em Lettervale', cHow: 'Como funciona', cNavT: 'A professora', cNavF: 'Famílias',
     cB1: '26 lições com jogos', cB2: 'Voz e músicas em cada página', cB3: 'Instruções em português',
     cS1t: 'A cortina se abre', cS1: 'A criança entra em Lettervale, um mundo mágico de castelos, lagos e florestas.',
-    cS2t: 'Cantar com a professora Rachel', cS2: 'Rachel aponta cada letra enquanto todos cantam o alfabeto juntos.',
+    cS2t: 'Cantar com a professora Ro', cS2: 'A professora Ro aponta cada letra enquanto todos cantam o alfabeto juntos.',
     cS3t: 'Seguir o mapa do tesouro', cS3: 'Cada letra concluída ganha uma estrela e leva a criança mais perto do tesouro.',
-    cAboutT: 'Conheça a professora Rachel', cAbout: 'Rachel Woronoff é professora do ensino fundamental. Em cada lição, ela guia as crianças com sua voz, suas músicas e muito carinho.',
+    cAboutT: 'Conheça a professora Ro', cAbout: 'Rachel Woronoff é professora do ensino fundamental. Em cada lição, ela guia as crianças com sua voz, suas músicas e muito carinho.',
     cRole: 'Professora do ensino fundamental', cFamT: 'Para famílias e professores', cF1: 'Funciona melhor em sessões curtas, com um adulto por perto.',
-    cF2: 'Aumente o volume: Rachel dá cada instrução em voz alta.', cF3: 'O progresso fica salvo neste aparelho.',
+    cF2: 'Aumente o volume: a professora Ro dá cada instrução em voz alta.', cF3: 'O progresso fica salvo neste aparelho.',
     cLangs: 'Também disponível em', cFoot: 'Feito com carinho para pequenos leitores.',
     today: L => [N('Hoje vamos aprender a letra'), E(L + '!')], thisIs: L => [N('Esta é a letra'), E(L)],
     trace: L => [N('Contorne a letra'), E(L), N('com o dedo. Siga a linha!')],
@@ -1229,30 +1203,28 @@ const STR = {
     tip: (L, s, w) => `A letra <b>${L}</b> tem o som <span class="sym">${s}</span>, como em <i>${w}</i>.`,
   },
   ja: {
-    langName: '日本語', hello: 'こんにちは！', world: 'もじの たに', uniTitle: 'ことばの だいがく', curtain: 'ようこそ！',
-    wHello: 'こんにちは、みんな！ レイチェル せんせい だよ。 もじの たに、レターベールへ ようこそ！ いっしょに エービーシーの うたを うたおう！',
+    langName: '日本語', hello: 'こんにちは！', world: 'もじの たに', curtain: 'ようこそ！',
+    wHello: 'こんにちは、みんな！ ロー せんせい だよ。 もじの たに、レターベールへ ようこそ！ いっしょに エービーシーの うたを うたおう！',
     wAfter: 'よく できたね！ つぎは たからの ちずを すすもう。 ひかっている もじを タッチしてね。',
-    mapTitle: 'もじの たからの ちず', start: 'スタート', treasure: 'たから', uniShort: 'だいがく',
+    mapTitle: 'もじの たからの ちず', start: 'スタート', treasure: 'たから',
     locked: 'さきに ちずの もじを ぜんぶ おわらせよう。 きみなら できるよ！',
     allDone: 'たからを みつけたね！ エービーシーが ぜんぶ おわったよ！ おめでとう！',
     yes: 'そう！', no: 'それじゃないよ。 もう いちど やってみよう。', great: 'すばらしい！ とても よく できたね。', traceOk: 'じょうず！ きれいな もじだね！',
     foundAll: 'やったね！ ぜんぶ みつけたよ。', proud: 'せんせいは とても うれしいよ！', star: 'ちずに ほしが ついたよ！',
     tapHome: 'おうちの ボタンを タッチして ちずに もどろう。', soundIn: 'この ことばで おとを きいてね。',
-    coverHello: 'こんにちは、みんな！ レイチェル せんせい だよ。 おおきな ボタンを タッチして はいってね。',
-    uniHello: 'おめでとう！ エービーシーが ぜんぶ おわったね。 ことばの だいがくへ ようこそ。 ここでは せかいじゅうの こどもたちが まなんでいるよ。 ドアを タッチして あいさつを きいてみよう！',
-    uniPick: '保護者の方へ：説明の言語を選んでください', uniOpen: '開く', diploma: 'ABC ディプロマ', here: 'いま ここ',
+    coverHello: 'こんにちは、みんな！ ロー せんせい だよ。 おおきな ボタンを タッチして はいってね。',
     adult: '保護者の方へ', hold: '保護者の方へ：長押ししてください', autoVoice: 'ページをめくると読み上げる', language: '言語', coverBtn: 'トップ',
     reset: '進み具合をリセット', resetQ: 'この端末の地図の星を消去しますか？', teacher: '先生用', close: 'OK',
     noVoice: 'この端末には日本語の音声がありません。システムの音声設定で追加してください。',
     noSpeech: 'このブラウザは音声に対応していません。Chrome、Safari、Edgeで開いてください。',
     cEyebrow: '日本語を話す4〜5歳の子どものための英語', cH1: '遊びながら、英語を読もう。',
-    cLead: 'レイチェル先生といっしょに、英語のアルファベット26文字とその音、はじめての単語を、歌やゲーム、宝の地図で楽しく学びます。',
+    cLead: 'ロー先生といっしょに、英語のアルファベット26文字とその音、はじめての単語を、歌やゲーム、宝の地図で楽しく学びます。',
     cCta: 'Lettervale へ入る', cHow: '使い方', cNavT: '先生について', cNavF: 'ご家庭の方へ',
     cB1: 'ゲーム付きの26レッスン', cB2: '全ページに音声と歌', cB3: '説明は日本語',
     cS1t: '幕が上がる', cS1: 'お城や湖、森がある魔法の世界「Lettervale」へ入ります。',
-    cS2t: 'レイチェル先生と歌う', cS2: 'みんなでABCの歌を歌いながら、先生が文字を一つずつ指します。',
+    cS2t: 'ロー先生と歌う', cS2: 'みんなでABCの歌を歌いながら、先生が文字を一つずつ指します。',
     cS3t: '宝の地図をすすむ', cS3: '文字を一つ終えるごとに星がもらえ、宝物に近づきます。',
-    cAboutT: 'レイチェル先生の紹介', cAbout: 'レイチェル・ウォロノフは小学校の先生です。毎回のレッスンで、声と歌とたくさんの愛情で子どもたちを導きます。',
+    cAboutT: 'ロー先生の紹介', cAbout: 'レイチェル・ウォロノフは小学校の先生です。毎回のレッスンで、声と歌とたくさんの愛情で子どもたちを導きます。',
     cRole: '小学校の先生', cFamT: 'ご家庭・先生方へ', cF1: '大人がそばにいる短い時間での利用がおすすめです。',
     cF2: '音を出してください。先生がすべての説明を声で伝えます。', cF3: '進み具合はこの端末に保存されます。',
     cLangs: 'ほかの言語', cFoot: '小さな読み手のために、心をこめて。',
@@ -1265,29 +1237,27 @@ const STR = {
     tip: (L, s, w) => `<b>${L}</b> は <span class="sym">${s}</span> の おと。 れい：<i>${w}</i>`,
   },
   zh: {
-    langName: '中文', hello: '你好！', world: '字母谷', uniTitle: '语言大学', curtain: '欢迎！',
-    wHello: '小朋友们好！我是瑞秋老师。欢迎来到字母谷！我们一起唱字母歌吧！',
+    langName: '中文', hello: '你好！', world: '字母谷', curtain: '欢迎！',
+    wHello: '小朋友们好！我是罗老师。欢迎来到字母谷！我们一起唱字母歌吧！',
     wAfter: '真棒！现在跟着藏宝图走吧。点一点发光的字母。',
-    mapTitle: '字母藏宝图', start: '起点', treasure: '宝藏', uniShort: '大学',
+    mapTitle: '字母藏宝图', start: '起点', treasure: '宝藏',
     locked: '先完成地图上所有的字母吧。你一定可以的！',
     allDone: '你找到宝藏了！你学完了全部字母！恭喜你！',
     yes: '对！', no: '不是这个，再试一次。', great: '太棒了！你做得非常好。', traceOk: '真棒！好漂亮的字母！',
     foundAll: '成功了！你全都找到了。', proud: '老师为你骄傲！', star: '你在地图上得到了一颗星星！',
     tapHome: '点一点小房子，回到地图。', soundIn: '听听这个单词里的发音：',
-    coverHello: '小朋友们好！我是瑞秋老师。点一下大按钮就能进去了。',
-    uniHello: '恭喜你！你学完了全部字母。欢迎来到语言大学。这里有来自世界各地的小朋友。点一扇门，听听他们怎么打招呼吧！',
-    uniPick: '家长请选择说明语言', uniOpen: '打开', diploma: '字母毕业证书', here: '你在这里',
+    coverHello: '小朋友们好！我是罗老师。点一下大按钮就能进去了。',
     adult: '家长专区', hold: '家长专区：请长按', autoVoice: '翻页时自动朗读', language: '语言', coverBtn: '首页',
     reset: '重置进度', resetQ: '要清除这台设备上地图的星星吗？', teacher: '老师', close: '好',
     noVoice: '这台设备没有中文语音。请在系统语音设置中添加。', noSpeech: '此浏览器无法朗读。请在 Chrome、Safari 或 Edge 中打开。',
     cEyebrow: '为说中文的4至5岁儿童设计的英语启蒙', cH1: '边玩边学，读懂英语。',
-    cLead: '跟着瑞秋老师，孩子们通过儿歌、游戏和藏宝图，认识英语的26个字母、字母的发音和最初的单词。',
+    cLead: '跟着罗老师，孩子们通过儿歌、游戏和藏宝图，认识英语的26个字母、字母的发音和最初的单词。',
     cCta: '进入字母谷', cHow: '如何使用', cNavT: '关于老师', cNavF: '家长须知',
     cB1: '26节互动课', cB2: '每页都有语音和儿歌', cB3: '中文说明',
     cS1t: '大幕拉开', cS1: '孩子走进字母谷 Lettervale，一个有城堡、湖泊和森林的魔法世界。',
-    cS2t: '和瑞秋老师一起唱', cS2: '大家一起唱字母歌，老师逐一指出每个字母。',
+    cS2t: '和罗老师一起唱', cS2: '大家一起唱字母歌，老师逐一指出每个字母。',
     cS3t: '跟着藏宝图前进', cS3: '每完成一个字母就得到一颗星星，离宝藏更近一步。',
-    cAboutT: '认识瑞秋老师', cAbout: '瑞秋·沃罗诺夫（Rachel Woronoff）是一名小学老师。在每节课中，她用声音、儿歌和满满的爱心带领孩子们学习。',
+    cAboutT: '认识罗老师', cAbout: '瑞秋·沃罗诺夫（Rachel Woronoff）是一名小学老师。在每节课中，她用声音、儿歌和满满的爱心带领孩子们学习。',
     cRole: '小学老师', cFamT: '给家长和老师', cF1: '建议在大人陪伴下进行短时间学习。',
     cF2: '请打开声音：老师会大声说出每一条指示。', cF3: '学习进度保存在这台设备上。',
     cLangs: '其他语言', cFoot: '用心为小读者打造。',
@@ -1300,29 +1270,27 @@ const STR = {
     tip: (L, s, w) => `字母 <b>${L}</b> 发 <span class="sym">${s}</span> 的音，例如 <i>${w}</i>。`,
   },
   ko: {
-    langName: '한국어', hello: '안녕하세요!', world: '글자 골짜기', uniTitle: '언어 대학교', curtain: '환영해요!',
-    wHello: '친구들, 안녕! 나는 레이첼 선생님이야. 글자 골짜기 레터베일에 온 걸 환영해! 다 같이 알파벳 노래를 불러 보자!',
+    langName: '한국어', hello: '안녕하세요!', world: '글자 골짜기', curtain: '환영해요!',
+    wHello: '친구들, 안녕! 나는 로 선생님이야. 글자 골짜기 레터베일에 온 걸 환영해! 다 같이 알파벳 노래를 불러 보자!',
     wAfter: '잘했어! 이제 보물 지도를 따라가 보자. 반짝이는 글자를 눌러 봐.',
-    mapTitle: '글자 보물 지도', start: '출발', treasure: '보물', uniShort: '대학교',
+    mapTitle: '글자 보물 지도', start: '출발', treasure: '보물',
     locked: '먼저 지도에 있는 글자를 모두 끝내 보자. 너는 할 수 있어!',
     allDone: '보물을 찾았어! 알파벳을 전부 끝냈어! 축하해!',
     yes: '맞아!', no: '그건 아니야. 다시 해 보자.', great: '훌륭해! 정말 잘했어.', traceOk: '잘했어! 정말 예쁜 글자야!',
     foundAll: '해냈어! 모두 찾았어.', proud: '선생님은 네가 정말 자랑스러워!', star: '지도에서 별을 받았어!',
     tapHome: '작은 집 버튼을 눌러서 지도로 돌아가자.', soundIn: '이 낱말에서 소리를 들어 봐.',
-    coverHello: '친구들, 안녕! 나는 레이첼 선생님이야. 큰 버튼을 눌러서 들어와 봐.',
-    uniHello: '축하해! 알파벳을 전부 끝냈어. 언어 대학교에 온 걸 환영해. 여기서는 전 세계 친구들이 공부해. 문을 눌러서 친구들이 어떻게 인사하는지 들어 봐!',
-    uniPick: '보호자용: 안내 언어를 선택하세요', uniOpen: '열기', diploma: '알파벳 수료증', here: '여기예요',
+    coverHello: '친구들, 안녕! 나는 로 선생님이야. 큰 버튼을 눌러서 들어와 봐.',
     adult: '보호자용', hold: '보호자용: 길게 누르세요', autoVoice: '페이지를 넘기면 읽어 주기', language: '언어', coverBtn: '처음 화면',
     reset: '진도 초기화', resetQ: '이 기기에서 지도의 별을 지울까요?', teacher: '선생님용', close: '확인',
     noVoice: '이 기기에는 한국어 음성이 없습니다. 시스템 음성 설정에서 추가하세요.', noSpeech: '이 브라우저는 음성을 지원하지 않습니다. Chrome, Safari, Edge에서 여세요.',
     cEyebrow: '한국어를 쓰는 4~5세 아이를 위한 영어', cH1: '놀면서 배우는 영어 읽기.',
-    cLead: '레이첼 선생님과 함께 아이들이 노래와 게임, 보물 지도로 영어 알파벳 26자와 소리, 첫 단어를 익힙니다.',
+    cLead: '로 선생님과 함께 아이들이 노래와 게임, 보물 지도로 영어 알파벳 26자와 소리, 첫 단어를 익힙니다.',
     cCta: 'Lettervale로 들어가기', cHow: '이용 방법', cNavT: '선생님 소개', cNavF: '보호자 안내',
     cB1: '게임이 있는 26개 수업', cB2: '모든 페이지에 음성과 노래', cB3: '한국어 안내',
     cS1t: '막이 올라가요', cS1: '아이는 성과 호수, 숲이 있는 마법의 세계 Lettervale로 들어갑니다.',
-    cS2t: '레이첼 선생님과 노래해요', cS2: '모두 함께 알파벳 노래를 부르는 동안 선생님이 글자를 하나씩 가리킵니다.',
+    cS2t: '로 선생님과 노래해요', cS2: '모두 함께 알파벳 노래를 부르는 동안 선생님이 글자를 하나씩 가리킵니다.',
     cS3t: '보물 지도를 따라가요', cS3: '글자를 하나 끝낼 때마다 별을 받고 보물에 더 가까워집니다.',
-    cAboutT: '레이첼 선생님을 소개합니다', cAbout: '레이첼 워로노프는 초등학교 선생님입니다. 수업마다 목소리와 노래, 따뜻한 마음으로 아이들을 이끕니다.',
+    cAboutT: '로 선생님을 소개합니다', cAbout: '레이첼 워로노프는 초등학교 선생님입니다. 수업마다 목소리와 노래, 따뜻한 마음으로 아이들을 이끕니다.',
     cRole: '초등학교 선생님', cFamT: '보호자와 선생님께', cF1: '어른이 곁에 있는 짧은 시간에 가장 좋습니다.',
     cF2: '소리를 켜 주세요. 선생님이 모든 안내를 소리 내어 말합니다.', cF3: '진도는 이 기기에 저장됩니다.',
     cLangs: '다른 언어', cFoot: '어린 독자를 위해 정성껏 만들었습니다.',
@@ -1386,7 +1354,7 @@ const WS = {
     learnedSay: n => `¡Muy bien! Aprendiste ${n} palabras nuevas.`, inLang: 'En español:', thisWord: 'Esta palabra es', meansSay: m => `Quiere decir: ${m}.`,
     hearT: 'Escucha y toca la palabra', allFound: 'Encontraste todas las palabras.', listenAgain: 'Escucha otra vez.',
     readT: 'Lee la palabra. ¿Cuál es el dibujo?', readAll: '¡Leíste todas las palabras solito!', readAllSay: '¡Excelente! Leíste todas las palabras.',
-    readTry: 'Lee la palabra y toca el dibujo.', readNo: 'Esa no. Di el sonido de cada letra y prueba otra vez.', alt: 'La maestra Rachel',
+    readTry: 'Lee la palabra y toca el dibujo.', readNo: 'Esa no. Di el sonido de cada letra y prueba otra vez.', alt: 'La maestra Ro',
     tSight: 'Palabras de vista', tCvc: 'Palabras para sonar', tPron: 'Pronombres y verbos',
     iSight: 'Estas palabras salen en casi todos los libros. ¡Vamos a reconocerlas rápido, a primera vista!',
     iCvc: 'Estas palabras tienen tres letras. Di el sonido de cada letra y júntalos para leer la palabra.',
@@ -1404,7 +1372,7 @@ const WS = {
     learnedSay: n => `Très bien ! Tu as appris ${n} nouveaux mots.`, inLang: 'En français :', thisWord: 'Ce mot, c’est', meansSay: m => `Ça veut dire : ${m}.`,
     hearT: 'Écoute et touche le mot', allFound: 'Tu as trouvé tous les mots.', listenAgain: 'Écoute encore.',
     readT: "Lis le mot. Quel est le dessin ?", readAll: 'Tu as lu tous les mots tout seul !', readAllSay: 'Excellent ! Tu as lu tous les mots.',
-    readTry: 'Lis le mot et touche le dessin.', readNo: 'Pas celui-là. Dis le son de chaque lettre et essaie encore.', alt: 'La maîtresse Rachel',
+    readTry: 'Lis le mot et touche le dessin.', readNo: 'Pas celui-là. Dis le son de chaque lettre et essaie encore.', alt: 'La maîtresse Ro',
     tSight: 'Mots à reconnaître', tCvc: 'Mots à déchiffrer', tPron: 'Pronoms et verbes',
     iSight: "Ces mots sont dans presque tous les livres. Apprenons à les reconnaître d'un seul coup d'œil !",
     iCvc: 'Ces mots ont trois lettres. Dis le son de chaque lettre, puis assemble-les pour lire le mot.',
@@ -1422,7 +1390,7 @@ const WS = {
     learnedSay: n => `Sehr gut! Du hast ${n} neue Wörter gelernt.`, inLang: 'Auf Deutsch:', thisWord: 'Dieses Wort heißt', meansSay: m => `Das bedeutet: ${m}.`,
     hearT: 'Hör zu und tippe das Wort an', allFound: 'Du hast alle Wörter gefunden.', listenAgain: 'Hör noch einmal zu.',
     readT: 'Lies das Wort. Welches Bild passt?', readAll: 'Du hast alle Wörter ganz allein gelesen!', readAllSay: 'Super! Du hast alle Wörter gelesen.',
-    readTry: 'Lies das Wort und tippe das Bild an.', readNo: 'Das nicht. Sag den Laut von jedem Buchstaben und versuch es nochmal.', alt: 'Lehrerin Rachel',
+    readTry: 'Lies das Wort und tippe das Bild an.', readNo: 'Das nicht. Sag den Laut von jedem Buchstaben und versuch es nochmal.', alt: 'Lehrerin Ro',
     tSight: 'Blickwörter', tCvc: 'Lautierwörter', tPron: 'Pronomen und Verben',
     iSight: 'Diese Wörter stehen in fast jedem Buch. Lernen wir, sie auf einen Blick zu erkennen!',
     iCvc: 'Diese Wörter haben drei Buchstaben. Sag den Laut von jedem Buchstaben und zieh sie zusammen.',
@@ -1440,7 +1408,7 @@ const WS = {
     learnedSay: n => `Bravissimo! Hai imparato ${n} parole nuove.`, inLang: 'In italiano:', thisWord: 'Questa parola è', meansSay: m => `Vuol dire: ${m}.`,
     hearT: 'Ascolta e tocca la parola', allFound: 'Hai trovato tutte le parole.', listenAgain: 'Ascolta ancora.',
     readT: 'Leggi la parola. Qual è il disegno?', readAll: 'Hai letto tutte le parole da solo!', readAllSay: 'Eccellente! Hai letto tutte le parole.',
-    readTry: 'Leggi la parola e tocca il disegno.', readNo: 'Non quello. Di’ il suono di ogni lettera e riprova.', alt: 'La maestra Rachel',
+    readTry: 'Leggi la parola e tocca il disegno.', readNo: 'Non quello. Di’ il suono di ogni lettera e riprova.', alt: 'La maestra Ro',
     tSight: 'Parole a colpo d’occhio', tCvc: 'Parole da sillabare', tPron: 'Pronomi e verbi',
     iSight: 'Queste parole sono in quasi tutti i libri. Impariamo a riconoscerle subito, a colpo d’occhio!',
     iCvc: 'Queste parole hanno tre lettere. Di’ il suono di ogni lettera e uniscili per leggere la parola.',
@@ -1458,7 +1426,7 @@ const WS = {
     learnedSay: n => `Muito bem! Você aprendeu ${n} palavras novas.`, inLang: 'Em português:', thisWord: 'Esta palavra é', meansSay: m => `Quer dizer: ${m}.`,
     hearT: 'Ouça e toque na palavra', allFound: 'Você encontrou todas as palavras.', listenAgain: 'Ouça de novo.',
     readT: 'Leia a palavra. Qual é o desenho?', readAll: 'Você leu todas as palavras sozinho!', readAllSay: 'Excelente! Você leu todas as palavras.',
-    readTry: 'Leia a palavra e toque no desenho.', readNo: 'Esse não. Diga o som de cada letra e tente de novo.', alt: 'A professora Rachel',
+    readTry: 'Leia a palavra e toque no desenho.', readNo: 'Esse não. Diga o som de cada letra e tente de novo.', alt: 'A professora Ro',
     tSight: 'Palavras de visão', tCvc: 'Palavras para soletrar', tPron: 'Pronomes e verbos',
     iSight: 'Estas palavras aparecem em quase todos os livros. Vamos reconhecê-las rapidinho, só de olhar!',
     iCvc: 'Estas palavras têm três letras. Diga o som de cada letra e junte tudo para ler a palavra.',
@@ -1476,7 +1444,7 @@ const WS = {
     learnedSay: n => `じょうず！ あたらしい ことばを ${n}こ おぼえたね。`, inLang: 'にほんごで：', thisWord: 'この ことばは', meansSay: m => `いみは 「${m}」 だよ。`,
     hearT: 'きいて、ことばを さわってね', allFound: 'ぜんぶの ことばを みつけたね。', listenAgain: 'もういちど きいてね。',
     readT: 'ことばを よんでね。どの えかな？', readAll: 'ぜんぶ ひとりで よめたね！', readAllSay: 'すばらしい！ ぜんぶの ことばを よめたね。',
-    readTry: 'ことばを よんで、えを さわってね。', readNo: 'それじゃないよ。もじの おとを ひとつずつ いって、もういちど やってみよう。', alt: 'レイチェルせんせい',
+    readTry: 'ことばを よんで、えを さわってね。', readNo: 'それじゃないよ。もじの おとを ひとつずつ いって、もういちど やってみよう。', alt: 'ローせんせい',
     tSight: 'みて おぼえる ことば', tCvc: 'おとで よむ ことば', tPron: 'だいめいしと どうし',
     iSight: 'これは ほとんどの えほんに でてくる ことばだよ。みた しゅんかんに わかるように なろう！',
     iCvc: 'みっつの もじの ことばだよ。もじの おとを ひとつずつ いって、くっつけて よもう。',
@@ -1494,7 +1462,7 @@ const WS = {
     learnedSay: n => `真棒！你学会了${n}个新单词。`, inLang: '中文意思：', thisWord: '这个单词是', meansSay: m => `意思是：${m}。`,
     hearT: '听一听，点出这个单词', allFound: '你找到了所有的单词。', listenAgain: '再听一遍。',
     readT: '读一读这个单词。哪张图对？', readAll: '你自己读出了所有的单词！', readAllSay: '太棒了！你读出了所有的单词。',
-    readTry: '读一读这个单词，点出对的图。', readNo: '不是这个。说出每个字母的音，再试一次。', alt: 'Rachel 老师',
+    readTry: '读一读这个单词，点出对的图。', readNo: '不是这个。说出每个字母的音，再试一次。', alt: '罗老师',
     tSight: '高频识读词', tCvc: '拼读单词', tPron: '代词和动词',
     iSight: '几乎每本书里都有这些词。我们来学着一眼就认出它们！',
     iCvc: '这些单词有三个字母。说出每个字母的音，再把音拼在一起读出单词。',
@@ -1512,7 +1480,7 @@ const WS = {
     learnedSay: n => `잘했어요! 새 단어 ${n}개를 배웠어요.`, inLang: '한국어로:', thisWord: '이 단어는', meansSay: m => `뜻은 "${m}"예요.`,
     hearT: '듣고 단어를 눌러요', allFound: '단어를 모두 찾았어요.', listenAgain: '다시 들어 봐요.',
     readT: '단어를 읽어요. 어떤 그림일까요?', readAll: '혼자서 단어를 모두 읽었어요!', readAllSay: '최고예요! 단어를 모두 읽었어요.',
-    readTry: '단어를 읽고 그림을 눌러요.', readNo: '그게 아니에요. 글자 소리를 하나씩 말하고 다시 해 봐요.', alt: '레이첼 선생님',
+    readTry: '단어를 읽고 그림을 눌러요.', readNo: '그게 아니에요. 글자 소리를 하나씩 말하고 다시 해 봐요.', alt: '로 선생님',
     tSight: '한눈에 읽는 단어', tCvc: '소리 내어 읽는 단어', tPron: '대명사와 동사',
     iSight: '거의 모든 책에 나오는 단어예요. 보자마자 바로 알아보도록 연습해요!',
     iCvc: '글자가 세 개인 단어예요. 글자마다 소리를 말하고 합쳐서 단어를 읽어요.',
@@ -1947,7 +1915,7 @@ const ICON = {
   hand: '<svg viewBox="0 0 64 80" aria-hidden="true"><path d="M26 6c4 0 7 3 7 7v20l2-1c3-1 6 0 7 2 3-1 6 0 7 3 3 0 6 2 6 6v14c0 12-8 20-20 20h-4c-8 0-13-4-17-10L5 50c-2-3-1-7 2-8 3-2 6-1 8 1l4 5V13c0-4 3-7 7-7z" fill="#FFE0C2" stroke="#1E2A5A" stroke-width="3.5" stroke-linejoin="round"/><path d="M33 33v12M42 35v10M51 39v8" stroke="#1E2A5A" stroke-width="3" stroke-linecap="round"/></svg>',
 };
 
-/* ---------- Pointer rigs (kid in the word-module song, Ms. Rachel in Lettervale) ---------- */
+/* ---------- Pointer rigs (kid in the word-module song, Miss Ro in Lettervale) ---------- */
 const ROFF = { x: -40, y: 90 };
 const KID_RIG = { sh: { x: 122, y: 196 }, rest: { x: 176, y: 300 }, arm: 56, trim: 22, dy: 8, pos: L => letterPos(L) };
 const RACHEL_RIG = { sh: { x: 228, y: 286 }, rest: { x: 270, y: 382 }, arm: 66, wand: 46, dy: 0,
@@ -1959,7 +1927,7 @@ function worldPos(L) {
   return { x: 268 + 72 * (c + off + .5), y: 368 + 66 * r };
 }
 
-/* ---------- Cartoon Ms. Rachel (v3: softer, more realistic, cuter) ---------- */
+/* ---------- Cartoon Miss Ro (v3: softer, more realistic, cuter) ---------- */
 let rachelUid = 0;
 function rachelSVG(o = {}) {
   const u = 'r' + (++rachelUid);
@@ -1980,10 +1948,8 @@ function rachelSVG(o = {}) {
     : o.wave
       ? `<path d="M226 280 Q262 238 266 196" stroke="${skS}" stroke-width="19" fill="none" stroke-linecap="round"/><circle cx="266" cy="190" r="12.5" fill="#F0C1A3"/>`
       : `<path d="M226 276 Q250 326 246 378" stroke="${skS}" stroke-width="19" fill="none" stroke-linecap="round"/><circle cx="246" cy="384" r="11.5" fill="#F0C1A3"/>`;
-  const cap = o.cap ? `<path d="M180 74 L254 96 L180 118 L106 96Z" fill="#22305F"/><path d="M148 102 H212 V120 Q180 131 148 120Z" fill="#2E3F7A"/>
-      <path d="M242 100 Q248 114 244 134" stroke="#FFD45C" stroke-width="3" fill="none"/><circle cx="244" cy="137" r="5.5" fill="#FFD45C"/>` : '';
-  const scroll = o.diploma ? `<g transform="rotate(-20 112 384)"><rect x="70" y="374" width="84" height="22" rx="11" fill="#FFF8E8" stroke="#C9A36B" stroke-width="3"/>
-      <rect x="104" y="372" width="12" height="26" fill="#C2465A"/></g>` : '';
+  const cap = '';
+  const scroll = '';
   return `<g ${o.ids ? 'id="kid"' : 'class="rach"'}>
     <defs>
       <radialGradient id="${u}sk" cx="45%" cy="38%" r="70%"><stop offset="0" stop-color="#FCE0CC"/><stop offset=".7" stop-color="#F6CDB2"/><stop offset="1" stop-color="#EDB696"/></radialGradient>
@@ -2280,7 +2246,7 @@ function enterWorld() {
 }
 
 
-/* ---------- Cover: Ms. Rachel in the Lettervale library ---------- */
+/* ---------- Cover: Miss Ro in the Lettervale library ---------- */
 const EDU = {
   es: { libName: 'Biblioteca de Lettervale', langPick: 'Elija el idioma de las instrucciones', cLearnT: 'Lo que aprenden',
     l: [['Reconocer las letras', 'Las 26 letras en mayúscula y minúscula, con juegos para encontrarlas.'],
@@ -2340,109 +2306,65 @@ const EDU = {
     steps: ['알기', '듣기', '따라 쓰기', '찾기', '놀이'] },
 };
 
-function librarySVG(libName) {
-  const BOOKC = ['#C2465A', '#2E6FB0', '#E2A62A', '#3E8E5A', '#7A4FD0', '#E07A5F', '#1E2A5A', '#D9534F', '#4FA3A5', '#B8860B'];
-  let seed = 7; const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
-  const shelfRow = (x0, x1, y) => {
-    let x = x0 + 4, out = '';
-    while (x < x1 - 14) {
-      const w = 10 + Math.round(rnd() * 9), h = 54 + Math.round(rnd() * 22), c = BOOKC[Math.floor(rnd() * BOOKC.length)];
-      if (x + w > x1 - 4) break;
-      if (rnd() < .12 && x + 26 < x1) {           // a leaning book
-        out += `<rect x="${x + 4}" y="${y - h + 4}" width="${w}" height="${h - 4}" rx="2" fill="${c}" transform="rotate(14 ${x + 4} ${y})"/>`;
-        x += w + 12; continue;
-      }
-      out += `<rect x="${x}" y="${y - h}" width="${w}" height="${h}" rx="2" fill="${c}"/>`
-        + `<rect x="${x + 2}" y="${y - h + 8}" width="${w - 4}" height="3" fill="#fff" opacity=".45"/>`
-        + `<rect x="${x + 2}" y="${y - 14}" width="${w - 4}" height="2.5" fill="#fff" opacity=".35"/>`;
-      x += w + 1.5;
-    }
-    return out;
-  };
-  const shelf = x => {
-    let s = `<rect x="${x}" y="64" width="164" height="410" rx="6" fill="#7A4A2A"/><rect x="${x + 10}" y="74" width="144" height="392" fill="#4A2C1A"/>`;
-    [164, 256, 348, 440].forEach(y => { s += shelfRow(x + 10, x + 154, y) + `<rect x="${x + 6}" y="${y}" width="152" height="11" rx="2" fill="#9A6A3A"/>`; });
-    return s + `<rect x="${x - 6}" y="58" width="176" height="12" rx="3" fill="#8A5A33"/>`;
-  };
-  const sparkle = (x, y, s, d) => `<path class="tw" style="animation-delay:${d}s" d="M${x} ${y - s} Q${x} ${y} ${x + s} ${y} Q${x} ${y} ${x} ${y + s} Q${x} ${y} ${x - s} ${y} Q${x} ${y} ${x} ${y - s}Z" fill="#FFE27A"/>`;
-  const floatL = (x, y, ch, c, d) => `<g class="floatL" style="animation-delay:${d}s"><text x="${x}" y="${y}" text-anchor="middle" font-family="Andika, sans-serif" font-weight="700" font-size="26" fill="${c}" stroke="#fff" stroke-width="4" paint-order="stroke">${ch}</text></g>`;
-  return `<svg viewBox="0 0 600 560" role="img" aria-label="${libName} · Rachel Woronoff" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <clipPath id="libarch"><path d="M192 476 V176 A108 108 0 0 1 408 176 V476Z"/></clipPath>
-      <radialGradient id="libglow" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#FFE7A3" stop-opacity=".95"/><stop offset="1" stop-color="#FFE7A3" stop-opacity="0"/></radialGradient>
-      <linearGradient id="libwall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F7EBD3"/><stop offset="1" stop-color="#EBD7B4"/></linearGradient>
-    </defs>
-    <rect width="600" height="560" fill="url(#libwall)"/>
-    <rect y="470" width="600" height="90" fill="#C98F55"/>
-    ${[0, 1, 2, 3, 4, 5].map(i => `<path d="M0 ${486 + i * 13} H600" stroke="#B57D46" stroke-width="2"/>`).join('')}
-    <ellipse cx="300" cy="528" rx="250" ry="26" fill="#C2465A" opacity=".85"/><ellipse cx="300" cy="528" rx="226" ry="19" fill="none" stroke="#FFD45C" stroke-width="3" stroke-dasharray="6 6"/>
-    ${shelf(14)}${shelf(422)}
-    <circle cx="300" cy="230" r="190" fill="url(#libglow)" opacity=".5"/>
-    <image href="Rach.jpg" x="152" y="68" width="296" height="408" preserveAspectRatio="xMidYMin slice" clip-path="url(#libarch)"/>
-    <path d="M192 476 V176 A108 108 0 0 1 408 176 V476" fill="none" stroke="#7A4A2A" stroke-width="14"/>
-    <path d="M192 476 V176 A108 108 0 0 1 408 176 V476" fill="none" stroke="#E2B65C" stroke-width="3" transform="translate(0 0)"/>
-    <rect x="186" y="10" width="228" height="42" rx="12" fill="#7A4A2A"/><rect x="192" y="15" width="216" height="32" rx="9" fill="#9A6A3A" stroke="#E2B65C" stroke-width="2"/>
-    <text x="300" y="37" text-anchor="middle" font-family="Fredoka, 'Baloo 2', sans-serif" font-weight="700" font-size="17" fill="#FFF3D6">${libName}</text>
-    <g transform="translate(64 34)"><rect x="-4" y="12" width="8" height="14" fill="#8A5A33"/><rect x="-16" y="24" width="32" height="6" rx="3" fill="#8A5A33"/>
-      <circle r="18" fill="#4C9EF5" stroke="#8A5A33" stroke-width="3"/><path d="M-10 -8 q6 -4 10 2 q4 6 -2 10 q-6 2 -8 -4z M4 -14 q8 2 8 10 q-6 0 -8 -4z" fill="#5BBF7A"/></g>
-    <g transform="translate(526 30)">
-      <ellipse cx="0" cy="12" rx="16" ry="18" fill="#9A6A3A"/><ellipse cx="0" cy="16" rx="10" ry="12" fill="#E8C99A"/>
-      <path d="M-14 -2 L-12 -14 L-6 -6Z M14 -2 L12 -14 L6 -6Z" fill="#9A6A3A"/>
-      <circle cx="-6" cy="2" r="6" fill="#fff"/><circle cx="6" cy="2" r="6" fill="#fff"/><circle cx="-6" cy="2" r="3" fill="#1E2A5A"/><circle cx="6" cy="2" r="3" fill="#1E2A5A"/>
-      <path d="M-3 8 L0 12 L3 8Z" fill="#E2A62A"/>
-      <path d="M-14 -16 L0 -22 L14 -16 L0 -10Z" fill="#1E2A5A"/><path d="M10 -15 v8" stroke="#FFD45C" stroke-width="2"/></g>
-    <g transform="translate(166 26)"><path d="M0 -26 V-6" stroke="#5A3420" stroke-width="2"/><rect x="-9" y="-6" width="18" height="24" rx="4" fill="#E2B65C" stroke="#7A4A2A" stroke-width="2"/>
-      <circle cy="6" r="6" fill="#FFF3B0"/><circle cy="6" r="22" fill="url(#libglow)"/></g>
-    <g transform="translate(434 26)"><path d="M0 -26 V-6" stroke="#5A3420" stroke-width="2"/><rect x="-9" y="-6" width="18" height="24" rx="4" fill="#E2B65C" stroke="#7A4A2A" stroke-width="2"/>
-      <circle cy="6" r="6" fill="#FFF3B0"/><circle cy="6" r="22" fill="url(#libglow)"/></g>
-    <rect x="150" y="466" width="300" height="16" rx="5" fill="#8A5A33"/><rect x="170" y="482" width="12" height="40" fill="#7A4A2A"/><rect x="418" y="482" width="12" height="40" fill="#7A4A2A"/>
-    <path d="M232 466 Q266 446 300 458 Q334 446 368 466 Z" fill="#FFF8E8" stroke="#C9A36B" stroke-width="2.5"/>
-    <path d="M300 458 V466" stroke="#C9A36B" stroke-width="2"/>
-    <path d="M244 460 h40 M252 454 h30 M316 454 h30 M316 460 h40" stroke="#C9B9A0" stroke-width="1.6"/>
-    ${floatL(262, 432, 'A', '#C2465A', 0)}${floatL(300, 410, 'b', '#2E6FB0', .7)}${floatL(338, 428, 'C', '#3E8E5A', 1.4)}${floatL(282, 386, 'd', '#7A4FD0', 2.1)}
-    ${sparkle(240, 400, 7, .3)}${sparkle(360, 396, 6, 1.1)}${sparkle(318, 370, 5, 1.8)}
-    <g transform="translate(36 490)"><rect x="0" y="-12" width="70" height="14" rx="3" fill="#2E6FB0"/><rect x="6" y="-26" width="62" height="14" rx="3" fill="#E2A62A"/><rect x="-2" y="-40" width="66" height="14" rx="3" fill="#C2465A"/></g>
-    <g transform="translate(500 476)" font-family="Andika, sans-serif" font-weight="700" font-size="18" text-anchor="middle">
-      <rect x="0" y="0" width="28" height="28" rx="5" fill="#FFD45C" stroke="#1E2A5A" stroke-width="2.5"/><text x="14" y="21" fill="#1E2A5A">A</text>
-      <rect x="30" y="0" width="28" height="28" rx="5" fill="#9ED6F5" stroke="#1E2A5A" stroke-width="2.5"/><text x="44" y="21" fill="#1E2A5A">B</text>
-      <rect x="15" y="-28" width="28" height="28" rx="5" fill="#FF9AA8" stroke="#1E2A5A" stroke-width="2.5"/><text x="29" y="-7" fill="#1E2A5A">C</text></g>
-  </svg>`;
-}
+/* ---------- Home page ---------- */
+const HOME = {
+  es: { navLangs: 'Idiomas', navLessons: 'Lecciones', cta2: 'Elegir idioma', langsT: 'Elija el idioma del niño',
+    langsP: 'La maestra Ro da las instrucciones en el idioma del niño, y las lecciones enseñan a leer en inglés. El progreso de cada idioma se guarda por separado.',
+    lessonsT: 'Todas las lecciones', lessonsP: 'Abra cualquier lección directamente. Las instrucciones serán en el idioma elegido arriba.',
+    lettersH: 'El abecedario, de la A a la Z', wordsH: 'Módulos de lectura', sL: 'lecciones de letras', sM: 'módulos de lectura', sG: 'idiomas de instrucción', done: 'completadas' },
+  fr: { navLangs: 'Langues', navLessons: 'Leçons', cta2: 'Choisir une langue', langsT: "Choisissez la langue de l'enfant",
+    langsP: "La maîtresse Ro donne les consignes dans la langue de l'enfant, et les leçons apprennent à lire en anglais. La progression de chaque langue est enregistrée séparément.",
+    lessonsT: 'Toutes les leçons', lessonsP: 'Ouvrez directement n’importe quelle leçon. Les consignes seront dans la langue choisie en haut.',
+    lettersH: "L'alphabet, de A à Z", wordsH: 'Modules de lecture', sL: 'leçons de lettres', sM: 'modules de lecture', sG: 'langues de consignes', done: 'terminées' },
+  de: { navLangs: 'Sprachen', navLessons: 'Lektionen', cta2: 'Sprache wählen', langsT: 'Wählen Sie die Sprache des Kindes',
+    langsP: 'Lehrerin Ro gibt die Anleitungen in der Sprache des Kindes, und die Lektionen lehren das Lesen auf Englisch. Der Fortschritt wird für jede Sprache getrennt gespeichert.',
+    lessonsT: 'Alle Lektionen', lessonsP: 'Öffnen Sie jede Lektion direkt. Die Anleitungen kommen in der oben gewählten Sprache.',
+    lettersH: 'Das Alphabet von A bis Z', wordsH: 'Lesemodule', sL: 'Buchstaben-Lektionen', sM: 'Lesemodule', sG: 'Sprachen für Anleitungen', done: 'geschafft' },
+  it: { navLangs: 'Lingue', navLessons: 'Lezioni', cta2: 'Scegli la lingua', langsT: 'Scegliete la lingua del bambino',
+    langsP: 'La maestra Ro dà le istruzioni nella lingua del bambino, e le lezioni insegnano a leggere in inglese. I progressi di ogni lingua vengono salvati separatamente.',
+    lessonsT: 'Tutte le lezioni', lessonsP: 'Aprite direttamente qualsiasi lezione. Le istruzioni saranno nella lingua scelta in alto.',
+    lettersH: "L'alfabeto dalla A alla Z", wordsH: 'Moduli di lettura', sL: 'lezioni sulle lettere', sM: 'moduli di lettura', sG: 'lingue per le istruzioni', done: 'completate' },
+  pt: { navLangs: 'Idiomas', navLessons: 'Lições', cta2: 'Escolher idioma', langsT: 'Escolha o idioma da criança',
+    langsP: 'A professora Ro dá as instruções no idioma da criança, e as lições ensinam a ler em inglês. O progresso de cada idioma é salvo separadamente.',
+    lessonsT: 'Todas as lições', lessonsP: 'Abra qualquer lição diretamente. As instruções serão no idioma escolhido acima.',
+    lettersH: 'O alfabeto de A a Z', wordsH: 'Módulos de leitura', sL: 'lições de letras', sM: 'módulos de leitura', sG: 'idiomas de instrução', done: 'concluídas' },
+  ja: { navLangs: '言語', navLessons: 'レッスン', cta2: '言語を選ぶ', langsT: 'お子さまの言語を選んでください',
+    langsP: 'ロー先生がお子さまの言語で説明し、レッスンでは英語の読み方を学びます。進み具合は言語ごとに保存されます。',
+    lessonsT: 'すべてのレッスン', lessonsP: 'どのレッスンにも直接進めます。説明は上で選んだ言語になります。',
+    lettersH: 'アルファベット A〜Z', wordsH: '読みのモジュール', sL: '文字のレッスン', sM: '読みのモジュール', sG: '説明の言語', done: '完了' },
+  zh: { navLangs: '语言', navLessons: '课程', cta2: '选择语言', langsT: '请选择孩子的语言',
+    langsP: '罗老师用孩子的语言讲解，课程教孩子读英语。每种语言的学习进度分别保存。',
+    lessonsT: '全部课程', lessonsP: '可以直接打开任何一课。说明语言为上方选择的语言。',
+    lettersH: '字母 A 到 Z', wordsH: '阅读单元', sL: '字母课', sM: '阅读单元', sG: '说明语言', done: '已完成' },
+  ko: { navLangs: '언어', navLessons: '수업', cta2: '언어 선택', langsT: '아이의 언어를 선택하세요',
+    langsP: '로 선생님이 아이의 언어로 안내하고, 수업에서는 영어 읽기를 배웁니다. 진도는 언어별로 따로 저장됩니다.',
+    lessonsT: '전체 수업', lessonsP: '원하는 수업을 바로 열 수 있습니다. 안내는 위에서 선택한 언어로 나옵니다.',
+    lettersH: '알파벳 A부터 Z까지', wordsH: '읽기 모듈', sL: '글자 수업', sM: '읽기 모듈', sG: '안내 언어', done: '완료' },
+};
+const H = () => HOME[LANG] || HOME.es;
+const doneFor = l => { try { return JSON.parse(localStorage.getItem(l === 'es' ? 'vamos-a-leer-done' : 'vamos-a-leer-done-' + l) || '[]').length; } catch (e) { return 0; } };
+const langNameIn = l => { try { const n = new Intl.DisplayNames([LANG], { type: 'language' }).of(l); return n.charAt(0).toLocaleUpperCase(LANG) + n.slice(1); } catch (e) { return STR[l].langName; } };
 
-function eduSections(t) {
-  const e = EDU[LANG] || EDU.es;
-  const icons = [
-    `<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="3" y="8" width="20" height="24" rx="5" fill="#FFD45C" stroke="#1E2A5A" stroke-width="2.5"/><text x="13" y="26" text-anchor="middle" font-family="Andika,sans-serif" font-weight="700" font-size="16" fill="#1E2A5A">A</text><rect x="25" y="16" width="20" height="24" rx="5" fill="#9ED6F5" stroke="#1E2A5A" stroke-width="2.5"/><text x="35" y="34" text-anchor="middle" font-family="Andika,sans-serif" font-weight="700" font-size="16" fill="#1E2A5A">a</text></svg>`,
-    `<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 18v12h8l10 8V10l-10 8z" fill="#FF9AA8" stroke="#1E2A5A" stroke-width="2.5" stroke-linejoin="round"/><path d="M32 16q6 8 0 16M37 11q10 13 0 26" stroke="#1E2A5A" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg>`,
-    `<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M4 10q10-4 20 2v28q-10-6-20-2z" fill="#FFF8E8" stroke="#1E2A5A" stroke-width="2.5" stroke-linejoin="round"/><path d="M44 10q-10-4-20 2v28q10-6 20-2z" fill="#FFF8E8" stroke="#1E2A5A" stroke-width="2.5" stroke-linejoin="round"/><circle cx="14" cy="22" r="5" fill="#FF5A5A"/><path d="M14 17q1-3 4-4" stroke="#5BBF7A" stroke-width="2"/><path d="M29 20h10M29 26h8" stroke="#8A93B8" stroke-width="2.5" stroke-linecap="round"/></svg>`,
-    `<svg viewBox="0 0 48 48" aria-hidden="true"><text x="18" y="38" text-anchor="middle" font-family="Andika,sans-serif" font-weight="700" font-size="34" fill="none" stroke="#8EDBA6" stroke-width="2" stroke-dasharray="3 3">B</text><path d="M30 44V24q0-3 3-3t3 3v-6q0-3 3-3t3 3v14q0 6-5 12z" fill="#FFE0C2" stroke="#1E2A5A" stroke-width="2.5" stroke-linejoin="round"/></svg>`];
-  return `
-  <section class="csec learn" id="c-learn"><div class="cwrap">
-    <h2>${e.cLearnT}</h2>
-    <div class="lgrid">${e.l.map(([h, p], i) => `<article class="lcard">${icons[i]}<h3>${h}</h3><p>${p}</p></article>`).join('')}</div>
-  </div></section>
-  <section class="csec pathsec"><div class="cwrap">
-    <div class="chalk">
-      <h2>${e.cPathT}</h2>
-      <div class="chalkabc" aria-hidden="true">${ABC.map((L, i) => `<span style="--c:${LCOL[L]}; --i:${i}">${L}${L.toLowerCase()}</span>`).join('')}</div>
-      <p>${e.cPath}</p>
-      <ol class="lsteps">${e.steps.map((s, i) => `<li><b>${i + 1}</b>${s}</li>`).join('')}</ol>
-    </div>
-  </div></section>`;
-}
-
-/* ---------- Cover (for parents and educators) ---------- */
 function renderCover() {
-  const t = T();
+  const t = T(), h = H(), e = EDU[LANG] || EDU.es;
   const opts = LANGS.map(l => `<option value="${l}"${l === LANG ? ' selected' : ''}>${STR[l].langName}</option>`).join('');
-  const stepIcon = [
-    `<svg viewBox="0 0 64 64" aria-hidden="true"><rect x="4" y="6" width="56" height="10" rx="3" fill="#C2465A"/><path d="M8 16h22c-2 14-8 30-22 40z" fill="#E0384F"/><path d="M56 16H34c2 14 8 30 22 40z" fill="#E0384F"/><path d="M26 58l6-14 6 14z" fill="#FFD45C"/></svg>`,
-    `<svg viewBox="0 0 64 64" aria-hidden="true"><rect x="6" y="10" width="20" height="20" rx="5" fill="#FFD45C" stroke="#1E2A5A" stroke-width="3"/><text x="16" y="26" text-anchor="middle" font-family="Andika,sans-serif" font-weight="700" font-size="15" fill="#1E2A5A">A</text><rect x="22" y="32" width="20" height="20" rx="5" fill="#9ED6F5" stroke="#1E2A5A" stroke-width="3"/><text x="32" y="48" text-anchor="middle" font-family="Andika,sans-serif" font-weight="700" font-size="15" fill="#1E2A5A">B</text><path d="M44 30V10l14-3v18" fill="none" stroke="#C2465A" stroke-width="3.5"/><circle cx="41" cy="31" r="4.5" fill="#C2465A"/><circle cx="55" cy="26" r="4.5" fill="#C2465A"/></svg>`,
-    `<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M6 14l16-7 20 7 16-7v43l-16 7-20-7-16 7z" fill="#F3DFAF" stroke="#1E2A5A" stroke-width="3" stroke-linejoin="round"/><path d="M14 44c8-4 10-14 20-14s10 6 16-4" stroke="#C2465A" stroke-width="3" stroke-dasharray="2 5" fill="none" stroke-linecap="round"/><path d="M45 18l6 6M51 18l-6 6" stroke="#C2465A" stroke-width="3.5" stroke-linecap="round"/></svg>`];
+  const langCards = LANGS.map(l => {
+    const n = doneFor(l), pct = Math.round(n / 26 * 100);
+    return `<article class="lcard2${l === LANG ? ' on' : ''}" lang="${l}">
+      <div class="lc-top"><span class="lc-hello">${STR[l].hello}</span>${l === LANG ? '<span class="lc-cur" aria-hidden="true">✓</span>' : ''}</div>
+      <h3>${STR[l].langName}</h3><p class="lc-sub" lang="${LANG}">${l === LANG ? STR[l].cB3 : langNameIn(l)}</p>
+      <div class="lc-prog" aria-label="${n}/26"><i style="width:${pct}%"></i></div><p class="lc-count" lang="${LANG}">${n} / 26 ${h.done}</p>
+      <button class="lc-go" data-start="${l}">${(WS[l] || WS.es).start}${ICON.play}</button></article>`;
+  }).join('');
+  const done = getDone();
+  const letterTiles = ABC.map((L, i) => `<button class="ltile${done.includes(L) ? ' done' : ''}" data-open="${WORD_MODS + i}" style="--lc:${LCOL[L]}" aria-label="${L}">
+      <b>${L}${LETTERS[L].lower}</b><span>${PIC[LETTERS[L].keys[0]]()}</span>${done.includes(L) ? '<i aria-hidden="true">★</i>' : ''}</button>`).join('');
+  const wordTiles = MODULES.slice(0, WORD_MODS).map((m, i) => `<button class="wtile" data-open="${i}" style="--mc:${m.color}">
+      <span class="wt-art">${PIC[m.art || m.word]()}</span><span class="wt-txt"><b>${m.kind === 'words' ? m.title : m.word}</b><small>${m.kind === 'words' ? modSub(m) : meanOf(m.word)}</small></span></button>`).join('');
   coverEl.innerHTML = `
   <header class="cnav"><div class="cwrap cnav-in">
-    <a class="logo" href="#top" aria-label="Vamos a leer"><span class="logomark" aria-hidden="true"><i style="background:#FFD45C">A</i><i style="background:#FF9AA8">B</i><i style="background:#9ED6F5">C</i></span><span class="logotext">Vamos a leer</span></a>
-    <nav class="clinks"><a href="#c-how">${t.cHow}</a><a href="#c-learn">${(EDU[LANG] || EDU.es).cLearnT}</a><a href="#c-teacher">${t.cNavT}</a><a href="#c-fam">${t.cNavF}</a></nav>
+    <a class="logo" href="#top" aria-label="Vamos a leer"><span class="logomark" aria-hidden="true">A<b>a</b></span><span class="logotext">Vamos a leer</span></a>
+    <nav class="clinks"><a href="#c-langs">${h.navLangs}</a><a href="#c-lessons">${h.navLessons}</a><a href="#c-how">${t.cHow}</a><a href="#c-teacher">${t.cNavT}</a></nav>
     <select class="clang" id="coverLang" aria-label="${t.language}">${opts}</select>
   </div></header>
   <section class="hero" id="top"><div class="cwrap hero-in">
@@ -2450,27 +2372,40 @@ function renderCover() {
       <p class="eyebrow">${t.cEyebrow}</p>
       <h1 class="h1">${t.cH1}</h1>
       <p class="lead">${t.cLead}</p>
-      <div class="langpick"><span>${(EDU[LANG] || EDU.es).langPick}</span>
-        <div class="lpchips">${LANGS.map(l => `<button class="lp${l === LANG ? ' on' : ''}" data-lang="${l}" aria-pressed="${l === LANG}"><b>${STR[l].hello}</b><small>${STR[l].langName}</small></button>`).join('')}</div></div>
       <div class="ctas">
         <button class="enter" id="enterBtn">${ICON.play}<span>${t.cCta}</span></button>
+        <a class="ghost" href="#c-langs">${h.cta2}</a>
         <button class="hear" id="greetBtn" aria-label="${t.hello}">${SPK}</button>
       </div>
-      <ul class="badges"><li><span aria-hidden="true">⭐</span>${t.cB1}</li><li><span aria-hidden="true">🎵</span>${t.cB2}</li><li><span aria-hidden="true">💬</span>${t.cB3}</li></ul>
+      <dl class="stats"><div><dt>26</dt><dd>${h.sL}</dd></div><div><dt>${WORD_MODS}</dt><dd>${h.sM}</dd></div><div><dt>${LANGS.length}</dt><dd>${h.sG}</dd></div></dl>
     </div>
-    <div class="hphoto">
-      <span class="blob b1"></span><span class="blob b2"></span>
-      <figure class="pcard libcard">${librarySVG((EDU[LANG] || EDU.es).libName)}
-        <figcaption><b>Rachel Woronoff</b><span>${t.cRole} · ${(EDU[LANG] || EDU.es).libName}</span></figcaption></figure>
-    </div>
+    <figure class="portrait">
+      <div class="pframe"><img src="Rach.jpg" width="1200" height="1200" alt="Rachel Woronoff" decoding="async"></div>
+      <figcaption><b>Rachel Woronoff</b><span>${t.cRole}</span></figcaption>
+    </figure>
   </div></section>
-  <section class="csec" id="c-how"><div class="cwrap">
+  <section class="csec langsec" id="c-langs"><div class="cwrap">
+    <div class="shead"><h2>${h.langsT}</h2><p>${h.langsP}</p></div>
+    <div class="lgrid2">${langCards}</div>
+  </div></section>
+  <section class="csec lessonsec" id="c-lessons"><div class="cwrap">
+    <div class="shead"><h2>${h.lessonsT}</h2><p>${h.lessonsP}</p></div>
+    <h3 class="subh">${h.lettersH}</h3>
+    <div class="ltiles">${letterTiles}</div>
+    <h3 class="subh">${h.wordsH}</h3>
+    <div class="wtiles">${wordTiles}</div>
+    <ol class="lsteps2" aria-label="${e.cPathT}">${e.steps.map((s, i) => `<li><b>${i + 1}</b>${s}</li>`).join('')}</ol>
+  </div></section>
+  <section class="csec howsec" id="c-how"><div class="cwrap">
     <h2>${t.cHow}</h2>
-    <div class="steps">${[[t.cS1t, t.cS1], [t.cS2t, t.cS2], [t.cS3t, t.cS3]].map(([h, p], i) => `<article class="step"><span class="snum">${i + 1}</span>${stepIcon[i]}<h3>${h}</h3><p>${p}</p></article>`).join('')}</div>
+    <div class="steps">${[[t.cS1t, t.cS1], [t.cS2t, t.cS2], [t.cS3t, t.cS3]].map(([a, p], i) => `<article class="step"><span class="snum">${i + 1}</span><h3>${a}</h3><p>${p}</p></article>`).join('')}</div>
   </div></section>
-  ${eduSections(t)}
+  <section class="csec learnsec" id="c-learn"><div class="cwrap">
+    <h2>${e.cLearnT}</h2>
+    <div class="lgrid">${e.l.map(([a, p]) => `<article class="lcard"><h3>${a}</h3><p>${p}</p></article>`).join('')}</div>
+  </div></section>
   <section class="csec about" id="c-teacher"><div class="cwrap about-in">
-    <img src="Rach.jpg" width="400" height="400" alt="" decoding="async">
+    <img src="Rach.jpg" width="1200" height="1200" alt="" decoding="async" loading="lazy">
     <div><h2>${t.cAboutT}</h2><p>${t.cAbout}</p></div>
   </div></section>
   <section class="csec" id="c-fam"><div class="cwrap">
@@ -2490,7 +2425,7 @@ function setLang(l) {
 }
 
 /* ---------- Hints for pre-readers: a pointing hand on every screen ---------- */
-// Whenever Ms. Rachel is quiet and the child has not acted, the hand points at what to tap next.
+// Whenever Miss Ro is quiet and the child has not acted, the hand points at what to tap next.
 let hintEl = null, hintRaf = 0, hintCur = null, hintGet = null, hs = {};
 let lastTap = 0, lastQuiet = 0, lastPage = 0, wasBusy = false;
 function clearHint() {
@@ -2607,7 +2542,7 @@ document.addEventListener('click', e => {
   if (b.dataset.greet) (hs.greeted = hs.greeted || new Set()).add(b.dataset.greet);
 }, true);
 
-/* ---------- Ms. Rachel the guide ---------- */
+/* ---------- Miss Ro the guide ---------- */
 function cheer() {
   document.querySelectorAll('.rguide').forEach(g => { g.classList.remove('cheer'); void g.offsetWidth; g.classList.add('cheer'); });
 }
@@ -3359,12 +3294,14 @@ recRows.addEventListener('click', async e => {
   }
 });
 
-/* ---------- Cover, Lettervale & university events ---------- */
+/* ---------- Cover & Lettervale events ---------- */
 document.getElementById('rguide').innerHTML = rachelBust();
 coverEl.addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
   if (b.id === 'enterBtn') return enterWorld();
   if (b.id === 'greetBtn') { ensureAC(); return greet(); }
+  if (b.dataset.start) { setLang(b.dataset.start); return enterWorld(); }
+  if (b.dataset.open) { ensureAC(); return openModule(+b.dataset.open); }
   if (b.dataset.lang) { const l = b.dataset.lang; setLang(l); showCover(); ensureAC(); return speak([{ t: STR[l].hello, l }]); }
 });
 coverEl.addEventListener('change', e => { if (e.target.id === 'coverLang') { setLang(e.target.value); showCover(); } });
