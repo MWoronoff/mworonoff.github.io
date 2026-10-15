@@ -1959,10 +1959,15 @@ function showWorld(o = {}) {
   if (o.reveal) {
     const b = document.getElementById('blocks'); b.hidden = false;
     document.getElementById('skipBtn').hidden = true;
-    const j = justDone; justDone = null;
+    const j = justDone, js = justStar; justDone = null; justStar = null;
     requestAnimationFrame(() => {
       const c = renderMap(j);
       if (o.scroll && !j && c) c(false);
+      if (js) {
+        const st = document.querySelector(`.stop[data-letter="${js}"]`);
+        if (st) { st.scrollIntoView({ block: 'center' }); setTimeout(() => burstAt(st), 300); }
+        speak([N(T().star)]);
+      }
       if (!j) setHint(() => document.querySelector('.stop.next, .unistop.open'), 2500);
     });
   }
@@ -2264,7 +2269,7 @@ function letterMod(m, p) {
       <div class="keys">${keyBtns(L)}</div>
       <div class="cheer"><img src="Rach.jpg" alt=""><span>⭐ ${T().star}</span></div>
       <div class="btns"><button class="homebig" data-act="home" aria-label="${T().mapTitle}">${ICON.map}</button>
-      ${nextL ? `<button class="nextl" data-act="nextLetter" aria-label="${nextL}"><span style="background:${LCOL[nextL]}">${nextL}${LETTERS[nextL].lower}</span>${ICON.next}</button>` : ''}</div></div>`;
+</div></div>`;
   }
   return '';
 }
@@ -2383,7 +2388,18 @@ function drawGuide() {
 }
 
 /* ---------- The treasure map ---------- */
-let justDone = null, mapTimer = null;
+let justDone = null, justStar = null, mapTimer = null;
+// After a letter's celebration, go to the treasure map so the child sees the marker move.
+function goMapSoon() {
+  clearTimeout(advanceT);
+  const onFinale = () => mi >= 0 && !bookEl.hidden && pages()[cur] === 'finale';
+  const tick = () => {
+    if (!onFinale()) return;
+    if (talking) { advanceT = setTimeout(tick, 300); return; }
+    advanceT = setTimeout(() => { if (onFinale()) renderHome(); }, 2000);
+  };
+  advanceT = setTimeout(tick, 1400);
+}
 function mapGeom() {
   const box = document.getElementById('mapbox');
   const w = (box && box.clientWidth) || 1000;
@@ -2638,8 +2654,9 @@ function render(dir = 0) {
   dotsEl.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('on', i === cur));
   if (p === 'finale') { burst(); if (m.kind === 'letter') {
     const d = getDone();
-    if (!d.includes(m.L) && ABC.find(L => !d.includes(L)) === m.L) justDone = m.L;
+    if (!d.includes(m.L)) { if (ABC.find(L => !d.includes(L)) === m.L) justDone = m.L; else justStar = m.L; }
     addDone(m.L);
+    goMapSoon();
   } }
   if (p === 'trace') initTrace();
   if (dir && autoEl.checked) setTimeout(prompt, 400);
@@ -2868,7 +2885,7 @@ pageEl.addEventListener('click', e => {
   const a = b.dataset.act;
   if (b.dataset.mod) { ensureAC(); return openModule(+b.dataset.mod); }
   if (a === 'next') return go(1);
-  if (a === 'nextLetter') return openModule(mi + 1);
+  if (a === 'nextLetter') return renderHome();
   if (a === 'clear') return drawGuide();
   if (b.dataset.tcase) {
     game.tcase = b.dataset.tcase;
