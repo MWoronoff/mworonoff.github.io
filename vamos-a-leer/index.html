@@ -256,9 +256,9 @@ h1,h2,.fun{font-family:"Fredoka","Baloo 2","Andika",sans-serif; font-weight:700;
 .clinks a:hover{color:var(--accent)}
 .clang{font:inherit; font-weight:700; color:var(--ink); border:1px solid #D5DAE8; border-radius:10px; padding:.4em .8em; background:#fff}
 .hero{background:linear-gradient(180deg,#FFF7F0 0,#FFFFFF 100%); border-bottom:1px solid var(--line)}
-.hero-in{display:grid; grid-template-columns:1.25fr .75fr; gap:clamp(28px,6vw,80px); align-items:center; padding-top:clamp(40px,6vw,84px); padding-bottom:clamp(44px,6vw,90px)}
+.hero-in{display:grid; grid-template-columns:1fr 1fr; gap:clamp(28px,6vw,80px); align-items:center; padding-top:clamp(40px,6vw,84px); padding-bottom:clamp(44px,6vw,90px)}
 .eyebrow{margin:0 0 16px; color:var(--accent); font-weight:800; font-size:.92rem; letter-spacing:.06em; text-transform:uppercase}
-.h1{margin:0; font-size:clamp(2.2rem,4.4vw,3.6rem); line-height:1.1; font-weight:800; letter-spacing:-.025em; color:var(--ink); max-width:14em}
+.h1{margin:0; font-size:clamp(2.2rem,4vw,3.4rem); line-height:1.1; font-weight:800; letter-spacing:-.025em; color:var(--ink); max-width:14em}
 .lead{margin:20px 0 0; font-size:clamp(1.06rem,1.5vw,1.2rem); line-height:1.65; color:var(--muted); max-width:34em}
 .ctas{display:flex; align-items:center; gap:12px; margin-top:30px; flex-wrap:wrap}
 .enter{border:0; background:var(--accent); color:#fff; font-family:"Plus Jakarta Sans",sans-serif; font-weight:600; font-size:clamp(1.1rem,1.8vw,1.3rem); padding:.75em 1.4em; border-radius:12px; display:inline-flex; align-items:center; gap:.55em; box-shadow:0 8px 20px rgba(224,71,91,.28); cursor:pointer}
@@ -268,15 +268,16 @@ h1,h2,.fun{font-family:"Fredoka","Baloo 2","Andika",sans-serif; font-weight:700;
 .ghost:hover{border-color:var(--ink)}
 .hear{width:52px; height:52px; border-radius:12px; border:1px solid #CFD5E6; background:#fff; color:var(--ink); display:grid; place-items:center; cursor:pointer}
 .hear svg{width:24px; height:24px}
-.stats{display:flex; gap:clamp(20px,4vw,48px); margin:38px 0 0; padding:22px 0 0; border-top:1px solid var(--line); flex-wrap:wrap}
+.stats{display:grid; grid-template-columns:repeat(3,auto); justify-content:start; gap:clamp(18px,3.5vw,44px); margin:38px 0 0; padding:22px 0 0; border-top:1px solid var(--line); flex-wrap:wrap}
 .stats div{display:flex; flex-direction:column}
 .stats dt{font-family:"Plus Jakarta Sans",sans-serif; font-weight:600; font-size:2rem; line-height:1; color:var(--ink)}
 .stats dd{margin:6px 0 0; color:var(--muted); font-weight:700; font-size:.92rem}
-.portrait{margin:0; justify-self:center; width:min(400px,100%)}
+.portrait{margin:0; justify-self:end; width:min(560px,100%)}
 .pframe{position:relative}
 .pframe::before{content:""; position:absolute; inset:18px -18px -18px 18px; border-radius:24px; background:#FFD45C; z-index:0}
 .pframe img{position:relative; z-index:1; display:block; width:100%; height:auto; aspect-ratio:1; object-fit:cover; border-radius:24px; box-shadow:0 22px 50px rgba(30,42,90,.18)}
-.portrait figcaption{margin-top:30px; display:flex; flex-direction:column; gap:2px}
+.portrait figcaption{margin-top:30px; display:flex; align-items:center; justify-content:space-between; gap:16px}
+.portrait figcaption div{display:flex; flex-direction:column; gap:2px}
 .portrait figcaption b{font-family:"Plus Jakarta Sans",sans-serif; font-weight:600; font-size:1.2rem}
 .portrait figcaption span{color:var(--muted); font-weight:700}
 .csec{padding:clamp(52px,7vw,92px) 0}
@@ -337,10 +338,10 @@ h1,h2,.fun{font-family:"Fredoka","Baloo 2","Andika",sans-serif; font-weight:700;
 .cfoot{border-top:1px solid var(--line); padding:24px 0; color:#8A93B8; font-size:.92rem}
 @media (max-width:1020px){ .ltiles{grid-template-columns:repeat(9,1fr)} .wtiles{grid-template-columns:repeat(3,1fr)} .lgrid2{grid-template-columns:repeat(2,1fr)} }
 @media (max-width:860px){
-  .hero-in{grid-template-columns:1fr; padding-top:26px} .portrait{width:min(300px,80vw)} .logotext{font-size:1.1rem; white-space:nowrap}
+  .hero-in{grid-template-columns:1fr; padding-top:26px} .portrait{width:min(520px,100%); justify-self:center} .logotext{font-size:1.1rem; white-space:nowrap}
   .steps,.tips{grid-template-columns:1fr} .lgrid{grid-template-columns:1fr 1fr} .clinks{display:none} .about-in{grid-template-columns:1fr; justify-items:center; text-align:center}
 }
-@media (max-width:560px){ .stats{display:grid; grid-template-columns:repeat(3,1fr); gap:12px} .ltiles{grid-template-columns:repeat(5,1fr)} .wtiles{grid-template-columns:1fr} .lgrid2{grid-template-columns:1fr 1fr; gap:10px} .lcard2{padding:14px} .lcard2.on{padding:13px} .lgrid{grid-template-columns:1fr} .stats dt{font-size:1.6rem} .lc-go{font-size:.92rem} }
+@media (max-width:560px){ .pframe{margin-right:12px} .pframe::before{inset:12px -12px -12px 12px} .stats{display:grid; grid-template-columns:repeat(3,1fr); gap:12px} .ltiles{grid-template-columns:repeat(5,1fr)} .wtiles{grid-template-columns:1fr} .lgrid2{grid-template-columns:1fr 1fr; gap:10px} .lcard2{padding:14px} .lcard2.on{padding:13px} .lgrid{grid-template-columns:1fr} .stats dt{font-size:1.6rem} .lc-go{font-size:.92rem} }
 
 /* ---------- Curtain ---------- */
 .curtain{position:fixed; inset:0; z-index:60; pointer-events:none; transform:translateY(-112%); transition:transform .75s cubic-bezier(.55,0,.35,1); display:grid; place-items:center}
@@ -2375,13 +2376,12 @@ function renderCover() {
       <div class="ctas">
         <button class="enter" id="enterBtn">${ICON.play}<span>${t.cCta}</span></button>
         <a class="ghost" href="#c-langs">${h.cta2}</a>
-        <button class="hear" id="greetBtn" aria-label="${t.hello}">${SPK}</button>
       </div>
       <dl class="stats"><div><dt>26</dt><dd>${h.sL}</dd></div><div><dt>${WORD_MODS}</dt><dd>${h.sM}</dd></div><div><dt>${LANGS.length}</dt><dd>${h.sG}</dd></div></dl>
     </div>
     <figure class="portrait">
       <div class="pframe"><img src="Rach.jpg" width="1200" height="1200" alt="Rachel Woronoff" decoding="async"></div>
-      <figcaption><b>Rachel Woronoff</b><span>${t.cRole}</span></figcaption>
+      <figcaption><div><b>Rachel Woronoff</b><span>${t.cRole}</span></div><button class="hear" id="greetBtn" aria-label="${t.hello}">${SPK}</button></figcaption>
     </figure>
   </div></section>
   <section class="csec langsec" id="c-langs"><div class="cwrap">
