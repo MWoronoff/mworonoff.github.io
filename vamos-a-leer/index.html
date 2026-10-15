@@ -281,6 +281,14 @@ h1,h2,.fun{font-family:"Fredoka","Baloo 2","Andika",sans-serif; font-weight:700;
 .hear:hover{border-color:var(--ink)}
 .hear svg{width:20px; height:20px}
 
+/* soft gradated rainbow behind the teacher and both columns */
+.hero{position:relative; overflow:hidden; isolation:isolate}
+.hero::before{content:""; position:absolute; inset:0; z-index:-1; pointer-events:none; opacity:.42;
+  background:radial-gradient(ellipse 60% 118% at 50% 104%,
+    transparent 0 52%, rgba(169,155,239,0) 52%, #A99BEF 56.5%, #7CC4F2 61%, #8FD99A 65.5%, #FFD866 70%, #FFA766 74.5%, #FF7A8A 79%, rgba(255,122,138,0) 84%, transparent 100%);
+  filter:blur(6px)}
+@media (max-width:860px){ .hero::before{background:radial-gradient(ellipse 150% 52% at 50% 64%,
+    transparent 0 38%, #A99BEF 44%, #7CC4F2 50%, #8FD99A 56%, #FFD866 62%, #FFA766 68%, #FF7A8A 74%, rgba(255,122,138,0) 80%, transparent 100%)} }
 .hero3{display:grid; grid-template-columns:minmax(0,1fr) minmax(300px,400px) minmax(0,1fr); gap:clamp(28px,4vw,56px); align-items:center; padding-top:clamp(44px,6vw,92px); padding-bottom:clamp(28px,3vw,44px)}
 .hero3 .h1{font-size:clamp(1.9rem,2.5vw,2.6rem); max-width:none}
 .hero3 .lead{font-size:1.05rem; margin-top:20px}
