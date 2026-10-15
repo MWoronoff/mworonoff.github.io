@@ -259,7 +259,7 @@ h1,h2,.fun{font-family:"Fredoka","Baloo 2","Andika",sans-serif; font-weight:700;
 
 .hero-in{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:clamp(32px,6vw,96px); align-items:center; padding-top:clamp(48px,7vw,104px); padding-bottom:clamp(56px,7vw,112px)}
 .kicker{margin:0 0 20px; color:var(--ink2); font-size:1rem; font-weight:400}
-.h1{margin:0; font-size:clamp(2.6rem,5.2vw,4.6rem); line-height:1.02; font-weight:600; letter-spacing:-.035em; max-width:11em}
+.h1{margin:0; font-size:clamp(2.5rem,4.3vw,4rem); line-height:1.02; font-weight:600; letter-spacing:-.035em; max-width:13em}
 .lead{margin:28px 0 0; font-size:clamp(1.05rem,1.45vw,1.2rem); line-height:1.7; color:var(--ink2); max-width:32em}
 .ctas{display:flex; align-items:center; gap:28px; margin-top:40px; flex-wrap:wrap}
 .btn-primary{border:0; background:var(--ink); color:#fff; font:inherit; font-weight:500; font-size:1.05rem; padding:1em 1.8em; border-radius:999px; cursor:pointer}
@@ -2181,6 +2181,7 @@ const HOUSE = ICON.house;
 
 function showView(v) {
   coverEl.hidden = v !== 'cover'; worldEl.hidden = v !== 'world'; bookEl.hidden = v !== 'book';
+  document.documentElement.lang = v === 'cover' ? PL : LANG;
   if (v !== 'world') worldIn.innerHTML = '';
   window.scrollTo(0, 0);
 }
@@ -2343,6 +2344,37 @@ const EDU = {
     steps: ['알기', '듣기', '따라 쓰기', '찾기', '놀이'] },
 };
 
+/* ---------- Home page language (English by default) ---------- */
+const COVER_EN = {
+  t: { cEyebrow: 'English reading for children ages 4 and 5', cH1: 'Learning to read in English, through play.',
+    cLead: 'With Miss Ro, children learn the 26 letters of the English alphabet, their sounds and their first words through songs, games and a treasure map.',
+    cCta: 'Enter Lettervale', cHow: 'How it works', cNavT: 'The teacher', language: 'Page language', hello: 'Hello!', cRole: 'Elementary school teacher',
+    cS1t: 'The curtain opens', cS1: 'Your child enters Lettervale, a magical world of castles, lakes and forests.',
+    cS2t: 'Sing with Miss Ro', cS2: 'Miss Ro points to each letter while you sing the alphabet together.',
+    cS3t: 'Follow the treasure map', cS3: 'Every finished letter earns a star and brings your child closer to the treasure.',
+    cAboutT: 'Meet Miss Ro', cAbout: 'Rachel Woronoff is an elementary school teacher. In every lesson she guides children with her voice, her songs and a lot of warmth.',
+    cFamT: 'For families and teachers', cF1: 'Works best in short sessions with an adult nearby.', cF2: 'Turn the sound up: Miss Ro gives every instruction out loud.',
+    cF3: 'Progress is saved on this device.', cFoot: 'Made with care for young readers.' },
+  e: { cPathT: 'A path of 26 lessons', cPath: 'Every lesson follows the same steps: meet the letter, hear its sound, trace it, find it and play with words.',
+    steps: ['Meet', 'Listen', 'Trace', 'Find', 'Play'], cLearnT: 'What children learn',
+    l: [['Letter recognition', 'All 26 letters in uppercase and lowercase, with games to find them.'],
+        ['English sounds', "The sound of each letter, with tips for the sounds that are new in your child's language."],
+        ['First words', "52 picture words from apple to zebra, with their meaning in your child's language."],
+        ['Finger tracing', 'Tracing each letter helps children remember it and prepares the hand for writing.']] },
+  h: { navLangs: 'Languages', navLessons: 'Lessons', cta2: 'Choose a language', langsT: "Choose your child's language",
+    langsP: "Miss Ro gives the instructions in your child's language, and the lessons teach reading in English. Progress is saved separately for each language.",
+    lessonsT: 'All lessons', lessonsP: 'Open any lesson directly. Instructions play in the lesson language you selected.',
+    lettersH: 'The alphabet, A to Z', wordsH: 'Reading modules', done: 'completed', instr: 'Lesson language', start: 'Start', cur: 'Current lesson language' },
+  mods: { cat: 'Your first word: C, A, T', dog: 'Your second word: D, O, G', sight: 'Common words to know at a glance', sun: 'Three-letter words to sound out', they: 'The building blocks of sentences' },
+};
+function setPageLang(l) { PL = l; try { localStorage.setItem('vamos-a-leer-page', l); } catch (e) {} }
+let PL = (() => {
+  try { const s = localStorage.getItem('vamos-a-leer-page'); if (s === 'en' || LANGS.includes(s)) return s; } catch (e) {}
+  const q = new URLSearchParams(location.search).get('lang');
+  return q && LANGS.includes(q) ? q : 'en';    // a shared ?lang= link opens in that language the first time
+})();
+setPageLang(PL);
+
 /* ---------- Home page ---------- */
 const HOME = {
   es: { navLangs: 'Idiomas', navLessons: 'Lecciones', cta2: 'Elegir idioma', langsT: 'Elija el idioma del niño',
@@ -2380,7 +2412,7 @@ const HOME = {
 };
 const H = () => HOME[LANG] || HOME.es;
 const doneFor = l => { try { return JSON.parse(localStorage.getItem(l === 'es' ? 'vamos-a-leer-done' : 'vamos-a-leer-done-' + l) || '[]').length; } catch (e) { return 0; } };
-const langNameIn = l => { try { const n = new Intl.DisplayNames([LANG], { type: 'language' }).of(l); return n.charAt(0).toLocaleUpperCase(LANG) + n.slice(1); } catch (e) { return STR[l].langName; } };
+const langNameIn = l => { try { const n = new Intl.DisplayNames([PL], { type: 'language' }).of(l); return n.charAt(0).toLocaleUpperCase(PL) + n.slice(1); } catch (e) { return STR[l].langName; } };
 const LINE = {
   letters: '<svg viewBox="0 0 32 32" aria-hidden="true"><rect x="3" y="6" width="12" height="16" rx="2"/><path d="M7 18l2-8 2 8M7.7 15.5h2.6"/><rect x="17" y="10" width="12" height="16" rx="2"/><circle cx="23" cy="19" r="2.6"/><path d="M25.6 16.4V22"/></svg>',
   sound: '<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M5 12v8h5l7 6V6l-7 6z"/><path d="M21 11.5a6 6 0 010 9M24.5 8a11 11 0 010 16"/></svg>',
@@ -2389,7 +2421,7 @@ const LINE = {
 };
 
 function lessonPreview() {
-  const d = LETTERS.A, e = EDU[LANG] || EDU.es;
+  const d = LETTERS.A, e = PL === 'en' ? COVER_EN.e : (EDU[PL] || EDU.es);
   return `<div class="device" aria-hidden="true">
     <div class="dv-top"><span class="dv-dot"></span><span class="dv-dot"></span><span class="dv-dot"></span></div>
     <div class="dv-body">
@@ -2400,20 +2432,23 @@ function lessonPreview() {
 }
 
 function renderCover() {
-  const t = T(), h = H(), e = EDU[LANG] || EDU.es;
-  const opts = LANGS.map(l => `<option value="${l}"${l === LANG ? ' selected' : ''}>${STR[l].langName}</option>`).join('');
+  const en = PL === 'en', t = en ? COVER_EN.t : STR[PL], h = en ? COVER_EN.h : (HOME[PL] || HOME.es), e = en ? COVER_EN.e : (EDU[PL] || EDU.es);
+  const startTxt = en ? h.start : (WS[PL] || WS.es).start;
+  document.documentElement.lang = PL;
+  document.title = 'Vamos a leer | ' + (en ? 'Learn to read in English with Miss Ro' : t.cH1);
+  const opts = ['en', ...LANGS].map(l => `<option value="${l}"${l === PL ? ' selected' : ''}>${l === 'en' ? 'English' : STR[l].langName}</option>`).join('');
   const langRows = LANGS.map(l => {
     const n = doneFor(l), pct = Math.round(n / 26 * 100);
     return `<li class="lrow${l === LANG ? ' on' : ''}">
       <span class="lr-name" lang="${l}">${STR[l].langName}</span>
-      <span class="lr-meta">${l === LANG ? STR[l].cB3 : langNameIn(l)}</span>
+      <span class="lr-meta">${l === LANG ? (en ? h.cur : STR[l].cB3) : langNameIn(l)}</span>
       <span class="lr-prog"><span class="lr-bar"><i style="width:${pct}%"></i></span><span>${n}/26</span></span>
-      <button class="lr-go" data-start="${l}" lang="${l}">${(WS[l] || WS.es).start}</button></li>`;
+      <button class="lr-go" data-start="${l}">${startTxt}</button></li>`;
   }).join('');
   const done = getDone();
   const letterTiles = ABC.map((L, i) => `<button class="glyph${done.includes(L) ? ' done' : ''}" data-open="${WORD_MODS + i}" aria-label="${L}">${L}<span>${LETTERS[L].lower}</span></button>`).join('');
   const wordRows = MODULES.slice(0, WORD_MODS).map((m, i) => `<li><button class="wrow" data-open="${i}">
-      <b>${m.kind === 'words' ? m.title : m.word}</b><span>${m.kind === 'words' ? modSub(m) : meanOf(m.word)}</span>
+      <b>${m.kind === 'words' ? m.title : m.word}</b><span>${en ? COVER_EN.mods[m.art || m.word] : m.kind === 'words' ? modSub(m) : meanOf(m.word)}</span>
       <em>${m.kind === 'words' ? m.words.slice(0, 4).map(x => x.w).join(', ') : m.letters.join(' ')}</em></button></li>`).join('');
   coverEl.innerHTML = `
   <header class="cnav"><div class="cwrap cnav-in">
@@ -3373,9 +3408,9 @@ coverEl.addEventListener('click', e => {
   if (b.id === 'greetBtn') { ensureAC(); return greet(); }
   if (b.dataset.start) { setLang(b.dataset.start); return enterWorld(); }
   if (b.dataset.open) { ensureAC(); return openModule(+b.dataset.open); }
-  if (b.dataset.lang) { const l = b.dataset.lang; setLang(l); showCover(); ensureAC(); return speak([{ t: STR[l].hello, l }]); }
+  if (b.dataset.lang) { const l = b.dataset.lang; setLang(l); if (PL !== 'en') setPageLang(l); showCover(); ensureAC(); return speak([{ t: STR[l].hello, l }]); }
 });
-coverEl.addEventListener('change', e => { if (e.target.id === 'coverLang') { setLang(e.target.value); showCover(); } });
+coverEl.addEventListener('change', e => { if (e.target.id === 'coverLang') { const v = e.target.value; setPageLang(v); if (v !== 'en') setLang(v); showCover(); } });
 function mapTap(el) {
   if (el.classList.contains('stop')) { ensureAC(); return openModule(WORD_MODS + ABC.indexOf(el.dataset.letter)); }
   if (el.classList.contains('cheststop')) { ensureAC(); if (allDone()) { burstAt(el); setTimeout(() => burstAt(el), 600); speak([N(T().allDone)]); } else speak([N(T().locked)]); }
