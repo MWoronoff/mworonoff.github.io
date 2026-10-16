@@ -186,10 +186,7 @@
             <h3>ZIP Radius Audience Builder</h3>
             <p>Pick a ZIP and a radius, choose the audience, and get the people in range, how they respond to ads, and a ranked ZIP list to export.</p>
             <div class="tool-actions">
-              <label class="visually-hidden" for="radius-cat" style="position:absolute;left:-9999px">Category for the radius tool</label>
-              <select id="radius-cat"></select>
-              <a class="btn btn-navy" id="radius-go" href="#radius-cat" role="button">Open radius tool</a>
-              <p id="radius-hint" role="status" style="margin:6px 0 0;width:100%;font-size:14px;color:#b42318" hidden>Choose a category first.</p>
+              <a class="btn btn-navy" href="/radius/">Open radius tool</a>
             </div>
           </div>
         </article>
@@ -296,8 +293,7 @@
   }
 
   // category tiles and the radius picker are plain HTML, so they work before (or without) the map data
-  var catBox = document.getElementById("cats"), sel = document.getElementById("radius-cat");
-  sel.appendChild(el("option", { value: "", text: "Choose a category" }));
+  var catBox = document.getElementById("cats");
   CATS.forEach(function (c) {
     catBox.appendChild(el("article", { class: "cat" }, [
       el("div", { class: "cat-map" }, [
@@ -313,20 +309,7 @@
         el("a", { href: "/crm-analyzer/?category=" + c.key + "&from=" + encodeURIComponent(c.name), text: "Analyze customers" })
       ])
     ]));
-    sel.appendChild(el("option", { value: c.path, text: c.name }));
   });
-  sel.addEventListener("change", function () {
-    var go = document.getElementById("radius-go"), hint = document.getElementById("radius-hint");
-    go.href = sel.value ? sel.value + "#level=radius" : "#radius-cat";
-    if (sel.value) { hint.hidden = true; sel.style.outline = ""; }
-  });
-  document.getElementById("radius-go").addEventListener("click", function (e) {
-    if (sel.value) return;
-    e.preventDefault();
-    document.getElementById("radius-hint").hidden = false;
-    sel.style.outline = "2px solid #b42318"; sel.focus();
-  });
-  sel.value = "";
 
   // Customer Market Analyzer art: the sample business's customer rate by distance band against the expected curve
   (function () {

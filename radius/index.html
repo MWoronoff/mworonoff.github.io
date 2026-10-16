@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ZIP Radius Audience Builder</title>
+<link rel="icon" href="../shared/adtaxi-logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<link rel="stylesheet" href="../shared/engine.css">
+<style>
+  .rx-cat select { min-width: 220px; }
+  .rx-cat small { display: block; margin-top: 4px; font-size: 13px; color: #5b6b7d; }
+</style>
+</head>
+<body>
+<div id="app"><p class="az-loading">Loading the radius tool…</p></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js" crossorigin=""></script>
+<script src="../shared/radius.js"></script>
+<script>
+/* Neutral entry to the ZIP radius tool: no category or audience preset. General demographics work here;
+   choosing a category moves to that analyzer's Radius view, keeping the ZIP and radius already entered. */
+var CATS = [
+  ["/healthcare/", "Healthcare"], ["/legal/", "Legal"], ["/higher-ed/", "Higher Education"],
+  ["/home-services/", "Home Services"], ["/furniture-analyzer/", "Furniture"], ["/apartment-analyzer/", "Apartments"],
+  ["/financial/", "Financial"], ["/auto/", "Auto"]
+];
+AdtaxiRadius.start({
+  title: "ZIP Radius Audience Builder",
+  subtitle: "Pick a center ZIP or town and a radius to see who lives there and which ZIPs over-index. Choose a category to add that industry's audience filters and best-prospect profiles.",
+  logo: "../shared/adtaxi-logo.svg",
+  exportName: "zip-radius",
+  links: [ { label: "Home", url: "../analyzers/" } ],
+  audienceData: "../shared/audience/zip_audience.json",
+  zipGeo: "../shared/geo/zip/{level}/{id}.json",
+  ageSet: "health",
+  radii: [5, 10, 15, 25, 50, 100],
+  radiusLabel: "Up to {r} miles",
+  filters: ["gender", "age", "income5"]
+}, document.getElementById("app"));
+
+(function addCategory() {
+  var bar = document.querySelector("#app .az-controls");
+  if (!bar) return setTimeout(addCategory, 100);
+  var lab = document.createElement("label"); lab.className = "az-field rx-cat";
+  var span = document.createElement("span"); span.textContent = "Category";
+  var sel = document.createElement("select"); sel.setAttribute("aria-label", "Category");
+  var o0 = document.createElement("option"); o0.value = ""; o0.textContent = "All categories (general audience)"; sel.appendChild(o0);
+  CATS.forEach(function (c) { var o = document.createElement("option"); o.value = c[0]; o.textContent = c[1]; sel.appendChild(o); });
+  sel.addEventListener("change", function () {
+    if (!sel.value) return;
+    var p = {}; (location.hash || "").replace(/^#/, "").split("&").forEach(function (kv) { var a = kv.split("="); if (a[0]) p[a[0]] = decodeURIComponent(a[1] || ""); });
+    location.href = sel.value + "#level=radius" + (/^\d{5}$/.test(p.zip || "") ? "&zip=" + p.zip : "") + (+p.r > 0 ? "&r=" + (+p.r) : "");
+  });
+  lab.appendChild(span); lab.appendChild(sel);
+  bar.insertBefore(lab, bar.firstChild);
+})();
+</script>
+</body>
+</html>
