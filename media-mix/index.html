@@ -216,6 +216,7 @@ var TIERS = [ { max: 7500, channels: 1, label: "$3K–$7.5K: one primary channel
   catSel.value = qc ? qc.id : "";
   stratSel.value = STRATEGIES.some(function (s) { return s.id === q.get("strategy"); }) ? q.get("strategy") : "";
   if (q.get("budget")) budIn.value = Number(q.get("budget")).toLocaleString("en-US");
+  if (location.search) history.replaceState(null, "", location.pathname);   // a refresh always starts blank
 
   function readBudget() { var v = Number(String(budIn.value).replace(/[^0-9.]/g, "")); return v > 0 ? v : null; }
 
@@ -305,8 +306,6 @@ var TIERS = [ { max: 7500, channels: 1, label: "$3K–$7.5K: one primary channel
     $("print").disabled = $("email").disabled = !(c && s);
     if (!c || !s) {
       sheet.appendChild(el("p", { class: "az-panel mm-empty", text: !c && !s ? "Choose a category and a media strategy to see how the category spends and the recommended digital plan." : !c ? "Now choose a category." : "Now choose a media strategy." }));
-      var p0 = new URLSearchParams(); if (c) p0.set("category", c.id); if (s) p0.set("strategy", s.id); if (budget) p0.set("budget", Math.round(budget));
-      history.replaceState(null, "", location.pathname + (p0.toString() ? "?" + p0.toString() : ""));
       return;
     }
     var today = new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" });
@@ -315,8 +314,6 @@ var TIERS = [ { max: 7500, channels: 1, label: "$3K–$7.5K: one primary channel
       el("img", { src: "../shared/adtaxi-logo.svg", alt: "Adtaxi" })]));
     sheet.appendChild(el("div", { class: "mm-grid" }, [categoryPanel(c), planPanel(c, s, budget)]));
     sheet.appendChild(el("p", { class: "mm-foot", text: "A starting point for discussion, not a package: the right mix depends on the objective, geography, audience and competition. Estimates for planning. Category figures are national (EMARKETER 2026); scores and figures are modeled from public government and licensed third-party data." }));
-    var p = new URLSearchParams({ category: c.id, strategy: s.id }); if (budget) p.set("budget", Math.round(budget));
-    history.replaceState(null, "", "?" + p.toString());
   }
 
   catSel.addEventListener("change", render); stratSel.addEventListener("change", render);
@@ -340,7 +337,8 @@ var TIERS = [ { max: 7500, channels: 1, label: "$3K–$7.5K: one primary channel
     L.push("");
     L.push("How we'll measure success: " + s.kpis.map(function (k) { return k[0]; }).join(", ") + ".");
     L.push("");
-    L.push("See the full plan: " + location.href);
+    var lp = new URLSearchParams({ category: c.id, strategy: s.id }); if (budget) lp.set("budget", Math.round(budget));
+    L.push("See the full plan: " + location.origin + location.pathname + "?" + lp.toString());
     L.push("");
     L.push("A starting point for discussion: the right mix depends on the objective, geography, audience and competition. Category figures: EMARKETER 2026 (national).");
     return "mailto:?subject=" + encodeURIComponent("Digital media plan: " + c.label + " · " + s.label) + "&body=" + encodeURIComponent(L.join("\n"));
