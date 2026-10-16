@@ -625,6 +625,10 @@ AdtaxiAnalyzer.start({
     "\"Vs. average\" is a percent difference: 53.5% vs. 36.7% is 46% more likely, not 17 points.",
     "The panel follows the radius tool's \"Best prospects for\" preset. New lines use new car/truck shoppers; used lines use used car/truck shoppers. AudienceSCAN gives these groups' percentages only; the all-adults figures are the same national figures used everywhere."
    ]
+  },
+  {
+   "title": "Category ad spend",
+   "body": "Shown under advertising response. U.S. automotive ad spend for 2026 (EMARKETER), split into digital and traditional, with digital broken out by format. Programmatic is estimated by applying EMARKETER's U.S. programmatic shares for video and display to this category. National data, the same for every market."
   }
  ],
  "sources": [
@@ -646,11 +650,14 @@ AdtaxiAnalyzer.start({
    "label": "Deluxe ZIP file (Q4 2025)"
   },
   {
+   "label": "EMARKETER US ad spending forecasts, 2026 (category ad spend, programmatic)"
+  },
+  {
    "label": "ZIP-level DMA list",
    "url": "https://github.com/BritCrit/dma_county_zip"
   }
  ],
- "sourcesNote": "Vehicle spending: EASI. Vehicles, income, children and commuting: Census ACS. Rural ZIPs: USDA. Dealers: Census Business Patterns. Population and households: Deluxe. Ad response: AudienceSCAN 2026.",
+ "sourcesNote": "Vehicle spending: EASI. Vehicles, income, children and commuting: Census ACS. Rural ZIPs: USDA. Dealers: Census Business Patterns. Population and households: Deluxe. Ad response: AudienceSCAN 2026. Category ad spend: EMARKETER 2026.",
  "radius": true,
  "pointLayer": {
   "key": "est",
@@ -658,6 +665,34 @@ AdtaxiAnalyzer.start({
   "unit": "dealers",
   "legend": "Circle size = dealers in the area (new car dealers for the new lines, used car dealers for the used lines)",
   "zipNote": "Census doesn't publish ZIPs with fewer than 3."
+ },
+ "adSpend": {
+  "title": "How auto advertisers spend",
+  "intro": "U.S. automotive ad spend, 2026: digital vs. traditional media, and how the digital dollars split by format.",
+  "digital": 24.78,
+  "traditional": 6.02,
+  "formats": [
+   {
+    "label": "Digital video",
+    "value": 11.96,
+    "sub": "incl. CTV $3.3B"
+   },
+   {
+    "label": "Search",
+    "value": 8.23
+   },
+   {
+    "label": "Display",
+    "value": 3.84
+   },
+   {
+    "label": "Other digital",
+    "value": 0.75
+   }
+  ],
+  "programmatic": 14.73,
+  "programmaticNote": "Estimate: U.S. programmatic shares of video (94.5%) and display (89.2%) applied to this category; search isn't bought programmatically.",
+  "note": "National totals for all automotive advertisers; local dealer mixes vary. Source: EMARKETER forecasts, May and August 2026."
  },
  "adResponse": {
   "title": "How your target group responds to advertising",

@@ -479,7 +479,7 @@
     var d = A.subs && (A.subs[rp] || A.subs[this.state.sub]);
     if (!box.classList.contains("az-panel")) box.className = "rz-extra az-panel az-ad";
     box.innerHTML = "";
-    if (!d) { box.hidden = true; return; }
+    if (!d) { var sp0 = this.spendPanel(); if (sp0) { box.hidden = false; box.appendChild(sp0); } else box.hidden = true; return; }
     box.hidden = false;
     var rows = d.rows.map(function (r) { return { label: r[0], aud: r[1], us: r[2], diff: r[2] ? r[1] / r[2] - 1 : null }; });
     var sortKey = this.adSort || "aud";
@@ -542,6 +542,57 @@
     });
     box.appendChild(cols);
     box.appendChild(el("p", { class: "az-ad-note", text: (A.note || "") + " Bar scale runs from " + base + "% to " + top + "%" + (base > 0 ? ", not from zero, to make the differences easier to see." : ".") + (d.source ? " Source: " + d.source + "." : A.source ? " Source: " + A.source + "." : "") }));
+    var sp = this.spendPanel(); if (sp) box.appendChild(sp);
+  };
+
+  /* ---------- Category ad spend (optional, national: digital vs. traditional and the digital breakout) ---------- */
+  Analyzer.prototype.spendPanel = function () {
+    var S = this.cfg.adSpend;
+    if (!S || !S.digital || !S.formats) return null;
+    var NS = "http://www.w3.org/2000/svg";
+    var total = S.digital + S.traditional, dShare = S.digital / total;
+    var money = function (x) { return "$" + (x >= 1 ? x.toFixed(1) : x.toFixed(2)) + "B"; };
+    var pc = function (x) { return (Math.round(x * 1000) / 10).toFixed(1) + "%"; };
+    // Donut: digital vs. traditional
+    var svg = document.createElementNS(NS, "svg");
+    svg.setAttribute("viewBox", "0 0 120 120"); svg.setAttribute("class", "az-sp-donut"); svg.setAttribute("role", "img");
+    svg.setAttribute("aria-label", "Digital " + pc(dShare) + ", traditional " + pc(1 - dShare) + " of " + money(total) + " total");
+    var R = 46, C = 2 * Math.PI * R;
+    [["#b9c6d3", 1, 0], ["var(--teal)", dShare, 0]].forEach(function (a) {
+      var c = document.createElementNS(NS, "circle");
+      c.setAttribute("cx", 60); c.setAttribute("cy", 60); c.setAttribute("r", R); c.setAttribute("fill", "none");
+      c.setAttribute("stroke-width", 18); c.setAttribute("style", "stroke:" + a[0]);
+      c.setAttribute("stroke-dasharray", (a[1] * C) + " " + C); c.setAttribute("transform", "rotate(-90 60 60)");
+      svg.appendChild(c);
+    });
+    [["az-sp-big", 58, money(total)], ["az-sp-small", 74, "total"]].forEach(function (t) {
+      var x = document.createElementNS(NS, "text");
+      x.setAttribute("x", 60); x.setAttribute("y", t[1]); x.setAttribute("text-anchor", "middle"); x.setAttribute("class", t[0]);
+      x.textContent = t[2]; svg.appendChild(x);
+    });
+    var left = el("div", { class: "az-sp-left" }, [svg, el("div", { class: "az-sp-legend" }, [
+      el("p", null, [el("span", { class: "az-sp-key dig" }), el("b", { text: "Digital " + pc(dShare) }), " " + money(S.digital)]),
+      el("p", null, [el("span", { class: "az-sp-key trad" }), el("b", { text: "Traditional " + pc(1 - dShare) }), " " + money(S.traditional)])
+    ])]);
+    // Digital breakout, largest first
+    var f = S.formats.slice().sort(function (a, b) { return b.value - a.value; });
+    var fmax = f[0].value;
+    var rows = el("div", { class: "az-sp-rows", role: "table", "aria-label": "Digital ad spend by format" });
+    f.forEach(function (r) {
+      rows.appendChild(el("div", { class: "az-sp-row", role: "row" }, [
+        el("span", { class: "az-sp-label", role: "cell" }, [r.label, r.sub ? el("small", { text: r.sub }) : null]),
+        el("span", { class: "az-sp-bars", role: "cell", "aria-hidden": "true" }, [el("span", { class: "az-sp-bar", style: "width:" + Math.max(1, r.value / fmax * 100) + "%" })]),
+        el("span", { class: "num", role: "cell", text: money(r.value) }),
+        el("span", { class: "num muted", role: "cell", text: pc(r.value / S.digital) })
+      ]));
+    });
+    var right = el("div", { class: "az-sp-right" }, [el("h3", { text: "Digital spend by format" }), rows,
+      S.programmatic ? el("p", { class: "az-sp-prog" }, [el("b", { text: "Bought programmatically: about " + money(S.programmatic) + " (" + Math.round(S.programmatic / S.digital * 100) + "% of digital)." }), S.programmaticNote ? " " + S.programmaticNote : ""]) : null]);
+    return el("div", { class: "az-sp" }, [
+      el("div", { class: "az-ad-head" }, [el("div", null, [el("h2", { text: S.title || "How the category spends on advertising" }), S.intro ? el("p", { text: S.intro }) : null])]),
+      el("div", { class: "az-sp-grid" }, [left, right]),
+      S.note ? el("p", { class: "az-ad-note", text: S.note }) : null
+    ]);
   };
 
   /* ---------- Map ---------- */

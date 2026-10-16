@@ -327,3 +327,27 @@ a.az-btn { display: inline-block; text-decoration: none; text-align: center; }
 
 .az-disclaimer { font-size: 12px; color: var(--muted, #5b6672); font-style: italic; margin-top: 10px; }
 .az-version { font-size: 11px; color: var(--muted, #5b6672); margin-top: 4px; letter-spacing: .02em; }
+/* Category ad spend (under the ad response panel, Radius view) */
+.az-sp { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); }
+.az-sp-grid { display: grid; grid-template-columns: minmax(220px, 300px) 1fr; gap: 24px; align-items: start; margin-top: 12px; }
+.az-sp-left { display: flex; align-items: center; gap: 14px; }
+.az-sp-donut { width: 120px; height: 120px; flex: none; }
+.az-sp-big { font-size: 15px; font-weight: 700; fill: var(--navy); }
+.az-sp-small { font-size: 10px; fill: var(--muted); }
+.az-sp-legend p { margin: 0 0 8px; font-size: 13px; color: var(--muted); }
+.az-sp-legend b { color: var(--navy); margin-right: 4px; }
+.az-sp-key { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+.az-sp-key.dig { background: var(--teal); }
+.az-sp-key.trad { background: #b9c6d3; }
+.az-sp-right h3 { margin: 0 0 6px; font-size: 14px; color: var(--navy); }
+.az-sp-rows { display: grid; }
+.az-sp-row { display: grid; grid-template-columns: minmax(110px, 1.2fr) minmax(60px, 2fr) 60px 52px; gap: 8px; align-items: center; padding: 5px 4px; border-top: 1px solid var(--line); font-size: 13px; }
+.az-sp-row:first-child { border-top: 0; }
+.az-sp-label small { display: block; color: var(--muted); font-size: 11px; }
+.az-sp-bar { display: block; height: 6px; border-radius: 4px; background: var(--teal); }
+.az-sp-row .num { text-align: right; font-variant-numeric: tabular-nums; }
+.az-sp-row .muted { color: var(--muted); }
+.az-sp-prog { margin: 10px 0 0; font-size: 13px; color: var(--muted); }
+.az-sp-prog b { color: var(--navy); }
+@media (max-width: 760px) { .az-sp-grid { grid-template-columns: 1fr; } }
+@media (max-width: 640px) { .az-sp-row { grid-template-columns: 1fr 58px 50px; } .az-sp-bars { display: none; } }
