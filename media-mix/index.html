@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Digital Media Mix Planner</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="../shared/adtaxi-logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../shared/engine.css">
+<style>
+  .mm-main { max-width: 1240px; margin: 0 auto; padding: 22px 20px 40px; }
+  .mm-draft { background: var(--warn-bg); border: 1px solid var(--warn-line); border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; font-size: 13px; }
+  .mm-controls { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) auto; gap: 16px; align-items: end; padding: 16px 20px; }
+  .mm-controls label { display: grid; gap: 6px; font-weight: 600; font-size: 13px; color: var(--navy); }
+  .mm-controls select, .mm-controls input { padding: 9px 10px; border: 1px solid var(--line); border-radius: 8px; background: #fff; font-weight: 400; min-width: 0; }
+  .mm-controls small { font-weight: 400; color: var(--muted); }
+  .mm-print { padding: 10px 16px; border-radius: 8px; border: 0; background: var(--navy); color: #fff; font-weight: 600; cursor: pointer; white-space: nowrap; }
+  .mm-print:hover { background: var(--navy-2); }
+  .mm-sheet { margin-top: 18px; }
+  .mm-head { display: none; }
+  .mm-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 18px; margin-top: 18px; align-items: start; }
+  .mm-panel { padding: 18px 20px; }
+  .mm-panel h2 { margin: 0 0 4px; font-size: 18px; color: var(--navy); }
+  .mm-panel > p.mm-intro { margin: 0 0 14px; color: var(--muted); }
+  .mm-donutrow { display: flex; align-items: center; gap: 16px; }
+  .mm-donut { width: 128px; height: 128px; flex: none; }
+  .mm-big { font-size: 15px; font-weight: 700; fill: var(--navy); }
+  .mm-small { font-size: 10px; fill: var(--muted); }
+  .mm-legend p { margin: 0 0 8px; font-size: 13px; color: var(--muted); white-space: nowrap; }
+  .mm-legend b { color: var(--navy); margin-right: 4px; }
+  .mm-key { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+  .mm-rows { margin-top: 14px; }
+  .mm-row { display: grid; grid-template-columns: minmax(96px, 1.2fr) minmax(50px, 1.6fr) 56px 50px; gap: 8px; align-items: center; padding: 6px 2px; border-top: 1px solid var(--line); font-size: 13px; }
+  .mm-row:first-child { border-top: 0; }
+  .mm-row small { display: block; color: var(--muted); font-size: 11px; }
+  .mm-bar { display: block; height: 6px; border-radius: 4px; background: var(--teal); }
+  .mm-row .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .mm-muted { color: var(--muted); }
+  .mm-fine { margin: 10px 0 0; font-size: 13px; color: var(--muted); }
+  .mm-fine b { color: var(--navy); }
+  .mm-note { margin: 12px 0 0; font-size: 12px; color: var(--muted); }
+  .mm-stack { display: flex; height: 16px; border-radius: 8px; overflow: hidden; margin: 6px 0 14px; }
+  .mm-stack span { display: block; height: 100%; }
+  .mm-role { margin-top: 12px; }
+  .mm-role h3 { margin: 0 0 4px; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  .mm-ch { display: grid; grid-template-columns: 14px minmax(0, 1fr) 64px 84px; gap: 10px; align-items: start; padding: 9px 2px; border-top: 1px solid var(--line); }
+  .mm-ch .mm-key { margin: 4px 0 0; }
+  .mm-ch b { color: var(--navy); }
+  .mm-ch p { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
+  .mm-ch .num { text-align: right; font-variant-numeric: tabular-nums; font-weight: 700; color: var(--navy); }
+  .mm-ch .num.mm-muted { font-weight: 400; color: var(--muted); }
+  .mm-tag { display: inline-block; font-size: 11px; font-weight: 600; color: var(--teal); border: 1px solid var(--ramp-2); border-radius: 999px; padding: 0 7px; margin-left: 6px; vertical-align: 1px; }
+  .mm-kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 16px; }
+  .mm-kpi { background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: 13px; }
+  .mm-kpi b { display: block; color: var(--navy); margin-bottom: 2px; }
+  .mm-call { margin-top: 14px; padding: 12px 14px; border-radius: 10px; background: #e9f5f3; border: 1px solid var(--ramp-2); font-size: 13px; }
+  .mm-call b { color: var(--navy); }
+  .mm-warn { margin-top: 14px; padding: 12px 14px; border-radius: 10px; background: var(--warn-bg); border: 1px solid var(--warn-line); font-size: 13px; }
+  .mm-why { margin: 14px 0 0; font-size: 13px; }
+  .mm-foot { margin-top: 18px; font-size: 12px; color: var(--muted); }
+  @media (max-width: 900px) {
+    .mm-controls { grid-template-columns: 1fr 1fr; }
+    .mm-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 560px) {
+    .mm-controls { grid-template-columns: 1fr; }
+    .mm-kpis { grid-template-columns: 1fr; }
+    .mm-row { grid-template-columns: 1fr 56px 50px; }
+    .mm-row .mm-barcell { display: none; }
+    .mm-ch { grid-template-columns: 14px minmax(0, 1fr) 56px; }
+    .mm-ch .mm-dollar { grid-column: 2 / 4; text-align: left; }
+  }
+  /* One-page leave-behind */
+  @page { size: letter; margin: 0.45in; }
+  @media print {
+    body { background: #fff; font-size: 11px; }
+    .az-header, .mm-controls, .mm-draft, .mm-noprint { display: none !important; }
+    .mm-main { padding: 0; max-width: none; }
+    .mm-head { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--teal); padding-bottom: 8px; }
+    .mm-head h1 { margin: 0; font-size: 20px; color: var(--navy); }
+    .mm-head p { margin: 2px 0 0; color: var(--muted); font-size: 12px; }
+    .mm-head img { height: 34px; }
+    .mm-sheet, .mm-grid { margin-top: 10px; }
+    .mm-grid { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 12px; }
+    .az-panel { box-shadow: none; border: 1px solid var(--line); break-inside: avoid; }
+    .mm-panel { padding: 10px 12px; }
+    .mm-panel h2 { font-size: 14px; }
+    .mm-donut { width: 104px; height: 104px; }
+    .mm-ch { padding: 5px 2px; }
+    .mm-ch p, .mm-row, .mm-fine, .mm-note, .mm-kpi, .mm-call, .mm-warn, .mm-why { font-size: 10.5px; }
+    .mm-ch { grid-template-columns: 12px minmax(0, 1fr) 40px 60px; }
+    .mm-kpis { margin-top: 10px; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+<header class="az-header">
+  <div class="az-header-inner">
+    <div class="az-title">
+      <h1>Digital Media Mix Planner</h1>
+      <p>Choose a category, a media strategy and, if you have one, a monthly budget. See how the category spends, then get a recommended digital breakout you can print as a one-page leave-behind.</p>
+      <nav class="az-links" aria-label="Related tools"><a href="../analyzers/">Home</a></nav>
+    </div>
+    <img class="az-logo" src="../shared/adtaxi-logo.svg" alt="Adtaxi">
+  </div>
+</header>
+
+<main class="mm-main">
+  <p class="mm-draft"><b>Preview.</b> The strategy splits below are a working draft pending review. They live in one settings block at the top of this page's script, so they can be changed without touching anything else.</p>
+
+  <section class="az-panel mm-controls" aria-label="Plan inputs">
+    <label>Category<select id="cat"></select></label>
+    <label>Media strategy<select id="strat"></select></label>
+    <label>Monthly budget (optional)<input id="budget" type="text" inputmode="numeric" placeholder="e.g. 10,000" autocomplete="off"></label>
+    <button class="mm-print" id="print" type="button">Print leave-behind</button>
+  </section>
+
+  <div class="mm-sheet" id="sheet" aria-live="polite"></div>
+</main>
+
+<script>
+/* =====================  SETTINGS (draft: edit here)  =====================
+   CATEGORIES: national category ad spend (EMARKETER 2026), $ billions.
+   CHANNELS:   what each channel is, its funnel role and how it's bought.
+   STRATEGIES: draft weights per channel. With a budget, the plan keeps the
+               top channels by weight (how many depends on the budget tier)
+               and re-scales them to 100%.
+   TIERS:      from the Adtaxi media mix training (fewer channels at lower budgets). */
+var CATEGORIES = [
+  { id: "auto", label: "Auto", noun: "automotive", digital: 24.78, traditional: 6.02, social: 6.49,
+    formats: [ { label: "Digital video", value: 11.96, sub: "incl. CTV $3.3B" }, { label: "Search", value: 8.23 },
+               { label: "Display", value: 3.84 }, { label: "Other digital", value: 0.75 } ],
+    programmatic: 14.73,
+    note: "National totals for all automotive advertisers; local dealer mixes vary." },
+  { id: "healthcare", label: "Healthcare", pending: true },
+  { id: "financial", label: "Financial", pending: true },
+  { id: "furniture", label: "Furniture", pending: true },
+  { id: "legal", label: "Legal", pending: true },
+  { id: "higher-ed", label: "Higher Education", pending: true },
+  { id: "home-services", label: "Home Services", pending: true },
+  { id: "apartments", label: "Apartments", pending: true }
+];
+
+var CHANNELS = {
+  ctv:      { label: "CTV / streaming TV",     role: "awareness",     prog: true,  color: "#0b5d53", job: "Reaches new households on the big screen, targeted by audience and ZIP instead of whole TV markets." },
+  youtube:  { label: "YouTube",                role: "awareness",     prog: false, color: "#1f8f81", job: "Video reach at scale, on TVs and phones, with targeting by interest and intent." },
+  dooh:     { label: "Digital out-of-home",    role: "awareness",     prog: true,  color: "#5fb8ac", job: "Screens near where people shop and commute, bought by location and daypart." },
+  social:   { label: "Social (Meta)",          role: "consideration", prog: false, color: "#13a196", job: "Builds familiarity and drives action with targeted image and video ads on Facebook and Instagram." },
+  display:  { label: "Programmatic display",   role: "consideration", prog: true,  color: "#3f7fb5", job: "Keeps the brand in front of the target audience across websites and apps, geo-targeted to the trade area." },
+  audio:    { label: "Digital audio",          role: "consideration", prog: true,  color: "#7aa6cf", job: "Streaming audio and podcast ads that reinforce the message, targeted by audience and location." },
+  search:   { label: "Google Search",          role: "conversion",    prog: false, color: "#0f2742", job: "Captures people actively searching for what you offer, at the moment they're ready to act." },
+  shopping: { label: "Shopping / product ads", role: "conversion",    prog: false, color: "#173c63", job: "Puts products and prices in front of shoppers who are ready to buy." },
+  retarget: { label: "Retargeting",            role: "conversion",    prog: true,  color: "#5f7286", job: "Brings back people who visited or engaged but didn't act yet." }
+};
+var ROLES = [ ["awareness", "Awareness: reach new audiences"], ["consideration", "Consideration: build familiarity"], ["conversion", "Conversion: capture demand"] ];
+
+var STRATEGIES = [
+  { id: "awareness", label: "Brand awareness", success: "Reach, visibility and brand familiarity",
+    kpis: [ ["Reach and frequency", "How many target households saw the brand, and how often"], ["Video completion", "Share of video ads watched to the end"], ["Brand search lift", "Growth in searches for the brand name"] ],
+    weights: { ctv: 35, youtube: 25, social: 20, display: 10, audio: 5, dooh: 5 } },
+  { id: "leads", label: "Lead generation", success: "Form fills, calls and appointments",
+    kpis: [ ["Cost per lead", "Media cost divided by qualified leads"], ["Calls and form fills", "Tracked leads by channel"], ["Lead-to-appointment rate", "How many leads become appointments"] ],
+    weights: { search: 50, social: 25, retarget: 15, youtube: 10 } },
+  { id: "online", label: "Online sales", success: "Ecommerce purchases and return on ad spend",
+    kpis: [ ["Return on ad spend", "Revenue per dollar of media"], ["Online purchases", "Orders attributed to the campaign"], ["Cost per acquisition", "Media cost per new customer"] ],
+    weights: { shopping: 35, search: 25, social: 20, retarget: 15, youtube: 5 } },
+  { id: "offline", label: "Offline / in-store sales", success: "Store visits and local purchases",
+    kpis: [ ["Store visits", "Measured visits to the location"], ["Calls and directions", "Calls and map requests from ads"], ["Cost per visit", "Media cost per measured visit"] ],
+    weights: { search: 30, social: 25, display: 25, ctv: 10, dooh: 10 } },
+  { id: "growth", label: "Growth (full funnel)", success: "New audiences plus captured demand",
+    kpis: [ ["New-audience reach", "Households reached that hadn't engaged before"], ["Search demand", "Growth in searches and site visits"], ["Leads or sales", "Outcomes tied back to the plan"] ],
+    weights: { search: 30, ctv: 30, social: 25, display: 15 } }
+];
+
+var MIN_BUDGET = 3000;
+var TIERS = [ { max: 7500, channels: 1, label: "$3K–$7.5K: one primary channel" },
+              { max: 12000, channels: 2, label: "$7.5K–$12K: one to two complementary channels" },
+              { max: 20000, channels: 3, label: "$12K–$20K: two to three channels with distinct roles" },
+              { max: Infinity, channels: 4, label: "$20K+: a broader multi-channel strategy" } ];
+/* =========================  END OF SETTINGS  ========================= */
+
+(function () {
+  var NS = "http://www.w3.org/2000/svg";
+  var $ = function (id) { return document.getElementById(id); };
+  function el(tag, attrs, kids) {
+    var n = document.createElement(tag);
+    for (var k in attrs || {}) { if (k === "text") n.textContent = attrs[k]; else if (attrs[k] != null) n.setAttribute(k, attrs[k]); }
+    (kids || []).forEach(function (c) { if (c != null) n.appendChild(typeof c === "string" ? document.createTextNode(c) : c); });
+    return n;
+  }
+  var bil = function (x) { return "$" + (x >= 1 ? x.toFixed(1) : x.toFixed(2)) + "B"; };
+  var pc1 = function (x) { return (Math.round(x * 1000) / 10).toFixed(1) + "%"; };
+  var pc0 = function (x) { return Math.round(x * 100) + "%"; };
+  var usd = function (x) { return "$" + Math.round(x).toLocaleString("en-US"); };
+
+  var catSel = $("cat"), stratSel = $("strat"), budIn = $("budget");
+  CATEGORIES.forEach(function (c) { var o = el("option", { value: c.id, text: c.label + (c.pending ? " (data coming)" : "") }); if (c.pending) o.disabled = true; catSel.appendChild(o); });
+  STRATEGIES.forEach(function (s) { stratSel.appendChild(el("option", { value: s.id, text: s.label })); });
+
+  // Starting values from the link, e.g. ?category=auto&strategy=leads&budget=10000 (analyzer buttons use ?category=)
+  var q = new URLSearchParams(location.search);
+  var qc = CATEGORIES.filter(function (c) { return c.id === q.get("category") && !c.pending; })[0];
+  catSel.value = qc ? qc.id : CATEGORIES.filter(function (c) { return !c.pending; })[0].id;
+  if (STRATEGIES.some(function (s) { return s.id === q.get("strategy"); })) stratSel.value = q.get("strategy");
+  if (q.get("budget")) budIn.value = Number(q.get("budget")).toLocaleString("en-US");
+
+  function readBudget() { var v = Number(String(budIn.value).replace(/[^0-9.]/g, "")); return v > 0 ? v : null; }
+
+  function donut(digital, traditional) {
+    var total = digital + traditional, share = digital / total;
+    var svg = document.createElementNS(NS, "svg");
+    svg.setAttribute("viewBox", "0 0 120 120"); svg.setAttribute("class", "mm-donut"); svg.setAttribute("role", "img");
+    svg.setAttribute("aria-label", "Digital " + pc1(share) + ", traditional " + pc1(1 - share) + " of " + bil(total));
+    var R = 46, C = 2 * Math.PI * R;
+    [["#b9c6d3", 1], ["var(--teal)", share]].forEach(function (a) {
+      var c = document.createElementNS(NS, "circle");
+      [["cx", 60], ["cy", 60], ["r", R], ["fill", "none"], ["stroke-width", 18], ["style", "stroke:" + a[0]], ["stroke-dasharray", a[1] * C + " " + C], ["transform", "rotate(-90 60 60)"]].forEach(function (p) { c.setAttribute(p[0], p[1]); });
+      svg.appendChild(c);
+    });
+    [["mm-big", 58, bil(total)], ["mm-small", 74, "total"]].forEach(function (t) {
+      var x = document.createElementNS(NS, "text"); x.setAttribute("x", 60); x.setAttribute("y", t[1]); x.setAttribute("text-anchor", "middle"); x.setAttribute("class", t[0]); x.textContent = t[2]; svg.appendChild(x);
+    });
+    return svg;
+  }
+
+  function categoryPanel(c) {
+    var share = c.digital / (c.digital + c.traditional);
+    var f = c.formats.slice().sort(function (a, b) { return b.value - a.value; }), max = f[0].value;
+    var rows = el("div", { class: "mm-rows", role: "table", "aria-label": "Digital ad spend by format" }, f.map(function (r) {
+      return el("div", { class: "mm-row", role: "row" }, [
+        el("span", { role: "cell" }, [r.label, r.sub ? el("small", { text: r.sub }) : null]),
+        el("span", { class: "mm-barcell", role: "cell", "aria-hidden": "true" }, [el("span", { class: "mm-bar", style: "width:" + Math.max(1, r.value / max * 100) + "%" })]),
+        el("span", { class: "num", role: "cell", text: bil(r.value) }),
+        el("span", { class: "num mm-muted", role: "cell", text: pc1(r.value / c.digital) })
+      ]);
+    }));
+    return el("section", { class: "az-panel mm-panel" }, [
+      el("h2", { text: "How " + c.noun + " advertisers spend" }),
+      el("p", { class: "mm-intro", text: "U.S. " + c.noun + " ad spend, 2026, and how the digital dollars split by format." }),
+      el("div", { class: "mm-donutrow" }, [donut(c.digital, c.traditional), el("div", { class: "mm-legend" }, [
+        el("p", null, [el("span", { class: "mm-key", style: "background:var(--teal)" }), el("b", { text: "Digital " + pc1(share) }), bil(c.digital)]),
+        el("p", null, [el("span", { class: "mm-key", style: "background:#b9c6d3" }), el("b", { text: "Traditional " + pc1(1 - share) }), bil(c.traditional)])
+      ])]),
+      rows,
+      c.social ? el("p", { class: "mm-fine" }, [el("b", { text: "Social media: " + bil(c.social) + " (" + pc1(c.social / c.digital) + " of digital)," }), " counted within display and video."]) : null,
+      c.programmatic ? el("p", { class: "mm-fine" }, [el("b", { text: "Bought programmatically: about " + bil(c.programmatic) + " (" + pc0(c.programmatic / c.digital) + " of digital)." }), " Estimate based on U.S. programmatic shares of video and display."]) : null,
+      el("p", { class: "mm-note", text: c.note + " Source: EMARKETER forecasts, 2026." })
+    ]);
+  }
+
+  function buildPlan(s, budget) {
+    var list = Object.keys(s.weights).map(function (k) { return { id: k, w: s.weights[k] }; }).sort(function (a, b) { return b.w - a.w; });
+    var tier = null;
+    if (budget && budget >= MIN_BUDGET) { tier = TIERS.filter(function (t) { return budget < t.max; })[0]; list = list.slice(0, tier.channels); }
+    var sum = list.reduce(function (a, r) { return a + r.w; }, 0);
+    list.forEach(function (r) { r.share = r.w / sum; r.ch = CHANNELS[r.id]; if (budget && tier) r.dollars = Math.round(budget * r.share / 50) * 50; });
+    return { items: list, tier: tier };
+  }
+
+  function planPanel(c, s, budget) {
+    var plan = buildPlan(s, budget), items = plan.items;
+    var kids = [el("h2", { text: "Recommended digital plan: " + s.label }),
+      el("p", { class: "mm-intro", text: "Goal: " + s.success.toLowerCase() + "." + (budget && plan.tier ? " Budget: " + usd(budget) + " a month." : budget ? "" : " Enter a monthly budget to see dollars and a plan sized to it.") })];
+    if (budget && budget < MIN_BUDGET) kids.push(el("p", { class: "mm-warn", text: "Below " + usd(MIN_BUDGET) + " a month, most channels can't be funded enough to perform. The split below shows the strategy's full mix; at this budget, start with the top channel only." }));
+    kids.push(el("div", { class: "mm-stack", role: "img", "aria-label": items.map(function (r) { return r.ch.label + " " + pc0(r.share); }).join(", ") },
+      items.map(function (r) { return el("span", { style: "width:" + r.share * 100 + "%;background:" + r.ch.color, title: r.ch.label + " " + pc0(r.share) }); })));
+    ROLES.forEach(function (role) {
+      var inRole = items.filter(function (r) { return r.ch.role === role[0]; });
+      if (!inRole.length) return;
+      kids.push(el("div", { class: "mm-role" }, [el("h3", { text: role[1] })].concat(inRole.map(function (r) {
+        return el("div", { class: "mm-ch" }, [
+          el("span", { class: "mm-key", style: "background:" + r.ch.color }),
+          el("div", null, [el("b", { text: r.ch.label }), r.ch.prog ? el("span", { class: "mm-tag", text: "Programmatic" }) : null, el("p", { text: r.ch.job })]),
+          el("span", { class: "num", text: pc0(r.share) }),
+          el("span", { class: "num mm-muted mm-dollar", text: r.dollars != null ? usd(r.dollars) : "" })
+        ]);
+      }))));
+    });
+    var prog = items.reduce(function (a, r) { return a + (r.ch.prog ? r.share : 0); }, 0);
+    if (prog > 0) kids.push(el("p", { class: "mm-fine" }, [el("b", { text: "Programmatic: " + pc0(prog) + " of this plan" + (budget && plan.tier ? " (" + usd(budget * prog) + ")" : "") + "," }), " bought automatically across websites, apps and streaming TV."]));
+    if (plan.tier) kids.push(el("p", { class: "mm-why" }, [el("b", { text: "Why " + items.length + (items.length === 1 ? " channel" : " channels") + ": " }), plan.tier.label + ". Fully funding fewer channels outperforms spreading a budget thin."]));
+    if (budget && budget >= 20000) kids.push(el("p", { class: "mm-call" }, [el("b", { text: "A larger opportunity. " }), "At this budget, Adtaxi's strategy team can build a custom plan with more channels, refined targeting and closed-loop measurement."]));
+    kids.push(el("div", { class: "mm-kpis" }, s.kpis.map(function (k) { return el("div", { class: "mm-kpi" }, [el("b", { text: k[0] }), k[1]]); })));
+    return el("section", { class: "az-panel mm-panel" }, kids);
+  }
+
+  function render() {
+    var c = CATEGORIES.filter(function (x) { return x.id === catSel.value; })[0];
+    var s = STRATEGIES.filter(function (x) { return x.id === stratSel.value; })[0];
+    var budget = readBudget();
+    var sheet = $("sheet"); sheet.innerHTML = "";
+    var today = new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" });
+    sheet.appendChild(el("div", { class: "mm-head" }, [
+      el("div", null, [el("h1", { text: "Digital media plan: " + c.label }), el("p", { text: s.label + (budget ? " · " + usd(budget) + " a month" : "") + " · " + today })]),
+      el("img", { src: "../shared/adtaxi-logo.svg", alt: "Adtaxi" })]));
+    sheet.appendChild(el("div", { class: "mm-grid" }, [categoryPanel(c), planPanel(c, s, budget)]));
+    sheet.appendChild(el("p", { class: "mm-foot", text: "A starting point for discussion, not a package: the right mix depends on the objective, geography, audience and competition. Estimates for planning. Category figures are national (EMARKETER 2026); scores and figures are modeled from public government and licensed third-party data." }));
+    var p = new URLSearchParams({ category: c.id, strategy: s.id }); if (budget) p.set("budget", Math.round(budget));
+    history.replaceState(null, "", "?" + p.toString());
+  }
+
+  catSel.addEventListener("change", render); stratSel.addEventListener("change", render);
+  budIn.addEventListener("input", render);
+  budIn.addEventListener("blur", function () { var b = readBudget(); budIn.value = b ? Math.round(b).toLocaleString("en-US") : ""; });
+  $("print").addEventListener("click", function () { window.print(); });
+  render();
+})();
+</script>
+</body>
+</html>
