@@ -24,10 +24,9 @@
   .mm-email { background: #fff; color: var(--navy); border: 1px solid var(--navy); }
   .mm-email:hover { background: var(--bg); }
   .mm-email:disabled { background: #fff; color: #b9c6d3; border-color: #b9c6d3; }
-  .mm-empty { padding: 22px 20px; margin: 0; color: var(--muted); text-align: center; }
-  .mm-sheet { margin-top: 18px; }
+  .mm-sheet { margin-top: 14px; }
   .mm-head { display: none; }
-  .mm-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 18px; margin-top: 18px; align-items: start; }
+  .mm-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 18px; margin-top: 10px; align-items: start; }
   .mm-panel { padding: 18px 20px; }
   .mm-panel h2 { margin: 0 0 4px; font-size: 18px; color: var(--navy); }
   .mm-panel > p.mm-intro { margin: 0 0 14px; color: var(--muted); }
@@ -42,14 +41,19 @@
   .mm-row { display: grid; grid-template-columns: minmax(96px, 1.2fr) minmax(50px, 1.6fr) 56px 50px; gap: 8px; align-items: center; padding: 6px 2px; border-top: 1px solid var(--line); font-size: 13px; }
   .mm-row:first-child { border-top: 0; }
   .mm-row small { display: block; color: var(--muted); font-size: 11px; }
-  .mm-bar { display: block; height: 6px; border-radius: 4px; background: var(--teal); }
+  .mm-track { display: block; height: 8px; border-radius: 5px; background: #fff; border: 1px solid #182432; overflow: hidden; }
+  .mm-bar { display: block; height: 100%; background: var(--teal); transition: width .7s ease; }
+  .mm-arc { transition: stroke-dasharray .8s ease; }
+  .mm-key-empty { background: #fff; border: 1px solid #182432; }
+  .mm-prompt { margin: 0 0 4px; color: var(--muted); }
+  .mm-prompt.mm-hide { visibility: hidden; }
   .mm-row .num { text-align: right; font-variant-numeric: tabular-nums; }
   .mm-muted { color: var(--muted); }
   .mm-fine { margin: 10px 0 0; font-size: 13px; color: var(--muted); }
   .mm-fine b { color: var(--navy); }
   .mm-note { margin: 12px 0 0; font-size: 12px; color: var(--muted); }
-  .mm-stack { display: flex; height: 16px; border-radius: 8px; overflow: hidden; margin: 6px 0 14px; }
-  .mm-stack span { display: block; height: 100%; }
+  .mm-stack { display: flex; height: 16px; border-radius: 8px; overflow: hidden; margin: 6px 0 14px; background: #fff; border: 1px solid #182432; }
+  .mm-stack span { display: block; height: 100%; transition: width .8s ease; }
   .mm-role { margin-top: 12px; }
   .mm-role h3 { margin: 0 0 4px; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
   .mm-ch { display: grid; grid-template-columns: 14px minmax(0, 1fr) 64px 84px; gap: 10px; align-items: start; padding: 9px 2px; border-top: 1px solid var(--line); }
@@ -83,7 +87,7 @@
   @page { size: letter; margin: 0.45in; }
   @media print {
     body { background: #fff; font-size: 11px; }
-    .az-header, .mm-controls, .mm-draft, .mm-noprint { display: none !important; }
+    .az-header, .mm-controls, .mm-draft, .mm-noprint, .mm-prompt { display: none !important; }
     .mm-main { padding: 0; max-width: none; }
     .mm-head { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--teal); padding-bottom: 8px; }
     .mm-head h1 { margin: 0; font-size: 20px; color: var(--navy); }
@@ -220,45 +224,64 @@ var TIERS = [ { max: 7500, channels: 1, label: "$3K–$7.5K: one primary channel
 
   function readBudget() { var v = Number(String(budIn.value).replace(/[^0-9.]/g, "")); return v > 0 ? v : null; }
 
-  function donut(digital, traditional) {
-    var total = digital + traditional, share = digital / total;
+  var OUTLINE = "#182432", EMPTY = "—";
+  var FORMAT_LABELS = ["Digital video", "Search", "Display", "Other digital"];
+  // Fill in after the frame is on the page, so colors grow in
+  function grow(fn) { requestAnimationFrame(function () { requestAnimationFrame(fn); }); }
+
+  function donut(c) {
     var svg = document.createElementNS(NS, "svg");
     svg.setAttribute("viewBox", "0 0 120 120"); svg.setAttribute("class", "mm-donut"); svg.setAttribute("role", "img");
-    svg.setAttribute("aria-label", "Digital " + pc1(share) + ", traditional " + pc1(1 - share) + " of " + bil(total));
     var R = 46, C = 2 * Math.PI * R;
-    [["#b9c6d3", 1], ["var(--teal)", share]].forEach(function (a) {
-      var c = document.createElementNS(NS, "circle");
-      [["cx", 60], ["cy", 60], ["r", R], ["fill", "none"], ["stroke-width", 18], ["style", "stroke:" + a[0]], ["stroke-dasharray", a[1] * C + " " + C], ["transform", "rotate(-90 60 60)"]].forEach(function (p) { c.setAttribute(p[0], p[1]); });
-      svg.appendChild(c);
-    });
-    [["mm-big", 58, bil(total)], ["mm-small", 74, "total"]].forEach(function (t) {
+    function circ(attrs) { var n = document.createElementNS(NS, "circle"); n.setAttribute("cx", 60); n.setAttribute("cy", 60); n.setAttribute("fill", "none"); for (var k in attrs) n.setAttribute(k, attrs[k]); svg.appendChild(n); return n; }
+    // Empty frame: white ring with a dark outline
+    circ({ r: R, "stroke-width": 18, style: "stroke:#fff" });
+    circ({ r: R + 9, "stroke-width": 1.2, style: "stroke:" + OUTLINE });
+    circ({ r: R - 9, "stroke-width": 1.2, style: "stroke:" + OUTLINE });
+    var total = c ? c.digital + c.traditional : 0, share = c ? c.digital / total : 0;
+    if (c) {
+      svg.setAttribute("aria-label", "Digital " + pc1(share) + ", traditional " + pc1(1 - share) + " of " + bil(total));
+      var arcs = [[share, 0, "var(--teal)"], [1 - share, share, "#b9c6d3"]].map(function (a) {
+        var n = circ({ r: R, "stroke-width": 17, class: "mm-arc", style: "stroke:" + a[2], "stroke-dasharray": "0 " + C, "stroke-dashoffset": -a[1] * C, transform: "rotate(-90 60 60)" });
+        return [n, a[0]];
+      });
+      grow(function () { arcs.forEach(function (a) { a[0].setAttribute("stroke-dasharray", a[1] * C + " " + C); }); });
+    } else svg.setAttribute("aria-label", "Digital and traditional share, shown after a category and strategy are chosen");
+    [["mm-big", 58, c ? bil(total) : EMPTY], ["mm-small", 74, "total"]].forEach(function (t) {
       var x = document.createElementNS(NS, "text"); x.setAttribute("x", 60); x.setAttribute("y", t[1]); x.setAttribute("text-anchor", "middle"); x.setAttribute("class", t[0]); x.textContent = t[2]; svg.appendChild(x);
     });
     return svg;
   }
 
+  function bar(pct) {   // outlined track; the fill grows to pct
+    var fill = el("span", { class: "mm-bar", style: "width:0" });
+    if (pct != null) grow(function () { fill.style.width = Math.max(1, pct) + "%"; });
+    return el("span", { class: "mm-track" }, [fill]);
+  }
+
   function categoryPanel(c) {
-    var share = c.digital / (c.digital + c.traditional);
-    var f = c.formats.slice().sort(function (a, b) { return b.value - a.value; }), max = f[0].value;
+    var share = c ? c.digital / (c.digital + c.traditional) : null;
+    var f = c ? c.formats.slice().sort(function (a, b) { return b.value - a.value; }) : FORMAT_LABELS.map(function (l) { return { label: l }; });
+    var max = c ? f[0].value : 1;
     var rows = el("div", { class: "mm-rows", role: "table", "aria-label": "Digital ad spend by format" }, f.map(function (r) {
       return el("div", { class: "mm-row", role: "row" }, [
         el("span", { role: "cell" }, [r.label, r.sub ? el("small", { text: r.sub }) : null]),
-        el("span", { class: "mm-barcell", role: "cell", "aria-hidden": "true" }, [el("span", { class: "mm-bar", style: "width:" + Math.max(1, r.value / max * 100) + "%" })]),
-        el("span", { class: "num", role: "cell", text: bil(r.value) }),
-        el("span", { class: "num mm-muted", role: "cell", text: pc1(r.value / c.digital) })
+        el("span", { class: "mm-barcell", role: "cell", "aria-hidden": "true" }, [bar(c ? r.value / max * 100 : null)]),
+        el("span", { class: "num", role: "cell", text: c ? bil(r.value) : EMPTY }),
+        el("span", { class: "num mm-muted", role: "cell", text: c ? pc1(r.value / c.digital) : EMPTY })
       ]);
     }));
-    return el("section", { class: "az-panel mm-panel" }, [
-      el("h2", { text: "How " + c.noun + " advertisers spend" }),
-      el("p", { class: "mm-intro", text: "U.S. " + c.noun + " ad spend, 2026, and how the digital dollars split by format." }),
-      el("div", { class: "mm-donutrow" }, [donut(c.digital, c.traditional), el("div", { class: "mm-legend" }, [
-        el("p", null, [el("span", { class: "mm-key", style: "background:var(--teal)" }), el("b", { text: "Digital " + pc1(share) }), bil(c.digital)]),
-        el("p", null, [el("span", { class: "mm-key", style: "background:#b9c6d3" }), el("b", { text: "Traditional " + pc1(1 - share) }), bil(c.traditional)])
+    return el("section", { class: "az-panel mm-panel" + (c ? "" : " mm-blank") }, [
+      el("h2", { text: c ? "How " + c.noun + " advertisers spend" : "How the category's advertisers spend" }),
+      el("p", { class: "mm-intro", text: "U.S. " + (c ? c.noun + " " : "") + "ad spend, 2026, and how the digital dollars split by format." }),
+      el("div", { class: "mm-donutrow" }, [donut(c), el("div", { class: "mm-legend" }, [
+        el("p", null, [el("span", { class: "mm-key" + (c ? "" : " mm-key-empty"), style: c ? "background:var(--teal)" : null }), el("b", { text: "Digital " + (c ? pc1(share) : EMPTY) }), c ? bil(c.digital) : ""]),
+        el("p", null, [el("span", { class: "mm-key" + (c ? "" : " mm-key-empty"), style: c ? "background:#b9c6d3" : null }), el("b", { text: "Traditional " + (c ? pc1(1 - share) : EMPTY) }), c ? bil(c.traditional) : ""])
       ])]),
       rows,
-      c.social ? el("p", { class: "mm-fine" }, [el("b", { text: "Social media: " + bil(c.social) + " (" + pc1(c.social / c.digital) + " of digital)," }), " counted within display and video."]) : null,
-      c.programmatic ? el("p", { class: "mm-fine" }, [el("b", { text: "Bought programmatically: about " + bil(c.programmatic) + " (" + pc0(c.programmatic / c.digital) + " of digital)." }), " Estimate based on U.S. programmatic shares of video and display."]) : null,
-      el("p", { class: "mm-note", text: c.note + " Source: EMARKETER forecasts, 2026." })
+      el("p", { class: "mm-fine" }, [el("b", { text: "Social media: " + (c && c.social ? bil(c.social) + " (" + pc1(c.social / c.digital) + " of digital)," : EMPTY) }), c && c.social ? " counted within display and video." : ""]),
+      el("p", { class: "mm-fine" }, [el("b", { text: "Bought programmatically: " + (c && c.programmatic ? "about " + bil(c.programmatic) + " (" + pc0(c.programmatic / c.digital) + " of digital)." : EMPTY) }), c && c.programmatic ? " Estimate based on U.S. programmatic shares of video and display." : ""]),
+      el("p", { class: "mm-note", text: (c ? c.note + " " : "National category totals. ") + "Source: EMARKETER forecasts, 2026." })
     ]);
   }
 
@@ -267,55 +290,60 @@ var TIERS = [ { max: 7500, channels: 1, label: "$3K–$7.5K: one primary channel
     var tier = null;
     if (budget && budget >= MIN_BUDGET) { tier = TIERS.filter(function (t) { return budget < t.max; })[0]; list = list.slice(0, tier.channels); }
     var sum = list.reduce(function (a, r) { return a + r.w; }, 0);
-    list.forEach(function (r) { r.share = r.w / sum; r.ch = CHANNELS[r.id]; if (budget && tier) r.dollars = Math.round(budget * r.share / 50) * 50; });
+    list.forEach(function (r) { r.share = r.w / sum; r.ch = CHANNELS[r.id]; r.pct = Math.floor(r.share * 100); });
+    var left = 100 - list.reduce(function (a, r) { return a + r.pct; }, 0);
+    list.slice().sort(function (a, b) { return (b.share * 100 - b.pct) - (a.share * 100 - a.pct); }).slice(0, left).forEach(function (r) { r.pct++; });
+    list.forEach(function (r) { r.share = r.pct / 100; if (budget && tier) r.dollars = Math.round(budget * r.share / 50) * 50; });
     return { items: list, tier: tier };
   }
 
   function planPanel(c, s, budget) {
-    var plan = buildPlan(s, budget), items = plan.items;
-    var kids = [el("h2", { text: "Recommended digital plan: " + s.label }),
-      el("p", { class: "mm-intro", text: "Goal: " + s.success.toLowerCase() + "." + (budget && plan.tier ? " Budget: " + usd(budget) + " a month." : budget ? "" : " Enter a monthly budget to see dollars and a plan sized to it.") })];
-    if (budget && budget < MIN_BUDGET) kids.push(el("p", { class: "mm-warn", text: "Below " + usd(MIN_BUDGET) + " a month, most channels can't be funded enough to perform. The split below shows the strategy's full mix; at this budget, start with the top channel only." }));
-    kids.push(el("div", { class: "mm-stack", role: "img", "aria-label": items.map(function (r) { return r.ch.label + " " + pc0(r.share); }).join(", ") },
-      items.map(function (r) { return el("span", { style: "width:" + r.share * 100 + "%;background:" + r.ch.color, title: r.ch.label + " " + pc0(r.share) }); })));
+    var ready = c && s, plan = ready ? buildPlan(s, budget) : null, items = plan ? plan.items : [];
+    var kids = [el("h2", { text: "Recommended digital plan" + (ready ? ": " + s.label : "") }),
+      el("p", { class: "mm-intro", text: ready ? "Goal: " + s.success.toLowerCase() + "." + (budget && plan.tier ? " Budget: " + usd(budget) + " a month." : budget ? "" : " Enter a monthly budget to see dollars and a plan sized to it.") : "Goal: " + EMPTY }) ];
+    if (ready && budget && budget < MIN_BUDGET) kids.push(el("p", { class: "mm-warn", text: "Below " + usd(MIN_BUDGET) + " a month, most channels can't be funded enough to perform. The split below shows the strategy's full mix; at this budget, start with the top channel only." }));
+    // Outlined plan bar; segments grow in
+    var segs = items.map(function (r) { return el("span", { style: "width:0;background:" + r.ch.color, title: r.ch.label + " " + pc0(r.share) }); });
+    kids.push(el("div", { class: "mm-stack", role: "img", "aria-label": ready ? items.map(function (r) { return r.ch.label + " " + pc0(r.share); }).join(", ") : "Plan mix, shown after a category and strategy are chosen" }, segs));
+    grow(function () { segs.forEach(function (sg, i) { sg.style.width = items[i].share * 100 + "%"; }); });
     ROLES.forEach(function (role) {
       var inRole = items.filter(function (r) { return r.ch.role === role[0]; });
-      if (!inRole.length) return;
-      kids.push(el("div", { class: "mm-role" }, [el("h3", { text: role[1] })].concat(inRole.map(function (r) {
+      if (ready && !inRole.length) return;
+      var rowsR = ready ? inRole.map(function (r) {
         return el("div", { class: "mm-ch" }, [
           el("span", { class: "mm-key", style: "background:" + r.ch.color }),
           el("div", null, [el("b", { text: r.ch.label }), r.ch.prog ? el("span", { class: "mm-tag", text: "Programmatic" }) : null, el("p", { text: r.ch.job })]),
           el("span", { class: "num", text: pc0(r.share) }),
           el("span", { class: "num mm-muted mm-dollar", text: r.dollars != null ? usd(r.dollars) : "" })
         ]);
-      }))));
+      }) : [el("div", { class: "mm-ch" }, [el("span", { class: "mm-key mm-key-empty" }), el("div", null, [el("b", { class: "mm-muted", text: EMPTY })]), el("span", { class: "num mm-muted", text: EMPTY }), el("span", { class: "num mm-muted mm-dollar", text: "" })])];
+      kids.push(el("div", { class: "mm-role" }, [el("h3", { text: role[1] })].concat(rowsR)));
     });
-    var prog = items.reduce(function (a, r) { return a + (r.ch.prog ? r.share : 0); }, 0);
-    if (prog > 0) kids.push(el("p", { class: "mm-fine" }, [el("b", { text: "Programmatic: " + pc0(prog) + " of this plan" + (budget && plan.tier ? " (" + usd(budget * prog) + ")" : "") + "," }), " bought automatically across websites, apps and streaming TV."]));
-    if (plan.tier) kids.push(el("p", { class: "mm-why" }, [el("b", { text: "Why " + items.length + (items.length === 1 ? " channel" : " channels") + ": " }), plan.tier.label + ". Fully funding fewer channels outperforms spreading a budget thin."]));
-    if (budget && budget >= 20000) kids.push(el("p", { class: "mm-call" }, [el("b", { text: "A larger opportunity. " }), "At this budget, Adtaxi's strategy team can build a custom plan with more channels, refined targeting and closed-loop measurement."]));
-    kids.push(el("div", { class: "mm-kpis" }, s.kpis.map(function (k) { return el("div", { class: "mm-kpi" }, [el("b", { text: k[0] }), k[1]]); })));
-    return el("section", { class: "az-panel mm-panel" }, kids);
+    if (ready) {
+      var prog = items.reduce(function (a, r) { return a + (r.ch.prog ? r.share : 0); }, 0);
+      if (prog > 0) kids.push(el("p", { class: "mm-fine" }, [el("b", { text: "Programmatic: " + pc0(prog) + " of this plan" + (budget && plan.tier ? " (" + usd(items.reduce(function (a, r) { return a + (r.ch.prog ? r.dollars : 0); }, 0)) + ")" : "") + "," }), " bought automatically across websites, apps and streaming TV."]));
+      if (plan.tier) kids.push(el("p", { class: "mm-why" }, [el("b", { text: "Why " + items.length + (items.length === 1 ? " channel" : " channels") + ": " }), plan.tier.label + ". Fully funding fewer channels outperforms spreading a budget thin."]));
+      if (budget && budget >= 20000) kids.push(el("p", { class: "mm-call" }, [el("b", { text: "A larger opportunity. " }), "At this budget, Adtaxi's strategy team can build a custom plan with more channels, refined targeting and closed-loop measurement."]));
+    }
+    kids.push(el("div", { class: "mm-kpis" }, (ready ? s.kpis : [0, 1, 2].map(function () { return ["How success is measured", EMPTY]; })).map(function (k) { return el("div", { class: "mm-kpi" }, [el("b", { text: k[0] }), k[1]]); })));
+    return el("section", { class: "az-panel mm-panel" + (ready ? "" : " mm-blank") }, kids);
   }
 
   function render() {
     var c = CATEGORIES.filter(function (x) { return x.id === catSel.value; })[0];
     var s = STRATEGIES.filter(function (x) { return x.id === stratSel.value; })[0];
-    var budget = readBudget();
+    var ready = !!(c && s), budget = readBudget();
     var sheet = $("sheet"); sheet.innerHTML = "";
-    $("print").disabled = $("email").disabled = !(c && s);
-    if (!c || !s) {
-      sheet.appendChild(el("p", { class: "az-panel mm-empty", text: !c && !s ? "Choose a category and a media strategy to see how the category spends and the recommended digital plan." : !c ? "Now choose a category." : "Now choose a media strategy." }));
-      return;
-    }
+    $("print").disabled = $("email").disabled = !ready;
     var today = new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" });
-    sheet.appendChild(el("div", { class: "mm-head" }, [
+    if (ready) sheet.appendChild(el("div", { class: "mm-head" }, [
       el("div", null, [el("h1", { text: "Digital media plan: " + c.label }), el("p", { text: s.label + (budget ? " · " + usd(budget) + " a month" : "") + " · " + today })]),
       el("img", { src: "../shared/adtaxi-logo.svg", alt: "Adtaxi" })]));
-    sheet.appendChild(el("div", { class: "mm-grid" }, [categoryPanel(c), planPanel(c, s, budget)]));
+    sheet.appendChild(el("p", { class: "mm-prompt" + (ready ? " mm-hide" : ""), text: ready ? "Plan ready." : !c && !s ? "Choose a category and a media strategy to fill in the charts." : !c ? "Now choose a category." : "Now choose a media strategy." }));
+    // Both frames always show; data fills in once both selections are made
+    sheet.appendChild(el("div", { class: "mm-grid" }, [categoryPanel(ready ? c : null), planPanel(ready ? c : null, ready ? s : null, budget)]));
     sheet.appendChild(el("p", { class: "mm-foot", text: "A starting point for discussion, not a package: the right mix depends on the objective, geography, audience and competition. Estimates for planning. Category figures are national (EMARKETER 2026); scores and figures are modeled from public government and licensed third-party data." }));
   }
-
   catSel.addEventListener("change", render); stratSel.addEventListener("change", render);
   budIn.addEventListener("input", render);
   budIn.addEventListener("blur", function () { var b = readBudget(); budIn.value = b ? Math.round(b).toLocaleString("en-US") : ""; });
