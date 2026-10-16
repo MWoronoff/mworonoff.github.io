@@ -188,7 +188,8 @@
             <div class="tool-actions">
               <label class="visually-hidden" for="radius-cat" style="position:absolute;left:-9999px">Category for the radius tool</label>
               <select id="radius-cat"></select>
-              <a class="btn btn-navy" id="radius-go" aria-disabled="true" style="opacity:.5;pointer-events:none">Open radius tool</a>
+              <a class="btn btn-navy" id="radius-go" href="#radius-cat" role="button">Open radius tool</a>
+              <p id="radius-hint" role="status" style="margin:6px 0 0;width:100%;font-size:14px;color:#b42318" hidden>Choose a category first.</p>
             </div>
           </div>
         </article>
@@ -315,9 +316,15 @@
     sel.appendChild(el("option", { value: c.path, text: c.name }));
   });
   sel.addEventListener("change", function () {
-    var go = document.getElementById("radius-go");
-    if (sel.value) { go.href = sel.value + "#level=radius"; go.removeAttribute("aria-disabled"); go.style.opacity = ""; go.style.pointerEvents = ""; }
-    else { go.removeAttribute("href"); go.setAttribute("aria-disabled", "true"); go.style.opacity = ".5"; go.style.pointerEvents = "none"; }
+    var go = document.getElementById("radius-go"), hint = document.getElementById("radius-hint");
+    go.href = sel.value ? sel.value + "#level=radius" : "#radius-cat";
+    if (sel.value) { hint.hidden = true; sel.style.outline = ""; }
+  });
+  document.getElementById("radius-go").addEventListener("click", function (e) {
+    if (sel.value) return;
+    e.preventDefault();
+    document.getElementById("radius-hint").hidden = false;
+    sel.style.outline = "2px solid #b42318"; sel.focus();
   });
   sel.value = "";
 
