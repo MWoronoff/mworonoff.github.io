@@ -353,3 +353,11 @@ a.az-btn { display: inline-block; text-decoration: none; text-align: center; }
 @media (max-width: 640px) { .az-sp-row { grid-template-columns: 1fr 58px 50px; } .az-sp-bars { display: none; } }
 .az-sp .az-ad-head p { max-width: none; }
 .az-sp-legend p { white-space: nowrap; }
+/* Ad response + ad spend now sit full width below the ZIP table: two columns of ad types again */
+.az-main > .rz-extra.az-ad { margin-top: 18px; }
+.az-main > .rz-extra .az-ad-cols { grid-template-columns: 1fr 1fr; }
+.az-main > .rz-extra .az-ad-cols .az-ad-rows + .az-ad-rows .az-ad-colhead { display: grid; }
+@media (max-width: 900px) {
+  .az-main > .rz-extra .az-ad-cols { grid-template-columns: 1fr; }
+  .az-main > .rz-extra .az-ad-cols .az-ad-rows + .az-ad-rows .az-ad-colhead { display: none; }
+}

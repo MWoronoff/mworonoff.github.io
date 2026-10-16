@@ -336,8 +336,8 @@
     this.summary = el("div", { class: "rz-summary", "aria-live": "polite" });
     this.legend = el("div", { class: "az-legend", "aria-label": "Map legend" });
     this.mapEl = el("div", { class: "az-map rz-map", role: "region", "aria-label": "Map of ZIPs in the radius" });
-    this.extra = el("div", { class: "rz-extra" });   // filled by an analyzer page that embeds the tool (ad response, under the map)
-    var right = el("div", { class: "rz-right" }, [this.summary, el("div", { class: "az-panel az-map-panel" }, [this.mapEl, this.legend]), this.extra]);
+    this.extra = el("div", { class: "rz-extra" });   // filled by an analyzer page that embeds the tool (ad response and category ad spend, below the ZIP table)
+    var right = el("div", { class: "rz-right" }, [this.summary, el("div", { class: "az-panel az-map-panel" }, [this.mapEl, this.legend])]);
 
     // Table
     this.tableTitle = el("h2"); this.tableNote = el("span");
@@ -348,7 +348,7 @@
     this.modal = el("dialog", { class: "az-modal", "aria-labelledby": "rz-method-title" }, [this.modalBody]);
     var sources = el("section", { class: "az-panel az-sources" }, [el("h2", { text: "Sources" }), this.sourcesP = el("p")]);
 
-    var main = el("main", { class: "az-main" }, [controls, this.errorBox, el("section", { class: "rz-stage" }, [this.filterPanel, right]), table, sources]);
+    var main = el("main", { class: "az-main" }, [controls, this.errorBox, el("section", { class: "rz-stage" }, [this.filterPanel, right]), table, this.extra, sources]);
     this.root.innerHTML = ""; if (header) this.root.appendChild(header); this.root.appendChild(main); this.root.appendChild(this.modal);
     this.rSel.value = s.r ? String(s.r) : ""; this.minSel.value = String(s.minIndex);
     this.syncFilters();
