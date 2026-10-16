@@ -19,6 +19,8 @@
   .mm-controls small { font-weight: 400; color: var(--muted); }
   .mm-print { padding: 10px 16px; border-radius: 8px; border: 0; background: var(--navy); color: #fff; font-weight: 600; cursor: pointer; white-space: nowrap; }
   .mm-print:hover { background: var(--navy-2); }
+  .mm-print:disabled { background: #b9c6d3; cursor: not-allowed; }
+  .mm-empty { padding: 22px 20px; margin: 0; color: var(--muted); text-align: center; }
   .mm-sheet { margin-top: 18px; }
   .mm-head { display: none; }
   .mm-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 18px; margin-top: 18px; align-items: start; }
@@ -198,14 +200,17 @@ var TIERS = [ { max: 7500, channels: 1, label: "$3K–$7.5K: one primary channel
   var usd = function (x) { return "$" + Math.round(x).toLocaleString("en-US"); };
 
   var catSel = $("cat"), stratSel = $("strat"), budIn = $("budget");
+  // No defaults: nothing shows until both a category and a strategy are chosen (budget stays optional)
+  catSel.appendChild(el("option", { value: "", text: "Choose a category" }));
+  stratSel.appendChild(el("option", { value: "", text: "Choose a strategy" }));
   CATEGORIES.forEach(function (c) { var o = el("option", { value: c.id, text: c.label + (c.pending ? " (data coming)" : "") }); if (c.pending) o.disabled = true; catSel.appendChild(o); });
   STRATEGIES.forEach(function (s) { stratSel.appendChild(el("option", { value: s.id, text: s.label })); });
 
   // Starting values from the link, e.g. ?category=auto&strategy=leads&budget=10000 (analyzer buttons use ?category=)
   var q = new URLSearchParams(location.search);
   var qc = CATEGORIES.filter(function (c) { return c.id === q.get("category") && !c.pending; })[0];
-  catSel.value = qc ? qc.id : CATEGORIES.filter(function (c) { return !c.pending; })[0].id;
-  if (STRATEGIES.some(function (s) { return s.id === q.get("strategy"); })) stratSel.value = q.get("strategy");
+  catSel.value = qc ? qc.id : "";
+  stratSel.value = STRATEGIES.some(function (s) { return s.id === q.get("strategy"); }) ? q.get("strategy") : "";
   if (q.get("budget")) budIn.value = Number(q.get("budget")).toLocaleString("en-US");
 
   function readBudget() { var v = Number(String(budIn.value).replace(/[^0-9.]/g, "")); return v > 0 ? v : null; }
@@ -293,6 +298,13 @@ var TIERS = [ { max: 7500, channels: 1, label: "$3K–$7.5K: one primary channel
     var s = STRATEGIES.filter(function (x) { return x.id === stratSel.value; })[0];
     var budget = readBudget();
     var sheet = $("sheet"); sheet.innerHTML = "";
+    $("print").disabled = !(c && s);
+    if (!c || !s) {
+      sheet.appendChild(el("p", { class: "az-panel mm-empty", text: !c && !s ? "Choose a category and a media strategy to see how the category spends and the recommended digital plan." : !c ? "Now choose a category." : "Now choose a media strategy." }));
+      var p0 = new URLSearchParams(); if (c) p0.set("category", c.id); if (s) p0.set("strategy", s.id); if (budget) p0.set("budget", Math.round(budget));
+      history.replaceState(null, "", location.pathname + (p0.toString() ? "?" + p0.toString() : ""));
+      return;
+    }
     var today = new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" });
     sheet.appendChild(el("div", { class: "mm-head" }, [
       el("div", null, [el("h1", { text: "Digital media plan: " + c.label }), el("p", { text: s.label + (budget ? " · " + usd(budget) + " a month" : "") + " · " + today })]),
