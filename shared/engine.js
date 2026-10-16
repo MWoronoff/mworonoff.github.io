@@ -587,6 +587,7 @@
       ]));
     });
     var right = el("div", { class: "az-sp-right" }, [el("h3", { text: "Digital spend by format" }), rows,
+      S.social ? el("p", { class: "az-sp-prog" }, [el("b", { text: "Social media: " + money(S.social) + " (" + pc(S.social / S.digital) + " of digital)," }), " " + (S.socialNote || "counted within display and video above.")]) : null,
       S.programmatic ? el("p", { class: "az-sp-prog" }, [el("b", { text: "Bought programmatically: about " + money(S.programmatic) + " (" + Math.round(S.programmatic / S.digital * 100) + "% of digital)." }), S.programmaticNote ? " " + S.programmaticNote : ""]) : null]);
     return el("div", { class: "az-sp" }, [
       el("div", { class: "az-ad-head" }, [el("div", null, [el("h2", { text: S.title || "How the category spends on advertising" }), S.intro ? el("p", { text: S.intro }) : null])]),
