@@ -351,3 +351,4 @@ a.az-btn { display: inline-block; text-decoration: none; text-align: center; }
 .az-sp-prog b { color: var(--navy); }
 @media (max-width: 760px) { .az-sp-grid { grid-template-columns: 1fr; } }
 @media (max-width: 640px) { .az-sp-row { grid-template-columns: 1fr 58px 50px; } .az-sp-bars { display: none; } }
+.az-sp .az-ad-head p { max-width: none; }
