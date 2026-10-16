@@ -120,7 +120,7 @@
 </header>
 
 <main class="mm-main">
-  <p class="mm-draft"><b>Preview.</b> The strategy splits below are a working draft pending review. They live in one settings block at the top of this page's script, so they can be changed without touching anything else.</p>
+  <p class="mm-draft"><b>Preview.</b> The strategy splits below are a working draft pending review. Channel availability and minimums follow Adtaxi's service tiers (set by total monthly budget), currently from the 2024 tier sheet pending the updated version. All of these live in one settings block at the top of this page's script, so they can be changed without touching anything else.</p>
 
   <section class="az-panel mm-controls" aria-label="Plan inputs">
     <label>Category<select id="cat" autocomplete="off"></select></label>
@@ -186,11 +186,31 @@ var STRATEGIES = [
     weights: { search: 30, ctv: 30, social: 25, display: 15 } }
 ];
 
-var MIN_BUDGET = 3000;
-var TIERS = [ { max: 7500, channels: 1, label: "$3K–$7.5K: one primary channel" },
+var MIN_BUDGET = 1000;
+var TIERS = [ { max: 7500, channels: 1, label: "Under $7.5K: one primary channel" },
               { max: 12000, channels: 2, label: "$7.5K–$12K: one to two complementary channels" },
               { max: 20000, channels: 3, label: "$12K–$20K: two to three channels with distinct roles" },
               { max: Infinity, channels: 4, label: "$20K+: a broader multi-channel strategy" } ];
+/* ADTAXI SERVICE TIERS: set by the advertiser's TOTAL monthly budget.
+   available: channels Adtaxi offers at that tier.
+   minimums:  fixed monthly minimums by channel.
+   progFirst / progAdd: programmatic channels without a fixed minimum need
+               progFirst for the first (highest-weight) one and progAdd for each
+               additional one. DOOH keeps its own minimum.
+   Values below are from the 2024 tier sheet: update when the current sheet is in.
+   Management fees are deliberately not included (this page is public). */
+var SERVICE_TIERS = [
+  { label: "Tier 3", min: 1000, max: 3000,
+    available: ["display", "retarget", "social", "search", "youtube"],
+    minimums: { display: 1000, retarget: 1000, social: 1000, search: 1500, youtube: 1500 } },
+  { label: "Tier 2", min: 3000, max: 10000,
+    available: ["ctv", "youtube", "dooh", "social", "display", "audio", "search", "shopping", "retarget"],
+    minimums: { social: 3000, search: 1500, dooh: 5000 }, progFirst: 3000, progAdd: 2000 },
+  { label: "Strategic", min: 10000, max: Infinity,
+    available: ["ctv", "youtube", "dooh", "social", "display", "audio", "search", "shopping", "retarget"],
+    minimums: { social: 3000, search: 1500, dooh: 5000 }, progFirst: 3000, progAdd: 2000 }
+];
+var CUSTOM_PLAN_BUDGET = 10000;   // Strategic tier: show the "larger opportunity" note
 /* =========================  END OF SETTINGS  ========================= */
 
 (function () {
@@ -285,23 +305,73 @@ var TIERS = [ { max: 7500, channels: 1, label: "$3K–$7.5K: one primary channel
     ]);
   }
 
+  function serviceTier(budget) { return SERVICE_TIERS.filter(function (t) { return budget >= t.min && budget < t.max; })[0] || null; }
+  function minFor(id, set, st) {
+    if (st.minimums[id] != null) return st.minimums[id];
+    if (CHANNELS[id].prog && st.progFirst) {
+      var progs = set.filter(function (r) { return CHANNELS[r.id].prog && st.minimums[r.id] == null; });
+      return progs.length && progs[0].id === id ? st.progFirst : st.progAdd;
+    }
+    return 0;
+  }
+  // Split the budget by weight, lifting any channel below its minimum up to it; null if the minimums don't fit
+  function fit(set, budget, st) {
+    var mins = {}, need = 0;
+    set.forEach(function (r) { mins[r.id] = minFor(r.id, set, st); need += mins[r.id]; });
+    if (need > budget) return null;
+    var out = {}, raised = {}, free = set.slice(), changed = true;
+    while (changed) {
+      changed = false;
+      var rest = budget - Object.keys(out).reduce(function (a, k) { return a + out[k]; }, 0);
+      var W = free.reduce(function (a, r) { return a + r.w; }, 0);
+      free.slice().forEach(function (r) {
+        if (rest * r.w / W < mins[r.id]) { out[r.id] = mins[r.id]; raised[r.id] = true; free.splice(free.indexOf(r), 1); changed = true; }
+      });
+      if (!changed) free.forEach(function (r) { out[r.id] = rest * r.w / W; });
+    }
+    return { dollars: out, raised: raised, mins: mins };
+  }
+
   function buildPlan(s, budget) {
     var list = Object.keys(s.weights).map(function (k) { return { id: k, w: s.weights[k] }; }).sort(function (a, b) { return b.w - a.w; });
-    var tier = null;
-    if (budget && budget >= MIN_BUDGET) { tier = TIERS.filter(function (t) { return budget < t.max; })[0]; list = list.slice(0, tier.channels); }
-    var sum = list.reduce(function (a, r) { return a + r.w; }, 0);
-    list.forEach(function (r) { r.share = r.w / sum; r.ch = CHANNELS[r.id]; r.pct = Math.floor(r.share * 100); });
+    var tier = null, st = null, skipped = [], unavailable = [], raised = [], mins = {};
+    if (budget && budget >= MIN_BUDGET) {
+      tier = TIERS.filter(function (t) { return budget < t.max; })[0];
+      st = serviceTier(budget);
+      // Take channels in weight order: skip ones not offered at this tier or whose minimum won't fit
+      var chosen = [], result = null;
+      list.forEach(function (r) {
+        if (chosen.length >= tier.channels) return;
+        if (st.available.indexOf(r.id) < 0) { unavailable.push(r); return; }
+        var trial = fit(chosen.concat([r]), budget, st);
+        if (trial) { chosen.push(r); result = trial; }
+        else skipped.push({ r: r, min: minFor(r.id, chosen.concat([r]), st) });
+      });
+      list = chosen;
+      // Dollars to the nearest $50, adding any rounding difference to the largest channel
+      list.forEach(function (r) { r.dollars = Math.round(result.dollars[r.id] / 50) * 50; mins[r.id] = result.mins[r.id]; if (result.raised[r.id]) raised.push(r); });
+      var diff = Math.round(budget) - list.reduce(function (a, r) { return a + r.dollars; }, 0);
+      list.slice().sort(function (a, b) { return b.dollars - a.dollars; })[0].dollars += diff;
+      list.forEach(function (r) { r.share = r.dollars / budget; });
+    } else {
+      var sum = list.reduce(function (a, r) { return a + r.w; }, 0);
+      list.forEach(function (r) { r.share = r.w / sum; });
+    }
+    list.forEach(function (r) { r.ch = CHANNELS[r.id]; r.pct = Math.floor(r.share * 100); });
     var left = 100 - list.reduce(function (a, r) { return a + r.pct; }, 0);
     list.slice().sort(function (a, b) { return (b.share * 100 - b.pct) - (a.share * 100 - a.pct); }).slice(0, left).forEach(function (r) { r.pct++; });
-    list.forEach(function (r) { r.share = r.pct / 100; if (budget && tier) r.dollars = Math.round(budget * r.share / 50) * 50; });
-    return { items: list, tier: tier };
+    list.forEach(function (r) { r.share = r.pct / 100; });
+    // Only mention unavailable channels that would have made the plan (weight above the last channel kept)
+    var floorW = list.length ? list[list.length - 1].w : 0;
+    unavailable = unavailable.filter(function (r) { return r.w >= floorW; });
+    return { items: list, tier: tier, service: st, skipped: skipped, unavailable: unavailable, raised: raised, mins: mins };
   }
 
   function planPanel(c, s, budget) {
     var ready = c && s, plan = ready ? buildPlan(s, budget) : null, items = plan ? plan.items : [];
     var kids = [el("h2", { text: "Recommended digital plan" + (ready ? ": " + s.label : "") }),
       el("p", { class: "mm-intro", text: ready ? "Goal: " + s.success.toLowerCase() + "." + (budget && plan.tier ? " Budget: " + usd(budget) + " a month." : budget ? "" : " Enter a monthly budget to see dollars and a plan sized to it.") : "Goal: " + EMPTY }) ];
-    if (ready && budget && budget < MIN_BUDGET) kids.push(el("p", { class: "mm-warn", text: "Below " + usd(MIN_BUDGET) + " a month, most channels can't be funded enough to perform. The split below shows the strategy's full mix; at this budget, start with the top channel only." }));
+    if (ready && budget && budget < MIN_BUDGET) kids.push(el("p", { class: "mm-warn", text: "Adtaxi's minimum is " + usd(MIN_BUDGET) + " a month. The split below shows the strategy's full mix for reference." }));
     // Outlined plan bar; segments grow in
     var segs = items.map(function (r) { return el("span", { style: "width:0;background:" + r.ch.color, title: r.ch.label + " " + pc0(r.share) }); });
     kids.push(el("div", { class: "mm-stack", role: "img", "aria-label": ready ? items.map(function (r) { return r.ch.label + " " + pc0(r.share); }).join(", ") : "Plan mix, shown after a category and strategy are chosen" }, segs));
@@ -323,7 +393,15 @@ var TIERS = [ { max: 7500, channels: 1, label: "$3K–$7.5K: one primary channel
       var prog = items.reduce(function (a, r) { return a + (r.ch.prog ? r.share : 0); }, 0);
       if (prog > 0) kids.push(el("p", { class: "mm-fine" }, [el("b", { text: "Programmatic: " + pc0(prog) + " of this plan" + (budget && plan.tier ? " (" + usd(items.reduce(function (a, r) { return a + (r.ch.prog ? r.dollars : 0); }, 0)) + ")" : "") + "," }), " bought automatically across websites, apps and streaming TV."]));
       if (plan.tier) kids.push(el("p", { class: "mm-why" }, [el("b", { text: "Why " + items.length + (items.length === 1 ? " channel" : " channels") + ": " }), plan.tier.label + ". Fully funding fewer channels outperforms spreading a budget thin."]));
-      if (budget && budget >= 20000) kids.push(el("p", { class: "mm-call" }, [el("b", { text: "A larger opportunity. " }), "At this budget, Adtaxi's strategy team can build a custom plan with more channels, refined targeting and closed-loop measurement."]));
+      if (plan.tier) {
+        var notes = [];
+        plan.raised.forEach(function (r) { notes.push(r.ch.label + " is set at its " + usd(plan.mins[r.id]) + " monthly minimum."); });
+        plan.skipped.forEach(function (x) { notes.push(CHANNELS[x.r.id].label + " needs at least " + usd(x.min) + " a month alongside the rest of this plan, so it isn't included."); });
+        plan.unavailable.forEach(function (r) { var t = SERVICE_TIERS.filter(function (t) { return t.available.indexOf(r.id) >= 0; })[0]; notes.push(CHANNELS[r.id].label + " is available from " + usd(t.min) + " a month."); });
+        if (notes.length) kids.push(el("p", { class: "mm-fine" }, [el("b", { text: "Channel minimums: " }), notes.join(" ")]));
+        kids.push(el("p", { class: "mm-fine mm-noprint" }, [el("b", { text: "Adtaxi service tier: " + plan.service.label }), " (" + usd(plan.service.min) + (plan.service.max === Infinity ? "+" : "–" + usd(plan.service.max - 1)) + " a month). Internal note; not printed."]));
+      }
+      if (budget && budget >= CUSTOM_PLAN_BUDGET) kids.push(el("p", { class: "mm-call" }, [el("b", { text: "A larger opportunity. " }), "At this budget, Adtaxi's strategy team can build a custom plan with more channels, refined targeting and closed-loop measurement."]));
     }
     kids.push(el("div", { class: "mm-kpis" }, (ready ? s.kpis : [0, 1, 2].map(function () { return ["How success is measured", EMPTY]; })).map(function (k) { return el("div", { class: "mm-kpi" }, [el("b", { text: k[0] }), k[1]]); })));
     return el("section", { class: "az-panel mm-panel" + (ready ? "" : " mm-blank") }, kids);
