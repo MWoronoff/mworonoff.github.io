@@ -188,7 +188,7 @@
             <div class="tool-actions">
               <label class="visually-hidden" for="radius-cat" style="position:absolute;left:-9999px">Category for the radius tool</label>
               <select id="radius-cat"></select>
-              <a class="btn btn-navy" id="radius-go" href="/healthcare/#level=radius">Open radius tool</a>
+              <a class="btn btn-navy" id="radius-go" aria-disabled="true" style="opacity:.5;pointer-events:none">Open radius tool</a>
             </div>
           </div>
         </article>
@@ -296,6 +296,7 @@
 
   // category tiles and the radius picker are plain HTML, so they work before (or without) the map data
   var catBox = document.getElementById("cats"), sel = document.getElementById("radius-cat");
+  sel.appendChild(el("option", { value: "", text: "Choose a category" }));
   CATS.forEach(function (c) {
     catBox.appendChild(el("article", { class: "cat" }, [
       el("div", { class: "cat-map" }, [
@@ -313,7 +314,12 @@
     ]));
     sel.appendChild(el("option", { value: c.path, text: c.name }));
   });
-  sel.addEventListener("change", function () { document.getElementById("radius-go").href = sel.value + "#level=radius"; });
+  sel.addEventListener("change", function () {
+    var go = document.getElementById("radius-go");
+    if (sel.value) { go.href = sel.value + "#level=radius"; go.removeAttribute("aria-disabled"); go.style.opacity = ""; go.style.pointerEvents = ""; }
+    else { go.removeAttribute("href"); go.setAttribute("aria-disabled", "true"); go.style.opacity = ".5"; go.style.pointerEvents = "none"; }
+  });
+  sel.value = "";
 
   // Customer Market Analyzer art: the sample business's customer rate by distance band against the expected curve
   (function () {

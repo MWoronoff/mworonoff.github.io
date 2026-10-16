@@ -177,8 +177,8 @@
     h.split("&").forEach(function (kv) { var a = kv.split("="); if (a[0]) p[a[0]] = decodeURIComponent(a[1] || ""); });
     var cfg = this.cfg;
     // Radius view (also where the old radius.html links forward to): #level=radius&sub=..&zip=..&r=..
-    this.wantRadius = p.level === "radius" && cfg.radius ? { zip: p.zip, r: p.r, p: p.p || p.sub } : null;
-    if (this.wantRadius && cfg.subcategories && cfg.subcategories.some(function (x) { return x.id === (p.p || p.sub); })) this.state.sub = p.p || p.sub;
+    this.wantRadius = p.level === "radius" && cfg.radius ? { zip: p.zip, r: p.r, p: p.p } : null;   // a profile applies only when the link names one (p=); no preset otherwise
+    if (this.wantRadius && p.p && cfg.subcategories && cfg.subcategories.some(function (x) { return x.id === p.p; })) this.state.sub = p.p;
     if (cfg.levels[p.level]) this.state.level = p.level;
     if (p.level === "zip") {
       var m = /^(dma|metro|county):(.+)$/.exec(p["in"] || "");
@@ -198,6 +198,7 @@
     if (this.mode === "radius") {
       if (s.sub) parts.push("sub=" + encodeURIComponent(s.sub));
       var rs = this.radius && this.radius.state;
+      if (rs && rs.profile) parts.push("p=" + encodeURIComponent(rs.profile));
       if (rs && rs.zip) parts.push("zip=" + rs.zip); if (rs && rs.r) parts.push("r=" + rs.r);
       var hr = "#" + parts.join("&"); if (location.hash !== hr) history.replaceState(null, "", hr);
       return;
@@ -360,12 +361,12 @@
       var on = b.getAttribute("data-level") === "radius"; b.setAttribute("aria-pressed", on);
       if (b.getAttribute("data-level") === "zip") b.disabled = false;
     });
-    var preset = cfg.radiusProfiles ? s.sub : null;
+    var preset = cfg.radiusProfiles && opt.p ? opt.p : null;   // no best-prospect preset unless asked for
     function go() {
       if (!self.radius) {
         var RC = cfg.radius === true ? window.ADTAXI_RADIUS : cfg.radius;   // the site's radius-config.js sets ADTAXI_RADIUS
         var rc = {}; for (var k in RC) rc[k] = RC[k];
-        rc.embedded = true; rc.initial = { zip: opt.zip, r: opt.r, p: opt.p || preset };
+        rc.embedded = true; rc.initial = { zip: opt.zip, r: opt.r, p: preset };
         rc.onState = function () { self.writeHash(); };
         rc.onUpdate = function (ready) { self.radiusReady = ready; self.renderAd(); };
         self.radius = window.AdtaxiRadius.start(rc, self.radiusBox);
@@ -877,7 +878,7 @@
       box.appendChild(el("button", { type: "button", class: "az-btn primary az-drill", text: "See ZIPs in this market", onclick: function () { self.drill(); } }));
     }
     if (s.level === "zip") {
-      if (cfg.radius) box.appendChild(el("button", { type: "button", class: "az-btn primary az-drill", onclick: function () { self.openRadius({ zip: row.id }); },
+      if (cfg.radius) box.appendChild(el("button", { type: "button", class: "az-btn primary az-drill", onclick: function () { self.openRadius({ zip: row.id, p: cfg.radiusProfiles ? self.state.sub : null }); },
         text: cfg.radiusProfiles && this.subLabel() ? "Find best prospects around this ZIP" : "Build a radius audience from this ZIP" }));
       else if (cfg.radiusPage) box.appendChild(el("a", { class: "az-btn primary az-drill", href: cfg.radiusPage + "#zip=" + encodeURIComponent(row.id) + "&r=" + (cfg.radiusDefault || 10) + (cfg.radiusProfiles && this.state.sub ? "&p=" + encodeURIComponent(this.state.sub) : ""),
         text: cfg.radiusProfiles && this.subLabel() ? "Find best prospects around this ZIP" : "Build a radius audience from this ZIP" }));
