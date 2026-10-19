@@ -4,7 +4,9 @@
    "id": "chi-furniture-past-purchasers",
    "client": "Chicago southwest suburbs furniture retailer",
    "title": "Past purchasers, Aug 2023 – Aug 2026",
-   "stores": [],
+   "stores": [
+    "60462"
+   ],
    "setup": "Three years of purchasers, one per household (repeat purchases combined). No sales dollars. The strongest file for the analysis.",
    "customers": 71183,
    "file": "chicago-furniture-past-purchasers.csv"
@@ -13,7 +15,9 @@
    "id": "chi-furniture-outlet-clearance",
    "client": "Chicago southwest suburbs furniture retailer",
    "title": "Outlet + clearance sales, Mar – Sep 2026",
-   "stores": [],
+   "stores": [
+    "60462"
+   ],
    "setup": "Six months of outlet and clearance-center transactions combined per customer, with sales dollars ($8.6M).",
    "customers": 6224,
    "file": "chicago-furniture-outlet-clearance.csv"
@@ -22,7 +26,9 @@
    "id": "chi-furniture-outlet-only",
    "client": "Chicago southwest suburbs furniture retailer",
    "title": "Outlet only, Mar – Sep 2026",
-   "stores": [],
+   "stores": [
+    "60462"
+   ],
    "setup": "Outlet transactions only, with sales dollars ($7.1M).",
    "customers": 4687,
    "file": "chicago-furniture-outlet-only.csv"
@@ -31,7 +37,9 @@
    "id": "chi-furniture-clearance-only",
    "client": "Chicago southwest suburbs furniture retailer",
    "title": "Clearance center only, Mar – Sep 2026",
-   "stores": [],
+   "stores": [
+    "60462"
+   ],
    "setup": "Clearance-center transactions only, with sales dollars ($1.5M).",
    "customers": 2258,
    "file": "chicago-furniture-clearance-only.csv"
@@ -40,7 +48,9 @@
    "id": "chi-furniture-weekly-sales",
    "client": "Chicago southwest suburbs furniture retailer",
    "title": "All sales, Oct 8 – 15, 2026",
-   "stores": [],
+   "stores": [
+    "60462"
+   ],
    "setup": "One week of sales across all channels ($1.25M). Too few customers for firm ZIP-level conclusions; use as a spot check.",
    "customers": 491,
    "file": "chicago-furniture-weekly-sales-oct8-15.csv"
