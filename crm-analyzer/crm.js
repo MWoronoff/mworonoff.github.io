@@ -271,6 +271,8 @@
       S.params.locs = t.stores.join(", ");
       guessColumns();
       $("crm-locs").value = t.stores.join(", ");
+      // the practice files were built inside a set radius, so they're judged on the trade area they were designed for
+      if ($("crm-radius")) $("crm-radius").value = t.radius || "auto";
       $("crm-setup").scrollIntoView({ behavior: "smooth", block: "start" });
     });
   }
@@ -413,9 +415,9 @@
         el("label", { class: "az-field crm-wide" }, ["Your location ZIPs (stores, offices or service base)",
           el("input", { id: "crm-locs", type: "text", placeholder: "e.g. 80222, 80134", value: S.params.locs || "" })]),
         el("label", { class: "az-field" }, ["Trade area", el("select", { id: "crm-radius" }, [
-          el("option", { value: "auto", text: "Auto (covers 90% of customers)" }),
+          el("option", { value: "auto", text: "Auto (covers 90% of customers)", selected: S.params.radius === "auto" }),
           [5, 10, 15, 20, 25, 35, 50, 75, 100, 150].map(function (m) { return el("option", { value: m, text: m + " miles" }); }),
-          el("option", { value: "dma", text: "Whole DMA", selected: !!S.params.dma })
+          el("option", { value: "dma", text: "Whole DMA (default)", selected: S.params.radius !== "auto" && !/^\d+$/.test(S.params.radius || "") })
         ].flat())]),
         el("label", { class: "az-field" }, ["Measure potential by", el("select", { id: "crm-base" },
           Object.keys(BASES).map(function (k) { return el("option", { value: k, text: BASES[k].label, selected: k === (categoryBase(S.params) || "hh") }); }))]),
@@ -581,7 +583,16 @@
     // Expected customers: potential x a customer rate that falls smoothly with distance from the nearest location,
     // rate(d) = a * exp(-d / s). The scale s is chosen by maximum (Poisson) likelihood over all trade-area ZIPs, so a
     // handful of ZIPs near the store can't distort it; "no distance effect" is one of the candidates.
-    var useDist = o.locs.length > 0 && o.radius;
+    var useDist = o.locs.length > 0;
+    // Customers in a ZIP live throughout it, not at its center, so a ZIP is never closer than the average distance from
+    // its center to points inside it (2/3 of its equivalent radius). Without this the store's own ZIP is treated as
+    // 0 miles away and its expected customers run too high.
+    items.forEach(function (it) {
+      var dens = it.f && it.f.density, area = dens > 0 && it.z.pop > 0 ? it.z.pop / dens : null;
+      var inside = area ? (2 / 3) * Math.sqrt(area / Math.PI) : 0;
+      if (it.d != null) it.d = Math.max(it.d, inside);
+    });
+    var maxD = o.radius || Math.max(5, Math.ceil(items.reduce(function (m, it) { return it.d != null && it.A > 0 ? Math.max(m, it.d) : m; }, 0) / 5) * 5);
     var totA = items.reduce(function (t, it) { return t + it.A; }, 0);
     var fit = function (sc) {
       var w = function (it) { return sc ? Math.exp(-it.d / sc) : 1; };
@@ -596,7 +607,7 @@
     // for the chart: observed rate by distance band next to the fitted curve
     var bandRows = [];
     if (useDist) {
-      var edges = BANDS.filter(function (b) { return b < o.radius; }).concat([o.radius]);
+      var edges = BANDS.filter(function (b) { return b < maxD; }).concat([maxD]);
       for (var i = 0; i < edges.length - 1; i++) {
         var lo = edges[i], hi = edges[i + 1], inB = items.filter(function (it) { return it.d >= lo && it.d < hi; });
         var bA = inB.reduce(function (t, it) { return t + it.A; }, 0), bB = inB.reduce(function (t, it) { return t + it.B; }, 0);
@@ -648,6 +659,8 @@
       });
     // similarity of every ZIP in the search area to the strong-ZIP profile
     var byZip = {}; items.forEach(function (it) { byZip[it.z.zip] = it; });
+    var areaRate = items.reduce(function (t, it) { return t + it.A; }, 0) / (items.reduce(function (t, it) { return t + it.B; }, 0) || 1);
+    var isLoc = {}; o.locs.forEach(function (l) { isLoc[l] = true; });
     var cand = o.search.map(function (z) {
       if (!z.f) return null;
       var sw = 0, sq = 0, tw = 0;
@@ -662,7 +675,8 @@
       var it = byZip[z.zip], c = cust[z.zip] || { n: 0 };
       var sim = 100 * Math.exp(-sq / sw / 2);
       return { z: z, sim: sim, A: c.n, idx: it ? it.idx : null, status: it ? it.status : null, d: z.d, B: base.get(z, z.f) || 0,
-        inMarket: !!it, opp: sim >= 60 && z.hh >= 200 && (!it ? c.n === 0 : (it.status === "under" || (it.status !== "over" && it.idx < 90))) };
+        inMarket: !!it, opp: sim >= 60 && z.hh >= 200 && !isLoc[z.zip] &&
+          (!it ? c.n === 0 : ((it.status === "under" || (it.status !== "over" && it.idx < 90)) && it.A / (it.B || 1) < areaRate)) };
     }).filter(Boolean).sort(function (a, b) { return b.sim - a.sim; });
     S.res = { o: o, items: items, strong: strong, strongLabel: strongLabel, prof: prof, simKeys: simKeys, cand: cand,
               bands: bandRows, inMarket: inMarket, useDist: useDist, halfMiles: halfMiles, weakSignal: weakSignal,
@@ -926,7 +940,17 @@
     ["l", "r"].forEach(function (side) {
       var M = MAPS[side];
       M.map = L.map("crm-map-" + side, { scrollWheelZoom: false, zoomSnap: 0.25 });
-      L.tileLayer("https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png", { attribution: "© OpenStreetMap, © CARTO", subdomains: "abcd", maxZoom: 13 }).addTo(M.map);
+      // keyless light-gray basemap; if its tiles fail to load, fall back to faded OpenStreetMap tiles
+      (function (map) {
+        var base = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}", { attribution: "Tiles \u00a9 Esri \u2014 Esri, HERE, Garmin, \u00a9 OpenStreetMap contributors", maxZoom: 16 });
+        var fails = 0;
+        base.on("tileerror", function () {
+          if (++fails !== 3) return;
+          map.removeLayer(base);
+          L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "\u00a9 OpenStreetMap contributors", maxZoom: 16, opacity: 0.45 }).addTo(map);
+        });
+        base.addTo(map);
+      })(M.map);
       M.map.fitBounds(bounds);
       // when a pan or zoom on this map finishes, put the other map in the same place
       M.map.on("moveend", function () {
@@ -984,7 +1008,11 @@
   function legend(side) {
     var RAMP = RAMPS[side];
     var M = MAPS[side], box = $("crm-legend-" + side); if (!box) return; box.innerHTML = "";
-    var f = M.mode === "spend" ? function (v) { return "$" + NF1.format(v); } : M.mode === "pen" ? function (v) { return NF1.format(v); } : function (v) { return NF0.format(v); };
+    var dec = M.mode === "spend" || M.mode === "pen" ? 1 : 0, b0 = M.br || [];
+    var nf = function (d) { return new Intl.NumberFormat("en-US", { minimumFractionDigits: d, maximumFractionDigits: d }); };
+    while (dec < 3 && b0.some(function (v, i) { return i && nf(dec).format(v) === nf(dec).format(b0[i - 1]) && v !== b0[i - 1]; })) dec++;
+    var NFL = nf(dec);
+    var f = M.mode === "spend" ? function (v) { return "$" + NFL.format(v); } : function (v) { return NFL.format(v); };
     var rows;
     if (M.mode === "status") rows = ["over", "inline", "under", "few"].map(function (k) { return [STATUS[k].color, STATUS[k].label]; });
     else if (M.mode === "sim") rows = [[RAMP[4], "90–100"], [RAMP[3], "75–90"], [RAMP[2], "60–75"], [RAMP[1], "40–60"], [RAMP[0], "20–40"], [NONE, "Under 20"]];
@@ -1040,8 +1068,8 @@
     var bot = $("crm-print-bottom"); bot.innerHTML = "";
     var find = [];
     if (R.halfMiles) find.push("Your " + unit + " rate halves about every " + NF1.format(R.halfMiles) + " miles from your nearest location; expected " + unit + " account for this.");
-    if (traits.length) find.push((R.weakSignal ? "Tentatively, your" : "Your") + " strongest ZIPs stand out for " + traits.slice(0, 3).map(function (p) {
-      return p.f.label.toLowerCase() + " (" + fmt(p.strong, p.f.unit) + " vs. " + fmt(p.market, p.f.unit) + " across the area)"; }).join(", ") + ".");
+    if (traits.length) find.push((R.weakSignal ? "Tentatively, your" : "Your") + " strongest ZIPs differ most from the area in " + traits.slice(0, 3).map(function (p) {
+      return p.f.label.toLowerCase() + " (" + (p.strong >= p.market ? "higher" : "lower") + ": " + fmt(p.strong, p.f.unit) + " vs. " + fmt(p.market, p.f.unit) + " across the area)"; }).join(", ") + ".");
     if (under.length) find.push("The biggest gaps: " + under.slice(0, 3).map(function (it) { return zipName(it.z) + " (" + NF0.format(it.A) + " vs. " + NF0.format(it.E) + " expected)"; }).join("; ") + ".");
     if (opp.length) find.push("Best untapped look-alikes: " + opp.slice(0, 4).map(function (c) { return zipName(c.z); }).join(", ") + ".");
     if (R.weakSignal) find.push("Caution: the number of over-performing ZIPs is close to what chance alone would produce, so treat the profile as tentative.");
