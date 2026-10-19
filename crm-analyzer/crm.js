@@ -511,6 +511,12 @@
   function run() {
     var zi = +$("crm-zipcol").value, vi = +$("crm-valcol").value, fc = +$("crm-filtcol").value, ci = +$("crm-cntcol").value;
     var keepVals = fc >= 0 ? Array.prototype.map.call($("crm-filtval").selectedOptions, function (o) { return o.value; }) : null;
+    // After the first analysis only the columns it used are kept; a column cleared then can't be used without reloading
+    var used = [zi, vi, fc, ci].filter(function (i) { return i >= 0; });
+    if (S.file.kept && used.some(function (i) { return S.file.kept.indexOf(i) < 0; })) {
+      results(el("p", { class: "az-error", text: "To protect customer data, columns not used in the last analysis were cleared from this browser. Load the file again to use a different column." }));
+      return;
+    }
     var cust = {}, stats = { rows: 0, valid: 0, matched: 0, bad: 0, unknown: 0, unknownZips: {} };
     S.file.rows.forEach(function (r) {
       if (keepVals && keepVals.length && keepVals.indexOf(String(r[fc] == null ? "" : r[fc]).trim()) < 0) return;
@@ -527,7 +533,11 @@
       if (vi >= 0) { var v = parseFloat(String(r[vi]).replace(/[$,\s]/g, "")); if (!isNaN(v)) c.v += v; }
     });
     // Drop the file contents now that the counts are made
-    S.file.rows = []; S.cust = cust; S.stats = stats; S.hasValue = vi >= 0; S.countCol = ci >= 0; S.countName = ci >= 0 ? S.file.header[ci] : null;
+    // Clear every column the analysis doesn't use (names, emails, addresses), but keep the ZIP, amount, count and
+    // filter columns so the trade area and other settings can be changed and the analysis run again
+    S.file.kept = used;
+    S.file.rows = S.file.rows.map(function (r) { var k = []; used.forEach(function (i) { k[i] = r[i]; }); return k; });
+    S.cust = cust; S.stats = stats; S.hasValue = vi >= 0; S.countCol = ci >= 0; S.countName = ci >= 0 ? S.file.header[ci] : null;
     if (!stats.matched) { results(el("p", { class: "az-error", text: "None of the ZIP codes matched a residential ZIP. Check that the right column is selected." })); return; }
     var locs = $("crm-locs").value.split(/[\s,;]+/).map(normZip).filter(function (z) { return z && S.zips[z]; });
     var base = $("crm-base").value, radiusSel = $("crm-radius").value, searchSel = $("crm-search").value;
