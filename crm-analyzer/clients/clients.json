@@ -2,7 +2,7 @@
  "clients": [
   {
    "id": "chi-furniture-past-purchasers",
-   "client": "Chicago southwest suburbs furniture retailer",
+   "client": "Darvin Furniture & Mattress (Orland Park, IL)",
    "title": "Past purchasers, Aug 2023 – Aug 2026",
    "stores": [
     "60462"
@@ -13,7 +13,7 @@
   },
   {
    "id": "chi-furniture-outlet-clearance",
-   "client": "Chicago southwest suburbs furniture retailer",
+   "client": "Darvin Furniture & Mattress (Orland Park, IL)",
    "title": "Outlet + clearance sales, Mar – Sep 2026",
    "stores": [
     "60462"
@@ -24,7 +24,7 @@
   },
   {
    "id": "chi-furniture-outlet-only",
-   "client": "Chicago southwest suburbs furniture retailer",
+   "client": "Darvin Furniture & Mattress (Orland Park, IL)",
    "title": "Outlet only, Mar – Sep 2026",
    "stores": [
     "60462"
@@ -35,7 +35,7 @@
   },
   {
    "id": "chi-furniture-clearance-only",
-   "client": "Chicago southwest suburbs furniture retailer",
+   "client": "Darvin Furniture & Mattress (Orland Park, IL)",
    "title": "Clearance center only, Mar – Sep 2026",
    "stores": [
     "60462"
@@ -46,7 +46,7 @@
   },
   {
    "id": "chi-furniture-weekly-sales",
-   "client": "Chicago southwest suburbs furniture retailer",
+   "client": "Darvin Furniture & Mattress (Orland Park, IL)",
    "title": "All sales, Oct 8 – 15, 2026",
    "stores": [
     "60462"
