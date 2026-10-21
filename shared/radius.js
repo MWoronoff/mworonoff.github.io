@@ -220,7 +220,8 @@
     this.filterDefs = {};
     for (var k in FILTERS) this.filterDefs[k] = FILTERS[k];
     this.filterDefs.age = { label: "Age", type: "multi", options: this.ages.options };
-    this.state = { zip: cfg.defaultZip || "", r: cfg.defaultRadius || 0, minIndex: 0, sortKey: "aud", sortDir: "desc", show: 50, sel: {}, profile: null };
+    this.state = { zip: cfg.defaultZip || "", r: cfg.defaultRadius || 0, minIndex: 0, sortKey: "aud", sortDir: "desc", show: 50, sel: {}, profile: null,
+                   mode: "radius", area: null, areaTokens: null };
     this.profiles = {};
     (cfg.profiles || []).forEach(function (p) { this.profiles[p.id] = p; }, this);
     if (cfg.embedded) {   // inside an analyzer page: the analyzer owns the URL and passes the starting ZIP, radius and preset
@@ -228,6 +229,7 @@
       if (/^\d{5}$/.test(ini.zip || "")) this.state.zip = ini.zip;
       if (+ini.r > 0) this.state.r = +ini.r;
       if (ini.p && this.profiles[ini.p]) { this.state.profile = ini.p; this.state.sel = JSON.parse(JSON.stringify(this.profiles[ini.p].sel)); this.state.sortKey = "idx"; }
+      if (ini.mode === "area" && cfg.customArea) { this.state.mode = "area"; if (ini.ca) this.pendingCA = ini.ca; }
     } else this.readHash();
   }
 
@@ -290,13 +292,14 @@
     this.minSel = el("select", { "aria-label": "Show", onchange: function () { s.minIndex = +this.value; self.update(false); } },
       [[0, "All ZIPs in range"], [100, "Index 100+"], [120, "Index 120+"], [150, "Index 150+"]].map(function (o) { return el("option", { value: o[0], text: o[1] }); }));
     var controls = el("section", { class: "az-controls", "aria-label": "Radius controls" }, [
-      el("label", { class: "az-field" }, [el("span", { text: "Center" }), this.zipIn, this.towns]),
-      el("label", { class: "az-field" }, [el("span", { text: "Radius" }), this.rSel]),
+      this.centerField = el("label", { class: "az-field" }, [el("span", { text: "Center" }), this.zipIn, this.towns]),
+      this.radiusField = el("label", { class: "az-field" }, [el("span", { text: "Radius" }), this.rSel]),
       el("label", { class: "az-field" }, [el("span", { text: "Show" }), this.minSel]),
       el("div", { class: "az-actions" }, [
         el("button", { type: "button", class: "az-btn", text: "How estimates work", onclick: function () { self.openMethod(); } }),
         el("button", { type: "button", class: "az-btn primary", text: "Export ZIP list", onclick: function () { self.exportCSV(); } })])]);
     this.errorBox = el("div", { class: "az-error", role: "alert", hidden: true });
+    this.areaPanel = cfg.customArea ? this.buildArea() : null;
 
     // Filters: multi-choice groups as chips, yes/no filters together under one heading
     var defs = this.filterDefs;
@@ -348,7 +351,7 @@
     this.modal = el("dialog", { class: "az-modal", "aria-labelledby": "rz-method-title" }, [this.modalBody]);
     var sources = el("section", { class: "az-panel az-sources" }, [el("h2", { text: "Sources" }), this.sourcesP = el("p")]);
 
-    var main = el("main", { class: "az-main" }, [controls, this.errorBox, el("section", { class: "rz-stage" }, [this.filterPanel, right]), table, this.extra, sources]);
+    var main = el("main", { class: "az-main" }, [controls, this.areaPanel, this.errorBox, el("section", { class: "rz-stage" }, [this.filterPanel, right]), table, this.extra, sources]);
     this.root.innerHTML = ""; if (header) this.root.appendChild(header); this.root.appendChild(main); this.root.appendChild(this.modal);
     this.rSel.value = s.r ? String(s.r) : ""; this.minSel.value = String(s.minIndex);
     this.syncFilters();
@@ -358,6 +361,7 @@
     this.map.attributionControl.setPrefix(false);
     this.map.attributionControl.addAttribution("Boundaries: U.S. Census Bureau");
     this.map.fitBounds([[24.4, -125], [49.5, -66.9]]);
+    this.showMode();
   };
   Radius.prototype.applyProfile = function (id) {
     var s = this.state, p = this.profiles[id];
@@ -524,6 +528,7 @@
   Radius.prototype.update = function (moved) {
     var s = this.state, c = this.c;
     if (!c) return;
+    if (s.mode === "area") return this.updateArea(moved);
     var ci = this.byZip[s.zip];
     if (ci === undefined || !s.r) { this.renderEmpty(); if (this.cfg.onUpdate) this.cfg.onUpdate(false); return; }
     this.computeNational();
@@ -552,15 +557,16 @@
   // Nothing is preselected: results appear once the user has chosen both a center and a radius
   Radius.prototype.renderEmpty = function () {
     var s = this.state, hasZip = this.c && this.byZip[s.zip] !== undefined;
-    var msg = hasZip ? "Choose a radius to see the audience around " + s.zip + "." :
+    if (s.mode === "area") hasZip = false;
+    var msg = s.mode === "area" ? "List ZIPs, counties or towns above, or upload a file, then select Map this area." : hasZip ? "Choose a radius to see the audience around " + s.zip + "." :
               s.r ? "Enter a ZIP or town to see the audience within " + s.r + " miles." :
               "Enter a ZIP or town and choose a radius to see the audience.";
     this.rows = null; this.mapToken = (this.mapToken || 0) + 1;
-    ["circle", "centerMark", "zipLayer"].forEach(function (k) { if (this[k]) { this.map.removeLayer(this[k]); this[k] = null; } }, this);
+    ["circle", "centerMark", "zipLayer", "areaLayer"].forEach(function (k) { if (this[k]) { this.map.removeLayer(this[k]); this[k] = null; } }, this);
     if (hasZip && this.map) this.map.setView([this.c.lat[this.byZip[s.zip]], this.c.lon[this.byZip[s.zip]]], 9);
     this.summary.innerHTML = "";
     this.summary.appendChild(el("p", { class: "az-empty", text: msg }));
-    this.tbody.innerHTML = ""; this.thead.innerHTML = ""; this.tableTitle.textContent = "ZIPs in range"; this.tableNote.textContent = "";
+    this.tbody.innerHTML = ""; this.thead.innerHTML = ""; this.tableTitle.textContent = s.mode === "area" ? "ZIPs in the area" : "ZIPs in range"; this.tableNote.textContent = "";
   };
   Radius.prototype.renderSummary = function () {
     var s = this.state, c = this.c, rows = this.visible(), A = 0, P = 0;
@@ -571,7 +577,7 @@
     var stat = function (val, label) { return el("div", { class: "rz-stat" }, [el("b", { class: "num", text: val }), el("span", { text: label })]); };
     this.summary.appendChild(el("div", { class: "rz-stat rz-stat-main" }, [
       el("b", { class: "num", text: NF0.format(Math.round(A)) }),
-      el("span", { text: (s.profile ? "Best prospects for " + this.profiles[s.profile].label + ", e" : est ? "E" : "") + (s.profile || est ? "stimated audience" : "Audience") + " within " + s.r + " miles of " + s.zip + " " + c.city[ci] + ", " + c.state[ci] + (s.minIndex ? " (ZIPs at index " + s.minIndex + "+)" : "") })]));
+      el("span", { text: (s.profile ? "Best prospects for " + this.profiles[s.profile].label + ", e" : est ? "E" : "") + (s.profile || est ? "stimated audience" : "Audience") + (s.mode === "area" ? " in the custom area (" + this.areaPhrase() + ")" : " within " + s.r + " miles of " + s.zip + " " + c.city[ci] + ", " + c.state[ci]) + (s.minIndex ? " (ZIPs at index " + s.minIndex + "+)" : "") })]));
     this.summary.appendChild(stat(share == null ? "—" : NF1.format(share * 100) + "%", "Share of population"));
     this.summary.appendChild(stat(idx == null ? "—" : NF0.format(idx), "Index vs. U.S. (100 = average)"));
     this.summary.appendChild(stat(NF0.format(rows.length), "ZIPs"));
@@ -579,10 +585,12 @@
   };
   Radius.prototype.renderTable = function () {
     var self = this, s = this.state, rows = this.visible().slice(), est = this.isEstimate();
-    var cols = [["zip", "ZIP", "l"], ["town", "Town", "l"], ["dist", "Miles", "n"], ["pop", "Population", "n"], ["aud", est ? "Est. audience" : "Audience", "n"], ["share", "Share", "n"], ["idx", "Index", "n"]];
+    var area = s.mode === "area", circ = area && s.area && s.area.circles.length;
+    var cols = [["zip", "ZIP", "l"], ["town", "Town", "l"]].concat(area ? [["county", "County", "l"]] : []).concat(!area || circ ? [["dist", area ? "Miles to location" : "Miles", "n"]] : [])
+      .concat([["pop", "Population", "n"], ["aud", est ? "Est. audience" : "Audience", "n"], ["share", "Share", "n"], ["idx", "Index", "n"]]);
     this.sortRows(rows);
     var k = s.sortKey, nSmall = k === "idx" ? rows.filter(function (r) { return (r.pop || 0) < SMALL_ZIP; }).length : 0;
-    this.tableTitle.textContent = "ZIPs within " + s.r + " miles";
+    this.tableTitle.textContent = area ? "ZIPs in the custom area" : "ZIPs within " + s.r + " miles";
     this.tableNote.textContent = (rows.length > s.show ? "Showing " + s.show + " of " + NF0.format(rows.length) + " ZIPs. Export includes all." : NF0.format(rows.length) + " ZIPs.") + (nSmall ? " ZIPs under " + NF0.format(SMALL_ZIP) + " residents are listed last." : "") + " Click a column to sort.";
     this.thead.innerHTML = "";
     var hr = el("tr");
@@ -601,14 +609,16 @@
     rows.slice(0, s.show).forEach(function (r) {
       frag.appendChild(el("tr", { tabindex: "0", onclick: function () { self.flash(r.zip); }, onkeydown: function (e) { if (e.key === "Enter") self.flash(r.zip); } }, [
         el("td", { class: "rz-l num", text: r.zip }), el("td", { class: "rz-l", text: r.town }),
-        el("td", { class: "num", text: NF1.format(r.dist) }), el("td", { class: "num", text: r.pop == null ? "—" : NF0.format(r.pop) }),
+        area ? el("td", { class: "rz-l rz-county", text: r.county || "—" }) : null,
+        !area || circ ? el("td", { class: "num", text: r.dist == null ? "—" : NF1.format(r.dist) }) : null,
+        el("td", { class: "num", text: r.pop == null ? "—" : NF0.format(r.pop) }),
         el("td", { class: "num", text: r.aud == null ? "No data" : NF0.format(Math.round(r.aud)) }),
         el("td", { class: "num", text: r.share == null ? "—" : NF1.format(r.share * 100) + "%" }),
         el("td", { class: "num", text: r.idx == null ? "—" : NF0.format(r.idx) })]));
     });
-    if (!rows.length) frag.appendChild(el("tr", null, [el("td", { colspan: "7", class: "az-empty", text: "No ZIPs meet the index cutoff. Lower the Show setting or widen the radius." })]));
+    if (!rows.length) frag.appendChild(el("tr", null, [el("td", { colspan: String(cols.length), class: "az-empty", text: area ? "No ZIPs meet the index cutoff. Lower the Show setting or add to the area." : "No ZIPs meet the index cutoff. Lower the Show setting or widen the radius." })]));
     this.tbody.appendChild(frag);
-    if (rows.length > s.show) this.tbody.appendChild(el("tr", null, [el("td", { colspan: "7" }, [el("button", { type: "button", class: "az-btn", text: "Show all " + NF0.format(rows.length), onclick: function () { s.show = 1e9; self.renderTable(); } })])]));
+    if (rows.length > s.show) this.tbody.appendChild(el("tr", null, [el("td", { colspan: String(cols.length) }, [el("button", { type: "button", class: "az-btn", text: "Show all " + NF0.format(rows.length), onclick: function () { s.show = 1e9; self.renderTable(); } })])]));
   };
 
   Radius.prototype.sortRows = function (rows) {
@@ -629,13 +639,26 @@
     return cssVar("--nodata");
   };
   Radius.prototype.renderMap = function (moved) {
-    var self = this, s = this.state, c = this.c, ci = this.byZip[s.zip];
-    var center = [c.lat[ci], c.lon[ci]];
-    if (this.circle) this.map.removeLayer(this.circle);
-    if (this.centerMark) this.map.removeLayer(this.centerMark);
-    this.circle = L.circle(center, { radius: s.r * 1609.34, color: "#0f2742", weight: 2, dashArray: "6 5", fill: false, interactive: false }).addTo(this.map);
-    this.centerMark = L.circleMarker(center, { radius: 6, color: "#fff", weight: 2, fillColor: "#0f2742", fillOpacity: 1 }).bindTooltip("Center: " + s.zip).addTo(this.map);
-    if (moved) this.map.fitBounds(this.circle.getBounds(), { padding: [16, 16] });
+    var self = this, s = this.state, c = this.c;
+    ["circle", "centerMark", "areaLayer"].forEach(function (k) { if (this[k]) { this.map.removeLayer(this[k]); this[k] = null; } }, this);
+    if (s.mode === "area") {
+      // Custom area: circles for any locations given with miles; the shaded ZIPs show the rest of the footprint
+      this.areaLayer = L.layerGroup().addTo(this.map);
+      var bounds = L.latLngBounds([]);
+      this.rows.forEach(function (r) { bounds.extend([c.lat[r.i], c.lon[r.i]]); });
+      s.area.circles.forEach(function (q) {
+        var ll = [c.lat[q.i], c.lon[q.i]];
+        var ring = L.circle(ll, { radius: q.r * 1609.34, color: "#0f2742", weight: 2, dashArray: "6 5", fill: false, interactive: false }).addTo(self.areaLayer);
+        L.circleMarker(ll, { radius: 6, color: "#fff", weight: 2, fillColor: "#0f2742", fillOpacity: 1 }).bindTooltip(q.label).addTo(self.areaLayer);
+        bounds.extend(ring.getBounds());
+      });
+      if (moved && bounds.isValid()) this.map.fitBounds(bounds.pad(0.05), { padding: [16, 16], maxZoom: 11 });
+    } else {
+      var ci = this.byZip[s.zip], center = [c.lat[ci], c.lon[ci]];
+      this.circle = L.circle(center, { radius: s.r * 1609.34, color: "#0f2742", weight: 2, dashArray: "6 5", fill: false, interactive: false }).addTo(this.map);
+      this.centerMark = L.circleMarker(center, { radius: 6, color: "#fff", weight: 2, fillColor: "#0f2742", fillOpacity: 1 }).bindTooltip("Center: " + s.zip).addTo(this.map);
+      if (moved) this.map.fitBounds(this.circle.getBounds(), { padding: [16, 16] });
+    }
     var byZip = {}, vis = {}, dmas = {};
     this.rows.forEach(function (r) { byZip[r.zip] = r; if (r.dma && r.dma !== "0") dmas[r.dma] = 1; });
     this.visible().forEach(function (r) { vis[r.zip] = 1; });
@@ -667,7 +690,8 @@
           }, { sticky: true, opacity: 0.97 });
         }
       }).addTo(self.map);
-      self.circle.bringToFront(); self.centerMark.bringToFront();
+      if (self.circle) { self.circle.bringToFront(); self.centerMark.bringToFront(); }
+      if (self.areaLayer) self.areaLayer.eachLayer(function (l) { l.bringToFront(); });
     });
     this.legend.innerHTML = "";
     this.legend.appendChild(el("div", { class: "az-legend-row" }, [el("b", { text: "Index vs. U.S." })]));
@@ -700,13 +724,16 @@
     if (!this.rows) return;
     var s = this.state, est = this.isEstimate();
     var rows = this.sortRows(this.visible().slice());   // same order as the table
-    var lines = [["ZIP", "Town", "Miles from center", "Population", est ? "Estimated audience" : "Audience", "Audience share", "Index vs US", "Audience definition"].map(csvCell).join(",")];
+    var area = s.mode === "area", circ = area && s.area.circles.length;
+    var head = ["ZIP", "Town"].concat(area ? ["County"] : []).concat(!area ? ["Miles from center"] : circ ? ["Miles to nearest location"] : []);
+    var lines = [head.concat(["Population", est ? "Estimated audience" : "Audience", "Audience share", "Index vs US", "Audience definition"]).map(csvCell).join(",")];
     var def = this.describe();
     rows.forEach(function (r) {
-      lines.push([r.zip, r.town, r.dist.toFixed(1), r.pop, r.aud == null ? "" : Math.round(r.aud), r.share == null ? "" : (r.share * 100).toFixed(1) + "%", r.idx == null ? "" : Math.round(r.idx), def].map(csvCell).join(","));
+      var lead = [r.zip, r.town].concat(area ? [r.county || ""] : []).concat(!area || circ ? [r.dist == null ? "" : r.dist.toFixed(1)] : []);
+      lines.push(lead.concat([r.pop, r.aud == null ? "" : Math.round(r.aud), r.share == null ? "" : (r.share * 100).toFixed(1) + "%", r.idx == null ? "" : Math.round(r.idx), def]).map(csvCell).join(","));
     });
     var blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
-    var a = el("a", { href: URL.createObjectURL(blob), download: (this.cfg.exportName || "adtaxi-radius") + "-" + s.zip + "-" + s.r + "mi.csv" });
+    var a = el("a", { href: URL.createObjectURL(blob), download: (this.cfg.exportName || "adtaxi-radius") + (area ? "-custom-area.csv" : "-" + s.zip + "-" + s.r + "mi.csv") });
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
   };
@@ -724,7 +751,9 @@
     var aged = cf.filter(function (k) { return defs[k].byAge; }).map(noun);
     var list = function (a) { return a.length < 2 ? a.join("") : a.slice(0, -1).join(", ") + " and " + a[a.length - 1]; };
     var secs = [
-      ["Which ZIPs are included", "A ZIP is in range when its center point is inside the circle. PO box and business-only ZIPs with no residents are left out."],
+      ["Which ZIPs are included", this.state.mode === "area" ?
+        "In a custom area, a ZIP is included when you list it, when it's assigned to a county you list, when its town name matches a town you list, or when its center point is within the miles you give for a location. Each ZIP is assigned to one county, the primary county in the Deluxe ZIP database, so a ZIP that crosses a county line counts toward the county where it's listed. PO box and business-only ZIPs with no residents are left out." :
+        "A ZIP is in range when its center point is inside the circle. PO box and business-only ZIPs with no residents are left out."],
       ["Gender and age", this.ages.method],
       ["Everything else is an estimate", list(traits).replace(/^./, function (x) { return x.toUpperCase(); }) + " come from separate tables. The tool multiplies the base count by each trait's share in that ZIP, which assumes the traits are independent within a ZIP. That's the standard approach, but real overlaps can be higher or lower, so combined counts are labeled as estimates."]
     ];
@@ -738,6 +767,388 @@
     secs.forEach(function (x) { b.appendChild(el("h3", { text: x[0] })); b.appendChild(el("p", { text: x[1] })); });
     if (this.meta) b.appendChild(el("p", { class: "az-empty", text: "Census ACS " + this.meta.acsYears + ". Data built " + this.meta.built + "." }));
     if (this.modal.showModal) this.modal.showModal(); else this.modal.setAttribute("open", "");
+  };
+
+  /* ---------- Custom area: an advertiser footprint that isn't a circle ---------- */
+  // A list of ZIPs, counties and towns, several locations each with its own miles, or an uploaded CSV/Excel file.
+  // Turned on per analyzer with customArea: true in the site's radius-config.js.
+  var STATE_NAMES = { alabama: "AL", alaska: "AK", arizona: "AZ", arkansas: "AR", california: "CA", colorado: "CO", connecticut: "CT", delaware: "DE",
+    "district of columbia": "DC", florida: "FL", georgia: "GA", hawaii: "HI", idaho: "ID", illinois: "IL", indiana: "IN", iowa: "IA", kansas: "KS",
+    kentucky: "KY", louisiana: "LA", maine: "ME", maryland: "MD", massachusetts: "MA", michigan: "MI", minnesota: "MN", mississippi: "MS", missouri: "MO",
+    montana: "MT", nebraska: "NE", nevada: "NV", "new hampshire": "NH", "new jersey": "NJ", "new mexico": "NM", "new york": "NY", "north carolina": "NC",
+    "north dakota": "ND", ohio: "OH", oklahoma: "OK", oregon: "OR", pennsylvania: "PA", "rhode island": "RI", "south carolina": "SC", "south dakota": "SD",
+    tennessee: "TN", texas: "TX", utah: "UT", vermont: "VT", virginia: "VA", washington: "WA", "west virginia": "WV", wisconsin: "WI", wyoming: "WY" };
+  var STATE_CODES = {}; Object.keys(STATE_NAMES).forEach(function (k) { STATE_CODES[STATE_NAMES[k]] = 1; });
+  var COUNTY_WORD = /\s+(county|parish|borough|census area|city and borough|municipality|co\.?)$/i;
+  var MAX_LINK_TOKENS = 2000;   // larger areas still work; they just aren't saved in the page link
+  function normName(t) {
+    return String(t || "").toLowerCase().replace(/\bsaint\b/g, "st").replace(/\bsainte\b/g, "ste").replace(/[.'’]/g, "").replace(/-/g, " ").replace(/\s+/g, " ").trim();
+  }
+  function stateCode(t) {
+    t = String(t || "").replace(/\./g, "").trim();
+    if (STATE_CODES[t.toUpperCase()] && t.length === 2) return t.toUpperCase();
+    return STATE_NAMES[t.toLowerCase()] || null;
+  }
+  // "Cook County, IL" / "Cook County IL" / "Naperville, Illinois" -> name + state
+  function splitPlace(t) {
+    var m = /^(.*\S)\s*,\s*([A-Za-z .]+)$/.exec(t), st;
+    if (m && (st = stateCode(m[2]))) return { name: m[1].trim(), st: st };
+    m = /^(.*\S)\s+([A-Za-z]{2})$/.exec(t);
+    if (m && (st = stateCode(m[2]))) return { name: m[1].replace(/,\s*$/, "").trim(), st: st };
+    return { name: t.replace(/,\s*$/, "").trim(), st: null };
+  }
+  function zipOf(tok) {   // 60462, 60462-1234, 604621234; a 4-digit value is a ZIP that lost its leading zero (Excel does this)
+    tok = String(tok == null ? "" : tok).trim();
+    var m = /^(\d{5})(?:-?\d{4})?$/.exec(tok);
+    if (m) return { zip: m[1] };
+    if (/^\d{4}$/.test(tok)) return { zip: "0" + tok, padded: true };
+    if (/^\d{3}$/.test(tok)) return { zip: "00" + tok, padded: true };
+    return null;
+  }
+  function parseCSV(text) {
+    var first = text.split(/\r?\n/, 1)[0] || "", d = first.indexOf("\t") >= 0 && first.indexOf(",") < 0 ? "\t" : ",";
+    var rows = [], row = [], cell = "", q = false;
+    for (var i = 0; i < text.length; i++) {
+      var ch = text[i];
+      if (q) { if (ch === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; } else cell += ch; }
+      else if (ch === '"') q = true;
+      else if (ch === d) { row.push(cell); cell = ""; }
+      else if (ch === "\n" || ch === "\r") { if (ch === "\r" && text[i + 1] === "\n") i++; row.push(cell); rows.push(row); row = []; cell = ""; }
+      else cell += ch;
+    }
+    if (cell !== "" || row.length) { row.push(cell); rows.push(row); }
+    return rows;
+  }
+  function loadXLSX() {
+    if (window.XLSX) return Promise.resolve();
+    if (loadXLSX.p) return loadXLSX.p;
+    return (loadXLSX.p = new Promise(function (ok, fail) {
+      var sc = document.createElement("script"); sc.src = "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js";
+      sc.onload = ok; sc.onerror = function () { loadXLSX.p = null; fail(new Error("the Excel reader didn't load")); };
+      document.head.appendChild(sc);
+    }));
+  }
+  // Turn a spreadsheet's rows into one area line per row, using whichever ZIP, county, state, town and miles columns it has
+  function rowsToLines(rows) {
+    rows = rows.filter(function (r) { return r && r.some(function (x) { return String(x == null ? "" : x).trim() !== ""; }); });
+    var cols = null, hi = -1;
+    for (var h = 0; h < Math.min(5, rows.length) && !cols; h++) {
+      var f = {}, hdr = rows[h].map(function (x) { return String(x == null ? "" : x).trim().toLowerCase(); });
+      hdr.forEach(function (t, j) {
+        if (f.zip == null && /\b(zip|zipcode|zip code|zip5|postal|postal code|postcode)\b|^zip/.test(t) && !/plus|\+4|zip4|county/.test(t)) f.zip = j;
+        else if (f.fips == null && /fips/.test(t)) f.fips = j;
+        else if (f.county == null && /county|parish/.test(t)) f.county = j;
+        else if (f.st == null && /^(state|st|state code|state abbr|state abbreviation|province)$/.test(t)) f.st = j;
+        else if (f.city == null && /^(city|town|place|municipality|city name)$/.test(t)) f.city = j;
+        else if (f.mi == null && /^(miles|mi|radius|radius miles|radius \(miles\)|miles radius|trade area miles)$/.test(t)) f.mi = j;
+      });
+      if (f.zip != null || f.fips != null || f.county != null || f.city != null) { cols = f; hi = h; }
+    }
+    var out = [], seen = {}, add = function (line) { if (line && !seen[line]) { seen[line] = 1; out.push(line); } };
+    var get = function (r, j) { return j == null ? "" : String(r[j] == null ? "" : r[j]).trim(); };
+    if (cols) {
+      var skipped = 0;
+      rows.slice(hi + 1).forEach(function (r) {
+        var mi = parseFloat(get(r, cols.mi)), tail = mi > 0 ? ", " + mi + " miles" : "";
+        var z = zipOf(get(r, cols.zip).replace(/\.0$/, "")), st = get(r, cols.st);
+        if (z) return add(z.zip + tail);
+        if (cols.zip != null) { skipped++; return; }   // a customer file: a row without a ZIP is skipped, not widened to its whole county
+        var fips = get(r, cols.fips).replace(/\.0$/, "");
+        if (/^\d{4,5}$/.test(fips)) return add("FIPS " + (fips.length === 4 ? "0" + fips : fips));
+        var cty = get(r, cols.county);
+        if (cty) return add(cty + (COUNTY_WORD.test(cty) || /\bcity$/i.test(cty) ? "" : " County") + (st ? ", " + st : ""));
+        var town = get(r, cols.city);
+        if (town) add(town + (st ? ", " + st : "") + tail);
+      });
+      return { lines: out, rows: rows.length - hi - 1, skipped: skipped };
+    }
+    // No headers we recognize: take a ZIP from each row, or the row's only value
+    rows.forEach(function (r) {
+      var z = null;
+      for (var j = 0; j < r.length && !z; j++) { var v = String(r[j] == null ? "" : r[j]).trim(); if (/^\d{5}(-?\d{4})?$/.test(v)) z = zipOf(v); }
+      if (z) add(z.zip);
+      else { var vals = r.map(function (x) { return String(x == null ? "" : x).trim(); }).filter(Boolean); if (vals.length === 1) add(vals[0]); }
+    });
+    return { lines: out, rows: rows.length };
+  }
+
+  Radius.prototype.buildArea = function () {
+    var self = this;
+    this.areaIn = el("textarea", { class: "rz-area-input", rows: "5", spellcheck: "false", "aria-label": "Custom area",
+      placeholder: "60462\n60463, 60464, 60467\nCook County, IL\nNaperville, IL\n46307, 15 miles",
+      onkeydown: function (e) { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) self.applyArea(); } });
+    this.areaFile = el("input", { type: "file", accept: ".csv,.txt,.tsv,.xlsx,.xls", class: "rz-visually-hidden", tabindex: "-1",
+      onchange: function () { if (this.files && this.files[0]) self.readAreaFile(this.files[0]); this.value = ""; } });
+    this.areaReport = el("div", { class: "rz-area-report", "aria-live": "polite", hidden: true });
+    return el("section", { class: "az-panel rz-area", "aria-label": "Custom area", hidden: true }, [
+      el("div", { class: "rz-area-text" }, [
+        el("h2", { text: "Custom area" }),
+        el("p", { class: "rz-note", text: "For a business whose market isn't a circle. Enter one item per line: a ZIP, a county (Cook County, IL), a town (Naperville, IL), or a ZIP or town with miles to draw a circle around a location (46307, 15 miles). ZIPs can also go on one line separated by commas." }),
+        el("p", { class: "rz-note", text: "Or upload a CSV or Excel file of the advertiser's ZIPs, counties or locations. The tool reads columns named ZIP, County, State, City and Miles and ignores the rest; uploading replaces the list." })
+      ]),
+      el("div", { class: "rz-area-entry" }, [
+        this.areaIn,
+        el("div", { class: "rz-area-actions" }, [
+          el("button", { type: "button", class: "az-btn primary", text: "Map this area", onclick: function () { self.applyArea(); } }),
+          el("button", { type: "button", class: "az-btn", text: "Upload a file", onclick: function () { self.areaFile.click(); } }),
+          this.areaFile,
+          el("button", { type: "button", class: "rz-clear", text: "Clear", onclick: function () { self.areaIn.value = ""; self.state.area = null; self.state.areaTokens = null; self.areaReport.hidden = true; self.update(true); self.writeHash(); } })
+        ]),
+        this.areaReport
+      ])
+    ]);
+  };
+  Radius.prototype.showMode = function () {
+    var area = this.state.mode === "area";
+    if (this.centerField) this.centerField.hidden = area;
+    if (this.radiusField) this.radiusField.hidden = area;
+    if (this.areaPanel) this.areaPanel.hidden = !area;
+    this.mapEl.setAttribute("aria-label", area ? "Map of ZIPs in the custom area" : "Map of ZIPs in the radius");
+    if (this.minSel && this.minSel.options[0]) this.minSel.options[0].text = area ? "All ZIPs in the area" : "All ZIPs in range";
+  };
+  // Called by the analyzer page: Geography > Radius or Geography > Custom area
+  Radius.prototype.setMode = function (mode, ca) {
+    var s = this.state;
+    mode = mode === "area" && this.cfg.customArea ? "area" : "radius";
+    if (mode === "area" && ca && ca !== (s.areaTokens || []).join(",")) this.pendingCA = ca;
+    if (s.mode === mode && !this.pendingCA) { this.resize(); return; }
+    s.mode = mode; this.showMode(); this.resize();
+    this.errorBox.hidden = true;
+    if (!this.c) return;   // still loading: start() picks up the mode
+    if (mode === "area") this.startArea(); else this.update(true);
+  };
+  Radius.prototype.startArea = function () {
+    var self = this;
+    this.loadCounties().then(function () {
+      if (self.pendingCA) {
+        self.areaIn.value = self.tokensToText(self.pendingCA.split(","));
+        self.pendingCA = null; self.applyArea();
+      } else self.update(true);
+      if (!self.areaIn.value) self.areaIn.focus({ preventScroll: true });
+    }).catch(function (e) { self.showError("The county list didn't load (" + e.message + "). Refresh the page and try again."); });
+  };
+  Radius.prototype.loadCounties = function () {
+    var self = this;
+    if (this.countyP) return this.countyP;
+    var url = this.cfg.countyZips || this.cfg.zipGeo.replace(/zip\/\{level\}\/\{id\}\.json$/, "county_zips.json");
+    return (this.countyP = fetch(url).then(function (r) {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.json();
+    }).then(function (d) {
+      var cty = self.counties = d.counties, byName = {}, cityName = {}, anyState = {};
+      self.zipCounty = {};
+      Object.keys(cty).forEach(function (f) {
+        var x = cty[f], n = x.n;
+        x.z.forEach(function (z) { self.zipCounty[z] = f; });
+        if (/ city$/.test(n)) { (cityName[x.s + "|" + normName(n.slice(0, -5))] = cityName[x.s + "|" + normName(n.slice(0, -5))] || []).push(f); return; }   // independent cities: "Richmond city"
+        var base = normName(n.replace(COUNTY_WORD, ""));
+        (byName[x.s + "|" + base] = byName[x.s + "|" + base] || []).push(f);
+        (anyState[base] = anyState[base] || []).push(f);
+      });
+      self.countyIdx = { byName: byName, city: cityName, any: anyState };
+      // Towns: every ZIP's town name, by state
+      var towns = {}, townAny = {}, c = self.c;
+      for (var i = 0; i < self.n; i++) {
+        if (!c.city[i]) continue;
+        var k = normName(c.city[i]);
+        (towns[c.state[i] + "|" + k] = towns[c.state[i] + "|" + k] || []).push(i);
+        (townAny[k] = townAny[k] || {})[c.state[i]] = 1;
+      }
+      self.townIdx = { byName: towns, any: townAny };
+    }));
+  };
+  Radius.prototype.countyLabel = function (f) { var x = this.counties[f]; return x ? x.n + ", " + x.s : f; };
+  Radius.prototype.findCounty = function (name, st) {
+    var I = this.countyIdx, base = normName(name.replace(COUNTY_WORD, "")), hits;
+    if (st) {
+      hits = I.byName[st + "|" + base];
+      if (!hits && / city$/.test(base)) hits = I.city[st + "|" + base.slice(0, -5)];   // "Baltimore City, MD"
+      return hits ? { f: hits } : null;
+    }
+    hits = I.any[base];
+    if (!hits) return null;
+    return hits.length === 1 ? { f: hits } : { many: hits.map(function (f) { return this.counties[f].s; }, this) };
+  };
+  Radius.prototype.findTown = function (name, st) {
+    var T = this.townIdx, k = normName(name);
+    if (!st) { var sts = Object.keys(T.any[k] || {}); if (sts.length > 1) return { many: sts }; st = sts[0]; }
+    var hits = st && T.byName[st + "|" + k];
+    return hits ? { st: st, i: hits } : null;
+  };
+  // Read the list into ZIPs, counties, towns and circles; anything not understood is reported back, not dropped silently
+  Radius.prototype.resolveArea = function (text) {
+    var self = this, c = this.c;
+    var A = { zips: {}, circles: [], items: [], bad: [], padded: [], noRes: 0, tokens: [], n: { zip: 0, county: 0, town: 0, loc: 0 } };
+    var tok = {}, addTok = function (t) { if (!tok[t]) { tok[t] = 1; A.tokens.push(t); } };
+    var bad = function (t, why) { A.bad.push({ text: t, why: why }); };
+    var addZip = function (raw) {
+      var z = zipOf(raw);
+      if (!z) return bad(raw, "isn't a 5-digit ZIP");
+      if (self.byZip[z.zip] === undefined) return bad(z.zip, "isn't a residential ZIP in the data (it may be a PO box, business or retired ZIP)");
+      if (z.padded) A.padded.push(raw + " → " + z.zip);
+      if (!A.zips[z.zip]) { A.zips[z.zip] = 1; A.n.zip++; }
+      addTok("z" + z.zip);
+    };
+    var addCircle = function (place, r, line) {
+      if (!(r > 0) || r > 500) return bad(line, "needs miles between 1 and 500");
+      var i = null, z = zipOf(place);
+      if (z) { i = self.byZip[z.zip]; if (i === undefined) return bad(line, "doesn't have a residential ZIP as its center"); }
+      else {
+        var p = splitPlace(place), t = self.findTown(p.name, p.st);
+        if (!t) return bad(line, "needs a ZIP or a town as its center");
+        if (t.many) return bad(line, "names a town in " + t.many.length + " states; add the state, such as " + p.name + ", " + t.many[0]);
+        t.i.forEach(function (j) { if (i == null || c.population[j] > c.population[i]) i = j; });   // the town's most populous ZIP
+      }
+      var label = c.zip[i] + " " + c.city[i] + ", " + c.state[i] + ": " + r + " miles";
+      A.circles.push({ i: i, r: r, label: label }); A.n.loc++;
+      A.items.push({ kind: "loc", label: label });
+      addTok("r" + c.zip[i] + ":" + r);
+    };
+    var addCounty = function (f) {
+      var x = self.counties[f];
+      if (tok["c" + f]) return;
+      var k = 0; x.z.forEach(function (z) { var i = self.byZip[z]; if (i !== undefined) { A.zips[z] = 1; if (c.population[i] > 0 || c.acs_pop[i] > 0) k++; } });
+      A.n.county++; A.items.push({ kind: "county", label: x.n + ", " + x.s, count: k });
+      addTok("c" + f);
+    };
+    String(text || "").split(/[\r\n;]+/).forEach(function (line) {
+      var t = line.replace(/\s+/g, " ").trim(), m;
+      if (!t) return;
+      // Numbers only: a ZIP list, or "ZIP miles"
+      if (/^[\d\s,\t-]+$/.test(t)) {
+        var parts = t.split(/[\s,\t]+/).filter(function (x) { return x && x !== "-"; });
+        if (parts.length === 2 && /^\d{1,3}$/.test(parts[1]) && zipOf(parts[0])) return addCircle(parts[0], +parts[1], t);
+        return parts.forEach(addZip);
+      }
+      if ((m = /^fips[:#\s]*(\d{4,5})$/i.exec(t))) {
+        var f = m[1].length === 4 ? "0" + m[1] : m[1];
+        return self.counties[f] ? addCounty(f) : bad(t, "isn't a county FIPS code");
+      }
+      // A ZIP or town with miles: "46307, 15 miles", "Naperville, IL 10 mi", "60462 within 25"
+      if ((m = /^(.+?)[,\s-]+(?:within\s+)?(\d{1,3}(?:\.\d+)?)\s*(?:mi|mile|miles)?\.?(?:\s+radius)?$/i.exec(t)) && !COUNTY_WORD.test(splitPlace(m[1]).name)) return addCircle(m[1].trim(), +m[2], t);
+      var p = splitPlace(t), hit;
+      var isCounty = COUNTY_WORD.test(p.name);
+      if (!isCounty) {
+        var town = self.findTown(p.name, p.st);
+        if (town && town.many) return bad(t, "is a town in " + town.many.length + " states (" + town.many.slice(0, 4).join(", ") + (town.many.length > 4 ? "…" : "") + "); add the state, such as " + p.name + ", " + town.many[0]);
+        if (town) {
+          var k = 0, key = "t" + town.st + ":" + c.city[town.i[0]];
+          if (tok[key]) return;
+          town.i.forEach(function (i) { if (c.population[i] > 0 || c.acs_pop[i] > 0) k++; A.zips[c.zip[i]] = 1; });
+          A.n.town++; A.items.push({ kind: "town", label: c.city[town.i[0]] + ", " + town.st, count: k });
+          return addTok(key);
+        }
+      }
+      hit = self.findCounty(p.name, p.st);
+      if (hit && hit.many) return bad(t, "is a county name in " + hit.many.length + " states; add the state, such as " + p.name + ", " + hit.many[0]);
+      if (hit) return hit.f.forEach(addCounty);
+      bad(t, isCounty ? "isn't a county we can find" + (p.st ? " in " + p.st : "; check the spelling and add the state") :
+        "isn't a ZIP, county or town we can find" + (p.st ? " in " + p.st : "; check the spelling and add the state"));
+    });
+    return A;
+  };
+  Radius.prototype.applyArea = function () {
+    var self = this;
+    if (!this.counties) { this.loadCounties().then(function () { self.applyArea(); }); return; }
+    var A = this.resolveArea(this.areaIn.value);
+    this.errorBox.hidden = true;
+    this.state.area = A.tokens.length ? A : null;
+    this.state.areaTokens = A.tokens.length ? A.tokens : null;
+    this.state.show = 50;
+    this.update(true);
+    this.renderAreaReport(A);
+  };
+  Radius.prototype.tokensToText = function (tokens) {
+    var self = this;
+    return tokens.map(function (t) {
+      var k = t.charAt(0), v = t.slice(1);
+      if (k === "z") return v;
+      if (k === "c") return self.counties && self.counties[v] ? self.countyLabel(v) : "FIPS " + v;
+      if (k === "t") { var a = v.split(":"); return a.slice(1).join(":") + ", " + a[0]; }
+      if (k === "r") { var b = v.split(":"); return b[0] + ", " + b[1] + " miles"; }
+      return "";
+    }).filter(Boolean).join("\n");
+  };
+  Radius.prototype.updateArea = function (moved) {
+    var s = this.state, c = this.c, A = s.area;
+    if (!A) { this.renderEmpty(); if (this.cfg.onUpdate) this.cfg.onUpdate(false); this.writeHash(); return; }
+    this.computeNational();
+    var inSet = {}, near = {}, rows = [], self = this;
+    Object.keys(A.zips).forEach(function (z) { var i = self.byZip[z]; if (i !== undefined) inSet[i] = 1; });
+    A.circles.forEach(function (q) {   // ZIPs whose center is within each location's miles
+      var lat0 = c.lat[q.i], lon0 = c.lon[q.i], dLat = q.r / 69, dLon = q.r / (69 * Math.cos(lat0 * Math.PI / 180));
+      for (var i = 0; i < self.n; i++) {
+        if (Math.abs(c.lat[i] - lat0) > dLat || Math.abs(c.lon[i] - lon0) > dLon) continue;
+        if (miles(lat0, lon0, c.lat[i], c.lon[i]) <= q.r) { inSet[i] = 1; near[i] = 1; }
+      }
+    });
+    var noRes = 0;
+    Object.keys(inSet).forEach(function (k) {
+      var i = +k, pop = c.acs_pop[i];
+      if (!pop && !c.population[i]) { noRes++; return; }
+      var d = null;
+      if (near[i]) A.circles.forEach(function (q) { var x = miles(c.lat[q.i], c.lon[q.i], c.lat[i], c.lon[i]); if (d == null || x < d) d = x; });
+      var aud = self.audience(i), share = aud != null && pop ? aud / pop : null, f = self.zipCounty[c.zip[i]];
+      rows.push({ i: i, zip: c.zip[i], town: c.city[i] + ", " + c.state[i], county: f ? self.counties[f].n : "", dist: d, pop: pop, aud: aud, share: share,
+                  idx: share != null && self.natRate ? share / self.natRate * 100 : null, dma: c.dma[i] });
+    });
+    A.noRes = noRes;
+    this.rows = rows;
+    this.writeHash();
+    this.renderSummary();
+    this.renderTable();
+    this.renderMap(moved);
+    if (this.cfg.onUpdate) this.cfg.onUpdate(rows.length > 0);
+  };
+  Radius.prototype.areaPhrase = function () {
+    var n = this.state.area.n, parts = [];
+    var pl = function (k, one, many) { if (k) parts.push(NF0.format(k) + " " + (k === 1 ? one : many)); };
+    pl(n.county, "county", "counties"); pl(n.town, "town", "towns"); pl(n.zip, "ZIP", "ZIPs"); pl(n.loc, "location", "locations");
+    return parts.length < 2 ? parts.join("") : parts.slice(0, -1).join(", ") + " and " + parts[parts.length - 1];
+  };
+  Radius.prototype.renderAreaReport = function (A) {
+    var box = this.areaReport, self = this;
+    box.innerHTML = ""; box.hidden = false;
+    if (A.fileNote) box.appendChild(el("p", { class: "rz-note", text: A.fileNote }));
+    if (A.tokens.length) {
+      var res = this.rows ? this.rows.length : 0;
+      box.appendChild(el("p", { class: "rz-area-ok", text: "Mapped " + this.areaPhrase() + ": " + NF0.format(res) + " residential ZIP" + (res === 1 ? "" : "s") + " in the area." +
+        (A.noRes ? " " + NF0.format(A.noRes) + " PO box or business-only ZIP" + (A.noRes === 1 ? " has" : "s have") + " no residents and " + (A.noRes === 1 ? "is" : "are") + " left out." : "") }));
+      var items = A.items.filter(function (x) { return x.kind !== "zip"; });
+      if (items.length) {
+        var shown = items.slice(0, 12).map(function (x) { return x.label + (x.count != null ? " (" + NF0.format(x.count) + " ZIP" + (x.count === 1 ? "" : "s") + ")" : ""); });
+        box.appendChild(el("p", { class: "rz-note", text: "Read as: " + shown.join("; ") + (items.length > 12 ? "; and " + (items.length - 12) + " more." : ".") }));
+      }
+      if (A.padded.length) box.appendChild(el("p", { class: "rz-note", text: "Added a leading zero to " + A.padded.slice(0, 5).join(", ") + (A.padded.length > 5 ? " and " + (A.padded.length - 5) + " more" : "") + "." }));
+      if (A.tokens.length > MAX_LINK_TOKENS) box.appendChild(el("p", { class: "rz-note", text: "This area is too large to save in the page link. Export the ZIP list to keep it." }));
+    } else if (!A.bad.length) box.appendChild(el("p", { class: "rz-note", text: "The list is empty. Enter ZIPs, counties or towns, or upload a file." }));
+    if (A.bad.length) {
+      var list = el("ul", { class: "rz-area-bad" }, A.bad.slice(0, 15).map(function (b) { return el("li", null, [el("b", { text: b.text }), " " + b.why + "."]); }));
+      box.appendChild(el("div", { class: "rz-area-warn" }, [el("p", { text: NF0.format(A.bad.length) + " item" + (A.bad.length === 1 ? " wasn't" : "s weren't") + " mapped:" }), list,
+        A.bad.length > 15 ? el("p", { class: "rz-note", text: "And " + (A.bad.length - 15) + " more. Fix the list above and select Map this area again." }) : null]));
+    }
+  };
+  Radius.prototype.readAreaFile = function (file) {
+    var self = this, name = (file.name || "").toLowerCase();
+    var read = /\.xlsx?$/.test(name) ?
+      loadXLSX().then(function () { return file.arrayBuffer(); }).then(function (buf) {
+        var wb = window.XLSX.read(buf, { type: "array" });
+        return window.XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, raw: false, defval: "" });
+      }) :
+      file.text().then(parseCSV);
+    read.then(function (rows) {
+      var res = rowsToLines(rows);
+      if (!res.lines.length) { self.showError("No ZIPs, counties or towns were found in " + file.name + ". Check that it has a column named ZIP, County or City, then upload it again."); return; }
+      self.areaIn.value = res.lines.join("\n");
+      self.loadCounties().then(function () {
+        self.applyArea();
+        var A = self.state.area || { tokens: [], bad: [], items: [], padded: [], n: {} };
+        A.fileNote = file.name + ": " + NF0.format(res.rows) + " row" + (res.rows === 1 ? "" : "s") + " read, " + NF0.format(res.lines.length) + " different ZIP" + (res.lines.length === 1 ? "" : "s") + ", counties or locations." +
+          (res.skipped ? " " + NF0.format(res.skipped) + " row" + (res.skipped === 1 ? " has" : "s have") + " no ZIP and " + (res.skipped === 1 ? "was" : "were") + " skipped." : "");
+        if (self.state.area) self.renderAreaReport(A);
+        else { var B = self.resolveArea(self.areaIn.value); B.fileNote = A.fileNote; self.renderAreaReport(B); }
+      });
+    }).catch(function (e) { self.showError(file.name + " couldn't be read: " + e.message + ". Save it as CSV or .xlsx and try again."); });
   };
 
   /* ---------- Used by an analyzer page that embeds the radius tool ---------- */
@@ -757,7 +1168,7 @@
           var c = app.c, i = app.byZip[app.state.zip];
           app.zipIn.value = app.state.zip + " " + c.city[i] + ", " + c.state[i];
         }
-        app.update(true);
+        if (app.state.mode === "area") app.startArea(); else app.update(true);
       }).catch(function (e) { app.showError(e.message + ". Refresh the page; if it keeps happening, the audience data hasn't been built yet."); });
       if (!cfg.embedded) window.addEventListener("hashchange", function () {
         if (!app.c) return;

@@ -177,7 +177,7 @@
     h.split("&").forEach(function (kv) { var a = kv.split("="); if (a[0]) p[a[0]] = decodeURIComponent(a[1] || ""); });
     var cfg = this.cfg;
     // Radius view (also where the old radius.html links forward to): #level=radius&sub=..&zip=..&r=..
-    this.wantRadius = p.level === "radius" && cfg.radius ? { zip: p.zip, r: p.r, p: p.p } : null;   // a profile applies only when the link names one (p=); no preset otherwise
+    this.wantRadius = (p.level === "radius" || p.level === "area") && cfg.radius ? { zip: p.zip, r: p.r, p: p.p, mode: p.level === "area" ? "area" : "radius", ca: p.ca } : null;   // a profile applies only when the link names one (p=); no preset otherwise
     if (this.wantRadius && p.p && cfg.subcategories && cfg.subcategories.some(function (x) { return x.id === p.p; })) this.state.sub = p.p;
     if (cfg.levels[p.level]) this.state.level = p.level;
     if (p.level === "zip") {
@@ -194,12 +194,13 @@
     }
   };
   Analyzer.prototype.writeHash = function () {
-    var s = this.state, parts = ["level=" + (this.mode === "radius" ? "radius" : s.level)];
+    var s = this.state, rs = this.radius && this.radius.state, isArea = this.mode === "radius" && (rs ? rs.mode === "area" : this.radiusMode === "area");
+    var parts = ["level=" + (this.mode === "radius" ? (isArea ? "area" : "radius") : s.level)];
     if (this.mode === "radius") {
       if (s.sub) parts.push("sub=" + encodeURIComponent(s.sub));
-      var rs = this.radius && this.radius.state;
       if (rs && rs.profile) parts.push("p=" + encodeURIComponent(rs.profile));
-      if (rs && rs.zip) parts.push("zip=" + rs.zip); if (rs && rs.r) parts.push("r=" + rs.r);
+      if (isArea) { if (rs && rs.areaTokens && rs.areaTokens.length <= 2000) parts.push("ca=" + encodeURIComponent(rs.areaTokens.join(","))); }   // custom area: ZIPs, counties, towns and locations
+      else { if (rs && rs.zip) parts.push("zip=" + rs.zip); if (rs && rs.r) parts.push("r=" + rs.r); }
       var hr = "#" + parts.join("&"); if (location.hash !== hr) history.replaceState(null, "", hr);
       return;
     }
@@ -259,10 +260,13 @@
     ]);
 
     // Controls
+    var RC0 = cfg.radius === true ? window.ADTAXI_RADIUS : cfg.radius, hasArea = !!(RC0 && RC0.customArea);
     this.levelSeg = el("div", { class: "az-seg", role: "group", "aria-label": "Geography level" },
-      Object.keys(cfg.levels).concat(cfg.radius ? ["radius"] : []).map(function (lv) {
+      Object.keys(cfg.levels).concat(cfg.radius ? ["radius"] : []).concat(hasArea ? ["area"] : []).map(function (lv) {
         if (lv === "radius") return el("button", { type: "button", "data-level": "radius", text: "Radius",
-          title: "Count prospects within a radius of any ZIP or town", onclick: function () { self.openRadius(); } });
+          title: "Count prospects within a radius of any ZIP or town", onclick: function () { self.openRadius({ mode: "radius" }); } });
+        if (lv === "area") return el("button", { type: "button", "data-level": "area", text: "Custom area",
+          title: "Map a business's actual footprint: a list or file of ZIPs, counties or towns, or several locations", onclick: function () { self.openRadius({ mode: "area" }); } });
         if (lv === "zip") return el("button", { type: "button", "data-level": "zip", text: cfg.levels.zip.label || "ZIPs in market",
           title: "Pick a DMA, metro or county first, then see the ZIPs inside it", onclick: function () { if (self.mode === "radius") self.closeRadius(); if (self.state.level !== "zip") self.drill(); } });
         return el("button", { type: "button", "data-level": lv, text: cfg.levels[lv].label || LEVEL_LABELS[lv],
@@ -354,11 +358,12 @@
   Analyzer.prototype.openRadius = function (opt) {
     var self = this, cfg = this.cfg, s = this.state; opt = opt || {};
     this.mode = "radius";
+    var rmode = this.radiusMode = opt.mode === "area" ? "area" : "radius";   // the radius tool also handles the custom area
     this.anaParts.forEach(function (x) { x.hidden = true; });
     Array.prototype.forEach.call(this.controlBar.querySelectorAll(".az-only"), function (x) { x.hidden = true; });
     this.radiusBox.hidden = false;
     Array.prototype.forEach.call(this.levelSeg.children, function (b) {
-      var on = b.getAttribute("data-level") === "radius"; b.setAttribute("aria-pressed", on);
+      var on = b.getAttribute("data-level") === rmode; b.setAttribute("aria-pressed", on);
       if (b.getAttribute("data-level") === "zip") b.disabled = false;
     });
     var preset = cfg.radiusProfiles && opt.p ? opt.p : null;   // no best-prospect preset unless asked for
@@ -366,13 +371,14 @@
       if (!self.radius) {
         var RC = cfg.radius === true ? window.ADTAXI_RADIUS : cfg.radius;   // the site's radius-config.js sets ADTAXI_RADIUS
         var rc = {}; for (var k in RC) rc[k] = RC[k];
-        rc.embedded = true; rc.initial = { zip: opt.zip, r: opt.r, p: preset };
+        rc.embedded = true; rc.initial = { zip: opt.zip, r: opt.r, p: preset, mode: rmode, ca: opt.ca };
         rc.onState = function () { self.writeHash(); };
         rc.onUpdate = function (ready) { self.radiusReady = ready; self.renderAd(); };
         self.radius = window.AdtaxiRadius.start(rc, self.radiusBox);
       } else {
         if (preset) self.radius.usePreset(preset);
-        if (opt.zip) self.radius.centerOn(opt.zip);
+        if (self.radius.setMode) self.radius.setMode(rmode, opt.ca);
+        if (opt.zip && rmode === "radius") self.radius.centerOn(opt.zip);
         self.radius.resize();
       }
       self.writeHash();
