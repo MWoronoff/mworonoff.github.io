@@ -12,6 +12,7 @@ window.ADTAXI_RADIUS = {
       columns: ["diabetes", "bphigh", "arthritis", "obesity", "depression", "mhlth", "fairpoor", "nodental"] }
   ],
   zipGeo: "../shared/geo/zip/{level}/{id}.json",
+  customArea: true,   // Geography > Custom area: a list or file of ZIPs, counties, towns or locations
   ageSet: "health",
   radii: [5, 10, 15, 25, 50, 100],
   radiusLabel: "Up to {r} miles",

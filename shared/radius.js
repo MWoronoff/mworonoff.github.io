@@ -986,7 +986,8 @@
       if (!z) return bad(raw, "isn't a 5-digit ZIP");
       if (self.byZip[z.zip] === undefined) return bad(z.zip, "isn't a residential ZIP in the data (it may be a PO box, business or retired ZIP)");
       if (z.padded) A.padded.push(raw + " → " + z.zip);
-      if (!A.zips[z.zip]) { A.zips[z.zip] = 1; A.n.zip++; }
+      A.zips[z.zip] = 1;
+      if (!tok["z" + z.zip]) A.n.zip++;   // count each ZIP the user listed once, whatever order the lines come in
       addTok("z" + z.zip);
     };
     var addCircle = function (place, r, line) {

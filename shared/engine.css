@@ -56,7 +56,7 @@ button, input, select { font: inherit; color: inherit; }
 /* Controls */
 .az-main { max-width: 1500px; margin: 0 auto; padding: 20px 28px 40px; }
 .az-controls {
-  display: flex; flex-wrap: wrap; align-items: flex-end; gap: 14px;
+  display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px;
   background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
   padding: 14px 16px; box-shadow: 0 2px 10px rgba(15,39,66,.03);
 }
@@ -64,9 +64,10 @@ button, input, select { font: inherit; color: inherit; }
 .az-field select, .az-field input {
   min-width: 170px; padding: 8px 10px; border: 1px solid #c9d5e0; border-radius: 8px; background: #fff; font-size: 14px; font-weight: 400;
 }
-.az-field input[type="search"] { min-width: 210px; }
+.az-field input[type="search"] { min-width: 150px; width: 170px; }
+.az-controls .az-field select { max-width: 200px; text-overflow: ellipsis; }   /* long category names don't push Search to a second row; the full name shows when the list opens */
 .az-seg { display: inline-flex; border: 1px solid #c9d5e0; border-radius: 8px; overflow: hidden; background: #fff; }
-.az-seg button { border: 0; background: transparent; padding: 8px 14px; cursor: pointer; font-weight: 600; font-size: 13px; color: var(--navy); }
+.az-seg button { border: 0; background: transparent; padding: 8px 11px; cursor: pointer; font-weight: 600; font-size: 13px; color: var(--navy); }
 .az-seg button + button { border-left: 1px solid #c9d5e0; }
 .az-seg button[aria-pressed="true"] { background: var(--navy); color: #fff; }
 .az-actions { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
@@ -381,3 +382,4 @@ a.az-btn { display: inline-block; text-decoration: none; text-align: center; }
 .rz-area-bad li { margin: 2px 0; }
 .az-table td.rz-l + td.rz-l.rz-county { white-space: normal; font-weight: 400; color: var(--ink); }
 @media (max-width: 820px) { .rz-area { grid-template-columns: 1fr; } }
+@media (max-width: 640px) { .az-controls .az-field select { max-width: none; } .az-field input[type="search"] { width: 100%; } }

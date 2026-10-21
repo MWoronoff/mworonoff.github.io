@@ -9,6 +9,7 @@ window.ADTAXI_RADIUS = {
   extraData: [ { url: "../shared/audience/zip_audience_legal.json", label: "Renter and owner households by age" },
                { url: "../shared/audience/zip_audience_apt.json", label: "Renter household data" } ],
   zipGeo: "../shared/geo/zip/{level}/{id}.json",
+  customArea: true,   // Geography > Custom area: a list or file of ZIPs, counties, towns or locations
   ageSet: "adult",
   radii: [5, 10, 15, 25, 100],
   radiusLabels: { 100: "50+ miles (covers up to 100)" },
