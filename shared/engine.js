@@ -152,7 +152,7 @@
   var ABOUT_ESTIMATES = { title: "About these estimates", body: [
     "Estimates for planning. Scores rank markets against each other; they don't forecast sales, leads or ad results.",
     "Census ACS figures are 5-year survey averages with margins of error, widest for small ZIPs and counties. IRS, mortgage, business and EASI figures are the newest year published, often one to three years old. Years are listed under Sources.",
-    "Radius counts are modeled: selected traits are treated as independent within each ZIP.",
+    "Trade area counts are modeled: selected traits are treated as independent within each ZIP.",
     "Business counts: U.S. totals are Census's published national figures. Market counts come from Census's county file, which adds to 1–6% less because Census withholds some county detail.",
     "ZIPs under 500 residents, and ZIPs that are mostly group quarters (campuses, bases, prisons), are shown but not ranked." ] };
 
@@ -260,13 +260,11 @@
     ]);
 
     // Controls
-    var RC0 = cfg.radius === true ? window.ADTAXI_RADIUS : cfg.radius, hasArea = !!(RC0 && RC0.customArea);
     this.levelSeg = el("div", { class: "az-seg", role: "group", "aria-label": "Geography level" },
-      Object.keys(cfg.levels).concat(cfg.radius ? ["radius"] : []).concat(hasArea ? ["area"] : []).map(function (lv) {
-        if (lv === "radius") return el("button", { type: "button", "data-level": "radius", text: "Radius",
-          title: "Count prospects within a radius of any ZIP or town", onclick: function () { self.openRadius({ mode: "radius" }); } });
-        if (lv === "area") return el("button", { type: "button", "data-level": "area", text: "Custom area",
-          title: "Map a business's actual footprint: a list or file of ZIPs, counties or towns, or several locations", onclick: function () { self.openRadius({ mode: "area" }); } });
+      Object.keys(cfg.levels).concat(cfg.radius ? ["radius"] : []).map(function (lv) {
+        // Trade area: the Zip Code Radius Tool, which draws the area as a radius or, where the site turns it on, a custom list of ZIPs, counties and towns
+        if (lv === "radius") return el("button", { type: "button", "data-level": "radius", text: "Trade area",
+          title: "Count prospects in a business's trade area: a radius around a ZIP or town, or a custom list of ZIPs, counties or towns", onclick: function () { self.openRadius(); } });
         if (lv === "zip") return el("button", { type: "button", "data-level": "zip", text: cfg.levels.zip.label || "ZIPs in market",
           title: "Pick a DMA, metro or county first, then see the ZIPs inside it", onclick: function () { if (self.mode === "radius") self.closeRadius(); if (self.state.level !== "zip") self.drill(); } });
         return el("button", { type: "button", "data-level": lv, text: cfg.levels[lv].label || LEVEL_LABELS[lv],
@@ -358,12 +356,13 @@
   Analyzer.prototype.openRadius = function (opt) {
     var self = this, cfg = this.cfg, s = this.state; opt = opt || {};
     this.mode = "radius";
-    var rmode = this.radiusMode = opt.mode === "area" ? "area" : "radius";   // the radius tool also handles the custom area
+    // Radius or custom area: a link or a ZIP's "Build a radius audience" button says which; the Trade area button keeps the last one used (Radius at first)
+    var rmode = this.radiusMode = opt.mode === "area" ? "area" : opt.mode === "radius" || opt.zip ? "radius" : (this.radius ? this.radius.state.mode : "radius");
     this.anaParts.forEach(function (x) { x.hidden = true; });
     Array.prototype.forEach.call(this.controlBar.querySelectorAll(".az-only"), function (x) { x.hidden = true; });
     this.radiusBox.hidden = false;
     Array.prototype.forEach.call(this.levelSeg.children, function (b) {
-      var on = b.getAttribute("data-level") === rmode; b.setAttribute("aria-pressed", on);
+      var on = b.getAttribute("data-level") === "radius"; b.setAttribute("aria-pressed", on);
       if (b.getAttribute("data-level") === "zip") b.disabled = false;
     });
     var preset = cfg.radiusProfiles && opt.p ? opt.p : null;   // no best-prospect preset unless asked for
@@ -386,7 +385,7 @@
     }
     if (window.AdtaxiRadius) go();
     else {
-      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261021e";   // version tag: browsers fetch the new file after an update
+      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261021f";   // version tag: browsers fetch the new file after an update
       sc.onload = go; sc.onerror = function () { self.showError("The radius tool didn't load. Refresh the page and try again."); };
       document.head.appendChild(sc);
     }

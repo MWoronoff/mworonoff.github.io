@@ -291,7 +291,13 @@
       })());
     this.minSel = el("select", { "aria-label": "Show", onchange: function () { s.minIndex = +this.value; self.update(false); } },
       [[0, "All ZIPs in range"], [100, "Index 100+"], [120, "Index 120+"], [150, "Index 150+"]].map(function (o) { return el("option", { value: o[0], text: o[1] }); }));
-    var controls = el("section", { class: "az-controls", "aria-label": "Radius controls" }, [
+    // Radius or custom area (sites with customArea: true): two ways to draw the same trade area
+    this.modeSeg = cfg.customArea ? el("div", { class: "az-seg", role: "group", "aria-label": "Draw the area as" }, [["radius", "Radius"], ["area", "Custom area"]].map(function (m) {
+      return el("button", { type: "button", "data-mode": m[0], text: m[1], "aria-pressed": String(s.mode === m[0]),
+        onclick: function () { self.setMode(m[0]); self.writeHash(); } });
+    })) : null;
+    var controls = el("section", { class: "az-controls", "aria-label": "Trade area controls" }, [
+      this.modeSeg ? el("div", { class: "az-field" }, [el("span", { text: "Area" }), this.modeSeg]) : null,
       this.centerField = el("label", { class: "az-field" }, [el("span", { text: "Center" }), this.zipIn, this.towns]),
       this.radiusField = el("label", { class: "az-field" }, [el("span", { text: "Radius" }), this.rSel]),
       el("label", { class: "az-field" }, [el("span", { text: "Show" }), this.minSel]),
@@ -903,6 +909,7 @@
     if (this.centerField) this.centerField.hidden = area;
     if (this.radiusField) this.radiusField.hidden = area;
     if (this.areaPanel) this.areaPanel.hidden = !area;
+    if (this.modeSeg) Array.prototype.forEach.call(this.modeSeg.children, function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-mode") === (area ? "area" : "radius"))); });
     this.mapEl.setAttribute("aria-label", area ? "Map of ZIPs in the custom area" : "Map of ZIPs in the radius");
     if (this.minSel && this.minSel.options[0]) this.minSel.options[0].text = area ? "All ZIPs in the area" : "All ZIPs in range";
   };
