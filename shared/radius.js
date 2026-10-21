@@ -875,7 +875,7 @@
   Radius.prototype.buildArea = function () {
     var self = this;
     this.areaIn = el("textarea", { class: "rz-area-input", rows: "5", spellcheck: "false", "aria-label": "Custom area",
-      placeholder: "60462\n60463, 60464, 60467\nCook County, IL\nNaperville, IL\n46307, 15 miles",
+      placeholder: "Type or paste ZIPs, counties or towns, one per line",
       onkeydown: function (e) { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) self.applyArea(); } });
     this.areaFile = el("input", { type: "file", accept: ".csv,.txt,.tsv,.xlsx,.xls", class: "rz-visually-hidden", tabindex: "-1",
       onchange: function () { if (this.files && this.files[0]) self.readAreaFile(this.files[0]); this.value = ""; } });
