@@ -385,7 +385,7 @@
     }
     if (window.AdtaxiRadius) go();
     else {
-      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261021f";   // version tag: browsers fetch the new file after an update
+      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261021g";   // version tag: browsers fetch the new file after an update
       sc.onload = go; sc.onerror = function () { self.showError("The radius tool didn't load. Refresh the page and try again."); };
       document.head.appendChild(sc);
     }
@@ -844,28 +844,64 @@
     box.appendChild(el("div", null, [el("h2", { text: s.level === "zip" ? "ZIP " + row.name : row.name }), el("div", { class: "az-sub", text: lvLabel + (this.subLabel() ? " · " + this.subLabel() : "") })]));
 
     var head = this.measure(cfg.headlineMeasure || s.rank);
+    // Rank among the other markets at this level (ties share the better rank); null at the U.S. level or with no value
+    var LEVEL_PLURAL = { dma: "DMAs", metro: "metros", county: "counties", zip: "ZIPs in this market" };
+    var rankOf = function (m, v) {
+      if (s.level === "us" || typeof v !== "number") return null;
+      var vals = [];
+      d.rows.forEach(function (r) { var x = self.val(r, m); if (typeof x === "number") vals.push(x); });
+      var better = vals.filter(function (x) { return m.lowerIsBetter ? x < v : x > v; }).length;
+      return { rank: better + 1, total: vals.length, vals: vals };
+    };
     if (head && this.availableAt(head, s.level)) {
-      var hv = this.val(row, head);
-      var rank = null, total = 0;
-      if (s.level !== "us" && typeof hv === "number") {
-        d.rows.forEach(function (r) { var x = self.val(r, head); if (typeof x === "number") { total++; } });
-        rank = 1 + d.rows.filter(function (r) { var x = self.val(r, head); return typeof x === "number" && (head.lowerIsBetter ? x < hv : x > hv); }).length;
+      var hv = this.val(row, head), hr = rankOf(head, hv), hvText = fmt(hv, head.format);
+      if (hv == null && row.u) {
+        box.appendChild(el("div", { class: "az-score" }, [el("b", { class: "num", text: "—" }), el("span", { text: "Not ranked" })]));
+      } else if (hr) {
+        // Rank first: "#1 of 210 DMAs", then the value with reference points (the best or next best, and the typical market)
+        var sorted = hr.vals.slice().sort(function (a, b) { return head.lowerIsBetter ? a - b : b - a; });
+        var mid = sorted.length % 2 ? sorted[(sorted.length - 1) / 2] : (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2;
+        var lvNoun = LEVEL_PLURAL[s.level] || "markets";
+        var typical = s.level === "zip" ? "typical ZIP here " : "typical " + (s.level === "county" ? "county" : s.level === "metro" ? "metro" : "DMA") + " ";
+        var ties = hr.vals.filter(function (x) { return x === hv; }).length - 1;
+        var nextBest = sorted.filter(function (x) { return x !== hv; })[0];
+        var ref = hr.rank === 1 ? (nextBest != null ? "next best " + fmt(nextBest, head.format) : null) : "#1 " + (head.format === "score" ? "scores " : "is ") + fmt(sorted[0], head.format);
+        box.appendChild(el("div", { class: "az-score az-rankhead" }, [
+          el("b", { class: "num", text: "#" + NF0.format(hr.rank) }),
+          el("span", { class: "az-rank-of", text: "of " + NF0.format(hr.total) + " " + lvNoun + (ties ? ", tied with " + NF0.format(ties) + (ties === 1 ? " other" : " others") : "") })
+        ]));
+        box.appendChild(el("p", { class: "az-score-line", text: [head.label + " " + (hvText == null ? "—" : hvText + self.mark(row, head)), ref, typical + fmt(mid, head.format)].filter(Boolean).join(" · ") }));
+      } else {
+        box.appendChild(el("div", { class: "az-score" }, [el("b", { class: "num", text: hvText == null ? "—" : hvText + self.mark(row, head) }), el("span", { text: head.label })]));
       }
-      box.appendChild(el("div", { class: "az-score" }, [
-        el("b", { class: "num", text: fmt(hv, head.format) == null ? "—" : fmt(hv, head.format) + self.mark(row, head) }),
-        el("span", { text: hv == null && row.u ? "Not ranked" : head.label + (rank ? ", ranked " + rank + " of " + total + (s.level === "zip" ? " ZIPs in this market" : "") : "") })
-      ]));
     }
 
     var comps = (cfg.components || []).map(function (k) { return self.measure(k); }).filter(function (m) { return m && self.availableAt(m, s.level) && self.relevant(m); });
     if (comps.length) {
+      // Each part: a plain-word rating by fifths of the markets, plus its rank. Competition ranks best where there are fewest
+      // competitors, so it gets its own words (light to heavy) rather than "very high" meaning little competition.
+      var WORDS = ["Very high", "High", "Average", "Low", "Very low"], COMP_WORDS = ["Very light", "Light", "Average", "Heavy", "Very heavy"];
+      var anyRank = false;
       box.appendChild(el("div", { class: "az-bars" }, comps.map(function (m) {
-        var v = self.val(row, m), ok = typeof v === "number";
+        var v = self.val(row, m), ok = typeof v === "number", r = ok ? rankOf(m, v) : null;
+        var isComp = m.key === "comp" || /^comp(@|$)/.test(m.key);
+        var right, width = ok ? Math.max(0, Math.min(100, v)) : 0;
+        if (r && r.total > 1) {
+          anyRank = true;
+          var fifth = Math.min(4, Math.floor((r.rank - 1) / r.total * 5));
+          right = el("span", { class: "az-bar-rate" }, [
+            el("span", { class: "az-rate az-rate-" + fifth, text: (isComp ? COMP_WORDS : WORDS)[fifth] }),
+            el("b", { class: "num", text: "#" + NF0.format(r.rank) })
+          ]);
+          width = Math.max(2, (r.total - r.rank + 1) / r.total * 100);   // bar shows rank position: #1 is a full bar
+        } else right = el("b", { class: "num" + (ok ? "" : " az-na"), text: ok ? fmt(v, m.format) + self.mark(row, m) : "No data" });
         return el("div", { title: m.help || null }, [
-          el("div", { class: "az-bar-label" }, [el("span", { text: m.label }), el("b", { class: "num" + (ok ? "" : " az-na"), text: ok ? fmt(v, m.format) + self.mark(row, m) : "No data" })]),
-          el("div", { class: "az-track" }, [el("div", { class: "az-fill", style: "width:" + (ok ? Math.max(0, Math.min(100, v)) : 0) + "%" })])
+          el("div", { class: "az-bar-label" }, [el("span", { text: m.label }), right]),
+          el("div", { class: "az-track" }, [el("div", { class: "az-fill", style: "width:" + width + "%" })])
         ]);
       })));
+      if (anyRank) box.appendChild(el("p", { class: "az-bars-note", text: "Ranks among " + (LEVEL_PLURAL[s.level] ? NF0.format(d.rows.filter(function (r) { return typeof self.val(r, comps[0]) === "number"; }).length) + " " + LEVEL_PLURAL[s.level] : "these markets") + ". Very high is the top 20%." +
+        (comps.some(function (m) { return m.key === "comp"; }) ? " Competition ranks best where there are fewest competitors per resident." : "") }));
     }
 
     var details = (cfg.detailMeasures || []).map(function (k) { return self.measure(k); }).filter(function (m) { return m && self.relevant(m); });
