@@ -490,7 +490,7 @@ def validate_scores(rep, z, co, subs, levels, what="businesses"):
 # ---------------- Scoring helpers ----------------
 def pct(s):
     """Percentile 0-100 within the group; missing stays missing."""
-    return (s.rank(pct=True, method="average") * 100).round(1)
+    return (s.rank(pct=True, method="average") * 100).round(2)
 
 
 def combine(parts, weights):
@@ -692,8 +692,8 @@ def main():
             df[f"comp@{i}"] = P(-df[f"per10k@{i}"]) if "comp" in use else np.nan
             cols = [df[f"{c}@{i}"] for c in use]
             full = pd.concat(cols, axis=1).notna().all(axis=1)
-            df[f"score@{i}"] = combine(cols, [WEIGHTS[c] for c in use]).where(full & mask).round(1)
-            for c in WEIGHTS: df[f"{c}@{i}"] = df[f"{c}@{i}"].round(1)
+            df[f"score@{i}"] = combine(cols, [WEIGHTS[c] for c in use]).where(full & mask).round(2)
+            for c in WEIGHTS: df[f"{c}@{i}"] = df[f"{c}@{i}"].round(2)
             under = (df[f"demand@{i}"] >= 70) & (P(df[f"per10k@{i}"]) <= 30)
             known = df[f"demand@{i}"].notna() & df[f"per10k@{i}"].notna() & mask
             df[f"under@{i}"] = np.where(under & known, "Yes", np.where(known, "No", None)) if COUNTED(s) else None
@@ -832,7 +832,7 @@ def main():
                     k = f"{p}@{s['id']}"
                     if k in df.columns:
                         x = clean(r[k])
-                        v[k] = round(x, 1) if p in SCORE_KEYS and x is not None else x   # one decimal: ranks use the real value, so near-equal markets don't show as ties
+                        v[k] = round(x, 2) if p in SCORE_KEYS and x is not None else x   # two decimals: ranks use the real value, so near-equal markets don't show as ties
             for k in ("population", "households", "adults", "a45p", "a65p", "a75p", "a30_64") + tuple(c for c in easi_spend_cols if c.endswith("_total")) + tuple(e for e in extra if not e.endswith(("_rate", "_g"))):
                 if v.get(k) is not None: v[k] = int(round(v[k]))
             for s in SUBCATS:
