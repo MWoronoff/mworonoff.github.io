@@ -1,0 +1,128 @@
+{
+ "updated": "October 2026",
+ "years": "2022–2025",
+ "note": "Index: each month's typical sales compared with an average month (100), from not-seasonally-adjusted U.S. sales, 2022–2025. 2020–2021 are left out because of pandemic swings. National pattern; local timing can differ with weather and school calendars.",
+ "source": {
+  "label": "U.S. Census Bureau, Monthly Retail Trade Survey (not seasonally adjusted)",
+  "url": "https://www.census.gov/retail/index.html"
+ },
+ "series": {
+  "4421": {
+   "label": "Furniture stores",
+   "naics": "4421",
+   "index": [
+    92.4,
+    94.4,
+    104.8,
+    97.2,
+    101.6,
+    99.8,
+    102.1,
+    103.6,
+    100.1,
+    96.8,
+    105.0,
+    102.0
+   ],
+   "latest": {
+    "year": 2026,
+    "month": 8,
+    "sales": 5602,
+    "prelim": true,
+    "yoy": -5.9
+   }
+  },
+  "44111": {
+   "label": "New car dealers",
+   "naics": "44111",
+   "index": [
+    90.3,
+    91.4,
+    107.2,
+    103.8,
+    104.4,
+    98.8,
+    101.6,
+    105.8,
+    97.6,
+    99.7,
+    95.8,
+    103.5
+   ],
+   "latest": {
+    "year": 2026,
+    "month": 8,
+    "sales": 109722,
+    "prelim": true,
+    "yoy": 0.9
+   }
+  },
+  "44112": {
+   "label": "Used car dealers",
+   "naics": "44112",
+   "index": [
+    89.5,
+    96.6,
+    115.7,
+    108.0,
+    107.2,
+    102.0,
+    101.7,
+    107.0,
+    99.4,
+    97.0,
+    89.1,
+    86.9
+   ],
+   "latest": {
+    "year": 2026,
+    "month": 8,
+    "sales": 14750,
+    "prelim": true,
+    "yoy": 5.8
+   }
+  },
+  "4441": {
+   "label": "Building mat. and supplies dealers",
+   "naics": "4441",
+   "index": [
+    82.0,
+    80.7,
+    99.1,
+    106.5,
+    116.8,
+    109.7,
+    106.3,
+    106.2,
+    99.9,
+    104.7,
+    96.9,
+    91.1
+   ],
+   "latest": {
+    "year": 2026,
+    "month": 8,
+    "sales": 39663,
+    "prelim": true,
+    "yoy": 5.7
+   }
+  }
+ },
+ "map": {
+  "furniture": {
+   "_default": "4421"
+  },
+  "auto": {
+   "newcar": "44111",
+   "newtruck": "44111",
+   "usedcar": "44112",
+   "usedtruck": "44112"
+  },
+  "home-services": {
+   "_default": "4441"
+  }
+ },
+ "proxyNote": {
+  "home-services": "Building materials dealers' sales stand in for home improvement demand."
+ }
+}

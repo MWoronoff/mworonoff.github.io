@@ -305,8 +305,8 @@
         ]),
         el("img", { class: "az-logo", src: cfg.logo || "../shared/adtaxi-logo.svg", alt: "Adtaxi" })
       ]),
-      this.tabBar = el("nav", { class: "az-tabs", "aria-label": "Analyzer sections", hidden: true }, [["markets", "Markets"], ["bench", "Benchmarks"]].map(function (t) {
-        return el("button", { type: "button", "data-tab": t[0], "aria-pressed": String(t[0] === "markets"), text: t[1], onclick: function () { self.setTab(t[0]); } });
+      this.tabBar = el("nav", { class: "az-tabs", "aria-label": "Analyzer sections", hidden: true }, [["markets", "Markets"], ["timing", "Timing"], ["bench", "Benchmarks"]].map(function (t) {
+        return el("button", { type: "button", "data-tab": t[0], "aria-pressed": String(t[0] === "markets"), text: t[1], hidden: t[0] !== "markets", onclick: function () { self.setTab(t[0]); } });
       }))
     ]);
 
@@ -391,8 +391,10 @@
     this.anaParts = [stage, this.adPanel, this.tablePanel, sources];
     this.controlBar = controlBar;
     this.benchPanel = el("section", { class: "az-bench", hidden: true, "aria-live": "polite" });
+    this.timingPanel = el("section", { class: "az-bench az-timing", hidden: true, "aria-live": "polite" });
+    this.tab = "markets";
     this.tabParts = [controlBar, this.notice, this.errorBox, stage, this.adPanel, this.tablePanel, sources, this.radiusBox];
-    var main = el("main", { class: "az-main" }, [controlBar, this.notice, this.errorBox, stage, this.adPanel, this.tablePanel, sources, this.radiusBox, this.benchPanel]);
+    var main = el("main", { class: "az-main" }, [controlBar, this.notice, this.errorBox, stage, this.adPanel, this.tablePanel, sources, this.radiusBox, this.benchPanel, this.timingPanel]);
     this.root.innerHTML = "";
     this.root.appendChild(header);
     this.root.appendChild(main);
@@ -1011,26 +1013,79 @@
   /* ---------- Benchmarks tab: typical search and social results for the category ---------- */
   Analyzer.prototype.loadBench = function () {
     var self = this, cfg = this.cfg;
-    if (cfg.benchmarks === false) return;
-    fetch(cfg.benchmarksData || "../shared/benchmarks.json?v=20261022d").then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
-      .then(function (b) { if (b.map && b.map[cfg.exportName]) { self.bench = b; self.tabBar.hidden = false; } })
-      .catch(function () { /* no tab without data */ });
+    function load(url, key, tab) {
+      fetch(url).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(function (b) { if (b.map && b.map[cfg.exportName]) { self[key] = b; self.tabBar.querySelector('[data-tab="' + tab + '"]').hidden = false; self.tabBar.hidden = false; } })
+        .catch(function () { /* no tab without data */ });
+    }
+    if (cfg.benchmarks !== false) load(cfg.benchmarksData || "../shared/benchmarks.json?v=20261022e", "bench", "bench");
+    if (cfg.timing !== false) load(cfg.timingData || "../shared/timing.json?v=20261022e", "timing", "timing");
   };
   Analyzer.prototype.setTab = function (tab) {
-    var self = this, bench = tab === "bench";
-    if (bench === !this.benchPanel.hidden) return;
+    var self = this, prev = this.tab;
+    if (tab === prev) return;
     Array.prototype.forEach.call(this.tabBar.children, function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-tab") === tab)); });
-    if (bench) {
-      this.tabSaved = this.tabParts.map(function (x) { return x.hidden; });
-      this.tabParts.forEach(function (x) { x.hidden = true; });
-      this.benchPanel.hidden = false;
-      this.renderBench();
-    } else {
-      this.benchPanel.hidden = true;
+    if (prev === "markets") { this.tabSaved = this.tabParts.map(function (x) { return x.hidden; }); this.tabParts.forEach(function (x) { x.hidden = true; }); }
+    this.benchPanel.hidden = tab !== "bench"; this.timingPanel.hidden = tab !== "timing";
+    this.tab = tab;
+    if (tab === "bench") this.renderBench();
+    else if (tab === "timing") this.renderTiming();
+    else {
       this.tabParts.forEach(function (x, i) { x.hidden = self.tabSaved ? self.tabSaved[i] : false; });
       if (this.map) this.map.invalidateSize();
       if (this.mode === "radius" && this.radius) this.radius.resize();
     }
+  };
+  // Category picker shared by the Timing and Benchmarks tabs; it drives the same category as the Markets tab
+  Analyzer.prototype.tabControls = function (render, note) {
+    var self = this, cfg = this.cfg, s = this.state, subs = cfg.subcategories || [];
+    var sel = subs.length ? el("select", { "aria-label": cfg.subcategoryLabel || "Category", onchange: function () {
+      if (self.subSel) { self.subSel.value = this.value; self.subSel.dispatchEvent(new Event("change")); } else s.sub = this.value;
+      render.call(self); } }, subs.map(function (x) { return el("option", { value: x.id, text: x.label }); })) : null;
+    if (sel) sel.value = s.sub;
+    return el("section", { class: "az-controls az-bench-controls", "aria-label": "Category" }, [
+      sel ? el("label", { class: "az-field" }, [el("span", { text: cfg.subcategoryLabel || "Category" }), sel]) : null,
+      el("div", { class: "az-actions" }, [exportMenu([{ label: "Leave-behind (PDF)", note: note, run: function () { self.leaveBehind(); } }])])]);
+  };
+
+  /* ---------- Timing tab: when the category's sales peak through the year ---------- */
+  var MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  var MONTHS_LONG = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  Analyzer.prototype.renderTiming = function () {
+    var cfg = this.cfg, T = this.timing, box = this.timingPanel;
+    if (!T) return;
+    box.innerHTML = "";
+    box.appendChild(this.tabControls(this.renderTiming, "A clean page of this calendar to send after the meeting"));
+    var m = T.map[cfg.exportName], code = m[this.state.sub] || m._default, S = T.series[code];
+    var sub = this.subLabel ? this.subLabel() : "";
+    var idx = S.index, order = idx.map(function (v, i) { return i; });
+    var hi = order.slice().sort(function (a, b) { return idx[b] - idx[a]; }).slice(0, 3);
+    var lo = order.slice().sort(function (a, b) { return idx[a] - idx[b]; }).slice(0, 3);
+    var mn = Math.min.apply(null, idx), mx = Math.max.apply(null, idx);
+    var level = function (v) { if (v >= 105) return 4; if (v >= 101) return 3; if (v > 96) return 2; return 1; };
+    var strip = el("div", { class: "az-tm-strip", role: "list", "aria-label": "Sales index by month, 100 = average month" }, idx.map(function (v, i) {
+      return el("div", { class: "az-tm-cell az-tm-l" + level(v) + (hi.indexOf(i) >= 0 ? " az-tm-peak" : ""), role: "listitem", "aria-label": MONTHS_LONG[i] + ": " + NF0.format(v) }, [
+        el("b", { text: MONTHS[i] }), el("span", { class: "az-tm-bar", "aria-hidden": "true" }, [el("i", { style: "height:" + Math.round(18 + (v - mn) / Math.max(1, mx - mn) * 62) + "%" })]),
+        el("span", { class: "num", text: NF0.format(v) })]);
+    }));
+    var names = function (list) { return list.slice().sort(function (a, b) { return a - b; }).map(function (i) { return MONTHS_LONG[i]; }).join(", "); };
+    // back-to-back peak months are one season: start a month ahead of each season's first month
+    var ahead = hi.filter(function (i) { return hi.indexOf((i + 11) % 12) < 0; }).sort(function (a, b) { return a - b; })
+      .map(function (i) { return MONTHS_LONG[(i + 11) % 12]; }).join(", ");
+    var L = S.latest, card = function (k, v, n) { return el("div", { class: "az-panel az-tm-card" }, [el("span", { text: k }), el("b", { text: v }), n ? el("small", { text: n }) : null]); };
+    box.appendChild(el("section", { class: "az-panel az-bench-panel" }, [
+      el("h2", { text: "When sales peak" + (sub ? ": " + sub : "") }),
+      el("p", { class: "az-bench-ind", text: "U.S. " + S.label.toLowerCase() + ", typical month = 100. " + ((T.proxyNote || {})[cfg.exportName] || "") }),
+      strip,
+      el("div", { class: "az-tm-legend", "aria-hidden": "true" }, [el("span", { text: "Below average" }), el("i", { class: "az-tm-l1" }), el("i", { class: "az-tm-l2" }), el("i", { class: "az-tm-l3" }), el("i", { class: "az-tm-l4" }), el("span", { text: "Above average" })])]));
+    box.appendChild(el("section", { class: "az-tm-cards" }, [
+      card("Peak months", names(hi), "Highest typical sales"),
+      card("Slowest months", names(lo), "Lowest typical sales"),
+      card("Start campaigns by", ahead, "About a month ahead of each peak"),
+      card("Latest month", (L.yoy >= 0 ? "+" : "") + NF1.format(L.yoy) + "%", MONTHS_LONG[L.month - 1] + " " + L.year + " vs. a year earlier" + (L.prelim ? " (preliminary)" : ""))]));
+    box.appendChild(el("p", { class: "az-bench-note", text: T.note }));
+    box.appendChild(el("section", { class: "az-panel az-sources" }, [el("h2", { text: "Source" }),
+      el("p", null, [el("a", { href: T.source.url, target: "_blank", rel: "noopener", text: T.source.label }), ", NAICS " + S.naics + " (" + S.label + "). Updated " + T.updated + "."])]));
   };
   Analyzer.prototype.benchFor = function (sub) {
     var m = this.bench.map[this.cfg.exportName], pick = m[sub] || m._default;
@@ -1040,14 +1095,7 @@
     var self = this, cfg = this.cfg, B = this.bench, s = this.state, box = this.benchPanel;
     if (!B) return;
     box.innerHTML = "";
-    var subs = cfg.subcategories || [];
-    var sel = subs.length ? el("select", { "aria-label": cfg.subcategoryLabel || "Category", onchange: function () {
-      if (self.subSel) { self.subSel.value = this.value; self.subSel.dispatchEvent(new Event("change")); } else s.sub = this.value;
-      self.renderBench(); } }, subs.map(function (x) { return el("option", { value: x.id, text: x.label }); })) : null;
-    if (sel) sel.value = s.sub;
-    box.appendChild(el("section", { class: "az-controls az-bench-controls", "aria-label": "Benchmark controls" }, [
-      sel ? el("label", { class: "az-field" }, [el("span", { text: cfg.subcategoryLabel || "Category" }), sel]) : null,
-      el("div", { class: "az-actions" }, [exportMenu([{ label: "Leave-behind (PDF)", note: "A clean page of these benchmarks to send after the meeting", run: function () { self.leaveBehind(); } }])])]));
+    box.appendChild(this.tabControls(this.renderBench, "A clean page of these benchmarks to send after the meeting"));
 
     var R = this.benchFor(s.sub), I = R.ind, A = R.all, subLabel = this.subLabel ? this.subLabel() : "";
     var money2 = function (v) { return "$" + NF2.format(v); }, pct = function (v) { return NF2.format(v) + "%"; };
@@ -1076,9 +1124,9 @@
   };
 
   Analyzer.prototype.leaveBehind = function () {
-    if (!this.benchPanel.hidden) {
+    if (this.tab !== "markets") {
       var sub = this.subLabel ? this.subLabel() : "";
-      return printLeaveBehind(this.cfg.logo, [this.cfg.title, "Performance benchmarks" + (sub ? " \u00b7 " + (this.cfg.subcategoryLabel || "Category") + ": " + sub : ""),
+      return printLeaveBehind(this.cfg.logo, [this.cfg.title, (this.tab === "timing" ? "Sales timing through the year" : "Performance benchmarks") + (sub ? " \u00b7 " + (this.cfg.subcategoryLabel || "Category") + ": " + sub : ""),
         "Prepared by Adtaxi \u00b7 " + today()], []);
     }
     var cfg = this.cfg, opt = this.rankSel && this.rankSel.options[this.rankSel.selectedIndex];
