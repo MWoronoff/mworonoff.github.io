@@ -574,6 +574,12 @@ def condition_age_rates(cache, rep):
                 cells.setdefault((r["year"], r.get("topic"), r["question"], r["response"], r["break_out"]), []).append(float(r["data_value"]))
         rows = rows + [{"year": y, "locationabbr": "US", "topic": t, "question": q, "response": rs, "break_out": ag, "data_value": float(np.median(v))}
                        for (y, t, q, rs, ag), v in cells.items() if len(v) >= 10]
+    # Diagnostic copy of the diabetes and arthritis rows (national), so a mismatch can be inspected after the build
+    try:
+        chk = [r for r in rows if r.get("locationabbr") == "US" and any(w in (r.get("question") or "").lower() for w in ("diabetes", "arthritis"))]
+        json.dump(chk[:3000], open(os.path.join(OUT, "brfss_rows_check.json"), "w"))
+    except Exception as e:
+        log(f"BRFSS check file not written: {e}")
     out, used = {}, []
     for cond in RADIUS_CONDITIONS:
         if cond == "nodental": continue
