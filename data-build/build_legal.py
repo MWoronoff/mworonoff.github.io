@@ -139,7 +139,7 @@ def main():
             df[f"category@{i}"], df[f"spend@{i}"], df[f"comp@{i}"] = cat, spend, comp
             cols = [df[f"{c}@{i}"] for c in parts]
             full = pd.concat(cols, axis=1).notna().all(axis=1)
-            df[f"score@{i}"] = combine(cols, [WEIGHTS[c] for c in parts]).where(full & mask).round(2)
+            df[f"score@{i}"] = combine(cols, [WEIGHTS[c] for c in parts]).where(full & mask).round(3)
             for c in WEIGHTS: df[f"{c}@{i}"] = df[f"{c}@{i}"].round(2)
             under = (df[f"demand@{i}"] >= 70) & (P(df.per10k) <= 30)
             known = df[f"demand@{i}"].notna() & df.per10k.notna() & mask
@@ -235,7 +235,7 @@ def main():
                 for p in per_sub:
                     k = f"{p}@{s['id']}"
                     if k in df.columns:
-                        x = clean(r[k]); v[k] = round(x, 2) if p in SCORE_KEYS and x is not None else x   # two decimals: ranks use the real value, so near-equal markets don't show as ties
+                        x = clean(r[k]); v[k] = round(x, 3 if p == "score" else 2) if p in SCORE_KEYS and x is not None else x   # two decimals: ranks use the real value, so near-equal markets don't show as ties
             v = {k: x for k, x in v.items() if x is not None}
             out.append({"id": str(idx), "name": names(idx), "v": v, "f": flags_fn(idx, r) if flags_fn else []})
         return out
