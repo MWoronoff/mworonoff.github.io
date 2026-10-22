@@ -27,6 +27,13 @@ Built 2026-10-22. Result: **PASSED**
 | Filling CDC 2025 gaps: Frequent mental distress | PASS | used; tested average county error (pts): prev region 0.63; prev local 0.96; neighbors 1.72; model 1.50. Best: prev region (Ohio 0.80, West Virginia 1.10, New York 0.33, Maryland 0.46, Tennessee 0.36, Indiana 0.73); 3,104 ZIPs |
 | Filling CDC 2025 gaps: Independent-living disability | PASS | used; tested average county error (pts): prev region 0.46; prev local 0.59; neighbors 1.24; model 0.54. Best: prev region (Ohio 1.06, West Virginia 0.32, New York 0.13, Maryland 0.23, Tennessee 0.59, Indiana 0.46); 3,104 ZIPs |
 | Adults covered by CDC PLACES plus estimates | INFO | 100.0% |
+| CDC BRFSS rates by age: Diabetes | WARN | not found; radius tool uses the all-adult rate at every age |
+| CDC BRFSS rates by age: High blood pressure | WARN | not found; radius tool uses the all-adult rate at every age |
+| CDC BRFSS rates by age: Arthritis | WARN | not found; radius tool uses the all-adult rate at every age |
+| CDC BRFSS rates by age: Obesity | WARN | not found; radius tool uses the all-adult rate at every age |
+| CDC BRFSS rates by age: Depression | WARN | not found; radius tool uses the all-adult rate at every age |
+| CDC BRFSS rates by age: Frequent mental distress | WARN | not found; radius tool uses the all-adult rate at every age |
+| CDC BRFSS rates by age: Fair or poor health | WARN | not found; radius tool uses the all-adult rate at every age |
 | EASI healthcare spending: Palm Springs | INFO | EASI includes Palm Springs in Los Angeles; the provisional Palm Springs DMA uses the Riverside–San Bernardino metro's per-household spending |
 | EASI U.S. healthcare spending per household | INFO | Medical services $1,215.73; Prescription drugs $215.68 |
 | EASI healthcare spending matched to DMAs | PASS | 210 of 210 |
