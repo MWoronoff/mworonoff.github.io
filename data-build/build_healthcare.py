@@ -581,10 +581,11 @@ def condition_age_rates(cache, rep):
             sel = [r for r in brfss_pick(rows, cond) if r.get("locationabbr") == loc and r.get("data_value") not in (None, "")]
             for y in sorted({int(r["year"]) for r in sel}, reverse=True):
                 ry = [r for r in sel if int(r["year"]) == y]
-                qtext = sorted({r["question"] for r in ry})[0]
-                ry = [r for r in ry if r["question"] == qtext]          # one question only
-                v = {a: sum(float(r["data_value"]) for r in ry if r.get("break_out") == a) for a in BRFSS_AGES}
-                if all(v[a] > 0 for a in BRFSS_AGES): best = (y, loc, qtext, v); break
+                for qtext in sorted({r["question"] for r in ry}):          # CDC may list several versions; take the first complete one
+                    rq = [r for r in ry if r["question"] == qtext]
+                    v = {a: sum(float(r["data_value"]) for r in rq if r.get("break_out") == a) for a in BRFSS_AGES}
+                    if all(v[a] > 0 for a in BRFSS_AGES): best = (y, loc, qtext, v); break
+                if best: break
             if best: break
         if not best:
             near = sorted({f"{r.get('question')} = {r.get('response')}" for r in rows if r.get("locationabbr") == "US"
@@ -593,7 +594,7 @@ def condition_age_rates(cache, rep):
             continue
         y, loc, qtext, v = best
         out[cond] = {g: round(sum(v[a] * n[a] for a in m) / sum(n[a] for a in m), 2) for g, m in groups.items()}
-        used.append(f"{DEMAND_LABELS[cond]} ({y}): " + ", ".join(f"{g.replace('_', '–').replace('p', '+')} {r:.1f}%" for g, r in out[cond].items()))
+        used.append(f"{DEMAND_LABELS[cond]} ({y}, \u201c{qtext[:60]}\u201d): " + ", ".join(f"{g.replace('_', '–').replace('p', '+')} {r:.1f}%" for g, r in out[cond].items()))
         log(f"BRFSS {cond}: {y} {loc} '{qtext}' -> {out[cond]}")
     if out:
         rep.append(("CDC BRFSS rates by age (all-states median)", "INFO", "; ".join(used)))
