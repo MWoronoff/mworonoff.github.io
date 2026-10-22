@@ -1,6 +1,6 @@
 # Apartment data check report
 
-Built 2026-10-14. Result: **PASSED**
+Built 2026-10-22. Result: **PASSED**
 
 | Check | Result | Detail |
 | --- | --- | --- |
@@ -11,7 +11,7 @@ Built 2026-10-14. Result: **PASSED**
 | Published benchmark: residential landlords and property managers | PASS | 133,096 (expected 60,000–250,000) |
 | ZIP detail coverage of county counts (cells under 3 businesses aren't published) | INFO | 89% |
 | Building permits: new units in 5+ unit buildings | PASS | 2025: 463,972 units in 3,029 counties (expected 150,000–800,000 nationally) |
-| Zillow rent index matched to metros | PASS | 380 of 387 metros; 2025-08 to 2026-08; median change +3.0% |
+| Zillow rent index matched to metros | PASS | 380 of 387 metros; 2025-09 to 2026-09; median change +3.1% |
 | EASI rent: Palm Springs | INFO | EASI includes Palm Springs in Los Angeles; the provisional Palm Springs DMA uses the Riverside–San Bernardino metro's per-household spending |
 | EASI U.S. rent per household | INFO | $4,370 a year |
 | EASI rent matched to DMAs | PASS | 210 of 210 |

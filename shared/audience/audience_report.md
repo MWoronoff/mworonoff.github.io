@@ -19,6 +19,9 @@ Result: **PASSED**
 | Veterans never exceeds its total | PASS | 0 ZIPs over |
 | Some college, no degree never exceeds its total | PASS | 0 ZIPs over |
 | Homeowners never exceeds its total | PASS | 0 ZIPs over |
+| College enrollment by age adds up (B14004) | PASS | 0 ZIP-blocks off |
+| College enrollment: by-age total vs. B14001 | PASS | 21,632,364 vs 21,632,364 |
+| Published benchmark: college enrollment rate, ages 18-24 | PASS | 41.0% (expected 30–50) |
 | Marital status: male + female = total | PASS | 0 ZIPs off |
 | Marital status: male never/now married + widowed + divorced = male total | PASS | 0 ZIPs off |
 | Homeowner ages add up | PASS | 0 ZIPs off |
