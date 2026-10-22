@@ -514,8 +514,11 @@ def self_test():
 # national BRFSS rates by age (the same survey PLACES is modeled from), so diabetes, high blood pressure and arthritis
 # rise with age instead of being applied evenly. Source: BRFSS Prevalence Data (2011 to present), data.cdc.gov dttw-5yxu,
 # the all-states median by age group. BRFSS's oldest group is 65+, so 65-74 and 75+ share its rate.
-BRFSS_URL = ("https://data.cdc.gov/resource/dttw-5yxu.json?$limit=50000&$select=year,locationabbr,topic,question,response,"
-             "break_out,data_value&$where=" + urllib.parse.quote("break_out_category='Age Group' AND locationabbr in('US','UW')"))
+BRFSS_WHERE = ("break_out_category='Age Group' AND (upper(question) like '%DIABETES%' OR upper(question) like '%HIGH BLOOD PRESSURE%' "
+               "OR upper(question) like '%ARTHRITIS%' OR upper(question) like '%DEPRESS%' OR upper(question) like '%GENERAL HEALTH%' "
+               "OR upper(question) like '%MENTAL HEALTH%' OR upper(topic) like '%BMI%' OR upper(question) like '%BMI%' OR upper(question) like '%BODY MASS%')")
+BRFSS_URL = ("https://data.cdc.gov/resource/dttw-5yxu.json?$limit=300000&$select=year,locationabbr,topic,question,response,"
+             "break_out,data_value&$where=" + urllib.parse.quote(BRFSS_WHERE))
 BRFSS_AGES = ["18-24", "25-34", "35-44", "45-54", "55-64", "65+"]
 
 
@@ -555,6 +558,21 @@ def condition_age_rates(cache, rep):
     n["55-64"] = tot(hl, "mh35_64") + tot(hl, "fh35_64") - n["35-44"] - n["45-54"]
     n["65+"] = sum(tot(hl, s + "h" + b) for s in "mf" for b in ("65_74", "75p"))
     groups = {"18_34": ["18-24", "25-34"], "35_64": ["35-44", "45-54", "55-64"], "65_74": ["65+"], "75p": ["65+"]}
+    def age_of(x):
+        m = re.search(r"(\d+)", x or "")
+        return {"18": "18-24", "25": "25-34", "35": "35-44", "45": "45-54", "55": "55-64", "65": "65+"}.get(m.group(1)) if m else None
+    for r in rows: r["break_out"] = age_of(r.get("break_out"))
+    locs = sorted({r.get("locationabbr") for r in rows if r.get("locationabbr")})
+    rep.append(("CDC BRFSS download", "INFO", f"{len(rows):,} rows by age; {len(locs)} locations; national median rows: {'yes' if 'US' in locs else 'no'}"))
+    # Without CDC's national median rows, take the median across states (CDC's national figure is the same median)
+    if "US" not in locs and rows:
+        states = {x for x in locs if x and len(x) == 2 and x not in ("GU", "PR", "VI", "UW")}
+        cells = {}
+        for r in rows:
+            if r.get("locationabbr") in states and r.get("data_value") not in (None, "") and r["break_out"]:
+                cells.setdefault((r["year"], r.get("topic"), r["question"], r["response"], r["break_out"]), []).append(float(r["data_value"]))
+        rows = rows + [{"year": y, "locationabbr": "US", "topic": t, "question": q, "response": rs, "break_out": ag, "data_value": float(np.median(v))}
+                       for (y, t, q, rs, ag), v in cells.items() if len(v) >= 40]
     out, used = {}, []
     for cond in RADIUS_CONDITIONS:
         if cond == "nodental": continue
@@ -569,7 +587,9 @@ def condition_age_rates(cache, rep):
                 if all(v[a] > 0 for a in BRFSS_AGES): best = (y, loc, qtext, v); break
             if best: break
         if not best:
-            rep.append((f"CDC BRFSS rates by age: {DEMAND_LABELS[cond]}", "WARN", "not found; radius tool uses the all-adult rate at every age"))
+            near = sorted({f"{r.get('question')} = {r.get('response')}" for r in rows if r.get("locationabbr") == "US"
+                           and any(w in (r.get("question") or "").lower() for w in (cond[:5], "bmi", "health"))})[:6]
+            rep.append((f"CDC BRFSS rates by age: {DEMAND_LABELS[cond]}", "WARN", "not found; radius tool uses the all-adult rate at every age. Nearby: " + " | ".join(near)))
             continue
         y, loc, qtext, v = best
         out[cond] = {g: round(sum(v[a] * n[a] for a in m) / sum(n[a] for a in m), 2) for g, m in groups.items()}
