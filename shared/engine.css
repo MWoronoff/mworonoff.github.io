@@ -395,3 +395,71 @@ a.az-btn { display: inline-block; text-decoration: none; text-align: center; }
 .az-rate-2 { background: #eef1f4; color: #44586c; }
 .az-rate-3, .az-rate-4 { background: #fdf0dc; color: #7a4a0b; }
 .az-bars-note { margin: 2px 0 0; font-size: 12px; color: var(--muted); }
+
+/* Export menu: Leave-behind (PDF) and data (CSV) under one button */
+.az-export { position: relative; display: inline-block; }
+.az-export-menu { position: absolute; right: 0; top: calc(100% + 6px); z-index: 1100; min-width: 270px; background: #fff;
+  border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); padding: 6px; }
+.az-export-menu[hidden] { display: none; }
+.az-export-menu button { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; width: 100%; border: 0; background: transparent;
+  border-radius: 8px; padding: 9px 11px; text-align: left; cursor: pointer; }
+.az-export-menu button:hover, .az-export-menu button:focus-visible { background: #eef6f5; }
+.az-export-menu b { font-size: 13px; color: var(--navy); }
+.az-export-menu small { font-size: 12px; color: var(--muted); font-weight: 400; }
+
+/* Split a budget: closed until opened, under the trade area's ZIP table */
+.rz-budget { padding: 14px 16px; }
+.rz-budget[hidden] { display: none; }
+.rz-budget > summary { cursor: pointer; font-weight: 700; font-size: 17px; color: var(--navy); }
+.rz-budget-body { margin-top: 12px; display: flex; flex-direction: column; gap: 12px; }
+.rz-budget-controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
+.rz-budget-controls .az-field select { max-width: none; }
+.rz-budget-actions { margin-left: auto; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.rz-mm { font-weight: 600; font-size: 13px; color: var(--navy); }
+.rz-budget .rz-note { margin: 0; }
+@media (max-width: 640px) { .rz-budget-actions { margin-left: 0; } }
+
+/* Leave-behind: printed (Save as PDF) view of what's on screen */
+.az-print-head { display: none; align-items: center; gap: 16px; border-bottom: 2px solid var(--navy); padding-bottom: 10px; margin-bottom: 14px; }
+.az-print-head img { width: 64px; height: 64px; flex: 0 0 auto; }
+.az-print-head h1 { margin: 0; font-size: 20px; color: var(--navy); }
+.az-print-head p { margin: 2px 0 0; color: var(--muted); font-size: 12px; }
+body.az-printing .az-map-panel { width: 720px; max-width: 100%; }
+body.az-printing .az-map { height: 420px; }
+@media print {
+  @page { size: letter portrait; margin: 0.5in; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { background: #fff; }
+  .az-print-head { display: flex; }
+  .az-header, .az-controls, .az-notice, .az-error, .az-modal, .rz-filters, .rz-area, .leaflet-control-zoom,
+  .az-btn, .az-export, .rz-clear, .rz-budget-actions, details.rz-budget:not([open]) { display: none !important; }
+  .az-main { max-width: none; padding: 0; }
+  .az-panel { box-shadow: none; break-inside: avoid; }
+  .az-stage, .rz-stage { display: block; }
+  .az-stage > * + *, .rz-stage > * + * { margin-top: 12px; }
+  .az-tablewrap { overflow: visible; max-height: none; }
+  .az-table tr { break-inside: avoid; }
+  .rz-budget > summary { list-style: none; }
+}
+
+/* Section tabs under the page title: Markets | Benchmarks */
+.az-tabs { max-width: 1500px; margin: 14px auto -20px; display: flex; gap: 28px; }
+.az-tabs[hidden] { display: none; }
+.az-tabs button { border: 0; background: transparent; color: #c7d6e4; font-weight: 700; font-size: 14px; padding: 10px 2px 9px;
+  border-bottom: 3px solid transparent; cursor: pointer; }
+.az-tabs button:hover { color: #fff; }
+.az-tabs button[aria-pressed="true"] { color: #fff; border-bottom-color: var(--teal-2); }
+
+/* Benchmarks tab */
+.az-bench { display: flex; flex-direction: column; gap: 16px; }
+.az-bench[hidden] { display: none; }
+.az-bench-panel { padding: 18px 20px; }
+.az-bench-panel h2 { margin: 0; font-size: 20px; color: var(--navy); }
+.az-bench-ind { margin: 4px 0 12px; color: var(--muted); }
+.az-bench-table th small, .az-bench-table td small { display: block; font-size: 12px; font-weight: 400; color: var(--muted); }
+.az-bench-table thead th { vertical-align: bottom; }
+.az-bench-table tbody th { text-align: left; font-weight: 600; color: var(--ink); }
+.az-bench-table td b { font-size: 17px; color: var(--navy); }
+.az-bench-table td.az-bench-na { color: var(--muted); font-size: 13px; }
+.az-bench-note { margin: 12px 0 0; font-size: 12px; color: var(--muted); }
+@media print { .az-tabs, .az-bench-controls { display: none !important; } }

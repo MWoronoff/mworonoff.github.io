@@ -246,6 +246,62 @@
   }
   function csvCell(s) { s = s == null ? "" : String(s); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }
 
+  // Export menu: one button that opens a short list of choices (same as the analyzer page's)
+  function exportMenu(items) {
+    var btn, menu, wrap;
+    function close() { menu.hidden = true; btn.setAttribute("aria-expanded", "false"); }
+    menu = el("div", { class: "az-export-menu", role: "menu", hidden: true }, items.map(function (it) {
+      return el("button", { type: "button", role: "menuitem", onclick: function () { close(); it.run(); } },
+        [el("b", { text: it.label }), it.note ? el("small", { text: it.note }) : null]);
+    }));
+    btn = el("button", { type: "button", class: "az-btn primary", "aria-haspopup": "menu", "aria-expanded": "false", text: "Export \u25be",
+      onclick: function (e) { e.stopPropagation(); var open = menu.hidden; menu.hidden = !open; btn.setAttribute("aria-expanded", String(open)); if (open) menu.querySelector("button").focus(); } });
+    wrap = el("div", { class: "az-export", onkeydown: function (e) { if (e.key === "Escape" && !menu.hidden) { close(); btn.focus(); } } }, [btn, menu]);
+    document.addEventListener("click", function (e) { if (!wrap.contains(e.target)) close(); });
+    return wrap;
+  }
+  // Leave-behind: the current view laid out for print (Save as PDF), with an Adtaxi heading and no controls
+  function printLeaveBehind(logo, lines, maps) {
+    var head = el("div", { class: "az-print-head" }, [el("img", { src: logo || "../shared/adtaxi-logo.svg", alt: "Adtaxi" }),
+      el("div", null, lines.filter(Boolean).map(function (t, i) { return el(i ? "p" : "h1", { text: t }); }))]);
+    document.body.insertBefore(head, document.body.firstChild);
+    document.body.classList.add("az-printing");
+    var views = (maps || []).filter(Boolean).map(function (m) {
+      var v = { m: m, c: m.getCenter(), z: m.getZoom(), b: m.getBounds() };
+      m.invalidateSize({ pan: false }); m.fitBounds(v.b, { animate: false });
+      return v;
+    });
+    var done = false;
+    function cleanup() {
+      if (done) return; done = true;
+      window.removeEventListener("afterprint", cleanup);
+      head.remove(); document.body.classList.remove("az-printing");
+      views.forEach(function (v) { v.m.invalidateSize({ pan: false }); v.m.setView(v.c, v.z, { animate: false }); });
+    }
+    window.addEventListener("afterprint", cleanup);
+    setTimeout(function () { window.print(); }, 450);
+  }
+  function money(v) { return "$" + NF0.format(v); }
+  function parseMoney(t) { var v = parseFloat(String(t || "").replace(/[$,\s]/g, "")); return isFinite(v) && v > 0 ? v : null; }
+
+  // Budget split: each ZIP's share follows its estimated audience (or audience x index, to lean toward above-average ZIPs).
+  // Whole dollars that add up exactly to the budget (largest remainders get the leftover dollars).
+  function splitBudget(rows, budget, by, n) {
+    var pick = rows.filter(function (r) { return r.aud != null && r.aud > 0; }).map(function (r) {
+      return { r: r, w: by === "weighted" ? r.aud * (r.idx == null ? 1 : r.idx / 100) : r.aud };
+    }).filter(function (x) { return x.w > 0; });
+    pick.sort(function (a, b) { return b.w - a.w; });
+    if (n) pick = pick.slice(0, n);
+    var W = pick.reduce(function (t, x) { return t + x.w; }, 0);
+    pick.forEach(function (x) { x.share = W ? x.w / W : 0; });
+    if (budget) {
+      var whole = Math.round(budget), used = 0;
+      pick.forEach(function (x) { var raw = whole * x.share; x.amt = Math.floor(raw); x.frac = raw - x.amt; used += x.amt; });
+      pick.slice().sort(function (a, b) { return b.frac - a.frac; }).slice(0, whole - used).forEach(function (x) { x.amt += 1; });
+    }
+    return pick;
+  }
+
   function Radius(cfg, root) {
     this.cfg = cfg; this.root = root; this.geo = {};
     this.ages = AGE_SETS[cfg.ageSet || "default"];
@@ -335,7 +391,9 @@
       el("label", { class: "az-field" }, [el("span", { text: "Show" }), this.minSel]),
       el("div", { class: "az-actions" }, [
         el("button", { type: "button", class: "az-btn", text: "How estimates work", onclick: function () { self.openMethod(); } }),
-        el("button", { type: "button", class: "az-btn primary", text: "Export ZIP list", onclick: function () { self.exportCSV(); } })])]);
+        exportMenu([
+          { label: "Leave-behind (PDF)", note: "A clean page of this trade area to send after the meeting", run: function () { self.leaveBehind(); } },
+          { label: "ZIP list (CSV)", note: "Every ZIP in the area for a spreadsheet", run: function () { self.exportCSV(); } }])])]);
     this.errorBox = el("div", { class: "az-error", role: "alert", hidden: true });
     this.areaPanel = cfg.customArea ? this.buildArea() : null;
 
@@ -388,8 +446,9 @@
     this.modalBody = el("div", { class: "az-modal-body" });
     this.modal = el("dialog", { class: "az-modal", "aria-labelledby": "rz-method-title" }, [this.modalBody]);
     var sources = el("section", { class: "az-panel az-sources" }, [el("h2", { text: "Sources" }), this.sourcesP = el("p")]);
+    this.budgetBox = this.buildBudget();
 
-    var main = el("main", { class: "az-main" }, [controls, this.areaPanel, this.errorBox, el("section", { class: "rz-stage" }, [this.filterPanel, right]), table, this.extra, sources]);
+    var main = el("main", { class: "az-main" }, [controls, this.areaPanel, this.errorBox, el("section", { class: "rz-stage" }, [this.filterPanel, right]), table, this.budgetBox, this.extra, sources]);
     this.root.innerHTML = ""; if (header) this.root.appendChild(header); this.root.appendChild(main); this.root.appendChild(this.modal);
     this.rSel.value = s.r ? String(s.r) : ""; this.minSel.value = String(s.minIndex);
     this.syncFilters();
@@ -607,6 +666,7 @@
     this.summary.innerHTML = "";
     this.summary.appendChild(el("p", { class: "az-empty", text: msg }));
     this.tbody.innerHTML = ""; this.thead.innerHTML = ""; this.tableTitle.textContent = s.mode === "area" ? "ZIPs in the area" : "ZIPs in range"; this.tableNote.textContent = "";
+    if (this.budgetBox) this.budgetBox.hidden = true;
   };
   Radius.prototype.renderSummary = function () {
     var s = this.state, c = this.c, rows = this.visible(), A = 0, P = 0;
@@ -659,6 +719,77 @@
     if (!rows.length) frag.appendChild(el("tr", null, [el("td", { colspan: String(cols.length), class: "az-empty", text: area ? "No ZIPs meet the index cutoff. Lower the Show setting or add to the area." : "No ZIPs meet the index cutoff. Lower the Show setting or widen the radius." })]));
     this.tbody.appendChild(frag);
     if (rows.length > s.show) this.tbody.appendChild(el("tr", null, [el("td", { colspan: String(cols.length) }, [el("button", { type: "button", class: "az-btn", text: "Show all " + NF0.format(rows.length), onclick: function () { s.show = 1e9; self.renderTable(); } })])]));
+    this.renderBudget();
+  };
+
+  /* ---------- Split a budget (closed until opened) ---------- */
+  Radius.prototype.buildBudget = function () {
+    var self = this, b = this.budget = { amount: null, by: "aud", n: 10 };
+    this.bAmount = el("input", { type: "text", inputmode: "decimal", placeholder: "$ per month", "aria-label": "Monthly budget",
+      oninput: function () { b.amount = parseMoney(this.value); self.renderBudget(); },
+      onchange: function () { if (b.amount) this.value = money(b.amount); } });
+    var bySel = el("select", { "aria-label": "Split by", onchange: function () { b.by = this.value; self.renderBudget(); } },
+      [["aud", "Audience size"], ["weighted", "Audience size, favoring above-average ZIPs"]].map(function (o) { return el("option", { value: o[0], text: o[1] }); }));
+    var nSel = el("select", { "aria-label": "ZIPs to include", onchange: function () { b.n = +this.value; self.renderBudget(); } },
+      [[5, "Top 5 ZIPs"], [10, "Top 10 ZIPs"], [15, "Top 15 ZIPs"], [25, "Top 25 ZIPs"], [0, "All ZIPs shown"]].map(function (o) { return el("option", { value: o[0], text: o[1] }); }));
+    nSel.value = "10";
+    this.bHead = el("thead"); this.bBody = el("tbody"); this.bNote = el("p", { class: "rz-note" });
+    return el("details", { class: "az-panel rz-budget", hidden: true }, [
+      el("summary", { text: "Split a budget" }),
+      el("div", { class: "rz-budget-body" }, [
+        el("div", { class: "rz-budget-controls" }, [
+          el("label", { class: "az-field" }, [el("span", { text: "Monthly budget" }), this.bAmount]),
+          el("label", { class: "az-field" }, [el("span", { text: "Split by" }), bySel]),
+          el("label", { class: "az-field" }, [el("span", { text: "Include" }), nSel]),
+          el("div", { class: "rz-budget-actions" }, [
+            el("button", { type: "button", class: "az-btn", text: "Export split (CSV)", onclick: function () { self.exportBudget(); } }),
+            el("a", { class: "rz-mm", href: this.cfg.mediaMixUrl || "../media-mix/", text: "Split by platform in the Media Mix Planner \u2192" })])]),
+        el("div", { class: "az-tablewrap" }, [el("table", { class: "az-table" }, [this.bHead, this.bBody])]),
+        this.bNote])]);
+  };
+  Radius.prototype.budgetRows = function () {
+    return this.rows ? splitBudget(this.visible(), this.budget.amount, this.budget.by, this.budget.n) : [];
+  };
+  Radius.prototype.renderBudget = function () {
+    if (!this.budgetBox) return;
+    var b = this.budget, pick = this.budgetRows();
+    this.budgetBox.hidden = !this.rows || !pick.length;
+    if (this.budgetBox.hidden) return;
+    var est = this.isEstimate();
+    this.bHead.innerHTML = "";
+    this.bHead.appendChild(el("tr", null, [["ZIP", 1], ["Town", 1], [est ? "Est. audience" : "Audience"], ["Index"], ["Share of budget"], ["Monthly amount"]].map(function (h) {
+      return el("th", { scope: "col", class: h[1] ? "rz-l" : null, text: h[0] }); })));
+    this.bBody.innerHTML = "";
+    var frag = document.createDocumentFragment();
+    pick.forEach(function (x) {
+      frag.appendChild(el("tr", null, [el("td", { class: "rz-l num", text: x.r.zip }), el("td", { class: "rz-l", text: x.r.town }),
+        el("td", { class: "num", text: NF0.format(Math.round(x.r.aud)) }), el("td", { class: "num", text: x.r.idx == null ? "\u2014" : NF0.format(x.r.idx) }),
+        el("td", { class: "num", text: NF1.format(x.share * 100) + "%" }), el("td", { class: "num", text: b.amount ? money(x.amt) : "\u2014" })]));
+    });
+    this.bBody.appendChild(frag);
+    this.bNote.textContent = (b.by === "weighted" ? "Shares follow each ZIP's estimated audience times its index, so above-average ZIPs get more. " : "Shares follow each ZIP's estimated audience. ") +
+      (b.amount ? "" : "Enter a monthly budget to see dollar amounts. ") + "A planning starting point; adjust for campaign minimums and platform targeting.";
+  };
+  Radius.prototype.exportBudget = function () {
+    var b = this.budget, pick = this.budgetRows();
+    if (!pick.length) return;
+    var lines = [["ZIP", "Town", "Estimated audience", "Index vs US", "Share of budget", "Monthly amount", "Split by", "Audience definition"].map(csvCell).join(",")];
+    var by = b.by === "weighted" ? "Audience x index" : "Audience", def = this.describe();
+    pick.forEach(function (x) {
+      lines.push([x.r.zip, x.r.town, Math.round(x.r.aud), x.r.idx == null ? "" : Math.round(x.r.idx), (x.share * 100).toFixed(1) + "%", b.amount ? x.amt : "", by, def].map(csvCell).join(","));
+    });
+    var blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
+    var a = el("a", { href: URL.createObjectURL(blob), download: (this.cfg.exportName || "adtaxi-radius") + "-budget-split.csv" });
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
+  };
+  Radius.prototype.leaveBehind = function () {
+    if (!this.rows) { this.showError("Choose a center and radius (or map a custom area) first, then create the leave-behind."); return; }
+    this.errorBox.hidden = true;
+    var s = this.state, c = this.c, ci = this.byZip[s.zip];
+    var where = s.mode === "area" ? "Custom area: " + this.areaPhrase() : "Within " + s.r + " miles of " + s.zip + " " + c.city[ci] + ", " + c.state[ci];
+    printLeaveBehind(this.cfg.logo, [this.cfg.printTitle || this.cfg.title, where, "Audience: " + this.describe(), "Prepared by Adtaxi \u00b7 " +
+      new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })], [this.map]);
   };
 
   Radius.prototype.sortRows = function (rows) {

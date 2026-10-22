@@ -1,0 +1,273 @@
+{
+ "updated": "October 2026",
+ "note": "Medians from U.S. campaigns. Results in a local market vary with the offer, budget, competition and how leads are counted.",
+ "sources": [
+  {
+   "label": "WordStream by LocaliQ, 2026 Google Ads Benchmarks: 13,474 U.S. search campaigns on Google and Microsoft Ads, April 2025 to March 2026",
+   "url": "https://www.wordstream.com/blog/2026-google-ads-benchmarks"
+  },
+  {
+   "label": "WordStream by LocaliQ, Facebook Ads Benchmarks 2026: U.S. Facebook and Instagram traffic and lead campaigns",
+   "url": "https://www.wordstream.com/blog/facebook-ads-benchmarks-2026"
+  }
+ ],
+ "industries": {
+  "legal": {
+   "label": "Attorneys & Legal Services",
+   "search": {
+    "cpc": 9.87,
+    "cvr": 5.55,
+    "ctr": 5.87,
+    "cpl": 131.63
+   },
+   "socialTraffic": {
+    "ctr": 1.77,
+    "cpc": 0.69
+   },
+   "socialLeads": null
+  },
+  "auto": {
+   "label": "Automotive – For Sale",
+   "search": {
+    "cpc": 2.27,
+    "cvr": 6.01,
+    "ctr": 8.28,
+    "cpl": 44.26
+   },
+   "socialTraffic": {
+    "ctr": 1.47,
+    "cpc": 0.7
+   },
+   "socialLeads": {
+    "ctr": 2.29,
+    "cpc": 2.01,
+    "cvr": 4.15,
+    "cpl": 35.52
+   }
+  },
+  "beauty": {
+   "label": "Beauty & Personal Care",
+   "search": {
+    "cpc": 4.62,
+    "cvr": 10.35,
+    "ctr": 6.75,
+    "cpl": 39.25
+   },
+   "socialTraffic": {
+    "ctr": 2.73,
+    "cpc": 0.5
+   },
+   "socialLeads": {
+    "ctr": 1.35,
+    "cpc": 2.97,
+    "cvr": 5.63,
+    "cpl": 50.91
+   }
+  },
+  "dental": {
+   "label": "Dentists & Dental Services",
+   "search": {
+    "cpc": 8.0,
+    "cvr": 10.67,
+    "ctr": 5.66,
+    "cpl": 72.97
+   },
+   "socialTraffic": {
+    "ctr": 1.55,
+    "cpc": 0.61
+   },
+   "socialLeads": {
+    "ctr": 1.62,
+    "cpc": 5.7,
+    "cvr": 6.07,
+    "cpl": 61.56
+   }
+  },
+  "education": {
+   "label": "Education & Instruction",
+   "search": {
+    "cpc": 4.81,
+    "cvr": 13.14,
+    "ctr": 7.56,
+    "cpl": 77.48
+   },
+   "socialTraffic": {
+    "ctr": 1.5,
+    "cpc": 0.7
+   },
+   "socialLeads": {
+    "ctr": 1.74,
+    "cpc": 1.72,
+    "cvr": 15.87,
+    "cpl": 26.31
+   }
+  },
+  "finance": {
+   "label": "Finance & Insurance",
+   "search": {
+    "cpc": 3.39,
+    "cvr": 2.64,
+    "ctr": 9.83,
+    "cpl": 74.44
+   },
+   "socialTraffic": {
+    "ctr": 1.46,
+    "cpc": 0.86
+   },
+   "socialLeads": null
+  },
+  "furniture": {
+   "label": "Furniture",
+   "search": {
+    "cpc": 3.97,
+    "cvr": 2.99,
+    "ctr": 6.57,
+    "cpl": 106.7
+   },
+   "socialTraffic": {
+    "ctr": 1.9,
+    "cpc": 0.64
+   },
+   "socialLeads": {
+    "ctr": 3.78,
+    "cpc": 2.18,
+    "cvr": 5.66,
+    "cpl": 39.25
+   }
+  },
+  "home": {
+   "label": "Home & Home Improvement",
+   "search": {
+    "cpc": 8.33,
+    "cvr": 8.05,
+    "ctr": 6.47,
+    "cpl": 90.92
+   },
+   "socialTraffic": {
+    "ctr": 1.76,
+    "cpc": 0.63
+   },
+   "socialLeads": {
+    "ctr": 2.14,
+    "cpc": 2.18,
+    "cvr": 5.32,
+    "cpl": 42.95
+   }
+  },
+  "physicians": {
+   "label": "Physicians & Surgeons",
+   "search": {
+    "cpc": 4.76,
+    "cvr": 12.43,
+    "ctr": 6.61,
+    "cpl": 40.04
+   },
+   "socialTraffic": {
+    "ctr": 1.9,
+    "cpc": 0.61
+   },
+   "socialLeads": {
+    "ctr": 4.18,
+    "cpc": 1.68,
+    "cvr": 6.41,
+    "cpl": 32.14
+   }
+  },
+  "realestate": {
+   "label": "Real Estate",
+   "search": {
+    "cpc": 3.22,
+    "cvr": 3.7,
+    "ctr": 7.61,
+    "cpl": 102.51
+   },
+   "socialTraffic": {
+    "ctr": 2.37,
+    "cpc": 0.55
+   },
+   "socialLeads": {
+    "ctr": 4.17,
+    "cpc": 1.27,
+    "cvr": 9.95,
+    "cpl": 13.74
+   }
+  },
+  "all": {
+   "label": "All industries",
+   "search": {
+    "cpc": 5.42,
+    "cvr": 8.18,
+    "ctr": 6.64,
+    "cpl": 66.69
+   },
+   "socialTraffic": {
+    "ctr": 1.93,
+    "cpc": 0.6
+   },
+   "socialLeads": {
+    "ctr": 2.7,
+    "cpc": 1.8,
+    "cvr": 8.54,
+    "cpl": 27.39
+   }
+  }
+ },
+ "map": {
+  "healthcare": {
+   "_default": [
+    "physicians",
+    false
+   ],
+   "dental": [
+    "dental",
+    true
+   ],
+   "medspa": [
+    "beauty",
+    false
+   ]
+  },
+  "legal": {
+   "_default": [
+    "legal",
+    true
+   ]
+  },
+  "higher-ed": {
+   "_default": [
+    "education",
+    true
+   ]
+  },
+  "home-services": {
+   "_default": [
+    "home",
+    true
+   ]
+  },
+  "apartments": {
+   "_default": [
+    "realestate",
+    false
+   ]
+  },
+  "furniture": {
+   "_default": [
+    "furniture",
+    true
+   ]
+  },
+  "auto": {
+   "_default": [
+    "auto",
+    true
+   ]
+  },
+  "financial": {
+   "_default": [
+    "finance",
+    false
+   ]
+  }
+ }
+}

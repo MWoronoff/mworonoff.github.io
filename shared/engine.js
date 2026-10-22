@@ -47,6 +47,45 @@
   }
   function csvCell(s) { s = s == null ? "" : String(s); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }
 
+  // Export menu: one button that opens a short list of choices (Leave-behind PDF, data CSV)
+  function exportMenu(items) {
+    var btn, menu, wrap;
+    function close() { menu.hidden = true; btn.setAttribute("aria-expanded", "false"); }
+    menu = el("div", { class: "az-export-menu", role: "menu", hidden: true }, items.map(function (it) {
+      return el("button", { type: "button", role: "menuitem", onclick: function () { close(); it.run(); } },
+        [el("b", { text: it.label }), it.note ? el("small", { text: it.note }) : null]);
+    }));
+    btn = el("button", { type: "button", class: "az-btn primary", "aria-haspopup": "menu", "aria-expanded": "false", text: "Export \u25be",
+      onclick: function (e) { e.stopPropagation(); var open = menu.hidden; menu.hidden = !open; btn.setAttribute("aria-expanded", String(open)); if (open) menu.querySelector("button").focus(); } });
+    wrap = el("div", { class: "az-export", onkeydown: function (e) { if (e.key === "Escape" && !menu.hidden) { close(); btn.focus(); } } }, [btn, menu]);
+    document.addEventListener("click", function (e) { if (!wrap.contains(e.target)) close(); });
+    return wrap;
+  }
+
+  // Leave-behind: the current view laid out for print (the browser's Save as PDF), with an Adtaxi heading and no controls.
+  // Maps are redrawn at page width for the print, then put back.
+  function printLeaveBehind(logo, lines, maps) {
+    var head = el("div", { class: "az-print-head" }, [el("img", { src: logo || "../shared/adtaxi-logo.svg", alt: "Adtaxi" }),
+      el("div", null, lines.filter(Boolean).map(function (t, i) { return el(i ? "p" : "h1", { text: t }); }))]);
+    document.body.insertBefore(head, document.body.firstChild);
+    document.body.classList.add("az-printing");
+    var views = (maps || []).filter(Boolean).map(function (m) {
+      var v = { m: m, c: m.getCenter(), z: m.getZoom(), b: m.getBounds() };
+      m.invalidateSize({ pan: false }); m.fitBounds(v.b, { animate: false });
+      return v;
+    });
+    var done = false;
+    function cleanup() {
+      if (done) return; done = true;
+      window.removeEventListener("afterprint", cleanup);
+      head.remove(); document.body.classList.remove("az-printing");
+      views.forEach(function (v) { v.m.invalidateSize({ pan: false }); v.m.setView(v.c, v.z, { animate: false }); });
+    }
+    window.addEventListener("afterprint", cleanup);
+    setTimeout(function () { window.print(); }, 450);   // give the map time to redraw at page width
+  }
+  function today() { return new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }); }
+
   function Analyzer(cfg, root) {
     this.cfg = cfg;
     this.root = root;
@@ -265,7 +304,10 @@
           links.length ? el("nav", { class: "az-links", "aria-label": "Related tools" }, links) : null
         ]),
         el("img", { class: "az-logo", src: cfg.logo || "../shared/adtaxi-logo.svg", alt: "Adtaxi" })
-      ])
+      ]),
+      this.tabBar = el("nav", { class: "az-tabs", "aria-label": "Analyzer sections", hidden: true }, [["markets", "Markets"], ["bench", "Benchmarks"]].map(function (t) {
+        return el("button", { type: "button", "data-tab": t[0], "aria-pressed": String(t[0] === "markets"), text: t[1], onclick: function () { self.setTab(t[0]); } });
+      }))
     ]);
 
     // Controls
@@ -300,7 +342,9 @@
       cfg.crm === false ? null : el("button", { type: "button", class: "az-btn", text: "Analyze your customers",
         title: "Upload a customer list and compare it with this market's potential, ZIP by ZIP",
         onclick: function () { location.href = self.crmUrl(); } }),
-      el("button", { type: "button", class: "az-btn primary", text: "Export CSV", onclick: function () { self.exportCSV(); } })
+      exportMenu([
+        { label: "Leave-behind (PDF)", note: "A clean page of this view to send after the meeting", run: function () { self.leaveBehind(); } },
+        { label: "Data (CSV)", note: "The table's data for a spreadsheet", run: function () { self.exportCSV(); } }])
     ]));
     var controlBar = el("section", { class: "az-controls", "aria-label": "Analyzer controls" }, controls);
     this.notice = el("div", { class: "az-notice", hidden: true });
@@ -346,7 +390,9 @@
     this.radiusBox = el("div", { class: "az-radius-embed", hidden: true });
     this.anaParts = [stage, this.adPanel, this.tablePanel, sources];
     this.controlBar = controlBar;
-    var main = el("main", { class: "az-main" }, [controlBar, this.notice, this.errorBox, stage, this.adPanel, this.tablePanel, sources, this.radiusBox]);
+    this.benchPanel = el("section", { class: "az-bench", hidden: true, "aria-live": "polite" });
+    this.tabParts = [controlBar, this.notice, this.errorBox, stage, this.adPanel, this.tablePanel, sources, this.radiusBox];
+    var main = el("main", { class: "az-main" }, [controlBar, this.notice, this.errorBox, stage, this.adPanel, this.tablePanel, sources, this.radiusBox, this.benchPanel]);
     this.root.innerHTML = "";
     this.root.appendChild(header);
     this.root.appendChild(main);
@@ -394,7 +440,7 @@
     }
     if (window.AdtaxiRadius) go();
     else {
-      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261022c";   // version tag: browsers fetch the new file after an update
+      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261022d";   // version tag: browsers fetch the new file after an update
       sc.onload = go; sc.onerror = function () { self.showError("The radius tool didn't load. Refresh the page and try again."); };
       document.head.appendChild(sc);
     }
@@ -962,6 +1008,85 @@
     if (meta && meta.built) b.appendChild(el("p", { class: "az-empty", text: "Data built " + meta.built + "." }));
     if (this.modal.showModal) this.modal.showModal(); else this.modal.setAttribute("open", "");
   };
+  /* ---------- Benchmarks tab: typical search and social results for the category ---------- */
+  Analyzer.prototype.loadBench = function () {
+    var self = this, cfg = this.cfg;
+    if (cfg.benchmarks === false) return;
+    fetch(cfg.benchmarksData || "../shared/benchmarks.json?v=20261022d").then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function (b) { if (b.map && b.map[cfg.exportName]) { self.bench = b; self.tabBar.hidden = false; } })
+      .catch(function () { /* no tab without data */ });
+  };
+  Analyzer.prototype.setTab = function (tab) {
+    var self = this, bench = tab === "bench";
+    if (bench === !this.benchPanel.hidden) return;
+    Array.prototype.forEach.call(this.tabBar.children, function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-tab") === tab)); });
+    if (bench) {
+      this.tabSaved = this.tabParts.map(function (x) { return x.hidden; });
+      this.tabParts.forEach(function (x) { x.hidden = true; });
+      this.benchPanel.hidden = false;
+      this.renderBench();
+    } else {
+      this.benchPanel.hidden = true;
+      this.tabParts.forEach(function (x, i) { x.hidden = self.tabSaved ? self.tabSaved[i] : false; });
+      if (this.map) this.map.invalidateSize();
+      if (this.mode === "radius" && this.radius) this.radius.resize();
+    }
+  };
+  Analyzer.prototype.benchFor = function (sub) {
+    var m = this.bench.map[this.cfg.exportName], pick = m[sub] || m._default;
+    return { ind: this.bench.industries[pick[0]], exact: pick[1], all: this.bench.industries.all };
+  };
+  Analyzer.prototype.renderBench = function () {
+    var self = this, cfg = this.cfg, B = this.bench, s = this.state, box = this.benchPanel;
+    if (!B) return;
+    box.innerHTML = "";
+    var subs = cfg.subcategories || [];
+    var sel = subs.length ? el("select", { "aria-label": cfg.subcategoryLabel || "Category", onchange: function () {
+      if (self.subSel) { self.subSel.value = this.value; self.subSel.dispatchEvent(new Event("change")); } else s.sub = this.value;
+      self.renderBench(); } }, subs.map(function (x) { return el("option", { value: x.id, text: x.label }); })) : null;
+    if (sel) sel.value = s.sub;
+    box.appendChild(el("section", { class: "az-controls az-bench-controls", "aria-label": "Benchmark controls" }, [
+      sel ? el("label", { class: "az-field" }, [el("span", { text: cfg.subcategoryLabel || "Category" }), sel]) : null,
+      el("div", { class: "az-actions" }, [exportMenu([{ label: "Leave-behind (PDF)", note: "A clean page of these benchmarks to send after the meeting", run: function () { self.leaveBehind(); } }])])]));
+
+    var R = this.benchFor(s.sub), I = R.ind, A = R.all, subLabel = this.subLabel ? this.subLabel() : "";
+    var money2 = function (v) { return "$" + NF2.format(v); }, pct = function (v) { return NF2.format(v) + "%"; };
+    var rows = [["cpc", "Cost per click", money2, "What each ad click costs"], ["ctr", "Click-through rate", pct, "Share of people who saw the ad and clicked"],
+                ["cvr", "Conversion rate", pct, "Share of clicks that became a lead (call, form or message)"], ["cpl", "Cost per lead", money2, "Ad spend for each lead"]];
+    var cols = [["search", "Search ads", "Google and Microsoft Ads"], ["socialLeads", "Facebook and Instagram", "Lead ads"], ["socialTraffic", "Facebook and Instagram", "Traffic ads"]]
+      .filter(function (c) { return I[c[0]]; });   // a platform with nothing published for this category is left out, and the note says so
+    var cell = function (col, r) {
+      var v = I[col[0]], a = A[col[0]];
+      if (col[0] === "socialTraffic" && (r[0] === "cvr" || r[0] === "cpl")) return el("td", { class: "az-bench-na", text: "Not measured for traffic ads" });
+      if (!v || v[r[0]] == null) return el("td", { class: "az-bench-na", text: "Not published for this category" });
+      return el("td", null, [el("b", { class: "num", text: r[2](v[r[0]]) }), a && a[r[0]] != null ? el("small", { text: "All industries " + r[2](a[r[0]]) }) : null]);
+    };
+    var thead = el("thead", null, [el("tr", null, [el("th", { scope: "col", text: "Measure" })].concat(cols.map(function (c) {
+      return el("th", { scope: "col" }, [c[1], el("small", { text: c[2] })]); })))]);
+    var tbody = el("tbody", null, rows.map(function (r) {
+      return el("tr", null, [el("th", { scope: "row" }, [r[1], el("small", { text: r[3] })])].concat(cols.map(function (c) { return cell(c, r); })));
+    }));
+    box.appendChild(el("section", { class: "az-panel az-bench-panel" }, [
+      el("h2", { text: "What to expect" + (subLabel ? ": " + subLabel : "") }),
+      el("p", { class: "az-bench-ind", text: "Benchmarks for " + I.label + (R.exact ? "" : " (closest published category)") + ", " + B.updated + "." }),
+      el("div", { class: "az-tablewrap" }, [el("table", { class: "az-table az-bench-table" }, [thead, tbody])]),
+      el("p", { class: "az-bench-note", text: (I.socialLeads ? "" : "Facebook and Instagram lead-ad figures aren't published for this category. ") + B.note })]));
+    box.appendChild(el("section", { class: "az-panel az-sources" }, [el("h2", { text: "Sources" }),
+      el("p", null, B.sources.map(function (x, i) { return el("span", null, [i ? " \u00b7 " : "", el("a", { href: x.url, target: "_blank", rel: "noopener", text: x.label })]); }))]));
+  };
+
+  Analyzer.prototype.leaveBehind = function () {
+    if (!this.benchPanel.hidden) {
+      var sub = this.subLabel ? this.subLabel() : "";
+      return printLeaveBehind(this.cfg.logo, [this.cfg.title, "Performance benchmarks" + (sub ? " \u00b7 " + (this.cfg.subcategoryLabel || "Category") + ": " + sub : ""),
+        "Prepared by Adtaxi \u00b7 " + today()], []);
+    }
+    var cfg = this.cfg, opt = this.rankSel && this.rankSel.options[this.rankSel.selectedIndex];
+    var sub = this.subLabel ? this.subLabel() : "";
+    printLeaveBehind(cfg.logo, [cfg.title,
+      [sub ? (cfg.subcategoryLabel || "Category") + ": " + sub : null, this.tableTitle.textContent || null, opt ? "Ranked by " + opt.text : null].filter(Boolean).join(" \u00b7 "),
+      "Prepared by Adtaxi \u00b7 " + today()], [this.map]);
+  };
   Analyzer.prototype.exportCSV = function () {
     var self = this, s = this.state;
     var level = s.level, d = this.d(level);
@@ -985,6 +1110,7 @@
       var app = new Analyzer(cfg, root || document.getElementById("app"));
       app.build();
       app.refresh();
+      app.loadBench();
       if (app.wantRadius) app.openRadius(app.wantRadius);
       window.addEventListener("hashchange", function () { app.readHash(); if (app.wantRadius) app.openRadius(app.wantRadius); else { if (app.mode === "radius") app.closeRadius(); app.refresh(); } });
       return app;
