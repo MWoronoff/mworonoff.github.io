@@ -6,6 +6,7 @@ window.ADTAXI_RADIUS = {
   exportName: "higher-ed-radius",
   links: [ { label: "Higher Education Market Analyzer", url: "./" }, { label: "Home", url: "../analyzers/" } ],
   audienceData: "../shared/audience/zip_audience.json",
+  extraData: [ { url: "../shared/audience/zip_audience_enroll.json", label: "College enrollment by age" } ],
   zipGeo: "../shared/geo/zip/{level}/{id}.json",
   customArea: true,   // Geography > Custom area: a list or file of ZIPs, counties, towns or locations
   radii: [5, 10, 15, 25, 50, 100, 200, 300],
@@ -20,6 +21,7 @@ window.ADTAXI_RADIUS = {
     { id: "adult", label: "Adult and online degree completion", note: "Ages 25–54 who started college but didn't finish.", sel: { age: ["25_34", "35_44", "45_54"], somecollege: true } }
   ],
   methodology: [
-    { title: "Graduate program prospects", body: "Census doesn't publish, by ZIP, how many people of each age hold a bachelor's degree, so the Graduate profile uses the household head's education. For adults 25–44, who usually head their own household, this is a close stand-in." }
+    { title: "Graduate program prospects", body: "Census doesn't publish, by ZIP, how many people of each age hold a bachelor's degree, so the Graduate profile uses the household head's education. For adults 25–44, who usually head their own household, this is a close stand-in." },
+    { title: "Enrollment, veterans and some college", body: "Currently enrolled uses each age group's own college enrollment rate in the ZIP (Census publishes it for 15–17, 18–24, 25–34 and 35+). Veterans count only adults 18+, and Some college, no degree only adults 25+, the groups Census measures them for." }
   ]
 };

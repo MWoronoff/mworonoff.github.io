@@ -385,7 +385,7 @@
     }
     if (window.AdtaxiRadius) go();
     else {
-      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261021g";   // version tag: browsers fetch the new file after an update
+      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261022a";   // version tag: browsers fetch the new file after an update
       sc.onload = go; sc.onerror = function () { self.showError("The radius tool didn't load. Refresh the page and try again."); };
       document.head.appendChild(sc);
     }
@@ -775,8 +775,9 @@
     var all = this.sortedRows();
     // Rank numbers follow the "rank by" measure, independent of column sorting.
     var rankOrder = s.sortKey ? (function () { var k = s.sortKey; s.sortKey = null; var r = self.sortedRows(); s.sortKey = k; return r; })() : all;
-    var rankOf = {}, n = 0;
-    rankOrder.forEach(function (r) { if (typeof self.val(r, rankM) === "number") rankOf[r.id] = ++n; });
+    // Equal values share a rank (1, 2, 2, 4), the same way the market panel counts rank and ties
+    var rankOf = {}, n = 0, prevV = null, prevR = 0;
+    rankOrder.forEach(function (r) { var x = self.val(r, rankM); if (typeof x !== "number") return; n++; if (x !== prevV) { prevR = n; prevV = x; } rankOf[r.id] = prevR; });
     var rows = all.filter(function (r) { return !s.query || r.name.toLowerCase().indexOf(s.query) >= 0; });
     var shown = s.show && !s.query ? rows.slice(0, s.show) : rows;
     var isZip = s.level === "zip", lvLabel = isZip ? "ZIP" : this.levelLabel(s.level);

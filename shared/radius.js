@@ -35,6 +35,9 @@
   var INC5 = { lt50: ["lt35", "35_50"], "50_75": ["50_75"], "75_100": ["75_100"], "100_150": ["100_150"], "150p": ["150_200", "200p"] };
   var BUILT = [["pre1980", "Before 1980"], ["80_99", "1980–1999"], ["2000p", "2000 or later"]];
   var VALUES = [["lt200", "Under $200K"], ["200_400", "$200K–$399K"], ["400_750", "$400K–$749K"], ["750p", "$750K+"]];
+  // Radius age groups -> Census college enrollment age groups (B14004)
+  var ENR_MAP = { "15_17": ["15_17"], "18_24": ["18_24"], "25_34": ["25_34"], "35_44": ["35p"], "45_54": ["35p"], "55p": ["35p"],
+                  "18_34": ["18_24", "25_34"], "35_64": ["35p"], "65_74": ["35p"], "75p": ["35p"] };
   var EMPLOY = { emp: "employed", unemp: "unemployed", nilf: "nilf" };
   var RINC = [["lt35", "Under $35K"], ["35_50", "$35K–$49K"], ["50_75", "$50K–$74K"], ["75_100", "$75K–$99K"], ["100_150", "$100K–$149K"], ["150p", "$150K+"]];
   var FILTERS = {
@@ -51,11 +54,24 @@
                 options: [["nocol", "No college"], ["some", "Some college or associate's"], ["ba", "Bachelor's or higher"]],
                 share: function (c, i, sel) { return ratio(sum(sel, function (b) { return c["hhed_" + b][i]; }), c.hhed_tot[i]); } },
     kids:     { label: "Children at home", type: "flag", text: "Households with children under 18", share: function (c, i) { return ratio(c.hh_kids[i], c.hh_tot[i]); } },
-    enrolled: { label: "Currently enrolled", type: "flag", text: "In college or graduate school", share: function (c, i) { return ratio(c.enr_college[i], c.enr_tot[i]); } },
+    // Each age group's own college enrollment rate (Census B14004: 15-17, 18-24, 25-34, 35+); about 4 in 10 at 18-24, far
+    // fewer at older ages. If that file hasn't loaded, falls back to the all-ages rate.
+    enrolled: { label: "Currently enrolled", type: "flag", text: "In college or graduate school",
+                byAge: function (c, i, b) {
+                  if (b === "u18") return 0;
+                  var g = ENR_MAP[b];
+                  if (!g || !c["enr_" + g[0]]) return ratio(c.enr_college[i], c.enr_tot[i]);
+                  var e = 0, t = 0;
+                  for (var k = 0; k < g.length; k++) { var x = c["enr_" + g[k]][i], y = c["ent_" + g[k]][i]; if (x == null || y == null) return null; e += x; t += y; }
+                  return t ? Math.min(1, e / t) : 0;
+                } },
     hispanic: { label: "Hispanic or Latino", type: "flag", text: "Hispanic or Latino", share: function (c, i) { return ratio(c.hispanic[i], c.hisp_tot[i]); } },
     spanish:  { label: "Spanish at home", type: "flag", text: "Spanish spoken at home", share: function (c, i) { return ratio(c.lang_spanish[i], c.pop5[i]); } },
-    veterans: { label: "Veterans", type: "flag", text: "Civilian veterans 18+", share: function (c, i) { return ratio(c.veterans[i], c.vet_tot[i]); } },
-    somecollege: { label: "Some college, no degree", type: "flag", text: "Adults 25+ who started college but didn't finish", share: function (c, i) { return ratio(c.some_college[i], c.adults25[i]); } },
+    // Veterans are adults 18+ and "some college, no degree" is measured for adults 25+: the rate applies only to those ages
+    veterans: { label: "Veterans", type: "flag", text: "Civilian veterans 18+",
+                byAge: function (c, i, b) { return b === "u18" || b === "15_17" ? 0 : ratio(c.veterans[i], c.vet_tot[i]); } },
+    somecollege: { label: "Some college, no degree", type: "flag", text: "Adults 25+ who started college but didn't finish",
+                   byAge: function (c, i, b) { return b === "u18" || b === "15_17" || b === "18_24" ? 0 : ratio(c.some_college[i], c.adults25[i]); } },
     homeowners: { label: "Homeowners", type: "flag", text: "Owner-occupied households", share: function (c, i) { return ratio(c.owners ? c.owners[i] : null, c.hhed_tot[i]); } },
 
     // Healthcare (age set "health"): applied within each age group

@@ -7,6 +7,7 @@ window.ADTAXI_RADIUS = {
   links: [ { label: "Apartment Market Analyzer", url: "./" }, { label: "Home", url: "../analyzers/" } ],
   audienceData: "../shared/audience/zip_audience.json",
   extraData: [ { url: "../shared/audience/zip_audience_legal.json", label: "Renter and owner households by age" },
+                { url: "../shared/audience/zip_audience_enroll.json", label: "College enrollment by age" },
                { url: "../shared/audience/zip_audience_apt.json", label: "Renter household data" } ],
   zipGeo: "../shared/geo/zip/{level}/{id}.json",
   customArea: true,   // Geography > Custom area: a list or file of ZIPs, counties, towns or locations
@@ -26,6 +27,6 @@ window.ADTAXI_RADIUS = {
   ],
   methodology: [
     { title: "Renter rate by age", body: "Census reports whether a household rents by the age of the head of household, so the tool uses each age group's own renter rate. Counts are adults living in renter households." },
-    { title: "Student housing", body: "College enrollment covers everyone in college or graduate school in the ZIP, including students in dorms, so it's combined with the renter rate for 18–24 year-olds as an estimate of students renting off campus." }
+    { title: "Student housing", body: "College enrollment uses the ZIP's own enrollment rate for 18–24 year-olds (Census counts everyone in college or graduate school, including students in dorms), combined with the renter rate for that age as an estimate of students renting off campus." }
   ]
 };
