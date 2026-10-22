@@ -15,7 +15,7 @@ Built 2026-10-22. Result: **PASSED**
 | EASI U.S. used trucks per household | INFO | $1,337.30 |
 | EASI auto spending matched to DMAs | PASS | 210 of 210 |
 | EASI auto spending matched to metros | PASS | 387 of 387 |
-| Score reality check, DMAs: rank correlation with category businesses' employees per 1,000 households, score (without Competition) | INFO | New cars 0.09 (0.25); New trucks and SUVs -0.05 (0.14); Used cars -0.28 (0.16); Used trucks and SUVs -0.24 (0.10). Weak (under 0.20 without Competition): New trucks and SUVs, Used cars, Used trucks and SUVs |
+| Score reality check, DMAs: rank correlation with category businesses' employees per 1,000 households, score (without Competition) | INFO | New cars 0.09 (0.25); New trucks and SUVs -0.05 (0.14); Used cars -0.28 (0.16); Used trucks and SUVs -0.24 (0.11). Weak (under 0.20 without Competition): New trucks and SUVs, Used cars, Used trucks and SUVs |
 | Score reality check, metros: rank correlation with category businesses' employees per 1,000 households, score (without Competition) | INFO | New cars -0.12 (0.06); New trucks and SUVs -0.17 (0.03); Used cars -0.27 (0.26); Used trucks and SUVs -0.20 (0.25). Weak (under 0.20 without Competition): New cars, New trucks and SUVs |
 | EASI new cars, DMAs vs. EASI's own total | PASS | 96.8% |
 | EASI new trucks, DMAs vs. EASI's own total | PASS | 96.8% |
@@ -34,6 +34,6 @@ Built 2026-10-22. Result: **PASSED**
 | Top DMAs: New cars | INFO | San Francisco-Oakland-San Jose, New York, Washington, Dc-Hagrstwn, Los Angeles, Houston |
 | Top DMAs: New trucks and SUVs | INFO | Salt Lake City, Monterey-Salinas, Sacramento-Stockton-Modesto, Denver, Boise |
 | Top DMAs: Used cars | INFO | Traverse City-Cadillac, Green Bay-Appleton, Flint-Saginaw-Bay City, La Crosse-Eau Claire, Charleston-Huntington |
-| Top DMAs: Used trucks and SUVs | INFO | Glendive, Traverse City-Cadillac, Sioux Falls (Mitchell), Denver, Minot-Bismarck-Dickinson |
+| Top DMAs: Used trucks and SUVs | INFO | Glendive, Traverse City-Cadillac, Sioux Falls (Mitchell), Denver, La Crosse-Eau Claire |
 | Counties built from ZIPs | PASS | 3,144 counties (2,399 with 10,000+ residents are ranked) |
 | County scores within 0–100 | PASS | 0 out of range; 9,596 scores computed |
