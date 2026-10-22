@@ -1,11 +1,7 @@
 {
  "updated": "October 2026",
  "years": "2022–2025",
- "note": "Index: each month's typical sales compared with an average month (100), from not-seasonally-adjusted U.S. sales, 2022–2025. 2020–2021 are left out because of pandemic swings. National pattern; local timing can differ with weather and school calendars.",
- "source": {
-  "label": "U.S. Census Bureau, Monthly Retail Trade Survey (not seasonally adjusted)",
-  "url": "https://www.census.gov/retail/index.html"
- },
+ "note": "National patterns; local timing can differ with weather, school calendars and local events.",
  "series": {
   "4421": {
    "label": "Furniture stores",
@@ -30,7 +26,9 @@
     "sales": 5602,
     "prelim": true,
     "yoy": -5.9
-   }
+   },
+   "source": "census",
+   "kind": "sales"
   },
   "44111": {
    "label": "New car dealers",
@@ -55,7 +53,9 @@
     "sales": 109722,
     "prelim": true,
     "yoy": 0.9
-   }
+   },
+   "source": "census",
+   "kind": "sales"
   },
   "44112": {
    "label": "Used car dealers",
@@ -80,7 +80,9 @@
     "sales": 14750,
     "prelim": true,
     "yoy": 5.8
-   }
+   },
+   "source": "census",
+   "kind": "sales"
   },
   "4441": {
    "label": "Building mat. and supplies dealers",
@@ -105,24 +107,209 @@
     "sales": 39663,
     "prelim": true,
     "yoy": 5.7
-   }
+   },
+   "source": "census",
+   "kind": "sales"
+  },
+  "cs-auto": {
+   "label": "Automotive websites",
+   "index": [
+    96.1,
+    99.8,
+    105.3,
+    99.3,
+    100.7,
+    104.9,
+    104.7,
+    106.7,
+    102.1,
+    92.4,
+    91.3,
+    96.7
+   ],
+   "kind": "online",
+   "source": "comscore"
+  },
+  "cs-edu": {
+   "label": "Education websites",
+   "index": [
+    97.4,
+    121.2,
+    109.5,
+    113.4,
+    93.3,
+    70.0,
+    64.2,
+    85.8,
+    132.4,
+    123.3,
+    104.0,
+    85.5
+   ],
+   "kind": "online",
+   "source": "comscore"
+  },
+  "cs-fin": {
+   "label": "Financial Services websites",
+   "index": [
+    95.7,
+    107.5,
+    98.6,
+    98.3,
+    92.2,
+    104.5,
+    98.0,
+    101.4,
+    95.4,
+    104.1,
+    103.0,
+    101.5
+   ],
+   "kind": "online",
+   "source": "comscore"
+  },
+  "cs-health": {
+   "label": "Health websites",
+   "index": [
+    108.3,
+    107.3,
+    118.8,
+    99.8,
+    97.7,
+    101.6,
+    99.0,
+    91.7,
+    98.6,
+    98.1,
+    94.0,
+    85.0
+   ],
+   "kind": "online",
+   "source": "comscore"
+  },
+  "cs-realestate": {
+   "label": "Real Estate websites",
+   "index": [
+    100.0,
+    92.7,
+    105.8,
+    104.8,
+    103.4,
+    95.5,
+    93.0,
+    109.7,
+    106.9,
+    104.6,
+    98.9,
+    84.6
+   ],
+   "kind": "online",
+   "source": "comscore"
+  },
+  "cs-retail": {
+   "label": "Retail websites",
+   "index": [
+    97.3,
+    93.6,
+    93.0,
+    100.0,
+    98.9,
+    101.6,
+    98.2,
+    95.7,
+    100.5,
+    101.6,
+    110.6,
+    109.0
+   ],
+   "kind": "online",
+   "source": "comscore"
+  },
+  "cs-homefurn": {
+   "label": "Home furnishings websites (includes home improvement retailers)",
+   "index": [
+    105.0,
+    95.6,
+    100.5,
+    103.8,
+    105.6,
+    98.2,
+    94.4,
+    91.9,
+    97.1,
+    91.2,
+    103.9,
+    112.9
+   ],
+   "kind": "online",
+   "source": "comscore"
   }
  },
  "map": {
   "furniture": {
-   "_default": "4421"
+   "_default": [
+    "4421",
+    "cs-homefurn"
+   ]
   },
   "auto": {
-   "newcar": "44111",
-   "newtruck": "44111",
-   "usedcar": "44112",
-   "usedtruck": "44112"
+   "newcar": [
+    "44111",
+    "cs-auto"
+   ],
+   "newtruck": [
+    "44111",
+    "cs-auto"
+   ],
+   "usedcar": [
+    "44112",
+    "cs-auto"
+   ],
+   "usedtruck": [
+    "44112",
+    "cs-auto"
+   ]
   },
   "home-services": {
-   "_default": "4441"
+   "_default": [
+    "4441",
+    "cs-homefurn"
+   ]
+  },
+  "healthcare": {
+   "_default": [
+    "cs-health"
+   ]
+  },
+  "higher-ed": {
+   "_default": [
+    "cs-edu"
+   ]
+  },
+  "financial": {
+   "_default": [
+    "cs-fin"
+   ]
+  },
+  "apartments": {
+   "_default": [
+    "cs-realestate"
+   ]
   }
  },
  "proxyNote": {
   "home-services": "Building materials dealers' sales stand in for home improvement demand."
+ },
+ "sources": {
+  "census": {
+   "label": "U.S. Census Bureau, Monthly Retail Trade Survey (not seasonally adjusted)",
+   "url": "https://www.census.gov/retail/index.html",
+   "note": "Sales index: each month's typical sales compared with an average month (100), 2022–2025. 2020–2021 are left out because of pandemic swings."
+  },
+  "comscore": {
+   "label": "Comscore Media Trend, Multi-Platform, U.S. total audience",
+   "url": null,
+   "note": "Online index: visits per day to the category's websites compared with an average month (100), January 2025–September 2026. Based on 21 months, so the pattern will firm up as more months are added."
+  }
  }
 }

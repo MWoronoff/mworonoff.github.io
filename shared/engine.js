@@ -1018,8 +1018,8 @@
         .then(function (b) { if (b.map && b.map[cfg.exportName]) { self[key] = b; self.tabBar.querySelector('[data-tab="' + tab + '"]').hidden = false; self.tabBar.hidden = false; } })
         .catch(function () { /* no tab without data */ });
     }
-    if (cfg.benchmarks !== false) load(cfg.benchmarksData || "../shared/benchmarks.json?v=20261022e", "bench", "bench");
-    if (cfg.timing !== false) load(cfg.timingData || "../shared/timing.json?v=20261022e", "timing", "timing");
+    if (cfg.benchmarks !== false) load(cfg.benchmarksData || "../shared/benchmarks.json?v=20261022f", "bench", "bench");
+    if (cfg.timing !== false) load(cfg.timingData || "../shared/timing.json?v=20261022f", "timing", "timing");
   };
   Analyzer.prototype.setTab = function (tab) {
     var self = this, prev = this.tab;
@@ -1056,37 +1056,52 @@
     if (!T) return;
     box.innerHTML = "";
     box.appendChild(this.tabControls(this.renderTiming, "A clean page of this calendar to send after the meeting"));
-    var m = T.map[cfg.exportName], code = m[this.state.sub] || m._default, S = T.series[code];
-    var sub = this.subLabel ? this.subLabel() : "";
-    var idx = S.index, order = idx.map(function (v, i) { return i; });
-    var hi = order.slice().sort(function (a, b) { return idx[b] - idx[a]; }).slice(0, 3);
-    var lo = order.slice().sort(function (a, b) { return idx[a] - idx[b]; }).slice(0, 3);
-    var mn = Math.min.apply(null, idx), mx = Math.max.apply(null, idx);
-    var level = function (v) { if (v >= 105) return 4; if (v >= 101) return 3; if (v > 96) return 2; return 1; };
-    var strip = el("div", { class: "az-tm-strip", role: "list", "aria-label": "Sales index by month, 100 = average month" }, idx.map(function (v, i) {
-      return el("div", { class: "az-tm-cell az-tm-l" + level(v) + (hi.indexOf(i) >= 0 ? " az-tm-peak" : ""), role: "listitem", "aria-label": MONTHS_LONG[i] + ": " + NF0.format(v) }, [
-        el("b", { text: MONTHS[i] }), el("span", { class: "az-tm-bar", "aria-hidden": "true" }, [el("i", { style: "height:" + Math.round(18 + (v - mn) / Math.max(1, mx - mn) * 62) + "%" })]),
-        el("span", { class: "num", text: NF0.format(v) })]);
-    }));
+    var m = T.map[cfg.exportName], codes = [].concat(m[this.state.sub] || m._default), sub = this.subLabel ? this.subLabel() : "";
     var names = function (list) { return list.slice().sort(function (a, b) { return a - b; }).map(function (i) { return MONTHS_LONG[i]; }).join(", "); };
+    var level = function (v) { if (v >= 105) return 4; if (v >= 101) return 3; if (v > 96) return 2; return 1; };
+    var peaks = function (idx, n) { return idx.map(function (v, i) { return i; }).sort(function (a, b) { return idx[b] - idx[a]; }).slice(0, n); };
+    var lows = function (idx, n) { return idx.map(function (v, i) { return i; }).sort(function (a, b) { return idx[a] - idx[b]; }).slice(0, n); };
+    var stripFor = function (S) {
+      var idx = S.index, hi = peaks(idx, 3), mn = Math.min.apply(null, idx), mx = Math.max.apply(null, idx);
+      return el("div", { class: "az-tm-strip", role: "list", "aria-label": S.label + ", by month, 100 = average month" }, idx.map(function (v, i) {
+        return el("div", { class: "az-tm-cell az-tm-l" + level(v) + (hi.indexOf(i) >= 0 ? " az-tm-peak" : ""), role: "listitem", "aria-label": MONTHS_LONG[i] + ": " + NF0.format(v) }, [
+          el("b", { text: MONTHS[i] }), el("span", { class: "az-tm-bar", "aria-hidden": "true" }, [el("i", { style: "height:" + Math.round(18 + (v - mn) / Math.max(1, mx - mn) * 62) + "%" })]),
+          el("span", { class: "num", text: NF0.format(v) })]);
+      }));
+    };
+    var legend = el("div", { class: "az-tm-legend", "aria-hidden": "true" }, [el("span", { text: "Below average" }), el("i", { class: "az-tm-l1" }), el("i", { class: "az-tm-l2" }), el("i", { class: "az-tm-l3" }), el("i", { class: "az-tm-l4" }), el("span", { text: "Above average" })]);
+    // a short online history only names peaks when some month runs at least 10% above average
+    var steady = function (S) { return S.kind === "online" && Math.max.apply(null, S.index) < 110; };
+    var head = function (S) { return S.kind === "online" ? "When people shop online" : "When sales peak"; };
+    var desc = function (S) { return "U.S. " + (S.kind === "online" ? "visits to " : "") + S.label.charAt(0).toLowerCase() + S.label.slice(1) + ", typical month = 100. " + (S.kind === "sales" ? ((T.proxyNote || {})[cfg.exportName] || "") : ""); };
+    var P = T.series[codes[0]], panel = el("section", { class: "az-panel az-bench-panel" }, [
+      el("h2", { text: head(P) + (sub ? ": " + sub : "") }), el("p", { class: "az-bench-ind", text: desc(P) }), stripFor(P), legend]);
+    codes.slice(1).forEach(function (c) {
+      var S = T.series[c];
+      panel.appendChild(el("h3", { class: "az-tm-h3", text: head(S) }));
+      panel.appendChild(el("p", { class: "az-bench-ind", text: desc(S) + (steady(S) ? "Fairly steady year-round." : "Peaks: " + names(peaks(S.index, 3)) + ".") }));
+      panel.appendChild(stripFor(S));
+    });
+    box.appendChild(panel);
+    var hi = peaks(P.index, 3), lo = lows(P.index, 3);
     // back-to-back peak months are one season: start a month ahead of each season's first month
     var ahead = hi.filter(function (i) { return hi.indexOf((i + 11) % 12) < 0; }).sort(function (a, b) { return a - b; })
       .map(function (i) { return MONTHS_LONG[(i + 11) % 12]; }).join(", ");
-    var L = S.latest, card = function (k, v, n) { return el("div", { class: "az-panel az-tm-card" }, [el("span", { text: k }), el("b", { text: v }), n ? el("small", { text: n }) : null]); };
-    box.appendChild(el("section", { class: "az-panel az-bench-panel" }, [
-      el("h2", { text: "When sales peak" + (sub ? ": " + sub : "") }),
-      el("p", { class: "az-bench-ind", text: "U.S. " + S.label.toLowerCase() + ", typical month = 100. " + ((T.proxyNote || {})[cfg.exportName] || "") }),
-      strip,
-      el("div", { class: "az-tm-legend", "aria-hidden": "true" }, [el("span", { text: "Below average" }), el("i", { class: "az-tm-l1" }), el("i", { class: "az-tm-l2" }), el("i", { class: "az-tm-l3" }), el("i", { class: "az-tm-l4" }), el("span", { text: "Above average" })])]));
-    box.appendChild(el("section", { class: "az-tm-cards" }, [
-      card("Peak months", names(hi), "Highest typical sales"),
-      card("Slowest months", names(lo), "Lowest typical sales"),
-      card("Start campaigns by", ahead, "About a month ahead of each peak"),
-      card("Latest month", (L.yoy >= 0 ? "+" : "") + NF1.format(L.yoy) + "%", MONTHS_LONG[L.month - 1] + " " + L.year + " vs. a year earlier" + (L.prelim ? " (preliminary)" : ""))]));
-    box.appendChild(el("p", { class: "az-bench-note", text: T.note }));
-    box.appendChild(el("section", { class: "az-panel az-sources" }, [el("h2", { text: "Source" }),
-      el("p", null, [el("a", { href: T.source.url, target: "_blank", rel: "noopener", text: T.source.label }), ", NAICS " + S.naics + " (" + S.label + "). Updated " + T.updated + "."])]));
+    var card = function (k, v, n) { return el("div", { class: "az-panel az-tm-card" }, [el("span", { text: k }), el("b", { text: v }), n ? el("small", { text: n }) : null]); };
+    var L = P.latest, cards = steady(P) ? [card("Seasonal swing", "Fairly steady year-round", "No month runs 10% or more above average"),
+      card("Highest months", names(hi), "Small lifts, not true peaks"), card("Timing advice", "Keep a steady presence", "Spend can follow budget cycles rather than season")] :
+      [card("Peak months", names(hi), P.kind === "online" ? "Most online shopping activity" : "Highest typical sales"),
+      card("Slowest months", names(lo), P.kind === "online" ? "Least online shopping activity" : "Lowest typical sales"),
+      card("Start campaigns by", ahead, "About a month ahead of each peak")];
+    if (L) cards.push(card("Latest month", (L.yoy >= 0 ? "+" : "") + NF1.format(L.yoy) + "%", MONTHS_LONG[L.month - 1] + " " + L.year + " sales vs. a year earlier" + (L.prelim ? " (preliminary)" : "")));
+    box.appendChild(el("section", { class: "az-tm-cards" + (cards.length === 3 ? " az-tm-cards3" : "") }, cards));
+    var used = {}; codes.forEach(function (c) { used[T.series[c].source] = 1; });
+    box.appendChild(el("p", { class: "az-bench-note", text: Object.keys(used).map(function (k) { return T.sources[k].note; }).concat([T.note]).join(" ") }));
+    box.appendChild(el("section", { class: "az-panel az-sources" }, [el("h2", { text: "Sources" }),
+      el("p", null, Object.keys(used).map(function (k, i) { var X = T.sources[k];
+        return el("span", null, [i ? " \u00b7 " : "", X.url ? el("a", { href: X.url, target: "_blank", rel: "noopener", text: X.label }) : X.label]); }).concat([" Updated " + T.updated + "."]))]));
   };
+
   Analyzer.prototype.benchFor = function (sub) {
     var m = this.bench.map[this.cfg.exportName], pick = m[sub] || m._default;
     return { ind: this.bench.industries[pick[0]], exact: pick[1], all: this.bench.industries.all };
