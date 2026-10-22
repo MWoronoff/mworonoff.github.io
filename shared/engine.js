@@ -385,7 +385,7 @@
     }
     if (window.AdtaxiRadius) go();
     else {
-      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261022a";   // version tag: browsers fetch the new file after an update
+      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261022b";   // version tag: browsers fetch the new file after an update
       sc.onload = go; sc.onerror = function () { self.showError("The radius tool didn't load. Refresh the page and try again."); };
       document.head.appendChild(sc);
     }

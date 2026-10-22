@@ -509,6 +509,85 @@ def self_test():
     return "percentile and weighted-average hand checks reproduce exactly"
 
 
+# ---------------- CDC BRFSS: national condition rates by age (for the radius tool) ----------------
+# CDC PLACES gives one rate for all adults in a ZIP. The radius tool splits that rate across its age groups using CDC's
+# national BRFSS rates by age (the same survey PLACES is modeled from), so diabetes, high blood pressure and arthritis
+# rise with age instead of being applied evenly. Source: BRFSS Prevalence Data (2011 to present), data.cdc.gov dttw-5yxu,
+# the all-states median by age group. BRFSS's oldest group is 65+, so 65-74 and 75+ share its rate.
+BRFSS_URL = ("https://data.cdc.gov/resource/dttw-5yxu.json?$limit=50000&$select=year,locationabbr,topic,question,response,"
+             "break_out,data_value&$where=" + urllib.parse.quote("break_out_category='Age Group' AND locationabbr in('US','UW')"))
+BRFSS_AGES = ["18-24", "25-34", "35-44", "45-54", "55-64", "65+"]
+
+
+def brfss_pick(rows, cond):
+    """Rows of one BRFSS measure for a condition."""
+    def q(r): return (r.get("question") or "").lower()
+    def resp(r): return (r.get("response") or "").strip().lower()
+    if cond == "obesity":
+        return [r for r in rows if "bmi" in (q(r) + (r.get("topic") or "").lower()) and resp(r).startswith("obese")]
+    if cond == "fairpoor":
+        return [r for r in rows if "general health" in q(r) and resp(r) in ("fair", "poor")]
+    if cond == "mhlth":
+        return [r for r in rows if "mental health" in q(r) and ("14" in resp(r) or "frequent" in resp(r))]
+    words = {"diabetes": ["diabetes"], "bphigh": ["high blood pressure"], "arthritis": ["arthritis"], "depression": ["depress"]}[cond]
+    return [r for r in rows if all(w in q(r) for w in words) and resp(r) == "yes" and "medic" not in q(r)
+            and "pre-diabetes" not in q(r) and "borderline" not in q(r)]
+
+
+def condition_age_rates(cache, rep):
+    """{condition: {radius age group: national % of adults}}, or {} if unavailable."""
+    try:
+        if cache:
+            p = os.path.join(cache, "brfss_age.json")
+            if not os.path.exists(p): raise RuntimeError("test cache has no brfss_age.json")
+            rows = json.load(open(p))
+        else:
+            log("Downloading CDC BRFSS rates by age"); rows = json.loads(get(BRFSS_URL, tries=3, timeout=300))
+        log(f"BRFSS rows: {len(rows):,}")
+    except Exception as e:
+        rep.append(("CDC BRFSS rates by age", "WARN", f"not available this run ({e}); radius tool applies each ZIP's all-adult condition rate at every age"))
+        return {}
+    # National adults by BRFSS age group (ACS), to combine BRFSS groups into the radius tool's groups
+    acs = json.load(open(os.path.join(ROOT, "shared", "audience", "zip_audience.json")))["cols"]
+    hl = json.load(open(os.path.join(ROOT, "shared", "audience", "zip_audience_health.json")))["cols"]
+    tot = lambda cols, k: float(sum(x or 0 for x in cols[k]))
+    n = {g: tot(acs, "m" + k) + tot(acs, "f" + k) for g, k in (("18-24", "18_24"), ("25-34", "25_34"), ("35-44", "35_44"), ("45-54", "45_54"))}
+    n["55-64"] = tot(hl, "mh35_64") + tot(hl, "fh35_64") - n["35-44"] - n["45-54"]
+    n["65+"] = sum(tot(hl, s + "h" + b) for s in "mf" for b in ("65_74", "75p"))
+    groups = {"18_34": ["18-24", "25-34"], "35_64": ["35-44", "45-54", "55-64"], "65_74": ["65+"], "75p": ["65+"]}
+    out, used = {}, []
+    for cond in RADIUS_CONDITIONS:
+        if cond == "nodental": continue
+        best = None
+        for loc in ("US", "UW"):
+            sel = [r for r in brfss_pick(rows, cond) if r.get("locationabbr") == loc and r.get("data_value") not in (None, "")]
+            for y in sorted({int(r["year"]) for r in sel}, reverse=True):
+                ry = [r for r in sel if int(r["year"]) == y]
+                qtext = sorted({r["question"] for r in ry})[0]
+                ry = [r for r in ry if r["question"] == qtext]          # one question only
+                v = {a: sum(float(r["data_value"]) for r in ry if r.get("break_out") == a) for a in BRFSS_AGES}
+                if all(v[a] > 0 for a in BRFSS_AGES): best = (y, loc, qtext, v); break
+            if best: break
+        if not best:
+            rep.append((f"CDC BRFSS rates by age: {DEMAND_LABELS[cond]}", "WARN", "not found; radius tool uses the all-adult rate at every age"))
+            continue
+        y, loc, qtext, v = best
+        out[cond] = {g: round(sum(v[a] * n[a] for a in m) / sum(n[a] for a in m), 2) for g, m in groups.items()}
+        used.append(f"{DEMAND_LABELS[cond]} ({y}): " + ", ".join(f"{g.replace('_', '–').replace('p', '+')} {r:.1f}%" for g, r in out[cond].items()))
+        log(f"BRFSS {cond}: {y} {loc} '{qtext}' -> {out[cond]}")
+    if out:
+        rep.append(("CDC BRFSS rates by age (all-states median)", "INFO", "; ".join(used)))
+        # Checks: rates are percentages, and conditions that rise with age do (catches a wrong question or response)
+        bad = [c for c, r in out.items() if not all(0 < x < 100 for x in r.values())]
+        rising = [c for c in ("diabetes", "bphigh", "arthritis") if c in out and not out[c]["65_74"] > 2 * out[c]["18_34"]]
+        ok = not bad and not rising
+        rep.append(("CDC BRFSS rates by age: plausible", "PASS" if ok else "FAIL",
+                    "diabetes, high blood pressure and arthritis at least twice as common at 65+ as at 18–34" if ok
+                    else f"out of range: {bad}; not rising with age: {rising}; radius tool uses all-adult rates"))
+        if not ok: return {}
+    return out
+
+
 # ---------------- Main ----------------
 def main():
     ap_ = argparse.ArgumentParser(); ap_.add_argument("--cache"); a = ap_.parse_args()
@@ -633,6 +712,8 @@ def main():
             if f"{k}_fill" not in z.columns: z[f"{k}_fill"] = 0; z[f"{k}_low"] = False
         rep.append(("CDC PLACES download", "WARN", f"not available this run ({e}); Consumer Demand uses Census inputs only"))
         release = None
+
+    cond_age = condition_age_rates(a.cache, rep)
 
     # ---------------- Aggregate to a level ----------------
     def agg(g):
@@ -935,7 +1016,8 @@ def main():
         cols[k] = [None if pd.isna(x) else int(round(x * 1000)) for x in zc_out[k]]
         cols[k + "_est"] = [int(x > 0) for x in zc_out[f"{k}_fill"]]
     json.dump({"meta": {"built": built, "release": release, "units": "tenths of a percent of adults 18+",
-                        "labels": {k: DEMAND_LABELS[k] for k in radius_keys}}, "cols": cols},
+                        "labels": {k: DEMAND_LABELS[k] for k in radius_keys},
+                        "ageRates": {k: v for k, v in cond_age.items() if k in radius_keys}}, "cols": cols},
               open(os.path.join(OUT, "zip_conditions.json"), "w"), separators=(",", ":"))
     log(f"Wrote {len(zc_out):,} ZIPs of condition rates ({', '.join(radius_keys) or 'none'}) for the radius tool")
 

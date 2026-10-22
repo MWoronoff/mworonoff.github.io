@@ -31,6 +31,22 @@
   // Health conditions (CDC PLACES, adults): any of the selected, treating conditions as independent within a ZIP
   var CONDITIONS = [["diabetes", "Diabetes"], ["bphigh", "High blood pressure"], ["arthritis", "Arthritis"], ["obesity", "Obesity"],
                     ["depression", "Depression"], ["mhlth", "Frequent mental distress"], ["fairpoor", "Fair or poor health"]];
+  // A ZIP's CDC PLACES rate covers all its adults. CDC's national rates by age (BRFSS, saved with the ZIP condition data)
+  // split it across age groups: rate for an age = ZIP rate x national rate for that age / national rate at the ZIP's own
+  // adult age mix, so the ZIP's total stays at CDC's figure while seniors get more and young adults fewer.
+  var COND_AGE = null, ADULT_AGES = ["18_34", "35_64", "65_74", "75p"];
+  function condRate(c, i, b, k) {
+    var p = c[k] ? c[k][i] : null; if (p == null) return null; p = p / 1000;
+    var r = COND_AGE && COND_AGE[k];
+    if (r && r[b] != null && c.mh18_34) {
+      var mix = 0, adults = 0;
+      for (var a = 0; a < ADULT_AGES.length; a++) {
+        var x = (c["mh" + ADULT_AGES[a]][i] || 0) + (c["fh" + ADULT_AGES[a]][i] || 0); mix += x * r[ADULT_AGES[a]]; adults += x;
+      }
+      if (mix > 0) p = p * r[b] * adults / mix;
+    }
+    return Math.min(0.95, p);
+  }
   var INC4 = { lt50: ["lt35", "35_50"], "50_100": ["50_75", "75_100"], "100_150": ["100_150"], "150p": ["150_200", "200p"] };   // fewer income bands
   var INC5 = { lt50: ["lt35", "35_50"], "50_75": ["50_75"], "75_100": ["75_100"], "100_150": ["100_150"], "150p": ["150_200", "200p"] };
   var BUILT = [["pre1980", "Before 1980"], ["80_99", "1980–1999"], ["2000p", "2000 or later"]];
@@ -84,7 +100,7 @@
                   byAge: function (c, i, b, sel) {
                     if (b === "u18") return 0;
                     var none = 1;
-                    for (var k = 0; k < sel.length; k++) { var p = c[sel[k]] ? c[sel[k]][i] : null; if (p == null) return null; none *= 1 - Math.min(1, p / 1000); }
+                    for (var k = 0; k < sel.length; k++) { var p = condRate(c, i, b, sel[k]); if (p == null) return null; none *= 1 - p; }
                     return 1 - none;
                   } },
     hearing:  { label: "Hearing difficulty", type: "flag", text: "Hearing difficulty", byAge: function (c, i, b) { return ratio(c["hear_" + b][i], c["civ_" + b][i]); } },
@@ -431,6 +447,7 @@
       if (!r.ok) throw new Error("HTTP " + r.status);
       return r.json();
     }).then(function (d) {
+      if (d.meta && d.meta.ageRates && Object.keys(d.meta.ageRates).length) COND_AGE = d.meta.ageRates;
       var zips = d.cols.zip;
       Object.keys(d.cols).forEach(function (k) {
         if (k === "zip") return;
@@ -476,7 +493,8 @@
   /* ---------- Audience math ---------- */
   Radius.prototype.audience = function (i) {
     var c = this.c, sel = this.state.sel, defs = this.filterDefs, ages = this.ages, base;
-    var g = sel.gender && sel.gender.length ? sel.gender : null, a = sel.age && sel.age.length ? sel.age : null;
+    // Both genders ticked is the same as no gender filter (counts everyone, not just the ages the sex x age table covers)
+    var g = sel.gender && sel.gender.length === 1 ? sel.gender : null, a = sel.age && sel.age.length ? sel.age : null;
     var keys = Object.keys(sel), byAge = keys.filter(function (k) { return defs[k].byAge; });
     var either = this.state.profile && this.profiles[this.state.profile] && this.profiles[this.state.profile].either;
     if (either) return this.audienceEither(i, either);
