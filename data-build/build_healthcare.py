@@ -458,6 +458,17 @@ def zcta_land(cache, rep):
     raise RuntimeError("No Census Gazetteer ZCTA file could be found")
 
 
+# Categories reviewed (Oct 2026) where business employment isn't a fair benchmark: the score is kept as is and the check
+# lists them as reviewed, with the reason, instead of weak. Keyed by category label, or by the benchmark's business type.
+REVIEWED = {
+    "New cars": "dealers cluster in regional hubs and small towns and buyers travel to them; every score part, including EASI new-vehicle spending, runs against dealer density",
+    "New trucks and SUVs": "same as new cars", "Used cars": "same as new cars", "Used trucks and SUVs": "same as new cars",
+    "furniture retailers": "stores cluster in regional hubs and showroom centers and buyers travel to them",
+    "Tax preparation": "offices follow market size; the score uses IRS counts of returns filed through paid preparers, the direct measure of customers",
+    "Eye care": "need (age 45+, diabetes, vision difficulty) runs highest where providers are scarcer; the DMA check passes",
+}
+
+
 def validate_scores(rep, z, co, subs, levels, what="businesses"):
     """Reality check: rank correlation between each category's Market Potential Score and an independent benchmark,
     Census employees in the category's industries per 1,000 households. Businesses hire where customers buy, and head
@@ -483,8 +494,12 @@ def validate_scores(rep, z, co, subs, levels, what="businesses"):
             lines.append(f"{slab} {r1:.2f} ({r2:.2f})")
             if r2 < 0.2: weak.append(slab)
         if lines:
+            rev = [w for w in weak if w in REVIEWED or what in REVIEWED]
+            weak = [w for w in weak if w not in rev]
+            why = sorted({REVIEWED.get(w) or REVIEWED.get(what) for w in rev})
             rep.append((f"Score reality check, {lab}: rank correlation with {what}' employees per 1,000 households, score (without Competition)",
-                        "INFO", "; ".join(lines) + (f". Weak (under 0.20 without Competition): {', '.join(weak)}" if weak else ". None weak.")))
+                        "INFO", "; ".join(lines) + (f". Weak (under 0.20 without Competition): {', '.join(weak)}" if weak else ". None weak.")
+                        + (f" Reviewed and kept (benchmark doesn't fit): {', '.join(rev)} ({'; '.join(why)})." if rev else "")))
 
 
 # ---------------- Scoring helpers ----------------
