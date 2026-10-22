@@ -47,6 +47,7 @@ REQUESTS = {
     "C16001": [v("C16001", 1), v("C16001", 3)],                       # language at home, population 5+
     "B21001": [v("B21001", 1), v("B21001", 2)],                       # veteran status, civilian 18+
     "B15003": [v("B15003", n) for n in (1, 17, 18, 19, 20, 21, 22, 23, 24, 25)],   # education, population 25+
+    "B14004": [v("B14004", n) for n in range(1, 34)],                 # college or graduate school enrollment by sex by age, 15+
     # Legal analyzer
     "B12001": [v("B12001", n) for n in (1, 2, 3, 4, 7, 9, 10, 11, 12, 13, 16, 18, 19)],   # sex by marital status, 15+
     "B25007": [v("B25007", n) for n in range(1, 22)],                 # tenure by age of householder (owner 2-11, renter 12-21)
@@ -87,6 +88,10 @@ MOVED_PRE2010 = (6, 7, 8)
 # B15001 layout: male total 2, female total 43; each age group's total line, followed by its 7 education lines
 # (less than 9th grade, 9th-12th no diploma, high school graduate, some college no degree, associate's, bachelor's, graduate)
 B15001_GROUPS = {"18_24": (3, 44), "25_34": (11, 52), "35_44": (19, 60), "45_64": (27, 68), "65p": (35, 76)}
+# B14004 (college enrollment by sex by age, 15+): male total 2; enrolled in public college 3 (ages 4-7), private 8 (9-12),
+# not enrolled 13 (14-17); female lines are +16. Age lines in each block: 15-17, 18-24, 25-34, 35 and over.
+ENR_AGES = {"15_17": 0, "18_24": 1, "25_34": 2, "35p": 3}
+ENR_BLOCKS = {"public": 3, "private": 8, "not": 13}
 # Healthcare radius age brackets (all ages), as B01001 lines for males (+24 for females)
 HC_AGES = {"u18": range(3, 7), "18_34": range(7, 13), "35_64": range(13, 20), "65_74": range(20, 23), "75p": range(23, 26)}
 # B18102 / B18103 (difficulty by sex by age): each age group is a total line then "with" and "without"; male groups start
@@ -119,6 +124,9 @@ LABEL_CHECKS = [(v("B01001", 2), ["Male"]), (v("B01001", 26), ["Female"])] + \
      (v("B03003", 3), ["Hispanic or Latino"]),
      (v("C16001", 3), ["Spanish"]),
      (v("B21001", 2), ["Veteran"]),
+     (v("B14004", 2), ["Male"]), (v("B14004", 3), ["Male", "public college"]), (v("B14004", 5), ["Male", "public college", "18 to 24"]),
+     (v("B14004", 8), ["Male", "private college"]), (v("B14004", 13), ["Male", "Not enrolled"]), (v("B14004", 17), ["Male", "Not enrolled", "35 years"]),
+     (v("B14004", 18), ["Female"]), (v("B14004", 21), ["Female", "public college", "18 to 24"]), (v("B14004", 33), ["Female", "Not enrolled", "35 years"]),
      (v("B15003", 19), ["Some college", "less than 1 year"]), (v("B15003", 20), ["Some college", "no degree"]),
      (v("B12001", 7), ["Male", "Separated"]), (v("B12001", 10), ["Male", "Divorced"]), (v("B12001", 16), ["Female", "Separated"]),
      (v("B12001", 19), ["Female", "Divorced"]), (v("B25007", 2), ["Owner occupied"]), (v("B25007", 7), ["Owner", "55 to 59"]),
@@ -321,6 +329,11 @@ def main():
     out["hh_kids"], out["hh_tot"] = acs[v("B11005", 2)], acs[v("B11005", 1)]
     out["enr_college"] = acs[v("B14001", 8)] + acs[v("B14001", 9)]
     out["enr_tot"] = acs[v("B14001", 1)]
+    # College enrollment by age (both sexes): enrolled and everyone, per B14004 age group, so the radius tool applies each
+    # age group's own enrollment rate (about 4 in 10 at 18-24, far fewer at 35+) instead of one rate for all ages
+    for b, k in ENR_AGES.items():
+        out[f"enr_{b}"] = sum(acs[v("B14004", ENR_BLOCKS[t] + 1 + k + off)] for t in ("public", "private") for off in (0, 16))
+        out[f"ent_{b}"] = out[f"enr_{b}"] + sum(acs[v("B14004", ENR_BLOCKS["not"] + 1 + k + off)] for off in (0, 16))
     out["hispanic"], out["hisp_tot"] = acs[v("B03003", 3)], acs[v("B03003", 1)]
     out["lang_spanish"], out["pop5"] = acs[v("C16001", 3)], acs[v("C16001", 1)]
     out["veterans"], out["vet_tot"] = acs[v("B21001", 2)], acs[v("B21001", 1)]
@@ -407,6 +420,19 @@ def main():
                               ("owners", "hhed_tot", "Homeowners")):
         n = int((out[part] > out[total] + 1).sum())
         rep.append((f"{name} never exceeds its total", "PASS" if n == 0 else "FAIL", f"{n} ZIPs over"))
+
+    # College enrollment by age (B14004): every block adds up, and its enrolled total agrees with B14001 (catches wrong lines)
+    bad = 0
+    for off in (0, 16):
+        for t, start in ENR_BLOCKS.items():
+            bad += int(((sum(acs[v("B14004", start + off + 1 + k)] for k in range(4)) - acs[v("B14004", start + off)]).abs() > 1).sum())
+        bad += int(((sum(acs[v("B14004", start + off)] for start in ENR_BLOCKS.values()) - acs[v("B14004", 2 + off)]).abs() > 1).sum())
+    bad += int(((acs[v("B14004", 2)] + acs[v("B14004", 18)] - acs[v("B14004", 1)]).abs() > 1).sum())
+    rep.append(("College enrollment by age adds up (B14004)", "PASS" if bad == 0 else "FAIL", f"{bad} ZIP-blocks off"))
+    e_age, e_all = sum(out[f"enr_{b}"].sum() for b in ENR_AGES), out.enr_college.sum()
+    rep.append(("College enrollment: by-age total vs. B14001", "PASS" if abs(e_age / e_all - 1) < 0.03 else "FAIL", f"{e_age:,.0f} vs {e_all:,.0f}"))
+    r1824 = out.enr_18_24.sum() / out.ent_18_24.sum() * 100
+    rep.append(("Published benchmark: college enrollment rate, ages 18-24", "PASS" if 30 < r1824 < 50 else "FAIL", f"{r1824:.1f}% (expected 30–50)"))
 
     # Legal tables: parts add up to their totals (catches wrong line numbers, since the file server has no labels)
     msum = acs[v("B12001", 2)] + acs[v("B12001", 11)]
@@ -584,6 +610,7 @@ def main():
              "zip_audience_legal.json": ["pop16", "nilf"] + [f"{t}{b}" for t in "or" for b in TEN_BRACKETS] + [f"val_{b}" for b in VAL_BANDS],
              "zip_audience_apt.json": ["r_tot", "r_sfd", "r_5p", "r_20p", "r_mtot", "r_moved21", "r_moved20", "rinc_tot"] + [f"rinc_{b}" for b in RINC] +
                                       ["rb_base", "rb_30p", "vac_rent", "vac_rented", "rk_tot", "r_kids"],
+             "zip_audience_enroll.json": [f"{t}_{b}" for t in ("enr", "ent") for b in ENR_AGES],
              "zip_audience_home.json": ["hb_tot"] + [f"hb_{b}" for b in BUILT] + ["hu_tot", "sfd_own", "hm_tot", "lt_own", "o_moved20"]}
     cols = {"zip": m.zip.tolist(), "city": m.city.fillna("").tolist(), "state": m.state.tolist(),
             "lat": m.lat.round(4).tolist(), "lon": m.lon.round(4).tolist(),

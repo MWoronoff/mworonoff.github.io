@@ -359,7 +359,7 @@ def main():
                 for p in per_sub:
                     k = f"{p}@{s['id']}"
                     if k in df.columns:
-                        x = clean(r[k]); v[k] = int(round(x)) if p in SCORE_KEYS and x is not None else x
+                        x = clean(r[k]); v[k] = round(x, 1) if p in SCORE_KEYS and x is not None else x   # one decimal: ranks use the real value, so near-equal markets don't show as ties
             v = {k: x for k, x in v.items() if x is not None}
             f = flags_fn(idx, r) if flags_fn else []
             if v.get("rent", 0) >= 3500: f.append("Median rent is at Census's $3,500 cap for ZIPs, so the actual figure is higher.")

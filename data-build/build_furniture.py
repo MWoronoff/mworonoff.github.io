@@ -273,7 +273,7 @@ def main():
                 for p in per_sub:
                     k = f"{p}@{s['id']}"
                     if k in df.columns:
-                        x = clean(r[k]); v[k] = int(round(x)) if (p in SCORE_KEYS or p in SUB_INTS) and x is not None else x
+                        x = clean(r[k]); v[k] = (round(x, 1) if p in SCORE_KEYS else int(round(x))) if (p in SCORE_KEYS or p in SUB_INTS) and x is not None else x   # scores to one decimal so ranks don't tie
             v = {k: x for k, x in v.items() if x is not None}
             out.append({"id": str(idx), "name": names(idx), "v": v, "f": flags_fn(idx, r) if flags_fn else []})
         return out

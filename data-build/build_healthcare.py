@@ -45,7 +45,7 @@ SUBCATS = [
      "demand": ["a65p", "a65s", "diabetes", "bphigh"],
      "note": "No Spending Power part: prescriptions follow age and health and are mostly paid by insurance, not household income."},
     {"id": "dental", "label": "Dental", "naics": ["621210"],
-     "demand": ["adults", "inc75_share", "nodental"]},
+     "demand": ["adults", "nodental"]},          # income counts once, under Spending Power
     {"id": "hearing", "label": "Hearing and audiology", "naics": ["621340", "456199"], "counts": False,
      "demand": ["a65p", "hearing"],
      "note": "No Competition part: Census counts audiologists with physical, occupational and speech therapists (mostly physical therapy), so no clean hearing business count exists."},
@@ -832,7 +832,7 @@ def main():
                     k = f"{p}@{s['id']}"
                     if k in df.columns:
                         x = clean(r[k])
-                        v[k] = int(round(x)) if p in SCORE_KEYS and x is not None else x
+                        v[k] = round(x, 1) if p in SCORE_KEYS and x is not None else x   # one decimal: ranks use the real value, so near-equal markets don't show as ties
             for k in ("population", "households", "adults", "a45p", "a65p", "a75p", "a30_64") + tuple(c for c in easi_spend_cols if c.endswith("_total")) + tuple(e for e in extra if not e.endswith(("_rate", "_g"))):
                 if v.get(k) is not None: v[k] = int(round(v[k]))
             for s in SUBCATS:
