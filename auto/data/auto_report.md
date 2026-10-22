@@ -15,8 +15,8 @@ Built 2026-10-22. Result: **PASSED**
 | EASI U.S. used trucks per household | INFO | $1,337.30 |
 | EASI auto spending matched to DMAs | PASS | 210 of 210 |
 | EASI auto spending matched to metros | PASS | 387 of 387 |
-| Score reality check, DMAs: rank correlation with category businesses' employees per 1,000 households, score (without Competition) | INFO | New cars 0.09 (0.25); New trucks and SUVs -0.05 (0.14); Used cars -0.28 (0.16); Used trucks and SUVs -0.24 (0.11). Weak (under 0.20 without Competition): New trucks and SUVs, Used cars, Used trucks and SUVs |
-| Score reality check, metros: rank correlation with category businesses' employees per 1,000 households, score (without Competition) | INFO | New cars -0.12 (0.06); New trucks and SUVs -0.17 (0.03); Used cars -0.27 (0.26); Used trucks and SUVs -0.20 (0.25). Weak (under 0.20 without Competition): New cars, New trucks and SUVs |
+| Score reality check, DMAs: rank correlation with category businesses' employees per 1,000 households, score (without Competition) | INFO | New cars 0.09 (0.25); New trucks and SUVs -0.05 (0.14); Used cars -0.28 (0.16); Used trucks and SUVs -0.24 (0.11). None weak. Reviewed and kept (benchmark doesn't fit): New trucks and SUVs, Used cars, Used trucks and SUVs (same as new cars). |
+| Score reality check, metros: rank correlation with category businesses' employees per 1,000 households, score (without Competition) | INFO | New cars -0.12 (0.06); New trucks and SUVs -0.17 (0.03); Used cars -0.27 (0.26); Used trucks and SUVs -0.20 (0.25). None weak. Reviewed and kept (benchmark doesn't fit): New cars, New trucks and SUVs (dealers cluster in regional hubs and small towns and buyers travel to them; every score part, including EASI new-vehicle spending, runs against dealer density; same as new cars). |
 | EASI new cars, DMAs vs. EASI's own total | PASS | 96.8% |
 | EASI new trucks, DMAs vs. EASI's own total | PASS | 96.8% |
 | EASI used cars, DMAs vs. EASI's own total | PASS | 96.8% |
