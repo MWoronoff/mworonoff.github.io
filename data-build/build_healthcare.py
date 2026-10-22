@@ -564,7 +564,8 @@ def condition_age_rates(cache, rep):
     for r in rows: r["break_out"] = age_of(r.get("break_out"))
     locs = sorted({r.get("locationabbr") for r in rows if r.get("locationabbr")})
     rep.append(("CDC BRFSS download", "INFO", f"{len(rows):,} rows by age; {len(locs)} locations; national median rows: {'yes' if 'US' in locs else 'no'}"))
-    # Without CDC's national median rows, take the median across states (CDC's national figure is the same median)
+    # Without CDC's national median rows, take the median across states that publish the cell (at least 10; states suppress
+        # small cells, such as diabetes at 18-24)
     if "US" not in locs and rows:
         states = {x for x in locs if x and len(x) == 2 and x not in ("GU", "PR", "VI", "UW")}
         cells = {}
@@ -572,7 +573,7 @@ def condition_age_rates(cache, rep):
             if r.get("locationabbr") in states and r.get("data_value") not in (None, "") and r["break_out"]:
                 cells.setdefault((r["year"], r.get("topic"), r["question"], r["response"], r["break_out"]), []).append(float(r["data_value"]))
         rows = rows + [{"year": y, "locationabbr": "US", "topic": t, "question": q, "response": rs, "break_out": ag, "data_value": float(np.median(v))}
-                       for (y, t, q, rs, ag), v in cells.items() if len(v) >= 40]
+                       for (y, t, q, rs, ag), v in cells.items() if len(v) >= 10]
     out, used = {}, []
     for cond in RADIUS_CONDITIONS:
         if cond == "nodental": continue
