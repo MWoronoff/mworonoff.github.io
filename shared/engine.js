@@ -83,6 +83,14 @@
     var k = this.valueKey(m);
     return Object.prototype.hasOwnProperty.call(row.v, k) ? row.v[k] : null;
   };
+  // Tie-breaker for the overall score: a score is an average of ranks, so two markets can land on exactly the same score.
+  // Equal scores are ordered by the first score part (Demand); markets equal on both stay tied. Used by the table and panel.
+  Analyzer.prototype.tieMeasure = function (m) {
+    if (!m || !/^score(@|$)/.test(m.key)) return null;
+    var c = (this.cfg.components || [])[0];
+    return c ? this.measure(c) : null;
+  };
+  Analyzer.prototype.tieVal = function (row, t) { var x = t ? this.val(row, t) : null; return typeof x === "number" ? x : -Infinity; };
   Analyzer.prototype.subLabel = function () {
     var s = (this.cfg.subcategories || []).filter(function (x) { return x.id === this.state.sub; }, this)[0];
     return s ? s.label : "";
@@ -152,6 +160,7 @@
   var ABOUT_ESTIMATES = { title: "About these estimates", body: [
     "Estimates for planning. Scores rank markets against each other; they don't forecast sales, leads or ad results.",
     "Census ACS figures are 5-year survey averages with margins of error, widest for small ZIPs and counties. IRS, mortgage, business and EASI figures are the newest year published, often one to three years old. Years are listed under Sources.",
+    "Markets with the same overall score are ranked by their Demand part; markets equal on both share a rank.",
     "Trade area counts are modeled: selected traits are treated as independent within each ZIP.",
     "Business counts: U.S. totals are Census's published national figures. Market counts come from Census's county file, which adds to 1–6% less because Census withholds some county detail.",
     "ZIPs under 500 residents, and ZIPs that are mostly group quarters (campuses, bases, prisons), are shown but not ranked." ] };
@@ -385,7 +394,7 @@
     }
     if (window.AdtaxiRadius) go();
     else {
-      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261022b";   // version tag: browsers fetch the new file after an update
+      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261022c";   // version tag: browsers fetch the new file after an update
       sc.onload = go; sc.onerror = function () { self.showError("The radius tool didn't load. Refresh the page and try again."); };
       document.head.appendChild(sc);
     }
@@ -754,12 +763,13 @@
   Analyzer.prototype.sortedRows = function () {
     var self = this, s = this.state, d = this.d(s.level);
     var key = s.sortKey || s.rank, m = this.measure(key), dir = s.sortKey ? s.sortDir : (m && m.lowerIsBetter ? "asc" : "desc");
-    var rows = d.rows.slice();
+    var rows = d.rows.slice(), t = this.tieMeasure(m);
     rows.sort(function (a, b) {
       var x = self.val(a, m), y = self.val(b, m);
       var xn = typeof x !== "number", yn = typeof y !== "number";
       if (xn && yn) return a.name.localeCompare(b.name);
       if (xn) return 1; if (yn) return -1;          // no data always sorts last
+      if (x === y && t) { var tx = self.tieVal(a, t), ty = self.tieVal(b, t); if (tx !== ty) return dir === "asc" ? tx - ty : ty - tx; }
       return dir === "asc" ? x - y : y - x;
     });
     return rows;
@@ -776,8 +786,13 @@
     // Rank numbers follow the "rank by" measure, independent of column sorting.
     var rankOrder = s.sortKey ? (function () { var k = s.sortKey; s.sortKey = null; var r = self.sortedRows(); s.sortKey = k; return r; })() : all;
     // Equal values share a rank (1, 2, 2, 4), the same way the market panel counts rank and ties
-    var rankOf = {}, n = 0, prevV = null, prevR = 0;
-    rankOrder.forEach(function (r) { var x = self.val(r, rankM); if (typeof x !== "number") return; n++; if (x !== prevV) { prevR = n; prevV = x; } rankOf[r.id] = prevR; });
+    var rankOf = {}, n = 0, prevV = null, prevT = null, prevR = 0, tieM = this.tieMeasure(rankM);
+    rankOrder.forEach(function (r) {
+      var x = self.val(r, rankM); if (typeof x !== "number") return; n++;
+      var t = self.tieVal(r, tieM);
+      if (x !== prevV || t !== prevT) { prevR = n; prevV = x; prevT = t; }
+      rankOf[r.id] = prevR;
+    });
     var rows = all.filter(function (r) { return !s.query || r.name.toLowerCase().indexOf(s.query) >= 0; });
     var shown = s.show && !s.query ? rows.slice(0, s.show) : rows;
     var isZip = s.level === "zip", lvLabel = isZip ? "ZIP" : this.levelLabel(s.level);
@@ -849,10 +864,14 @@
     var LEVEL_PLURAL = { dma: "DMAs", metro: "metros", county: "counties", zip: "ZIPs in this market" };
     var rankOf = function (m, v) {
       if (s.level === "us" || typeof v !== "number") return null;
-      var vals = [];
-      d.rows.forEach(function (r) { var x = self.val(r, m); if (typeof x === "number") vals.push(x); });
-      var better = vals.filter(function (x) { return m.lowerIsBetter ? x < v : x > v; }).length;
-      return { rank: better + 1, total: vals.length, vals: vals };
+      var vals = [], tm = self.tieMeasure(m), tv = self.tieVal(row, tm), better = 0, ties = 0;
+      d.rows.forEach(function (r) {
+        var x = self.val(r, m); if (typeof x !== "number") return;
+        vals.push(x);
+        if (m.lowerIsBetter ? x < v : x > v) better++;
+        else if (x === v && r !== row) { var t = self.tieVal(r, tm); if (t > tv) better++; else if (t === tv) ties++; }
+      });
+      return { rank: better + 1, total: vals.length, vals: vals, ties: ties };
     };
     if (head && this.availableAt(head, s.level)) {
       var hv = this.val(row, head), hr = rankOf(head, hv), hvText = fmt(hv, head.format);
@@ -864,7 +883,7 @@
         var mid = sorted.length % 2 ? sorted[(sorted.length - 1) / 2] : (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2;
         var lvNoun = LEVEL_PLURAL[s.level] || "markets";
         var typical = s.level === "zip" ? "typical ZIP here " : "typical " + (s.level === "county" ? "county" : s.level === "metro" ? "metro" : "DMA") + " ";
-        var ties = hr.vals.filter(function (x) { return x === hv; }).length - 1;
+        var ties = hr.ties;
         var nextBest = sorted.filter(function (x) { return x !== hv; })[0];
         var ref = hr.rank === 1 ? (nextBest != null ? "next best " + fmt(nextBest, head.format) : null) : "#1 " + (head.format === "score" ? "scores " : "is ") + fmt(sorted[0], head.format);
         box.appendChild(el("div", { class: "az-score az-rankhead" }, [
