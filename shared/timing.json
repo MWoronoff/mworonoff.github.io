@@ -128,7 +128,13 @@
     96.7
    ],
    "kind": "online",
-   "source": "comscore"
+   "source": "comscore",
+   "ytd": {
+    "visitors": 1.7,
+    "visits": -1.4,
+    "period": "Jan–Sep",
+    "year": 2026
+   }
   },
   "cs-edu": {
    "label": "Education websites",
@@ -147,7 +153,13 @@
     85.5
    ],
    "kind": "online",
-   "source": "comscore"
+   "source": "comscore",
+   "ytd": {
+    "visitors": -5.1,
+    "visits": -7.1,
+    "period": "Jan–Sep",
+    "year": 2026
+   }
   },
   "cs-fin": {
    "label": "Financial Services websites",
@@ -166,7 +178,13 @@
     101.5
    ],
    "kind": "online",
-   "source": "comscore"
+   "source": "comscore",
+   "ytd": {
+    "visitors": -1.6,
+    "visits": 2.7,
+    "period": "Jan–Sep",
+    "year": 2026
+   }
   },
   "cs-health": {
    "label": "Health websites",
@@ -185,7 +203,13 @@
     85.0
    ],
    "kind": "online",
-   "source": "comscore"
+   "source": "comscore",
+   "ytd": {
+    "visitors": -5.6,
+    "visits": -18.7,
+    "period": "Jan–Sep",
+    "year": 2026
+   }
   },
   "cs-realestate": {
    "label": "Real Estate websites",
@@ -204,7 +228,13 @@
     84.6
    ],
    "kind": "online",
-   "source": "comscore"
+   "source": "comscore",
+   "ytd": {
+    "visitors": 1.0,
+    "visits": 2.5,
+    "period": "Jan–Sep",
+    "year": 2026
+   }
   },
   "cs-retail": {
    "label": "Retail websites",
@@ -223,7 +253,13 @@
     109.0
    ],
    "kind": "online",
-   "source": "comscore"
+   "source": "comscore",
+   "ytd": {
+    "visitors": 0.5,
+    "visits": 7.8,
+    "period": "Jan–Sep",
+    "year": 2026
+   }
   },
   "cs-homefurn": {
    "label": "Home furnishings websites (includes home improvement retailers)",
@@ -242,7 +278,13 @@
     112.9
    ],
    "kind": "online",
-   "source": "comscore"
+   "source": "comscore",
+   "ytd": {
+    "visitors": -7.9,
+    "visits": -6.5,
+    "period": "Jan–Sep",
+    "year": 2026
+   }
   }
  },
  "map": {
@@ -309,7 +351,7 @@
   "comscore": {
    "label": "Comscore Media Trend, Multi-Platform, U.S. total audience",
    "url": null,
-   "note": "Online index: visits per day to the category's websites compared with an average month (100), January 2025–September 2026. Based on 21 months, so the pattern will firm up as more months are added."
+   "note": "Online index: visits per day to the category's websites compared with an average month (100), January 2025–September 2026. Based on 21 months, so the pattern will firm up as more months are added. Year-to-date change compares January–September 2026 with the same months of 2025."
   }
  }
 }

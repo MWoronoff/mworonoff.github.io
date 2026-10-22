@@ -1019,7 +1019,7 @@
         .catch(function () { /* no tab without data */ });
     }
     if (cfg.benchmarks !== false) load(cfg.benchmarksData || "../shared/benchmarks.json?v=20261022f", "bench", "bench");
-    if (cfg.timing !== false) load(cfg.timingData || "../shared/timing.json?v=20261022f", "timing", "timing");
+    if (cfg.timing !== false) load(cfg.timingData || "../shared/timing.json?v=20261022g", "timing", "timing");
   };
   Analyzer.prototype.setTab = function (tab) {
     var self = this, prev = this.tab;
@@ -1073,13 +1073,14 @@
     // a short online history only names peaks when some month runs at least 10% above average
     var steady = function (S) { return S.kind === "online" && Math.max.apply(null, S.index) < 110; };
     var head = function (S) { return S.kind === "online" ? "When people shop online" : "When sales peak"; };
-    var desc = function (S) { return "U.S. " + (S.kind === "online" ? "visits to " : "") + S.label.charAt(0).toLowerCase() + S.label.slice(1) + ", typical month = 100. " + (S.kind === "sales" ? ((T.proxyNote || {})[cfg.exportName] || "") : ""); };
+    var desc = function (S) { return "U.S. " + (S.kind === "online" ? "visits to " : "") + S.label.toLowerCase() + ", typical month = 100. " + (S.kind === "sales" ? ((T.proxyNote || {})[cfg.exportName] || "") : ""); };
     var P = T.series[codes[0]], panel = el("section", { class: "az-panel az-bench-panel" }, [
       el("h2", { text: head(P) + (sub ? ": " + sub : "") }), el("p", { class: "az-bench-ind", text: desc(P) }), stripFor(P), legend]);
     codes.slice(1).forEach(function (c) {
       var S = T.series[c];
       panel.appendChild(el("h3", { class: "az-tm-h3", text: head(S) }));
-      panel.appendChild(el("p", { class: "az-bench-ind", text: desc(S) + (steady(S) ? "Fairly steady year-round." : "Peaks: " + names(peaks(S.index, 3)) + ".") }));
+      panel.appendChild(el("p", { class: "az-bench-ind", text: desc(S) + (steady(S) ? "Fairly steady year-round." : "Peaks: " + names(peaks(S.index, 3)) + ".") +
+        (S.ytd ? " " + S.ytd.period + " " + S.ytd.year + " vs. a year earlier: visitors " + (S.ytd.visitors >= 0 ? "+" : "") + NF1.format(S.ytd.visitors) + "%, visits " + (S.ytd.visits >= 0 ? "+" : "") + NF1.format(S.ytd.visits) + "%." : "") }));
       panel.appendChild(stripFor(S));
     });
     box.appendChild(panel);
@@ -1093,6 +1094,8 @@
       [card("Peak months", names(hi), P.kind === "online" ? "Most online shopping activity" : "Highest typical sales"),
       card("Slowest months", names(lo), P.kind === "online" ? "Least online shopping activity" : "Lowest typical sales"),
       card("Start campaigns by", ahead, "About a month ahead of each peak")];
+    var pc = function (v) { return (v >= 0 ? "+" : "") + NF1.format(v) + "%"; };
+    if (!L && P.ytd) cards.push(card("Online audience, " + P.ytd.period, pc(P.ytd.visitors), "Visitors vs. " + P.ytd.period + " " + (P.ytd.year - 1) + "; visits " + pc(P.ytd.visits)));
     if (L) cards.push(card("Latest month", (L.yoy >= 0 ? "+" : "") + NF1.format(L.yoy) + "%", MONTHS_LONG[L.month - 1] + " " + L.year + " sales vs. a year earlier" + (L.prelim ? " (preliminary)" : "")));
     box.appendChild(el("section", { class: "az-tm-cards" + (cards.length === 3 ? " az-tm-cards3" : "") }, cards));
     var used = {}; codes.forEach(function (c) { used[T.series[c].source] = 1; });
