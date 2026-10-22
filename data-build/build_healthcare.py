@@ -572,11 +572,30 @@ def condition_age_rates(cache, rep):
     n = {g: tot(acs, "m" + k) + tot(acs, "f" + k) for g, k in (("18-24", "18_24"), ("25-34", "25_34"), ("35-44", "35_44"), ("45-54", "45_54"))}
     n["55-64"] = tot(hl, "mh35_64") + tot(hl, "fh35_64") - n["35-44"] - n["45-54"]
     n["65+"] = sum(tot(hl, s + "h" + b) for s in "mf" for b in ("65_74", "75p"))
-    groups = {"18_34": ["18-24", "25-34"], "35_64": ["35-44", "45-54", "55-64"], "65_74": ["65+"], "75p": ["65+"]}
-    def age_of(x):
-        m = re.search(r"(\d+)", x or "")
-        return {"18": "18-24", "25": "25-34", "35": "35-44", "45": "45-54", "55": "55-64", "65": "65+"}.get(m.group(1)) if m else None
-    for r in rows: r["break_out"] = age_of(r.get("break_out"))
+    # Adults by single year of age (each ACS group spread evenly; 65+ spread over 65-89), to weight CDC's age bands
+    spans = {"18-24": (18, 24), "25-34": (25, 34), "35-44": (35, 44), "45-54": (45, 54), "55-64": (55, 64), "65+": (65, 89)}
+    popy = {a: 0.0 for a in range(18, 121)}
+    for g, (lo, hi) in spans.items():
+        for a in range(lo, hi + 1): popy[a] = n[g] / (hi - lo + 1)
+    RGROUPS = {"18_34": (18, 34), "35_64": (35, 64), "65_74": (65, 120), "75p": (65, 120)}   # CDC's oldest band is 65+
+
+    def tile(bands):
+        """Non-overlapping age bands covering 18 and up, finest first: [(low, high, rate)] or None."""
+        parsed = sorted((int(k.split("-")[0]), int(k.split("-")[1]), v) for k, v in bands.items() if k and v > 0)
+        cur, out_ = 18, []
+        while cur <= 120:
+            nxt = [b for b in parsed if b[0] == cur]
+            if not nxt: return None
+            b = min(nxt, key=lambda b: b[1]); out_.append(b); cur = b[1] + 1
+            if b[1] >= 120: break
+        return out_ if out_ and out_[-1][1] >= 120 else None
+    def band(x):
+        """Age label -> (low, high): "18-24" -> (18, 24); "65+" or "65 or older" -> (65, 120). None if not an age band."""
+        m = re.findall(r"\d+", x or "")
+        if not m: return None
+        lo = int(m[0]); hi = int(m[1]) if len(m) > 1 else 120
+        return f"{lo}-{hi}" if 18 <= lo < hi else None
+    for r in rows: r["break_out"] = band(r.get("break_out"))
     locs = sorted({r.get("locationabbr") for r in rows if r.get("locationabbr")})
     rep.append(("CDC BRFSS download", "INFO", f"{len(rows):,} rows by age; {len(locs)} locations; national median rows: {'yes' if 'US' in locs else 'no'}"))
     # Without CDC's national median rows, take the median across states that publish the cell (at least 10; states suppress
@@ -605,8 +624,10 @@ def condition_age_rates(cache, rep):
                 ry = [r for r in sel if int(r["year"]) == y]
                 for qtext in sorted({r["question"] for r in ry}):          # CDC may list several versions; take the first complete one
                     rq = [r for r in ry if r["question"] == qtext]
-                    v = {a: sum(float(r["data_value"]) for r in rq if r.get("break_out") == a) for a in BRFSS_AGES}
-                    if all(v[a] > 0 for a in BRFSS_AGES): best = (y, loc, qtext, v); break
+                    bands = {}
+                    for r in rq: bands[r["break_out"]] = bands.get(r["break_out"], 0) + float(r["data_value"])
+                    tiles = tile(bands)
+                    if tiles: best = (y, loc, qtext, tiles); break
                 if best: break
             if best: break
         if not best:
@@ -614,8 +635,10 @@ def condition_age_rates(cache, rep):
                            and any(w in (r.get("question") or "").lower() for w in (cond[:5], "bmi", "health"))})[:6]
             rep.append((f"CDC BRFSS rates by age: {DEMAND_LABELS[cond]}", "WARN", "not found; radius tool uses the all-adult rate at every age. Nearby: " + " | ".join(near)))
             continue
-        y, loc, qtext, v = best
-        out[cond] = {g: round(sum(v[a] * n[a] for a in m) / sum(n[a] for a in m), 2) for g, m in groups.items()}
+        y, loc, qtext, tiles = best
+        rate_at = lambda age: next(v for lo, hi, v in tiles if lo <= age <= hi)
+        out[cond] = {g: round(sum(rate_at(a) * popy[a] for a in range(glo, ghi + 1)) / sum(popy[a] for a in range(glo, ghi + 1)), 2)
+                     for g, (glo, ghi) in RGROUPS.items()}
         used.append(f"{DEMAND_LABELS[cond]} ({y}, \u201c{qtext[:60]}\u201d): " + ", ".join(f"{g.replace('_', '–').replace('p', '+')} {r:.1f}%" for g, r in out[cond].items()))
         log(f"BRFSS {cond}: {y} {loc} '{qtext}' -> {out[cond]}")
     if out:
