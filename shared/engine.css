@@ -418,6 +418,21 @@ a.az-btn { display: inline-block; text-decoration: none; text-align: center; }
 .rz-mm { font-weight: 600; font-size: 13px; color: var(--navy); }
 .rz-budget .rz-note { margin: 0; }
 @media (max-width: 640px) { .rz-budget-actions { margin-left: 0; } }
+/* Recommended allocation */
+.rz-alloc-sum { margin: 0; font-weight: 600; color: var(--navy); }
+.rz-alloc-warn { margin: 0; padding: 8px 12px; border-radius: 8px; background: var(--warn-bg); border: 1px solid var(--warn-line); color: #6b5200; font-size: 13px; }
+.rz-alloc-warn[hidden], .rz-alloc-block[hidden], .rz-alloc-fee[hidden] { display: none; }
+.rz-alloc-block { display: flex; flex-direction: column; gap: 6px; }
+.rz-alloc-block h3 { margin: 4px 0 0; font-size: 14px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+.rz-alloc-block .rz-note { margin: 0; }
+.rz-alloc-chwrap { max-width: 640px; }
+.rz-alloc-ch td:nth-child(2), .az-table.rz-alloc-ch td.rz-l + td.rz-l { font-weight: 400; color: var(--ink); min-width: 0; }
+.rz-budget .az-table tbody tr { cursor: default; }
+.rz-alloc-total td:nth-child(2) { min-width: 0; }
+.rz-swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 8px; vertical-align: middle; }
+.rz-alloc-total td { font-weight: 700; border-top: 2px solid var(--line); }
+.rz-alloc-sub td { color: var(--muted); }
+.rz-alloc-strong { font-weight: 600; }
 
 /* Leave-behind: printed (Save as PDF) view of what's on screen */
 .az-print-head { display: none; align-items: center; gap: 16px; border-bottom: 2px solid var(--navy); padding-bottom: 10px; margin-bottom: 14px; }
@@ -432,7 +447,7 @@ body.az-printing .az-map { height: 420px; }
   body { background: #fff; }
   .az-print-head { display: flex; }
   .az-header, .az-controls, .az-notice, .az-error, .az-modal, .rz-filters, .rz-area, .leaflet-control-zoom,
-  .az-btn, .az-export, .rz-clear, .rz-budget-actions, details.rz-budget:not([open]) { display: none !important; }
+  .az-btn, .az-export, .rz-clear, .rz-budget-actions, .rz-budget-controls, details.rz-budget:not([open]) { display: none !important; }
   .az-main { max-width: none; padding: 0; }
   .az-panel { box-shadow: none; break-inside: avoid; }
   .az-stage, .rz-stage { display: block; }

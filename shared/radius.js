@@ -722,64 +722,197 @@
     this.renderBudget();
   };
 
-  /* ---------- Split a budget (closed until opened) ---------- */
+  /* ---------- Recommended allocation (closed until opened) ----------
+     Budget -> Adtaxi channel plan (shared/media-plan.js, same rules as the Media Mix Planner)
+     -> each channel spread across the top ZIPs by audience. Fees follow the FEES settings there. */
+  function loadPlan(src, done) {
+    if (window.AdtaxiPlan) { done(); return; }
+    if (loadPlan.waiting) { loadPlan.waiting.push(done); return; }
+    loadPlan.waiting = [done];
+    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261023a";
+    sc.onload = function () { var w = loadPlan.waiting; loadPlan.waiting = null; w.forEach(function (f) { f(); }); };
+    sc.onerror = function () { loadPlan.waiting = null; };
+    document.head.appendChild(sc);
+  }
+  // Whole dollars of one amount spread by the ZIP shares, adding up exactly (largest remainders get the leftover dollars)
+  function spread(total, pick) {
+    var whole = Math.round(total), used = 0, out = pick.map(function (x) { var raw = whole * x.share, v = Math.floor(raw); used += v; return { v: v, f: raw - v }; });
+    out.map(function (o, i) { return i; }).sort(function (i, j) { return out[j].f - out[i].f; }).slice(0, whole - used).forEach(function (i) { out[i].v += 1; });
+    return out.map(function (o) { return o.v; });
+  }
   Radius.prototype.buildBudget = function () {
-    var self = this, b = this.budget = { amount: null, by: "aud", n: 10 };
+    var self = this, b = this.budget = { amount: null, by: "aud", n: 10, strat: "" };
     this.bAmount = el("input", { type: "text", inputmode: "decimal", placeholder: "$ per month", "aria-label": "Monthly budget",
       oninput: function () { b.amount = parseMoney(this.value); self.renderBudget(); },
       onchange: function () { if (b.amount) this.value = money(b.amount); } });
-    var bySel = el("select", { "aria-label": "Split by", onchange: function () { b.by = this.value; self.renderBudget(); } },
+    this.bStrat = el("select", { "aria-label": "Media strategy", onchange: function () { b.strat = this.value; self.renderBudget(); } },
+      [el("option", { value: "", text: "Choose a strategy" })]);
+    var bySel = el("select", { "aria-label": "Spread by", onchange: function () { b.by = this.value; self.renderBudget(); } },
       [["aud", "Audience size"], ["weighted", "Audience size, favoring above-average ZIPs"]].map(function (o) { return el("option", { value: o[0], text: o[1] }); }));
     var nSel = el("select", { "aria-label": "ZIPs to include", onchange: function () { b.n = +this.value; self.renderBudget(); } },
       [[5, "Top 5 ZIPs"], [10, "Top 10 ZIPs"], [15, "Top 15 ZIPs"], [25, "Top 25 ZIPs"], [0, "All ZIPs shown"]].map(function (o) { return el("option", { value: o[0], text: o[1] }); }));
     nSel.value = "10";
+    this.bLink = el("a", { class: "rz-mm", href: this.cfg.mediaMixUrl || "../media-mix/", text: "Open in the Media Mix Planner \u2192" });
+    this.bSummary = el("p", { class: "rz-alloc-sum" });
+    this.bWarn = el("p", { class: "rz-alloc-warn", hidden: true });
+    this.cHead = el("thead"); this.cBody = el("tbody");
+    this.cWrap = el("div", { class: "rz-alloc-block", hidden: true }, [el("h3", { text: "By channel" }),
+      el("div", { class: "az-tablewrap rz-alloc-chwrap" }, [el("table", { class: "az-table rz-alloc-ch" }, [this.cHead, this.cBody])]), this.cNote = el("p", { class: "rz-note" })]);
     this.bHead = el("thead"); this.bBody = el("tbody"); this.bNote = el("p", { class: "rz-note" });
+    this.bFee = el("p", { class: "rz-note rz-alloc-fee" });
+    loadPlan(this.cfg.planScript, function () {
+      AdtaxiPlan.STRATEGIES.forEach(function (st) { self.bStrat.appendChild(el("option", { value: st.id, text: st.label })); });
+      self.renderBudget();
+    });
     return el("details", { class: "az-panel rz-budget", hidden: true }, [
-      el("summary", { text: "Split a budget" }),
+      el("summary", { text: "Recommended allocation" }),
       el("div", { class: "rz-budget-body" }, [
         el("div", { class: "rz-budget-controls" }, [
           el("label", { class: "az-field" }, [el("span", { text: "Monthly budget" }), this.bAmount]),
-          el("label", { class: "az-field" }, [el("span", { text: "Split by" }), bySel]),
+          el("label", { class: "az-field" }, [el("span", { text: "Media strategy" }), this.bStrat]),
+          el("label", { class: "az-field" }, [el("span", { text: "Spread by" }), bySel]),
           el("label", { class: "az-field" }, [el("span", { text: "Include" }), nSel]),
           el("div", { class: "rz-budget-actions" }, [
-            el("button", { type: "button", class: "az-btn", text: "Export split (CSV)", onclick: function () { self.exportBudget(); } }),
-            el("a", { class: "rz-mm", href: this.cfg.mediaMixUrl || "../media-mix/", text: "Split by platform in the Media Mix Planner \u2192" })])]),
-        el("div", { class: "az-tablewrap" }, [el("table", { class: "az-table" }, [this.bHead, this.bBody])]),
-        this.bNote])]);
+            el("button", { type: "button", class: "az-btn", text: "Export allocation (CSV)", onclick: function () { self.exportBudget(); } }),
+            this.bLink])]),
+        this.bSummary, this.bWarn, this.cWrap,
+        el("div", { class: "rz-alloc-block" }, [el("h3", { text: "By ZIP" }),
+          el("div", { class: "az-tablewrap" }, [el("table", { class: "az-table" }, [this.bHead, this.bBody])]), this.bNote]),
+        this.bFee])]);
   };
   Radius.prototype.budgetRows = function () {
-    return this.rows ? splitBudget(this.visible(), this.budget.amount, this.budget.by, this.budget.n) : [];
+    return this.rows ? splitBudget(this.visible(), null, this.budget.by, this.budget.n) : [];
+  };
+  // Everything the allocation shows: ZIP shares, fee math, channel plan and dollars per ZIP per channel
+  Radius.prototype.allocation = function () {
+    var b = this.budget, P = window.AdtaxiPlan, pick = this.budgetRows();
+    var out = { pick: pick, money: null, strat: null, plan: null, channels: [], below: false };
+    if (!pick.length) return out;
+    out.money = P ? P.applyFees(b.amount) : { entered: b.amount, media: b.amount, fee: 0, total: b.amount, tierBudget: b.amount, feesOn: false };
+    out.strat = P && b.strat ? P.STRATEGIES.filter(function (x) { return x.id === b.strat; })[0] : null;
+    out.below = !!(P && b.amount && out.money.tierBudget < P.MIN_BUDGET);
+    if (out.strat) {
+      out.plan = P.buildPlan(out.strat, out.below ? null : out.money.media, out.below ? null : out.money.tierBudget);
+      out.channels = out.plan.items;
+    }
+    var withDollars = b.amount && !out.below;
+    if (withDollars) {
+      var media = out.money.media;
+      if (out.strat && out.plan.tier) {
+        out.channels.forEach(function (c) { c.byZip = spread(c.dollars, pick); });
+        pick.forEach(function (x, i) { x.amt = out.channels.reduce(function (t, c) { return t + c.byZip[i]; }, 0); });
+      } else {
+        var v = spread(media, pick); pick.forEach(function (x, i) { x.amt = v[i]; });
+      }
+    } else pick.forEach(function (x) { x.amt = null; });
+    out.withDollars = !!withDollars;
+    return out;
   };
   Radius.prototype.renderBudget = function () {
     if (!this.budgetBox) return;
-    var b = this.budget, pick = this.budgetRows();
+    var self = this, b = this.budget, A = this.allocation(), pick = A.pick, P = window.AdtaxiPlan;
     this.budgetBox.hidden = !this.rows || !pick.length;
     if (this.budgetBox.hidden) return;
-    var est = this.isEstimate();
+    var est = this.isEstimate(), chans = A.withDollars && A.plan && A.plan.tier && A.channels.length > 1 ? A.channels : [];
+    var showFee = A.money && A.money.feesOn && P.FEES.showFee;
+
+    // Planner link carries the same choices
+    var q = new URLSearchParams(), pc = this.cfg.planCategory || String(this.cfg.exportName || "").replace(/-radius$/, "").replace(/^apartment$/, "apartments");
+    if (pc && !/^(zip|adtaxi)$/.test(pc)) q.set("category", pc);
+    if (b.strat) q.set("strategy", b.strat); if (b.amount) q.set("budget", Math.round(b.amount));
+    this.bLink.href = (this.cfg.mediaMixUrl || "../media-mix/") + (q.toString() ? "?" + q : "");
+
+    // One-line summary (also what the leave-behind shows in place of the controls)
+    var bits = [];
+    if (b.amount) bits.push(money(b.amount) + " a month" + (A.money.feesOn ? (P.FEES.budgetIs === "net" ? " in media" : " total") : ""));
+    if (A.strat) bits.push(A.strat.label);
+    bits.push(b.n ? "top " + b.n + " ZIPs" : "all ZIPs shown");
+    this.bSummary.textContent = "Recommended allocation: " + bits.join(" \u00b7 ");
+
+    this.bWarn.hidden = !A.below;
+    if (A.below) this.bWarn.textContent = "Adtaxi's minimum is " + money(P.MIN_BUDGET) + " a month. Shares are shown without dollars.";
+
+    // By channel
+    this.cWrap.hidden = !A.strat;
+    if (A.strat) {
+      this.cHead.innerHTML = ""; this.cBody.innerHTML = "";
+      this.cHead.appendChild(el("tr", null, [["Channel", 1], ["Role", 1], ["Share"], ["Monthly amount"]].map(function (h) {
+        return el("th", { scope: "col", class: h[1] ? "rz-l" : null, text: h[0] }); })));
+      A.channels.forEach(function (c) {
+        self.cBody.appendChild(el("tr", null, [el("td", { class: "rz-l" }, [el("span", { class: "rz-swatch", style: "background:" + c.ch.color }), c.ch.label]),
+          el("td", { class: "rz-l", text: c.ch.role.charAt(0).toUpperCase() + c.ch.role.slice(1) }),
+          el("td", { class: "num", text: c.pct + "%" }), el("td", { class: "num", text: A.withDollars && c.dollars != null ? money(c.dollars) : "\u2014" })]));
+      });
+      if (showFee && A.withDollars) {
+        [["Media", A.money.media], ["Management fee", A.money.fee], ["Total", A.money.total]].forEach(function (r, i) {
+          self.cBody.appendChild(el("tr", { class: i === 2 ? "rz-alloc-total" : "rz-alloc-sub" }, [el("td", { class: "rz-l", text: r[0] }), el("td"), el("td"), el("td", { class: "num", text: money(r[1]) })]));
+        });
+      }
+      var notes = [];
+      if (A.plan.tier) {
+        notes.push(A.plan.tier.label + ". Fully funding fewer channels outperforms spreading a budget thin.");
+        A.plan.unavailable.forEach(function (r) { var t = P.SERVICE_TIERS.filter(function (t) { return t.available.indexOf(r.id) >= 0; })[0]; notes.push(P.CHANNELS[r.id].label + " is available from " + money(t.min) + " a month."); });
+        A.plan.skipped.forEach(function (x) { notes.push(P.CHANNELS[x.r.id].label + " needs at least " + money(x.min) + " a month on its own, so it isn't in this plan."); });
+        if (A.plan.raised.length) notes.push(A.plan.raised.map(function (r) { return r.ch.label; }).join(" and ") + (A.plan.raised.length > 1 ? " are" : " is") + " set at the channel minimum.");
+        if (A.money.tierBudget >= P.CUSTOM_PLAN_BUDGET) notes.push("At this budget, Adtaxi's strategy team can also build a custom plan with more channels and refined targeting.");
+      } else notes.push(b.amount ? "Strategy mix shown for reference." : "Enter a monthly budget to size the plan: the channel count and minimums depend on it.");
+      this.cNote.textContent = notes.join(" ");
+    }
+
+    // By ZIP
     this.bHead.innerHTML = "";
-    this.bHead.appendChild(el("tr", null, [["ZIP", 1], ["Town", 1], [est ? "Est. audience" : "Audience"], ["Index"], ["Share of budget"], ["Monthly amount"]].map(function (h) {
-      return el("th", { scope: "col", class: h[1] ? "rz-l" : null, text: h[0] }); })));
+    var heads = [["ZIP", 1], ["Town", 1], [est ? "Est. audience" : "Audience"], ["Index"], ["Share"]];
+    chans.forEach(function (c) { heads.push([c.ch.short]); });
+    heads.push([chans.length ? "Monthly total" : "Monthly amount"]);
+    this.bHead.appendChild(el("tr", null, heads.map(function (h) { return el("th", { scope: "col", class: h[1] ? "rz-l" : null, text: h[0] }); })));
     this.bBody.innerHTML = "";
     var frag = document.createDocumentFragment();
-    pick.forEach(function (x) {
-      frag.appendChild(el("tr", null, [el("td", { class: "rz-l num", text: x.r.zip }), el("td", { class: "rz-l", text: x.r.town }),
+    pick.forEach(function (x, i) {
+      var tds = [el("td", { class: "rz-l num", text: x.r.zip }), el("td", { class: "rz-l", text: x.r.town }),
         el("td", { class: "num", text: NF0.format(Math.round(x.r.aud)) }), el("td", { class: "num", text: x.r.idx == null ? "\u2014" : NF0.format(x.r.idx) }),
-        el("td", { class: "num", text: NF1.format(x.share * 100) + "%" }), el("td", { class: "num", text: b.amount ? money(x.amt) : "\u2014" })]));
+        el("td", { class: "num", text: NF1.format(x.share * 100) + "%" })];
+      chans.forEach(function (c) { tds.push(el("td", { class: "num", text: money(c.byZip[i]) })); });
+      tds.push(el("td", { class: "num rz-alloc-strong", text: x.amt != null ? money(x.amt) : "\u2014" }));
+      frag.appendChild(el("tr", null, tds));
     });
+    if (A.withDollars) {
+      var tot = [el("td", { class: "rz-l", text: "Total" }), el("td"), el("td"), el("td"), el("td", { class: "num", text: "100%" })];
+      chans.forEach(function (c) { tot.push(el("td", { class: "num", text: money(c.dollars) })); });
+      tot.push(el("td", { class: "num", text: money(pick.reduce(function (t, x) { return t + x.amt; }, 0)) }));
+      frag.appendChild(el("tr", { class: "rz-alloc-total" }, tot));
+    }
     this.bBody.appendChild(frag);
-    this.bNote.textContent = (b.by === "weighted" ? "Shares follow each ZIP's estimated audience times its index, so above-average ZIPs get more. " : "Shares follow each ZIP's estimated audience. ") +
-      (b.amount ? "" : "Enter a monthly budget to see dollar amounts. ") + "A planning starting point; adjust for campaign minimums and platform targeting.";
+    this.bNote.textContent = (b.by === "weighted" ? "Each ZIP's share follows its estimated audience times its index, so above-average ZIPs get more. " : "Each ZIP's share follows its estimated audience. ") +
+      (!b.amount ? "Enter a monthly budget to see dollar amounts. " : "") + (!A.strat ? "Choose a media strategy to split by channel. " : "") +
+      (chans.length ? "Channel minimums apply to each channel's monthly total, not to each ZIP. " : "") +
+      "A planning recommendation; final targeting is set by platform.";
+    this.bFee.hidden = !!showFee;
+    this.bFee.textContent = P ? (A.money && A.money.feesOn ? "Figures shown are media dollars." : P.FEES.offNote) : "Allocations reflect media spend only; management fees not included.";
   };
   Radius.prototype.exportBudget = function () {
-    var b = this.budget, pick = this.budgetRows();
+    var b = this.budget, A = this.allocation(), pick = A.pick;
     if (!pick.length) return;
-    var lines = [["ZIP", "Town", "Estimated audience", "Index vs US", "Share of budget", "Monthly amount", "Split by", "Audience definition"].map(csvCell).join(",")];
-    var by = b.by === "weighted" ? "Audience x index" : "Audience", def = this.describe();
-    pick.forEach(function (x) {
-      lines.push([x.r.zip, x.r.town, Math.round(x.r.aud), x.r.idx == null ? "" : Math.round(x.r.idx), (x.share * 100).toFixed(1) + "%", b.amount ? x.amt : "", by, def].map(csvCell).join(","));
+    var chans = A.withDollars && A.plan && A.plan.tier && A.channels.length > 1 ? A.channels : [];
+    var head = ["ZIP", "Town", "Estimated audience", "Index vs US", "Share"];
+    chans.forEach(function (c) { head.push(c.ch.label); });
+    head.push("Monthly total", "Media strategy", "Spread by", "Audience definition");
+    var lines = [head.map(csvCell).join(",")];
+    var by = b.by === "weighted" ? "Audience x index" : "Audience", def = this.describe(), st = A.strat ? A.strat.label : "";
+    pick.forEach(function (x, i) {
+      var row = [x.r.zip, x.r.town, Math.round(x.r.aud), x.r.idx == null ? "" : Math.round(x.r.idx), (x.share * 100).toFixed(1) + "%"];
+      chans.forEach(function (c) { row.push(c.byZip[i]); });
+      row.push(x.amt != null ? x.amt : "", st, by, def);
+      lines.push(row.map(csvCell).join(","));
     });
+    if (A.withDollars) {
+      var t = ["Total", "", "", "", "100.0%"]; chans.forEach(function (c) { t.push(c.dollars); });
+      t.push(pick.reduce(function (s, x) { return s + x.amt; }, 0)); lines.push(t.map(csvCell).join(","));
+    }
+    var P = window.AdtaxiPlan;
+    if (A.money && A.money.feesOn && P.FEES.showFee) lines.push("", ["Media", A.money.media].map(csvCell).join(","), ["Management fee", A.money.fee].map(csvCell).join(","), ["Total", A.money.total].map(csvCell).join(","));
+    else lines.push("", csvCell(P ? P.FEES.offNote : "Allocations reflect media spend only; management fees not included."));
     var blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
-    var a = el("a", { href: URL.createObjectURL(blob), download: (this.cfg.exportName || "adtaxi-radius") + "-budget-split.csv" });
+    var a = el("a", { href: URL.createObjectURL(blob), download: (this.cfg.exportName || "adtaxi-radius") + "-recommended-allocation.csv" });
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
   };
