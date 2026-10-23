@@ -767,7 +767,7 @@
     if (window.AdtaxiPlan) { done(); return; }
     if (loadPlan.waiting) { loadPlan.waiting.push(done); return; }
     loadPlan.waiting = [done];
-    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261023d";
+    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261023e";
     sc.onload = function () { var w = loadPlan.waiting; loadPlan.waiting = null; w.forEach(function (f) { f(); }); };
     sc.onerror = function () { loadPlan.waiting = null; };
     document.head.appendChild(sc);
@@ -798,8 +798,10 @@
       el("div", { class: "az-tablewrap rz-alloc-chwrap" }, [el("table", { class: "az-table rz-alloc-ch" }, [this.cHead, this.cBody])]), this.cNote = el("p", { class: "rz-note" })]);
     this.bHead = el("thead"); this.bBody = el("tbody"); this.bNote = el("p", { class: "rz-note" });
     this.bFee = el("p", { class: "rz-note rz-alloc-fee" });
+    this.bRates = el("div", { class: "rz-rates" });
     loadPlan(this.cfg.planScript, function () {
       AdtaxiPlan.STRATEGIES.forEach(function (st) { self.bStrat.appendChild(el("option", { value: st.id, text: st.label })); });
+      self.bRates.appendChild(AdtaxiPlan.rateEditor(function () { self.renderBudget(); }));
       self.renderBudget();
     });
     return el("details", { class: "az-panel rz-budget", hidden: true }, [
@@ -814,7 +816,7 @@
           el("div", { class: "rz-budget-actions" }, [
             el("button", { type: "button", class: "az-btn", text: "Export allocation (CSV)", onclick: function () { self.exportBudget(); } }),
             this.bLink])]),
-        this.bSummary, this.bWarn, this.cWrap,
+        this.bRates, this.bSummary, this.bWarn, this.cWrap,
         el("div", { class: "rz-alloc-block" }, [el("h3", { text: "By ZIP" }),
           el("div", { class: "az-tablewrap" }, [el("table", { class: "az-table" }, [this.bHead, this.bBody])]), this.bNote]),
         this.bFee])]);
@@ -868,8 +870,9 @@
     bits.push(b.n ? "top " + b.n + " ZIPs" : "all ZIPs shown");
     this.bSummary.textContent = "Recommended allocation: " + bits.join(" \u00b7 ");
 
-    this.bWarn.hidden = !A.below;
-    if (A.below) this.bWarn.textContent = "Adtaxi's minimum is " + money(P.MIN_BUDGET) + " a month. Shares are shown without dollars.";
+    this.bWarn.hidden = !A.below && !(P && P.customRates());
+    this.bWarn.textContent = P && P.customRates() ? P.CUSTOM_NOTE + " " : "";
+    if (A.below) this.bWarn.textContent += "Adtaxi's minimum is " + money(P.MIN_BUDGET) + " a month. Shares are shown without dollars.";
 
     // By channel
     this.cWrap.hidden = !A.strat;
@@ -972,7 +975,8 @@
       });
     }
     if (A.money && A.money.feesOn && P.FEES.showFee) lines.push("", ["Media", A.money.media].map(csvCell).join(","), ["Management fee", A.money.fee].map(csvCell).join(","), ["Total", A.money.total].map(csvCell).join(","));
-    else lines.push("", csvCell(P ? P.FEES.offNote : "Amounts are total monthly investment by channel, including Adtaxi management."));
+    if (P && P.customRates()) lines.push("", csvCell(P.CUSTOM_NOTE));
+    lines.push("", csvCell(P ? P.FEES.offNote : "Amounts are total monthly investment by channel, including Adtaxi management."));
     var blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
     var a = el("a", { href: URL.createObjectURL(blob), download: (this.cfg.exportName || "adtaxi-radius") + "-recommended-allocation.csv" });
     document.body.appendChild(a); a.click(); a.remove();

@@ -230,10 +230,90 @@
     return out;
   }
 
+  /* ---------- Editable rates ----------
+     A user can change channel minimums and management fees on their own device (saved in this browser only).
+     Plans recalculate from the edited values; "Reset to rate card" restores the settings above. */
+  var DEFAULTS = { min: JSON.parse(JSON.stringify(MINIMUMS)), pct: JSON.parse(JSON.stringify(MGMT.pct)), search: MGMT.search.map(function (t) { return t.pct; }) };
+  var RATE_KEY = "adtaxi-plan-rates-v1", listeners = [];
+  function num(v, lo, hi) { v = typeof v === "string" ? parseFloat(v.replace(/[$,%\s]/g, "")) : v; return isFinite(v) && v >= lo && v <= hi ? v : null; }
+  function applyRates(o) {
+    o = o || {};
+    Object.keys(DEFAULTS.min).forEach(function (k) { var v = o.min && num(o.min[k], 0, 1e7); MINIMUMS[k] = v != null ? v : DEFAULTS.min[k]; });
+    Object.keys(MGMT.pct).forEach(function (k) { if (!(k in DEFAULTS.pct)) delete MGMT.pct[k]; });
+    Object.keys(CHANNELS).forEach(function (k) {
+      if (CHANNELS[k].prog || k === "search") return;
+      var v = o.pct && o.pct[k] != null ? num(o.pct[k], 0, 0.9) : null;
+      if (v != null) MGMT.pct[k] = v; else if (k in DEFAULTS.pct) MGMT.pct[k] = DEFAULTS.pct[k]; else delete MGMT.pct[k];
+    });
+    MGMT.search.forEach(function (t, i) { var v = o.search && num(o.search[i], 0, 0.9); t.pct = v != null ? v : DEFAULTS.search[i]; });
+  }
+  function currentRates() { return { min: JSON.parse(JSON.stringify(MINIMUMS)), pct: JSON.parse(JSON.stringify(MGMT.pct)), search: MGMT.search.map(function (t) { return t.pct; }) }; }
+  function customRates() { return JSON.stringify(currentRates()) !== JSON.stringify(DEFAULTS); }
+  function setRates(o) {
+    applyRates(o);
+    try { if (customRates()) localStorage.setItem(RATE_KEY, JSON.stringify(currentRates())); else localStorage.removeItem(RATE_KEY); } catch (e) {}
+    listeners.forEach(function (f) { try { f(); } catch (e) {} });
+  }
+  function resetRates() { setRates(null); }
+  try { var saved = localStorage.getItem(RATE_KEY); if (saved) applyRates(JSON.parse(saved)); } catch (e) {}
+  var CUSTOM_NOTE = "Custom rates in use: minimums or management fees were edited on this device.";
+
+  // The editor: a closed panel listing each channel's minimum and fee. onChange runs after every edit and on reset.
+  function rateEditor(onChange) {
+    if (!document.getElementById("ap-rates-css")) {
+      var st = document.createElement("style"); st.id = "ap-rates-css";
+      st.textContent = ".ap-rates{border:1px solid #dce4ec;border-radius:10px;padding:10px 14px;background:#fff}" +
+        ".ap-rates>summary{cursor:pointer;font-weight:700;color:#0f2742}.ap-rates p{margin:8px 0;font-size:12px;color:#5f7286}" +
+        ".ap-rates table{border-collapse:collapse;font-size:13px;width:100%;max-width:560px}.ap-rates th{font-size:12px;color:#5f7286;text-align:right;padding:4px 6px;font-weight:600}" +
+        ".ap-rates th:first-child,.ap-rates td:first-child{text-align:left}.ap-rates td{padding:3px 6px;border-top:1px solid #eef2f5;text-align:right;white-space:nowrap}" +
+        ".ap-rates input{width:84px;padding:4px 6px;border:1px solid #c9d5e0;border-radius:6px;font:inherit;text-align:right}.ap-rates input.ap-pct{width:56px}" +
+        ".ap-rates .ap-edited{background:#fff7db;border-color:#ead58d}.ap-rates button{margin-top:8px;padding:6px 12px;border:1px solid #c9d5e0;border-radius:8px;background:#fff;font:inherit;font-weight:600;color:#0f2742;cursor:pointer}" +
+        ".ap-rates .ap-flag{color:#6b5200;font-weight:600}@media print{.ap-rates{display:none!important}}";
+      document.head.appendChild(st);
+    }
+    function E(tag, attrs, kids) {
+      var n = document.createElement(tag);
+      for (var k in attrs || {}) { if (k === "text") n.textContent = attrs[k]; else if (k.slice(0, 2) === "on") n.addEventListener(k.slice(2), attrs[k]); else if (attrs[k] != null) n.setAttribute(k, attrs[k]); }
+      (kids || []).forEach(function (c) { if (c != null) n.appendChild(typeof c === "string" ? document.createTextNode(c) : c); });
+      return n;
+    }
+    var box = E("details", { class: "ap-rates" }), flag = E("span", { class: "ap-flag" }), tbody = E("tbody");
+    function input(val, isPct, def, save) {
+      var shown = val == null ? "" : isPct ? String(Math.round(val * 1000) / 10) : String(Math.round(val));
+      var i = E("input", { type: "text", inputmode: "decimal", value: shown, placeholder: isPct ? "none" : "", class: (isPct ? "ap-pct" : "") + (val !== def ? " ap-edited" : ""),
+        "aria-label": isPct ? "Management fee percent" : "Monthly minimum in dollars", onchange: function () { save(this.value); } });
+      return i;
+    }
+    function draw() {
+      var R = currentRates();
+      tbody.innerHTML = "";
+      Object.keys(CHANNELS).forEach(function (id) {
+        var ch = CHANNELS[id], minDef = DEFAULTS.min[id];
+        var minCell = id in R.min ? ["$", input(R.min[id], false, minDef, function (v) { var o = currentRates(); o.min[id] = num(v, 0, 1e7) != null ? num(v, 0, 1e7) : minDef; setRates(o); })] : ["—"];
+        var feeCell;
+        if (ch.prog) feeCell = ["In CPM"];
+        else if (id === "search") feeCell = MGMT.search.map(function (t, i) {
+          return E("span", null, [i ? " / " : "", input(R.search[i], true, DEFAULTS.search[i], function (v) { var o = currentRates(), x = num(v, 0, 90); o.search[i] = x != null ? x / 100 : DEFAULTS.search[i]; setRates(o); }), "%"]);
+        });
+        else feeCell = [input(R.pct[id], true, DEFAULTS.pct[id], function (v) { var o = currentRates(), x = String(v).trim() === "" ? null : num(v, 0, 90); if (x == null) delete o.pct[id]; else o.pct[id] = x / 100; setRates(o); }), "%"];
+        tbody.appendChild(E("tr", null, [E("td", { text: ch.label + (id === "search" ? " (under $3K / $3K+)" : "") }), E("td", null, minCell), E("td", null, feeCell)]));
+      });
+      flag.textContent = customRates() ? " · custom rates in use" : "";
+    }
+    box.appendChild(E("summary", null, ["Edit rates", flag]));
+    box.appendChild(E("p", { text: "Defaults are the Adtaxi rate card (Nov 2025). Changes recalculate the plan right away and are saved on this device only; they don't change anyone else's view. Leave a fee blank for none." }));
+    box.appendChild(E("table", null, [E("thead", null, [E("tr", null, [E("th", { text: "Channel" }), E("th", { text: "Monthly minimum" }), E("th", { text: "Management fee" })])]), tbody]));
+    box.appendChild(E("button", { type: "button", text: "Reset to rate card", onclick: function () { resetRates(); } }));
+    listeners.push(function () { draw(); if (onChange) onChange(); });
+    draw();
+    return box;
+  }
+
   window.AdtaxiPlan = {
     CHANNELS: CHANNELS, ROLES: ROLES, STRATEGIES: STRATEGIES, MIN_BUDGET: MIN_BUDGET, TIERS: TIERS,
     SERVICE_TIERS: SERVICE_TIERS, CUSTOM_PLAN_BUDGET: CUSTOM_PLAN_BUDGET, FEES: FEES,
     serviceTier: serviceTier, minFor: minFor, buildPlan: buildPlan, applyFees: applyFees, termNote: termNote,
-    MGMT: MGMT, channelFee: channelFee, feeSummary: feeSummary, feeLine: feeLine
+    MGMT: MGMT, channelFee: channelFee, feeSummary: feeSummary, feeLine: feeLine,
+    rateEditor: rateEditor, setRates: setRates, resetRates: resetRates, customRates: customRates, CUSTOM_NOTE: CUSTOM_NOTE
   };
 })();

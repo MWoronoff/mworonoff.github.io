@@ -105,6 +105,7 @@
     .mm-kpis { margin-top: 10px; }
     * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   }
+  .ap-rates { margin: -4px 0 16px; }
   .mm-toggle { display: flex; flex-direction: row; align-items: center; gap: 8px; font-weight: 600; white-space: nowrap; align-self: end; padding-bottom: 9px; }
   .mm-toggle input { width: 16px; height: 16px; margin: 0; accent-color: var(--teal); }
   .mm-feeline { margin-top: 3px !important; font-size: 12px; color: var(--navy); font-weight: 600; }
@@ -137,7 +138,7 @@
   <div class="mm-sheet" id="sheet" aria-live="polite"></div>
 </main>
 
-<script src="../shared/media-plan.js?v=20261023d"></script>
+<script src="../shared/media-plan.js?v=20261023e"></script>
 <script>
 /* =====================  SETTINGS (draft: edit here)  =====================
    CATEGORIES: national category ad spend (EMARKETER 2026), $ billions.
@@ -271,6 +272,7 @@ var P = window.AdtaxiPlan, CHANNELS = P.CHANNELS, ROLES = P.ROLES, STRATEGIES = 
     var ready = c && s, plan = ready ? buildPlan(s, budget) : null, items = plan ? plan.items : [];
     var kids = [el("h2", { text: "Recommended digital plan" + (ready ? ": " + s.label : "") }),
       el("p", { class: "mm-intro", text: ready ? "Goal: " + s.success.toLowerCase() + "." + (budget && plan.tier ? " Budget: " + usd(budget) + " a month." : budget ? "" : " Enter a monthly budget to see dollars and a plan sized to it.") : "Goal: " + EMPTY }) ];
+    if (ready && P.customRates()) kids.push(el("p", { class: "mm-warn", text: P.CUSTOM_NOTE }));
     if (ready && budget && budget < MIN_BUDGET) kids.push(el("p", { class: "mm-warn", text: "Adtaxi's minimum is " + usd(MIN_BUDGET) + " a month. The split below shows the strategy's full mix for reference." }));
     // Outlined plan bar; segments grow in
     var segs = items.map(function (r) { return el("span", { style: "width:0;background:" + r.ch.color, title: r.ch.label + " " + pc0(r.share) }); });
@@ -332,6 +334,9 @@ var P = window.AdtaxiPlan, CHANNELS = P.CHANNELS, ROLES = P.ROLES, STRATEGIES = 
     sheet.appendChild(el("p", { class: "mm-foot", text: "A starting point for discussion, not a package: the right mix depends on the objective, geography, audience and competition. Estimates for planning. Category figures are national (EMARKETER 2026); scores and figures are modeled from public government and licensed third-party data." }));
   }
   catSel.addEventListener("change", render); stratSel.addEventListener("change", render);
+  // Editable rates (minimums and fees), saved on this device; the plan recalculates on every change
+  var ctl = document.querySelector(".mm-controls");
+  ctl.parentNode.insertBefore(P.rateEditor(function () { render(); }), ctl.nextSibling);
   budIn.addEventListener("input", render);
   $("fees").addEventListener("change", render);
   budIn.addEventListener("blur", function () { var b = readBudget(); budIn.value = b ? Math.round(b).toLocaleString("en-US") : ""; });
@@ -350,6 +355,7 @@ var P = window.AdtaxiPlan, CHANNELS = P.CHANNELS, ROLES = P.ROLES, STRATEGIES = 
     L.push("");
     L.push("Recommended digital plan:");
     plan.items.forEach(function (r) { L.push("- " + r.ch.label + ": " + pc0(r.share) + (withDollars ? " (" + usd(r.dollars) + ")" : "") + (withDollars && showFees() ? ". " + P.feeLine(P.channelFee(r.id, r.dollars)) : "")); });
+    if (P.customRates()) L.push(P.CUSTOM_NOTE);
     if (withDollars) L.push(showFees() ? "Amounts are total monthly investment; management fees are shown per channel (programmatic is priced by CPM with management included)." : "Amounts are total monthly investment, including Adtaxi management.");
     L.push("");
     L.push("How we'll measure success: " + s.kpis.map(function (k) { return k[0]; }).join(", ") + ".");
