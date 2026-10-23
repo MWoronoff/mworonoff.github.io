@@ -872,7 +872,8 @@
 
     this.bWarn.hidden = !A.below && !(P && P.customRates());
     this.bWarn.textContent = P && P.customRates() ? P.CUSTOM_NOTE + " " : "";
-    if (A.below) this.bWarn.textContent += "Adtaxi's minimum is " + money(P.MIN_BUDGET) + " a month. Shares are shown without dollars.";
+    if (P && P.customRates()) this.bWarn.appendChild(el("button", { type: "button", class: "rz-reset", text: "Reset to rate card", onclick: function () { P.resetRates(); } }));
+    if (A.below) this.bWarn.appendChild(document.createTextNode((P && P.customRates() ? " " : "") + "Adtaxi's minimum is " + money(P.MIN_BUDGET) + " a month. Shares are shown without dollars."));
 
     // By channel
     this.cWrap.hidden = !A.strat;

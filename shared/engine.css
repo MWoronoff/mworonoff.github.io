@@ -433,6 +433,8 @@ a.az-btn { display: inline-block; text-decoration: none; text-align: center; }
 .rz-alloc-total td { font-weight: 700; border-top: 2px solid var(--line); }
 .rz-alloc-sub td { color: var(--muted); }
 .rz-alloc-strong { font-weight: 600; }
+.rz-reset { margin-left: 6px; padding: 3px 10px; border: 1px solid var(--warn-line); border-radius: 6px; background: #fff; font: inherit; font-weight: 600; color: #6b5200; cursor: pointer; }
+@media print { .rz-reset { display: none !important; } }
 .rz-feetoggle { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 13px; color: var(--navy); padding-bottom: 9px; white-space: nowrap; }
 .rz-feetoggle input { width: 16px; height: 16px; margin: 0; accent-color: var(--teal); }
 .az-table td.rz-feena { color: var(--muted); font-size: 12px; text-align: right; }

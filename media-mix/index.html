@@ -106,6 +106,8 @@
     * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   }
   .ap-rates { margin: -4px 0 16px; }
+  .mm-reset { margin-left: 6px; padding: 3px 10px; border: 1px solid #ead58d; border-radius: 6px; background: #fff; font: inherit; font-weight: 600; color: #6b5200; cursor: pointer; }
+  @media print { .mm-reset { display: none; } }
   .mm-toggle { display: flex; flex-direction: row; align-items: center; gap: 8px; font-weight: 600; white-space: nowrap; align-self: end; padding-bottom: 9px; }
   .mm-toggle input { width: 16px; height: 16px; margin: 0; accent-color: var(--teal); }
   .mm-feeline { margin-top: 3px !important; font-size: 12px; color: var(--navy); font-weight: 600; }
@@ -272,7 +274,10 @@ var P = window.AdtaxiPlan, CHANNELS = P.CHANNELS, ROLES = P.ROLES, STRATEGIES = 
     var ready = c && s, plan = ready ? buildPlan(s, budget) : null, items = plan ? plan.items : [];
     var kids = [el("h2", { text: "Recommended digital plan" + (ready ? ": " + s.label : "") }),
       el("p", { class: "mm-intro", text: ready ? "Goal: " + s.success.toLowerCase() + "." + (budget && plan.tier ? " Budget: " + usd(budget) + " a month." : budget ? "" : " Enter a monthly budget to see dollars and a plan sized to it.") : "Goal: " + EMPTY }) ];
-    if (ready && P.customRates()) kids.push(el("p", { class: "mm-warn", text: P.CUSTOM_NOTE }));
+    if (ready && P.customRates()) {
+      var rb = el("button", { type: "button", class: "mm-reset", text: "Reset to rate card" }); rb.addEventListener("click", function () { P.resetRates(); });
+      kids.push(el("p", { class: "mm-warn mm-custom" }, [P.CUSTOM_NOTE + " ", rb]));
+    }
     if (ready && budget && budget < MIN_BUDGET) kids.push(el("p", { class: "mm-warn", text: "Adtaxi's minimum is " + usd(MIN_BUDGET) + " a month. The split below shows the strategy's full mix for reference." }));
     // Outlined plan bar; segments grow in
     var segs = items.map(function (r) { return el("span", { style: "width:0;background:" + r.ch.color, title: r.ch.label + " " + pc0(r.share) }); });

@@ -7,7 +7,7 @@ import glob, json, os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-V = "20261023g"   # version tag for the shared engine files on these pages
+V = "20261023h"   # version tag for the shared engine files on these pages
 
 SUBS = [{"id": "exec", "label": "Master franchise candidates"}, {"id": "owner", "label": "First-time franchise buyers"}]
 SOURCES = [
