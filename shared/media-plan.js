@@ -69,9 +69,8 @@
   ];
   var CUSTOM_PLAN_BUDGET = 10000;   // Strategic tier: show the "larger opportunity" note
 
-  /* BUDGETS ARE GROSS: per the Adtaxi rate card, the client's budget includes Adtaxi's management (social, search and
-     YouTube carry a fee taken from the budget; programmatic is priced by CPM with the margin built in). So every amount
-     shown is the client's total investment by channel. No rates are published here: this repo is public.
+  /* BUDGET AND FEES: the budget is allocated in full by platform. With "Add management fees" on, each platform's fee is
+     added to its cost (programmatic is priced by CPM with management included, so it doesn't change).
      MANAGEMENT FEES: switched OFF. While enabled is false, nothing about fees appears
      on screen and every dollar shown is media spend, with the note below.
      To switch fees on, fill in the rates and set enabled: true:
@@ -90,7 +89,7 @@
     rates: { "Tier 3": { pct: null, flat: null }, "Tier 2": { pct: null, flat: null }, "Strategic": { pct: null, flat: null } },
     minFee: null,
     showFee: true,
-    offNote: "Amounts are total monthly investment by channel, including Adtaxi management."
+    offNote: "Amounts allocate the full budget by platform. Turn on Add management fees to add each platform's fee to its cost."
   };
   /* MANAGEMENT FEE SCHEDULE (Adtaxi rate card, Nov 2025), shown only when a user turns on "Show management fees".
      Budgets are gross: the fee comes out of each channel's amount, and the rest is media spend.
@@ -106,30 +105,41 @@
   };
   /* =========================  END OF SETTINGS  ========================= */
 
-  /* One channel's fee: { kind: "fee", pct, fee, media } | { kind: "cpm" } | { kind: "none" } */
-  function channelFee(id, dollars) {
+  /* Management fees added on top (the "Add management fees" toggle): a channel's allocated amount is its media spend,
+     and the fee is added so the channel's total cost rises. Rate card fees are a share of the total (Meta: 60% of the
+     total goes to media), so total = media / (1 - fee): $2,640 of Meta media costs $4,400, a $1,760 fee.
+     Search's fee tier follows the resulting total (25% under $3,000, 20% at $3,000+).
+     Returns { kind: "fee", pct, media, fee, total } | { kind: "cpm", media, total } | { kind: "none", media, total } */
+  function channelFee(id, media) {
     var ch = CHANNELS[id];
-    if (!ch || dollars == null) return { kind: "none" };
-    if (ch.prog) return { kind: "cpm" };
+    if (!ch || media == null) return { kind: "none", media: media, total: media };
+    if (ch.prog) return { kind: "cpm", media: media, total: media };
     var pct = MGMT.pct[id];
-    if (id === "search") pct = MGMT.search.filter(function (t) { return dollars >= t.min && dollars < t.max; })[0].pct;
-    if (pct == null) return { kind: "none" };
-    var fee = Math.round(dollars * pct);
-    return { kind: "fee", pct: pct, fee: fee, media: dollars - fee };
+    var total;
+    if (id === "search") {
+      var hi = MGMT.search[MGMT.search.length - 1], lo = MGMT.search[0];
+      if (media / (1 - hi.pct) >= hi.min) pct = hi.pct;
+      else if (media / (1 - lo.pct) < hi.min) pct = lo.pct;
+      else { total = hi.min; pct = (total - media) / total; }   // between tiers: the total sits at the tier boundary
+    }
+    if (pct == null) return { kind: "none", media: media, total: media };
+    if (total == null) total = Math.round(media / (1 - pct));
+    return { kind: "fee", pct: pct, media: media, fee: total - media, total: total };
   }
-  /* Plan totals: fees and media for fee-based channels, and the programmatic amount (management in CPM) */
+  /* Plan totals with fees added: media (the budget), fees, and total cost */
   function feeSummary(items) {
-    var out = { fee: 0, media: 0, feeBased: 0, cpm: 0, none: 0, total: 0 };
+    var out = { media: 0, fee: 0, total: 0, cpm: 0, none: 0 };
     items.forEach(function (r) {
-      var d = r.dollars; if (d == null) return;
-      var f = channelFee(r.id, d); out.total += d;
-      if (f.kind === "fee") { out.fee += f.fee; out.media += f.media; out.feeBased += d; }
-      else if (f.kind === "cpm") out.cpm += d; else out.none += d;
+      if (r.dollars == null) return;
+      var f = channelFee(r.id, r.dollars);
+      out.media += f.media; out.total += f.total;
+      if (f.kind === "fee") out.fee += f.fee; else if (f.kind === "cpm") out.cpm += f.media; else out.none += f.media;
     });
     return out;
   }
+  function usd0(x) { return "$" + Math.round(x).toLocaleString("en-US"); }
   function feeLine(f) {
-    if (f.kind === "fee") return "Media $" + Math.round(f.media).toLocaleString("en-US") + " · management fee $" + Math.round(f.fee).toLocaleString("en-US") + " (" + Math.round(f.pct * 100) + "%)";
+    if (f.kind === "fee") return "Media " + usd0(f.media) + " + management fee " + usd0(f.fee) + " (" + Math.round(f.pct * 1000) / 10 + "% of total) = " + usd0(f.total);
     if (f.kind === "cpm") return MGMT.cpmNote;
     return MGMT.unknownNote;
   }

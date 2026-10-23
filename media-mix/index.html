@@ -127,20 +127,20 @@
 </header>
 
 <main class="mm-main">
-  <p class="mm-draft"><b>Preview.</b> The strategy splits below are a working draft pending review. Channel availability follows Adtaxi's service tiers (set by total monthly budget, from the 2024 tier sheet pending the updated version); channel minimums follow the Adtaxi rate card (Nov 2025). Amounts are total monthly investment, including Adtaxi management. All of these live in one shared settings file, also used by the Recommended allocation in each analyzer, so the two always match.</p>
+  <p class="mm-draft"><b>Preview.</b> The strategy splits below are a working draft pending review. Channel availability follows Adtaxi's service tiers (set by total monthly budget, from the 2024 tier sheet pending the updated version); channel minimums follow the Adtaxi rate card (Nov 2025). With Add management fees on, each platform's fee is added to its cost. All of these live in one shared settings file, also used by the Recommended allocation in each analyzer, so the two always match.</p>
 
   <section class="az-panel mm-controls" aria-label="Plan inputs">
     <label>Category<select id="cat" autocomplete="off"></select></label>
     <label>Media strategy<select id="strat" autocomplete="off"></select></label>
     <label>Monthly budget (optional)<input id="budget" type="text" inputmode="numeric" placeholder="e.g. 10,000" autocomplete="off"></label>
-    <label class="mm-toggle"><input id="fees" type="checkbox" autocomplete="off"> Show management fees</label>
+    <label class="mm-toggle"><input id="fees" type="checkbox" autocomplete="off"> Add management fees</label>
     <div class="mm-btns"><button class="mm-print" id="print" type="button">Print leave-behind</button><button class="mm-print mm-email" id="email" type="button">Email</button></div>
   </section>
 
   <div class="mm-sheet" id="sheet" aria-live="polite"></div>
 </main>
 
-<script src="../shared/media-plan.js?v=20261023e"></script>
+<script src="../shared/media-plan.js?v=20261023f"></script>
 <script>
 /* =====================  SETTINGS (draft: edit here)  =====================
    CATEGORIES: national category ad spend (EMARKETER 2026), $ billions.
@@ -292,7 +292,7 @@ var P = window.AdtaxiPlan, CHANNELS = P.CHANNELS, ROLES = P.ROLES, STRATEGIES = 
           el("div", null, [el("b", { text: r.ch.label }), r.ch.prog ? el("span", { class: "mm-tag", text: "Programmatic" }) : null, el("p", { text: r.ch.job }),
             showFees() && r.dollars != null && plan.tier ? el("p", { class: "mm-feeline", text: P.feeLine(P.channelFee(r.id, r.dollars)) }) : null]),
           el("span", { class: "num", text: pc0(r.share) }),
-          el("span", { class: "num mm-muted mm-dollar", text: r.dollars != null ? usd(r.dollars) : "" })
+          el("span", { class: "num mm-muted mm-dollar", text: r.dollars != null ? usd(showFees() && plan.tier ? P.channelFee(r.id, r.dollars).total : r.dollars) : "" })
         ]);
       }) : [el("div", { class: "mm-ch" }, [el("span", { class: "mm-key mm-key-empty" }), el("div", null, [el("b", { class: "mm-muted", text: EMPTY })]), el("span", { class: "num mm-muted", text: EMPTY }), el("span", { class: "num mm-muted mm-dollar", text: "" })])];
       kids.push(el("div", { class: "mm-role" }, [el("h3", { text: role[1] })].concat(rowsR)));
@@ -302,10 +302,10 @@ var P = window.AdtaxiPlan, CHANNELS = P.CHANNELS, ROLES = P.ROLES, STRATEGIES = 
       if (prog > 0) kids.push(el("p", { class: "mm-fine" }, [el("b", { text: "Programmatic: " + pc0(prog) + " of this plan" + (budget && plan.tier ? " (" + usd(items.reduce(function (a, r) { return a + (r.ch.prog ? r.dollars : 0); }, 0)) + ")" : "") + "," }), " bought automatically across websites, apps and streaming TV."]));
       if (showFees() && budget && plan.tier) {
         var fs = P.feeSummary(items);
-        kids.push(el("p", { class: "mm-fine" }, [el("b", { text: "Management fees: " }),
-          (fs.feeBased ? usd(fs.fee) + " of the " + usd(fs.feeBased) + " for social, search and YouTube channels, leaving " + usd(fs.media) + " in media spend. " : "") +
-          (fs.cpm ? "Programmatic (" + usd(fs.cpm) + ") is priced by CPM with management included. " : "") +
-          (fs.none ? usd(fs.none) + " is in channels whose fee isn't on the rate card. " : "") + "Total monthly investment: " + usd(fs.total) + "."]));
+        kids.push(el("p", { class: "mm-fine" }, [el("b", { text: "With management fees: " }),
+          "media budget " + usd(fs.media) + " + management fees " + usd(fs.fee) + " = total investment " + usd(fs.total) + "." +
+          (fs.cpm ? " Programmatic (" + usd(fs.cpm) + ") is priced by CPM with management included, so it doesn't change." : "") +
+          (fs.none ? " " + usd(fs.none) + " is in channels with no fee on the rate card." : "")]));
       }
       if (plan.tier) kids.push(el("p", { class: "mm-why" }, [el("b", { text: "Why " + items.length + (items.length === 1 ? " channel" : " channels") + ": " }), plan.tier.label + ". Fully funding fewer channels outperforms spreading a budget thin."]));
       if (plan.tier) {
@@ -359,9 +359,10 @@ var P = window.AdtaxiPlan, CHANNELS = P.CHANNELS, ROLES = P.ROLES, STRATEGIES = 
     L.push("How " + c.noun + " advertisers spend (U.S., 2026): " + pc0(c.digital / (c.digital + c.traditional)) + " digital, " + pc0(c.traditional / (c.digital + c.traditional)) + " traditional. Largest digital format: " + (function () { var t = c.formats.slice().sort(function (a, b) { return b.value - a.value; })[0]; return t.label.toLowerCase() + " (" + pc0(t.value / c.digital) + " of digital)"; })() + ".");
     L.push("");
     L.push("Recommended digital plan:");
-    plan.items.forEach(function (r) { L.push("- " + r.ch.label + ": " + pc0(r.share) + (withDollars ? " (" + usd(r.dollars) + ")" : "") + (withDollars && showFees() ? ". " + P.feeLine(P.channelFee(r.id, r.dollars)) : "")); });
+    plan.items.forEach(function (r) { L.push("- " + r.ch.label + ": " + pc0(r.share) + (withDollars ? " (" + usd(showFees() ? P.channelFee(r.id, r.dollars).total : r.dollars) + ")" : "") + (withDollars && showFees() ? ". " + P.feeLine(P.channelFee(r.id, r.dollars)) : "")); });
     if (P.customRates()) L.push(P.CUSTOM_NOTE);
-    if (withDollars) L.push(showFees() ? "Amounts are total monthly investment; management fees are shown per channel (programmatic is priced by CPM with management included)." : "Amounts are total monthly investment, including Adtaxi management.");
+    if (withDollars && showFees()) { var fsE = P.feeSummary(plan.items); L.push("With management fees: media budget " + usd(fsE.media) + " + management fees " + usd(fsE.fee) + " = total investment " + usd(fsE.total) + ". Programmatic is priced by CPM with management included."); }
+    else if (withDollars) L.push(P.FEES.offNote.replace(" Turn on Add management fees to add each platform's fee to its cost.", ""));
     L.push("");
     L.push("How we'll measure success: " + s.kpis.map(function (k) { return k[0]; }).join(", ") + ".");
     L.push("");

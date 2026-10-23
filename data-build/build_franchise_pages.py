@@ -7,7 +7,7 @@ import glob, json, os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-V = "20261023h"   # version tag for the shared engine files on these pages
+V = "20261023i"   # version tag for the shared engine files on these pages
 
 SUBS = [{"id": "exec", "label": "Master franchise candidates"}, {"id": "owner", "label": "First-time franchise buyers"}]
 SOURCES = [
@@ -56,7 +56,7 @@ def radius_cfg(title, export, depth, links):
         "audienceData": f"{up}shared/audience/zip_audience.json",
         "extraData": [{"url": f"{up}shared/audience/zip_audience_fin.json", "label": "Tax return data", "source": "IRS Statistics of Income ZIP data"}],
         "zipGeo": f"{up}shared/geo/zip/{{level}}/{{id}}.json",
-        "planScript": f"{up}shared/media-plan.js?v=20261023e", "mediaMixUrl": f"{up}media-mix/", "planCategory": "none",
+        "planScript": f"{up}shared/media-plan.js?v=20261023f", "mediaMixUrl": f"{up}media-mix/", "planCategory": "none",
         "customArea": True, "ageSet": "adult", "radii": [5, 10, 15, 25, 50, 100], "radiusLabel": "Up to {r} miles",
         "filters": ["age", "income", "veterans"],
         "profileLabel": "Best prospects for",
