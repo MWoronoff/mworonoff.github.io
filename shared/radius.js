@@ -803,7 +803,7 @@
     this.pComp = el("textarea", { rows: "3", placeholder: "One per line (optional)", "aria-label": "Local competitors" });
     this.pStatus = el("span", { class: "rz-pstatus", role: "status" });
     this.pBox = el("div", { class: "rz-proposal", hidden: true }, [
-      el("p", { class: "rz-ptitle", text: "Proposal (PowerPoint, 2 slides): your trade area, then the recommended platforms with why each one, investment and targeted impressions. Investment includes Adtaxi management. The file is editable." }),
+      el("p", { class: "rz-ptitle", text: "Proposal (PowerPoint, 2 slides): your trade area, then a package summary (investment, targeted impressions, average CPM, clicks and leads) and the recommended platforms with why each one. Investment includes Adtaxi management. The file is editable." }),
       el("div", { class: "rz-pfields" }, [
         el("label", { class: "az-field" }, [el("span", { text: "Client or business name" }), this.pClient]),
         el("label", { class: "az-field rz-pcomp" }, [el("span", { text: "Local competitors" }), this.pComp]),
@@ -1123,7 +1123,10 @@
                amount: amount, reasons: reasons, est: P.estimate(ch.id, amount, bench) };
     });
     var total = plan.reduce(function (t, p) { return t + p.amount; }, 0);
-    plan.forEach(function (p) { p.pct = total ? Math.round(p.amount / total * 100) : 0; });
+    // Whole-number shares that add to 100 (largest remainder)
+    plan.forEach(function (p) { var x = total ? p.amount / total * 100 : 0; p.pct = Math.floor(x); p.rem = x - p.pct; });
+    var short = total ? 100 - plan.reduce(function (t, p) { return t + p.pct; }, 0) : 0;
+    plan.slice().sort(function (a, z) { return z.rem - a.rem; }).slice(0, short).forEach(function (p) { p.pct++; });
     var ci = this.byZip[s.zip];
     var place = s.mode === "area" ? "Custom area: " + this.areaPhrase() : "Within " + s.r + " miles of " + s.zip + " " + c.city[ci] + ", " + c.state[ci];
     var placeShort = s.mode === "area" ? "" : c.city[ci] + ", " + c.state[ci];

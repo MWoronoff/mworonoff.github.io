@@ -1,8 +1,8 @@
 /* Adtaxi proposal: a 2-slide, editable PowerPoint built in the browser from a Trade area and its Recommended allocation.
    Slide 1  Your trade area: map, prospects, index, top ZIPs, local competitors (typed by the rep).
    Slide 2  Recommended monthly investment & targeted impressions: each platform with its investment (management
-            included), why it's recommended (ad response, audience concentration, its role) and estimated delivery;
-            the goal and the first 90 days.
+            included), why it's recommended (ad response, audience concentration, its role) and estimated delivery,
+            after a package summary (investment, targeted impressions, average CPM, clicks, leads); then the goal.
    Uses PptxGenJS (loaded on demand). window.AdtaxiProposal.build(ctx) returns a Promise that resolves when the file
    is saved. ctx is assembled by shared/radius.js. */
 (function () {
@@ -64,52 +64,83 @@
     if (ctx.competitors.length) {
       var y = 4.32 + 0.24 * rows.length + 0.15, n = Math.min(5, ctx.competitors.length);
       s.addText("Local competitors", { x: X, y: y, w: W, h: 0.26, fontFace: FONT, fontSize: 11, bold: true, color: C.ink, margin: 0, isTextBox: true });
-      s.addText(ctx.competitors.slice(0, n).map(function (c, i) { return { text: c, options: { bullet: true, breakLine: i < n - 1 } }; }),
+      s.addText(ctx.competitors.slice(0, n).map(function (c, i) { return { text: c, options: { bullet: { indent: 10 }, breakLine: i < n - 1 } }; }),
         { x: X, y: y + 0.28, w: W, h: Math.min(6.9 - y - 0.3, 0.2 * n + 0.1), fontFace: FONT, fontSize: 9, color: C.ink, margin: 0, valign: "top", paraSpaceAfter: 1, isTextBox: true });
     }
   }
+
+  // Package totals: impressions, clicks and leads add up over the platforms that have an estimate;
+  // the averages divide those platforms' investment by their delivery (so a platform without an estimate doesn't skew them).
+  function totals(plan) {
+    var t = { impr: 0, clicks: 0, leads: 0, $impr: 0, $clicks: 0, $leads: 0, nImpr: 0, n: plan.length };
+    plan.forEach(function (p) {
+      var e = p.est;
+      if (e.impr != null) { t.impr += e.impr; t.$impr += p.amount; t.nImpr++; }
+      if (e.clicks != null) { t.clicks += e.clicks; t.$clicks += p.amount; }
+      if (e.leads != null) { t.leads += e.leads; t.$leads += p.amount; }
+    });
+    t.cpm = t.impr ? t.$impr / t.impr * 1000 : null;
+    t.cpc = t.clicks ? t.$clicks / t.clicks : null;
+    t.cpl = t.leads ? t.$leads / t.leads : null;
+    return t;
+  }
+  var money2 = function (x) { return "$" + x.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
 
   function slideInvestment(pres, ctx) {
     var s = pres.addSlide();
     frame(pres, s, ctx, 2);
     s.addText("Recommended Monthly Investment & Targeted Impressions", { x: 0.4, y: 0.98, w: 9.2, h: 0.45, fontFace: FONT, fontSize: 19, bold: true, color: C.ink, margin: 0, isTextBox: true });
     s.addText(ctx.strategy.label + " · " + money(ctx.total) + " a month · investment includes Adtaxi management", { x: 0.4, y: 1.42, w: 9.2, h: 0.3, fontFace: FONT, fontSize: 11, color: C.muted, margin: 0, isTextBox: true });
+
+    // Package summary: one row of tiles
+    var T = totals(ctx.plan), partial = T.nImpr && T.nImpr < T.n;
+    var tiles = [
+      [money(ctx.total), "Monthly investment", money(ctx.total * 3) + " for the first 3 months"],
+      [T.impr ? approx(T.impr) : "—", "Targeted impressions", T.impr ? approx(T.impr * 3) + " over 3 months" : "Estimate on request"],
+      [T.cpm != null ? money2(T.cpm) : "—", "Average CPM", partial ? "On platforms with an estimate" : "Investment per 1,000 targeted impressions"],
+      [T.clicks ? approx(T.clicks) : "—", "Est. clicks", T.cpc != null ? money2(T.cpc) + " average cost per click" : ""],
+      [T.leads ? approx(T.leads) : "—", "Est. leads", T.cpl != null ? money(T.cpl) + " average cost per lead" : ""]
+    ];
+    var gap = 0.1, tw = (9.2 - gap * (tiles.length - 1)) / tiles.length, ty = 1.82, th = 0.95;
+    s.addText("PACKAGE SUMMARY", { x: 0.4, y: ty, w: 4, h: 0.22, fontFace: FONT, fontSize: 8.5, bold: true, color: C.teal, charSpacing: 1, margin: 0, isTextBox: true });
+    ty += 0.25;
+    tiles.forEach(function (t, i) {
+      var x = 0.4 + i * (tw + gap), first = i === 0;
+      s.addShape(pres.shapes.ROUNDED_RECTANGLE, { x: x, y: ty, w: tw, h: th, fill: { color: first ? C.teal : C.mint }, line: { color: first ? C.teal : C.mint }, rectRadius: 0.06 });
+      s.addText(t[0], { x: x + 0.08, y: ty + 0.06, w: tw - 0.16, h: 0.38, fontFace: FONT, fontSize: 17, bold: true, color: first ? C.white : C.teal, margin: 0, isTextBox: true });
+      s.addText(t[1], { x: x + 0.08, y: ty + 0.44, w: tw - 0.16, h: 0.2, fontFace: FONT, fontSize: 8.5, bold: true, color: first ? C.white : C.ink, margin: 0, isTextBox: true });
+      if (t[2]) s.addText(t[2], { x: x + 0.08, y: ty + 0.64, w: tw - 0.16, h: 0.27, fontFace: FONT, fontSize: 7.5, color: first ? C.mint : C.muted, margin: 0, valign: "top", isTextBox: true });
+    });
+
+    // Platform table
     var H = { bold: true, color: C.white, fill: { color: C.orange }, fontSize: 9.5, valign: "middle" };
     var rows = [[{ text: "Platform", options: H }, { text: "Monthly investment", options: Object.assign({ align: "right" }, H) }, { text: "Why this platform", options: H },
                  { text: "Targeted impressions", options: Object.assign({ align: "right" }, H) }, { text: "Est. clicks / leads", options: Object.assign({ align: "right" }, H) }]];
-    var tImp = 0, tClk = 0, tLead = 0, anyImp = false, anyClk = false, anyLead = false;
-    // Fewer platforms leave more room per row; many platforms shrink the reasons text so the table fits the slide.
-    var many = ctx.plan.length > 4, rFont = many ? 7.5 : 8.5;
+    var many = ctx.plan.length > 2, rFont = many ? 7.5 : 8.5, rowsH = 0.42;
     ctx.plan.forEach(function (p) {
       var e = p.est, cl = [];
-      if (e.clicks != null) { cl.push(approx(e.clicks) + " clicks"); tClk += e.clicks; anyClk = true; }
-      if (e.leads != null) { cl.push(approx(e.leads) + " leads"); tLead += e.leads; anyLead = true; }
-      if (e.impr != null) { tImp += e.impr; anyImp = true; }
+      if (e.clicks != null) cl.push(approx(e.clicks) + " clicks");
+      if (e.leads != null) cl.push(approx(e.leads) + " leads");
+      var why = (many ? p.reasons.slice(0, 2) : p.reasons).join(" ");
+      // PowerPoint sizes rows to their text; estimate the height so the Goal row sits just under the table
+      rowsH += Math.max(0.5, Math.ceil(why.length / (rFont > 8 ? 62 : 70)) * (rFont / 72 * 1.2) + 0.1);
       rows.push([
         { text: [{ text: p.label, options: { bold: true, breakLine: true } }, { text: p.role, options: { fontSize: 8, color: C.muted } }] },
         { text: [{ text: money(p.amount), options: { bold: true, breakLine: true } }, { text: p.pct + "% of plan", options: { fontSize: 8, color: C.muted } }], options: { align: "right" } },
-        { text: (many ? p.reasons.slice(0, 2) : p.reasons).join(" "), options: { fontSize: rFont } },
+        { text: why, options: { fontSize: rFont } },
         { text: e.impr != null ? approx(e.impr) : "Estimate on request", options: { align: "right", bold: e.impr != null, color: e.impr != null ? C.ink : C.muted, fontSize: e.impr != null ? 10 : 8.5 } },
         { text: cl.length ? cl.join("\n") : "—", options: { align: "right", fontSize: 8.5, color: cl.length ? C.ink : C.muted } }
       ]);
     });
-    var T = { bold: true, fill: { color: "F2F2F2" } };
-    rows.push([{ text: "Total", options: T }, { text: money(ctx.total), options: Object.assign({ align: "right" }, T) }, { text: "", options: T },
-               { text: anyImp ? approx(tImp) : "—", options: Object.assign({ align: "right" }, T) },
-               { text: [anyClk ? approx(tClk) + " clicks" : null, anyLead ? approx(tLead) + " leads" : null].filter(Boolean).join("\n") || "—", options: Object.assign({ align: "right", fontSize: 8.5 }, T) }]);
-    s.addTable(rows, { x: 0.4, y: 1.82, w: 9.2, colW: [1.55, 1.15, 3.85, 1.25, 1.4], fontFace: FONT, fontSize: 9, color: C.ink, valign: "middle",
+    var tableY = ty + th + 0.2;
+    s.addTable(rows, { x: 0.4, y: tableY, w: 9.2, colW: [1.55, 1.15, 3.85, 1.25, 1.4], fontFace: FONT, fontSize: 9, color: C.ink, valign: "middle",
                        border: { type: "solid", pt: 0.5, color: C.line }, margin: [0.04, 0.07, 0.04, 0.07], autoPage: false });
 
-    // Goal and the first 90 days
-    // Sits just under the table (row heights are estimated: PowerPoint sizes rows to their text)
-    var y = Math.min(5.42, 1.82 + 0.45 + ctx.plan.length * (many ? 0.62 : 0.72) + 0.42 + 0.35);
-    s.addShape(pres.shapes.RECTANGLE, { x: 0.4, y: y, w: 3.0, h: 1.0, fill: { color: C.mint }, line: { color: C.mint } });
-    s.addText([{ text: "Goal", options: { bold: true, fontSize: 13, breakLine: true } }, { text: ctx.strategy.success, options: { fontSize: 11 } }],
-      { x: 0.5, y: y + 0.05, w: 2.8, h: 0.9, fontFace: FONT, color: C.ink, align: "center", valign: "middle", margin: 0, isTextBox: true });
-    var TH = { bold: true, color: C.white, fill: { color: C.gray }, align: "center", fontSize: 9.5 };
-    s.addTable([[{ text: "Month 1", options: TH }, { text: "Month 2", options: TH }, { text: "Month 3", options: TH }],
-                [{ text: "Launch & learning", options: { align: "center" } }, { text: "Optimization", options: { align: "center" } }, { text: "Steady results & scale", options: { align: "center" } }]],
-      { x: 3.6, y: y, w: 6.0, colW: [2.0, 2.0, 2.0], rowH: [0.38, 0.62], fontFace: FONT, fontSize: 10, color: C.ink, valign: "middle", border: { type: "solid", pt: 0.5, color: C.line } });
+    // Goal, just under the table
+    var y = Math.min(5.8, tableY + rowsH + 0.25), gh = 0.6;
+    s.addShape(pres.shapes.RECTANGLE, { x: 0.4, y: y, w: 9.2, h: gh, fill: { color: C.mint }, line: { color: C.mint } });
+    s.addText([{ text: "Goal: ", options: { bold: true, fontSize: 13 } }, { text: ctx.strategy.success, options: { fontSize: 12 } }],
+      { x: 0.55, y: y, w: 8.9, h: gh, fontFace: FONT, color: C.ink, align: "center", valign: "middle", margin: 0, isTextBox: true });
     s.addText(ctx.footnote, { x: 0.4, y: 6.5, w: 9.2, h: 0.5, fontFace: FONT, fontSize: 7, color: C.muted, margin: 0, valign: "top", isTextBox: true });
   }
 
