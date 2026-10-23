@@ -252,7 +252,14 @@
        Leads are estimated for Search and Meta only. Audio, DOOH and Shopping: no published basis, so no estimate. */
   var RETAIL_CPM = { display: 10, retarget: 10, ctv: 50, audio: 35, dooh: 30 };
   var BENCH_CPM = { youtube: 20, tiktok: 6.5, snapchat: 5.25 };
-  var DISPLAY_CTR = 0.001, CTV_VCR = 0.95;
+  // ctr: display/retargeting click-through rate; vcr: CTV completion rate. search/social: a rep's own CPC, CTR (%) and CPL;
+  // null uses the WordStream benchmark for the category.
+  var EST = { ctr: 0.001, vcr: 0.95, search: { cpc: null, ctr: null, cpl: null }, social: { cpc: null, ctr: null, cpl: null } };
+  function benchWith(id, b) {   // the category benchmark with any of the rep's overrides on top
+    var o = EST[id], r = {};
+    ["cpc", "ctr", "cpl"].forEach(function (k) { r[k] = o[k] != null ? o[k] : b ? b[k] : null; });
+    return r.cpc && r.ctr ? r : null;
+  }
   function feeShare(id, amount) {
     if (id === "search") { var t = MGMT.search.filter(function (x) { return amount >= x.min && amount < x.max; })[0]; return t ? t.pct : 0; }
     return MGMT.pct[id] || 0;
@@ -262,18 +269,18 @@
     if (!amount || !CHANNELS[id]) return out;
     if (RETAIL_CPM[id]) {
       out.impr = amount / RETAIL_CPM[id] * 1000; out.basis = "cpm"; out.cpm = RETAIL_CPM[id];
-      if (id === "display" || id === "retarget") out.clicks = out.impr * DISPLAY_CTR;
-      if (id === "ctv") out.views = out.impr * CTV_VCR;
+      if (id === "display" || id === "retarget") out.clicks = out.impr * EST.ctr;
+      if (id === "ctv") out.views = out.impr * EST.vcr;
       return out;
     }
     var media = amount * (1 - feeShare(id, amount));
     if (BENCH_CPM[id]) { out.impr = media / BENCH_CPM[id] * 1000; out.basis = "bench"; out.cpm = BENCH_CPM[id]; return out; }
-    if (id === "search" && bench && bench.search) {
-      var b = bench.search; out.clicks = media / b.cpc; out.impr = out.clicks / (b.ctr / 100); if (b.cpl) out.leads = media / b.cpl; out.basis = "search"; return out;
-    }
-    if (id === "social" && bench && bench.socialTraffic) {
-      var t = bench.socialTraffic, cpm = t.cpc * t.ctr / 100 * 1000;
-      out.impr = media / cpm * 1000; out.clicks = media / t.cpc; if (bench.socialLeads && bench.socialLeads.cpl) out.leads = media / bench.socialLeads.cpl; out.basis = "social"; return out;
+    var b = id === "search" ? benchWith("search", bench && bench.search)
+          : id === "social" ? benchWith("social", bench && bench.socialTraffic && { cpc: bench.socialTraffic.cpc, ctr: bench.socialTraffic.ctr, cpl: bench.socialLeads && bench.socialLeads.cpl }) : null;
+    if (b && id === "search") { out.clicks = media / b.cpc; out.impr = out.clicks / (b.ctr / 100); if (b.cpl) out.leads = media / b.cpl; out.basis = "search"; return out; }
+    if (b && id === "social") {
+      var cpm = b.cpc * b.ctr / 100 * 1000;
+      out.impr = media / cpm * 1000; out.clicks = media / b.cpc; if (b.cpl) out.leads = media / b.cpl; out.basis = "social"; return out;
     }
     return out;
   }
@@ -281,7 +288,10 @@
   /* ---------- Editable rates ----------
      A user can change channel minimums and management fees on their own device (saved in this browser only).
      Plans recalculate from the edited values; "Reset to rate card" restores the settings above. */
-  var DEFAULTS = { min: JSON.parse(JSON.stringify(MINIMUMS)), pct: JSON.parse(JSON.stringify(MGMT.pct)), search: MGMT.search.map(function (t) { return t.pct; }) };
+  var CPM_ALL = {}; Object.keys(RETAIL_CPM).forEach(function (k) { CPM_ALL[k] = RETAIL_CPM; }); Object.keys(BENCH_CPM).forEach(function (k) { CPM_ALL[k] = BENCH_CPM; });
+  function cpmNow() { var o = {}; Object.keys(CPM_ALL).forEach(function (k) { o[k] = CPM_ALL[k][k]; }); return o; }
+  function estNow() { return JSON.parse(JSON.stringify(EST)); }
+  var DEFAULTS = { min: JSON.parse(JSON.stringify(MINIMUMS)), pct: JSON.parse(JSON.stringify(MGMT.pct)), search: MGMT.search.map(function (t) { return t.pct; }), cpm: cpmNow(), est: estNow() };
   var RATE_KEY = "adtaxi-plan-rates-v1", listeners = [];
   function num(v, lo, hi) { v = typeof v === "string" ? parseFloat(v.replace(/[$,%\s]/g, "")) : v; return isFinite(v) && v >= lo && v <= hi ? v : null; }
   function applyRates(o) {
@@ -294,8 +304,15 @@
       if (v != null) MGMT.pct[k] = v; else if (k in DEFAULTS.pct) MGMT.pct[k] = DEFAULTS.pct[k]; else delete MGMT.pct[k];
     });
     MGMT.search.forEach(function (t, i) { var v = o.search && num(o.search[i], 0, 0.9); t.pct = v != null ? v : DEFAULTS.search[i]; });
+    Object.keys(CPM_ALL).forEach(function (k) { var v = o.cpm && num(o.cpm[k], 0.01, 1e4); CPM_ALL[k][k] = v != null ? v : DEFAULTS.cpm[k]; });
+    var e = o.est || {}, D = DEFAULTS.est;
+    var c = num(e.ctr, 0, 1); EST.ctr = c != null ? c : D.ctr;
+    var vc = num(e.vcr, 0, 1); EST.vcr = vc != null ? vc : D.vcr;
+    ["search", "social"].forEach(function (id) {
+      ["cpc", "ctr", "cpl"].forEach(function (k) { var v = e[id] && e[id][k] != null ? num(e[id][k], 0.0001, 1e5) : null; EST[id][k] = v != null ? v : null; });
+    });
   }
-  function currentRates() { return { min: JSON.parse(JSON.stringify(MINIMUMS)), pct: JSON.parse(JSON.stringify(MGMT.pct)), search: MGMT.search.map(function (t) { return t.pct; }) }; }
+  function currentRates() { return { min: JSON.parse(JSON.stringify(MINIMUMS)), pct: JSON.parse(JSON.stringify(MGMT.pct)), search: MGMT.search.map(function (t) { return t.pct; }), cpm: cpmNow(), est: estNow() }; }
   function customRates() { return JSON.stringify(currentRates()) !== JSON.stringify(DEFAULTS); }
   function setRates(o) {
     applyRates(o);
@@ -304,7 +321,7 @@
   }
   function resetRates() { setRates(null); }
   try { var saved = localStorage.getItem(RATE_KEY); if (saved) applyRates(JSON.parse(saved)); } catch (e) {}
-  var CUSTOM_NOTE = "Custom rates in use: minimums or management fees were edited on this device.";
+  var CUSTOM_NOTE = "Custom rates in use: minimums, management fees or estimate rates were edited on this device.";
 
   // The editor: a closed panel listing each channel's minimum and fee. onChange runs after every edit and on reset.
   function rateEditor(onChange) {
@@ -312,7 +329,7 @@
       var st = document.createElement("style"); st.id = "ap-rates-css";
       st.textContent = ".ap-rates{border:1px solid #dce4ec;border-radius:10px;padding:10px 14px;background:#fff}" +
         ".ap-rates>summary{cursor:pointer;font-weight:700;color:#0f2742}.ap-rates p{margin:8px 0;font-size:12px;color:#5f7286}" +
-        ".ap-rates table{border-collapse:collapse;font-size:13px;width:100%;max-width:560px}.ap-rates th{font-size:12px;color:#5f7286;text-align:right;padding:4px 6px;font-weight:600}" +
+        ".ap-rates table{border-collapse:collapse;font-size:13px;width:100%;max-width:720px}.ap-rates th{font-size:12px;color:#5f7286;text-align:right;padding:4px 6px;font-weight:600}" +
         ".ap-rates th:first-child,.ap-rates td:first-child{text-align:left}.ap-rates td{padding:3px 6px;border-top:1px solid #eef2f5;text-align:right;white-space:nowrap}" +
         ".ap-rates input{width:84px;padding:4px 6px;border:1px solid #c9d5e0;border-radius:6px;font:inherit;text-align:right}.ap-rates input.ap-pct{width:56px}" +
         ".ap-rates .ap-edited{background:#fff7db;border-color:#ead58d}.ap-rates button{margin-top:8px;padding:6px 12px;border:1px solid #c9d5e0;border-radius:8px;background:#fff;font:inherit;font-weight:600;color:#0f2742;cursor:pointer}" +
@@ -332,9 +349,31 @@
         "aria-label": isPct ? "Management fee percent" : "Monthly minimum in dollars", onchange: function () { save(this.value); } });
       return i;
     }
+    // A general input: dec = decimals shown, scale = 100 for a share shown as a percent; blank saves null (benchmark) when allowed
+    function field(val, def, dec, scale, label, save, blankOk) {
+      var shown = val == null ? "" : String(Math.round(val * (scale || 1) * Math.pow(10, dec)) / Math.pow(10, dec));
+      return E("input", { type: "text", inputmode: "decimal", value: shown, placeholder: blankOk ? "auto" : "", class: "ap-pct" + (val !== def ? " ap-edited" : ""), "aria-label": label,
+        onchange: function () { var t = String(this.value).trim(); if (t === "" && blankOk) return save(null); var x = num(t, 0, 1e7); save(x == null ? def : x / (scale || 1)); } });
+    }
+    var ebody = E("tbody");
+    function drawEst() {
+      var R = currentRates(), D = DEFAULTS.est;
+      ebody.innerHTML = "";
+      function set(fn) { var o = currentRates(); fn(o.est); setRates(o); }
+      ebody.appendChild(E("tr", null, [E("td", { text: "Programmatic display & retargeting (click-through)" }), E("td", { text: "—" }), E("td", null, [field(R.est.ctr, D.ctr, 2, 100, "Display click-through rate percent", function (v) { set(function (e) { e.ctr = v; }); }), "%"]), E("td", { text: "—" })]));
+      ebody.appendChild(E("tr", null, [E("td", { text: "CTV / streaming TV (completion)" }), E("td", { text: "—" }), E("td", null, [field(R.est.vcr, D.vcr, 1, 100, "CTV completion rate percent", function (v) { set(function (e) { e.vcr = v; }); }), "%"]), E("td", { text: "—" })]));
+      [["search", "Google Search"], ["social", "Meta"]].forEach(function (x) {
+        var id = x[0], o = R.est[id];
+        ebody.appendChild(E("tr", null, [E("td", { text: x[1] }),
+          E("td", null, ["$", field(o.cpc, null, 2, 1, x[1] + " cost per click", function (v) { set(function (e) { e[id].cpc = v; }); }, true)]),
+          E("td", null, [field(o.ctr, null, 2, 1, x[1] + " click-through rate percent", function (v) { set(function (e) { e[id].ctr = v; }); }, true), "%"]),
+          E("td", null, ["$", field(o.cpl, null, 0, 1, x[1] + " cost per lead", function (v) { set(function (e) { e[id].cpl = v; }); }, true)])]));
+      });
+    }
     function draw() {
       var R = currentRates();
       tbody.innerHTML = "";
+      drawEst();
       Object.keys(CHANNELS).forEach(function (id) {
         var ch = CHANNELS[id], minDef = DEFAULTS.min[id];
         var minCell = id in R.min ? ["$", input(R.min[id], false, minDef, function (v) { var o = currentRates(); o.min[id] = num(v, 0, 1e7) != null ? num(v, 0, 1e7) : minDef; setRates(o); })] : ["—"];
@@ -344,13 +383,17 @@
           return E("span", null, [i ? " / " : "", input(R.search[i], true, DEFAULTS.search[i], function (v) { var o = currentRates(), x = num(v, 0, 90); o.search[i] = x != null ? x / 100 : DEFAULTS.search[i]; setRates(o); }), "%"]);
         });
         else feeCell = [input(R.pct[id], true, DEFAULTS.pct[id], function (v) { var o = currentRates(), x = String(v).trim() === "" ? null : num(v, 0, 90); if (x == null) delete o.pct[id]; else o.pct[id] = x / 100; setRates(o); }), "%"];
-        tbody.appendChild(E("tr", null, [E("td", { text: ch.label + (id === "search" ? " (under $3K / $3K+)" : "") }), E("td", null, minCell), E("td", null, feeCell)]));
+        var cpmCell = id in R.cpm ? ["$", field(R.cpm[id], DEFAULTS.cpm[id], 2, 1, ch.label + " CPM", function (v) { var o = currentRates(); o.cpm[id] = v; setRates(o); })]
+                    : [id === "search" || id === "social" ? "Below" : "—"];
+        tbody.appendChild(E("tr", null, [E("td", { text: ch.label + (id === "search" ? " (under $3K / $3K+)" : "") }), E("td", null, minCell), E("td", null, feeCell), E("td", null, cpmCell)]));
       });
       flag.textContent = customRates() ? " · custom rates in use" : "";
     }
     box.appendChild(E("summary", null, ["Edit rates", flag]));
-    box.appendChild(E("p", { text: "Defaults are the Adtaxi rate card (Nov 2025). Changes recalculate the plan right away and are saved on this device only; they don't change anyone else's view. Leave a fee blank for none." }));
-    box.appendChild(E("table", null, [E("thead", null, [E("tr", null, [E("th", { text: "Channel" }), E("th", { text: "Monthly minimum" }), E("th", { text: "Management fee" })])]), tbody]));
+    box.appendChild(E("p", { text: "Minimums, fees and programmatic CPMs default to the Adtaxi rate card (Nov 2025); YouTube, TikTok and Snapchat CPMs and the estimate rates below default to industry benchmarks. Changes recalculate the plan and the proposal's targeted impressions right away and are saved on this device only; they don't change anyone else's view. Leave a fee blank for none." }));
+    box.appendChild(E("table", null, [E("thead", null, [E("tr", null, [E("th", { text: "Channel" }), E("th", { text: "Monthly minimum" }), E("th", { text: "Management fee" }), E("th", { text: "CPM (for estimates)" })])]), tbody]));
+    box.appendChild(E("p", { text: "Estimate rates. Search and Meta set to auto use the WordStream 2026 benchmark for the category; enter your own from campaign results to replace any of them." }));
+    box.appendChild(E("table", null, [E("thead", null, [E("tr", null, [E("th", { text: "Platform" }), E("th", { text: "Cost per click" }), E("th", { text: "Click-through / completion rate" }), E("th", { text: "Cost per lead" })])]), ebody]));
     box.appendChild(E("button", { type: "button", text: "Reset to rate card", onclick: function () { resetRates(); } }));
     listeners.push(function () { draw(); if (onChange) onChange(); });
     draw();
@@ -362,7 +405,7 @@
     SERVICE_TIERS: SERVICE_TIERS, CUSTOM_PLAN_BUDGET: CUSTOM_PLAN_BUDGET, FEES: FEES,
     serviceTier: serviceTier, minFor: minFor, buildPlan: buildPlan, applyFees: applyFees, termNote: termNote,
     MGMT: MGMT, channelFee: channelFee, feeSummary: feeSummary, feeLine: feeLine,
-    RETAIL_CPM: RETAIL_CPM, BENCH_CPM: BENCH_CPM, DISPLAY_CTR: DISPLAY_CTR, CTV_VCR: CTV_VCR, estimate: estimate,
+    RETAIL_CPM: RETAIL_CPM, BENCH_CPM: BENCH_CPM, EST: EST, estimate: estimate,
     rateEditor: rateEditor, setRates: setRates, resetRates: resetRates, customRates: customRates, CUSTOM_NOTE: CUSTOM_NOTE
   };
 })();

@@ -767,7 +767,7 @@
     if (window.AdtaxiPlan) { done(); return; }
     if (loadPlan.waiting) { loadPlan.waiting.push(done); return; }
     loadPlan.waiting = [done];
-    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261023q";
+    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261023r";
     sc.onload = function () { var w = loadPlan.waiting; loadPlan.waiting = null; w.forEach(function (f) { f(); }); };
     sc.onerror = function () { loadPlan.waiting = null; };
     document.head.appendChild(sc);
@@ -1019,7 +1019,7 @@
   Radius.prototype.proposalBase = function () { return (this.cfg.planScript || "../shared/media-plan.js").replace(/media-plan\.js.*$/, ""); };
   Radius.prototype.benchmarks = function () {
     var self = this;
-    if (!this._bench) this._bench = fetch(this.cfg.benchmarksData || this.proposalBase() + "benchmarks.json?v=20261023q").then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
+    if (!this._bench) this._bench = fetch(this.cfg.benchmarksData || this.proposalBase() + "benchmarks.json?v=20261023r").then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
     return this._bench.then(function (B) {
       if (!B) return null;
       var cat = self.cfg.planCategory && self.cfg.planCategory !== "none" ? self.cfg.planCategory : String(self.cfg.exportName || "").replace(/-radius$/, "").replace(/^apartment$/, "apartments");
@@ -1134,8 +1134,8 @@
     var has = function (ids) { return A.channels.some(function (c) { return ids.indexOf(c.id) >= 0; }); };
     var foot = "Investment includes Adtaxi management." + (term ? " " + term : "") +
       " Targeted impressions are planning estimates, not guarantees: programmatic at Adtaxi suggested retail CPMs" +
-      (has(["display", "retarget"]) ? ", with display clicks at a 0.10% click-through rate (open-exchange benchmark)" : "") +
-      (has(["ctv"]) ? " and CTV completed views at a 95% completion rate (Innovid)" : "") +
+      (has(["display", "retarget"]) ? ", with display clicks at a " + +(P.EST.ctr * 100).toFixed(2) + "% click-through rate (open-exchange benchmark)" : "") +
+      (has(["ctv"]) ? " and CTV completed views at a " + Math.round(P.EST.vcr * 1000) / 10 + "% completion rate (Innovid)" : "") +
       "; Google Search and Meta from WordStream 2026 benchmarks (" + (bench && bench.label ? bench.label : "all industries") + ", U.S. medians)" +
       (has(["youtube", "tiktok", "snapchat"]) ? "; YouTube, TikTok and Snapchat at 2026 cross-platform benchmark CPMs (Hubfluence)" : "") +
       ", on the media portion of each investment. Leads: Search and Meta only; display, video and CTV also drive store visits and branded searches not counted here." +
@@ -1157,7 +1157,7 @@
     if (!b.amount || !A.strat || !A.withDollars || !A.plan || !A.plan.tier || !A.channels.length) { st.textContent = "Enter a monthly budget and choose a media strategy first."; return Promise.resolve(null); }
     st.textContent = "Building…";
     var base = this.proposalBase();
-    return Promise.all([loadScriptOnce(this.cfg.pptxScript || "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261023q"), this.benchmarks(), this.logoImage()])
+    return Promise.all([loadScriptOnce(this.cfg.pptxScript || "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261023r"), this.benchmarks(), this.logoImage()])
       .then(function (res) { return window.AdtaxiProposal.build(self.proposalContext(res[2], res[3]), opt); })
       .then(function (out) { st.textContent = "Downloaded. Open it in PowerPoint or Google Slides to edit."; return out; })
       .catch(function (e) { st.textContent = "The proposal couldn't be built (" + e.message + "). Try again in a minute."; throw e; });
