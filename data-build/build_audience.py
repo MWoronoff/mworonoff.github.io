@@ -321,6 +321,7 @@ def main():
     for band, lines in INC.items():
         out[f"inc_{band}"] = sum(acs[v("B19001", n)] for n in lines)
     out["inc_tot"] = acs[v("B19001", 1)]
+    out["inc_100_125"], out["inc_125_150"] = acs[v("B19001", 14)], acs[v("B19001", 15)]   # franchise tools split $100K-$149K at $125K
     out["hhed_nocol"] = acs[v("B25013", 3)] + acs[v("B25013", 4)] + acs[v("B25013", 8)] + acs[v("B25013", 9)]
     out["hhed_some"] = acs[v("B25013", 5)] + acs[v("B25013", 10)]
     out["hhed_ba"] = acs[v("B25013", 6)] + acs[v("B25013", 11)]
@@ -611,6 +612,7 @@ def main():
              "zip_audience_apt.json": ["r_tot", "r_sfd", "r_5p", "r_20p", "r_mtot", "r_moved21", "r_moved20", "rinc_tot"] + [f"rinc_{b}" for b in RINC] +
                                       ["rb_base", "rb_30p", "vac_rent", "vac_rented", "rk_tot", "r_kids"],
              "zip_audience_enroll.json": [f"{t}_{b}" for t in ("enr", "ent") for b in ENR_AGES],
+             "zip_audience_inc.json": ["inc_100_125", "inc_125_150"],
              "zip_audience_home.json": ["hb_tot"] + [f"hb_{b}" for b in BUILT] + ["hu_tot", "sfd_own", "hm_tot", "lt_own", "o_moved20"]}
     cols = {"zip": m.zip.tolist(), "city": m.city.fillna("").tolist(), "state": m.state.tolist(),
             "lat": m.lat.round(4).tolist(), "lon": m.lon.round(4).tolist(),

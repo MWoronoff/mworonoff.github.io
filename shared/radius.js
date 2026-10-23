@@ -66,6 +66,14 @@
                 share: function (c, i, sel) { return ratio(sum(sel, function (b) { return sum(INC4[b], function (x) { return c["inc_" + x][i]; }); }), c.inc_tot[i]); } },
     income5:  { label: "Household income", type: "multi", options: [["lt50", "Under $50K"], ["50_75", "$50K–$74K"], ["75_100", "$75K–$99K"], ["100_150", "$100K–$149K"], ["150p", "$150K+"]],
                 share: function (c, i, sel) { return ratio(sum(sel, function (b) { return sum(INC5[b], function (x) { return c["inc_" + x][i]; }); }), c.inc_tot[i]); } },
+    // Franchise tools: $100K–$149K split at $125K (B19001 lines 14 and 15, in zip_audience_inc.json). Until that file is
+    // loaded, the band is split at the national ratio (about 56% under $125K).
+    income8:  { label: "Household income", type: "multi", options: [["lt35", "Under $35K"], ["35_50", "$35K–$49K"], ["50_75", "$50K–$74K"], ["75_100", "$75K–$99K"],
+                           ["100_125", "$100K–$124K"], ["125_150", "$125K–$149K"], ["150_200", "$150K–$199K"], ["200p", "$200K+"]],
+                share: function (c, i, sel) { return ratio(sum(sel, function (b) {
+                  if (c["inc_" + b]) return c["inc_" + b][i];
+                  var x = c.inc_100_150[i]; return x == null ? null : b === "100_125" ? x * 0.56 : b === "125_150" ? x * 0.44 : 0;
+                }), c.inc_tot[i]); } },
     parented: { label: "Parents' education (head of household)", type: "multi",
                 options: [["nocol", "No college"], ["some", "Some college or associate's"], ["ba", "Bachelor's or higher"]],
                 share: function (c, i, sel) { return ratio(sum(sel, function (b) { return c["hhed_" + b][i]; }), c.hhed_tot[i]); } },
@@ -767,7 +775,7 @@
     if (window.AdtaxiPlan) { done(); return; }
     if (loadPlan.waiting) { loadPlan.waiting.push(done); return; }
     loadPlan.waiting = [done];
-    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261023r";
+    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261023s";
     sc.onload = function () { var w = loadPlan.waiting; loadPlan.waiting = null; w.forEach(function (f) { f(); }); };
     sc.onerror = function () { loadPlan.waiting = null; };
     document.head.appendChild(sc);
@@ -1019,7 +1027,7 @@
   Radius.prototype.proposalBase = function () { return (this.cfg.planScript || "../shared/media-plan.js").replace(/media-plan\.js.*$/, ""); };
   Radius.prototype.benchmarks = function () {
     var self = this;
-    if (!this._bench) this._bench = fetch(this.cfg.benchmarksData || this.proposalBase() + "benchmarks.json?v=20261023r").then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
+    if (!this._bench) this._bench = fetch(this.cfg.benchmarksData || this.proposalBase() + "benchmarks.json?v=20261023s").then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
     return this._bench.then(function (B) {
       if (!B) return null;
       var cat = self.cfg.planCategory && self.cfg.planCategory !== "none" ? self.cfg.planCategory : String(self.cfg.exportName || "").replace(/-radius$/, "").replace(/^apartment$/, "apartments");
@@ -1091,7 +1099,8 @@
     var adSub = ad && ad.subs ? (ad.subs[s.profile] || ad.subs[ctx0.sub]) : null;
     // Trade-area counts describe the audience chosen in the tool; ad-response reasons describe AudienceSCAN's target group
     var hasSel = Object.keys(s.sel || {}).some(function (k) { return s.sel[k]; });
-    var audienceNoun = prof ? prof.label.toLowerCase() + " prospects" : hasSel ? "people in the selected audience" : "residents";
+    var PC = this.cfg.proposal || {};   // page-specific proposal wording (franchise pages): goals by strategy, platform roles, a footnote line
+    var audienceNoun = prof && PC.nouns && PC.nouns[s.profile] ? PC.nouns[s.profile] : prof ? prof.label.toLowerCase() + (/candidates|buyers|prospects|owners/i.test(prof.label) ? "" : " prospects") : hasSel ? "people in the selected audience" : "residents";
     var adNoun = adSub && adSub.audience ? adSub.audience : audienceNoun;
     var rows = this.visible(), aud = 0, pop = 0;
     rows.forEach(function (r) { if (r.aud != null) { aud += r.aud; pop += r.pop || 0; } });
@@ -1117,8 +1126,9 @@
       }
       // The geo-targeting line goes on the first awareness/consideration platform; the others say what the platform does
       var intent = ch.id === "search" || ch.id === "shopping" || ch.id === "retarget";
-      reasons.push(intent || usedConc ? ch.ch.job : conc); if (!intent) usedConc = true;
-      if (reasons.length < 2) reasons.push(ch.ch.job);
+      var job = (PC.jobs && PC.jobs[ch.id]) || ch.ch.job;
+      reasons.push(intent || usedConc ? job : conc); if (!intent) usedConc = true;
+      if (reasons.length < 2) reasons.push(job);
       return { id: ch.id, label: ch.id === "social" ? "Meta (Facebook & Instagram)" : ch.ch.label, role: ch.ch.role.charAt(0).toUpperCase() + ch.ch.role.slice(1),
                amount: amount, reasons: reasons, est: P.estimate(ch.id, amount, bench) };
     });
@@ -1140,7 +1150,7 @@
       (has(["youtube", "tiktok", "snapchat"]) ? "; YouTube, TikTok and Snapchat at 2026 cross-platform benchmark CPMs (Hubfluence)" : "") +
       ", on the media portion of each investment. Leads: Search and Meta only; display, video and CTV also drive store visits and branded searches not counted here." +
       (adSub ? " Ad response: 2026 AudienceSCAN®, " + adNoun + " vs. all U.S. adults." : "") +
-      " Audience: Census ACS and Adtaxi estimates." + (P.customRates() ? " Custom rates in use." : "");
+      (PC.note ? " " + PC.note : "") + " Audience: Census ACS and Adtaxi estimates." + (P.customRates() ? " Custom rates in use." : "");
     var client = (this.pClient.value || "").trim() || "Prepared for you";
     var comps = (this.pComp.value || "").split(/\n/).map(function (x) { return x.trim(); }).filter(Boolean);
     var d = new Date();
@@ -1148,7 +1158,7 @@
       client: client, place: place, placeShort: placeShort, logoPng: logo, mapPng: this.mapImage(),
       mapCaption: "ZIPs shaded by concentration of " + audienceNoun + " (index vs. U.S.; darker is higher)." + (s.mode === "area" ? "" : " Dashed ring: " + s.r + "-mile radius.") + " Prepared by Adtaxi, " + d.toLocaleDateString("en-US", { month: "long", year: "numeric" }) + ".",
       audienceNoun: audienceNoun, stats: { aud: aud, idx: idx, zips: rows.length, pop: pop }, topZips: top, competitors: comps,
-      strategy: A.strat, plan: plan, total: total, footnote: foot,
+      strategy: PC.goals && PC.goals[A.strat.id] ? Object.assign({}, A.strat, { success: PC.goals[A.strat.id] }) : A.strat, plan: plan, total: total, footnote: foot,
       fileName: "Adtaxi proposal - " + client.replace(/[\\/:*?"<>|]/g, "") + " - " + d.toISOString().slice(0, 10) + ".pptx"
     };
   };
@@ -1157,7 +1167,7 @@
     if (!b.amount || !A.strat || !A.withDollars || !A.plan || !A.plan.tier || !A.channels.length) { st.textContent = "Enter a monthly budget and choose a media strategy first."; return Promise.resolve(null); }
     st.textContent = "Building…";
     var base = this.proposalBase();
-    return Promise.all([loadScriptOnce(this.cfg.pptxScript || "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261023r"), this.benchmarks(), this.logoImage()])
+    return Promise.all([loadScriptOnce(this.cfg.pptxScript || "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261023s"), this.benchmarks(), this.logoImage()])
       .then(function (res) { return window.AdtaxiProposal.build(self.proposalContext(res[2], res[3]), opt); })
       .then(function (out) { st.textContent = "Downloaded. Open it in PowerPoint or Google Slides to edit."; return out; })
       .catch(function (e) { st.textContent = "The proposal couldn't be built (" + e.message + "). Try again in a minute."; throw e; });

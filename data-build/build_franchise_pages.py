@@ -7,9 +7,55 @@ import glob, json, os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-V = "20261023i"   # version tag for the shared engine files on these pages
+V = "20261023s"   # version tag for the shared engine files on these pages (keep in step with the other analyzers)
 
 SUBS = [{"id": "exec", "label": "Master franchise candidates"}, {"id": "owner", "label": "First-time franchise buyers"}]
+# AudienceSCAN 2026, Small Business Owners (4.5% of U.S. adults): saw or heard an ad of each type that led them to take
+# action in the past 30 days, vs. all U.S. adults. The closest AudienceSCAN group to franchise candidates.
+SBO_ROWS = [
+    ["Ad on a social network", 41.2, 35.9],
+    ["Streaming TV advertising (such as Hulu, Pluto TV or YouTube TV)", 41.3, 36.7],
+    ["Ad on search results pages (like on Google, Yahoo or Bing)", 39.2, 35.8],
+    ["Television (traditional, including cable or satellite subscription)", 38.9, 34.7],
+    ["Mobile phone app or text message", 38.8, 36.6],
+    ["Ad that plays before or during the video you want to watch", 37.5, 31.1],
+    ["Ads/Coupons in your mailbox", 34.3, 29.9],
+    ["Emailed ad or newsletter", 33.7, 28.6],
+    ["Online display ads (banners and pop-up ads)", 33.0, 30.0],
+    ["Text link ad on a website", 31.6, 27.3],
+    ["Ad on a podcast", 30.4, 22.7],
+    ["Outdoor ad/sign/billboard/transit", 29.7, 23.6],
+    ["Newspaper (print, online, mobile or tablet)", 29.2, 23.5],
+    ["Advertising circulars in your mailbox or inserted in the newspaper", 29.1, 27.2],
+    ["Radio (over-the-air, online, mobile or tablet)", 28.1, 25.5],
+    ["Magazine (print, online, mobile or on tablet)", 26.5, 21.5],
+    ["Ads at movie theater", 24.7, 21.5],
+]
+SBO = {"short": "Small business owners", "audience": "small business owners", "rows": SBO_ROWS}
+AD_RESPONSE = {
+    "title": "How small business owners respond to advertising",
+    "source": "2026 AudienceSCAN® study",
+    "note": "National survey data: the percent who saw or heard an ad of each type that led them to take action in the past 30 days. Percentages are based on all U.S. adults and on everyone in the target group, not on users of each medium. Small business owners (4.5% of U.S. adults) are the closest AudienceSCAN group to franchise candidates, so the same figures show for both owner profiles. \"Vs. average\" is how much more likely the group is to have responded than all U.S. adults (a percent difference, not percentage points). The same national figures apply to every market.",
+    "subs": {"exec": SBO, "owner": SBO},
+}
+# Proposal wording for franchise development (shared/radius.js reads cfg.proposal)
+PROPOSAL = {
+    "nouns": {"exec": "adults who fit the master franchise candidate profile", "owner": "adults who fit the first-time franchise buyer profile"},
+    "goals": {"awareness": "Awareness among prospective franchise owners in the top candidate ZIPs",
+              "leads": "Qualified franchise inquiries and discovery calls",
+              "online": "Visits to the franchise opportunity site and completed inquiry forms",
+              "offline": "Discovery calls and Discovery Day attendance",
+              "growth": "New prospective owners plus captured franchise searches"},
+    "jobs": {"search": "Captures people already researching franchise ownership, such as \"franchise opportunities\" and searches for the concept's category.",
+             "social": "Reaches the owner profile by age, income and location in the top candidate ZIPs, with lead forms that pre-qualify on capital and timeline.",
+             "ctv": "Tells the ownership story on the big screen to households in the top candidate ZIPs.",
+             "youtube": "Video that explains the opportunity to people researching business ownership, targeted by interest and ZIP.",
+             "display": "Keeps the opportunity in front of the owner profile across websites and apps in the top candidate ZIPs.",
+             "retarget": "Brings back visitors to the franchise site who haven't inquired yet; franchise decisions take months.",
+             "audio": "Reaches commuting professionals with the ownership message during podcasts and streaming audio.",
+             "dooh": "Builds local presence for the brand where candidates work and commute."},
+    "note": "Franchise leads: the 2026 Annual Franchise Development Report puts average cost per lead at $142 to $802 by segment and average cost per franchise sale at $9,276 for non-brick-and-mortar service concepts; this proposal doesn't forecast sales.",
+}
 SOURCES = [
     {"label": "Census American Community Survey 5-year (age of householder by household income, veterans)", "url": "https://www.census.gov/programs-surveys/acs"},
     {"label": "IRS Statistics of Income, individual income tax ZIP Code data", "url": "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-statistics-zip-code-data-soi"},
@@ -54,17 +100,18 @@ def radius_cfg(title, export, depth, links):
         "title": title, "subtitle": "Pick a center ZIP or town and a radius (or map a custom area), then choose the owner profile to see how many candidates live there and which ZIPs over-index.",
         "logo": f"{up}shared/adtaxi-logo.svg", "exportName": export, "links": links,
         "audienceData": f"{up}shared/audience/zip_audience.json",
-        "extraData": [{"url": f"{up}shared/audience/zip_audience_fin.json", "label": "Tax return data", "source": "IRS Statistics of Income ZIP data"}],
+        "extraData": [{"url": f"{up}shared/audience/zip_audience_fin.json", "label": "Tax return data", "source": "IRS Statistics of Income ZIP data"},
+                      {"url": f"{up}shared/audience/zip_audience_inc.json", "label": "Household income at $125K", "source": "Census ACS household income (B19001)"}],
         "zipGeo": f"{up}shared/geo/zip/{{level}}/{{id}}.json",
-        "planScript": f"{up}shared/media-plan.js?v=20261023f", "mediaMixUrl": f"{up}media-mix/", "planCategory": "none",
+        "planScript": f"{up}shared/media-plan.js?v={V}", "mediaMixUrl": f"{up}media-mix/", "planCategory": "none",
         "customArea": True, "ageSet": "adult", "radii": [5, 10, 15, 25, 50, 100], "radiusLabel": "Up to {r} miles",
-        "filters": ["age", "income", "veterans"],
-        "profileLabel": "Best prospects for",
+        "filters": ["age", "income8", "veterans"],
+        "profileLabel": "Best prospects for", "proposal": PROPOSAL,
         "profiles": [
-            {"id": "exec", "label": "Master franchise candidates", "note": "Adults 35 and older in households earning $100K+, including first-time franchise buyers (this tool's income ranges don't split at $125K). IRS shares of returns with $200K+ income and with capital gains show by ZIP.",
-             "sel": {"age": ["35_44", "45_54", "55p"], "income": ["100_150", "150_200", "200p"]}, "context": ["hi200", "cg"]},
+            {"id": "exec", "label": "Master franchise candidates", "note": "Adults 35 and older in households earning $125K+, including first-time franchise buyers. IRS shares of returns with $200K+ income and with capital gains show by ZIP.",
+             "sel": {"age": ["35_44", "45_54", "55p"], "income8": ["125_150", "150_200", "200p"]}, "context": ["hi200", "cg"]},
             {"id": "owner", "label": "First-time franchise buyers", "note": "Adults 25 and older in households earning $100K+: Millennial, Gen X and Boomer buyers making a career change. The IRS share of returns with $200K+ income shows by ZIP.",
-             "sel": {"age": ["25_34", "35_44", "45_54", "55p"], "income": ["100_150", "150_200", "200p"]}, "context": ["hi200"]}],
+             "sel": {"age": ["25_34", "35_44", "45_54", "55p"], "income8": ["100_125", "125_150", "150_200", "200p"]}, "context": ["hi200"]}],
         "methodology": [
             {"title": "Who counts", "body": "Counts are adults by age and household income (Census). Census doesn't publish net worth or job titles by ZIP, so household income stands in for capital, and the profiles are planning estimates, not lists of people."},
             {"title": "Tax return rates", "body": "The $200K+ income, capital gains and self-employment figures are IRS shares of tax returns in each ZIP. They describe the ZIP, not individual households, so they show as columns and aren't applied to the count."},
@@ -175,6 +222,7 @@ def analyzer_cfg(client):
         "sources": SOURCES,
         "sourcesNote": "Candidates: Census ACS and IRS. Businesses: Census Business Patterns. Jobs: Census LODES." + (f" Territories: {client['client']}." if client else ""),
         "radius": True,
+        "adResponse": AD_RESPONSE,
     }
     if client: cfg["compBasis"] = "per buyer business"
     if client:

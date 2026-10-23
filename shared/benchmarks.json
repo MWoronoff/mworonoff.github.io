@@ -210,6 +210,26 @@
     "cvr": 8.54,
     "cpl": 27.39
    }
+  },
+  "franchise": {
+   "label": "Franchise development: clicks at all-industry WordStream medians; leads at a $500 cost per lead (2026 Annual Franchise Development Report)",
+   "search": {
+    "cpc": 5.42,
+    "ctr": 6.64,
+    "cvr": null,
+    "cpl": 500
+   },
+   "socialTraffic": {
+    "ctr": 1.93,
+    "cpc": 0.6
+   },
+   "socialLeads": {
+    "ctr": 2.7,
+    "cpc": 1.8,
+    "cvr": null,
+    "cpl": 500
+   },
+   "source": "Franchise Update Media, 2026 Annual Franchise Development Report: average cost per lead $142 to $802 by segment (service, brick-and-mortar $608)"
   }
  },
  "map": {
@@ -266,6 +286,18 @@
   "financial": {
    "_default": [
     "finance",
+    false
+   ]
+  },
+  "franchise": {
+   "_default": [
+    "franchise",
+    false
+   ]
+  },
+  "franchise-stratus": {
+   "_default": [
+    "franchise",
     false
    ]
   }

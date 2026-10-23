@@ -41,7 +41,7 @@ jobs:
         if: (inputs.target || 'all') == 'all'
         run: bash data-build/build_boundaries.sh
       - name: Build radius audience data
-        if: (inputs.target || 'all') == 'all'
+        if: (inputs.target || 'all') == 'all' || inputs.target == 'franchise'
         run: |
           set -o pipefail
           python3 data-build/build_audience.py 2>&1 | tee audience.log || {

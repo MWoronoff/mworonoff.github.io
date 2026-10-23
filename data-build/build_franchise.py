@@ -339,7 +339,10 @@ def main():
         byid = {t["id"]: t for t in c["territories"]}
         def tflags(i, r):
             t = byid[i]; return [t["note"]] if t.get("note") else []
-        dump({"level": "territory", "meta": tmeta, "rows": rows(ter, lambda i: byid[i]["name"], tflags)}, os.path.join(cout, "territory.json"))
+        trows = rows(ter, lambda i: byid[i]["name"], tflags)
+        for r in trows:   # drawn from our approximation until the client's own county list is in
+            if byid[r["id"]].get("note", "").startswith("Provisional"): r["t"] = "Provisional"
+        dump({"level": "territory", "meta": tmeta, "rows": trows}, os.path.join(cout, "territory.json"))
         dump({"level": "us", "meta": tmeta, "rows": rows(frame([("us", zc)]), lambda i: "United States")}, os.path.join(cout, "us.json"))
         dump({"counties": county_lists, "names": {i: byid[i]["name"] for i in county_lists}}, os.path.join(cout, "territory_counties.json"))
         nt = write_zip_files(zc, zip_frame(zc), groups, os.path.join(cout, "zip", "territory"), "territory")

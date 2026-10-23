@@ -10,14 +10,14 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
-<link rel="stylesheet" href="../../shared/engine.css?v=20261023r">
+<link rel="stylesheet" href="../../shared/engine.css?v=20261023s">
 </head>
 <body>
 <div id="app"><p class="az-loading">Loading the Franchise Development Analyzer: Stratus Clean…</p></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js" crossorigin=""></script>
-<script src="../../shared/engine.js?v=20261023r"></script>
-<script src="radius-config.js?v=20261023i"></script>
+<script src="../../shared/engine.js?v=20261023s"></script>
+<script src="radius-config.js?v=20261023s"></script>
 <script>
 AdtaxiAnalyzer.start({
  "title": "Franchise Development Analyzer: Stratus Clean",
@@ -58,7 +58,7 @@ AdtaxiAnalyzer.start({
  },
  "statesGeo": "../../shared/geo/states.topo.json",
  "zipIndex": "../../shared/geo/zip_market.json",
- "radiusScript": "../../shared/radius.js?v=20261023r",
+ "radiusScript": "../../shared/radius.js?v=20261023s",
  "benchmarks": false,
  "timing": false,
  "subcategoryLabel": "Owner profile",
@@ -378,6 +378,195 @@ AdtaxiAnalyzer.start({
  ],
  "sourcesNote": "Candidates: Census ACS and IRS. Businesses: Census Business Patterns. Jobs: Census LODES. Territories: Stratus Clean.",
  "radius": true,
+ "adResponse": {
+  "title": "How small business owners respond to advertising",
+  "source": "2026 AudienceSCAN® study",
+  "note": "National survey data: the percent who saw or heard an ad of each type that led them to take action in the past 30 days. Percentages are based on all U.S. adults and on everyone in the target group, not on users of each medium. Small business owners (4.5% of U.S. adults) are the closest AudienceSCAN group to franchise candidates, so the same figures show for both owner profiles. \"Vs. average\" is how much more likely the group is to have responded than all U.S. adults (a percent difference, not percentage points). The same national figures apply to every market.",
+  "subs": {
+   "exec": {
+    "short": "Small business owners",
+    "audience": "small business owners",
+    "rows": [
+     [
+      "Ad on a social network",
+      41.2,
+      35.9
+     ],
+     [
+      "Streaming TV advertising (such as Hulu, Pluto TV or YouTube TV)",
+      41.3,
+      36.7
+     ],
+     [
+      "Ad on search results pages (like on Google, Yahoo or Bing)",
+      39.2,
+      35.8
+     ],
+     [
+      "Television (traditional, including cable or satellite subscription)",
+      38.9,
+      34.7
+     ],
+     [
+      "Mobile phone app or text message",
+      38.8,
+      36.6
+     ],
+     [
+      "Ad that plays before or during the video you want to watch",
+      37.5,
+      31.1
+     ],
+     [
+      "Ads/Coupons in your mailbox",
+      34.3,
+      29.9
+     ],
+     [
+      "Emailed ad or newsletter",
+      33.7,
+      28.6
+     ],
+     [
+      "Online display ads (banners and pop-up ads)",
+      33.0,
+      30.0
+     ],
+     [
+      "Text link ad on a website",
+      31.6,
+      27.3
+     ],
+     [
+      "Ad on a podcast",
+      30.4,
+      22.7
+     ],
+     [
+      "Outdoor ad/sign/billboard/transit",
+      29.7,
+      23.6
+     ],
+     [
+      "Newspaper (print, online, mobile or tablet)",
+      29.2,
+      23.5
+     ],
+     [
+      "Advertising circulars in your mailbox or inserted in the newspaper",
+      29.1,
+      27.2
+     ],
+     [
+      "Radio (over-the-air, online, mobile or tablet)",
+      28.1,
+      25.5
+     ],
+     [
+      "Magazine (print, online, mobile or on tablet)",
+      26.5,
+      21.5
+     ],
+     [
+      "Ads at movie theater",
+      24.7,
+      21.5
+     ]
+    ]
+   },
+   "owner": {
+    "short": "Small business owners",
+    "audience": "small business owners",
+    "rows": [
+     [
+      "Ad on a social network",
+      41.2,
+      35.9
+     ],
+     [
+      "Streaming TV advertising (such as Hulu, Pluto TV or YouTube TV)",
+      41.3,
+      36.7
+     ],
+     [
+      "Ad on search results pages (like on Google, Yahoo or Bing)",
+      39.2,
+      35.8
+     ],
+     [
+      "Television (traditional, including cable or satellite subscription)",
+      38.9,
+      34.7
+     ],
+     [
+      "Mobile phone app or text message",
+      38.8,
+      36.6
+     ],
+     [
+      "Ad that plays before or during the video you want to watch",
+      37.5,
+      31.1
+     ],
+     [
+      "Ads/Coupons in your mailbox",
+      34.3,
+      29.9
+     ],
+     [
+      "Emailed ad or newsletter",
+      33.7,
+      28.6
+     ],
+     [
+      "Online display ads (banners and pop-up ads)",
+      33.0,
+      30.0
+     ],
+     [
+      "Text link ad on a website",
+      31.6,
+      27.3
+     ],
+     [
+      "Ad on a podcast",
+      30.4,
+      22.7
+     ],
+     [
+      "Outdoor ad/sign/billboard/transit",
+      29.7,
+      23.6
+     ],
+     [
+      "Newspaper (print, online, mobile or tablet)",
+      29.2,
+      23.5
+     ],
+     [
+      "Advertising circulars in your mailbox or inserted in the newspaper",
+      29.1,
+      27.2
+     ],
+     [
+      "Radio (over-the-air, online, mobile or tablet)",
+      28.1,
+      25.5
+     ],
+     [
+      "Magazine (print, online, mobile or on tablet)",
+      26.5,
+      21.5
+     ],
+     [
+      "Ads at movie theater",
+      24.7,
+      21.5
+     ]
+    ]
+   }
+  }
+ },
  "compBasis": "per buyer business",
  "pointLayers": [
   {

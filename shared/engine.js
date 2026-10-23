@@ -444,7 +444,7 @@
     }
     if (window.AdtaxiRadius) go();
     else {
-      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261023r";   // version tag: browsers fetch the new file after an update
+      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261023s";   // version tag: browsers fetch the new file after an update
       sc.onload = go; sc.onerror = function () { self.showError("The radius tool didn't load. Refresh the page and try again."); };
       document.head.appendChild(sc);
     }
@@ -703,7 +703,7 @@
       onEachFeature: function (f, layer) {
         var id = String(f.properties[idField]), row = d.byId[id];
         self.layerById[id] = layer;
-        var name = row ? row.name : (f.properties.dma_name || f.properties.NAME || id);
+        var name = row ? row.name + (row.t ? " (" + row.t.toLowerCase() + ")" : "") : (f.properties.dma_name || f.properties.NAME || id);
         if (!row && lv === "zip") name = "ZIP " + id;
         var v = row ? fmt(self.val(row, m), m.format) : null;
         if (v != null) v += self.mark(row, m);
@@ -873,7 +873,7 @@
         onclick: function () { self.select(r.id, { zoom: true }); },
         onkeydown: function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); self.select(r.id, { zoom: true }); } } }, [
         el("td", { class: "az-rank num", text: rankOf[r.id] ? String(rankOf[r.id]) : "–" }),
-        el("td", { text: r.name })
+        el("td", null, [r.name, r.t ? el("span", { class: "az-tag", title: (r.f && r.f[0]) || null, text: r.t }) : null])
       ]);
       cols.forEach(function (m) {
         var v = fmt(self.val(r, m), m.format);
@@ -907,7 +907,7 @@
       return;
     }
     var lvLabel = s.level === "zip" ? "ZIP in " + this.parentName() : this.levelLabel(s.level);
-    box.appendChild(el("div", null, [el("h2", { text: s.level === "zip" ? "ZIP " + row.name : row.name }), el("div", { class: "az-sub", text: lvLabel + (this.subLabel() ? " · " + this.subLabel() : "") })]));
+    box.appendChild(el("div", null, [el("h2", null, [s.level === "zip" ? "ZIP " + row.name : row.name, row.t ? el("span", { class: "az-tag", text: row.t }) : null]), el("div", { class: "az-sub", text: lvLabel + (this.subLabel() ? " · " + this.subLabel() : "") })]));
 
     var head = this.measure(cfg.headlineMeasure || s.rank);
     // Rank among the other markets at this level (ties share the better rank); null at the U.S. level or with no value

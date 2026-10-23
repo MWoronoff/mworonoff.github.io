@@ -20,10 +20,15 @@ window.ADTAXI_RADIUS = {
    "url": "../shared/audience/zip_audience_fin.json",
    "label": "Tax return data",
    "source": "IRS Statistics of Income ZIP data"
+  },
+  {
+   "url": "../shared/audience/zip_audience_inc.json",
+   "label": "Household income at $125K",
+   "source": "Census ACS household income (B19001)"
   }
  ],
  "zipGeo": "../shared/geo/zip/{level}/{id}.json",
- "planScript": "../shared/media-plan.js?v=20261023r",
+ "planScript": "../shared/media-plan.js?v=20261023s",
  "mediaMixUrl": "../media-mix/",
  "planCategory": "none",
  "customArea": true,
@@ -39,23 +44,47 @@ window.ADTAXI_RADIUS = {
  "radiusLabel": "Up to {r} miles",
  "filters": [
   "age",
-  "income",
+  "income8",
   "veterans"
  ],
  "profileLabel": "Best prospects for",
+ "proposal": {
+  "nouns": {
+   "exec": "adults who fit the master franchise candidate profile",
+   "owner": "adults who fit the first-time franchise buyer profile"
+  },
+  "goals": {
+   "awareness": "Awareness among prospective franchise owners in the top candidate ZIPs",
+   "leads": "Qualified franchise inquiries and discovery calls",
+   "online": "Visits to the franchise opportunity site and completed inquiry forms",
+   "offline": "Discovery calls and Discovery Day attendance",
+   "growth": "New prospective owners plus captured franchise searches"
+  },
+  "jobs": {
+   "search": "Captures people already researching franchise ownership, such as \"franchise opportunities\" and searches for the concept's category.",
+   "social": "Reaches the owner profile by age, income and location in the top candidate ZIPs, with lead forms that pre-qualify on capital and timeline.",
+   "ctv": "Tells the ownership story on the big screen to households in the top candidate ZIPs.",
+   "youtube": "Video that explains the opportunity to people researching business ownership, targeted by interest and ZIP.",
+   "display": "Keeps the opportunity in front of the owner profile across websites and apps in the top candidate ZIPs.",
+   "retarget": "Brings back visitors to the franchise site who haven't inquired yet; franchise decisions take months.",
+   "audio": "Reaches commuting professionals with the ownership message during podcasts and streaming audio.",
+   "dooh": "Builds local presence for the brand where candidates work and commute."
+  },
+  "note": "Franchise leads: the 2026 Annual Franchise Development Report puts average cost per lead at $142 to $802 by segment and average cost per franchise sale at $9,276 for non-brick-and-mortar service concepts; this proposal doesn't forecast sales."
+ },
  "profiles": [
   {
    "id": "exec",
    "label": "Master franchise candidates",
-   "note": "Adults 35 and older in households earning $100K+, including first-time franchise buyers (this tool's income ranges don't split at $125K). IRS shares of returns with $200K+ income and with capital gains show by ZIP.",
+   "note": "Adults 35 and older in households earning $125K+, including first-time franchise buyers. IRS shares of returns with $200K+ income and with capital gains show by ZIP.",
    "sel": {
     "age": [
      "35_44",
      "45_54",
      "55p"
     ],
-    "income": [
-     "100_150",
+    "income8": [
+     "125_150",
      "150_200",
      "200p"
     ]
@@ -76,8 +105,9 @@ window.ADTAXI_RADIUS = {
      "45_54",
      "55p"
     ],
-    "income": [
-     "100_150",
+    "income8": [
+     "100_125",
+     "125_150",
      "150_200",
      "200p"
     ]
