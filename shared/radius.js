@@ -767,7 +767,7 @@
     if (window.AdtaxiPlan) { done(); return; }
     if (loadPlan.waiting) { loadPlan.waiting.push(done); return; }
     loadPlan.waiting = [done];
-    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261023a";
+    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261023b";
     sc.onload = function () { var w = loadPlan.waiting; loadPlan.waiting = null; w.forEach(function (f) { f(); }); };
     sc.onerror = function () { loadPlan.waiting = null; };
     document.head.appendChild(sc);
@@ -891,6 +891,7 @@
         notes.push(A.plan.tier.label + ". Fully funding fewer channels outperforms spreading a budget thin.");
         A.plan.unavailable.forEach(function (r) { var t = P.SERVICE_TIERS.filter(function (t) { return t.available.indexOf(r.id) >= 0; })[0]; notes.push(P.CHANNELS[r.id].label + " is available from " + money(t.min) + " a month."); });
         A.plan.skipped.forEach(function (x) { notes.push(P.CHANNELS[x.r.id].label + " needs at least " + money(x.min) + " a month on its own, so it isn't in this plan."); });
+        var tn = P.termNote(A.channels); if (tn) notes.push(tn);
         if (A.plan.raised.length) notes.push(A.plan.raised.map(function (r) { return r.ch.label; }).join(" and ") + (A.plan.raised.length > 1 ? " are" : " is") + " set at the channel minimum.");
         if (A.money.tierBudget >= P.CUSTOM_PLAN_BUDGET) notes.push("At this budget, Adtaxi's strategy team can also build a custom plan with more channels and refined targeting.");
       } else notes.push(b.amount ? "Strategy mix shown for reference." : "Enter a monthly budget to size the plan: the channel count and minimums depend on it.");
@@ -925,7 +926,7 @@
       (chans.length ? "Channel minimums apply to each channel's monthly total, not to each ZIP. " : "") +
       "A planning recommendation; final targeting is set by platform.";
     this.bFee.hidden = !!showFee;
-    this.bFee.textContent = P ? (A.money && A.money.feesOn ? "Figures shown are media dollars." : P.FEES.offNote) : "Allocations reflect media spend only; management fees not included.";
+    this.bFee.textContent = P ? (A.money && A.money.feesOn ? "Figures shown are media dollars." : P.FEES.offNote) : "Amounts are total monthly investment by channel, including Adtaxi management.";
   };
   Radius.prototype.exportBudget = function () {
     var b = this.budget, A = this.allocation(), pick = A.pick;
@@ -948,7 +949,7 @@
     }
     var P = window.AdtaxiPlan;
     if (A.money && A.money.feesOn && P.FEES.showFee) lines.push("", ["Media", A.money.media].map(csvCell).join(","), ["Management fee", A.money.fee].map(csvCell).join(","), ["Total", A.money.total].map(csvCell).join(","));
-    else lines.push("", csvCell(P ? P.FEES.offNote : "Allocations reflect media spend only; management fees not included."));
+    else lines.push("", csvCell(P ? P.FEES.offNote : "Amounts are total monthly investment by channel, including Adtaxi management."));
     var blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
     var a = el("a", { href: URL.createObjectURL(blob), download: (this.cfg.exportName || "adtaxi-radius") + "-recommended-allocation.csv" });
     document.body.appendChild(a); a.click(); a.remove();

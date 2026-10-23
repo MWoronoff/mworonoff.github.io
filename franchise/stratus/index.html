@@ -10,14 +10,14 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
-<link rel="stylesheet" href="../../shared/engine.css?v=20261023c">
+<link rel="stylesheet" href="../../shared/engine.css?v=20261023d">
 </head>
 <body>
 <div id="app"><p class="az-loading">Loading the Franchise Development Analyzer: Stratus Clean…</p></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js" crossorigin=""></script>
-<script src="../../shared/engine.js?v=20261023c"></script>
-<script src="radius-config.js?v=20261023c"></script>
+<script src="../../shared/engine.js?v=20261023d"></script>
+<script src="radius-config.js?v=20261023d"></script>
 <script>
 AdtaxiAnalyzer.start({
  "title": "Franchise Development Analyzer: Stratus Clean",
@@ -58,18 +58,18 @@ AdtaxiAnalyzer.start({
  },
  "statesGeo": "../../shared/geo/states.topo.json",
  "zipIndex": "../../shared/geo/zip_market.json",
- "radiusScript": "../../shared/radius.js?v=20261023c",
+ "radiusScript": "../../shared/radius.js?v=20261023d",
  "benchmarks": false,
  "timing": false,
  "subcategoryLabel": "Owner profile",
  "subcategories": [
   {
    "id": "exec",
-   "label": "Master and multi-unit owners"
+   "label": "Master franchise candidates"
   },
   {
    "id": "owner",
-   "label": "Single-unit owner-operators"
+   "label": "First-time franchise buyers"
   }
  ],
  "measures": [
@@ -184,7 +184,7 @@ AdtaxiAnalyzer.start({
   {
    "key": "o100",
    "label": "Householders 25–64 earning $100K+",
-   "short": "Owners 25–64",
+   "short": "Buyers 25–64",
    "format": "int",
    "subs": [
     "owner"
@@ -200,13 +200,19 @@ AdtaxiAnalyzer.start({
    ]
   },
   {
-   "key": "selfemp_share",
-   "label": "Share of tax returns with business or self-employment income",
+   "key": "avg_wage",
+   "label": "Average salary per wage earner",
+   "format": "money",
+   "help": "IRS wages divided by returns with wages, area-level: higher where more corporate and professional earners live."
+  },
+  {
+   "key": "married_share",
+   "label": "Share of households that are married couples",
    "format": "pct",
    "subs": [
     "owner"
    ],
-   "help": "IRS, area-level: how common business ownership already is here."
+   "help": "Census ACS. Most new franchise buyers are married, often with a spouse's income covering household costs while the business starts."
   },
   {
    "key": "vets",
@@ -276,6 +282,7 @@ AdtaxiAnalyzer.start({
   "hi200_share",
   "o100",
   "o100_share",
+  "avg_wage",
   "buyers",
   "buyer_jobs",
   "vets",
@@ -294,7 +301,8 @@ AdtaxiAnalyzer.start({
   "cg_share",
   "o100",
   "o100_share",
-  "selfemp_share",
+  "avg_wage",
+  "married_share",
   "buyers",
   "buyer_jobs",
   "buyers_per1k",
@@ -324,8 +332,8 @@ AdtaxiAnalyzer.start({
   {
    "title": "Candidates",
    "body": [
-    "Master and multi-unit owners: householders 45–64 earning $125K+ (count and share), and the IRS shares of returns with income of $200K+ and with capital gains.",
-    "Single-unit owner-operators: householders 25–64 earning $100K+ (count and share), and the IRS share of returns with business or self-employment income.",
+    "Master franchise candidates, first-time or not: householders 45–64 earning $125K+ (count and share), the IRS shares of returns with income of $200K+ and with capital gains, and the IRS average salary per wage earner.",
+    "First-time franchise buyers: householders 25–64 earning $100K+ (count and share), the IRS average salary per wage earner (corporate earners, who make up most first-time buyers) and the share of married-couple households (the dual-income cushion many new owners rely on).",
     "Census doesn't publish net worth, liquid capital or job titles for areas, so household income and investment income stand in for them. IRS figures are area-level rates, not facts about individuals."
    ]
   },

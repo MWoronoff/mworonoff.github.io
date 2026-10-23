@@ -23,7 +23,7 @@ window.ADTAXI_RADIUS = {
   }
  ],
  "zipGeo": "../../shared/geo/zip/{level}/{id}.json",
- "planScript": "../../shared/media-plan.js?v=20261023a",
+ "planScript": "../../shared/media-plan.js?v=20261023b",
  "mediaMixUrl": "../../media-mix/",
  "planCategory": "none",
  "customArea": true,
@@ -46,8 +46,8 @@ window.ADTAXI_RADIUS = {
  "profiles": [
   {
    "id": "exec",
-   "label": "Master and multi-unit owners",
-   "note": "Adults 35 and older in households earning $150K+ (this tool's income ranges don't split at $125K). IRS shares of returns with $200K+ income and with capital gains show by ZIP.",
+   "label": "Master franchise candidates",
+   "note": "Adults 35 and older in households earning $100K+, including first-time franchise buyers (this tool's income ranges don't split at $125K). IRS shares of returns with $200K+ income and with capital gains show by ZIP.",
    "sel": {
     "age": [
      "35_44",
@@ -55,6 +55,7 @@ window.ADTAXI_RADIUS = {
      "55p"
     ],
     "income": [
+     "100_150",
      "150_200",
      "200p"
     ]
@@ -66,13 +67,14 @@ window.ADTAXI_RADIUS = {
   },
   {
    "id": "owner",
-   "label": "Single-unit owner-operators",
-   "note": "Adults 25–54 in households earning $100K+. The IRS share of returns with business or self-employment income shows by ZIP.",
+   "label": "First-time franchise buyers",
+   "note": "Adults 25 and older in households earning $100K+: Millennial, Gen X and Boomer buyers making a career change. The IRS share of returns with $200K+ income shows by ZIP.",
    "sel": {
     "age": [
      "25_34",
      "35_44",
-     "45_54"
+     "45_54",
+     "55p"
     ],
     "income": [
      "100_150",
@@ -81,7 +83,7 @@ window.ADTAXI_RADIUS = {
     ]
    },
    "context": [
-    "selfemp"
+    "hi200"
    ]
   }
  ],

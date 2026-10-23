@@ -13,18 +13,21 @@
                   progFirst / progAdd: programmatic channels without a fixed minimum
                   need progFirst for the first (highest-weight) one and progAdd for
                   each additional one. DOOH keeps its own minimum.
-                  Values are from the 2024 tier sheet: update when the current sheet is in.
+                  Channel availability by tier is from the 2024 tier sheet; minimums are from the Adtaxi rate card (Nov 2025).
+   TERMS:         channels with term: 3 are sold with a 3-month minimum (rate card).
    FEES:          management fees. OFF until real rates are supplied (see below). */
 (function () {
   var CHANNELS = {
     ctv:      { label: "CTV / streaming TV",     short: "CTV",              role: "awareness",     prog: true,  color: "#0b5d53", job: "Reaches new households on the big screen, targeted by audience and ZIP instead of whole TV markets." },
     youtube:  { label: "YouTube",                short: "YouTube",          role: "awareness",     prog: false, color: "#1f8f81", job: "Video reach at scale, on TVs and phones, with targeting by interest and intent." },
     dooh:     { label: "Digital out-of-home",    short: "DOOH",             role: "awareness",     prog: true,  color: "#5fb8ac", job: "Screens near where people shop and commute, bought by location and daypart." },
-    social:   { label: "Social (Meta)",          short: "Social",           role: "consideration", prog: false, color: "#13a196", job: "Builds familiarity and drives action with targeted image and video ads on Facebook and Instagram." },
+    social:   { label: "Social (Meta)",          short: "Social",           role: "consideration", prog: false, term: 3, color: "#13a196", job: "Builds familiarity and drives action with targeted image and video ads on Facebook and Instagram." },
     display:  { label: "Programmatic display",   short: "Display",          role: "consideration", prog: true,  color: "#3f7fb5", job: "Keeps the brand in front of the target audience across websites and apps, geo-targeted to the trade area." },
     audio:    { label: "Digital audio",          short: "Audio",            role: "consideration", prog: true,  color: "#7aa6cf", job: "Streaming audio and podcast ads that reinforce the message, targeted by audience and location." },
-    search:   { label: "Google Search",          short: "Search",           role: "conversion",    prog: false, color: "#0f2742", job: "Captures people actively searching for what you offer, at the moment they're ready to act." },
+    search:   { label: "Google Search",          short: "Search",           role: "conversion",    prog: false, term: 3, color: "#0f2742", job: "Captures people actively searching for what you offer, at the moment they're ready to act." },
     shopping: { label: "Shopping / product ads", short: "Shopping",         role: "conversion",    prog: false, color: "#173c63", job: "Puts products and prices in front of shoppers who are ready to buy." },
+    tiktok:   { label: "TikTok",                 short: "TikTok",           role: "awareness",     prog: false, term: 3, color: "#2f9e8f", job: "Short-form video that reaches new audiences with engaging, sound-on creative." },
+    snapchat: { label: "Snapchat",               short: "Snapchat",         role: "awareness",     prog: false, term: 3, color: "#8fcfc6", job: "Full-screen mobile ads that reach younger audiences close to home." },
     retarget: { label: "Retargeting",            short: "Retargeting",      role: "conversion",    prog: true,  color: "#5f7286", job: "Brings back people who visited or engaged but didn't act yet." }
   };
   var ROLES = [ ["awareness", "Awareness: reach new audiences"], ["consideration", "Consideration: build familiarity"], ["conversion", "Conversion: capture demand"] ];
@@ -32,7 +35,7 @@
   var STRATEGIES = [
     { id: "awareness", label: "Brand awareness", success: "Reach, visibility and brand familiarity",
       kpis: [ ["Reach and frequency", "How many target households saw the brand, and how often"], ["Video completion", "Share of video ads watched to the end"], ["Brand search lift", "Growth in searches for the brand name"] ],
-      weights: { ctv: 35, youtube: 25, social: 20, display: 10, audio: 5, dooh: 5 } },
+      weights: { ctv: 35, youtube: 25, social: 20, display: 10, audio: 5, dooh: 5, tiktok: 5, snapchat: 3 } },
     { id: "leads", label: "Lead generation", success: "Form fills, calls and appointments",
       kpis: [ ["Cost per lead", "Media cost divided by qualified leads"], ["Calls and form fills", "Tracked leads by channel"], ["Lead-to-appointment rate", "How many leads become appointments"] ],
       weights: { search: 50, social: 25, retarget: 15, youtube: 10 } },
@@ -52,20 +55,24 @@
                 { max: 12000, channels: 2, label: "$7.5K–$12K: one to two complementary channels" },
                 { max: 20000, channels: 3, label: "$12K–$20K: two to three channels with distinct roles" },
                 { max: Infinity, channels: 4, label: "$20K+: a broader multi-channel strategy" } ];
+  // Monthly minimums per channel (Adtaxi rate card, Nov 2025): each programmatic product (display, which includes
+  // retargeting, plus CTV and audio) $3K; DOOH $5K; Meta, TikTok and Snapchat $3K; Google Search $1.5K; YouTube $750.
+  // Shopping isn't on the rate card, so it has no minimum here.
+  var MINIMUMS = { display: 3000, retarget: 3000, ctv: 3000, audio: 3000, dooh: 5000, social: 3000, tiktok: 3000, snapchat: 3000, search: 1500, youtube: 750 };
   var SERVICE_TIERS = [
     { label: "Tier 3", min: 1000, max: 3000,
-      available: ["display", "retarget", "social", "search", "youtube"],
-      minimums: { display: 1000, retarget: 1000, social: 1000, search: 1500, youtube: 1500 } },
+      available: ["display", "retarget", "social", "tiktok", "snapchat", "search", "youtube"], minimums: MINIMUMS },
     { label: "Tier 2", min: 3000, max: 10000,
-      available: ["ctv", "youtube", "dooh", "social", "display", "audio", "search", "shopping", "retarget"],
-      minimums: { social: 3000, search: 1500, dooh: 5000 }, progFirst: 3000, progAdd: 2000 },
+      available: ["ctv", "youtube", "dooh", "social", "tiktok", "snapchat", "display", "audio", "search", "shopping", "retarget"], minimums: MINIMUMS },
     { label: "Strategic", min: 10000, max: Infinity,
-      available: ["ctv", "youtube", "dooh", "social", "display", "audio", "search", "shopping", "retarget"],
-      minimums: { social: 3000, search: 1500, dooh: 5000 }, progFirst: 3000, progAdd: 2000 }
+      available: ["ctv", "youtube", "dooh", "social", "tiktok", "snapchat", "display", "audio", "search", "shopping", "retarget"], minimums: MINIMUMS }
   ];
   var CUSTOM_PLAN_BUDGET = 10000;   // Strategic tier: show the "larger opportunity" note
 
-  /* MANAGEMENT FEES: switched OFF. While enabled is false, nothing about fees appears
+  /* BUDGETS ARE GROSS: per the Adtaxi rate card, the client's budget includes Adtaxi's management (social, search and
+     YouTube carry a fee taken from the budget; programmatic is priced by CPM with the margin built in). So every amount
+     shown is the client's total investment by channel. No rates are published here: this repo is public.
+     MANAGEMENT FEES: switched OFF. While enabled is false, nothing about fees appears
      on screen and every dollar shown is media spend, with the note below.
      To switch fees on, fill in the rates and set enabled: true:
        budgetIs: "gross": the budget entered includes fees (fees come out of it)
@@ -83,10 +90,17 @@
     rates: { "Tier 3": { pct: null, flat: null }, "Tier 2": { pct: null, flat: null }, "Strategic": { pct: null, flat: null } },
     minFee: null,
     showFee: true,
-    offNote: "Allocations reflect media spend only; management fees not included."
+    offNote: "Amounts are total monthly investment by channel, including Adtaxi management."
   };
   /* =========================  END OF SETTINGS  ========================= */
 
+  // "Social (Meta) and Google Search are sold with a 3-month minimum." for the channels in a plan that carry a term
+  function termNote(items) {
+    var t = items.filter(function (r) { return CHANNELS[r.id] && CHANNELS[r.id].term; }).map(function (r) { return CHANNELS[r.id].label; });
+    if (!t.length) return "";
+    var list = t.length === 1 ? t[0] : t.slice(0, -1).join(", ") + " and " + t[t.length - 1];
+    return list + (t.length === 1 ? " is" : " are") + " sold with a 3-month minimum.";
+  }
   function serviceTier(budget) { return SERVICE_TIERS.filter(function (t) { return budget >= t.min && budget < t.max; })[0] || null; }
   function minFor(id, set, st) {
     if (st.minimums[id] != null) return st.minimums[id];
@@ -179,6 +193,6 @@
   window.AdtaxiPlan = {
     CHANNELS: CHANNELS, ROLES: ROLES, STRATEGIES: STRATEGIES, MIN_BUDGET: MIN_BUDGET, TIERS: TIERS,
     SERVICE_TIERS: SERVICE_TIERS, CUSTOM_PLAN_BUDGET: CUSTOM_PLAN_BUDGET, FEES: FEES,
-    serviceTier: serviceTier, minFor: minFor, buildPlan: buildPlan, applyFees: applyFees
+    serviceTier: serviceTier, minFor: minFor, buildPlan: buildPlan, applyFees: applyFees, termNote: termNote
   };
 })();

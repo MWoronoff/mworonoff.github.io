@@ -120,7 +120,7 @@
 </header>
 
 <main class="mm-main">
-  <p class="mm-draft"><b>Preview.</b> The strategy splits below are a working draft pending review. Channel availability and minimums follow Adtaxi's service tiers (set by total monthly budget), currently from the 2024 tier sheet pending the updated version. All of these live in one shared settings file, also used by the Recommended allocation in each analyzer, so the two always match.</p>
+  <p class="mm-draft"><b>Preview.</b> The strategy splits below are a working draft pending review. Channel availability follows Adtaxi's service tiers (set by total monthly budget, from the 2024 tier sheet pending the updated version); channel minimums follow the Adtaxi rate card (Nov 2025). Amounts are total monthly investment, including Adtaxi management. All of these live in one shared settings file, also used by the Recommended allocation in each analyzer, so the two always match.</p>
 
   <section class="az-panel mm-controls" aria-label="Plan inputs">
     <label>Category<select id="cat" autocomplete="off"></select></label>
@@ -132,7 +132,7 @@
   <div class="mm-sheet" id="sheet" aria-live="polite"></div>
 </main>
 
-<script src="../shared/media-plan.js?v=20261023a"></script>
+<script src="../shared/media-plan.js?v=20261023b"></script>
 <script>
 /* =====================  SETTINGS (draft: edit here)  =====================
    CATEGORIES: national category ad spend (EMARKETER 2026), $ billions.
@@ -292,6 +292,7 @@ var P = window.AdtaxiPlan, CHANNELS = P.CHANNELS, ROLES = P.ROLES, STRATEGIES = 
         plan.raised.forEach(function (r) { notes.push(r.ch.label + " is set at its " + usd(plan.mins[r.id]) + " monthly minimum."); });
         plan.skipped.forEach(function (x) { notes.push(CHANNELS[x.r.id].label + " needs at least " + usd(x.min) + " a month alongside the rest of this plan, so it isn't included."); });
         plan.unavailable.forEach(function (r) { var t = SERVICE_TIERS.filter(function (t) { return t.available.indexOf(r.id) >= 0; })[0]; notes.push(CHANNELS[r.id].label + " is available from " + usd(t.min) + " a month."); });
+        var tn = P.termNote(items); if (tn) notes.push(tn);
         if (notes.length) kids.push(el("p", { class: "mm-fine" }, [el("b", { text: "Channel minimums: " }), notes.join(" ")]));
         kids.push(el("p", { class: "mm-fine mm-noprint" }, [el("b", { text: "Adtaxi service tier: " + plan.service.label }), " (" + usd(plan.service.min) + (plan.service.max === Infinity ? "+" : "–" + usd(plan.service.max - 1)) + " a month). Internal note; not printed."]));
       }

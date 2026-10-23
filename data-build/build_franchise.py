@@ -7,9 +7,10 @@ counties), the kinds of businesses that buy its service, and the industry codes 
 that client's Territory level into franchise/<client>/data/.
 
 Two owner profiles (the analyzer's "Owner profile" selector):
-  exec   Master and multi-unit owners: established executives with capital (householders 45-64 earning $125K+,
-         returns with income of $200K+, returns with capital gains)
-  owner  Single-unit owner-operators (householders 25-64 earning $100K+, returns with business or self-employment income)
+  exec   Master franchise candidates, first-time or not: established executives with capital (householders 45-64 earning
+         $125K+, returns with income of $200K+ and with capital gains, average salary per wage earner)
+  owner  First-time franchise buyers: mostly corporate employees making a career change (householders 25-64 earning
+         $100K+, average salary per wage earner, married-couple households for the dual-income cushion)
 
 Score = 50% Candidates + 30% Territory Opportunity + 20% Competition, each a percentile among areas at the same level.
   Candidates: the profile's inputs above, count and concentration.
@@ -39,8 +40,8 @@ OUT = os.path.join(ROOT, "franchise", "data")
 MIN_POP = 500
 WEIGHTS = {"demand": 0.50, "category": 0.30, "comp": 0.20}
 SUBCATS = [
-    {"id": "exec", "label": "Master and multi-unit owners", "demand": ["x125", "x125_share", "hi200_share", "cg_share"]},
-    {"id": "owner", "label": "Single-unit owner-operators", "demand": ["o100", "o100_share", "selfemp_share"]},
+    {"id": "exec", "label": "Master franchise candidates", "demand": ["x125", "x125_share", "hi200_share", "cg_share", "avg_wage"]},
+    {"id": "owner", "label": "First-time franchise buyers", "demand": ["o100", "o100_share", "avg_wage", "married_share"]},
 ]
 # Census LODES job sectors (CNS codes) by 2-digit NAICS sector
 LODES_SECTOR = {"11": "cns01", "21": "cns02", "22": "cns03", "23": "cns04", "31": "cns05", "42": "cns06", "44": "cns07",
@@ -49,12 +50,13 @@ LODES_SECTOR = {"11": "cns01", "21": "cns02", "22": "cns03", "23": "cns04", "31"
 ALL_SECTORS = list(LODES_SECTOR)
 NATIONAL_COMPETITORS = []   # national page: no competitor industry, so Competition is left out and weights re-scale
 SUMS = ["population", "households", "hh_tot", "hh4564", "hh2564", "x125", "o100", "returns", "hi200", "cg", "selfemp",
-        "vets", "vet_tot", "buyers", "buyer_jobs", "est_all", "comp_est"]
+        "vets", "vet_tot", "buyers", "buyer_jobs", "est_all", "comp_est", "married", "hh_type", "wage_n", "wage_amt"]
 COUNTS = ["population", "households", "x125", "o100", "hi200", "cg", "selfemp", "vets", "buyers", "buyer_jobs", "comp_est", "returns"]
 RATE_PARTS = {"x125_share": ("x125", "hh4564"), "o100_share": ("o100", "hh2564"), "hi200_share": ("hi200", "returns"),
-              "cg_share": ("cg", "returns"), "selfemp_share": ("selfemp", "returns"), "vet_share": ("vets", "vet_tot")}
-IRS = {"irs_n1": "returns", "irs_n1_stub6": "hi200", "irs_n01000": "cg", "irs_n00900": "selfemp"}
-IRS_KEYS = set(IRS.values()) - {"returns"}
+              "cg_share": ("cg", "returns"), "selfemp_share": ("selfemp", "returns"), "vet_share": ("vets", "vet_tot"),
+              "married_share": ("married", "hh_type")}
+IRS = {"irs_n1": "returns", "irs_n1_stub6": "hi200", "irs_n01000": "cg", "irs_n00900": "selfemp", "irs_n00200": "wage_n", "irs_a00200": "wage_amt"}
+IRS_KEYS = set(IRS.values()) - {"returns", "wage_n", "wage_amt"}
 
 
 def log(*a): print(*a, flush=True)
@@ -73,7 +75,7 @@ def load_zips(cache, rep):
     z = pd.read_csv(os.path.join(GEO, "zip_geo.csv"), dtype={"zip": str, "county_fips": str, "cbsa_code": str, "dma_code": str})
     z["cbsa_code"] = z.cbsa_code.fillna(""); z["dma_code"] = z.dma_code.fillna("0")
     b = lambda n: f"B19037_E{n:03d}"
-    acs_cols = [b(n) for n in (1, 19, 36, 32, 33, 34, 35, 49, 50, 51, 52)] + ["B21001_E001", "B21001_E002"]
+    acs_cols = [b(n) for n in (1, 19, 36, 32, 33, 34, 35, 49, 50, 51, 52)] + ["B21001_E001", "B21001_E002", "B11001_E001", "B11001_E003"]
     acs = pd.read_csv(os.path.join(MASTER, "zip_acs.csv.gz"), dtype={"zip": str}, usecols=["zip"] + acs_cols)
     m = pd.DataFrame({"zip": acs.zip})
     m["hh_tot"], m["hh4564"] = acs[b(1)], acs[b(36)]
@@ -81,6 +83,7 @@ def load_zips(cache, rep):
     m["x125"] = acs[b(50)] + acs[b(51)] + acs[b(52)]                               # householder 45-64, $125K+
     m["o100"] = acs[[b(n) for n in (32, 33, 34, 35, 49, 50, 51, 52)]].sum(axis=1, min_count=8)   # householder 25-64, $100K+
     m["vet_tot"], m["vets"] = acs.B21001_E001, acs.B21001_E002
+    m["hh_type"], m["married"] = acs.B11001_E001, acs.B11001_E003                 # households; married-couple households
     z = z.merge(m, on="zip", how="left")
     irs = pd.read_csv(os.path.join(MASTER, "zip_irs.csv.gz"), dtype={"zip": str}, usecols=["zip"] + list(IRS)).rename(columns=IRS)
     z = z.merge(irs, on="zip", how="left")
@@ -124,6 +127,8 @@ def agg(g):
         else:
             ok = g[n].notna() & g[d].notna(); den = g[d][ok].sum()
             r[k] = g[n][ok].sum() / den if den > 0 else np.nan
+    ok = g.wage_n.notna() & g.wage_amt.notna(); wn = g.wage_n[ok].sum()
+    r["avg_wage"] = g.wage_amt[ok].sum() * 1000 / wn if wn > 0 else np.nan   # IRS amounts are in $000
     pop = r["population"]
     r["buyers_per1k"] = r["buyers"] / pop * 1000 if pop and pop > 0 and r["buyers"] == r["buyers"] else np.nan
     r["comp_per1k"] = r["comp_est"] / r["buyers"] * 1000 if r["buyers"] and r["buyers"] > 0 and r["comp_est"] == r["comp_est"] else np.nan
@@ -161,7 +166,7 @@ def score(df, parts=tuple(WEIGHTS), mask=None):
     return df
 
 
-RATES = list(RATE_PARTS) + ["buyers_per1k", "comp_per1k", "density"]
+RATES = list(RATE_PARTS) + ["avg_wage", "buyers_per1k", "comp_per1k", "density"]
 KEEP = COUNTS + RATES
 PER_SUB = ["score", "demand", "category", "comp", "under", "est", "per1k"]
 SCORE_KEYS = ("score", "demand", "category", "comp")
@@ -209,6 +214,7 @@ def zip_frame(z):
     for c in SUMS: zf[c] = zz[c]
     zf["density"] = (zz.households / zz.land).where(zz.land > 0)
     for k, (n, d) in RATE_PARTS.items(): zf[k] = (zz[n] / zz[d]).where(zz[d] > 0)
+    zf["avg_wage"] = (zz.wage_amt * 1000 / zz.wage_n).where(zz.wage_n > 0)
     zf["buyers_per1k"] = (zz.buyers / zz.population * 1000).where(zz.population > 0)
     zf["comp_per1k"] = (zz.comp_est / zz.buyers * 1000).where(zz.buyers > 0)
     return zf
@@ -275,8 +281,9 @@ def main():
     us = frame([("us", z)])
     U = lambda k: float(us[k].iloc[0])
     for k, lo, hi in (("x125_share", .28, .50), ("o100_share", .30, .55), ("hi200_share", .04, .12), ("cg_share", .10, .28),
-                      ("selfemp_share", .12, .25), ("vet_share", .04, .09)):
+                      ("selfemp_share", .12, .25), ("vet_share", .04, .09), ("married_share", .44, .52)):
         rep.append((f"U.S. {k}", "PASS" if lo <= U(k) <= hi else "FAIL", f"{U(k):.1%} (expected {lo:.0%}–{hi:.0%})"))
+    rep.append(("U.S. average wages per return with wages (IRS)", "PASS" if 55000 <= U("avg_wage") <= 95000 else "FAIL", f"${U('avg_wage'):,.0f} (expected $55K–$95K)"))
     rep.append(("U.S. businesses with employees (ZIP Business Patterns)", "PASS" if 7.0e6 <= U("est_all") <= 9.0e6 else "FAIL", f"{U('est_all'):,.0f} (expected 7–9 million)"))
     rep.append(("U.S. householders 45–64 earning $125K+", "PASS" if 10e6 <= U("x125") <= 22e6 else "FAIL", f"{U('x125'):,.0f}"))
     for name, df in (("DMA", dma), ("Metro", met)):

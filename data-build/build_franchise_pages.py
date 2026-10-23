@@ -7,9 +7,9 @@ import glob, json, os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-V = "20261023c"   # version tag for the shared engine files on these pages
+V = "20261023d"   # version tag for the shared engine files on these pages
 
-SUBS = [{"id": "exec", "label": "Master and multi-unit owners"}, {"id": "owner", "label": "Single-unit owner-operators"}]
+SUBS = [{"id": "exec", "label": "Master franchise candidates"}, {"id": "owner", "label": "First-time franchise buyers"}]
 SOURCES = [
     {"label": "Census American Community Survey 5-year (age of householder by household income, veterans)", "url": "https://www.census.gov/programs-surveys/acs"},
     {"label": "IRS Statistics of Income, individual income tax ZIP Code data", "url": "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-statistics-zip-code-data-soi"},
@@ -56,15 +56,15 @@ def radius_cfg(title, export, depth, links):
         "audienceData": f"{up}shared/audience/zip_audience.json",
         "extraData": [{"url": f"{up}shared/audience/zip_audience_fin.json", "label": "Tax return data", "source": "IRS Statistics of Income ZIP data"}],
         "zipGeo": f"{up}shared/geo/zip/{{level}}/{{id}}.json",
-        "planScript": f"{up}shared/media-plan.js?v=20261023a", "mediaMixUrl": f"{up}media-mix/", "planCategory": "none",
+        "planScript": f"{up}shared/media-plan.js?v=20261023b", "mediaMixUrl": f"{up}media-mix/", "planCategory": "none",
         "customArea": True, "ageSet": "adult", "radii": [5, 10, 15, 25, 50, 100], "radiusLabel": "Up to {r} miles",
         "filters": ["age", "income", "veterans"],
         "profileLabel": "Best prospects for",
         "profiles": [
-            {"id": "exec", "label": "Master and multi-unit owners", "note": "Adults 35 and older in households earning $150K+ (this tool's income ranges don't split at $125K). IRS shares of returns with $200K+ income and with capital gains show by ZIP.",
-             "sel": {"age": ["35_44", "45_54", "55p"], "income": ["150_200", "200p"]}, "context": ["hi200", "cg"]},
-            {"id": "owner", "label": "Single-unit owner-operators", "note": "Adults 25–54 in households earning $100K+. The IRS share of returns with business or self-employment income shows by ZIP.",
-             "sel": {"age": ["25_34", "35_44", "45_54"], "income": ["100_150", "150_200", "200p"]}, "context": ["selfemp"]}],
+            {"id": "exec", "label": "Master franchise candidates", "note": "Adults 35 and older in households earning $100K+, including first-time franchise buyers (this tool's income ranges don't split at $125K). IRS shares of returns with $200K+ income and with capital gains show by ZIP.",
+             "sel": {"age": ["35_44", "45_54", "55p"], "income": ["100_150", "150_200", "200p"]}, "context": ["hi200", "cg"]},
+            {"id": "owner", "label": "First-time franchise buyers", "note": "Adults 25 and older in households earning $100K+: Millennial, Gen X and Boomer buyers making a career change. The IRS share of returns with $200K+ income shows by ZIP.",
+             "sel": {"age": ["25_34", "35_44", "45_54", "55p"], "income": ["100_150", "150_200", "200p"]}, "context": ["hi200"]}],
         "methodology": [
             {"title": "Who counts", "body": "Counts are adults by age and household income (Census). Census doesn't publish net worth or job titles by ZIP, so household income stands in for capital, and the profiles are planning estimates, not lists of people."},
             {"title": "Tax return rates", "body": "The $200K+ income, capital gains and self-employment figures are IRS shares of tax returns in each ZIP. They describe the ZIP, not individual households, so they show as columns and aren't applied to the count."},
@@ -97,10 +97,11 @@ def measures(client):
         {"key": "x125_share", "label": "Share of householders 45–64 earning $125K+", "format": "pct", "subs": ["exec"]},
         {"key": "hi200_share", "label": "Share of tax returns with income of $200K+", "format": "pct", "subs": ["exec"], "help": "IRS, area-level: how common high incomes are here."},
         {"key": "cg_share", "label": "Share of tax returns with capital gains", "format": "pct", "subs": ["exec"], "help": "IRS, area-level: a sign of investable assets beyond salary."},
-        {"key": "o100", "label": "Householders 25–64 earning $100K+", "short": "Owners 25–64", "format": "int", "subs": ["owner"],
+        {"key": "o100", "label": "Householders 25–64 earning $100K+", "short": "Buyers 25–64", "format": "int", "subs": ["owner"],
          "help": "Households headed by someone 25–64 with income of $100K or more (Census ACS)."},
         {"key": "o100_share", "label": "Share of householders 25–64 earning $100K+", "format": "pct", "subs": ["owner"]},
-        {"key": "selfemp_share", "label": "Share of tax returns with business or self-employment income", "format": "pct", "subs": ["owner"], "help": "IRS, area-level: how common business ownership already is here."},
+        {"key": "avg_wage", "label": "Average salary per wage earner", "format": "money", "help": "IRS wages divided by returns with wages, area-level: higher where more corporate and professional earners live."},
+        {"key": "married_share", "label": "Share of households that are married couples", "format": "pct", "subs": ["owner"], "help": "Census ACS. Most new franchise buyers are married, often with a spouse's income covering household costs while the business starts."},
         {"key": "vets", "label": "Veterans", "format": "int", "help": "Civilian veterans 18+ (Census ACS). Many franchise systems offer veteran discounts (VetFran). Shown, not scored."},
         {"key": "vet_share", "label": "Share of adults who are veterans", "format": "pct"},
         {"key": "buyers", "label": buyers, "short": "Buyers", "format": "int", "help": bhelp},
@@ -123,8 +124,8 @@ def methodology(client):
         ("Score = 50% Candidates + 30% Territory Opportunity + 20% Competition." if client else "Score = 62.5% Candidates + 37.5% Market Opportunity (the client weights of 50% and 30%, re-scaled; Competition is added on a client's page, where its competitors are known).")
         + " Each part is a percentile (0–100) against areas at the same level. No score is shown when a part has no data."]},
         {"title": "Candidates", "body": [
-            "Master and multi-unit owners: householders 45–64 earning $125K+ (count and share), and the IRS shares of returns with income of $200K+ and with capital gains.",
-            "Single-unit owner-operators: householders 25–64 earning $100K+ (count and share), and the IRS share of returns with business or self-employment income.",
+            "Master franchise candidates, first-time or not: householders 45–64 earning $125K+ (count and share), the IRS shares of returns with income of $200K+ and with capital gains, and the IRS average salary per wage earner.",
+            "First-time franchise buyers: householders 25–64 earning $100K+ (count and share), the IRS average salary per wage earner (corporate earners, who make up most first-time buyers) and the share of married-couple households (the dual-income cushion many new owners rely on).",
             "Census doesn't publish net worth, liquid capital or job titles for areas, so household income and investment income stand in for them. IRS figures are area-level rates, not facts about individuals."]},
         {"title": "Territory Opportunity" if client else "Market Opportunity", "body":
             (client["buyers"]["help"] + " " if client else "All businesses with paid employees. ") +
@@ -164,10 +165,10 @@ def analyzer_cfg(client):
         "radiusScript": f"{up}shared/radius.js?v={V}", "benchmarks": False, "timing": False,
         "subcategoryLabel": "Owner profile", "subcategories": SUBS,
         "measures": measures(client),
-        "rankBy": ["score", "x125", "x125_share", "hi200_share", "o100", "o100_share", "buyers", "buyer_jobs", "vets", "population"],
+        "rankBy": ["score", "x125", "x125_share", "hi200_share", "o100", "o100_share", "avg_wage", "buyers", "buyer_jobs", "vets", "population"],
         "defaultRank": "score",
         "components": ["demand", "category", "comp"] if client else ["demand", "category"],
-        "detailMeasures": ["x125", "x125_share", "hi200_share", "cg_share", "o100", "o100_share", "selfemp_share", "buyers", "buyer_jobs", "buyers_per1k"]
+        "detailMeasures": ["x125", "x125_share", "hi200_share", "cg_share", "o100", "o100_share", "avg_wage", "married_share", "buyers", "buyer_jobs", "buyers_per1k"]
                           + (["est", "per1k", "under"] if client else []) + ["vets", "vet_share", "population", "households", "density"],
         "tableColumns": ["score", "population", "buyers"] + (["under"] if client else []),
         "methodology": methodology(client),
