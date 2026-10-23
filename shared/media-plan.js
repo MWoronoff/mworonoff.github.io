@@ -57,8 +57,8 @@
                 { max: Infinity, channels: 4, label: "$20K+: a broader multi-channel strategy" } ];
   // Monthly minimums per channel (Adtaxi rate card, Nov 2025): each programmatic product (display, which includes
   // retargeting, plus CTV and audio) $3K; DOOH $5K; Meta, TikTok and Snapchat $3K; Google Search $1.5K; YouTube $750.
-  // Shopping isn't on the rate card, so it has no minimum here.
-  var MINIMUMS = { display: 3000, retarget: 3000, ctv: 3000, audio: 3000, dooh: 5000, social: 3000, tiktok: 3000, snapchat: 3000, search: 1500, youtube: 750 };
+  // Shopping isn't on the rate card: $3K per Adtaxi (Oct 2026), sometimes per platform; one channel here, so $3K.
+  var MINIMUMS = { display: 3000, retarget: 3000, ctv: 3000, audio: 3000, dooh: 5000, social: 3000, tiktok: 3000, snapchat: 3000, search: 1500, youtube: 750, shopping: 3000 };
   var SERVICE_TIERS = [
     { label: "Tier 3", min: 1000, max: 3000,
       available: ["display", "retarget", "social", "tiktok", "snapchat", "search", "youtube"], minimums: MINIMUMS },
@@ -97,7 +97,7 @@
        pct:      fee as a share of the channel's monthly amount
        search:   Google Search fee by the search amount (Tier 3 $1,500-$2,999: 25%; $3,000+: 20%)
        Programmatic channels (prog: true) are priced by CPM with management included: no separate fee line.
-       Channels not listed here (Shopping) aren't on the rate card, so no fee is shown for them. */
+       Shopping's fee isn't on the rate card, so no fee is shown for it. */
   var MGMT = {
     pct: { social: 0.40, tiktok: 0.40, snapchat: 0.40, youtube: 0.40 },
     search: [ { min: 0, max: 3000, pct: 0.25 }, { min: 3000, max: Infinity, pct: 0.20 } ],
