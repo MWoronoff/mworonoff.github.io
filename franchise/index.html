@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Franchise Development Analyzer</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="../shared/adtaxi-logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<link rel="stylesheet" href="../shared/engine.css?v=20261023c">
+</head>
+<body>
+<div id="app"><p class="az-loading">Loading the Franchise Development Analyzer…</p></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js" crossorigin=""></script>
+<script src="../shared/engine.js?v=20261023c"></script>
+<script src="radius-config.js?v=20261023c"></script>
+<script>
+AdtaxiAnalyzer.start({
+ "title": "Franchise Development Analyzer",
+ "subtitle": "Where franchise systems' best owner candidates are: Franchise Opportunity Scores for DMAs, metros, counties and ZIPs, by owner profile, to focus franchise-development ad dollars.",
+ "logo": "../shared/adtaxi-logo.svg",
+ "exportName": "franchise",
+ "links": [
+  {
+   "label": "Home",
+   "url": "../analyzers/"
+  }
+ ],
+ "radiusDefault": 25,
+ "radiusProfiles": true,
+ "defaultLevel": "dma",
+ "usMapLevel": "dma",
+ "levels": {
+  "us": {
+   "label": "U.S.",
+   "data": "data/us.json"
+  },
+  "dma": {
+   "label": "DMA",
+   "data": "data/dma.json",
+   "geo": "../shared/geo/dma.topo.json",
+   "idField": "dma_code"
+  },
+  "metro": {
+   "label": "Metro",
+   "data": "data/metro.json",
+   "geo": "../shared/geo/metro.topo.json",
+   "idField": "cbsa_code"
+  },
+  "county": {
+   "label": "County",
+   "data": "data/county.json",
+   "geo": "../shared/geo/county.topo.json",
+   "idField": "fips"
+  },
+  "zip": {
+   "label": "ZIPs in market",
+   "data": "data/zip/{level}/{id}.json",
+   "geo": "../shared/geo/zip/{level}/{id}.json",
+   "idField": "zip"
+  }
+ },
+ "statesGeo": "../shared/geo/states.topo.json",
+ "zipIndex": "../shared/geo/zip_market.json",
+ "radiusScript": "../shared/radius.js?v=20261023c",
+ "benchmarks": false,
+ "timing": false,
+ "subcategoryLabel": "Owner profile",
+ "subcategories": [
+  {
+   "id": "exec",
+   "label": "Master and multi-unit owners"
+  },
+  {
+   "id": "owner",
+   "label": "Single-unit owner-operators"
+  }
+ ],
+ "measures": [
+  {
+   "key": "score",
+   "label": "Franchise Opportunity Score",
+   "short": "Score",
+   "format": "score",
+   "perSub": true,
+   "levels": [
+    "dma",
+    "metro",
+    "county",
+    "zip"
+   ],
+   "help": "0–100. Candidates 62.5%, Market Opportunity 37.5% (each a percentile among areas at the same level). Competition is added on a client's page, where its competitors are known. ZIPs use Candidates only."
+  },
+  {
+   "key": "demand",
+   "label": "Candidates",
+   "short": "Candidates",
+   "format": "score",
+   "perSub": true,
+   "levels": [
+    "dma",
+    "metro",
+    "county",
+    "zip"
+   ],
+   "help": "Average of the percentiles for this owner profile's inputs (see How scores work)."
+  },
+  {
+   "key": "category",
+   "label": "Market Opportunity",
+   "short": "Opportunity",
+   "format": "score",
+   "perSub": true,
+   "levels": [
+    "dma",
+    "metro",
+    "county"
+   ],
+   "help": "Average of the percentiles for businesses with employees, the jobs at them, and those businesses per 1,000 residents: the customers a franchisee would sell to."
+  },
+  {
+   "key": "x125",
+   "label": "Householders 45–64 earning $125K+",
+   "short": "Execs 45–64",
+   "format": "int",
+   "subs": [
+    "exec"
+   ],
+   "help": "Households headed by someone 45–64 with income of $125K or more (Census ACS): the established, capitalized candidates for a master or multi-unit franchise."
+  },
+  {
+   "key": "x125_share",
+   "label": "Share of householders 45–64 earning $125K+",
+   "format": "pct",
+   "subs": [
+    "exec"
+   ]
+  },
+  {
+   "key": "hi200_share",
+   "label": "Share of tax returns with income of $200K+",
+   "format": "pct",
+   "subs": [
+    "exec"
+   ],
+   "help": "IRS, area-level: how common high incomes are here."
+  },
+  {
+   "key": "cg_share",
+   "label": "Share of tax returns with capital gains",
+   "format": "pct",
+   "subs": [
+    "exec"
+   ],
+   "help": "IRS, area-level: a sign of investable assets beyond salary."
+  },
+  {
+   "key": "o100",
+   "label": "Householders 25–64 earning $100K+",
+   "short": "Owners 25–64",
+   "format": "int",
+   "subs": [
+    "owner"
+   ],
+   "help": "Households headed by someone 25–64 with income of $100K or more (Census ACS)."
+  },
+  {
+   "key": "o100_share",
+   "label": "Share of householders 25–64 earning $100K+",
+   "format": "pct",
+   "subs": [
+    "owner"
+   ]
+  },
+  {
+   "key": "selfemp_share",
+   "label": "Share of tax returns with business or self-employment income",
+   "format": "pct",
+   "subs": [
+    "owner"
+   ],
+   "help": "IRS, area-level: how common business ownership already is here."
+  },
+  {
+   "key": "vets",
+   "label": "Veterans",
+   "format": "int",
+   "help": "Civilian veterans 18+ (Census ACS). Many franchise systems offer veteran discounts (VetFran). Shown, not scored."
+  },
+  {
+   "key": "vet_share",
+   "label": "Share of adults who are veterans",
+   "format": "pct"
+  },
+  {
+   "key": "buyers",
+   "label": "Businesses with employees",
+   "short": "Buyers",
+   "format": "int",
+   "help": "All businesses with paid employees (Census ZIP Code Business Patterns): the base of potential customers for a business-to-business franchise."
+  },
+  {
+   "key": "buyer_jobs",
+   "label": "Jobs at those businesses",
+   "short": "Jobs",
+   "format": "int",
+   "help": "Jobs located in these industries (Census LODES): a measure of facility size and activity."
+  },
+  {
+   "key": "buyers_per1k",
+   "label": "Businesses with employees per 1,000 residents",
+   "format": "dec1"
+  },
+  {
+   "key": "population",
+   "label": "Population",
+   "format": "int"
+  },
+  {
+   "key": "households",
+   "label": "Households",
+   "format": "int"
+  },
+  {
+   "key": "density",
+   "label": "Households per square mile",
+   "short": "HH/sq mi",
+   "format": "int"
+  }
+ ],
+ "rankBy": [
+  "score",
+  "x125",
+  "x125_share",
+  "hi200_share",
+  "o100",
+  "o100_share",
+  "buyers",
+  "buyer_jobs",
+  "vets",
+  "population"
+ ],
+ "defaultRank": "score",
+ "components": [
+  "demand",
+  "category"
+ ],
+ "detailMeasures": [
+  "x125",
+  "x125_share",
+  "hi200_share",
+  "cg_share",
+  "o100",
+  "o100_share",
+  "selfemp_share",
+  "buyers",
+  "buyer_jobs",
+  "buyers_per1k",
+  "vets",
+  "vet_share",
+  "population",
+  "households",
+  "density"
+ ],
+ "tableColumns": [
+  "score",
+  "population",
+  "buyers"
+ ],
+ "methodology": [
+  {
+   "title": "Franchise Opportunity Score",
+   "body": [
+    "Where are a franchise system's best owner candidates, and which markets deserve the most franchise-development ad dollars?",
+    "Score = 62.5% Candidates + 37.5% Market Opportunity (the client weights of 50% and 30%, re-scaled; Competition is added on a client's page, where its competitors are known). Each part is a percentile (0–100) against areas at the same level. No score is shown when a part has no data."
+   ]
+  },
+  {
+   "title": "Candidates",
+   "body": [
+    "Master and multi-unit owners: householders 45–64 earning $125K+ (count and share), and the IRS shares of returns with income of $200K+ and with capital gains.",
+    "Single-unit owner-operators: householders 25–64 earning $100K+ (count and share), and the IRS share of returns with business or self-employment income.",
+    "Census doesn't publish net worth, liquid capital or job titles for areas, so household income and investment income stand in for them. IRS figures are area-level rates, not facts about individuals."
+   ]
+  },
+  {
+   "title": "Market Opportunity",
+   "body": "All businesses with paid employees. Half count, half concentration: establishments and the jobs at them (count), and establishments per 1,000 residents."
+  },
+  {
+   "title": "ZIPs in market",
+   "body": "Pick a DMA, metro or county, then ZIPs in market to rank its ZIPs by Candidates, for geographic targeting. ZIPs under 500 residents, or mostly group quarters, are shown but not ranked."
+  }
+ ],
+ "sources": [
+  {
+   "label": "Census American Community Survey 5-year (age of householder by household income, veterans)",
+   "url": "https://www.census.gov/programs-surveys/acs"
+  },
+  {
+   "label": "IRS Statistics of Income, individual income tax ZIP Code data",
+   "url": "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-statistics-zip-code-data-soi"
+  },
+  {
+   "label": "Census ZIP Code Business Patterns",
+   "url": "https://www.census.gov/programs-surveys/cbp.html"
+  },
+  {
+   "label": "Census LEHD Origin-Destination Employment Statistics (jobs by industry)",
+   "url": "https://lehd.ces.census.gov/data/"
+  }
+ ],
+ "sourcesNote": "Candidates: Census ACS and IRS. Businesses: Census Business Patterns. Jobs: Census LODES.",
+ "radius": true
+});
+</script>
+</body>
+</html>

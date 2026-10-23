@@ -215,6 +215,7 @@
     prep:     { label: "Paid preparer", long: "Share of tax returns filed by a paid preparer (IRS)", value: function (c, i) { return irsShare(c, i, "prep"); } },
     eitc:     { label: "EITC returns", long: "Share of tax returns claiming the Earned Income Credit (IRS)", value: function (c, i) { return irsShare(c, i, "eitc"); } },
     selfemp:  { label: "Self-employed", long: "Share of tax returns with business or self-employment income (IRS)", value: function (c, i) { return irsShare(c, i, "selfemp"); } },
+    hi200:    { label: "$200K+ income", long: "Share of tax returns with income of $200K or more (IRS)", value: function (c, i) { return irsShare(c, i, "hi200"); } },
     div:      { label: "Dividends", long: "Share of tax returns with dividend income (IRS)", value: function (c, i) { return irsShare(c, i, "div"); } },
     cg:       { label: "Capital gains", long: "Share of tax returns reporting capital gains (IRS)", value: function (c, i) { return irsShare(c, i, "cg"); } },
     ira:      { label: "IRA income", long: "Share of tax returns with IRA distributions (IRS)", value: function (c, i) { return irsShare(c, i, "ira"); } },
@@ -855,7 +856,7 @@
 
     // Planner link carries the same choices
     var q = new URLSearchParams(), pc = this.cfg.planCategory || String(this.cfg.exportName || "").replace(/-radius$/, "").replace(/^apartment$/, "apartments");
-    if (pc && !/^(zip|adtaxi)$/.test(pc)) q.set("category", pc);
+    if (pc && !/^(zip|adtaxi|none)$/.test(pc)) q.set("category", pc);
     if (b.strat) q.set("strategy", b.strat); if (b.amount) q.set("budget", Math.round(b.amount));
     this.bLink.href = (this.cfg.mediaMixUrl || "../media-mix/") + (q.toString() ? "?" + q : "");
 

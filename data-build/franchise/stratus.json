@@ -1,0 +1,846 @@
+{
+ "id": "stratus",
+ "client": "Stratus Clean",
+ "title": "Franchise Development Analyzer: Stratus Clean",
+ "concept": "commercial cleaning",
+ "territoryNoun": "master franchise territory",
+ "territorySource": "Stratus Clean Available Markets sheet (U.S. markets; Canada not covered by these U.S. data sources).",
+ "pending": [
+  "South Chicago, IL",
+  "Island North, MI",
+  "Benson North, MN"
+ ],
+ "pendingNote": "Listed by Stratus but can't be drawn without its county list.",
+ "buyers": {
+  "label": "Businesses that buy commercial cleaning",
+  "help": "Offices (information, finance, real estate, professional and management firms), medical, schools, warehouses and distribution, manufacturing, retail and fitness: the facilities that contract out cleaning.",
+  "sectors": [
+   "31",
+   "42",
+   "44",
+   "48",
+   "51",
+   "52",
+   "53",
+   "54",
+   "55",
+   "61",
+   "62",
+   "71"
+  ]
+ },
+ "competitors": {
+  "label": "Janitorial companies",
+  "naics": [
+   "561720"
+  ],
+  "help": "Janitorial services establishments with paid employees (Census, industry 561720), per 1,000 buyer businesses."
+ },
+ "territories": [
+  {
+   "id": "ak",
+   "name": "Alaska (statewide)",
+   "state": "AK",
+   "states": [
+    "AK"
+   ],
+   "note": "Statewide territory as listed by Stratus; other territories in the state, if any, aren't excluded."
+  },
+  {
+   "id": "id",
+   "name": "Idaho (statewide)",
+   "state": "ID",
+   "states": [
+    "ID"
+   ],
+   "note": "Statewide territory as listed by Stratus; other territories in the state, if any, aren't excluded."
+  },
+  {
+   "id": "me",
+   "name": "Maine (statewide)",
+   "state": "ME",
+   "states": [
+    "ME"
+   ],
+   "note": "Statewide territory as listed by Stratus; other territories in the state, if any, aren't excluded."
+  },
+  {
+   "id": "ms",
+   "name": "Mississippi (statewide)",
+   "state": "MS",
+   "states": [
+    "MS"
+   ],
+   "note": "Statewide territory as listed by Stratus; other territories in the state, if any, aren't excluded."
+  },
+  {
+   "id": "mt",
+   "name": "Montana (statewide)",
+   "state": "MT",
+   "states": [
+    "MT"
+   ],
+   "note": "Statewide territory as listed by Stratus; other territories in the state, if any, aren't excluded."
+  },
+  {
+   "id": "nm",
+   "name": "New Mexico (statewide)",
+   "state": "NM",
+   "states": [
+    "NM"
+   ],
+   "note": "Statewide territory as listed by Stratus; other territories in the state, if any, aren't excluded."
+  },
+  {
+   "id": "nd",
+   "name": "North Dakota (statewide)",
+   "state": "ND",
+   "states": [
+    "ND"
+   ],
+   "note": "Statewide territory as listed by Stratus; other territories in the state, if any, aren't excluded."
+  },
+  {
+   "id": "ri",
+   "name": "Rhode Island (statewide)",
+   "state": "RI",
+   "states": [
+    "RI"
+   ],
+   "note": "Statewide territory as listed by Stratus; other territories in the state, if any, aren't excluded."
+  },
+  {
+   "id": "sd",
+   "name": "South Dakota (statewide)",
+   "state": "SD",
+   "states": [
+    "SD"
+   ],
+   "note": "Statewide territory as listed by Stratus; other territories in the state, if any, aren't excluded."
+  },
+  {
+   "id": "wv",
+   "name": "West Virginia (statewide)",
+   "state": "WV",
+   "states": [
+    "WV"
+   ],
+   "note": "Statewide territory as listed by Stratus; other territories in the state, if any, aren't excluded."
+  },
+  {
+   "id": "wy",
+   "name": "Wyoming (statewide)",
+   "state": "WY",
+   "states": [
+    "WY"
+   ],
+   "note": "Statewide territory as listed by Stratus; other territories in the state, if any, aren't excluded."
+  },
+  {
+   "id": "al-huntsville",
+   "name": "Huntsville, AL",
+   "state": "AL",
+   "cbsa": [
+    "26620"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in AL); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "al-montgomery",
+   "name": "Montgomery, AL",
+   "state": "AL",
+   "cbsa": [
+    "33860"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in AL); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "az-tucson",
+   "name": "Tucson, AZ",
+   "state": "AZ",
+   "cbsa": [
+    "46060"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in AZ); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "az-flagstaff",
+   "name": "Flagstaff, AZ",
+   "state": "AZ",
+   "cbsa": [
+    "22380"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in AZ); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "ar-little-rock",
+   "name": "Little Rock, AR",
+   "state": "AR",
+   "cbsa": [
+    "30780"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in AR); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "ct-fairfield",
+   "name": "Fairfield, CT",
+   "state": "CT",
+   "cbsa": [
+    "14860"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in CT); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "ct-hartford",
+   "name": "Hartford, CT",
+   "state": "CT",
+   "cbsa": [
+    "25540"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in CT); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "fl-daytona",
+   "name": "Daytona, FL",
+   "state": "FL",
+   "cbsa": [
+    "19660"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in FL); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "fl-lakeland",
+   "name": "Lakeland, FL",
+   "state": "FL",
+   "cbsa": [
+    "29460"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in FL); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "fl-gainesville",
+   "name": "Gainesville, FL",
+   "state": "FL",
+   "cbsa": [
+    "23540"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in FL); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "fl-pensacola",
+   "name": "Pensacola, FL",
+   "state": "FL",
+   "cbsa": [
+    "37860"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in FL); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "fl-sarasota",
+   "name": "Sarasota, FL",
+   "state": "FL",
+   "cbsa": [
+    "35840"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in FL); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "fl-tallahassee",
+   "name": "Tallahassee, FL",
+   "state": "FL",
+   "cbsa": [
+    "45220"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in FL); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "ga-augusta",
+   "name": "Augusta, GA",
+   "state": "GA",
+   "cbsa": [
+    "12260"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in GA); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "ga-columbus-macon",
+   "name": "Columbus/Macon, GA",
+   "state": "GA",
+   "cbsa": [
+    "17980",
+    "31420"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in GA); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "ga-savannah",
+   "name": "Savannah, GA",
+   "state": "GA",
+   "cbsa": [
+    "42340"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in GA); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "ga-valdosta",
+   "name": "Valdosta, GA",
+   "state": "GA",
+   "cbsa": [
+    "46660"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in GA); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "il-champaign",
+   "name": "Champaign, IL",
+   "state": "IL",
+   "cbsa": [
+    "16580"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in IL); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "il-peoria",
+   "name": "Peoria, IL",
+   "state": "IL",
+   "cbsa": [
+    "37900"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in IL); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "il-rockford",
+   "name": "Rockford, IL",
+   "state": "IL",
+   "cbsa": [
+    "40420"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in IL); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "il-springfield",
+   "name": "Springfield, IL",
+   "state": "IL",
+   "cbsa": [
+    "44100"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in IL); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "in-evansville",
+   "name": "Evansville, IN",
+   "state": "IN",
+   "cbsa": [
+    "21780"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in IN); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "in-south-bend",
+   "name": "South Bend, IN",
+   "state": "IN",
+   "cbsa": [
+    "43780"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in IN); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "ky-bowling-green",
+   "name": "Bowling Green, KY",
+   "state": "KY",
+   "cbsa": [
+    "14540"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in KY); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "ky-paducah",
+   "name": "Paducah, KY",
+   "state": "KY",
+   "cbsa": [
+    "37140"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in KY); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "la-lafayette",
+   "name": "Lafayette, LA",
+   "state": "LA",
+   "cbsa": [
+    "29180"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in LA); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "la-shreveport",
+   "name": "Shreveport, LA",
+   "state": "LA",
+   "cbsa": [
+    "43340"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in LA); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "mi-flint",
+   "name": "Flint, MI",
+   "state": "MI",
+   "cbsa": [
+    "22420"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in MI); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "mn-duluth",
+   "name": "Duluth, MN",
+   "state": "MN",
+   "cbsa": [
+    "20260"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in MN); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "mn-rochester",
+   "name": "Rochester, MN",
+   "state": "MN",
+   "cbsa": [
+    "40340"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in MN); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "ny-buffalo",
+   "name": "Buffalo, NY",
+   "state": "NY",
+   "cbsa": [
+    "15380"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in NY); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "ny-rochester",
+   "name": "Rochester, NY",
+   "state": "NY",
+   "cbsa": [
+    "40380"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in NY); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "ny-albany",
+   "name": "Albany, NY",
+   "state": "NY",
+   "cbsa": [
+    "10580"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in NY); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "ny-syracuse",
+   "name": "Syracuse, NY",
+   "state": "NY",
+   "cbsa": [
+    "45060"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in NY); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "ny-poughkeepsie",
+   "name": "Poughkeepsie, NY",
+   "state": "NY",
+   "cbsa": [
+    "28880"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in NY); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "nc-raleigh-durham",
+   "name": "Raleigh/Durham, NC",
+   "state": "NC",
+   "cbsa": [
+    "39580",
+    "20500"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in NC); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "nc-greensboro-winston-salem",
+   "name": "Greensboro/Winston-Salem, NC",
+   "state": "NC",
+   "cbsa": [
+    "24660",
+    "49180"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in NC); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "nc-greenville",
+   "name": "Greenville, NC",
+   "state": "NC",
+   "cbsa": [
+    "24780"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in NC); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "nc-wilmington",
+   "name": "Wilmington, NC",
+   "state": "NC",
+   "cbsa": [
+    "48900"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in NC); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "oh-lima",
+   "name": "Lima, OH",
+   "state": "OH",
+   "cbsa": [
+    "30620"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in OH); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "or-eugene",
+   "name": "Eugene, OR",
+   "state": "OR",
+   "cbsa": [
+    "21660"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in OR); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "pa-erie",
+   "name": "Erie, PA",
+   "state": "PA",
+   "cbsa": [
+    "21500"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in PA); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "pa-harrisburg",
+   "name": "Harrisburg, PA",
+   "state": "PA",
+   "cbsa": [
+    "25420"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in PA); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "pa-lancaster",
+   "name": "Lancaster, PA",
+   "state": "PA",
+   "cbsa": [
+    "29540"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in PA); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "pa-scranton",
+   "name": "Scranton, PA",
+   "state": "PA",
+   "cbsa": [
+    "42540"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in PA); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "pa-williamsport",
+   "name": "Williamsport, PA",
+   "state": "PA",
+   "cbsa": [
+    "48700"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in PA); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "tn-knoxville",
+   "name": "Knoxville, TN",
+   "state": "TN",
+   "cbsa": [
+    "28940"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in TN); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "tn-memphis",
+   "name": "Memphis, TN",
+   "state": "TN",
+   "cbsa": [
+    "32820"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in TN); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "tn-chattanooga",
+   "name": "Chattanooga, TN",
+   "state": "TN",
+   "cbsa": [
+    "16860"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in TN); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "tn-johnson-city",
+   "name": "Johnson City, TN",
+   "state": "TN",
+   "cbsa": [
+    "27740"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in TN); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "tx-amarillo",
+   "name": "Amarillo, TX",
+   "state": "TX",
+   "cbsa": [
+    "11100"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in TX); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "tx-beaumont",
+   "name": "Beaumont, TX",
+   "state": "TX",
+   "cbsa": [
+    "13140"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in TX); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "tx-corpus-christi",
+   "name": "Corpus Christi, TX",
+   "state": "TX",
+   "cbsa": [
+    "18580"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in TX); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "tx-el-paso",
+   "name": "El Paso, TX",
+   "state": "TX",
+   "cbsa": [
+    "21340"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in TX); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "tx-laredo",
+   "name": "Laredo, TX",
+   "state": "TX",
+   "cbsa": [
+    "29700"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in TX); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "tx-lubbock",
+   "name": "Lubbock, TX",
+   "state": "TX",
+   "cbsa": [
+    "31180"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in TX); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "tx-mcallen",
+   "name": "McAllen, TX",
+   "state": "TX",
+   "cbsa": [
+    "32580"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in TX); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "tx-odessa",
+   "name": "Odessa, TX",
+   "state": "TX",
+   "cbsa": [
+    "36220"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in TX); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "tx-tyler",
+   "name": "Tyler, TX",
+   "state": "TX",
+   "cbsa": [
+    "46340"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in TX); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "tx-waco",
+   "name": "Waco, TX",
+   "state": "TX",
+   "cbsa": [
+    "47380"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in TX); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "va-charlottesville",
+   "name": "Charlottesville, VA",
+   "state": "VA",
+   "cbsa": [
+    "16820"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in VA); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "va-hampton",
+   "name": "Hampton, VA",
+   "state": "VA",
+   "cbsa": [
+    "47260"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in VA); Stratus sizes territories by population, so its own county list may differ. Hampton is drawn as the whole Hampton Roads metro."
+  },
+  {
+   "id": "va-roanoke",
+   "name": "Roanoke, VA",
+   "state": "VA",
+   "cbsa": [
+    "40220"
+   ],
+   "note": "Provisional: drawn as the Census metro area (the part in VA); Stratus sizes territories by population, so its own county list may differ."
+  },
+  {
+   "id": "ga-whitfield",
+   "name": "Whitfield, GA",
+   "state": "GA",
+   "counties": [
+    "13313"
+   ],
+   "note": "Provisional: drawn as the county named; Stratus's own county list may differ."
+  },
+  {
+   "id": "il-jefferson",
+   "name": "Jefferson, IL",
+   "state": "IL",
+   "counties": [
+    "17081"
+   ],
+   "note": "Provisional: drawn as the county named; Stratus's own county list may differ."
+  },
+  {
+   "id": "in-new-castle",
+   "name": "New Castle, IN",
+   "state": "IN",
+   "counties": [
+    "18065"
+   ],
+   "note": "Provisional: drawn as the county named; Stratus's own county list may differ."
+  },
+  {
+   "id": "in-wabash",
+   "name": "Wabash, IN",
+   "state": "IN",
+   "counties": [
+    "18169"
+   ],
+   "note": "Provisional: drawn as the county named; Stratus's own county list may differ."
+  },
+  {
+   "id": "ky-sandy-hook",
+   "name": "Sandy Hook, KY",
+   "state": "KY",
+   "counties": [
+    "21063"
+   ],
+   "note": "Provisional: drawn as the county named; Stratus's own county list may differ."
+  },
+  {
+   "id": "ky-somerset",
+   "name": "Somerset, KY",
+   "state": "KY",
+   "counties": [
+    "21199"
+   ],
+   "note": "Provisional: drawn as the county named; Stratus's own county list may differ."
+  },
+  {
+   "id": "mi-grand-traverse",
+   "name": "Grand Traverse, MI",
+   "state": "MI",
+   "counties": [
+    "26055"
+   ],
+   "note": "Provisional: drawn as the county named; Stratus's own county list may differ."
+  },
+  {
+   "id": "nc-catawba",
+   "name": "Catawba, NC",
+   "state": "NC",
+   "counties": [
+    "37035"
+   ],
+   "note": "Provisional: drawn as the county named; Stratus's own county list may differ."
+  },
+  {
+   "id": "oh-cambridge",
+   "name": "Cambridge, OH",
+   "state": "OH",
+   "counties": [
+    "39059"
+   ],
+   "note": "Provisional: drawn as the county named; Stratus's own county list may differ."
+  },
+  {
+   "id": "oh-jackson",
+   "name": "Jackson, OH",
+   "state": "OH",
+   "counties": [
+    "39079"
+   ],
+   "note": "Provisional: drawn as the county named; Stratus's own county list may differ."
+  },
+  {
+   "id": "tn-camden",
+   "name": "Camden, TN",
+   "state": "TN",
+   "counties": [
+    "47005"
+   ],
+   "note": "Provisional: drawn as the county named; Stratus's own county list may differ."
+  },
+  {
+   "id": "tx-decatur",
+   "name": "Decatur, TX",
+   "state": "TX",
+   "counties": [
+    "48497"
+   ],
+   "note": "Provisional: drawn as the county named; Stratus's own county list may differ."
+  },
+  {
+   "id": "tx-waxahachie",
+   "name": "Waxahachie, TX",
+   "state": "TX",
+   "counties": [
+    "48139"
+   ],
+   "note": "Provisional: drawn as the county named; Stratus's own county list may differ."
+  },
+  {
+   "id": "vt-montpelier",
+   "name": "Montpelier, VT",
+   "state": "VT",
+   "counties": [
+    "50023"
+   ],
+   "note": "Provisional: drawn as the county named; Stratus's own county list may differ."
+  },
+  {
+   "id": "wi-chippewa-falls",
+   "name": "Chippewa Falls, WI",
+   "state": "WI",
+   "counties": [
+    "55017"
+   ],
+   "note": "Provisional: drawn as the county named; Stratus's own county list may differ."
+  }
+ ],
+ "territoryNounPlural": "master franchise territories"
+}

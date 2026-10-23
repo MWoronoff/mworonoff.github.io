@@ -11,7 +11,7 @@
 (function () {
   "use strict";
 
-  var LEVEL_LABELS = { us: "U.S.", dma: "DMA", metro: "Metro", county: "County", zip: "ZIP" };
+  var LEVEL_LABELS = { us: "U.S.", territory: "Territory", dma: "DMA", metro: "Metro", county: "County", zip: "ZIP" };
   var RAMP = ["--ramp-1", "--ramp-2", "--ramp-3", "--ramp-4", "--ramp-5"];
 
   function el(tag, attrs, children) {
@@ -143,6 +143,7 @@
   Analyzer.prototype.d = function (level) { var k = this.key(level); return k ? this.data[k] : null; };
   Analyzer.prototype.url = function (template) {
     var p = this.state.parent || {};
+    if (template && typeof template === "object") template = template[p.level] || template["default"];   // ZIP files can live elsewhere for some parent levels (e.g. a client's territories)
     return template.replace("{level}", p.level).replace("{id}", encodeURIComponent(p.id));
   };
   Analyzer.prototype.levelLabel = function (level) { return (this.cfg.levels[level] && this.cfg.levels[level].label) || LEVEL_LABELS[level]; };
@@ -155,7 +156,7 @@
     return !!this.cfg.levels.zip && (this.drillable(s.level) && !!s.area || s.level === "zip");
   };
   // ZIPs in market opens from a DMA, a metro or (when the site has a County view) a county
-  Analyzer.prototype.drillable = function (level) { return level === "dma" || level === "metro" || (level === "county" && !!this.cfg.levels.county); };
+  Analyzer.prototype.drillable = function (level) { return level === "dma" || level === "metro" || level === "territory" || (level === "county" && !!this.cfg.levels.county); };
   Analyzer.prototype.drill = function () {
     var s = this.state;
     if (!this.cfg.levels.zip || !this.drillable(s.level) || !s.area) return;
@@ -229,8 +230,8 @@
     if (this.wantRadius && p.p && cfg.subcategories && cfg.subcategories.some(function (x) { return x.id === p.p; })) this.state.sub = p.p;
     if (cfg.levels[p.level]) this.state.level = p.level;
     if (p.level === "zip") {
-      var m = /^(dma|metro|county):(.+)$/.exec(p["in"] || "");
-      if (m && cfg.levels.zip) this.state.parent = { level: m[1], id: m[2] }; else this.state.level = "dma";
+      var m = /^(dma|metro|county|territory):(.+)$/.exec(p["in"] || "");
+      if (m && cfg.levels.zip && cfg.levels[m[1]]) this.state.parent = { level: m[1], id: m[2] }; else this.state.level = cfg.defaultLevel || "dma";
     }
     if ((cfg.subcategories || []).some(function (s) { return s.id === p.sub; })) this.state.sub = p.sub;
     if ((cfg.rankBy || []).indexOf(p.rank) >= 0) this.state.rank = p.rank;
@@ -442,7 +443,7 @@
     }
     if (window.AdtaxiRadius) go();
     else {
-      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261023b";   // version tag: browsers fetch the new file after an update
+      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261023c";   // version tag: browsers fetch the new file after an update
       sc.onload = go; sc.onerror = function () { self.showError("The radius tool didn't load. Refresh the page and try again."); };
       document.head.appendChild(sc);
     }
@@ -909,7 +910,7 @@
 
     var head = this.measure(cfg.headlineMeasure || s.rank);
     // Rank among the other markets at this level (ties share the better rank); null at the U.S. level or with no value
-    var LEVEL_PLURAL = { dma: "DMAs", metro: "metros", county: "counties", zip: "ZIPs in this market" };
+    var LEVEL_PLURAL = { territory: "territories", dma: "DMAs", metro: "metros", county: "counties", zip: "ZIPs in this market" };
     var rankOf = function (m, v) {
       if (s.level === "us" || typeof v !== "number") return null;
       var vals = [], tm = self.tieMeasure(m), tv = self.tieVal(row, tm), better = 0, ties = 0;
@@ -930,7 +931,7 @@
         var sorted = hr.vals.slice().sort(function (a, b) { return head.lowerIsBetter ? a - b : b - a; });
         var mid = sorted.length % 2 ? sorted[(sorted.length - 1) / 2] : (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2;
         var lvNoun = LEVEL_PLURAL[s.level] || "markets";
-        var typical = s.level === "zip" ? "typical ZIP here " : "typical " + (s.level === "county" ? "county" : s.level === "metro" ? "metro" : "DMA") + " ";
+        var typical = s.level === "zip" ? "typical ZIP here " : "typical " + (s.level === "county" ? "county" : s.level === "metro" ? "metro" : s.level === "territory" ? "territory" : "DMA") + " ";
         var ties = hr.ties;
         var nextBest = sorted.filter(function (x) { return x !== hv; })[0];
         var ref = hr.rank === 1 ? (nextBest != null ? "next best " + fmt(nextBest, head.format) : null) : "#1 " + (head.format === "score" ? "scores " : "is ") + fmt(sorted[0], head.format);
@@ -969,7 +970,7 @@
         ]);
       })));
       if (anyRank) box.appendChild(el("p", { class: "az-bars-note", text: "Ranks among " + (LEVEL_PLURAL[s.level] ? NF0.format(d.rows.filter(function (r) { return typeof self.val(r, comps[0]) === "number"; }).length) + " " + LEVEL_PLURAL[s.level] : "these markets") + ". Very high is the top 20%." +
-        (comps.some(function (m) { return m.key === "comp"; }) ? " Competition ranks best where there are fewest competitors per resident." : "") }));
+        (comps.some(function (m) { return m.key === "comp"; }) ? " Competition ranks best where there are fewest competitors " + (self.cfg.compBasis || "per resident") + "." : "") }));
     }
 
     var details = (cfg.detailMeasures || []).map(function (k) { return self.measure(k); }).filter(function (m) { return m && self.relevant(m); });

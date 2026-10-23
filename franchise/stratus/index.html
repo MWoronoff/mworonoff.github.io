@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Franchise Development Analyzer: Stratus Clean</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="../../shared/adtaxi-logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<link rel="stylesheet" href="../../shared/engine.css?v=20261023c">
+</head>
+<body>
+<div id="app"><p class="az-loading">Loading the Franchise Development Analyzer: Stratus Clean…</p></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js" crossorigin=""></script>
+<script src="../../shared/engine.js?v=20261023c"></script>
+<script src="radius-config.js?v=20261023c"></script>
+<script>
+AdtaxiAnalyzer.start({
+ "title": "Franchise Development Analyzer: Stratus Clean",
+ "subtitle": "Where Stratus Clean's best owner candidates are: Franchise Opportunity Scores for its available master franchise territories and the ZIPs inside them, to focus franchise-development ad dollars.",
+ "logo": "../../shared/adtaxi-logo.svg",
+ "exportName": "franchise-stratus",
+ "links": [
+  {
+   "label": "All U.S. markets",
+   "url": "../"
+  },
+  {
+   "label": "Home",
+   "url": "../../analyzers/"
+  }
+ ],
+ "radiusDefault": 25,
+ "radiusProfiles": true,
+ "defaultLevel": "territory",
+ "usMapLevel": "territory",
+ "levels": {
+  "us": {
+   "label": "U.S.",
+   "data": "data/us.json"
+  },
+  "territory": {
+   "label": "Territory",
+   "data": "data/territory.json",
+   "geo": "geo/territory.topo.json",
+   "idField": "territory_id"
+  },
+  "zip": {
+   "label": "ZIPs in territory",
+   "data": "data/zip/{level}/{id}.json",
+   "geo": "geo/zip/{level}/{id}.json",
+   "idField": "zip"
+  }
+ },
+ "statesGeo": "../../shared/geo/states.topo.json",
+ "zipIndex": "../../shared/geo/zip_market.json",
+ "radiusScript": "../../shared/radius.js?v=20261023c",
+ "benchmarks": false,
+ "timing": false,
+ "subcategoryLabel": "Owner profile",
+ "subcategories": [
+  {
+   "id": "exec",
+   "label": "Master and multi-unit owners"
+  },
+  {
+   "id": "owner",
+   "label": "Single-unit owner-operators"
+  }
+ ],
+ "measures": [
+  {
+   "key": "score",
+   "label": "Franchise Opportunity Score",
+   "short": "Score",
+   "format": "score",
+   "perSub": true,
+   "levels": [
+    "territory",
+    "dma",
+    "metro",
+    "county",
+    "zip"
+   ],
+   "help": "0–100. Candidates 50%, Territory Opportunity 30%, Competition 20%, each a percentile among areas at the same level. ZIPs use Candidates only."
+  },
+  {
+   "key": "demand",
+   "label": "Candidates",
+   "short": "Candidates",
+   "format": "score",
+   "perSub": true,
+   "levels": [
+    "territory",
+    "dma",
+    "metro",
+    "county",
+    "zip"
+   ],
+   "help": "Average of the percentiles for this owner profile's inputs (see How scores work)."
+  },
+  {
+   "key": "category",
+   "label": "Territory Opportunity",
+   "short": "Opportunity",
+   "format": "score",
+   "perSub": true,
+   "levels": [
+    "territory",
+    "dma",
+    "metro",
+    "county"
+   ],
+   "help": "Average of the percentiles for businesses that buy commercial cleaning, the jobs at them, and those businesses per 1,000 residents: the customers a franchisee would sell to."
+  },
+  {
+   "key": "comp",
+   "label": "Competition",
+   "short": "Compete",
+   "format": "score",
+   "perSub": true,
+   "levels": [
+    "territory",
+    "dma",
+    "metro",
+    "county"
+   ],
+   "help": "Percentile of janitorial companies per 1,000 buyer businesses, reversed: fewer competitors scores higher."
+  },
+  {
+   "key": "under",
+   "label": "Underserved",
+   "short": "Underserved",
+   "format": "text",
+   "perSub": true,
+   "levels": [
+    "territory",
+    "dma",
+    "metro",
+    "county"
+   ],
+   "help": "Strong candidate supply (70th percentile or higher) with few competitors per buyer business (30th percentile or lower). Shown, not scored."
+  },
+  {
+   "key": "x125",
+   "label": "Householders 45–64 earning $125K+",
+   "short": "Execs 45–64",
+   "format": "int",
+   "subs": [
+    "exec"
+   ],
+   "help": "Households headed by someone 45–64 with income of $125K or more (Census ACS): the established, capitalized candidates for a master or multi-unit franchise."
+  },
+  {
+   "key": "x125_share",
+   "label": "Share of householders 45–64 earning $125K+",
+   "format": "pct",
+   "subs": [
+    "exec"
+   ]
+  },
+  {
+   "key": "hi200_share",
+   "label": "Share of tax returns with income of $200K+",
+   "format": "pct",
+   "subs": [
+    "exec"
+   ],
+   "help": "IRS, area-level: how common high incomes are here."
+  },
+  {
+   "key": "cg_share",
+   "label": "Share of tax returns with capital gains",
+   "format": "pct",
+   "subs": [
+    "exec"
+   ],
+   "help": "IRS, area-level: a sign of investable assets beyond salary."
+  },
+  {
+   "key": "o100",
+   "label": "Householders 25–64 earning $100K+",
+   "short": "Owners 25–64",
+   "format": "int",
+   "subs": [
+    "owner"
+   ],
+   "help": "Households headed by someone 25–64 with income of $100K or more (Census ACS)."
+  },
+  {
+   "key": "o100_share",
+   "label": "Share of householders 25–64 earning $100K+",
+   "format": "pct",
+   "subs": [
+    "owner"
+   ]
+  },
+  {
+   "key": "selfemp_share",
+   "label": "Share of tax returns with business or self-employment income",
+   "format": "pct",
+   "subs": [
+    "owner"
+   ],
+   "help": "IRS, area-level: how common business ownership already is here."
+  },
+  {
+   "key": "vets",
+   "label": "Veterans",
+   "format": "int",
+   "help": "Civilian veterans 18+ (Census ACS). Many franchise systems offer veteran discounts (VetFran). Shown, not scored."
+  },
+  {
+   "key": "vet_share",
+   "label": "Share of adults who are veterans",
+   "format": "pct"
+  },
+  {
+   "key": "buyers",
+   "label": "Businesses that buy commercial cleaning",
+   "short": "Buyers",
+   "format": "int",
+   "help": "Offices (information, finance, real estate, professional and management firms), medical, schools, warehouses and distribution, manufacturing, retail and fitness: the facilities that contract out cleaning."
+  },
+  {
+   "key": "buyer_jobs",
+   "label": "Jobs at those businesses",
+   "short": "Jobs",
+   "format": "int",
+   "help": "Jobs located in these industries (Census LODES): a measure of facility size and activity."
+  },
+  {
+   "key": "buyers_per1k",
+   "label": "Businesses that buy commercial cleaning per 1,000 residents",
+   "format": "dec1"
+  },
+  {
+   "key": "est",
+   "label": "Janitorial companies",
+   "short": "Competitors",
+   "format": "int",
+   "perSub": true,
+   "help": "Janitorial services establishments with paid employees (Census, industry 561720), per 1,000 buyer businesses."
+  },
+  {
+   "key": "per1k",
+   "label": "Janitorial companies per 1,000 buyer businesses",
+   "format": "dec1",
+   "perSub": true
+  },
+  {
+   "key": "population",
+   "label": "Population",
+   "format": "int"
+  },
+  {
+   "key": "households",
+   "label": "Households",
+   "format": "int"
+  },
+  {
+   "key": "density",
+   "label": "Households per square mile",
+   "short": "HH/sq mi",
+   "format": "int"
+  }
+ ],
+ "rankBy": [
+  "score",
+  "x125",
+  "x125_share",
+  "hi200_share",
+  "o100",
+  "o100_share",
+  "buyers",
+  "buyer_jobs",
+  "vets",
+  "population"
+ ],
+ "defaultRank": "score",
+ "components": [
+  "demand",
+  "category",
+  "comp"
+ ],
+ "detailMeasures": [
+  "x125",
+  "x125_share",
+  "hi200_share",
+  "cg_share",
+  "o100",
+  "o100_share",
+  "selfemp_share",
+  "buyers",
+  "buyer_jobs",
+  "buyers_per1k",
+  "est",
+  "per1k",
+  "under",
+  "vets",
+  "vet_share",
+  "population",
+  "households",
+  "density"
+ ],
+ "tableColumns": [
+  "score",
+  "population",
+  "buyers",
+  "under"
+ ],
+ "methodology": [
+  {
+   "title": "Franchise Opportunity Score",
+   "body": [
+    "Where are a franchise system's best owner candidates, and which territories deserve the most franchise-development ad dollars?",
+    "Score = 50% Candidates + 30% Territory Opportunity + 20% Competition. Each part is a percentile (0–100) against areas at the same level. No score is shown when a part has no data."
+   ]
+  },
+  {
+   "title": "Candidates",
+   "body": [
+    "Master and multi-unit owners: householders 45–64 earning $125K+ (count and share), and the IRS shares of returns with income of $200K+ and with capital gains.",
+    "Single-unit owner-operators: householders 25–64 earning $100K+ (count and share), and the IRS share of returns with business or self-employment income.",
+    "Census doesn't publish net worth, liquid capital or job titles for areas, so household income and investment income stand in for them. IRS figures are area-level rates, not facts about individuals."
+   ]
+  },
+  {
+   "title": "Territory Opportunity",
+   "body": "Offices (information, finance, real estate, professional and management firms), medical, schools, warehouses and distribution, manufacturing, retail and fitness: the facilities that contract out cleaning. Half count, half concentration: establishments and the jobs at them (count), and establishments per 1,000 residents."
+  },
+  {
+   "title": "Competition",
+   "body": "Janitorial services establishments with paid employees (Census, industry 561720), per 1,000 buyer businesses. Reversed, so fewer competitors scores higher. Other franchise systems recruiting the same candidates aren't separable in Census data."
+  },
+  {
+   "title": "Territories",
+   "body": [
+    "Stratus Clean Available Markets sheet (U.S. markets; Canada not covered by these U.S. data sources).",
+    "Each territory is drawn from Census geography: a whole state, a Census metro area (only the part in the listed state), or a county. These are provisional until Stratus Clean's own county lists are in; see each territory's note.",
+    "Listed by Stratus but can't be drawn without its county list. South Chicago, IL, Island North, MI, Benson North, MN."
+   ]
+  },
+  {
+   "title": "ZIPs in market",
+   "body": "Pick a territory, then ZIPs in market to rank its ZIPs by Candidates, for geographic targeting. ZIPs under 500 residents, or mostly group quarters, are shown but not ranked."
+  }
+ ],
+ "sources": [
+  {
+   "label": "Census American Community Survey 5-year (age of householder by household income, veterans)",
+   "url": "https://www.census.gov/programs-surveys/acs"
+  },
+  {
+   "label": "IRS Statistics of Income, individual income tax ZIP Code data",
+   "url": "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-statistics-zip-code-data-soi"
+  },
+  {
+   "label": "Census ZIP Code Business Patterns",
+   "url": "https://www.census.gov/programs-surveys/cbp.html"
+  },
+  {
+   "label": "Census LEHD Origin-Destination Employment Statistics (jobs by industry)",
+   "url": "https://lehd.ces.census.gov/data/"
+  }
+ ],
+ "sourcesNote": "Candidates: Census ACS and IRS. Businesses: Census Business Patterns. Jobs: Census LODES. Territories: Stratus Clean.",
+ "radius": true,
+ "compBasis": "per buyer business",
+ "pointLayers": [
+  {
+   "key": "est",
+   "label": "Show janitorial companies",
+   "unit": "janitorial companies",
+   "legend": "Janitorial companies (circle size = count)",
+   "color": "#1f6f8b",
+   "zipNote": "Census counts establishments with paid employees."
+  }
+ ]
+});
+</script>
+</body>
+</html>
