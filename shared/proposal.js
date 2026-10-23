@@ -54,11 +54,13 @@
       s.addText(st[0], { x: x + 0.1, y: 3.1, w: half - 0.2, h: 0.4, fontFace: FONT, fontSize: 18, bold: true, color: C.ink, margin: 0, isTextBox: true });
       s.addText(st[1], { x: x + 0.1, y: 3.48, w: half - 0.2, h: 0.38, fontFace: FONT, fontSize: 8.5, color: C.muted, margin: 0, valign: "top", isTextBox: true });
     });
-    s.addText("Highest-concentration ZIPs", { x: X, y: 4.02, w: W, h: 0.28, fontFace: FONT, fontSize: 11, bold: true, color: C.ink, margin: 0, isTextBox: true });
+    s.addText((ctx.topTitle || "Highest-concentration ZIPs") + (ctx.topTown ? ", all in " + ctx.topTown : ""), { x: X, y: 4.02, w: W, h: 0.28, fontFace: FONT, fontSize: 11, bold: true, color: C.ink, margin: 0, isTextBox: true });
     var hdr = { bold: true, color: C.white, fill: { color: C.gray }, fontSize: 8.5 };
-    var rows = [[{ text: "ZIP", options: hdr }, { text: "Town", options: hdr }, { text: "Prospects", options: Object.assign({ align: "right" }, hdr) }, { text: "Index", options: Object.assign({ align: "right" }, hdr) }]];
+    // When every top ZIP is in the same town, the town goes in the heading and the column shows population instead
+    var townCol = !ctx.topTown;
+    var rows = [[{ text: "ZIP", options: hdr }, { text: townCol ? "Town" : "Population", options: townCol ? hdr : Object.assign({ align: "right" }, hdr) }, { text: "Prospects", options: Object.assign({ align: "right" }, hdr) }, { text: "Index", options: Object.assign({ align: "right" }, hdr) }]];
     ctx.topZips.slice(0, 5).forEach(function (z) {
-      rows.push([z.zip, z.town, { text: nf(z.aud), options: { align: "right" } }, { text: z.idx == null ? "—" : nf(z.idx), options: { align: "right" } }]);
+      rows.push([z.zip, townCol ? z.town : { text: nf(z.pop || 0), options: { align: "right" } }, { text: nf(z.aud), options: { align: "right" } }, { text: z.idx == null ? "—" : nf(z.idx), options: { align: "right" } }]);
     });
     s.addTable(rows, { x: X, y: 4.32, w: W, colW: [0.6, 1.5, 0.85, 0.6], fontFace: FONT, fontSize: 8.5, color: C.ink, border: { type: "solid", pt: 0.5, color: C.line }, rowH: 0.24, margin: [0.02, 0.05, 0.02, 0.05] });
     if (ctx.competitors.length) {

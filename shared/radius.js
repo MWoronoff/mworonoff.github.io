@@ -775,7 +775,7 @@
     if (window.AdtaxiPlan) { done(); return; }
     if (loadPlan.waiting) { loadPlan.waiting.push(done); return; }
     loadPlan.waiting = [done];
-    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261023u";
+    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261023v";
     sc.onload = function () { var w = loadPlan.waiting; loadPlan.waiting = null; w.forEach(function (f) { f(); }); };
     sc.onerror = function () { loadPlan.waiting = null; };
     document.head.appendChild(sc);
@@ -1027,7 +1027,7 @@
   Radius.prototype.proposalBase = function () { return (this.cfg.planScript || "../shared/media-plan.js").replace(/media-plan\.js.*$/, ""); };
   Radius.prototype.benchmarks = function () {
     var self = this;
-    if (!this._bench) this._bench = fetch(this.cfg.benchmarksData || this.proposalBase() + "benchmarks.json?v=20261023u").then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
+    if (!this._bench) this._bench = fetch(this.cfg.benchmarksData || this.proposalBase() + "benchmarks.json?v=20261023v").then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
     return this._bench.then(function (B) {
       if (!B) return null;
       var cat = self.cfg.planCategory && self.cfg.planCategory !== "none" ? self.cfg.planCategory : String(self.cfg.exportName || "").replace(/-radius$/, "").replace(/^apartment$/, "apartments");
@@ -1105,8 +1105,13 @@
     var rows = this.visible(), aud = 0, pop = 0;
     rows.forEach(function (r) { if (r.aud != null) { aud += r.aud; pop += r.pop || 0; } });
     var idx = pop && this.natRate ? aud / pop / this.natRate * 100 : null;
-    var top = rows.filter(function (r) { return r.idx != null && (r.pop || 0) >= SMALL_ZIP; }).sort(function (a, z) { return (z.idx - a.idx) || (z.aud - a.aud); }).slice(0, 5)
-      .map(function (r) { return { zip: r.zip, town: r.town, aud: Math.round(r.aud), idx: r.idx }; });
+    // Top ZIPs: in a large area (a metro, several DMAs, a state) the highest index tends to be a small ZIP, so rank the
+    // above-average ZIPs (index 110+) by prospects instead; in a small area, rank by index
+    var big = rows.length > 150;
+    var top = rows.filter(function (r) { return r.idx != null && (r.pop || 0) >= SMALL_ZIP && (!big || r.idx >= 110); })
+      .sort(big ? function (a, z) { return (z.aud - a.aud) || (z.idx - a.idx); } : function (a, z) { return (z.idx - a.idx) || (z.aud - a.aud); }).slice(0, 5)
+      .map(function (r) { return { zip: r.zip, town: r.town, aud: Math.round(r.aud), idx: r.idx, pop: r.pop }; });
+    var oneTown = top.length > 1 && top.every(function (z) { return z.town === top[0].town; });
     // Concentration: the ZIPs in the allocation (top N by audience) vs. the whole trade area
     var pAud = 0, pPop = 0; A.pick.forEach(function (x) { pAud += x.r.aud || 0; pPop += x.r.pop || 0; });
     var pIdx = pPop && this.natRate ? pAud / pPop / this.natRate * 100 : null, pShare = aud ? pAud / aud : null;
@@ -1121,7 +1126,7 @@
         var k = -1; adRows.forEach(function (r, i) { if (k < 0 && m[0].test(r[0])) k = i; });
         if (k >= 0) {
           var r = adRows[k], lift = r[2] ? Math.round((r[1] / r[2] - 1) * 100) : null;
-          reasons.push((k === 0 ? "#1" : "#" + (k + 1) + " of " + adRows.length) + " in ad response: " + r[1].toFixed(1).replace(/\.0$/, "") + "% of " + adNoun + " acted on " + m[1] + " in the past 30 days" + (lift != null ? " (" + (lift >= 0 ? "+" : "") + lift + "% vs. all adults)" : "") + ".");
+          reasons.push(r[1].toFixed(1).replace(/\.0$/, "") + "% of " + adNoun + " acted on " + m[1] + " in the past 30 days" + (lift != null ? ", " + (lift >= 0 ? "+" : "") + lift + "% vs. all adults" : "") + " (" + (k === 0 ? "#1" : "#" + (k + 1)) + " of " + adRows.length + " media).");
         }
       }
       // The geo-targeting line goes on the first awareness/consideration platform; the others say what the platform does
@@ -1158,6 +1163,7 @@
       client: client, place: place, placeShort: placeShort, logoPng: logo, mapPng: this.mapImage(),
       mapCaption: "ZIPs shaded by concentration of " + audienceNoun + " (index vs. U.S.; darker is higher)." + (s.mode === "area" ? "" : " Dashed ring: " + s.r + "-mile radius.") + " Prepared by Adtaxi, " + d.toLocaleDateString("en-US", { month: "long", year: "numeric" }) + ".",
       audienceNoun: audienceNoun, stats: { aud: aud, idx: idx, zips: rows.length, pop: pop }, topZips: top, competitors: comps,
+      topTitle: big ? "Largest above-average ZIPs" : "Highest-concentration ZIPs", topTown: oneTown ? top[0].town : null,
       strategy: PC.goals && PC.goals[A.strat.id] ? Object.assign({}, A.strat, { success: PC.goals[A.strat.id] }) : A.strat, plan: plan, total: total, footnote: foot,
       fileName: "Adtaxi proposal - " + client.replace(/[\\/:*?"<>|]/g, "") + " - " + d.toISOString().slice(0, 10) + ".pptx"
     };
@@ -1167,7 +1173,7 @@
     if (!b.amount || !A.strat || !A.withDollars || !A.plan || !A.plan.tier || !A.channels.length) { st.textContent = "Enter a monthly budget and choose a media strategy first."; return Promise.resolve(null); }
     st.textContent = "Building…";
     var base = this.proposalBase();
-    return Promise.all([loadScriptOnce(this.cfg.pptxScript || "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261023u"), this.benchmarks(), this.logoImage()])
+    return Promise.all([loadScriptOnce(this.cfg.pptxScript || "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261023v"), this.benchmarks(), this.logoImage()])
       .then(function (res) { return window.AdtaxiProposal.build(self.proposalContext(res[2], res[3]), opt); })
       .then(function (out) { st.textContent = "Downloaded. Open it in PowerPoint or Google Slides to edit."; return out; })
       .catch(function (e) { st.textContent = "The proposal couldn't be built (" + e.message + "). Try again in a minute."; throw e; });
