@@ -92,7 +92,47 @@
     showFee: true,
     offNote: "Amounts are total monthly investment by channel, including Adtaxi management."
   };
+  /* MANAGEMENT FEE SCHEDULE (Adtaxi rate card, Nov 2025), shown only when a user turns on "Show management fees".
+     Budgets are gross: the fee comes out of each channel's amount, and the rest is media spend.
+       pct:      fee as a share of the channel's monthly amount
+       search:   Google Search fee by the search amount (Tier 3 $1,500-$2,999: 25%; $3,000+: 20%)
+       Programmatic channels (prog: true) are priced by CPM with management included: no separate fee line.
+       Channels not listed here (Shopping) aren't on the rate card, so no fee is shown for them. */
+  var MGMT = {
+    pct: { social: 0.40, tiktok: 0.40, snapchat: 0.40, youtube: 0.40 },
+    search: [ { min: 0, max: 3000, pct: 0.25 }, { min: 3000, max: Infinity, pct: 0.20 } ],
+    cpmNote: "Management included in CPM pricing",
+    unknownNote: "Fee not on the rate card"
+  };
   /* =========================  END OF SETTINGS  ========================= */
+
+  /* One channel's fee: { kind: "fee", pct, fee, media } | { kind: "cpm" } | { kind: "none" } */
+  function channelFee(id, dollars) {
+    var ch = CHANNELS[id];
+    if (!ch || dollars == null) return { kind: "none" };
+    if (ch.prog) return { kind: "cpm" };
+    var pct = MGMT.pct[id];
+    if (id === "search") pct = MGMT.search.filter(function (t) { return dollars >= t.min && dollars < t.max; })[0].pct;
+    if (pct == null) return { kind: "none" };
+    var fee = Math.round(dollars * pct);
+    return { kind: "fee", pct: pct, fee: fee, media: dollars - fee };
+  }
+  /* Plan totals: fees and media for fee-based channels, and the programmatic amount (management in CPM) */
+  function feeSummary(items) {
+    var out = { fee: 0, media: 0, feeBased: 0, cpm: 0, none: 0, total: 0 };
+    items.forEach(function (r) {
+      var d = r.dollars; if (d == null) return;
+      var f = channelFee(r.id, d); out.total += d;
+      if (f.kind === "fee") { out.fee += f.fee; out.media += f.media; out.feeBased += d; }
+      else if (f.kind === "cpm") out.cpm += d; else out.none += d;
+    });
+    return out;
+  }
+  function feeLine(f) {
+    if (f.kind === "fee") return "Media $" + Math.round(f.media).toLocaleString("en-US") + " · management fee $" + Math.round(f.fee).toLocaleString("en-US") + " (" + Math.round(f.pct * 100) + "%)";
+    if (f.kind === "cpm") return MGMT.cpmNote;
+    return MGMT.unknownNote;
+  }
 
   // "Social (Meta) and Google Search are sold with a 3-month minimum." for the channels in a plan that carry a term
   function termNote(items) {
@@ -193,6 +233,7 @@
   window.AdtaxiPlan = {
     CHANNELS: CHANNELS, ROLES: ROLES, STRATEGIES: STRATEGIES, MIN_BUDGET: MIN_BUDGET, TIERS: TIERS,
     SERVICE_TIERS: SERVICE_TIERS, CUSTOM_PLAN_BUDGET: CUSTOM_PLAN_BUDGET, FEES: FEES,
-    serviceTier: serviceTier, minFor: minFor, buildPlan: buildPlan, applyFees: applyFees, termNote: termNote
+    serviceTier: serviceTier, minFor: minFor, buildPlan: buildPlan, applyFees: applyFees, termNote: termNote,
+    MGMT: MGMT, channelFee: channelFee, feeSummary: feeSummary, feeLine: feeLine
   };
 })();

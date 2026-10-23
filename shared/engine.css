@@ -433,6 +433,10 @@ a.az-btn { display: inline-block; text-decoration: none; text-align: center; }
 .rz-alloc-total td { font-weight: 700; border-top: 2px solid var(--line); }
 .rz-alloc-sub td { color: var(--muted); }
 .rz-alloc-strong { font-weight: 600; }
+.rz-feetoggle { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 13px; color: var(--navy); padding-bottom: 9px; white-space: nowrap; }
+.rz-feetoggle input { width: 16px; height: 16px; margin: 0; accent-color: var(--teal); }
+.az-table td.rz-feena { color: var(--muted); font-size: 12px; text-align: right; }
+@media print { .rz-feetoggle { display: none !important; } }
 
 /* Leave-behind: printed (Save as PDF) view of what's on screen */
 .az-print-head { display: none; align-items: center; gap: 16px; border-bottom: 2px solid var(--navy); padding-bottom: 10px; margin-bottom: 14px; }

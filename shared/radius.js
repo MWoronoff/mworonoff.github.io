@@ -767,7 +767,7 @@
     if (window.AdtaxiPlan) { done(); return; }
     if (loadPlan.waiting) { loadPlan.waiting.push(done); return; }
     loadPlan.waiting = [done];
-    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261023b";
+    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261023c";
     sc.onload = function () { var w = loadPlan.waiting; loadPlan.waiting = null; w.forEach(function (f) { f(); }); };
     sc.onerror = function () { loadPlan.waiting = null; };
     document.head.appendChild(sc);
@@ -779,7 +779,7 @@
     return out.map(function (o) { return o.v; });
   }
   Radius.prototype.buildBudget = function () {
-    var self = this, b = this.budget = { amount: null, by: "aud", n: 10, strat: "" };
+    var self = this, b = this.budget = { amount: null, by: "aud", n: 10, strat: "", fees: false };
     this.bAmount = el("input", { type: "text", inputmode: "decimal", placeholder: "$ per month", "aria-label": "Monthly budget",
       oninput: function () { b.amount = parseMoney(this.value); self.renderBudget(); },
       onchange: function () { if (b.amount) this.value = money(b.amount); } });
@@ -810,6 +810,7 @@
           el("label", { class: "az-field" }, [el("span", { text: "Media strategy" }), this.bStrat]),
           el("label", { class: "az-field" }, [el("span", { text: "Spread by" }), bySel]),
           el("label", { class: "az-field" }, [el("span", { text: "Include" }), nSel]),
+          el("label", { class: "rz-feetoggle" }, [el("input", { type: "checkbox", onchange: function () { b.fees = this.checked; self.renderBudget(); } }), "Show management fees"]),
           el("div", { class: "rz-budget-actions" }, [
             el("button", { type: "button", class: "az-btn", text: "Export allocation (CSV)", onclick: function () { self.exportBudget(); } }),
             this.bLink])]),
@@ -874,13 +875,23 @@
     this.cWrap.hidden = !A.strat;
     if (A.strat) {
       this.cHead.innerHTML = ""; this.cBody.innerHTML = "";
-      this.cHead.appendChild(el("tr", null, [["Channel", 1], ["Role", 1], ["Share"], ["Monthly amount"]].map(function (h) {
+      var fees = b.fees && A.withDollars && P;
+      this.cHead.appendChild(el("tr", null, [["Channel", 1], ["Role", 1], ["Share"], ["Monthly amount"]].concat(fees ? [["Management fee"], ["Media spend"]] : []).map(function (h) {
         return el("th", { scope: "col", class: h[1] ? "rz-l" : null, text: h[0] }); })));
       A.channels.forEach(function (c) {
         self.cBody.appendChild(el("tr", null, [el("td", { class: "rz-l" }, [el("span", { class: "rz-swatch", style: "background:" + c.ch.color }), c.ch.label]),
           el("td", { class: "rz-l", text: c.ch.role.charAt(0).toUpperCase() + c.ch.role.slice(1) }),
-          el("td", { class: "num", text: c.pct + "%" }), el("td", { class: "num", text: A.withDollars && c.dollars != null ? money(c.dollars) : "\u2014" })]));
+          el("td", { class: "num", text: c.pct + "%" }), el("td", { class: "num", text: A.withDollars && c.dollars != null ? money(c.dollars) : "\u2014" })].concat(fees ? (function () {
+            var f = P.channelFee(c.id, c.dollars);
+            return f.kind === "fee" ? [el("td", { class: "num", text: money(f.fee) + " (" + Math.round(f.pct * 100) + "%)" }), el("td", { class: "num", text: money(f.media) })]
+              : [el("td", { class: "rz-feena", colspan: "2", text: f.kind === "cpm" ? P.MGMT.cpmNote : P.MGMT.unknownNote })];
+          })() : [])));
       });
+      if (fees) {
+        var fs = P.feeSummary(A.channels);
+        self.cBody.appendChild(el("tr", { class: "rz-alloc-total" }, [el("td", { class: "rz-l", text: "Total" }), el("td"), el("td", { class: "num", text: "100%" }),
+          el("td", { class: "num", text: money(fs.total) }), el("td", { class: "num", text: fs.feeBased ? money(fs.fee) : "\u2014" }), el("td", { class: "num", text: fs.feeBased ? money(fs.media) + (fs.cpm ? " + programmatic" : "") : "\u2014" })]));
+      }
       if (showFee && A.withDollars) {
         [["Media", A.money.media], ["Management fee", A.money.fee], ["Total", A.money.total]].forEach(function (r, i) {
           self.cBody.appendChild(el("tr", { class: i === 2 ? "rz-alloc-total" : "rz-alloc-sub" }, [el("td", { class: "rz-l", text: r[0] }), el("td"), el("td"), el("td", { class: "num", text: money(r[1]) })]));
@@ -926,6 +937,11 @@
       (chans.length ? "Channel minimums apply to each channel's monthly total, not to each ZIP. " : "") +
       "A planning recommendation; final targeting is set by platform.";
     this.bFee.hidden = !!showFee;
+    if (b.fees && A.withDollars && P && chans.length + (A.channels || []).length) {
+      this.bFee.hidden = false;
+      this.bFee.textContent = "Amounts are total monthly investment. Management fees come out of social, search and YouTube amounts; programmatic is priced by CPM with management included. ZIP amounts are total investment.";
+      return;
+    }
     this.bFee.textContent = P ? (A.money && A.money.feesOn ? "Figures shown are media dollars." : P.FEES.offNote) : "Amounts are total monthly investment by channel, including Adtaxi management.";
   };
   Radius.prototype.exportBudget = function () {
@@ -948,6 +964,13 @@
       t.push(pick.reduce(function (s, x) { return s + x.amt; }, 0)); lines.push(t.map(csvCell).join(","));
     }
     var P = window.AdtaxiPlan;
+    if (b.fees && A.withDollars && P && A.channels.length) {
+      lines.push("", ["Channel", "Monthly amount", "Management fee", "Media spend", "Note"].map(csvCell).join(","));
+      A.channels.forEach(function (c) {
+        var f = P.channelFee(c.id, c.dollars);
+        lines.push([c.ch.label, c.dollars, f.kind === "fee" ? f.fee : "", f.kind === "fee" ? f.media : "", f.kind === "fee" ? Math.round(f.pct * 100) + "% management fee" : f.kind === "cpm" ? P.MGMT.cpmNote : P.MGMT.unknownNote].map(csvCell).join(","));
+      });
+    }
     if (A.money && A.money.feesOn && P.FEES.showFee) lines.push("", ["Media", A.money.media].map(csvCell).join(","), ["Management fee", A.money.fee].map(csvCell).join(","), ["Total", A.money.total].map(csvCell).join(","));
     else lines.push("", csvCell(P ? P.FEES.offNote : "Amounts are total monthly investment by channel, including Adtaxi management."));
     var blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
