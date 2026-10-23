@@ -240,6 +240,33 @@
     return out;
   }
 
+  /* ---------- Targeted impressions (proposals) ----------
+     Estimates for a channel's monthly investment (which includes Adtaxi management):
+       Programmatic: impressions at Adtaxi's suggested retail CPMs (rate card, Nov 2025; management is in the CPM).
+       Google Search and Meta: the media portion (investment minus the management fee) at WordStream 2026 benchmarks
+         for the industry: Search clicks = media / CPC, impressions = clicks / CTR, leads = media / CPL;
+         Meta CPM = CPC x CTR x 1,000, impressions = media / CPM x 1,000, clicks = media / CPC.
+       Other channels: no published basis, so no estimate. */
+  var RETAIL_CPM = { display: 10, retarget: 10, ctv: 50, audio: 35, dooh: 30 };
+  function feeShare(id, amount) {
+    if (id === "search") { var t = MGMT.search.filter(function (x) { return amount >= x.min && amount < x.max; })[0]; return t ? t.pct : 0; }
+    return MGMT.pct[id] || 0;
+  }
+  function estimate(id, amount, bench) {
+    var out = { impr: null, clicks: null, leads: null, basis: "none" };
+    if (!amount || !CHANNELS[id]) return out;
+    if (RETAIL_CPM[id]) { out.impr = amount / RETAIL_CPM[id] * 1000; out.basis = "cpm"; out.cpm = RETAIL_CPM[id]; return out; }
+    var media = amount * (1 - feeShare(id, amount));
+    if (id === "search" && bench && bench.search) {
+      var b = bench.search; out.clicks = media / b.cpc; out.impr = out.clicks / (b.ctr / 100); if (b.cpl) out.leads = media / b.cpl; out.basis = "search"; return out;
+    }
+    if (id === "social" && bench && bench.socialTraffic) {
+      var t = bench.socialTraffic, cpm = t.cpc * t.ctr / 100 * 1000;
+      out.impr = media / cpm * 1000; out.clicks = media / t.cpc; if (bench.socialLeads && bench.socialLeads.cpl) out.leads = media / bench.socialLeads.cpl; out.basis = "social"; return out;
+    }
+    return out;
+  }
+
   /* ---------- Editable rates ----------
      A user can change channel minimums and management fees on their own device (saved in this browser only).
      Plans recalculate from the edited values; "Reset to rate card" restores the settings above. */
@@ -324,6 +351,7 @@
     SERVICE_TIERS: SERVICE_TIERS, CUSTOM_PLAN_BUDGET: CUSTOM_PLAN_BUDGET, FEES: FEES,
     serviceTier: serviceTier, minFor: minFor, buildPlan: buildPlan, applyFees: applyFees, termNote: termNote,
     MGMT: MGMT, channelFee: channelFee, feeSummary: feeSummary, feeLine: feeLine,
+    RETAIL_CPM: RETAIL_CPM, estimate: estimate,
     rateEditor: rateEditor, setRates: setRates, resetRates: resetRates, customRates: customRates, CUSTOM_NOTE: CUSTOM_NOTE
   };
 })();

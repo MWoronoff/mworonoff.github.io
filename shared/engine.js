@@ -430,6 +430,7 @@
         var rc = {}; for (var k in RC) rc[k] = RC[k];
         rc.embedded = true; rc.initial = { zip: opt.zip, r: opt.r, p: preset, mode: rmode, ca: opt.ca };
         rc.onState = function () { self.writeHash(); };
+        rc.context = function () { return { ad: cfg.adResponse, sub: self.state.sub }; };   // the proposal's ad-response reasons
         rc.onUpdate = function (ready) { self.radiusReady = ready; self.renderAd(); };
         self.radius = window.AdtaxiRadius.start(rc, self.radiusBox);
       } else {
@@ -443,7 +444,7 @@
     }
     if (window.AdtaxiRadius) go();
     else {
-      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261023i";   // version tag: browsers fetch the new file after an update
+      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261023p";   // version tag: browsers fetch the new file after an update
       sc.onload = go; sc.onerror = function () { self.showError("The radius tool didn't load. Refresh the page and try again."); };
       document.head.appendChild(sc);
     }

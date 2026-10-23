@@ -767,7 +767,7 @@
     if (window.AdtaxiPlan) { done(); return; }
     if (loadPlan.waiting) { loadPlan.waiting.push(done); return; }
     loadPlan.waiting = [done];
-    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261023f";
+    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261023p";
     sc.onload = function () { var w = loadPlan.waiting; loadPlan.waiting = null; w.forEach(function (f) { f(); }); };
     sc.onerror = function () { loadPlan.waiting = null; };
     document.head.appendChild(sc);
@@ -799,6 +799,15 @@
     this.bHead = el("thead"); this.bBody = el("tbody"); this.bNote = el("p", { class: "rz-note" });
     this.bFee = el("p", { class: "rz-note rz-alloc-fee" });
     this.bRates = el("div", { class: "rz-rates" });
+    this.pClient = el("input", { type: "text", placeholder: "e.g. Bright Smile Dental", "aria-label": "Client or business name" });
+    this.pComp = el("textarea", { rows: "3", placeholder: "One per line (optional)", "aria-label": "Local competitors" });
+    this.pStatus = el("span", { class: "rz-pstatus", role: "status" });
+    this.pBox = el("div", { class: "rz-proposal", hidden: true }, [
+      el("p", { class: "rz-ptitle", text: "Proposal (PowerPoint, 2 slides): your trade area, then the recommended platforms with why each one, investment and targeted impressions. Investment includes Adtaxi management. The file is editable." }),
+      el("div", { class: "rz-pfields" }, [
+        el("label", { class: "az-field" }, [el("span", { text: "Client or business name" }), this.pClient]),
+        el("label", { class: "az-field rz-pcomp" }, [el("span", { text: "Local competitors" }), this.pComp]),
+        el("div", { class: "rz-pact" }, [el("button", { type: "button", class: "az-btn primary", text: "Download PowerPoint", onclick: function () { self.buildProposal().catch(function () {}); } }), this.pStatus])])]);
     loadPlan(this.cfg.planScript, function () {
       AdtaxiPlan.STRATEGIES.forEach(function (st) { self.bStrat.appendChild(el("option", { value: st.id, text: st.label })); });
       self.bRates.appendChild(AdtaxiPlan.rateEditor(function () { self.renderBudget(); }));
@@ -814,9 +823,10 @@
           el("label", { class: "az-field" }, [el("span", { text: "Include" }), nSel]),
           el("label", { class: "rz-feetoggle" }, [el("input", { type: "checkbox", onchange: function () { b.fees = this.checked; self.renderBudget(); } }), "Add management fees"]),
           el("div", { class: "rz-budget-actions" }, [
+            el("button", { type: "button", class: "az-btn primary", text: "Build proposal", onclick: function () { self.pBox.hidden = !self.pBox.hidden; if (!self.pBox.hidden) self.pClient.focus(); } }),
             el("button", { type: "button", class: "az-btn", text: "Export allocation (CSV)", onclick: function () { self.exportBudget(); } }),
             this.bLink])]),
-        this.bRates, this.bSummary, this.bWarn, this.cWrap,
+        this.pBox, this.bRates, this.bSummary, this.bWarn, this.cWrap,
         el("div", { class: "rz-alloc-block" }, [el("h3", { text: "By ZIP" }),
           el("div", { class: "az-tablewrap" }, [el("table", { class: "az-table" }, [this.bHead, this.bBody])]), this.bNote]),
         this.bFee])]);
@@ -990,6 +1000,159 @@
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
   };
+  /* ---------- Proposal (PowerPoint) ---------- */
+  function loadScriptOnce(url) {
+    loadScriptOnce.p = loadScriptOnce.p || {};
+    if (!loadScriptOnce.p[url]) loadScriptOnce.p[url] = new Promise(function (ok, bad) {
+      var sc = document.createElement("script"); sc.src = url; sc.onload = ok; sc.onerror = function () { delete loadScriptOnce.p[url]; bad(new Error("couldn't load " + url)); };
+      document.head.appendChild(sc);
+    });
+    return loadScriptOnce.p[url];
+  }
+  // AudienceSCAN media types that match each channel, and how the reason phrases them
+  var AD_MATCH = {
+    search: [/search results/i, "a search ad"], shopping: [/search results/i, "a search ad"],
+    social: [/social network/i, "a social media ad"], tiktok: [/social network/i, "a social media ad"], snapchat: [/social network/i, "a social media ad"],
+    ctv: [/streaming tv/i, "a streaming TV ad"], youtube: [/before or during the video/i, "a video ad before or during a video"],
+    display: [/online display/i, "an online display ad"], retarget: [/online display/i, "an online display ad"],
+    audio: [/radio/i, "a radio or streaming audio ad"], dooh: [/outdoor|billboard/i, "an outdoor or billboard ad"] };
+  Radius.prototype.proposalBase = function () { return (this.cfg.planScript || "../shared/media-plan.js").replace(/media-plan\.js.*$/, ""); };
+  Radius.prototype.benchmarks = function () {
+    var self = this;
+    if (!this._bench) this._bench = fetch(this.cfg.benchmarksData || this.proposalBase() + "benchmarks.json?v=20261023p").then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
+    return this._bench.then(function (B) {
+      if (!B) return null;
+      var cat = self.cfg.planCategory && self.cfg.planCategory !== "none" ? self.cfg.planCategory : String(self.cfg.exportName || "").replace(/-radius$/, "").replace(/^apartment$/, "apartments");
+      var m = B.map && B.map[cat], ctx = self.cfg.context ? self.cfg.context() : {};
+      var key = m ? (m[self.state.profile] || m[ctx.sub] || m._default) : null;
+      return B.industries[key ? key[0] : "all"] || B.industries.all || null;
+    });
+  };
+  Radius.prototype.mapImage = function () {
+    var feats = this.mapFeats || [], byZip = this.mapByZip || {}, vis = this.mapVis || {}, s = this.state, c = this.c, self = this;
+    if (!feats.length) return null;
+    var W = 1080, H = 810, cv = document.createElement("canvas"); cv.width = W; cv.height = H;
+    var g = cv.getContext("2d"); g.fillStyle = "#f4f7fa"; g.fillRect(0, 0, W, H);
+    var minX = 1e9, maxX = -1e9, minY = 1e9, maxY = -1e9, lat0, ring = null;
+    function each(geom, fn) { var polys = geom.type === "Polygon" ? [geom.coordinates] : geom.type === "MultiPolygon" ? geom.coordinates : []; polys.forEach(function (p) { fn(p); }); }
+    if (s.mode !== "area") {
+      var ci = this.byZip[s.zip]; lat0 = c.lat[ci];
+      ring = { lat: c.lat[ci], lon: c.lon[ci], r: s.r };
+      var dLat = s.r / 69, dLon = s.r / (69 * Math.cos(lat0 * Math.PI / 180));
+      minX = ring.lon - dLon; maxX = ring.lon + dLon; minY = ring.lat - dLat; maxY = ring.lat + dLat;
+    } else {
+      feats.forEach(function (f) { if (!vis[f.properties.zip]) return; each(f.geometry, function (p) { p[0].forEach(function (pt) { if (pt[0] < minX) minX = pt[0]; if (pt[0] > maxX) maxX = pt[0]; if (pt[1] < minY) minY = pt[1]; if (pt[1] > maxY) maxY = pt[1]; }); }); });
+      if (minX > maxX) return null;
+      lat0 = (minY + maxY) / 2;
+    }
+    var k = Math.cos(lat0 * Math.PI / 180), pad = 0.08;
+    var spanX = (maxX - minX) * k, spanY = maxY - minY;
+    var scale = Math.min(W * (1 - 2 * pad) / spanX, H * (1 - 2 * pad) / spanY);
+    var ox = (W - spanX * scale) / 2, oy = (H - spanY * scale) / 2;
+    var P = function (lon, lat) { return [ox + (lon - minX) * k * scale, oy + (maxY - lat) * scale]; };
+    feats.forEach(function (f) {
+      var r = byZip[f.properties.zip];
+      g.globalAlpha = vis[f.properties.zip] ? 0.92 : 0.3;
+      g.fillStyle = self.colorFor(r && r.idx); g.strokeStyle = "#ffffff"; g.lineWidth = 1;
+      each(f.geometry, function (poly) {
+        g.beginPath();
+        poly.forEach(function (lin) { lin.forEach(function (pt, i) { var q = P(pt[0], pt[1]); if (i) g.lineTo(q[0], q[1]); else g.moveTo(q[0], q[1]); }); g.closePath(); });
+        g.fill("evenodd"); g.stroke();
+      });
+    });
+    g.globalAlpha = 1;
+    if (ring) {
+      var cp = P(ring.lon, ring.lat), rad = ring.r / 69 * scale;
+      g.setLineDash([12, 9]); g.strokeStyle = "#0f2742"; g.lineWidth = 3; g.beginPath(); g.arc(cp[0], cp[1], rad, 0, Math.PI * 2); g.stroke(); g.setLineDash([]);
+      g.fillStyle = "#0f2742"; g.strokeStyle = "#fff"; g.lineWidth = 3; g.beginPath(); g.arc(cp[0], cp[1], 9, 0, Math.PI * 2); g.fill(); g.stroke();
+    }
+    // Legend
+    var lx = 22, ly = H - 22 - 26 * CLASSES.length;
+    g.globalAlpha = 0.92; g.fillStyle = "#fff"; g.fillRect(lx - 10, ly - 32, 190, 26 * CLASSES.length + 44); g.globalAlpha = 1;
+    g.fillStyle = "#0f2742"; g.font = "bold 19px Arial"; g.fillText("Index vs. U.S.", lx, ly - 8);
+    for (var j = CLASSES.length - 1, row = 0; j >= 0; j--, row++) {
+      g.fillStyle = cssVar(CLASSES[j][2]) || "#999"; g.fillRect(lx, ly + row * 26 + 4, 22, 18);
+      g.fillStyle = "#222"; g.font = "17px Arial"; g.fillText(CLASSES[j][3], lx + 32, ly + row * 26 + 19);
+    }
+    return cv.toDataURL("image/png");
+  };
+  Radius.prototype.logoImage = function () {
+    var src = this.cfg.logo || this.proposalBase() + "adtaxi-logo.svg";
+    return new Promise(function (ok) {
+      var im = new Image();
+      im.onload = function () { try { var cv = document.createElement("canvas"); cv.width = cv.height = 300; cv.getContext("2d").drawImage(im, 0, 0, 300, 300); ok(cv.toDataURL("image/png")); } catch (e) { ok(null); } };
+      im.onerror = function () { ok(null); };
+      im.src = src;
+    });
+  };
+  Radius.prototype.proposalContext = function (bench, logo) {
+    var s = this.state, c = this.c, A = this.allocation(), P = window.AdtaxiPlan;
+    var ctx0 = this.cfg.context ? this.cfg.context() : {}, ad = ctx0.ad, prof = s.profile && this.profiles[s.profile];
+    var adSub = ad && ad.subs ? (ad.subs[s.profile] || ad.subs[ctx0.sub]) : null;
+    // Trade-area counts describe the audience chosen in the tool; ad-response reasons describe AudienceSCAN's target group
+    var hasSel = Object.keys(s.sel || {}).some(function (k) { return s.sel[k]; });
+    var audienceNoun = prof ? prof.label.toLowerCase() + " prospects" : hasSel ? "people in the selected audience" : "residents";
+    var adNoun = adSub && adSub.audience ? adSub.audience : audienceNoun;
+    var rows = this.visible(), aud = 0, pop = 0;
+    rows.forEach(function (r) { if (r.aud != null) { aud += r.aud; pop += r.pop || 0; } });
+    var idx = pop && this.natRate ? aud / pop / this.natRate * 100 : null;
+    var top = rows.filter(function (r) { return r.idx != null && (r.pop || 0) >= SMALL_ZIP; }).sort(function (a, z) { return (z.idx - a.idx) || (z.aud - a.aud); }).slice(0, 5)
+      .map(function (r) { return { zip: r.zip, town: r.town, aud: Math.round(r.aud), idx: r.idx }; });
+    // Concentration: the ZIPs in the allocation (top N by audience) vs. the whole trade area
+    var pAud = 0, pPop = 0; A.pick.forEach(function (x) { pAud += x.r.aud || 0; pPop += x.r.pop || 0; });
+    var pIdx = pPop && this.natRate ? pAud / pPop / this.natRate * 100 : null, pShare = aud ? pAud / aud : null;
+    var conc = A.pick.length < rows.length && pShare != null
+      ? "Geo-targeted to the " + A.pick.length + " ZIPs that hold " + Math.round(pShare * 100) + "% of the trade area's " + audienceNoun + (pIdx ? " (index " + Math.round(pIdx) + ")" : "") + "."
+      : "Geo-targeted to the trade area's " + rows.length + " ZIPs" + (idx ? " (index " + Math.round(idx) + ")" : "") + ".";
+    var adRows = adSub && adSub.rows ? adSub.rows.slice().sort(function (a, z) { return z[1] - a[1]; }) : [];
+    var usedConc = false;
+    var plan = A.channels.map(function (ch) {
+      var reasons = [], m = AD_MATCH[ch.id], amount = ch.cost != null ? ch.cost : ch.dollars;
+      if (m && adRows.length) {
+        var k = -1; adRows.forEach(function (r, i) { if (k < 0 && m[0].test(r[0])) k = i; });
+        if (k >= 0) {
+          var r = adRows[k], lift = r[2] ? Math.round((r[1] / r[2] - 1) * 100) : null;
+          reasons.push((k === 0 ? "#1" : "#" + (k + 1) + " of " + adRows.length) + " in ad response: " + r[1].toFixed(1).replace(/\.0$/, "") + "% of " + adNoun + " acted on " + m[1] + " in the past 30 days" + (lift != null ? " (" + (lift >= 0 ? "+" : "") + lift + "% vs. all adults)" : "") + ".");
+        }
+      }
+      // The geo-targeting line goes on the first awareness/consideration platform; the others say what the platform does
+      var intent = ch.id === "search" || ch.id === "shopping" || ch.id === "retarget";
+      reasons.push(intent || usedConc ? ch.ch.job : conc); if (!intent) usedConc = true;
+      if (reasons.length < 2) reasons.push(ch.ch.job);
+      return { id: ch.id, label: ch.id === "social" ? "Meta (Facebook & Instagram)" : ch.ch.label, role: ch.ch.role.charAt(0).toUpperCase() + ch.ch.role.slice(1),
+               amount: amount, reasons: reasons, est: P.estimate(ch.id, amount, bench) };
+    });
+    var total = plan.reduce(function (t, p) { return t + p.amount; }, 0);
+    plan.forEach(function (p) { p.pct = total ? Math.round(p.amount / total * 100) : 0; });
+    var ci = this.byZip[s.zip];
+    var place = s.mode === "area" ? "Custom area: " + this.areaPhrase() : "Within " + s.r + " miles of " + s.zip + " " + c.city[ci] + ", " + c.state[ci];
+    var placeShort = s.mode === "area" ? "" : c.city[ci] + ", " + c.state[ci];
+    var term = P.termNote(A.channels);
+    var foot = "Investment includes Adtaxi management." + (term ? " " + term : "") +
+      " Targeted impressions are planning estimates, not guarantees: programmatic at Adtaxi suggested retail CPMs; Google Search and Meta from WordStream 2026 benchmarks (" + (bench && bench.label ? bench.label : "all industries") +
+      ", U.S. medians) on the media portion of each investment." + (adSub ? " Ad response: 2026 AudienceSCAN®, " + adNoun + " vs. all U.S. adults." : "") +
+      " Audience: Census ACS and Adtaxi estimates." + (P.customRates() ? " Custom rates in use." : "");
+    var client = (this.pClient.value || "").trim() || "Prepared for you";
+    var comps = (this.pComp.value || "").split(/\n/).map(function (x) { return x.trim(); }).filter(Boolean);
+    var d = new Date();
+    return {
+      client: client, place: place, placeShort: placeShort, logoPng: logo, mapPng: this.mapImage(),
+      mapCaption: "ZIPs shaded by concentration of " + audienceNoun + " (index vs. U.S.; darker is higher)." + (s.mode === "area" ? "" : " Dashed ring: " + s.r + "-mile radius.") + " Prepared by Adtaxi, " + d.toLocaleDateString("en-US", { month: "long", year: "numeric" }) + ".",
+      audienceNoun: audienceNoun, stats: { aud: aud, idx: idx, zips: rows.length, pop: pop }, topZips: top, competitors: comps,
+      strategy: A.strat, plan: plan, total: total, footnote: foot,
+      fileName: "Adtaxi proposal - " + client.replace(/[\\/:*?"<>|]/g, "") + " - " + d.toISOString().slice(0, 10) + ".pptx"
+    };
+  };
+  Radius.prototype.buildProposal = function (opt) {
+    var self = this, b = this.budget, A = this.allocation(), st = this.pStatus;
+    if (!b.amount || !A.strat || !A.withDollars || !A.plan || !A.plan.tier || !A.channels.length) { st.textContent = "Enter a monthly budget and choose a media strategy first."; return Promise.resolve(null); }
+    st.textContent = "Building…";
+    var base = this.proposalBase();
+    return Promise.all([loadScriptOnce(this.cfg.pptxScript || "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261023p"), this.benchmarks(), this.logoImage()])
+      .then(function (res) { return window.AdtaxiProposal.build(self.proposalContext(res[2], res[3]), opt); })
+      .then(function (out) { st.textContent = "Downloaded. Open it in PowerPoint or Google Slides to edit."; return out; })
+      .catch(function (e) { st.textContent = "The proposal couldn't be built (" + e.message + "). Try again in a minute."; throw e; });
+  };
   Radius.prototype.leaveBehind = function () {
     if (!this.rows) { this.showError("Choose a center and radius (or map a custom area) first, then create the leave-behind."); return; }
     this.errorBox.hidden = true;
@@ -1052,7 +1215,7 @@
       if (self.zipLayer) self.map.removeLayer(self.zipLayer);
       var feats = [];
       urls.forEach(function (u) { var fc = self.geo[u]; if (fc) fc.features.forEach(function (f) { if (byZip[f.properties.zip]) feats.push(f); }); });
-      self.layerByZip = {};
+      self.layerByZip = {}; self.mapFeats = feats; self.mapByZip = byZip; self.mapVis = vis;   // kept for the proposal map
       // Thousands of ZIP outlines (100+ mile radii) draw much faster on a canvas than as separate SVG shapes
       if (feats.length > 1200 && !self.canvas) self.canvas = L.canvas({ padding: 0.3 });
       self.zipLayer = L.geoJSON({ type: "FeatureCollection", features: feats }, {
