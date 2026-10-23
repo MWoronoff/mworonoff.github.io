@@ -72,12 +72,13 @@
   // Package totals: impressions, clicks and leads add up over the platforms that have an estimate;
   // the averages divide those platforms' investment by their delivery (so a platform without an estimate doesn't skew them).
   function totals(plan) {
-    var t = { impr: 0, clicks: 0, leads: 0, $impr: 0, $clicks: 0, $leads: 0, nImpr: 0, n: plan.length };
+    var t = { impr: 0, clicks: 0, leads: 0, views: 0, $impr: 0, $clicks: 0, $leads: 0, nImpr: 0, n: plan.length };
     plan.forEach(function (p) {
       var e = p.est;
       if (e.impr != null) { t.impr += e.impr; t.$impr += p.amount; t.nImpr++; }
       if (e.clicks != null) { t.clicks += e.clicks; t.$clicks += p.amount; }
       if (e.leads != null) { t.leads += e.leads; t.$leads += p.amount; }
+      if (e.views != null) t.views += e.views;
     });
     t.cpm = t.impr ? t.$impr / t.impr * 1000 : null;
     t.cpc = t.clicks ? t.$clicks / t.clicks : null;
@@ -96,10 +97,10 @@
     var T = totals(ctx.plan), partial = T.nImpr && T.nImpr < T.n;
     var tiles = [
       [money(ctx.total), "Monthly investment", money(ctx.total * 3) + " for the first 3 months"],
-      [T.impr ? approx(T.impr) : "—", "Targeted impressions", T.impr ? approx(T.impr * 3) + " over 3 months" : "Estimate on request"],
+      [T.impr ? approx(T.impr) : "—", "Targeted impressions", T.impr ? approx(T.impr * 3) + " over 3 months" + (T.views ? "\n" + approx(T.views) + " completed CTV views" : "") : "Estimate on request"],
       [T.cpm != null ? money2(T.cpm) : "—", "Average CPM", partial ? "On platforms with an estimate" : "Investment per 1,000 targeted impressions"],
       [T.clicks ? approx(T.clicks) : "—", "Est. clicks", T.cpc != null ? money2(T.cpc) + " average cost per click" : ""],
-      [T.leads ? approx(T.leads) : "—", "Est. leads", T.cpl != null ? money(T.cpl) + " average cost per lead" : ""]
+      [T.leads ? approx(T.leads) : "—", "Est. leads (Search & Meta)", T.cpl != null ? money(T.cpl) + " average cost per lead" : ""]
     ];
     var gap = 0.1, tw = (9.2 - gap * (tiles.length - 1)) / tiles.length, ty = 1.82, th = 0.95;
     s.addText("PACKAGE SUMMARY", { x: 0.4, y: ty, w: 4, h: 0.22, fontFace: FONT, fontSize: 8.5, bold: true, color: C.teal, charSpacing: 1, margin: 0, isTextBox: true });
@@ -115,12 +116,13 @@
     // Platform table
     var H = { bold: true, color: C.white, fill: { color: C.orange }, fontSize: 9.5, valign: "middle" };
     var rows = [[{ text: "Platform", options: H }, { text: "Monthly investment", options: Object.assign({ align: "right" }, H) }, { text: "Why this platform", options: H },
-                 { text: "Targeted impressions", options: Object.assign({ align: "right" }, H) }, { text: "Est. clicks / leads", options: Object.assign({ align: "right" }, H) }]];
+                 { text: "Targeted impressions", options: Object.assign({ align: "right" }, H) }, { text: "Est. results", options: Object.assign({ align: "right" }, H) }]];
     var many = ctx.plan.length > 2, rFont = many ? 7.5 : 8.5, rowsH = 0.42;
     ctx.plan.forEach(function (p) {
       var e = p.est, cl = [];
       if (e.clicks != null) cl.push(approx(e.clicks) + " clicks");
       if (e.leads != null) cl.push(approx(e.leads) + " leads");
+      if (e.views != null) cl.push(approx(e.views) + " completed views");
       var why = (many ? p.reasons.slice(0, 2) : p.reasons).join(" ");
       // PowerPoint sizes rows to their text; estimate the height so the Goal row sits just under the table
       rowsH += Math.max(0.5, Math.ceil(why.length / (rFont > 8 ? 62 : 70)) * (rFont / 72 * 1.2) + 0.1);
@@ -137,11 +139,11 @@
                        border: { type: "solid", pt: 0.5, color: C.line }, margin: [0.04, 0.07, 0.04, 0.07], autoPage: false });
 
     // Goal, just under the table
-    var y = Math.min(5.8, tableY + rowsH + 0.25), gh = 0.6;
+    var y = Math.min(5.7, tableY + rowsH + 0.25), gh = 0.6;
     s.addShape(pres.shapes.RECTANGLE, { x: 0.4, y: y, w: 9.2, h: gh, fill: { color: C.mint }, line: { color: C.mint } });
     s.addText([{ text: "Goal: ", options: { bold: true, fontSize: 13 } }, { text: ctx.strategy.success, options: { fontSize: 12 } }],
       { x: 0.55, y: y, w: 8.9, h: gh, fontFace: FONT, color: C.ink, align: "center", valign: "middle", margin: 0, isTextBox: true });
-    s.addText(ctx.footnote, { x: 0.4, y: 6.5, w: 9.2, h: 0.5, fontFace: FONT, fontSize: 7, color: C.muted, margin: 0, valign: "top", isTextBox: true });
+    s.addText(ctx.footnote, { x: 0.4, y: 6.4, w: 9.2, h: 0.58, fontFace: FONT, fontSize: 6.5, color: C.muted, margin: 0, valign: "top", isTextBox: true });
   }
 
   function build(ctx, opt) {
