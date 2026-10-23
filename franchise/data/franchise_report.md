@@ -5,7 +5,7 @@ Built 2026-10-23. Result: **PASSED**
 | Check | Result | Detail |
 | --- | --- | --- |
 | Formula tests | PASS | percentile and weighted-average hand checks reproduce exactly |
-| Land area (Census Gazetteer) | INFO | not available here (No Census Gazetteer ZCTA file could be found); households per square mile left blank |
+| Land area source | INFO | Census 2026 Gazetteer ZCTA file (33,791 ZIPs) |
 | U.S. x125_share | PASS | 38.5% (expected 28%–50%) |
 | U.S. o100_share | PASS | 47.2% (expected 30%–55%) |
 | U.S. hi200_share | PASS | 7.9% (expected 4%–12%) |
