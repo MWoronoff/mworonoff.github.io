@@ -11,6 +11,8 @@
 (function () {
   "use strict";
 
+  var PICK_PREFIX = { dma: "d", metro: "m", county: "c" };   // Custom area tokens in the Trade area tool
+  var PICK_NOUN = { dma: ["DMA", "DMAs"], metro: ["metro", "metros"], county: ["county", "counties"] };
   var LEVEL_LABELS = { us: "U.S.", territory: "Territory", dma: "DMA", metro: "Metro", county: "County", zip: "ZIP" };
   var RAMP = ["--ramp-1", "--ramp-2", "--ramp-3", "--ramp-4", "--ramp-5"];
 
@@ -316,7 +318,7 @@
       Object.keys(cfg.levels).concat(cfg.radius ? ["radius"] : []).map(function (lv) {
         // Trade area: the Zip Code Radius Tool, which draws the area as a radius or, where the site turns it on, a custom list of ZIPs, counties and towns
         if (lv === "radius") return el("button", { type: "button", "data-level": "radius", text: "Trade area",
-          title: "Count prospects in a business's trade area: a radius around a ZIP or town, or a custom list of ZIPs, counties or towns", onclick: function () { self.openRadius(); } });
+          title: "Count prospects in a business's trade area: a radius around a ZIP or town, or a custom list of ZIPs, counties, towns, DMAs or metros", onclick: function () { self.openRadius(); } });
         if (lv === "zip") return el("button", { type: "button", "data-level": "zip", text: cfg.levels.zip.label || "ZIPs in market",
           title: "Pick a DMA, metro or county first, then see the ZIPs inside it", onclick: function () { if (self.mode === "radius") self.closeRadius(); if (self.state.level !== "zip") self.drill(); } });
         return el("button", { type: "button", "data-level": lv, text: cfg.levels[lv].label || LEVEL_LABELS[lv],
@@ -368,8 +370,12 @@
     this.tableNote = el("span");
     this.thead = el("thead");
     this.tbody = el("tbody");
+    // Pick several DMAs, metros or counties and open them together as one trade area (Custom area in the Trade area tool)
+    this.pick = { level: null, ids: {} };
+    this.pickBar = el("div", { class: "az-pickbar", hidden: true, role: "status" });
     this.tablePanel = el("section", { class: "az-panel az-table-panel" }, [
       el("div", { class: "az-table-head" }, [el("div", { class: "az-table-title" }, [this.tableTitle, this.backBtn]), this.tableNote]),
+      this.pickBar,
       el("div", { class: "az-tablewrap" }, [el("table", { class: "az-table" }, [this.thead, this.tbody])])
     ]);
 
@@ -411,6 +417,21 @@
 
   /* ---------- State changes ---------- */
   /* ---------- Radius view: the Zip Code Radius Tool inside the analyzer page ---------- */
+  Analyzer.prototype.renderPick = function () {
+    var self = this, s = this.state, cfg = this.cfg, ids = Object.keys(this.pick.ids), bar = this.pickBar;
+    bar.innerHTML = "";
+    if (!ids.length || PICK_PREFIX[s.level] == null) { bar.hidden = true; return; }
+    var rows = this.sortedRows().filter(function (r) { return self.pick.ids[r.id]; }), pop = 0;
+    rows.forEach(function (r) { pop += (r.v && r.v.population) || 0; });
+    var noun = PICK_NOUN[s.level][ids.length === 1 ? 0 : 1];
+    var names = rows.slice(0, 3).map(function (r) { return r.name; }).join("; ") + (rows.length > 3 ? "; and " + (rows.length - 3) + " more" : "");
+    bar.hidden = false;
+    bar.appendChild(el("p", null, [el("b", { text: NF0.format(ids.length) + " " + noun + " selected" }), ": " + names + (pop ? " · " + NF0.format(pop) + " people" : "")]));
+    bar.appendChild(el("div", { class: "az-pickact" }, [
+      el("button", { type: "button", class: "az-btn primary", text: "Open as trade area", title: "Count prospects, rank ZIPs, split a budget and build a proposal for these " + PICK_NOUN[s.level][1] + " together",
+        onclick: function () { self.openRadius({ mode: "area", ca: ids.map(function (id) { return PICK_PREFIX[s.level] + id; }).join(","), p: cfg.radiusProfiles ? s.sub : null }); } }),
+      el("button", { type: "button", class: "az-btn", text: "Clear", onclick: function () { self.pick.ids = {}; self.renderPick(); self.renderTable(); } })]));
+  };
   Analyzer.prototype.openRadius = function (opt) {
     var self = this, cfg = this.cfg, s = this.state; opt = opt || {};
     this.mode = "radius";
@@ -444,7 +465,7 @@
     }
     if (window.AdtaxiRadius) go();
     else {
-      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261023t";   // version tag: browsers fetch the new file after an update
+      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261023u";   // version tag: browsers fetch the new file after an update
       sc.onload = go; sc.onerror = function () { self.showError("The radius tool didn't load. Refresh the page and try again."); };
       document.head.appendChild(sc);
     }
@@ -853,7 +874,11 @@
     this.tableNote.textContent = "Showing " + NF0.format(shown.length) + " of " + NF0.format(all.length) + (isZip ? " ZIPs" : " markets") + ", ranked by " + (rankM ? rankM.label.toLowerCase() : "") + ". Click a column to sort.";
 
     this.thead.innerHTML = "";
-    var hr = el("tr", null, [el("th", { scope: "col", text: "Rank" }), el("th", { scope: "col", text: lvLabel })]);
+    var cfg = this.cfg, RCf = cfg.radius === true ? window.ADTAXI_RADIUS : cfg.radius;
+    var pickable = !!(RCf && RCf.customArea) && PICK_PREFIX[s.level] != null;
+    if (this.pick.level !== s.level) this.pick = { level: s.level, ids: {} };
+    var hr = el("tr", null, [pickable ? el("th", { scope: "col", class: "az-pickcol", title: "Select markets to combine into one trade area" }, [el("span", { class: "az-visually-hidden", text: "Select" })]) : null,
+      el("th", { scope: "col", text: "Rank" }), el("th", { scope: "col", text: lvLabel })]);
     cols.forEach(function (m) {
       var active = (s.sortKey || s.rank) === m.key;
       var dir = s.sortKey ? s.sortDir : (m.lowerIsBetter ? "asc" : "desc");
@@ -871,7 +896,9 @@
     shown.forEach(function (r) {
       var tr = el("tr", { tabindex: "0", "data-id": r.id, "aria-selected": r.id === s.area ? "true" : "false",
         onclick: function () { self.select(r.id, { zoom: true }); },
-        onkeydown: function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); self.select(r.id, { zoom: true }); } } }, [
+        onkeydown: function (e) { if (e.target.tagName === "INPUT") return; if (e.key === "Enter" || e.key === " ") { e.preventDefault(); self.select(r.id, { zoom: true }); } } }, [
+        pickable ? el("td", { class: "az-pickcol", onclick: function (e) { e.stopPropagation(); } }, [el("input", { type: "checkbox", "aria-label": "Select " + r.name,
+          checked: self.pick.ids[r.id] ? "checked" : null, onchange: function () { if (this.checked) self.pick.ids[r.id] = 1; else delete self.pick.ids[r.id]; self.renderPick(); } })]) : null,
         el("td", { class: "az-rank num", text: rankOf[r.id] ? String(rankOf[r.id]) : "–" }),
         el("td", null, [r.name, r.t ? el("span", { class: "az-tag", title: (r.f && r.f[0]) || null, text: r.t }) : null])
       ]);
@@ -884,9 +911,11 @@
       frag.appendChild(tr);
     });
     this.tbody.innerHTML = "";
-    if (!shown.length) this.tbody.appendChild(el("tr", null, [el("td", { colspan: String(cols.length + 2), class: "az-empty", text: "No markets match \u201c" + s.query + "\u201d. Clear the search to see all markets." })]));
+    if (!shown.length) this.tbody.appendChild(el("tr", null, [el("td", { colspan: String(cols.length + (pickable ? 3 : 2)), class: "az-empty", text: "No markets match \u201c" + s.query + "\u201d. Clear the search to see all markets." })]));
     this.tbody.appendChild(frag);
     if (anyMark) this.tableNote.textContent += " * Uses estimated health values; select the market and see its Data notes.";
+    if (pickable) this.tableNote.textContent += " Tick several to open them together as one trade area.";
+    this.renderPick();
   };
   Analyzer.prototype.markRow = function () {
     var id = this.state.area, sel = null;

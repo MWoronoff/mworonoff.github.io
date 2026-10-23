@@ -115,6 +115,7 @@ jobs:
         run: |
           python3 data-build/build_home_maps.py
           python3 data-build/build_zip_index.py
+          python3 data-build/build_market_names.py
       - name: Commit results
         run: |
           git config user.name "github-actions"

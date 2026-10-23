@@ -687,7 +687,7 @@
   Radius.prototype.renderEmpty = function () {
     var s = this.state, hasZip = this.c && this.byZip[s.zip] !== undefined;
     if (s.mode === "area") hasZip = false;
-    var msg = s.mode === "area" ? "List ZIPs, counties or towns above, or upload a file, then select Map this area." : hasZip ? "Choose a radius to see the audience around " + s.zip + "." :
+    var msg = s.mode === "area" ? "List ZIPs, counties, towns, DMAs or metros above, or upload a file, then select Map this area." : hasZip ? "Choose a radius to see the audience around " + s.zip + "." :
               s.r ? "Enter a ZIP or town to see the audience within " + s.r + " miles." :
               "Enter a ZIP or town and choose a radius to see the audience.";
     this.rows = null; this.mapToken = (this.mapToken || 0) + 1;
@@ -775,7 +775,7 @@
     if (window.AdtaxiPlan) { done(); return; }
     if (loadPlan.waiting) { loadPlan.waiting.push(done); return; }
     loadPlan.waiting = [done];
-    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261023t";
+    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261023u";
     sc.onload = function () { var w = loadPlan.waiting; loadPlan.waiting = null; w.forEach(function (f) { f(); }); };
     sc.onerror = function () { loadPlan.waiting = null; };
     document.head.appendChild(sc);
@@ -1027,7 +1027,7 @@
   Radius.prototype.proposalBase = function () { return (this.cfg.planScript || "../shared/media-plan.js").replace(/media-plan\.js.*$/, ""); };
   Radius.prototype.benchmarks = function () {
     var self = this;
-    if (!this._bench) this._bench = fetch(this.cfg.benchmarksData || this.proposalBase() + "benchmarks.json?v=20261023t").then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
+    if (!this._bench) this._bench = fetch(this.cfg.benchmarksData || this.proposalBase() + "benchmarks.json?v=20261023u").then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
     return this._bench.then(function (B) {
       if (!B) return null;
       var cat = self.cfg.planCategory && self.cfg.planCategory !== "none" ? self.cfg.planCategory : String(self.cfg.exportName || "").replace(/-radius$/, "").replace(/^apartment$/, "apartments");
@@ -1167,7 +1167,7 @@
     if (!b.amount || !A.strat || !A.withDollars || !A.plan || !A.plan.tier || !A.channels.length) { st.textContent = "Enter a monthly budget and choose a media strategy first."; return Promise.resolve(null); }
     st.textContent = "Building…";
     var base = this.proposalBase();
-    return Promise.all([loadScriptOnce(this.cfg.pptxScript || "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261023t"), this.benchmarks(), this.logoImage()])
+    return Promise.all([loadScriptOnce(this.cfg.pptxScript || "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261023u"), this.benchmarks(), this.logoImage()])
       .then(function (res) { return window.AdtaxiProposal.build(self.proposalContext(res[2], res[3]), opt); })
       .then(function (out) { st.textContent = "Downloaded. Open it in PowerPoint or Google Slides to edit."; return out; })
       .catch(function (e) { st.textContent = "The proposal couldn't be built (" + e.message + "). Try again in a minute."; throw e; });
@@ -1437,7 +1437,7 @@
   Radius.prototype.buildArea = function () {
     var self = this;
     this.areaIn = el("textarea", { class: "rz-area-input", rows: "5", spellcheck: "false", "aria-label": "Custom area",
-      placeholder: "Type or paste ZIPs, counties or towns, one per line",
+      placeholder: "Type or paste ZIPs, counties, towns, DMAs, metros, states or Census regions, one per line",
       onkeydown: function (e) { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) self.applyArea(); } });
     this.areaFile = el("input", { type: "file", accept: ".csv,.txt,.tsv,.xlsx,.xls", class: "rz-visually-hidden", tabindex: "-1",
       onchange: function () { if (this.files && this.files[0]) self.readAreaFile(this.files[0]); this.value = ""; } });
@@ -1482,7 +1482,7 @@
   };
   Radius.prototype.startArea = function () {
     var self = this;
-    this.loadCounties().then(function () {
+    Promise.all([this.loadCounties(), this.loadMarkets()]).then(function () {
       if (self.pendingCA) {
         self.areaIn.value = self.tokensToText(self.pendingCA.split(","));
         self.pendingCA = null; self.applyArea();
@@ -1490,9 +1490,60 @@
       if (!self.areaIn.value) self.areaIn.focus({ preventScroll: true });
     }).catch(function (e) { self.showError("The county list didn't load (" + e.message + "). Refresh the page and try again."); });
   };
+  // States, Census regions and divisions for Custom area (Census Bureau regions and divisions of the United States)
+  var STATE_NAMES = { AL: "Alabama", AK: "Alaska", AZ: "Arizona", AR: "Arkansas", CA: "California", CO: "Colorado", CT: "Connecticut", DE: "Delaware", DC: "District of Columbia",
+    FL: "Florida", GA: "Georgia", HI: "Hawaii", ID: "Idaho", IL: "Illinois", IN: "Indiana", IA: "Iowa", KS: "Kansas", KY: "Kentucky", LA: "Louisiana", ME: "Maine", MD: "Maryland",
+    MA: "Massachusetts", MI: "Michigan", MN: "Minnesota", MS: "Mississippi", MO: "Missouri", MT: "Montana", NE: "Nebraska", NV: "Nevada", NH: "New Hampshire", NJ: "New Jersey",
+    NM: "New Mexico", NY: "New York", NC: "North Carolina", ND: "North Dakota", OH: "Ohio", OK: "Oklahoma", OR: "Oregon", PA: "Pennsylvania", RI: "Rhode Island", SC: "South Carolina",
+    SD: "South Dakota", TN: "Tennessee", TX: "Texas", UT: "Utah", VT: "Vermont", VA: "Virginia", WA: "Washington", WV: "West Virginia", WI: "Wisconsin", WY: "Wyoming" };
+  var CENSUS_GROUPS = {
+    new_england: { n: "New England", kind: "division", st: ["CT", "ME", "MA", "NH", "RI", "VT"] },
+    middle_atlantic: { n: "Middle Atlantic", kind: "division", st: ["NJ", "NY", "PA"] },
+    east_north_central: { n: "East North Central", kind: "division", st: ["IL", "IN", "MI", "OH", "WI"] },
+    west_north_central: { n: "West North Central", kind: "division", st: ["IA", "KS", "MN", "MO", "NE", "ND", "SD"] },
+    south_atlantic: { n: "South Atlantic", kind: "division", st: ["DE", "DC", "FL", "GA", "MD", "NC", "SC", "VA", "WV"] },
+    east_south_central: { n: "East South Central", kind: "division", st: ["AL", "KY", "MS", "TN"] },
+    west_south_central: { n: "West South Central", kind: "division", st: ["AR", "LA", "OK", "TX"] },
+    mountain: { n: "Mountain", kind: "division", st: ["AZ", "CO", "ID", "MT", "NV", "NM", "UT", "WY"] },
+    pacific: { n: "Pacific", kind: "division", st: ["AK", "CA", "HI", "OR", "WA"] }
+  };
+  CENSUS_GROUPS.northeast = { n: "Northeast", kind: "region", st: CENSUS_GROUPS.new_england.st.concat(CENSUS_GROUPS.middle_atlantic.st) };
+  CENSUS_GROUPS.midwest = { n: "Midwest", kind: "region", st: CENSUS_GROUPS.east_north_central.st.concat(CENSUS_GROUPS.west_north_central.st) };
+  CENSUS_GROUPS.south = { n: "South", kind: "region", st: CENSUS_GROUPS.south_atlantic.st.concat(CENSUS_GROUPS.east_south_central.st, CENSUS_GROUPS.west_south_central.st) };
+  CENSUS_GROUPS.west = { n: "West", kind: "region", st: CENSUS_GROUPS.mountain.st.concat(CENSUS_GROUPS.pacific.st) };
+  var STATE_BY_NAME = {}; Object.keys(STATE_NAMES).forEach(function (k) { STATE_BY_NAME[STATE_NAMES[k].toLowerCase()] = k; });
+  // DMA and metro names (shared/geo/market_names.json) for Custom area lines such as "Raleigh-Durham DMA"
+  Radius.prototype.loadMarkets = function () {
+    var self = this;
+    if (this.marketP) return this.marketP;
+    var url = this.cfg.marketNames || this.cfg.zipGeo.replace(/zip\/\{level\}\/\{id\}\.json$/, "market_names.json");
+    return (this.marketP = fetch(url).then(function (r) { return r.ok ? r.json() : { dma: {}, metro: {} }; })
+      .catch(function () { return { dma: {}, metro: {} }; }).then(function (d) { self.markets = d; return d; }));
+  };
+  Radius.prototype.marketZips = function (kind, code) {   // indexes of the ZIPs in a DMA or metro
+    var col = kind === "dma" ? this.c.dma : this.c.cbsa;
+    if (!col) return [];
+    if (!this._mz) this._mz = {};
+    if (!this._mz[kind]) { var ix = {}; for (var i = 0; i < col.length; i++) { var k = col[i]; if (k) (ix[k] = ix[k] || []).push(i); } this._mz[kind] = ix; }
+    return this._mz[kind][code] || [];
+  };
+  Radius.prototype.findMarket = function (kind, q) {
+    var names = (this.markets && this.markets[kind]) || {}, norm = function (x) { return String(x).toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); };
+    var nq = norm(q), words = nq.split(" ").filter(Boolean), exact = [], prefix = [], part = [];
+    if (!nq) return null;
+    Object.keys(names).forEach(function (code) {   // best match first: the whole name, then the start of the name, then all the words anywhere
+      var n = norm(names[code]);
+      if (n === nq) exact.push(code);
+      else if (n.indexOf(nq + " ") === 0) prefix.push(code);
+      else if (words.every(function (w) { return (" " + n + " ").indexOf(" " + w) >= 0; })) part.push(code);
+    });
+    var hits = exact.length ? exact : prefix.length ? prefix : part;
+    return hits.length === 1 ? { code: hits[0] } : hits.length ? { many: hits.map(function (c) { return names[c]; }) } : null;
+  };
   Radius.prototype.loadCounties = function () {
     var self = this;
     if (this.countyP) return this.countyP;
+    this.loadMarkets();
     var url = this.cfg.countyZips || this.cfg.zipGeo.replace(/zip\/\{level\}\/\{id\}\.json$/, "county_zips.json");
     return (this.countyP = fetch(url).then(function (r) {
       if (!r.ok) throw new Error("HTTP " + r.status);
@@ -1541,7 +1592,7 @@
   // Read the list into ZIPs, counties, towns and circles; anything not understood is reported back, not dropped silently
   Radius.prototype.resolveArea = function (text) {
     var self = this, c = this.c;
-    var A = { zips: {}, circles: [], items: [], bad: [], padded: [], noRes: 0, tokens: [], n: { zip: 0, county: 0, town: 0, loc: 0 } };
+    var A = { zips: {}, circles: [], items: [], bad: [], padded: [], noRes: 0, tokens: [], n: { zip: 0, county: 0, town: 0, loc: 0, dma: 0, metro: 0, state: 0, region: 0 } };
     var tok = {}, addTok = function (t) { if (!tok[t]) { tok[t] = 1; A.tokens.push(t); } };
     var bad = function (t, why) { A.bad.push({ text: t, why: why }); };
     var addZip = function (raw) {
@@ -1575,6 +1626,46 @@
       A.n.county++; A.items.push({ kind: "county", label: x.n + ", " + x.s, count: k });
       addTok("c" + f);
     };
+    var KIND = { dma: "DMA", metro: "metro" };
+    var addMarket = function (kind, code) {
+      var key = (kind === "dma" ? "d" : "m") + code;
+      if (tok[key]) return;
+      var ix = self.marketZips(kind, code), k = 0;
+      if (!ix.length) return bad((kind === "dma" ? "DMA " : "Metro ") + code, "has no residential ZIPs in the data");
+      ix.forEach(function (i) { A.zips[c.zip[i]] = 1; if (c.population[i] > 0 || c.acs_pop[i] > 0) k++; });
+      var nm = self.markets && self.markets[kind] && self.markets[kind][code];
+      A.n[kind]++; A.items.push({ kind: kind, label: (nm || code) + " " + KIND[kind], count: k });
+      addTok(key);
+    };
+    var stateZips = function (st) { var out = []; for (var i = 0; i < c.state.length; i++) if (c.state[i] === st) out.push(i); return out; };
+    var addState = function (st) {
+      if (tok["s" + st]) return;
+      var k = 0; stateZips(st).forEach(function (i) { A.zips[c.zip[i]] = 1; if (c.population[i] > 0 || c.acs_pop[i] > 0) k++; });
+      A.n.state++; A.items.push({ kind: "state", label: STATE_NAMES[st], count: k }); addTok("s" + st);
+    };
+    var addGroup = function (key) {
+      var g = CENSUS_GROUPS[key]; if (tok["g" + key]) return;
+      var k = 0; g.st.forEach(function (st) { stateZips(st).forEach(function (i) { A.zips[c.zip[i]] = 1; if (c.population[i] > 0 || c.acs_pop[i] > 0) k++; }); });
+      A.n.region++; A.items.push({ kind: "region", label: g.n + " (Census " + g.kind + ", " + g.st.length + " states)", count: k }); addTok("g" + key);
+    };
+    var marketLine = function (t) {   // "DMA 560", "Metro 39580", "Raleigh-Durham DMA", "DMA: Charlotte", "Charlotte metro area", "NC", "North Carolina", "South Atlantic", "Midwest region"
+      var m, low = t.toLowerCase().replace(/^(?:the\s+)?(?:state of|census (?:region|division)[:\s]*)\s*/, "").replace(/\s+(?:state|census region|census division|region|division)$/, "").trim();
+      if (/^[A-Za-z]{2}$/.test(t) && STATE_NAMES[t.toUpperCase()]) return addState(t.toUpperCase()), true;
+      if (STATE_BY_NAME[low]) return addState(STATE_BY_NAME[low]), true;
+      var gk = low.replace(/[^a-z]+/g, "_");
+      if (CENSUS_GROUPS[gk]) return addGroup(gk), true;
+      if ((m = /^dma[:#\s-]*(\d{3})\b/i.exec(t))) return addMarket("dma", m[1]), true;
+      if ((m = /^(?:metro|msa|cbsa)[:#\s-]*(\d{5})\b/i.exec(t))) return addMarket("metro", m[1]), true;
+      var kind = null, q = null;
+      if ((m = /^(dma|metro|msa)\s*[:\-]\s*(.+)$/i.exec(t))) { kind = m[1]; q = m[2]; }
+      else if ((m = /^(.+?)[\s,-]+(dma|metro(?: area)?|msa)$/i.exec(t))) { kind = m[2]; q = m[1]; }
+      if (!kind) return false;
+      kind = /^dma$/i.test(kind) ? "dma" : "metro";
+      var hit = self.findMarket(kind, q);
+      if (!hit) return bad(t, "isn't a " + KIND[kind] + " we can find; check the spelling"), true;
+      if (hit.many) return bad(t, "matches " + hit.many.length + " " + (kind === "dma" ? "DMAs" : "metros") + " (" + hit.many.slice(0, 3).join("; ") + (hit.many.length > 3 ? "…" : "") + "); use more of the name"), true;
+      return addMarket(kind, hit.code), true;
+    };
     String(text || "").split(/[\r\n;]+/).forEach(function (line) {
       var t = line.replace(/\s+/g, " ").trim(), m;
       if (!t) return;
@@ -1588,6 +1679,7 @@
         var f = m[1].length === 4 ? "0" + m[1] : m[1];
         return self.counties[f] ? addCounty(f) : bad(t, "isn't a county FIPS code");
       }
+      if (marketLine(t)) return;
       // A ZIP or town with miles: "46307, 15 miles", "Naperville, IL 10 mi", "60462 within 25"
       if ((m = /^(.+?)[,\s-]+(?:within\s+)?(\d{1,3}(?:\.\d+)?)\s*(?:mi|mile|miles)?\.?(?:\s+radius)?$/i.exec(t)) && !COUNTY_WORD.test(splitPlace(m[1]).name)) return addCircle(m[1].trim(), +m[2], t);
       var p = splitPlace(t), hit;
@@ -1613,7 +1705,7 @@
   };
   Radius.prototype.applyArea = function () {
     var self = this;
-    if (!this.counties) { this.loadCounties().then(function () { self.applyArea(); }); return; }
+    if (!this.counties || !this.markets) { Promise.all([this.loadCounties(), this.loadMarkets()]).then(function () { self.applyArea(); }); return; }
     var A = this.resolveArea(this.areaIn.value);
     this.errorBox.hidden = true;
     this.state.area = A.tokens.length ? A : null;
@@ -1630,6 +1722,9 @@
       if (k === "c") return self.counties && self.counties[v] ? self.countyLabel(v) : "FIPS " + v;
       if (k === "t") { var a = v.split(":"); return a.slice(1).join(":") + ", " + a[0]; }
       if (k === "r") { var b = v.split(":"); return b[0] + ", " + b[1] + " miles"; }
+      if (k === "s") return STATE_NAMES[v] || v;
+      if (k === "g") return CENSUS_GROUPS[v] ? CENSUS_GROUPS[v].n + " " + CENSUS_GROUPS[v].kind : "";
+      if (k === "d" || k === "m") { var nm = self.markets && self.markets[k === "d" ? "dma" : "metro"][v]; return (k === "d" ? "DMA " : "Metro ") + v + (nm ? " " + nm : ""); }
       return "";
     }).filter(Boolean).join("\n");
   };
@@ -1667,7 +1762,7 @@
   Radius.prototype.areaPhrase = function () {
     var n = this.state.area.n, parts = [];
     var pl = function (k, one, many) { if (k) parts.push(NF0.format(k) + " " + (k === 1 ? one : many)); };
-    pl(n.county, "county", "counties"); pl(n.town, "town", "towns"); pl(n.zip, "ZIP", "ZIPs"); pl(n.loc, "location", "locations");
+    pl(n.region, "Census region or division", "Census regions and divisions"); pl(n.state, "state", "states"); pl(n.dma, "DMA", "DMAs"); pl(n.metro, "metro", "metros"); pl(n.county, "county", "counties"); pl(n.town, "town", "towns"); pl(n.zip, "ZIP", "ZIPs"); pl(n.loc, "location", "locations");
     return parts.length < 2 ? parts.join("") : parts.slice(0, -1).join(", ") + " and " + parts[parts.length - 1];
   };
   Radius.prototype.renderAreaReport = function (A) {
@@ -1685,7 +1780,7 @@
       }
       if (A.padded.length) box.appendChild(el("p", { class: "rz-note", text: "Added a leading zero to " + A.padded.slice(0, 5).join(", ") + (A.padded.length > 5 ? " and " + (A.padded.length - 5) + " more" : "") + "." }));
       if (A.tokens.length > MAX_LINK_TOKENS) box.appendChild(el("p", { class: "rz-note", text: "This area is too large to save in the page link. Export the ZIP list to keep it." }));
-    } else if (!A.bad.length) box.appendChild(el("p", { class: "rz-note", text: "The list is empty. Enter ZIPs, counties or towns, or upload a file." }));
+    } else if (!A.bad.length) box.appendChild(el("p", { class: "rz-note", text: "The list is empty. Enter ZIPs, counties, towns, DMAs or metros, or upload a file." }));
     if (A.bad.length) {
       var list = el("ul", { class: "rz-area-bad" }, A.bad.slice(0, 15).map(function (b) { return el("li", null, [el("b", { text: b.text }), " " + b.why + "."]); }));
       box.appendChild(el("div", { class: "rz-area-warn" }, [el("p", { text: NF0.format(A.bad.length) + " item" + (A.bad.length === 1 ? " wasn't" : "s weren't") + " mapped:" }), list,
