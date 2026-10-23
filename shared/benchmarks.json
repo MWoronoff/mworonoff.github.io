@@ -294,12 +294,6 @@
     "franchise",
     false
    ]
-  },
-  "franchise-stratus": {
-   "_default": [
-    "franchise",
-    false
-   ]
   }
  }
 }

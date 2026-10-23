@@ -279,7 +279,10 @@
       lines: "Tax preparation, wealth management, retirement planning, home purchase mortgage, refinance and home equity" },
     { key: "auto", name: "Auto", path: "/auto/", shown: "New trucks and SUVs",
       desc: "Vehicle buyers by household vehicles, income, commuting, rural share and vehicle spending.",
-      lines: "New cars, new trucks and SUVs, used cars, used trucks and SUVs" }
+      lines: "New cars, new trucks and SUVs, used cars, used trucks and SUVs" },
+    { key: "franchise", name: "Franchise Development", chip: "Franchise", path: "/franchise/", shown: "Master franchise candidates", crm: false,
+      desc: "Prospective franchise owners by age, household income, tax-return wealth signals and local businesses.",
+      lines: "Master and multi-unit candidates, first-time franchise buyers" }
   ];
   var css = getComputedStyle(document.documentElement);
   var RAMP = ["--r0", "--r1", "--r2", "--r3", "--r4"].map(function (v) { return css.getPropertyValue(v).trim(); });
@@ -306,7 +309,7 @@
       el("div", { class: "cat-actions" }, [
         el("a", { class: "go", href: c.path, text: "Open analyzer" }),
         el("a", { href: c.path + "#level=radius", text: "ZIP radius tool" }),
-        el("a", { href: "/crm-analyzer/?category=" + c.key + "&from=" + encodeURIComponent(c.name), text: "Analyze customers" })
+        c.crm === false ? null : el("a", { href: "/crm-analyzer/?category=" + c.key + "&from=" + encodeURIComponent(c.name), text: "Analyze customers" })
       ])
     ]));
   });

@@ -28,7 +28,7 @@ window.ADTAXI_RADIUS = {
   }
  ],
  "zipGeo": "../shared/geo/zip/{level}/{id}.json",
- "planScript": "../shared/media-plan.js?v=20261023s",
+ "planScript": "../shared/media-plan.js?v=20261023t",
  "mediaMixUrl": "../media-mix/",
  "planCategory": "none",
  "customArea": true,
@@ -70,7 +70,8 @@ window.ADTAXI_RADIUS = {
    "audio": "Reaches commuting professionals with the ownership message during podcasts and streaming audio.",
    "dooh": "Builds local presence for the brand where candidates work and commute."
   },
-  "note": "Franchise leads: the 2026 Annual Franchise Development Report puts average cost per lead at $142 to $802 by segment and average cost per franchise sale at $9,276 for non-brick-and-mortar service concepts; this proposal doesn't forecast sales."
+  "drives": "visits to the franchise site and branded searches",
+  "note": "Franchise leads: the 2026 Annual Franchise Development Report puts average cost per lead at $142 to $802 and average cost per franchise sale at $6,700 to $25,145, depending on the sector; this proposal doesn't forecast sales."
  },
  "profiles": [
   {
@@ -128,7 +129,7 @@ window.ADTAXI_RADIUS = {
   },
   {
    "title": "Reaching these candidates",
-   "body": "Job title, seniority and employer targeting is available on LinkedIn, not from these counts. Use the ZIPs here for channels that target by geography, such as streaming TV, programmatic display and direct mail, and to set the geography for LinkedIn and search campaigns."
+   "body": "Census doesn't publish job titles or net worth by ZIP, so these counts describe the owner profile by age and household income. Use the top ZIPs to set the geography for search, Meta, streaming TV, programmatic display and direct mail, and to pick where a franchise's markets have the most candidates."
   }
  ]
 };

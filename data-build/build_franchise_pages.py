@@ -7,7 +7,7 @@ import glob, json, os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-V = "20261023s"   # version tag for the shared engine files on these pages (keep in step with the other analyzers)
+V = "20261023t"   # version tag for the shared engine files on these pages (keep in step with the other analyzers)
 
 SUBS = [{"id": "exec", "label": "Master franchise candidates"}, {"id": "owner", "label": "First-time franchise buyers"}]
 # AudienceSCAN 2026, Small Business Owners (4.5% of U.S. adults): saw or heard an ad of each type that led them to take
@@ -54,7 +54,8 @@ PROPOSAL = {
              "retarget": "Brings back visitors to the franchise site who haven't inquired yet; franchise decisions take months.",
              "audio": "Reaches commuting professionals with the ownership message during podcasts and streaming audio.",
              "dooh": "Builds local presence for the brand where candidates work and commute."},
-    "note": "Franchise leads: the 2026 Annual Franchise Development Report puts average cost per lead at $142 to $802 by segment and average cost per franchise sale at $9,276 for non-brick-and-mortar service concepts; this proposal doesn't forecast sales.",
+    "drives": "visits to the franchise site and branded searches",
+    "note": "Franchise leads: the 2026 Annual Franchise Development Report puts average cost per lead at $142 to $802 and average cost per franchise sale at $6,700 to $25,145, depending on the sector; this proposal doesn't forecast sales.",
 }
 SOURCES = [
     {"label": "Census American Community Survey 5-year (age of householder by household income, veterans)", "url": "https://www.census.gov/programs-surveys/acs"},
@@ -115,7 +116,7 @@ def radius_cfg(title, export, depth, links):
         "methodology": [
             {"title": "Who counts", "body": "Counts are adults by age and household income (Census). Census doesn't publish net worth or job titles by ZIP, so household income stands in for capital, and the profiles are planning estimates, not lists of people."},
             {"title": "Tax return rates", "body": "The $200K+ income, capital gains and self-employment figures are IRS shares of tax returns in each ZIP. They describe the ZIP, not individual households, so they show as columns and aren't applied to the count."},
-            {"title": "Reaching these candidates", "body": "Job title, seniority and employer targeting is available on LinkedIn, not from these counts. Use the ZIPs here for channels that target by geography, such as streaming TV, programmatic display and direct mail, and to set the geography for LinkedIn and search campaigns."}],
+            {"title": "Reaching these candidates", "body": "Census doesn't publish job titles or net worth by ZIP, so these counts describe the owner profile by age and household income. Use the top ZIPs to set the geography for search, Meta, streaming TV, programmatic display and direct mail, and to pick where a franchise's markets have the most candidates."}],
     }
 
 
@@ -125,7 +126,7 @@ def measures(client):
     buyers = client["buyers"]["label"] if client else "Businesses with employees"
     bhelp = client["buyers"]["help"] if client else "All businesses with paid employees (Census ZIP Code Business Patterns): the base of potential customers for a business-to-business franchise."
     score_help = ("0–100. Candidates 50%, Territory Opportunity 30%, Competition 20%, each a percentile among areas at the same level. ZIPs use Candidates only."
-                  if client else "0–100. Candidates 62.5%, Market Opportunity 37.5% (each a percentile among areas at the same level). Competition is added on a client's page, where its competitors are known. ZIPs use Candidates only.")
+                  if client else "0–100. Candidates 62.5%, Market Opportunity 37.5% (each a percentile among areas at the same level). ZIPs use Candidates only.")
     m = [
         {"key": "score", "label": "Franchise Opportunity Score", "short": "Score", "format": "score", "perSub": True, "levels": L_ALL, "help": score_help},
         {"key": "demand", "label": "Candidates", "short": "Candidates", "format": "score", "perSub": True, "levels": L_ALL,
@@ -168,7 +169,7 @@ def measures(client):
 def methodology(client):
     out = [{"title": "Franchise Opportunity Score", "body": [
         "Where are a franchise system's best owner candidates, and which " + ("territories" if client else "markets") + " deserve the most franchise-development ad dollars?",
-        ("Score = 50% Candidates + 30% Territory Opportunity + 20% Competition." if client else "Score = 62.5% Candidates + 37.5% Market Opportunity (the client weights of 50% and 30%, re-scaled; Competition is added on a client's page, where its competitors are known).")
+        ("Score = 50% Candidates + 30% Territory Opportunity + 20% Competition." if client else "Score = 62.5% Candidates + 37.5% Market Opportunity .")
         + " Each part is a percentile (0–100) against areas at the same level. No score is shown when a part has no data."]},
         {"title": "Candidates", "body": [
             "Master franchise candidates, first-time or not: householders 45–64 earning $125K+ (count and share), the IRS shares of returns with income of $200K+ and with capital gains, and the IRS average salary per wage earner.",

@@ -19,6 +19,7 @@ CATS = [  # (key used by the page, analyzer folder, score field)
     ("apartments", "apartment-analyzer", "score@student"),
     ("financial", "financial", "score@wealth"),
     ("auto", "auto", "score@newtruck"),
+    ("franchise", "franchise", "score@exec"),
 ]
 
 def albers(lon, lat):
