@@ -206,6 +206,27 @@
   // Homeowner rate for an age group, applied once: by the first selected owner filter in OWNER_ORDER, 1 for the rest
   var OWNER_ORDER = ["mortg", "built", "ownval", "sfd", "longten"];
   function irsShare(c, i, k) { return c.returns ? ratio(c[k] ? c[k][i] : null, c.returns[i]) : null; }
+  /* ZIP context columns: area rates shown beside each ZIP (and sortable), not applied to people as filters.
+     IRS shares of returns and CDC PLACES adult rates are ZIP-level estimates; they say how common something is
+     in a ZIP, not who it applies to. A preset lists its columns in context and can rank by one with sortBy. */
+  function per1000(c, i, k) { var v = c[k] ? c[k][i] : null; return v == null ? null : Math.min(1, v / 1000); }
+  function presetSort(p) { return p && p.sortBy && CONTEXT[p.sortBy] ? "x_" + p.sortBy : "idx"; }
+  var CONTEXT = {
+    prep:     { label: "Paid preparer", long: "Share of tax returns filed by a paid preparer (IRS)", value: function (c, i) { return irsShare(c, i, "prep"); } },
+    eitc:     { label: "EITC returns", long: "Share of tax returns claiming the Earned Income Credit (IRS)", value: function (c, i) { return irsShare(c, i, "eitc"); } },
+    selfemp:  { label: "Self-employed", long: "Share of tax returns with business or self-employment income (IRS)", value: function (c, i) { return irsShare(c, i, "selfemp"); } },
+    div:      { label: "Dividends", long: "Share of tax returns with dividend income (IRS)", value: function (c, i) { return irsShare(c, i, "div"); } },
+    cg:       { label: "Capital gains", long: "Share of tax returns reporting capital gains (IRS)", value: function (c, i) { return irsShare(c, i, "cg"); } },
+    ira:      { label: "IRA income", long: "Share of tax returns with IRA distributions (IRS)", value: function (c, i) { return irsShare(c, i, "ira"); } },
+    pens:     { label: "Pension income", long: "Share of tax returns with pension or annuity income (IRS)", value: function (c, i) { return irsShare(c, i, "pens"); } },
+    diabetes: { label: "Diabetes", long: "Share of adults with diabetes (CDC PLACES)", value: function (c, i) { return per1000(c, i, "diabetes"); } },
+    bphigh:   { label: "High BP", long: "Share of adults with high blood pressure (CDC PLACES)", value: function (c, i) { return per1000(c, i, "bphigh"); } },
+    arthritis:{ label: "Arthritis", long: "Share of adults with arthritis (CDC PLACES)", value: function (c, i) { return per1000(c, i, "arthritis"); } },
+    obesity:  { label: "Obesity", long: "Share of adults with obesity (CDC PLACES)", value: function (c, i) { return per1000(c, i, "obesity"); } },
+    depression:{ label: "Depression", long: "Share of adults ever told they have depression (CDC PLACES)", value: function (c, i) { return per1000(c, i, "depression"); } },
+    mhlth:    { label: "Mental distress", long: "Share of adults with frequent mental distress (CDC PLACES)", value: function (c, i) { return per1000(c, i, "mhlth"); } },
+    nodental: { label: "No dental visit", long: "Share of adults with no dental visit in the past year (CDC PLACES)", value: function (c, i) { return per1000(c, i, "nodental"); } }
+  };
   function picked(v) { return v === true || (v && v.length > 0); }
   function ownerPart(c, i, b, all, me) {
     for (var k = 0; k < OWNER_ORDER.length && OWNER_ORDER[k] !== me; k++) if (all && picked(all[OWNER_ORDER[k]])) return 1;
@@ -316,7 +337,7 @@
       var ini = cfg.initial || {};
       if (/^\d{5}$/.test(ini.zip || "")) this.state.zip = ini.zip;
       if (+ini.r > 0) this.state.r = +ini.r;
-      if (ini.p && this.profiles[ini.p]) { this.state.profile = ini.p; this.state.sel = JSON.parse(JSON.stringify(this.profiles[ini.p].sel)); this.state.sortKey = "idx"; }
+      if (ini.p && this.profiles[ini.p]) { this.state.profile = ini.p; this.state.sel = JSON.parse(JSON.stringify(this.profiles[ini.p].sel)); this.state.sortKey = presetSort(this.profiles[ini.p]); }
       if (ini.mode === "area" && cfg.customArea) { this.state.mode = "area"; if (ini.ca) this.pendingCA = ini.ca; }
     } else this.readHash();
   }
@@ -342,7 +363,7 @@
       }); }
     });
     // A link from the analyzer carries only the category: start from that category's profile
-    if (s.profile && !hasF) { s.sel = JSON.parse(JSON.stringify(this.profiles[s.profile].sel)); s.sortKey = "idx"; s.sortDir = "desc"; }
+    if (s.profile && !hasF) { s.sel = JSON.parse(JSON.stringify(this.profiles[s.profile].sel)); s.sortKey = presetSort(this.profiles[s.profile]); s.sortDir = "desc"; }
   };
   Radius.prototype.writeHash = function () {
     if (this.cfg.embedded) { if (this.cfg.onState) this.cfg.onState(this.state); return; }
@@ -463,7 +484,7 @@
   Radius.prototype.applyProfile = function (id) {
     var s = this.state, p = this.profiles[id];
     s.profile = p ? id : null;
-    if (p) { s.sel = JSON.parse(JSON.stringify(p.sel)); s.sortKey = "idx"; s.sortDir = "desc"; }
+    if (p) { s.sel = JSON.parse(JSON.stringify(p.sel)); s.sortKey = presetSort(p); s.sortDir = "desc"; }
     this.syncFilters(); this.update(false);
   };
   Radius.prototype.syncFilters = function () {
@@ -683,20 +704,35 @@
     this.summary.appendChild(stat(NF0.format(rows.length), "ZIPs"));
     this.summary.appendChild(stat(NF0.format(P), "Population"));
   };
+  // Context columns for the current preset (or the tool's default list when no preset is chosen)
+  Radius.prototype.contextKeys = function () {
+    var p = this.state.profile && this.profiles[this.state.profile];
+    var keys = (p && p.context) || (!p && this.cfg.context) || [];
+    return keys.filter(function (k) { return CONTEXT[k]; });
+  };
+  Radius.prototype.addContext = function (rows) {
+    var c = this.c, keys = this.contextKeys();
+    rows.forEach(function (r) { keys.forEach(function (k) { r["x_" + k] = CONTEXT[k].value(c, r.i); }); });
+    return keys;
+  };
   Radius.prototype.renderTable = function () {
     var self = this, s = this.state, rows = this.visible().slice(), est = this.isEstimate();
     var area = s.mode === "area", circ = area && s.area && s.area.circles.length;
+    var ctx = this.addContext(rows);
+    if (/^x_/.test(s.sortKey) && ctx.indexOf(s.sortKey.slice(2)) < 0) { s.sortKey = "idx"; s.sortDir = "desc"; }
     var cols = [["zip", "ZIP", "l"], ["town", "Town", "l"]].concat(area ? [["county", "County", "l"]] : []).concat(!area || circ ? [["dist", area ? "Miles to location" : "Miles", "n"]] : [])
-      .concat([["pop", "Population", "n"], ["aud", est ? "Est. audience" : "Audience", "n"], ["share", "Share", "n"], ["idx", "Index", "n"]]);
+      .concat([["pop", "Population", "n"], ["aud", est ? "Est. audience" : "Audience", "n"], ["share", "Share", "n"], ["idx", "Index", "n"]])
+      .concat(ctx.map(function (k) { return ["x_" + k, CONTEXT[k].label, "n", CONTEXT[k].long]; }));
     this.sortRows(rows);
-    var k = s.sortKey, nSmall = k === "idx" ? rows.filter(function (r) { return (r.pop || 0) < SMALL_ZIP; }).length : 0;
+    var k = s.sortKey, nSmall = (k === "idx" || /^x_/.test(k)) ? rows.filter(function (r) { return (r.pop || 0) < SMALL_ZIP; }).length : 0;
     this.tableTitle.textContent = area ? "ZIPs in the custom area" : "ZIPs within " + s.r + " miles";
-    this.tableNote.textContent = (rows.length > s.show ? "Showing " + s.show + " of " + NF0.format(rows.length) + " ZIPs. Export includes all." : NF0.format(rows.length) + " ZIPs.") + (nSmall ? " ZIPs under " + NF0.format(SMALL_ZIP) + " residents are listed last." : "") + " Click a column to sort.";
+    this.tableNote.textContent = (rows.length > s.show ? "Showing " + s.show + " of " + NF0.format(rows.length) + " ZIPs. Export includes all." : NF0.format(rows.length) + " ZIPs.") + (nSmall ? " ZIPs under " + NF0.format(SMALL_ZIP) + " residents are listed last." : "") + " Click a column to sort." +
+      (ctx.length ? " " + ctx.map(function (k) { return CONTEXT[k].label; }).join(" and ") + (ctx.length > 1 ? " are ZIP-wide rates" : " is a ZIP-wide rate") + ", shown for context and not applied to the audience; point to a heading for its source." : "");
     this.thead.innerHTML = "";
     var hr = el("tr");
     cols.forEach(function (cdef) {
       var active = k === cdef[0];
-      hr.appendChild(el("th", { scope: "col", class: cdef[2] === "l" ? "rz-l" : null, "aria-sort": active ? (s.sortDir === "asc" ? "ascending" : "descending") : null }, [
+      hr.appendChild(el("th", { scope: "col", class: cdef[2] === "l" ? "rz-l" : cdef[3] ? "rz-ctx" : null, title: cdef[3] || null, "aria-sort": active ? (s.sortDir === "asc" ? "ascending" : "descending") : null }, [
         el("button", { type: "button", text: cdef[1], onclick: function () {
           if (s.sortKey === cdef[0]) s.sortDir = s.sortDir === "asc" ? "desc" : "asc";
           else { s.sortKey = cdef[0]; s.sortDir = cdef[2] === "l" || cdef[0] === "dist" ? "asc" : "desc"; }
@@ -714,7 +750,8 @@
         el("td", { class: "num", text: r.pop == null ? "—" : NF0.format(r.pop) }),
         el("td", { class: "num", text: r.aud == null ? "No data" : NF0.format(Math.round(r.aud)) }),
         el("td", { class: "num", text: r.share == null ? "—" : NF1.format(r.share * 100) + "%" }),
-        el("td", { class: "num", text: r.idx == null ? "—" : NF0.format(r.idx) })]));
+        el("td", { class: "num", text: r.idx == null ? "—" : NF0.format(r.idx) })].concat(ctx.map(function (k) {
+          var v = r["x_" + k]; return el("td", { class: "num rz-ctx", text: v == null ? "—" : NF1.format(v * 100) + "%" }); }))));
     });
     if (!rows.length) frag.appendChild(el("tr", null, [el("td", { colspan: String(cols.length), class: "az-empty", text: area ? "No ZIPs meet the index cutoff. Lower the Show setting or add to the area." : "No ZIPs meet the index cutoff. Lower the Show setting or widen the radius." })]));
     this.tbody.appendChild(frag);
@@ -928,7 +965,7 @@
   Radius.prototype.sortRows = function (rows) {
     var s = this.state, k = s.sortKey, dir = s.sortDir === "asc" ? 1 : -1;
     rows.sort(function (a, b) {
-      if (k === "idx") { var sa = (a.pop || 0) < SMALL_ZIP, sb = (b.pop || 0) < SMALL_ZIP; if (sa !== sb) return sa ? 1 : -1; }
+      if (k === "idx" || /^x_/.test(k)) { var sa = (a.pop || 0) < SMALL_ZIP, sb = (b.pop || 0) < SMALL_ZIP; if (sa !== sb) return sa ? 1 : -1; }
       var x = a[k], y = b[k];
       if (x == null && y == null) return 0; if (x == null) return 1; if (y == null) return -1;
       return typeof x === "string" ? dir * x.localeCompare(y) : dir * (x - y);
@@ -1030,11 +1067,13 @@
     var rows = this.sortRows(this.visible().slice());   // same order as the table
     var area = s.mode === "area", circ = area && s.area.circles.length;
     var head = ["ZIP", "Town"].concat(area ? ["County"] : []).concat(!area ? ["Miles from center"] : circ ? ["Miles to nearest location"] : []);
-    var lines = [head.concat(["Population", est ? "Estimated audience" : "Audience", "Audience share", "Index vs US", "Audience definition"]).map(csvCell).join(",")];
+    var ctx = this.addContext(rows);
+    var lines = [head.concat(["Population", est ? "Estimated audience" : "Audience", "Audience share", "Index vs US"]).concat(ctx.map(function (k) { return CONTEXT[k].long; })).concat(["Audience definition"]).map(csvCell).join(",")];
     var def = this.describe();
     rows.forEach(function (r) {
       var lead = [r.zip, r.town].concat(area ? [r.county || ""] : []).concat(!area || circ ? [r.dist == null ? "" : r.dist.toFixed(1)] : []);
-      lines.push(lead.concat([r.pop, r.aud == null ? "" : Math.round(r.aud), r.share == null ? "" : (r.share * 100).toFixed(1) + "%", r.idx == null ? "" : Math.round(r.idx), def]).map(csvCell).join(","));
+      lines.push(lead.concat([r.pop, r.aud == null ? "" : Math.round(r.aud), r.share == null ? "" : (r.share * 100).toFixed(1) + "%", r.idx == null ? "" : Math.round(r.idx)])
+        .concat(ctx.map(function (k) { var v = r["x_" + k]; return v == null ? "" : (v * 100).toFixed(1) + "%"; })).concat([def]).map(csvCell).join(","));
     });
     var blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
     var a = el("a", { href: URL.createObjectURL(blob), download: (this.cfg.exportName || "adtaxi-radius") + (area ? "-custom-area.csv" : "-" + s.zip + "-" + s.r + "mi.csv") });

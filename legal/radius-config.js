@@ -12,7 +12,7 @@ window.ADTAXI_RADIUS = {
   ageSet: "adult",
   radii: [5, 10, 15, 25, 50, 100],
   radiusLabel: "Up to {r} miles",
-  filters: ["age", "income5", "home", "employ", "car", "divsep", "poverty", "lep"],
+  filters: ["age", "income5", "home", "employ", "car", "divsep", "lep"],
   profileLabel: "Best prospects for",
   profiles: [
     { id: "pi", label: "Personal injury", note: "Employed adults who commute by car.", sel: { employ: ["emp"], car: true } },

@@ -15,11 +15,11 @@ window.ADTAXI_RADIUS = {
   radii: [5, 10, 15, 25, 100],
   radiusLabels: { 100: "50+ miles (covers up to 100)" },
   radiusLabel: "Up to {r} miles",
-  filters: ["age", "renter", "rinc", "rtype", "rmoved", "rburden", "rkids", "enrolled"],
+  filters: ["age", "renter", "rinc", "rtype", "rmoved", "rburden", "enrolled"],
   profileLabel: "Best prospects for",
   profiles: [
     { id: "all", label: "All apartments", note: "Adults renting in apartment buildings with 5 or more units.", sel: { rtype: ["apt"] } },
-    { id: "luxury", label: "Luxury / Class A", note: "Adults 25–44 renting in apartment buildings, in renter households earning $100K+.", sel: { age: ["25_34", "35_44"], rinc: ["100_150", "150p"], rtype: ["apt"] } },
+    { id: "luxury", label: "Luxury / Class A", note: "Adults renting in apartment buildings, in renter households earning $100K+.", sel: { rinc: ["100_150", "150p"], rtype: ["apt"] } },
     { id: "mid", label: "Mid-market / workforce", note: "Adults renting in apartment buildings, in renter households earning $35K–$99K.", sel: { rinc: ["35_50", "50_75", "75_100"], rtype: ["apt"] } },
     { id: "affordable", label: "Affordable housing", note: "Adults in renter households earning under $35K.", sel: { rinc: ["lt35"] } },
     { id: "student", label: "Student housing", note: "Renters 18–24 enrolled in college or graduate school.", sel: { age: ["18_24"], renter: true, enrolled: true } },
@@ -27,6 +27,7 @@ window.ADTAXI_RADIUS = {
   ],
   methodology: [
     { title: "Renter rate by age", body: "Census reports whether a household rents by the age of the head of household, so the tool uses each age group's own renter rate. Counts are adults living in renter households." },
+    { title: "Advertising rules", body: "Housing ads fall under fair housing rules: Meta and Google don't allow age, gender or ZIP targeting for them, and family status can't be used to select renters. Use these counts to size the market and plan channels that allow geographic targeting, such as streaming TV, programmatic display and direct mail. Age-restricted (55+) communities are an exception for age." },
     { title: "Student housing", body: "College enrollment uses the ZIP's own enrollment rate for 18–24 year-olds (Census counts everyone in college or graduate school, including students in dorms), combined with the renter rate for that age as an estimate of students renting off campus." }
   ]
 };

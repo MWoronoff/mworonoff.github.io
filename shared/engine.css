@@ -505,3 +505,7 @@ body.az-printing .az-map { height: 420px; }
 .az-tm-h3 { margin: 22px 0 0; font-size: 16px; color: var(--navy); }
 .az-tm-cards3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 @media (max-width: 640px) { .az-tm-cards3 { grid-template-columns: 1fr; } }
+
+/* Radius ZIP table: context columns (ZIP-wide IRS or CDC rates shown beside the audience, not applied to it) */
+.az-table th.rz-ctx, .az-table td.rz-ctx { background: #f7f9fb; color: var(--muted); }
+.az-table th.rz-ctx button { text-decoration: underline dotted; text-underline-offset: 3px; }
