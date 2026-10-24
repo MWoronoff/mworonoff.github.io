@@ -790,7 +790,7 @@
     if (window.AdtaxiPlan) { done(); return; }
     if (loadPlan.waiting) { loadPlan.waiting.push(done); return; }
     loadPlan.waiting = [done];
-    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261024b";
+    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261024c";
     sc.onload = function () { var w = loadPlan.waiting; loadPlan.waiting = null; w.forEach(function (f) { f(); }); };
     sc.onerror = function () { loadPlan.waiting = null; };
     document.head.appendChild(sc);
@@ -826,7 +826,7 @@
     this.pComp = el("textarea", { rows: "3", placeholder: "One per line (optional)", "aria-label": "Local competitors" });
     this.pStatus = el("span", { class: "rz-pstatus", role: "status" });
     this.pBox = el("div", { class: "rz-proposal", hidden: true }, [
-      el("p", { class: "rz-ptitle", text: "Proposal (PowerPoint, 2 slides): your trade area, then a package summary (investment, targeted impressions, average CPM, clicks and leads) and the recommended platforms with why each one. Investment includes Adtaxi management. The file is editable." }),
+      el("p", { class: "rz-ptitle", text: "Proposal (PowerPoint, 2 slides): your trade area, then a package summary (investment, targeted impressions, reach and frequency, average CPM, clicks and leads) and the recommended platforms with why each one. Investment includes Adtaxi management. The file is editable." }),
       el("div", { class: "rz-pfields" }, [
         el("label", { class: "az-field" }, [el("span", { text: "Client or business name" }), this.pClient]),
         el("label", { class: "az-field rz-pcomp" }, [el("span", { text: "Local competitors" }), this.pComp]),
@@ -1042,7 +1042,7 @@
   Radius.prototype.proposalBase = function () { return (this.cfg.planScript || "../shared/media-plan.js").replace(/media-plan\.js.*$/, ""); };
   Radius.prototype.benchmarks = function () {
     var self = this;
-    if (!this._bench) this._bench = fetch(this.cfg.benchmarksData || this.proposalBase() + "benchmarks.json?v=20261024b").then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
+    if (!this._bench) this._bench = fetch(this.cfg.benchmarksData || this.proposalBase() + "benchmarks.json?v=20261024c").then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
     return this._bench.then(function (B) {
       if (!B) return null;
       var cat = self.cfg.planCategory && self.cfg.planCategory !== "none" ? self.cfg.planCategory : String(self.cfg.exportName || "").replace(/-radius$/, "").replace(/^apartment$/, "apartments");
@@ -1168,7 +1168,7 @@
       (has(["ctv"]) ? " and CTV completed views at a " + Math.round(P.EST.vcr * 1000) / 10 + "% completion rate (Innovid)" : "") +
       "; Google Search and Meta from WordStream 2026 benchmarks (" + (bench && bench.label ? bench.label : "all industries") + ", U.S. medians)" +
       (has(["youtube", "tiktok", "snapchat"]) ? "; YouTube, TikTok and Snapchat at 2026 cross-platform benchmark CPMs (Hubfluence)" : "") +
-      ", on the media portion of each investment. Leads: Search and Meta only; display, video and CTV also drive " + (PC.drives || "store visits and branded searches") + " not counted here." +
+      ", on the media portion of each investment. Reach and frequency are modeled: about 70% of targeted impressions assumed to land on the audience in the targeted ZIPs, with reach leveling off as frequency builds (at most 85% of the audience). Leads: Search and Meta only; display, video and CTV also drive " + (PC.drives || "store visits and branded searches") + " not counted here." +
       (adSub ? " Ad response: 2026 AudienceSCAN®, " + adNoun + " vs. all U.S. adults." : "") +
       (PC.note ? " " + PC.note : "") + " Audience: Census ACS and Adtaxi estimates." + (P.customRates() ? " Custom rates in use." : "");
     var client = (this.pClient.value || "").trim() || "Prepared for you";
@@ -1177,7 +1177,7 @@
     return {
       client: client, place: place, placeShort: placeShort, logoPng: logo, mapPng: this.mapImage(),
       mapCaption: "ZIPs shaded by concentration of " + audienceNoun + " (index vs. U.S.; darker is higher)." + (s.mode === "area" ? "" : " Dashed ring: " + s.r + "-mile radius.") + " Prepared by Adtaxi, " + d.toLocaleDateString("en-US", { month: "long", year: "numeric" }) + ".",
-      audienceNoun: audienceNoun, stats: { aud: aud, idx: idx, zips: rows.length, pop: pop }, topZips: top, competitors: comps,
+      audienceNoun: audienceNoun, stats: { aud: aud, idx: idx, zips: rows.length, pop: pop, planAud: pAud }, topZips: top, competitors: comps,
       topTitle: big ? "Largest above-average ZIPs" : "Highest-concentration ZIPs", topTown: oneTown ? top[0].town : null,
       strategy: PC.goals && PC.goals[A.strat.id] ? Object.assign({}, A.strat, { success: PC.goals[A.strat.id] }) : A.strat, plan: plan, total: total, footnote: foot,
       fileName: "Adtaxi proposal - " + client.replace(/[\\/:*?"<>|]/g, "") + " - " + d.toISOString().slice(0, 10) + ".pptx"
@@ -1188,7 +1188,7 @@
     if (!b.amount || !A.strat || !A.withDollars || !A.plan || !A.plan.tier || !A.channels.length) { st.textContent = "Enter a monthly budget and choose a media strategy first."; return Promise.resolve(null); }
     st.textContent = "Building…";
     var base = this.proposalBase();
-    return Promise.all([loadScriptOnce(this.cfg.pptxScript || "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261024b"), this.benchmarks(), this.logoImage()])
+    return Promise.all([loadScriptOnce(this.cfg.pptxScript || "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261024c"), this.benchmarks(), this.logoImage()])
       .then(function (res) { return window.AdtaxiProposal.build(self.proposalContext(res[2], res[3]), opt); })
       .then(function (out) { st.textContent = "Downloaded. Open it in PowerPoint or Google Slides to edit."; return out; })
       .catch(function (e) { st.textContent = "The proposal couldn't be built (" + e.message + "). Try again in a minute."; throw e; });

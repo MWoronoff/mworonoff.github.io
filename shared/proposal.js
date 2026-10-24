@@ -2,7 +2,8 @@
    Slide 1  Your trade area: map, prospects, index, top ZIPs, local competitors (typed by the rep).
    Slide 2  Recommended monthly investment & targeted impressions: each platform with its investment (management
             included), why it's recommended (ad response, audience concentration, its role) and estimated delivery,
-            after a package summary (investment, targeted impressions, average CPM, clicks, leads); then the goal.
+            after a package summary (investment, targeted impressions, reach and frequency, average CPM, clicks, leads);
+            then the goal.
    Uses PptxGenJS (loaded on demand). window.AdtaxiProposal.build(ctx) returns a Promise that resolves when the file
    is saved. ctx is assembled by shared/radius.js. */
 (function () {
@@ -87,6 +88,17 @@
     t.cpl = t.leads ? t.$leads / t.leads : null;
     return t;
   }
+  // Reach and frequency for the whole plan (not by platform: the same people overlap across channels). Modeled, not
+  // measured: ON_TARGET of targeted impressions land on the audience in the targeted ZIPs; reach follows a standard
+  // saturation curve, reach = MAX x (1 - e^(-OTS / K)), where OTS is on-target impressions per person, so it levels off
+  // as frequency builds instead of passing the audience size. Average frequency = on-target impressions / people reached.
+  var RF = { ON_TARGET: 0.70, MAX: 0.85, K: 3 };
+  function reachFreq(impr, aud) {
+    if (!impr || !aud || aud <= 0) return null;
+    var on = impr * RF.ON_TARGET, ots = on / aud, share = RF.MAX * (1 - Math.exp(-ots / RF.K));
+    var reach = share * aud;
+    return reach >= 1 ? { reach: reach, share: share, freq: on / reach } : null;
+  }
   var money2 = function (x) { return "$" + x.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
 
   function slideInvestment(pres, ctx) {
@@ -97,12 +109,14 @@
 
     // Package summary: one row of tiles
     var T = totals(ctx.plan), partial = T.nImpr && T.nImpr < T.n;
+    var R = reachFreq(T.impr, ctx.stats.planAud || ctx.stats.aud);
     var tiles = [
       [money(ctx.total), "Monthly investment", money(ctx.total * 3) + " for the first 3 months"],
       [T.impr ? approx(T.impr) : "—", "Targeted impressions", T.impr ? approx(T.impr * 3) + " over 3 months" + (T.views ? "\n" + approx(T.views) + " completed CTV views" : "") : "Estimate on request"],
+      [R ? approx(R.reach) : "—", "Est. monthly reach", R ? Math.round(R.share * 100) + "% of the audience, about " + (Math.round(R.freq * 10) / 10) + " times each" + (partial ? " (platforms with an estimate)" : "") : "Estimate on request"],
       [T.cpm != null ? money2(T.cpm) : "—", "Average CPM", partial ? "On platforms with an estimate" : "Investment per 1,000 targeted impressions"],
       [T.clicks ? approx(T.clicks) : "—", "Est. clicks", T.cpc != null ? money2(T.cpc) + " average cost per click" : ""],
-      [T.leads ? approx(T.leads) : "—", "Est. leads (Search & Meta)", T.cpl != null ? money(T.cpl) + " average cost per lead" : ""]
+      [T.leads ? approx(T.leads) : "—", "Est. leads", "Search & Meta" + (T.cpl != null ? ", " + money(T.cpl) + " average cost per lead" : "")]
     ];
     var gap = 0.1, tw = (9.2 - gap * (tiles.length - 1)) / tiles.length, ty = 1.82, th = 0.95;
     s.addText("PACKAGE SUMMARY", { x: 0.4, y: ty, w: 4, h: 0.22, fontFace: FONT, fontSize: 8.5, bold: true, color: C.teal, charSpacing: 1, margin: 0, isTextBox: true });
@@ -110,7 +124,7 @@
     tiles.forEach(function (t, i) {
       var x = 0.4 + i * (tw + gap), first = i === 0;
       s.addShape(pres.shapes.ROUNDED_RECTANGLE, { x: x, y: ty, w: tw, h: th, fill: { color: first ? C.teal : C.mint }, line: { color: first ? C.teal : C.mint }, rectRadius: 0.06 });
-      s.addText(t[0], { x: x + 0.08, y: ty + 0.06, w: tw - 0.16, h: 0.38, fontFace: FONT, fontSize: 17, bold: true, color: first ? C.white : C.teal, margin: 0, isTextBox: true });
+      s.addText(t[0], { x: x + 0.08, y: ty + 0.06, w: tw - 0.16, h: 0.38, fontFace: FONT, fontSize: tiles.length > 5 ? 15 : 17, bold: true, color: first ? C.white : C.teal, margin: 0, isTextBox: true });
       s.addText(t[1], { x: x + 0.08, y: ty + 0.44, w: tw - 0.16, h: 0.2, fontFace: FONT, fontSize: 8.5, bold: true, color: first ? C.white : C.ink, margin: 0, isTextBox: true });
       if (t[2]) s.addText(t[2], { x: x + 0.08, y: ty + 0.64, w: tw - 0.16, h: 0.27, fontFace: FONT, fontSize: 7.5, color: first ? C.mint : C.muted, margin: 0, valign: "top", isTextBox: true });
     });
