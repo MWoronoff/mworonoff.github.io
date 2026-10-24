@@ -1,4 +1,4 @@
-/* Adtaxi Customer Market Analyzer.
+/* Adtaxi Customer Analysis (CRM).
    Reads a customer file in the browser (nothing is uploaded), compares customers in each ZIP with the number expected
    from the ZIP's households and its distance from the business, profiles the over-performing ZIPs, and scores every ZIP
    in a wider search area on how closely it resembles them. Data: data/zips.json, data/fields.json, data/st/XX.json,
@@ -1123,7 +1123,7 @@
     var m = el("dialog", { class: "az-modal", "aria-label": "How it works", onclick: function (e) { if (e.target === m) close(); }, oncancel: function (e) { e.preventDefault(); close(); } }, [
       el("div", { class: "az-modal-body" }, [
         el("button", { class: "az-modal-close", type: "button", "aria-label": "Close", text: "×", onclick: close }),
-        el("h2", { text: "How the Customer Market Analyzer works" }),
+        el("h2", { text: "How Customer Analysis (CRM) works" }),
         el("h3", { text: "Your data stays with you" }),
         el("p", { text: "The customer file is read by your browser. Only ZIP codes and amounts are kept, and only in this page's memory; nothing is sent to a server. Closing the page clears it." }),
         el("h3", { text: "Expected customers" }),

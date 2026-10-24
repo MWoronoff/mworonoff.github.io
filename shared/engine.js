@@ -208,7 +208,7 @@
     "ZIPs under 500 residents, and ZIPs that are mostly group quarters (campuses, bases, prisons), are shown but not ranked." ] };
 
   /* ---------- URL state ---------- */
-  // Link to the Customer Market Analyzer with this analyzer's category, subcategory and selected DMA
+  // Link to the Customer Analysis (CRM) with this analyzer's category, subcategory and selected DMA
   Analyzer.prototype.crmUrl = function () {
     var s = this.state, cfg = this.cfg, q = [];
     q.push("category=" + encodeURIComponent(cfg.exportName || ""));
