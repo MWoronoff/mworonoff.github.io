@@ -242,6 +242,31 @@ button, input, select { font: inherit; color: inherit; }
 .rz-stat-main b { font-size: 30px; color: var(--teal); }
 .rz-summary .az-empty { background: #fff; padding: 14px; margin: 0; grid-column: 1 / -1; }
 .rz-map { height: 520px; }
+.rz-stat-key b { color: var(--teal); font-size: 24px; }
+.rz-summary-note { grid-column: 1 / -1; margin: 0; background: #fff; padding: 9px 14px; font-size: 12px; color: var(--muted); border-top: 1px solid var(--line); }
+/* Trade area map: legend in a strip under the map (never over the ZIPs), market buttons and side-by-side market panels */
+.rz-map-panel { display: flex; flex-direction: column; }
+.rz-legend { position: static; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; border: 0; border-top: 1px solid var(--line); border-radius: 0; background: #fff; padding: 9px 14px; }
+.rz-legend .az-legend-row { margin: 0; }
+.rz-legend-title { color: var(--navy); }
+.rz-legend-hint { margin-left: auto; color: var(--muted); }
+.rz-mkts { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 12px; border-bottom: 1px solid var(--line); background: #fff; }
+.rz-mkts[hidden], .rz-minis[hidden] { display: none; }
+.rz-mkt { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; font: inherit; text-align: left; cursor: pointer;
+  border: 1px solid var(--line); border-radius: 8px; background: #fff; padding: 6px 11px; color: var(--ink); }
+.rz-mkt b { font-size: 13px; color: var(--navy); }
+.rz-mkt span { font-size: 11.5px; color: var(--muted); }
+.rz-mkt:hover { border-color: var(--teal); }
+.rz-mkt.on { background: var(--navy); border-color: var(--navy); }
+.rz-mkt.on b, .rz-mkt.on span { color: #fff; }
+.rz-minis { --rz-cols: 3; display: grid; grid-template-columns: repeat(var(--rz-cols), minmax(0, 1fr)); gap: 1px; background: var(--line); }
+.rz-mini { background: #fff; display: flex; flex-direction: column; min-width: 0; }
+.rz-mini-head { font: inherit; text-align: left; cursor: pointer; border: 0; background: #fff; padding: 9px 12px 7px; display: flex; flex-direction: column; gap: 1px; }
+.rz-mini-head b { color: var(--navy); font-size: 13.5px; }
+.rz-mini-head span { color: var(--muted); font-size: 12px; }
+.rz-mini-head:hover b { color: var(--teal); text-decoration: underline; }
+.rz-mini-map { height: 300px; background: #f7fafc; }
+.rz-mini-map.leaflet-container { font: inherit; background: #f7fafc; }
 .az-table th.rz-l, .az-table td.rz-l { text-align: left; }
 .az-table td.rz-l + td.rz-l { white-space: normal; font-weight: 600; color: var(--navy); }
 a.az-btn { display: inline-block; text-decoration: none; text-align: center; }
@@ -250,6 +275,12 @@ a.az-btn { display: inline-block; text-decoration: none; text-align: center; }
   .rz-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .rz-stat-main { grid-column: 1 / -1; }
   .rz-map { height: 400px; }
+  .rz-minis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .rz-mini-map { height: 240px; }
+  .rz-legend-hint { margin-left: 0; width: 100%; }
+}
+@media (max-width: 600px) {
+  .rz-minis { grid-template-columns: 1fr; }
 }
 
 /* Optional count overlay (e.g. contractor locations) */

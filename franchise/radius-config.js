@@ -28,7 +28,7 @@ window.ADTAXI_RADIUS = {
   }
  ],
  "zipGeo": "../shared/geo/zip/{level}/{id}.json",
- "planScript": "../shared/media-plan.js?v=20261023v",
+ "planScript": "../shared/media-plan.js?v=20261024a",
  "mediaMixUrl": "../media-mix/",
  "planCategory": "none",
  "customArea": true,
@@ -47,7 +47,7 @@ window.ADTAXI_RADIUS = {
   "income8",
   "veterans"
  ],
- "profileLabel": "Best prospects for",
+ "profileLabel": "Owner profile",
  "proposal": {
   "nouns": {
    "exec": "adults who fit the master franchise candidate profile",
@@ -73,6 +73,10 @@ window.ADTAXI_RADIUS = {
   "drives": "visits to the franchise site and branded searches",
   "note": "Franchise leads: the 2026 Annual Franchise Development Report puts average cost per lead at $142 to $802 and average cost per franchise sale at $6,700 to $25,145, depending on the sector; this proposal doesn't forecast sales."
  },
+ "audienceNoun": "Qualified adults",
+ "audienceFit": "fit the {profile} profile by age and income",
+ "leadWithIndex": true,
+ "summaryNote": "A planning pool, not a buyer count: only a small fraction of qualified adults buy a franchise in any year. The index shows where candidates are most concentrated, so use it to decide where to spend.",
  "profiles": [
   {
    "id": "exec",
@@ -98,10 +102,9 @@ window.ADTAXI_RADIUS = {
   {
    "id": "owner",
    "label": "First-time franchise buyers",
-   "note": "Adults 25 and older in households earning $100K+: Millennial, Gen X and Boomer buyers making a career change. The IRS share of returns with $200K+ income shows by ZIP.",
+   "note": "Adults 35 and older in households earning $100K+: most people who buy a business are 40 to 60, often making a career change. The IRS share of returns with $200K+ income shows by ZIP.",
    "sel": {
     "age": [
-     "25_34",
      "35_44",
      "45_54",
      "55p"
@@ -122,6 +125,14 @@ window.ADTAXI_RADIUS = {
   {
    "title": "Who counts",
    "body": "Counts are adults by age and household income (Census). Census doesn't publish net worth or job titles by ZIP, so household income stands in for capital, and the profiles are planning estimates, not lists of people."
+  },
+  {
+   "title": "Qualified adults vs. buyers",
+   "body": "Qualified adults are everyone who fits the owner profile's age and income, the pool that ads can reach. Only a small fraction buy a franchise in any year (the industry adds roughly 12,000 to 13,000 net new units a year, and many go to existing multi-unit owners), so the count sizes the reachable audience, not the number of buyers. The index is the better guide to where to spend."
+  },
+  {
+   "title": "Age",
+   "body": "First-time buyers start at 35: most people who buy a business are 40 to 60 (BizBuySell Small Business Study). Census age groups end at 55 and older, so that group includes some retirees."
   },
   {
    "title": "Tax return rates",

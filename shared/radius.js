@@ -463,10 +463,12 @@
 
     // Summary + map
     this.summary = el("div", { class: "rz-summary", "aria-live": "polite" });
-    this.legend = el("div", { class: "az-legend", "aria-label": "Map legend" });
+    this.legend = el("div", { class: "az-legend rz-legend", "aria-label": "Map legend" });
+    this.mktBar = el("div", { class: "rz-mkts", role: "group", "aria-label": "Markets in the area", hidden: true });
+    this.miniGrid = el("div", { class: "rz-minis", hidden: true });
     this.mapEl = el("div", { class: "az-map rz-map", role: "region", "aria-label": "Map of ZIPs in the radius" });
     this.extra = el("div", { class: "rz-extra" });   // filled by an analyzer page that embeds the tool (ad response and category ad spend, below the ZIP table)
-    var right = el("div", { class: "rz-right" }, [this.summary, el("div", { class: "az-panel az-map-panel" }, [this.mapEl, this.legend])]);
+    var right = el("div", { class: "rz-right" }, [this.summary, el("div", { class: "az-panel az-map-panel rz-map-panel" }, [this.mktBar, this.mapEl, this.miniGrid, this.legend])]);
 
     // Table
     this.tableTitle = el("h2"); this.tableNote = el("span");
@@ -692,6 +694,7 @@
               "Enter a ZIP or town and choose a radius to see the audience.";
     this.rows = null; this.mapToken = (this.mapToken || 0) + 1;
     ["circle", "centerMark", "zipLayer", "areaLayer"].forEach(function (k) { if (this[k]) { this.map.removeLayer(this[k]); this[k] = null; } }, this);
+    if (this.map) this.clearMarkets();
     if (hasZip && this.map) this.map.setView([this.c.lat[this.byZip[s.zip]], this.c.lon[this.byZip[s.zip]]], 9);
     this.summary.innerHTML = "";
     this.summary.appendChild(el("p", { class: "az-empty", text: msg }));
@@ -705,18 +708,27 @@
     var ci = this.byZip[s.zip];
     this.summary.innerHTML = "";
     var stat = function (val, label) { return el("div", { class: "rz-stat" }, [el("b", { class: "num", text: val }), el("span", { text: label })]); };
-    this.summary.appendChild(el("div", { class: "rz-stat rz-stat-main" }, [
-      el("b", { class: "num", text: NF0.format(Math.round(A)) }),
-      el("span", { text: (s.profile ? "Best prospects for " + this.profiles[s.profile].label + ", e" : est ? "E" : "") + (s.profile || est ? "stimated audience" : "Audience") + (s.mode === "area" ? " in the custom area (" + this.areaPhrase() + ")" : " within " + s.r + " miles of " + s.zip + " " + c.city[ci] + ", " + c.state[ci]) + (s.minIndex ? " (ZIPs at index " + s.minIndex + "+)" : "") })]));
-    this.summary.appendChild(stat(share == null ? "—" : NF1.format(share * 100) + "%", "Share of population"));
-    this.summary.appendChild(stat(idx == null ? "—" : NF0.format(idx), "Index vs. U.S. (100 = average)"));
+    var cfg = this.cfg, where = s.mode === "area" ? " in the custom area (" + this.areaPhrase() + ")" : " within " + s.r + " miles of " + s.zip + " " + c.city[ci] + ", " + c.state[ci];
+    var minTxt = s.minIndex ? " (ZIPs at index " + s.minIndex + "+)" : "", label;
+    if (cfg.audienceNoun) {   // e.g. franchise: "Qualified adults", a reachable pool rather than a count of likely buyers
+      label = cfg.audienceNoun + (est ? " (estimated)" : "") + where + minTxt +
+        (s.profile && cfg.audienceFit ? ": " + cfg.audienceFit.replace("{profile}", this.profiles[s.profile].label) : "");
+    } else {
+      label = (s.profile ? "Best prospects for " + this.profiles[s.profile].label + ", e" : est ? "E" : "") + (s.profile || est ? "stimated audience" : "Audience") + where + minTxt;
+    }
+    this.summary.appendChild(el("div", { class: "rz-stat rz-stat-main" }, [el("b", { class: "num", text: NF0.format(Math.round(A)) }), el("span", { text: label })]));
+    var shareStat = stat(share == null ? "—" : NF1.format(share * 100) + "%", "Share of population");
+    var idxStat = stat(idx == null ? "—" : NF0.format(idx), "Index vs. U.S. (100 = average)");
+    if (cfg.leadWithIndex) { idxStat.classList.add("rz-stat-key"); this.summary.appendChild(idxStat); this.summary.appendChild(shareStat); }
+    else { this.summary.appendChild(shareStat); this.summary.appendChild(idxStat); }
     this.summary.appendChild(stat(NF0.format(rows.length), "ZIPs"));
     this.summary.appendChild(stat(NF0.format(P), "Population"));
+    if (cfg.summaryNote) this.summary.appendChild(el("p", { class: "rz-summary-note", text: cfg.summaryNote }));
   };
   // Context columns for the current preset (or the tool's default list when no preset is chosen)
   Radius.prototype.contextKeys = function () {
     var p = this.state.profile && this.profiles[this.state.profile];
-    var keys = (p && p.context) || (!p && this.cfg.context) || [];
+    var keys = (p && p.context) || (!p && Array.isArray(this.cfg.contextCols) && this.cfg.contextCols) || [];   // cfg.context is the proposal callback, not a column list
     return keys.filter(function (k) { return CONTEXT[k]; });
   };
   Radius.prototype.addContext = function (rows) {
@@ -775,7 +787,7 @@
     if (window.AdtaxiPlan) { done(); return; }
     if (loadPlan.waiting) { loadPlan.waiting.push(done); return; }
     loadPlan.waiting = [done];
-    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261023v";
+    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261024a";
     sc.onload = function () { var w = loadPlan.waiting; loadPlan.waiting = null; w.forEach(function (f) { f(); }); };
     sc.onerror = function () { loadPlan.waiting = null; };
     document.head.appendChild(sc);
@@ -1027,7 +1039,7 @@
   Radius.prototype.proposalBase = function () { return (this.cfg.planScript || "../shared/media-plan.js").replace(/media-plan\.js.*$/, ""); };
   Radius.prototype.benchmarks = function () {
     var self = this;
-    if (!this._bench) this._bench = fetch(this.cfg.benchmarksData || this.proposalBase() + "benchmarks.json?v=20261023v").then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
+    if (!this._bench) this._bench = fetch(this.cfg.benchmarksData || this.proposalBase() + "benchmarks.json?v=20261024a").then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
     return this._bench.then(function (B) {
       if (!B) return null;
       var cat = self.cfg.planCategory && self.cfg.planCategory !== "none" ? self.cfg.planCategory : String(self.cfg.exportName || "").replace(/-radius$/, "").replace(/^apartment$/, "apartments");
@@ -1173,7 +1185,7 @@
     if (!b.amount || !A.strat || !A.withDollars || !A.plan || !A.plan.tier || !A.channels.length) { st.textContent = "Enter a monthly budget and choose a media strategy first."; return Promise.resolve(null); }
     st.textContent = "Building…";
     var base = this.proposalBase();
-    return Promise.all([loadScriptOnce(this.cfg.pptxScript || "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261023v"), this.benchmarks(), this.logoImage()])
+    return Promise.all([loadScriptOnce(this.cfg.pptxScript || "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261024a"), this.benchmarks(), this.logoImage()])
       .then(function (res) { return window.AdtaxiProposal.build(self.proposalContext(res[2], res[3]), opt); })
       .then(function (out) { st.textContent = "Downloaded. Open it in PowerPoint or Google Slides to edit."; return out; })
       .catch(function (e) { st.textContent = "The proposal couldn't be built (" + e.message + "). Try again in a minute."; throw e; });
@@ -1184,7 +1196,7 @@
     var s = this.state, c = this.c, ci = this.byZip[s.zip];
     var where = s.mode === "area" ? "Custom area: " + this.areaPhrase() : "Within " + s.r + " miles of " + s.zip + " " + c.city[ci] + ", " + c.state[ci];
     printLeaveBehind(this.cfg.logo, [this.cfg.printTitle || this.cfg.title, where, "Audience: " + this.describe(), "Prepared by Adtaxi \u00b7 " +
-      new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })], [this.map]);
+      new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })], this.mapEl.style.display === "none" ? this.minis : [this.map]);
   };
 
   Radius.prototype.sortRows = function (rows) {
@@ -1204,6 +1216,144 @@
     for (var k = 0; k < CLASSES.length; k++) if (idx >= CLASSES[k][0] && idx < CLASSES[k][1]) return cssVar(CLASSES[k][2]);
     return cssVar("--nodata");
   };
+  // Faint state lines for context on every map (main and market panels), drawn above the ZIP shading
+  Radius.prototype.loadStates = function () {
+    var self = this;
+    if (this.statesP) return this.statesP;
+    var url = this.cfg.statesGeo || this.cfg.zipGeo.replace(/zip\/\{level\}\/\{id\}\.json$/, "states.topo.json");
+    return (this.statesP = fetch(url).then(function (r) { return r.ok ? r.json() : null; }).then(function (t) {
+      self.statesFC = t ? topojson.mesh(t, t.objects[Object.keys(t.objects)[0]], function (a, b) { return a !== b; }) : null;
+    }).catch(function () { self.statesFC = null; }));
+  };
+  Radius.prototype.addStates = function (map) {
+    if (!this.statesFC) return null;
+    if (!map.getPane("rzStates")) { var pn = map.createPane("rzStates"); pn.style.zIndex = 420; pn.style.pointerEvents = "none"; }
+    return L.geoJSON(this.statesFC, { pane: "rzStates", interactive: false, style: { color: "#6f8296", weight: 1.1, opacity: 0.75, fill: false } }).addTo(map);
+  };
+  // Custom areas that span distant places (New York + Boston + San Francisco) are split into markets: groups of ZIPs
+  // whose centers touch on a grid of half-degree cells (about 30 miles). Very small groups join the nearest market.
+  Radius.prototype.clusters = function (rows) {
+    var c = this.c, cellOf = {}, cells = {}, CELL = 0.5;
+    rows.forEach(function (r) {
+      var k = Math.floor(c.lat[r.i] / CELL) + ":" + Math.floor(c.lon[r.i] / CELL);
+      (cells[k] = cells[k] || []).push(r); cellOf[r.zip] = k;
+    });
+    var seen = {}, groups = [];
+    Object.keys(cells).forEach(function (k0) {
+      if (seen[k0]) return;
+      var stack = [k0], g = []; seen[k0] = 1;
+      while (stack.length) {
+        var k = stack.pop(), a = k.split(":"), y = +a[0], x = +a[1];
+        g = g.concat(cells[k]);
+        for (var dy = -1; dy <= 1; dy++) for (var dx = -1; dx <= 1; dx++) {
+          var n = (y + dy) + ":" + (x + dx);
+          if (cells[n] && !seen[n]) { seen[n] = 1; stack.push(n); }
+        }
+      }
+      groups.push(g);
+    });
+    var centroid = function (g) {
+      var la = 0, lo = 0; g.forEach(function (r) { la += c.lat[r.i]; lo += c.lon[r.i]; });
+      return [la / g.length, lo / g.length];
+    };
+    groups.sort(function (a, b) { return b.length - a.length; });
+    var minSize = Math.max(3, Math.round(rows.length * 0.02));
+    var major = groups.filter(function (g, i) { return i === 0 || g.length >= minSize; }).slice(0, 6);
+    var cents = major.map(centroid);
+    groups.forEach(function (g) {
+      if (major.indexOf(g) >= 0) return;
+      var m = centroid(g), best = 0, bd = Infinity;
+      cents.forEach(function (q, j) { var d = miles(m[0], m[1], q[0], q[1]); if (d < bd) { bd = d; best = j; } });
+      Array.prototype.push.apply(major[best], g);
+    });
+    var self = this, names = (this.markets && this.markets.dma) || {};
+    return major.map(function (g) {
+      var A = 0, P = 0, b = L.latLngBounds([]), byDma = {}, set = {};
+      g.forEach(function (r) {
+        set[r.zip] = 1; b.extend([c.lat[r.i], c.lon[r.i]]);
+        if (r.aud != null) { A += r.aud; P += r.pop || 0; }
+        if (r.dma && r.dma !== "0") byDma[r.dma] = (byDma[r.dma] || 0) + (r.pop || 0);
+      });
+      var d = Object.keys(byDma).sort(function (x, y) { return byDma[y] - byDma[x]; });
+      var top = d[0] && names[d[0]];
+      var name = top ? top + (d.length > 1 ? " area" : " DMA") : (g[0].town || "Market");
+      var share = P ? A / P : null;
+      return { rows: g, zips: set, bounds: b, aud: A, pop: P, idx: share != null && self.natRate ? share / self.natRate * 100 : null, name: name, center: centroid(g) };
+    }).sort(function (a, b) { return b.aud - a.aud; });
+  };
+  Radius.prototype.zipStyle = function (byZip, vis) {
+    var self = this;
+    return function (f) {
+      var r = byZip[f.properties.zip], on = vis[f.properties.zip];
+      return { color: "#ffffff", weight: 0.7, fillOpacity: on ? 0.9 : 0.25, fillColor: self.colorFor(r && r.idx) };
+    };
+  };
+  Radius.prototype.zipTip = function (r) {
+    return '<div class="az-tip"><b>' + r.zip + " " + r.town + "</b><br>" + (r.aud == null ? "No data" : NF0.format(Math.round(r.aud)) + " people, index " + (r.idx == null ? "—" : NF0.format(r.idx))) + "</div>";
+  };
+  Radius.prototype.clearMarkets = function () {
+    (this.minis || []).forEach(function (m) { m.remove(); });
+    this.minis = []; this.mkts = null; this.mktView = null;
+    if (this.mktBar) { this.mktBar.hidden = true; this.mktBar.innerHTML = ""; }
+    if (this.miniGrid) { this.miniGrid.hidden = true; this.miniGrid.innerHTML = ""; }
+    if (this.mapEl && this.mapEl.style.display === "none") { this.mapEl.style.display = ""; this.map.invalidateSize(); }
+  };
+  // "All markets" shows one zoomed panel per market; a market button (or a panel) zooms the main map to that market
+  Radius.prototype.showMarket = function (k) {
+    var self = this, M = this.mkts;
+    if (!M) return;
+    this.mktView = k;
+    Array.prototype.forEach.call(this.mktBar.children, function (b, j) { b.classList.toggle("on", (k === "all" && j === 0) || j === k + 1); b.setAttribute("aria-pressed", String((k === "all" && j === 0) || j === k + 1)); });
+    if (k === "all") {
+      this.mapEl.style.display = "none"; this.miniGrid.hidden = false;
+      if (!this.minis.length) this.buildMinis();
+      this.minis.forEach(function (m, j) { m.invalidateSize(); m.fitBounds(M[j].bounds, { padding: [10, 10], maxZoom: 10, animate: false }); });
+    } else {
+      this.miniGrid.hidden = true; this.mapEl.style.display = "";
+      this.map.invalidateSize();
+      this.map.fitBounds(M[k].bounds, { padding: [24, 24], maxZoom: 11 });
+    }
+  };
+  Radius.prototype.buildMinis = function () {
+    var self = this, byZip = this.mapByZip, vis = this.mapVis;
+    this.miniGrid.innerHTML = "";
+    this.miniGrid.style.setProperty("--rz-cols", this.mkts.length <= 2 ? this.mkts.length : this.mkts.length === 4 ? 2 : 3);
+    this.minis = this.mkts.map(function (m, j) {
+      var box = el("div", { class: "rz-mini-map" });
+      var head = el("button", { type: "button", class: "rz-mini-head", title: "Zoom in on " + m.name, onclick: function () { self.showMarket(j); } }, [
+        el("b", { text: m.name }),
+        el("span", { text: NF0.format(Math.round(m.aud)) + " · index " + (m.idx == null ? "—" : NF0.format(m.idx)) + " · " + NF0.format(m.rows.length) + " ZIPs" })]);
+      self.miniGrid.appendChild(el("div", { class: "rz-mini" }, [head, box]));
+      var mm = L.map(box, { zoomControl: false, attributionControl: false, dragging: false, scrollWheelZoom: false, doubleClickZoom: false, boxZoom: false,
+                            keyboard: false, touchZoom: false, zoomSnap: 0.25 });
+      var feats = self.mapFeats.filter(function (f) { return m.zips[f.properties.zip]; });
+      L.geoJSON({ type: "FeatureCollection", features: feats }, {
+        renderer: feats.length > 1200 ? L.canvas({ padding: 0.3 }) : undefined,
+        style: self.zipStyle(byZip, vis),
+        onEachFeature: function (f, layer) { var r = byZip[f.properties.zip]; layer.bindTooltip(function () { return self.zipTip(r); }, { sticky: true, opacity: 0.97 }); }
+      }).addTo(mm);
+      self.addStates(mm);
+      mm.fitBounds(m.bounds, { padding: [10, 10], maxZoom: 10, animate: false });
+      return mm;
+    });
+  };
+  Radius.prototype.renderMarkets = function (moved) {
+    var self = this, s = this.state;
+    var M = s.mode === "area" && this.rows.length ? this.clusters(this.rows) : [];
+    var far = false;
+    for (var a = 0; a < M.length; a++) for (var b = a + 1; b < M.length; b++) if (miles(M[a].center[0], M[a].center[1], M[b].center[0], M[b].center[1]) > 250) far = true;
+    var prev = this.mktView, prevN = this.mkts ? this.mkts.length : 0;
+    (this.minis || []).forEach(function (m) { m.remove(); }); this.minis = [];
+    if (M.length < 2 || !far) { this.clearMarkets(); return; }
+    this.mkts = M;
+    this.mktBar.innerHTML = ""; this.mktBar.hidden = false;
+    this.mktBar.appendChild(el("button", { type: "button", class: "rz-mkt", onclick: function () { self.showMarket("all"); } }, [el("b", { text: "All markets" }), el("span", { text: M.length + " side by side" })]));
+    M.forEach(function (m, j) {
+      self.mktBar.appendChild(el("button", { type: "button", class: "rz-mkt", onclick: function () { self.showMarket(j); } }, [
+        el("b", { text: m.name }), el("span", { text: NF0.format(Math.round(m.aud)) + " · index " + (m.idx == null ? "—" : NF0.format(m.idx)) })]));
+    });
+    this.showMarket(moved || prev == null || prevN !== M.length ? "all" : prev);
+  };
   Radius.prototype.renderMap = function (moved) {
     var self = this, s = this.state, c = this.c;
     ["circle", "centerMark", "areaLayer"].forEach(function (k) { if (this[k]) { this.map.removeLayer(this[k]); this[k] = null; } }, this);
@@ -1220,6 +1370,7 @@
       });
       if (moved && bounds.isValid()) this.map.fitBounds(bounds.pad(0.05), { padding: [16, 16], maxZoom: 11 });
     } else {
+      this.clearMarkets();
       var ci = this.byZip[s.zip], center = [c.lat[ci], c.lon[ci]];
       this.circle = L.circle(center, { radius: s.r * 1609.34, color: "#0f2742", weight: 2, dashArray: "6 5", fill: false, interactive: false }).addTo(this.map);
       this.centerMark = L.circleMarker(center, { radius: 6, color: "#fff", weight: 2, fillColor: "#0f2742", fillOpacity: 1 }).bindTooltip("Center: " + s.zip).addTo(this.map);
@@ -1235,7 +1386,7 @@
       return fetch(u).then(function (r) { return r.ok ? r.json() : null; }).then(function (t) {
         self.geo[u] = t ? topojson.feature(t, t.objects[Object.keys(t.objects)[0]]) : null;
       }).catch(function () { self.geo[u] = null; });
-    })).then(function () {
+    }).concat([this.loadStates(), s.mode === "area" ? this.loadMarkets() : null])).then(function () {
       if (token !== self.mapToken) return;   // a newer update has started
       if (self.zipLayer) self.map.removeLayer(self.zipLayer);
       var feats = [];
@@ -1245,28 +1396,30 @@
       if (feats.length > 1200 && !self.canvas) self.canvas = L.canvas({ padding: 0.3 });
       self.zipLayer = L.geoJSON({ type: "FeatureCollection", features: feats }, {
         renderer: feats.length > 1200 ? self.canvas : undefined,
-        style: function (f) {
-          var r = byZip[f.properties.zip], on = vis[f.properties.zip];
-          return { color: "#ffffff", weight: 0.7, fillOpacity: on ? 0.9 : 0.25, fillColor: self.colorFor(r && r.idx) };
-        },
+        style: self.zipStyle(byZip, vis),
         onEachFeature: function (f, layer) {
           var r = byZip[f.properties.zip]; self.layerByZip[f.properties.zip] = layer;
-          layer.bindTooltip(function () {
-            return '<div class="az-tip"><b>' + r.zip + " " + r.town + "</b><br>" + (r.aud == null ? "No data" : NF0.format(Math.round(r.aud)) + " people, index " + (r.idx == null ? "—" : NF0.format(r.idx))) + "</div>";
-          }, { sticky: true, opacity: 0.97 });
+          layer.bindTooltip(function () { return self.zipTip(r); }, { sticky: true, opacity: 0.97 });
         }
       }).addTo(self.map);
+      if (!self.statesLayer) self.statesLayer = self.addStates(self.map);
       if (self.circle) { self.circle.bringToFront(); self.centerMark.bringToFront(); }
       if (self.areaLayer) self.areaLayer.eachLayer(function (l) { l.bringToFront(); });
+      if (s.mode === "area") self.renderMarkets(moved);
     });
     this.legend.innerHTML = "";
-    this.legend.appendChild(el("div", { class: "az-legend-row" }, [el("b", { text: "Index vs. U.S." })]));
-    for (var k = CLASSES.length - 1; k >= 0; k--) this.legend.appendChild(el("div", { class: "az-legend-row" }, [el("span", { class: "az-swatch", style: "background:" + cssVar(CLASSES[k][2]) }), el("span", { text: CLASSES[k][3] })]));
-    this.legend.appendChild(el("div", { class: "az-legend-row" }, [el("span", { class: "az-swatch nodata" }), el("span", { text: "No data" })]));
+    this.legend.appendChild(el("b", { class: "rz-legend-title", text: "Index vs. U.S." }));
+    for (var k = CLASSES.length - 1; k >= 0; k--) this.legend.appendChild(el("span", { class: "az-legend-row" }, [el("span", { class: "az-swatch", style: "background:" + cssVar(CLASSES[k][2]) }), el("span", { text: CLASSES[k][3] })]));
+    this.legend.appendChild(el("span", { class: "az-legend-row" }, [el("span", { class: "az-swatch nodata" }), el("span", { text: "No data" })]));
+    this.legend.appendChild(el("span", { class: "rz-legend-hint", text: "Point to a ZIP for its audience and index." }));
   };
   Radius.prototype.flash = function (zip) {
     var l = this.layerByZip && this.layerByZip[zip];
     if (!l) return;
+    if (this.mkts && this.mapEl.style.display === "none") {   // in the side-by-side view: open the main map first
+      var j = -1; this.mkts.forEach(function (m, k) { if (m.zips[zip]) j = k; });
+      this.showMarket(j >= 0 ? j : 0);
+    }
     this.map.fitBounds(l.getBounds(), { maxZoom: 11, padding: [60, 60] });
     l.setStyle({ color: "#0f2742", weight: 3 }); l.bringToFront(); l.openTooltip();
     setTimeout(function () { l.setStyle({ color: "#ffffff", weight: 0.7 }); }, 2500);
@@ -1284,7 +1437,7 @@
     var p = this.state.profile && this.profiles[this.state.profile];
     if (p && p.either) parts.push("and either " + p.either.map(function (x) { return x.text; }).join(" or "));
     var out = parts.length ? parts.join("; ") : "Everyone";
-    return p ? "Best prospects for " + p.label + ": " + out : out;
+    return p ? (this.cfg.audienceNoun ? this.cfg.audienceNoun + ", " + p.label + " profile: " : "Best prospects for " + p.label + ": ") + out : out;
   };
   Radius.prototype.exportCSV = function () {
     if (!this.rows) return;
