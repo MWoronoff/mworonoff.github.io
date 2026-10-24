@@ -28,7 +28,7 @@ window.ADTAXI_RADIUS = {
   }
  ],
  "zipGeo": "../shared/geo/zip/{level}/{id}.json",
- "planScript": "../shared/media-plan.js?v=20261024a",
+ "planScript": "../shared/media-plan.js?v=20261024b",
  "mediaMixUrl": "../media-mix/",
  "planCategory": "none",
  "customArea": true,
@@ -81,7 +81,7 @@ window.ADTAXI_RADIUS = {
   {
    "id": "exec",
    "label": "Master franchise candidates",
-   "note": "Adults 35 and older in households earning $125K+, including first-time franchise buyers. IRS shares of returns with $200K+ income and with capital gains show by ZIP.",
+   "note": "Adults 35 and older in households earning $125K+, including first-time franchise buyers. IRS shares of returns with $200K+ income and with capital gains, and the share of adults with a bachelor's degree or higher, show by ZIP.",
    "sel": {
     "age": [
      "35_44",
@@ -96,7 +96,8 @@ window.ADTAXI_RADIUS = {
    },
    "context": [
     "hi200",
-    "cg"
+    "cg",
+    "ba"
    ]
   },
   {
@@ -135,8 +136,8 @@ window.ADTAXI_RADIUS = {
    "body": "First-time buyers start at 35: most people who buy a business are 40 to 60 (BizBuySell Small Business Study). Census age groups end at 55 and older, so that group includes some retirees."
   },
   {
-   "title": "Tax return rates",
-   "body": "The $200K+ income, capital gains and self-employment figures are IRS shares of tax returns in each ZIP. They describe the ZIP, not individual households, so they show as columns and aren't applied to the count."
+   "title": "ZIP-wide rates",
+   "body": "The $200K+ income, capital gains and self-employment figures are IRS shares of tax returns in each ZIP, and Bachelor's+ is the Census share of adults 25+ with a bachelor's degree or higher. They describe the ZIP, not individual households, so they show as columns and aren't applied to the count. Census doesn't publish education by age and income for ZIPs, and degrees are far more common among high earners than among all adults, so applying the ZIP rate would badly undercount."
   },
   {
    "title": "Reaching these candidates",

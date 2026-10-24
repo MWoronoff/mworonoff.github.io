@@ -217,6 +217,7 @@
   /* ZIP context columns: area rates shown beside each ZIP (and sortable), not applied to people as filters.
      IRS shares of returns and CDC PLACES adult rates are ZIP-level estimates; they say how common something is
      in a ZIP, not who it applies to. A preset lists its columns in context and can rank by one with sortBy. */
+  function listAnd(a) { return a.length < 3 ? a.join(" and ") : a.slice(0, -1).join(", ") + " and " + a[a.length - 1]; }
   function per1000(c, i, k) { var v = c[k] ? c[k][i] : null; return v == null ? null : Math.min(1, v / 1000); }
   function presetSort(p) { return p && p.sortBy && CONTEXT[p.sortBy] ? "x_" + p.sortBy : "idx"; }
   var CONTEXT = {
@@ -234,7 +235,9 @@
     obesity:  { label: "Obesity", long: "Share of adults with obesity (CDC PLACES)", value: function (c, i) { return per1000(c, i, "obesity"); } },
     depression:{ label: "Depression", long: "Share of adults ever told they have depression (CDC PLACES)", value: function (c, i) { return per1000(c, i, "depression"); } },
     mhlth:    { label: "Mental distress", long: "Share of adults with frequent mental distress (CDC PLACES)", value: function (c, i) { return per1000(c, i, "mhlth"); } },
-    nodental: { label: "No dental visit", long: "Share of adults with no dental visit in the past year (CDC PLACES)", value: function (c, i) { return per1000(c, i, "nodental"); } }
+    nodental: { label: "No dental visit", long: "Share of adults with no dental visit in the past year (CDC PLACES)", value: function (c, i) { return per1000(c, i, "nodental"); } },
+    ba:       { label: "Bachelor's+", long: "Share of adults 25+ with a bachelor's degree or higher (Census ACS)",
+                value: function (c, i) { var a = c.ba_only && c.ba_only[i], g = c.grad_deg && c.grad_deg[i]; return a == null || g == null ? null : ratio(a + g, c.adults25[i]); } }
   };
   function picked(v) { return v === true || (v && v.length > 0); }
   function ownerPart(c, i, b, all, me) {
@@ -748,7 +751,7 @@
     var k = s.sortKey, nSmall = (k === "idx" || /^x_/.test(k)) ? rows.filter(function (r) { return (r.pop || 0) < SMALL_ZIP; }).length : 0;
     this.tableTitle.textContent = area ? "ZIPs in the custom area" : "ZIPs within " + s.r + " miles";
     this.tableNote.textContent = (rows.length > s.show ? "Showing " + s.show + " of " + NF0.format(rows.length) + " ZIPs. Export includes all." : NF0.format(rows.length) + " ZIPs.") + (nSmall ? " ZIPs under " + NF0.format(SMALL_ZIP) + " residents are listed last." : "") + " Click a column to sort." +
-      (ctx.length ? " " + ctx.map(function (k) { return CONTEXT[k].label; }).join(" and ") + (ctx.length > 1 ? " are ZIP-wide rates" : " is a ZIP-wide rate") + ", shown for context and not applied to the audience; point to a heading for its source." : "");
+      (ctx.length ? " " + listAnd(ctx.map(function (k) { return CONTEXT[k].label; })) + (ctx.length > 1 ? " are ZIP-wide rates" : " is a ZIP-wide rate") + ", shown for context and not applied to the audience; point to a heading for its source." : "");
     this.thead.innerHTML = "";
     var hr = el("tr");
     cols.forEach(function (cdef) {
@@ -787,7 +790,7 @@
     if (window.AdtaxiPlan) { done(); return; }
     if (loadPlan.waiting) { loadPlan.waiting.push(done); return; }
     loadPlan.waiting = [done];
-    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261024a";
+    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261024b";
     sc.onload = function () { var w = loadPlan.waiting; loadPlan.waiting = null; w.forEach(function (f) { f(); }); };
     sc.onerror = function () { loadPlan.waiting = null; };
     document.head.appendChild(sc);
@@ -1039,7 +1042,7 @@
   Radius.prototype.proposalBase = function () { return (this.cfg.planScript || "../shared/media-plan.js").replace(/media-plan\.js.*$/, ""); };
   Radius.prototype.benchmarks = function () {
     var self = this;
-    if (!this._bench) this._bench = fetch(this.cfg.benchmarksData || this.proposalBase() + "benchmarks.json?v=20261024a").then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
+    if (!this._bench) this._bench = fetch(this.cfg.benchmarksData || this.proposalBase() + "benchmarks.json?v=20261024b").then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
     return this._bench.then(function (B) {
       if (!B) return null;
       var cat = self.cfg.planCategory && self.cfg.planCategory !== "none" ? self.cfg.planCategory : String(self.cfg.exportName || "").replace(/-radius$/, "").replace(/^apartment$/, "apartments");
@@ -1185,7 +1188,7 @@
     if (!b.amount || !A.strat || !A.withDollars || !A.plan || !A.plan.tier || !A.channels.length) { st.textContent = "Enter a monthly budget and choose a media strategy first."; return Promise.resolve(null); }
     st.textContent = "Building…";
     var base = this.proposalBase();
-    return Promise.all([loadScriptOnce(this.cfg.pptxScript || "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261024a"), this.benchmarks(), this.logoImage()])
+    return Promise.all([loadScriptOnce(this.cfg.pptxScript || "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261024b"), this.benchmarks(), this.logoImage()])
       .then(function (res) { return window.AdtaxiProposal.build(self.proposalContext(res[2], res[3]), opt); })
       .then(function (out) { st.textContent = "Downloaded. Open it in PowerPoint or Google Slides to edit."; return out; })
       .catch(function (e) { st.textContent = "The proposal couldn't be built (" + e.message + "). Try again in a minute."; throw e; });
