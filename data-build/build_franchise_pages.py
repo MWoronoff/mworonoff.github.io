@@ -7,7 +7,7 @@ import glob, json, os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-V = "20261026l"   # version tag for the shared engine files on these pages (keep in step with the other analyzers)
+V = "20261026m"   # version tag for the shared engine files on these pages (keep in step with the other analyzers)
 
 SUBS = [{"id": "exec", "label": "Master franchise candidates"}, {"id": "owner", "label": "First-time franchise buyers"}]
 # AudienceSCAN 2026, Small Business Owners (4.5% of U.S. adults): saw or heard an ad of each type that led them to take
@@ -192,7 +192,10 @@ def methodology(client):
         out.append({"title": "Territories", "body": [client["territorySource"],
             "Each territory is drawn from Census geography: a whole state, a Census metro area (only the part in the listed state), or a county. These are provisional until " + client["client"] + "'s own county lists are in; see each territory's note.",
             client["pendingNote"] + " " + ", ".join(client["pending"]) + "."]})
-    out.append({"title": "ZIPs in market", "body": "Pick a " + ("territory" if client else "DMA, metro or county") + ", then ZIPs in market to rank its ZIPs by Candidates, for geographic targeting. ZIPs under 500 residents, or mostly group quarters, are shown but not ranked."})
+    if client:
+        out.append({"title": "ZIPs in market", "body": "Pick a territory, then ZIPs in market to rank its ZIPs by Candidates, for geographic targeting. ZIPs under 500 residents, or mostly group quarters, are shown but not ranked."})
+    else:   # drill-down navigation (engine cfg.drill)
+        out.append({"title": "Finding markets", "body": "Start with the U.S. totals and the DMAs ranked under them. Look inside a DMA to rank its metros, counties and ZIPs within that market; look inside a metro for its counties and ZIPs, or a county for its ZIPs. The breadcrumb above the map steps back. Metros that reach past a DMA's edge are marked Partly outside. Tick boxes in any list (DMAs, metros, counties or ZIPs) to build one combined trade area; each ZIP is counted once. ZIPs are ranked by Candidates only. ZIPs under 500 residents, or mostly group quarters, are shown but not ranked."})
     return out
 
 
@@ -217,7 +220,7 @@ def analyzer_cfg(client):
         "subtitle": (f"Where {client['client']}'s best owner candidates are: Franchise Opportunity Scores for its available {client['territoryNounPlural']} and the ZIPs inside them, to focus franchise-development ad dollars."
                      if client else "Where franchise systems' best owner candidates are: Franchise Opportunity Scores for DMAs, metros, counties and ZIPs, by owner profile, to focus franchise-development ad dollars."),
         "logo": f"{up}shared/adtaxi-logo.svg", "exportName": "franchise-" + client["id"] if client else "franchise", "links": links,
-        "radiusDefault": 25, "radiusProfiles": True, "defaultLevel": "us", "usMapLevel": "territory" if client else "dma",
+        "radiusDefault": 25, "radiusProfiles": True, "defaultLevel": "us", "usMapLevel": "territory" if client else "dma", "drill": not client,
         "levels": levels, "statesGeo": f"{up}shared/geo/states.topo.json", "zipIndex": f"{up}shared/geo/zip_market.json",
         "radiusScript": f"{up}shared/radius.js?v={V}", "benchmarks": False, "timing": False,
         "subcategoryLabel": "Owner profile", "subcategories": SUBS,

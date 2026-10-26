@@ -10,14 +10,14 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
-<link rel="stylesheet" href="../shared/engine.css?v=20261026l">
+<link rel="stylesheet" href="../shared/engine.css?v=20261026m">
 </head>
 <body>
 <div id="app"><p class="az-loading">Loading the Franchise Development Analyzer…</p></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js" crossorigin=""></script>
-<script src="../shared/engine.js?v=20261026l"></script>
-<script src="radius-config.js?v=20261026l"></script>
+<script src="../shared/engine.js?v=20261026m"></script>
+<script src="radius-config.js?v=20261026m"></script>
 <script>
 AdtaxiAnalyzer.start({
  "title": "Franchise Development Analyzer",
@@ -34,6 +34,7 @@ AdtaxiAnalyzer.start({
  "radiusProfiles": true,
  "defaultLevel": "us",
  "usMapLevel": "dma",
+ "drill": true,
  "levels": {
   "us": {
    "label": "U.S.",
@@ -66,7 +67,7 @@ AdtaxiAnalyzer.start({
  },
  "statesGeo": "../shared/geo/states.topo.json",
  "zipIndex": "../shared/geo/zip_market.json",
- "radiusScript": "../shared/radius.js?v=20261026l",
+ "radiusScript": "../shared/radius.js?v=20261026m",
  "benchmarks": false,
  "timing": false,
  "subcategoryLabel": "Owner profile",
@@ -317,8 +318,8 @@ AdtaxiAnalyzer.start({
    "body": "All businesses with paid employees. Half count, half concentration: establishments and the jobs at them (count), and establishments per 1,000 residents."
   },
   {
-   "title": "ZIPs in market",
-   "body": "Pick a DMA, metro or county, then ZIPs in market to rank its ZIPs by Candidates, for geographic targeting. ZIPs under 500 residents, or mostly group quarters, are shown but not ranked."
+   "title": "Finding markets",
+   "body": "Start with the U.S. totals and the DMAs ranked under them. Look inside a DMA to rank its metros, counties and ZIPs within that market; look inside a metro for its counties and ZIPs, or a county for its ZIPs. The breadcrumb above the map steps back. Metros that reach past a DMA's edge are marked Partly outside. Tick boxes in any list (DMAs, metros, counties or ZIPs) to build one combined trade area; each ZIP is counted once. ZIPs are ranked by Candidates only. ZIPs under 500 residents, or mostly group quarters, are shown but not ranked."
   }
  ],
  "sources": [
