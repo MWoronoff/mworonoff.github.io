@@ -217,7 +217,7 @@ def analyzer_cfg(client):
         "subtitle": (f"Where {client['client']}'s best owner candidates are: Franchise Opportunity Scores for its available {client['territoryNounPlural']} and the ZIPs inside them, to focus franchise-development ad dollars."
                      if client else "Where franchise systems' best owner candidates are: Franchise Opportunity Scores for DMAs, metros, counties and ZIPs, by owner profile, to focus franchise-development ad dollars."),
         "logo": f"{up}shared/adtaxi-logo.svg", "exportName": "franchise-" + client["id"] if client else "franchise", "links": links,
-        "radiusDefault": 25, "radiusProfiles": True, "defaultLevel": "us", "usMapLevel": "territory" if client else "dma", "footprint": not client,
+        "radiusDefault": 25, "radiusProfiles": True, "defaultLevel": "us", "usMapLevel": "territory" if client else "dma",
         "levels": levels, "statesGeo": f"{up}shared/geo/states.topo.json", "zipIndex": f"{up}shared/geo/zip_market.json",
         "radiusScript": f"{up}shared/radius.js?v={V}", "benchmarks": False, "timing": False,
         "subcategoryLabel": "Owner profile", "subcategories": SUBS,
