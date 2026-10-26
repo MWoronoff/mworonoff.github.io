@@ -348,7 +348,7 @@
     this.filterDefs = {};
     for (var k in FILTERS) this.filterDefs[k] = FILTERS[k];
     this.filterDefs.age = { label: "Age", type: "multi", options: this.ages.options };
-    this.state = { zip: cfg.defaultZip || "", r: cfg.defaultRadius || 0, minIndex: 0, sortKey: "aud", sortDir: "desc", show: 50, sel: {}, profile: null,
+    this.state = { unit: "zip", zip: cfg.defaultZip || "", r: cfg.defaultRadius || 0, minIndex: 0, sortKey: "aud", sortDir: "desc", show: 50, sel: {}, profile: null,
                    mode: "radius", area: null, areaTokens: null };
     this.profiles = {};
     (cfg.profiles || []).forEach(function (p) { this.profiles[p.id] = p; }, this);
@@ -429,6 +429,11 @@
       this.centerField = el("label", { class: "az-field" }, [el("span", { text: "Center" }), this.zipIn, this.towns]),
       this.radiusField = el("label", { class: "az-field" }, [el("span", { text: "Radius" }), this.rSel]),
       el("label", { class: "az-field" }, [el("span", { text: "Show" }), this.minSel]),
+      el("div", { class: "az-field" }, [el("span", { text: "Rank and map" }), this.unitSeg = el("div", { class: "az-seg", role: "group", "aria-label": "Rank and map by ZIP or county" },
+        [["zip", "ZIPs"], ["county", "Counties"]].map(function (u) {
+          return el("button", { type: "button", "data-unit": u[0], text: u[1], "aria-pressed": String(s.unit === u[0]), title: u[0] === "county" ? "Add up the area's ZIPs by county" : "Rank each ZIP in the area",
+            onclick: function () { self.setUnit(u[0]); } });
+        }))]),
       el("div", { class: "az-actions" }, [
         el("button", { type: "button", class: "az-btn", text: "How estimates work", onclick: function () { self.openMethod(); } }),
         exportMenu([
@@ -708,7 +713,7 @@
               s.r ? "Enter a ZIP or town to see the audience within " + s.r + " miles." :
               "Enter a ZIP or town and choose a radius to see the audience.";
     this.rows = null; this.mapToken = (this.mapToken || 0) + 1;
-    ["circle", "centerMark", "zipLayer", "areaLayer"].forEach(function (k) { if (this[k]) { this.map.removeLayer(this[k]); this[k] = null; } }, this);
+    ["circle", "centerMark", "zipLayer", "areaLayer", "countyLayer"].forEach(function (k) { if (this[k]) { this.map.removeLayer(this[k]); this[k] = null; } }, this);
     if (this.map) this.clearMarkets();
     if (hasZip && this.map) this.map.setView([this.c.lat[this.byZip[s.zip]], this.c.lon[this.byZip[s.zip]]], 9);
     this.summary.innerHTML = "";
@@ -751,8 +756,90 @@
     rows.forEach(function (r) { keys.forEach(function (k) { r["x_" + k] = CONTEXT[k].value(c, r.i); }); });
     return keys;
   };
+  /* ---------- Counties: the trade area's ZIPs added up by county ---------- */
+  Radius.prototype.setUnit = function (u) {
+    var s = this.state; if (s.unit === u) return;
+    s.unit = u; s.sortKey = "aud"; s.sortDir = "desc";
+    Array.prototype.forEach.call(this.unitSeg.children, function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-unit") === u)); });
+    if (!this.rows) return;
+    this.renderTable(); this.renderMap(false);
+  };
+  // One row per county: the sums of its ZIPs inside the area (a county partly outside counts only the part inside).
+  // ZIP-wide context rates are averaged weighted by population.
+  Radius.prototype.countyRows = function () {
+    var self = this, c = this.c, by = {}, keys = this.contextKeys();
+    this.visible().forEach(function (r) {
+      var f = self.zipCounty && self.zipCounty[r.zip]; if (!f) return;
+      var x = by[f] || (by[f] = { fips: f, town: self.countyLabel(f), zips: 0, pop: 0, aud: 0, any: false, w: {}, p: {} });
+      x.zips++; x.pop += r.pop || 0; if (r.aud != null) { x.aud += r.aud; x.any = true; }
+      keys.forEach(function (k) { var v = CONTEXT[k].value(c, r.i); if (v != null && r.pop) { x.w[k] = (x.w[k] || 0) + v * r.pop; x.p[k] = (x.p[k] || 0) + r.pop; } });
+    });
+    return Object.keys(by).map(function (f) {
+      var x = by[f]; if (!x.any) x.aud = null;
+      x.share = x.aud != null && x.pop ? x.aud / x.pop : null;
+      x.idx = x.share != null && self.natRate ? x.share / self.natRate * 100 : null;
+      keys.forEach(function (k) { x["x_" + k] = x.p[k] ? x.w[k] / x.p[k] : null; });
+      return x;
+    });
+  };
+  Radius.prototype.renderCountyTable = function () {
+    var self = this, s = this.state, est = this.isEstimate(), area = s.mode === "area";
+    if (!this.zipCounty) { this.tableTitle.textContent = "Counties"; this.tableNote.textContent = "Loading counties…"; this.thead.innerHTML = ""; this.tbody.innerHTML = "";
+      this.loadCounties().then(function () { if (self.state.unit === "county" && self.rows) { self.renderTable(); self.renderMap(false); } }); return; }
+    var rows = this.countyRows(), ctx = this.contextKeys();
+    if (["town", "zips", "pop", "aud", "share", "idx"].indexOf(s.sortKey) < 0 && !/^x_/.test(s.sortKey)) { s.sortKey = "aud"; s.sortDir = "desc"; }
+    var cols = [["town", "County", "l"], ["zips", "ZIPs", "n"], ["pop", "Population", "n"], ["aud", est ? "Est. audience" : "Audience", "n"], ["share", "Share", "n"], ["idx", "Index", "n"]]
+      .concat(ctx.map(function (k) { return ["x_" + k, CONTEXT[k].label, "n", CONTEXT[k].long + "; ZIPs averaged by population"]; }));
+    this.sortRows(rows);
+    var k = s.sortKey;
+    this.tableTitle.textContent = area ? "Counties in the custom area" : "Counties within " + s.r + " miles";
+    this.tableNote.textContent = NF0.format(rows.length) + (rows.length === 1 ? " county" : " counties") + ". Each county adds up the area's ZIPs in that county, so a county partly outside the area counts only the part inside. Click a column to sort.";
+    this.thead.innerHTML = "";
+    var hr = el("tr");
+    cols.forEach(function (cdef) {
+      var active = k === cdef[0];
+      hr.appendChild(el("th", { scope: "col", class: cdef[2] === "l" ? "rz-l" : cdef[3] ? "rz-ctx" : null, title: cdef[3] || null, "aria-sort": active ? (s.sortDir === "asc" ? "ascending" : "descending") : null }, [
+        el("button", { type: "button", text: cdef[1], onclick: function () {
+          if (s.sortKey === cdef[0]) s.sortDir = s.sortDir === "asc" ? "desc" : "asc";
+          else { s.sortKey = cdef[0]; s.sortDir = cdef[2] === "l" ? "asc" : "desc"; }
+          self.renderTable();
+        } })]));
+    });
+    this.thead.appendChild(hr);
+    this.tbody.innerHTML = "";
+    var frag = document.createDocumentFragment();
+    rows.forEach(function (r, n) {
+      frag.appendChild(el("tr", { tabindex: "0", onclick: function () { self.flashCounty(r.fips); }, onkeydown: function (e) { if (e.key === "Enter") self.flashCounty(r.fips); } }, [
+        el("td", { class: "rz-l", style: "font-weight:600", text: r.town }), el("td", { class: "num", style: "font-weight:400", text: NF0.format(r.zips) }),
+        el("td", { class: "num", text: NF0.format(r.pop) }),
+        el("td", { class: "num", text: r.aud == null ? "No data" : NF0.format(Math.round(r.aud)) }),
+        el("td", { class: "num", text: r.share == null ? "—" : NF1.format(r.share * 100) + "%" }),
+        el("td", { class: "num", text: r.idx == null ? "—" : NF0.format(r.idx) })].concat(ctx.map(function (k) {
+          var v = r["x_" + k]; return el("td", { class: "num rz-ctx", text: v == null ? "—" : NF1.format(v * 100) + "%" }); }))));
+    });
+    if (!rows.length) frag.appendChild(el("tr", null, [el("td", { colspan: String(cols.length), class: "az-empty", text: "No ZIPs meet the index cutoff." })]));
+    this.tbody.appendChild(frag);
+    this.renderBudget();
+  };
+  Radius.prototype.flashCounty = function (f) {
+    var l = this.layerByCounty && this.layerByCounty[f];
+    if (!l) return;
+    this.map.fitBounds(l.getBounds(), { maxZoom: 10, padding: [60, 60] });
+    l.setStyle({ color: "#0f2742", weight: 3 }); l.bringToFront(); l.openTooltip();
+    setTimeout(function () { l.setStyle({ color: "#ffffff", weight: 1 }); }, 2500);
+  };
+  Radius.prototype.loadCountyGeo = function () {
+    var self = this;
+    if (this.countyGeoP) return this.countyGeoP;
+    var url = this.cfg.countyGeo || this.cfg.zipGeo.replace(/zip\/\{level\}\/\{id\}\.json$/, "county.topo.json");
+    return (this.countyGeoP = fetch(url).then(function (r) { return r.ok ? r.json() : null; }).then(function (t) {
+      self.countyFC = t ? topojson.feature(t, t.objects[Object.keys(t.objects)[0]]) : null;
+    }).catch(function () { self.countyFC = null; }));
+  };
+
   Radius.prototype.renderTable = function () {
     var self = this, s = this.state, rows = this.visible().slice(), est = this.isEstimate();
+    if (s.unit === "county") return this.renderCountyTable();
     var area = s.mode === "area", circ = area && s.area && s.area.circles.length;
     var ctx = this.addContext(rows);
     if (/^x_/.test(s.sortKey) && ctx.indexOf(s.sortKey.slice(2)) < 0) { s.sortKey = "idx"; s.sortDir = "desc"; }
@@ -802,7 +889,7 @@
     if (window.AdtaxiPlan) { done(); return; }
     if (loadPlan.waiting) { loadPlan.waiting.push(done); return; }
     loadPlan.waiting = [done];
-    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261026k";
+    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261026l";
     sc.onload = function () { var w = loadPlan.waiting; loadPlan.waiting = null; w.forEach(function (f) { f(); }); };
     sc.onerror = function () { loadPlan.waiting = null; };
     document.head.appendChild(sc);
@@ -1054,7 +1141,7 @@
   Radius.prototype.proposalBase = function () { return (this.cfg.planScript || "../shared/media-plan.js").replace(/media-plan\.js.*$/, ""); };
   Radius.prototype.benchmarks = function () {
     var self = this;
-    if (!this._bench) this._bench = fetch(this.cfg.benchmarksData || this.proposalBase() + "benchmarks.json?v=20261026k").then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
+    if (!this._bench) this._bench = fetch(this.cfg.benchmarksData || this.proposalBase() + "benchmarks.json?v=20261026l").then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
     return this._bench.then(function (B) {
       if (!B) return null;
       var cat = self.cfg.planCategory && self.cfg.planCategory !== "none" ? self.cfg.planCategory : String(self.cfg.exportName || "").replace(/-radius$/, "").replace(/^apartment$/, "apartments");
@@ -1200,7 +1287,7 @@
     if (!b.amount || !A.strat || !A.withDollars || !A.plan || !A.plan.tier || !A.channels.length) { st.textContent = "Enter a monthly budget and choose a media strategy first."; return Promise.resolve(null); }
     st.textContent = "Building…";
     var base = this.proposalBase();
-    return Promise.all([loadScriptOnce(this.cfg.pptxScript || "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261026k"), this.benchmarks(), this.logoImage()])
+    return Promise.all([loadScriptOnce(this.cfg.pptxScript || "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261026l"), this.benchmarks(), this.logoImage()])
       .then(function (res) { return window.AdtaxiProposal.build(self.proposalContext(res[2], res[3]), opt); })
       .then(function (out) { st.textContent = "Downloaded. Open it in PowerPoint or Google Slides to edit."; return out; })
       .catch(function (e) { st.textContent = "The proposal couldn't be built (" + e.message + "). Try again in a minute."; throw e; });
@@ -1401,9 +1488,10 @@
       return fetch(u).then(function (r) { return r.ok ? r.json() : null; }).then(function (t) {
         self.geo[u] = t ? topojson.feature(t, t.objects[Object.keys(t.objects)[0]]) : null;
       }).catch(function () { self.geo[u] = null; });
-    }).concat([this.loadStates(), s.mode === "area" ? this.loadMarkets() : null])).then(function () {
+    }).concat([this.loadStates(), s.mode === "area" ? this.loadMarkets() : null, s.unit === "county" ? this.loadCounties() : null, s.unit === "county" ? this.loadCountyGeo() : null])).then(function () {
       if (token !== self.mapToken) return;   // a newer update has started
       if (self.zipLayer) self.map.removeLayer(self.zipLayer);
+      if (self.countyLayer) { self.map.removeLayer(self.countyLayer); self.countyLayer = null; }
       var feats = [];
       urls.forEach(function (u) { var fc = self.geo[u]; if (fc) fc.features.forEach(function (f) { if (byZip[f.properties.zip]) feats.push(f); }); });
       self.layerByZip = {}; self.mapFeats = feats; self.mapByZip = byZip; self.mapVis = vis;   // kept for the proposal map
@@ -1416,7 +1504,19 @@
           var r = byZip[f.properties.zip]; self.layerByZip[f.properties.zip] = layer;
           layer.bindTooltip(function () { return self.zipTip(r); }, { sticky: true, opacity: 0.97 });
         }
-      }).addTo(self.map);
+      });
+      if (s.unit === "county" && self.countyFC && self.zipCounty) {
+        // Counties view: each county shaded by the index of its ZIPs inside the area (whole county outline shown)
+        var cr = {}; self.countyRows().forEach(function (x) { cr[x.fips] = x; });
+        self.layerByCounty = {};
+        self.countyLayer = L.geoJSON({ type: "FeatureCollection", features: self.countyFC.features.filter(function (f) { return cr[f.properties.fips]; }) }, {
+          style: function (f) { return { color: "#ffffff", weight: 1, fillOpacity: 0.9, fillColor: self.colorFor(cr[f.properties.fips].idx) }; },
+          onEachFeature: function (f, layer) {
+            var x = cr[f.properties.fips]; self.layerByCounty[f.properties.fips] = layer;
+            layer.bindTooltip('<div class="az-tip"><b>' + x.town + "</b><br>" + (x.aud == null ? "No data" : NF0.format(Math.round(x.aud)) + " people in " + NF0.format(x.zips) + (x.zips === 1 ? " ZIP" : " ZIPs") + " inside the area, index " + (x.idx == null ? "—" : NF0.format(x.idx))) + "</div>", { sticky: true, opacity: 0.97 });
+          }
+        }).addTo(self.map);
+      } else self.zipLayer.addTo(self.map);
       if (!self.statesLayer) self.statesLayer = self.addStates(self.map);
       if (self.circle) { self.circle.bringToFront(); self.centerMark.bringToFront(); }
       if (self.areaLayer) self.areaLayer.eachLayer(function (l) { l.bringToFront(); });
@@ -1426,7 +1526,7 @@
     this.legend.appendChild(el("b", { class: "rz-legend-title", text: "Index vs. U.S." }));
     for (var k = CLASSES.length - 1; k >= 0; k--) this.legend.appendChild(el("span", { class: "az-legend-row" }, [el("span", { class: "az-swatch", style: "background:" + cssVar(CLASSES[k][2]) }), el("span", { text: CLASSES[k][3] })]));
     this.legend.appendChild(el("span", { class: "az-legend-row" }, [el("span", { class: "az-swatch nodata" }), el("span", { text: "No data" })]));
-    this.legend.appendChild(el("span", { class: "rz-legend-hint", text: "Point to a ZIP for its audience and index." }));
+    this.legend.appendChild(el("span", { class: "rz-legend-hint", text: s.unit === "county" ? "Point to a county for its audience and index (its ZIPs inside the area)." : "Point to a ZIP for its audience and index." }));
   };
   Radius.prototype.flash = function (zip) {
     var l = this.layerByZip && this.layerByZip[zip];

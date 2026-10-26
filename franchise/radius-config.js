@@ -28,7 +28,7 @@ window.ADTAXI_RADIUS = {
   }
  ],
  "zipGeo": "../shared/geo/zip/{level}/{id}.json",
- "planScript": "../shared/media-plan.js?v=20261026k",
+ "planScript": "../shared/media-plan.js?v=20261026l",
  "mediaMixUrl": "../media-mix/",
  "planCategory": "none",
  "customArea": true,
