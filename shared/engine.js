@@ -374,19 +374,19 @@
     this.search = el("input", { type: "search", placeholder: "Find a market", "aria-label": "Find a market",
       oninput: function () { self.state.query = this.value.trim().toLowerCase(); self.renderTable(); self.maybeFindZip(); } });
     controls.push(el("label", { class: "az-field az-only" }, [el("span", { text: "Search" }), this.search]));
-    // Action buttons. Results (case studies and testimonials for the selected category, in a side panel) comes first and
+    // Action buttons. Results (case studies and testimonials for the selected category, in a side panel) comes last and
     // stays available in the Trade area; the other buttons are hidden there (az-only).
     var exportBtn = exportMenu([
         { label: "Leave-behind (PDF)", note: "A clean page of this view to send after the meeting", run: function () { self.leaveBehind(); } },
         { label: "Data (CSV)", note: "The table's data for a spreadsheet", run: function () { self.exportCSV(); } }]);
     exportBtn.classList.add("az-only");
     controls.push(el("div", { class: "az-actions" }, [
+      el("button", { type: "button", class: "az-btn az-only", text: "How scores work", onclick: function () { self.openMethod(); } }),
+      cfg.crm === false ? null : el("button", { type: "button", class: "az-btn az-only", text: "Analyze your footprint",
+        title: "Upload a customer list to see the business's geographic footprint against this market's potential, ZIP by ZIP",
+        onclick: function () { location.href = self.crmUrl(); } }),
       cfg.results === false ? null : el("button", { type: "button", class: "az-btn az-results-btn", text: "Results",
         title: "Case studies and client testimonials for this category", "aria-haspopup": "dialog", onclick: function () { self.openResults(); } }),
-      el("button", { type: "button", class: "az-btn az-only", text: "How scores work", onclick: function () { self.openMethod(); } }),
-      cfg.crm === false ? null : el("button", { type: "button", class: "az-btn az-only", text: "Analyze your customers",
-        title: "Upload a customer list and compare it with this market's potential, ZIP by ZIP",
-        onclick: function () { location.href = self.crmUrl(); } }),
       exportBtn
     ]));
     var controlBar = el("section", { class: "az-controls", "aria-label": "Analyzer controls" }, controls);
@@ -509,7 +509,7 @@
     }
     if (window.AdtaxiRadius) go();
     else {
-      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261026d";   // version tag: browsers fetch the new file after an update
+      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261026e";   // version tag: browsers fetch the new file after an update
       sc.onload = go; sc.onerror = function () { self.showError("The radius tool didn't load. Refresh the page and try again."); };
       document.head.appendChild(sc);
     }
