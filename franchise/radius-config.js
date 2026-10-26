@@ -1,7 +1,7 @@
 /* Zip Code Radius Tool settings for this analyzer (written by data-build/build_franchise_pages.py). */
 window.ADTAXI_RADIUS = {
  "title": "Zip Code Radius Tool - Franchise Development",
- "subtitle": "Pick a center ZIP or town and a radius (or map a custom area), then choose the owner profile to see how many candidates live there and which ZIPs over-index.",
+ "subtitle": "Pick a center ZIP or town and a radius (or map a custom area), then choose the owner profile to see how many candidate households live there and which ZIPs over-index.",
  "logo": "../shared/adtaxi-logo.svg",
  "exportName": "franchise-radius",
  "links": [
@@ -25,10 +25,15 @@ window.ADTAXI_RADIUS = {
    "url": "../shared/audience/zip_audience_inc.json",
    "label": "Household income at $125K and ages 55–64",
    "source": "Census ACS household income (B19001) and sex by age (B01001)"
+  },
+  {
+   "url": "../shared/audience/zip_audience_hh.json",
+   "label": "Households by householder age and income",
+   "source": "Census ACS age of householder by household income (B19037) and home value (B25075)"
   }
  ],
  "zipGeo": "../shared/geo/zip/{level}/{id}.json",
- "planScript": "../shared/media-plan.js?v=20261026p",
+ "planScript": "../shared/media-plan.js?v=20261026q",
  "mediaMixUrl": "../media-mix/",
  "planCategory": "none",
  "customArea": true,
@@ -69,7 +74,11 @@ window.ADTAXI_RADIUS = {
    "Strategic"
   ]
  },
- "ageSet": "adult65",
+ "ageSet": "householder",
+ "hhCount": true,
+ "audienceUnit": "households",
+ "shareLabel": "Share of households",
+ "shareShort": "Share",
  "radii": [
   5,
   10,
@@ -110,20 +119,18 @@ window.ADTAXI_RADIUS = {
   "drives": "visits to the franchise site and branded searches",
   "note": "Franchise leads: the 2026 Annual Franchise Development Report puts average cost per lead at $142 to $802 and average cost per franchise sale at $6,700 to $25,145, depending on the sector; this proposal doesn't forecast sales."
  },
- "audienceNoun": "Qualified adults",
- "audienceFit": "fit the {profile} profile by age and income",
+ "audienceNoun": "Qualified households",
+ "audienceFit": "fit the {profile} profile by householder age and household income",
  "leadWithIndex": true,
- "summaryNote": "A planning pool, not a buyer count: only a small fraction of qualified adults buy a franchise in any year. The index shows where candidates are most concentrated, so use it to decide where to spend.",
+ "summaryNote": "A planning pool, not a buyer count: only a small fraction of qualified households buy a franchise in any year. The index shows where candidates are most concentrated, so use it to decide where to spend.",
  "profiles": [
   {
    "id": "exec",
    "label": "Master franchise candidates",
-   "note": "Adults 35–64 in households earning $125K+, including first-time franchise buyers. IRS shares of returns with $200K+ income and with capital gains, the share of adults with a bachelor's degree or higher and the share of workers in management jobs show by ZIP.",
+   "note": "Households headed by someone 45–64 earning $125K+, counted directly by Census, including first-time franchise buyers (add 25–44 to widen). ZIP-wide signals of capital and background feed the Score: $200K+ income, capital gains, dividends, self-employment, homes owned free and clear, $500K+ homes, bachelor's degrees and managers.",
    "sel": {
     "age": [
-     "35_44",
-     "45_54",
-     "55_64"
+     "4564"
     ],
     "income8": [
      "125_150",
@@ -134,6 +141,10 @@ window.ADTAXI_RADIUS = {
    "context": [
     "hi200",
     "cg",
+    "div",
+    "selfemp",
+    "nomortg",
+    "val500",
     "ba",
     "mgmt"
    ]
@@ -141,12 +152,11 @@ window.ADTAXI_RADIUS = {
   {
    "id": "owner",
    "label": "First-time franchise buyers",
-   "note": "Adults 35–64 in households earning $100K+: most people who buy a business are 40 to 60, often making a career change. The IRS share of returns with $200K+ income shows by ZIP.",
+   "note": "Households headed by someone 25–64 earning $100K+, counted directly by Census: most people who buy a business are 40 to 60, often making a career change. ZIP-wide signals feed the Score: $200K+ income, self-employment, homes owned free and clear and $500K+ homes.",
    "sel": {
     "age": [
-     "35_44",
-     "45_54",
-     "55_64"
+     "2544",
+     "4564"
     ],
     "income8": [
      "100_125",
@@ -156,30 +166,33 @@ window.ADTAXI_RADIUS = {
     ]
    },
    "context": [
-    "hi200"
+    "hi200",
+    "selfemp",
+    "nomortg",
+    "val500"
    ]
   }
  ],
  "methodology": [
   {
    "title": "Who counts",
-   "body": "Counts are adults by age and household income (Census). Census doesn't publish net worth or job titles by ZIP, so household income stands in for capital, and the profiles are planning estimates, not lists of people."
+   "body": "Counts are households, by the householder's age and the household's income, taken directly from one Census table (age of householder by household income), so an age and income selection is a count, not an estimate. One household is one potential buyer. Census groups householders as 25 to 44, 45 to 64 and 65 and older. Share and index compare qualified households with all households. Census doesn't publish net worth or job titles by ZIP, so household income stands in for capital, and the ZIP-wide signals in the Score add the rest."
   },
   {
-   "title": "Qualified adults vs. buyers",
-   "body": "Qualified adults are everyone who fits the owner profile's age and income, the pool that ads can reach. Only a small fraction buy a franchise in any year (the industry adds roughly 12,000 to 13,000 net new units a year, and many go to existing multi-unit owners), so the count sizes the reachable audience, not the number of buyers. The index is the better guide to where to spend."
+   "title": "Qualified households vs. buyers",
+   "body": "Qualified households are every household that fits the owner profile's age and income, the pool that ads can reach. Only a small fraction buy a franchise in any year (the industry adds roughly 12,000 to 13,000 net new units a year, and many go to existing multi-unit owners), so the count sizes the reachable audience, not the number of buyers. The index is the better guide to where to spend."
   },
   {
    "title": "Age",
-   "body": "First-time buyers start at 35: most people who buy a business are 40 to 60 (BizBuySell Small Business Study). Census age groups end at 55 and older, so that group includes some retirees."
+   "body": "Most people who buy a business are 40 to 60 (BizBuySell Small Business Study). Census reports householders only as 25 to 44, 45 to 64 and 65 and older, so master franchise candidates use 45 to 64 (the same group as the market scores) and first-time buyers use 25 to 64."
   },
   {
    "title": "ZIP-wide rates",
-   "body": "The $200K+ income, capital gains and self-employment figures are IRS shares of tax returns in each ZIP, Bachelor's+ is the Census share of adults 25+ with a bachelor's degree or higher, and Managers is the Census share of employed people in management occupations. They describe the ZIP, not individual households, so they aren't applied to the count; they count toward the Score instead. Census doesn't publish education by age and income for ZIPs, and degrees are far more common among high earners than among all adults, so applying the ZIP rate would badly undercount."
+   "body": "The $200K+ income, capital gains, dividends and self-employment figures are IRS shares of tax returns in each ZIP. Owned free and clear is the Census share of owner-occupied homes with no mortgage, and $500K+ homes the share valued at $500,000 or more: home equity is a common way to fund a franchise. Bachelor's+ is the Census share of adults 25+ with a bachelor's degree or higher, and Managers is the Census share of employed people in management occupations. They describe the ZIP, not individual households, so they aren't applied to the count; they count toward the Score instead. Census doesn't publish education by age and income for ZIPs, and degrees are far more common among high earners than among all adults, so applying the ZIP rate would badly undercount."
   },
   {
    "title": "Score",
-   "body": "The Score (0–100) ranks the trade area's counties and ZIPs against each other: 40% index (how concentrated candidates are), 30% estimated audience (how many there are) and 30% the profile's ZIP-wide rates ($200K+ income, capital gains, bachelor's+ and managers for master franchise candidates; $200K+ income for first-time buyers). Each part is a percentile among the area's counties or ZIPs, so the same ZIP can score differently in a different trade area. Counties come first, then ZIPs. ZIPs and county parts under 1,000 residents aren't scored."
+   "body": "The Score (0–100) ranks the trade area's counties and ZIPs against each other: 40% index (how concentrated candidates are), 30% estimated audience (how many there are) and 30% the profile's ZIP-wide rates, averaged equally ($200K+ income, capital gains, dividends, self-employment, homes owned free and clear, $500K+ homes, bachelor's+ and managers for master franchise candidates; $200K+ income, self-employment, homes owned free and clear and $500K+ homes for first-time buyers). Each part is a percentile among the area's counties or ZIPs, so the same ZIP can score differently in a different trade area. Counties come first, then ZIPs. ZIPs and county parts under 1,000 residents aren't scored."
   },
   {
    "title": "Reaching these candidates",

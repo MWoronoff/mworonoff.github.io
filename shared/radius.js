@@ -28,6 +28,10 @@
                  col: function (sex, b) { return sex + b; }, all: "adults18",
                  note: "Counts cover adults 18 and older. Leave a group blank to include every adult.",
                  method: "The audience starts from adults 18 and older. Counts of adults by sex and age come from one Census table, so a gender and age selection is an exact count." },
+    // Franchise Trade area with cfg.hhCount: households by the householder's age, counted directly with income (Census B19037)
+    householder: { options: [["2544", "25–44"], ["4564", "45–64"], ["65p", "65+"]], col: null, all: "hh19037",
+                 note: "Counts are households, by the householder's age and the household's income, counted directly from one Census table. Leave a group blank to include every household.",
+                 method: "Households come from one Census table of householder age by household income, so an age and income selection is a direct count of households, not an estimate. Census groups householders as 25 to 44, 45 to 64 and 65 and older." },
     adult:     { options: [["18_24", "18–24"], ["25_34", "25–34"], ["35_44", "35–44"], ["45_54", "45–54"], ["55p", "55+"]],
                  col: function (sex, b) { return sex + b; }, all: "adults18",
                  note: "Counts cover adults 18 and older. Leave a group blank to include every adult.",
@@ -241,6 +245,10 @@
     depression:{ label: "Depression", long: "Share of adults ever told they have depression (CDC PLACES)", value: function (c, i) { return per1000(c, i, "depression"); } },
     mhlth:    { label: "Mental distress", long: "Share of adults with frequent mental distress (CDC PLACES)", value: function (c, i) { return per1000(c, i, "mhlth"); } },
     nodental: { label: "No dental visit", long: "Share of adults with no dental visit in the past year (CDC PLACES)", value: function (c, i) { return per1000(c, i, "nodental"); } },
+    nomortg:  { label: "Owned free and clear", long: "Share of owner-occupied homes with no mortgage (Census ACS): home equity many buyers use to fund a business",
+                value: function (c, i) { return c.own_units ? ratio(c.mortg_free ? c.mortg_free[i] : null, c.own_units[i]) : null; } },
+    val500:   { label: "$500K+ homes", long: "Share of owner-occupied homes valued at $500,000 or more (Census ACS)",
+                value: function (c, i) { return c.val_own ? ratio(c.val500 ? c.val500[i] : null, c.val_own[i]) : null; } },
     mgmt:     { label: "Managers", long: "Share of employed people 16+ in management occupations (Census ACS)",
                 value: function (c, i) { var m = c.mgmt && c.mgmt[i], t = c.occ_tot && c.occ_tot[i]; return m == null || !t ? null : ratio(m, t); } },
     ba:       { label: "Bachelor's+", long: "Share of adults 25+ with a bachelor's degree or higher (Census ACS)",
@@ -347,7 +355,7 @@
     this.ages = AGE_SETS[cfg.ageSet || "default"];
     this.filterDefs = {};
     for (var k in FILTERS) this.filterDefs[k] = FILTERS[k];
-    this.filterDefs.age = { label: "Age", type: "multi", options: this.ages.options };
+    this.filterDefs.age = { label: cfg.hhCount ? "Householder age" : "Age", type: "multi", options: this.ages.options };
     this.state = { unit: cfg.countiesFirst ? "county" : "zip", zip: cfg.defaultZip || "", r: cfg.defaultRadius || 0, minIndex: 0, sortKey: cfg.blendScore ? "score" : "aud", sortDir: "desc", show: 50, sel: {}, profile: null,
                    mode: "radius", area: null, areaTokens: null };
     this.profiles = {};
@@ -602,7 +610,27 @@
   Radius.prototype.showError = function (t) { this.errorBox.hidden = false; this.errorBox.textContent = t; };
 
   /* ---------- Audience math ---------- */
+  // cfg.hhCount: the selected householder ages x household incomes, added up from the direct counts (h<age>_<income>);
+  // any other selected filter (e.g. veterans) is then applied as a share
+  Radius.prototype.hhAudience = function (i) {
+    var c = this.c, sel = this.state.sel, defs = this.filterDefs;
+    var ages = sel.age && sel.age.length ? sel.age : this.ages.options.map(function (x) { return x[0]; });
+    var incs = sel.income8 && sel.income8.length ? sel.income8 : defs.income8.options.map(function (x) { return x[0]; });
+    var base = 0;
+    for (var a = 0; a < ages.length; a++) for (var b = 0; b < incs.length; b++) {
+      var col = c["h" + ages[a] + "_" + incs[b]]; if (!col) return null;
+      var v = col[i]; if (v == null) return null; base += v;
+    }
+    var keys = Object.keys(sel);
+    for (var k = 0; k < keys.length && base > 0; k++) {
+      if (keys[k] === "age" || keys[k] === "income8" || keys[k] === "gender") continue;
+      var f = defs[keys[k]], x = f.byAge ? f.byAge(c, i, "hh", sel[keys[k]], sel) : f.share ? f.share(c, i, sel[keys[k]], sel) : 1;
+      if (x == null) return null; base *= x;
+    }
+    return base;
+  };
   Radius.prototype.audience = function (i) {
+    if (this.cfg.hhCount) return this.hhAudience(i);
     var c = this.c, sel = this.state.sel, defs = this.filterDefs, ages = this.ages, base;
     // Both genders ticked is the same as no gender filter (counts everyone, not just the ages the sex x age table covers)
     var g = sel.gender && sel.gender.length === 1 ? sel.gender : null, a = sel.age && sel.age.length ? sel.age : null;
@@ -664,12 +692,15 @@
   };
   Radius.prototype.isEstimate = function () {
     var sel = this.state.sel, defs = this.filterDefs;
+    if (this.cfg.hhCount) return Object.keys(sel).some(function (k) { return k !== "age" && k !== "income8" && k !== "gender" && picked(sel[k]) && (defs[k].share || defs[k].byAge); });
     return !!this.state.profile || Object.keys(sel).some(function (k) { return defs[k].share || defs[k].byAge; });
   };
+  // What share and index are measured against: residents, or all households when the count is households (cfg.hhCount)
+  Radius.prototype.baseOf = function (i) { var c = this.c; return this.cfg.hhCount ? (c.hh19037 ? c.hh19037[i] : null) : c.acs_pop[i]; };
   Radius.prototype.computeNational = function () {
     var A = 0, P = 0;
     for (var i = 0; i < this.n; i++) {
-      var a = this.audience(i), p = this.c.acs_pop[i];
+      var a = this.audience(i), p = this.baseOf(i);
       if (a != null && p) { A += a; P += p; }
     }
     this.natRate = P ? A / P : 0;
@@ -690,8 +721,8 @@
       var d = miles(lat0, lon0, c.lat[i], c.lon[i]); if (d > s.r) continue;
       var pop = c.acs_pop[i];
       if (!pop && !c.population[i]) continue;
-      var aud = this.audience(i), share = aud != null && pop ? aud / pop : null;
-      rows.push({ i: i, zip: c.zip[i], town: c.city[i] + ", " + c.state[i], dist: d, pop: pop, aud: aud, share: share,
+      var aud = this.audience(i), base = this.baseOf(i), share = aud != null && base ? aud / base : null;
+      rows.push({ i: i, zip: c.zip[i], town: c.city[i] + ", " + c.state[i], dist: d, pop: pop, base: base, aud: aud, share: share,
                   idx: share != null && this.natRate ? share / this.natRate * 100 : null, dma: c.dma[i] });
     }
     this.rows = rows;
@@ -722,8 +753,8 @@
     if (this.budgetBox) this.budgetBox.hidden = true;
   };
   Radius.prototype.renderSummary = function () {
-    var s = this.state, c = this.c, rows = this.visible(), A = 0, P = 0;
-    rows.forEach(function (r) { if (r.aud != null) { A += r.aud; P += r.pop || 0; } });
+    var s = this.state, c = this.c, rows = this.visible(), A = 0, P = 0, pop = 0;
+    rows.forEach(function (r) { if (r.aud != null) { A += r.aud; P += r.base || 0; pop += r.pop || 0; } });   // P: what share is measured against
     var share = P ? A / P : null, idx = share != null && this.natRate ? share / this.natRate * 100 : null, est = this.isEstimate();
     var ci = this.byZip[s.zip];
     this.summary.innerHTML = "";
@@ -737,12 +768,12 @@
       label = (s.profile ? "Target audience: " + this.profiles[s.profile].label + ", e" : est ? "E" : "") + (s.profile || est ? "stimated audience" : "Audience") + where + minTxt;
     }
     this.summary.appendChild(el("div", { class: "rz-stat rz-stat-main" }, [el("b", { class: "num", text: NF0.format(Math.round(A)) }), el("span", { text: label })]));
-    var shareStat = stat(share == null ? "—" : NF1.format(share * 100) + "%", "Share of population");
+    var shareStat = stat(share == null ? "—" : NF1.format(share * 100) + "%", this.cfg.shareLabel || "Share of population");
     var idxStat = stat(idx == null ? "—" : NF0.format(idx), "Index vs. U.S. (100 = average)");
     if (cfg.leadWithIndex) { idxStat.classList.add("rz-stat-key"); this.summary.appendChild(idxStat); this.summary.appendChild(shareStat); }
     else { this.summary.appendChild(shareStat); this.summary.appendChild(idxStat); }
     this.summary.appendChild(stat(NF0.format(rows.length), "ZIPs"));
-    this.summary.appendChild(stat(NF0.format(P), "Population"));
+    this.summary.appendChild(stat(NF0.format(pop), "Population"));
     if (cfg.summaryNote) this.summary.appendChild(el("p", { class: "rz-summary-note", text: cfg.summaryNote }));
   };
   // Context columns for the current preset (or the tool's default list when no preset is chosen)
@@ -804,13 +835,13 @@
     var self = this, c = this.c, by = {}, keys = this.contextKeys();
     this.visible().forEach(function (r) {
       var f = self.zipCounty && self.zipCounty[r.zip]; if (!f) return;
-      var x = by[f] || (by[f] = { fips: f, town: self.countyLabel(f), zips: 0, pop: 0, aud: 0, any: false, w: {}, p: {} });
-      x.zips++; x.pop += r.pop || 0; if (r.aud != null) { x.aud += r.aud; x.any = true; }
+      var x = by[f] || (by[f] = { fips: f, town: self.countyLabel(f), zips: 0, pop: 0, base: 0, aud: 0, any: false, w: {}, p: {} });
+      x.zips++; x.pop += r.pop || 0; if (r.aud != null) x.base += r.base || 0; if (r.aud != null) { x.aud += r.aud; x.any = true; }
       keys.forEach(function (k) { var v = CONTEXT[k].value(c, r.i); if (v != null && r.pop) { x.w[k] = (x.w[k] || 0) + v * r.pop; x.p[k] = (x.p[k] || 0) + r.pop; } });
     });
     return Object.keys(by).map(function (f) {
       var x = by[f]; if (!x.any) x.aud = null;
-      x.share = x.aud != null && x.pop ? x.aud / x.pop : null;
+      x.share = x.aud != null && x.base ? x.aud / x.base : null;
       x.idx = x.share != null && self.natRate ? x.share / self.natRate * 100 : null;
       keys.forEach(function (k) { x["x_" + k] = x.p[k] ? x.w[k] / x.p[k] : null; });
       return x;
@@ -823,7 +854,7 @@
     var rows = this.countyRows(), ctx = this.contextKeys(), sc = !!this.cfg.blendScore;
     this.addScore(rows, ctx);
     if (["town", "zips", "pop", "aud", "share", "idx"].concat(sc ? ["score"] : []).indexOf(s.sortKey) < 0 && !/^x_/.test(s.sortKey)) { s.sortKey = sc ? "score" : "aud"; s.sortDir = "desc"; }
-    var cols = [["town", "County", "l"]].concat(sc ? [["score", "Score", "n"]] : []).concat([["zips", "ZIPs", "n"], ["pop", "Population", "n"]]).concat([ ["aud", est ? "Est. audience" : "Audience", "n"], ["share", "Share", "n"], ["idx", "Index", "n"]])
+    var cols = [["town", "County", "l"]].concat(sc ? [["score", "Score", "n"]] : []).concat([["zips", "ZIPs", "n"], ["pop", "Population", "n"]]).concat([ ["aud", est ? "Est. audience" : "Audience", "n"], ["share", this.cfg.shareShort || "Share", "n"], ["idx", "Index", "n"]])
       .concat(ctx.map(function (k) { return ["x_" + k, CONTEXT[k].label, "n", CONTEXT[k].long + "; ZIPs averaged by population"]; }));
     this.sortRows(rows);
     var k = s.sortKey;
@@ -882,7 +913,7 @@
     if (/^x_/.test(s.sortKey) && ctx.indexOf(s.sortKey.slice(2)) < 0) { s.sortKey = sc ? "score" : "idx"; s.sortDir = "desc"; }
     if (s.sortKey === "score" && !sc) s.sortKey = "idx";
     var cols = [["zip", "ZIP", "l"], ["town", "Town", "l"]].concat(area ? [["county", "County", "l"]] : []).concat(sc ? [["score", "Score", "n"]] : []).concat(!area || circ ? [["dist", area ? "Miles to location" : "Miles", "n"]] : [])
-      .concat([["pop", "Population", "n"], ["aud", est ? "Est. audience" : "Audience", "n"], ["share", "Share", "n"], ["idx", "Index", "n"]])
+      .concat([["pop", "Population", "n"], ["aud", est ? "Est. audience" : "Audience", "n"], ["share", this.cfg.shareShort || "Share", "n"], ["idx", "Index", "n"]])
       .concat(ctx.map(function (k) { return ["x_" + k, CONTEXT[k].label, "n", CONTEXT[k].long]; }));
     this.sortRows(rows);
     var k = s.sortKey, nSmall = (k === "idx" || k === "score" || /^x_/.test(k)) ? rows.filter(function (r) { return (r.pop || 0) < SMALL_ZIP; }).length : 0;
@@ -1259,8 +1290,9 @@
     var audienceNoun = prof && PC.nouns && PC.nouns[s.profile] ? PC.nouns[s.profile] : prof ? (/candidates|buyers|prospects|owners/i.test(prof.label) ? prof.label.toLowerCase() : "likely " + prof.label.toLowerCase() + " customers") : hasSel ? "people in the selected audience" : "residents";
     var adNoun = adSub && adSub.audience ? adSub.audience : audienceNoun;
     var rows = this.visible(), aud = 0, pop = 0;
-    rows.forEach(function (r) { if (r.aud != null) { aud += r.aud; pop += r.pop || 0; } });
-    var idx = pop && this.natRate ? aud / pop / this.natRate * 100 : null;
+    var basis = 0;
+    rows.forEach(function (r) { if (r.aud != null) { aud += r.aud; pop += r.pop || 0; basis += r.base || 0; } });
+    var idx = basis && this.natRate ? aud / basis / this.natRate * 100 : null;
     // Top ZIPs: in a large area (a metro, several DMAs, a state) the highest index tends to be a small ZIP, so rank the
     // above-average ZIPs (index 110+) by prospects instead; in a small area, rank by index
     var big = rows.length > 150;
@@ -1269,7 +1301,7 @@
       .map(function (r) { return { zip: r.zip, town: r.town, aud: Math.round(r.aud), idx: r.idx, pop: r.pop }; });
     var oneTown = top.length > 1 && top.every(function (z) { return z.town === top[0].town; });
     // Concentration: the ZIPs in the allocation (top N by audience) vs. the whole trade area
-    var pAud = 0, pPop = 0; A.pick.forEach(function (x) { pAud += x.r.aud || 0; pPop += x.r.pop || 0; });
+    var pAud = 0, pPop = 0; A.pick.forEach(function (x) { pAud += x.r.aud || 0; pPop += x.r.base || 0; });
     var pIdx = pPop && this.natRate ? pAud / pPop / this.natRate * 100 : null, pShare = aud ? pAud / aud : null;
     var conc = A.pick.length < rows.length && pShare != null
       ? "Geo-targeted to the " + A.pick.length + " ZIPs that hold " + Math.round(pShare * 100) + "% of the trade area's " + audienceNoun + (pIdx ? " (index " + Math.round(pIdx) + ")" : "") + "."
@@ -1415,7 +1447,7 @@
       var A = 0, P = 0, b = L.latLngBounds([]), byDma = {}, set = {};
       g.forEach(function (r) {
         set[r.zip] = 1; b.extend([c.lat[r.i], c.lon[r.i]]);
-        if (r.aud != null) { A += r.aud; P += r.pop || 0; }
+        if (r.aud != null) { A += r.aud; P += r.base || 0; }
         if (r.dma && r.dma !== "0") byDma[r.dma] = (byDma[r.dma] || 0) + (r.pop || 0);
       });
       var d = Object.keys(byDma).sort(function (x, y) { return byDma[y] - byDma[x]; });
@@ -1433,7 +1465,7 @@
     };
   };
   Radius.prototype.zipTip = function (r) {
-    return '<div class="az-tip"><b>' + r.zip + " " + r.town + "</b><br>" + (r.aud == null ? "No data" : NF0.format(Math.round(r.aud)) + " people, index " + (r.idx == null ? "—" : NF0.format(r.idx))) + "</div>";
+    return '<div class="az-tip"><b>' + r.zip + " " + r.town + "</b><br>" + (r.aud == null ? "No data" : NF0.format(Math.round(r.aud)) + " " + (this.cfg.audienceUnit || "people") + ", index " + (r.idx == null ? "—" : NF0.format(r.idx))) + "</div>";
   };
   Radius.prototype.clearMarkets = function () {
     (this.minis || []).forEach(function (m) { m.remove(); });
@@ -1555,7 +1587,7 @@
           style: function (f) { return { color: "#ffffff", weight: 1, fillOpacity: 0.9, fillColor: self.colorFor(cr[f.properties.fips].idx) }; },
           onEachFeature: function (f, layer) {
             var x = cr[f.properties.fips]; self.layerByCounty[f.properties.fips] = layer;
-            layer.bindTooltip('<div class="az-tip"><b>' + x.town + "</b><br>" + (x.aud == null ? "No data" : NF0.format(Math.round(x.aud)) + " people in " + NF0.format(x.zips) + (x.zips === 1 ? " ZIP" : " ZIPs") + " inside the area, index " + (x.idx == null ? "—" : NF0.format(x.idx))) + "</div>", { sticky: true, opacity: 0.97 });
+            layer.bindTooltip('<div class="az-tip"><b>' + x.town + "</b><br>" + (x.aud == null ? "No data" : NF0.format(Math.round(x.aud)) + " " + (self.cfg.audienceUnit || "people") + " in " + NF0.format(x.zips) + (x.zips === 1 ? " ZIP" : " ZIPs") + " inside the area, index " + (x.idx == null ? "—" : NF0.format(x.idx))) + "</div>", { sticky: true, opacity: 0.97 });
           }
         }).addTo(self.map);
       } else self.zipLayer.addTo(self.map);
@@ -2066,8 +2098,8 @@
       if (!pop && !c.population[i]) { noRes++; return; }
       var d = null;
       if (near[i]) A.circles.forEach(function (q) { var x = miles(c.lat[q.i], c.lon[q.i], c.lat[i], c.lon[i]); if (d == null || x < d) d = x; });
-      var aud = self.audience(i), share = aud != null && pop ? aud / pop : null, f = self.zipCounty[c.zip[i]];
-      rows.push({ i: i, zip: c.zip[i], town: c.city[i] + ", " + c.state[i], county: f ? self.counties[f].n : "", dist: d, pop: pop, aud: aud, share: share,
+      var aud = self.audience(i), base = self.baseOf(i), share = aud != null && base ? aud / base : null, f = self.zipCounty[c.zip[i]];
+      rows.push({ i: i, zip: c.zip[i], town: c.city[i] + ", " + c.state[i], county: f ? self.counties[f].n : "", dist: d, pop: pop, base: base, aud: aud, share: share,
                   idx: share != null && self.natRate ? share / self.natRate * 100 : null, dma: c.dma[i] });
     });
     A.noRes = noRes;

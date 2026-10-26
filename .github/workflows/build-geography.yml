@@ -106,6 +106,7 @@ jobs:
             echo "::error title=Franchise build::$msg"; exit 1; }
           npm i --no-save topojson-client@3.1.0 topojson-server@3.0.1
           node data-build/build_franchise_geo.js
+          python3 data-build/build_franchise_audience.py
           python3 data-build/build_franchise_pages.py
           echo "::notice title=Franchise build::$(grep -v '^\[PASS\]' franchise.log | tail -n 12 | sed ':a;N;$!ba;s/%/%25/g;s/\n/%0A/g')"
       - name: Build engine test page data
