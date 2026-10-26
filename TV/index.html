@@ -160,7 +160,7 @@
 
   <section class="az-panel tv-plan">
     <h2>Campaign inputs</h2>
-    <p>The Broadcast CPM, spot price and audience per spot fill in with the market averages, and the Digital Video CPM with the $45 planning CPM. Adjust any of them to match the schedule. Results appear once the budget and frequencies are entered.</p>
+    <p>The Broadcast CPM, spot price and audience per spot fill in with the market averages, and the Digital Video CPM with the selected product's rate card CPM (CTV / Advanced TV, $50, to start). Adjust any of them to match the schedule. Results appear once the budget and frequencies are entered.</p>
     <div class="tv-inputs">
       <div class="tv-group">Campaign</div>
       <label class="az-field"><span>Campaign budget ($)</span><input id="budget" type="number" min="0" step="1000" inputmode="decimal"></label>
@@ -170,7 +170,8 @@
       <label class="az-field"><span id="avgLabel">Average target audience per spot</span><input id="avgaud" type="number" min="0" step="1" inputmode="decimal"><span class="tv-hint"><span id="avgHint">Filled in with the Scarborough average for the selected target; edit to match the schedule.</span> <button type="button" class="tv-reset" id="avgReset" hidden>Reset to average</button></span></label>
       <label class="az-field"><span id="freqLabel">Schedule frequency, selected target</span><input id="tvfreq" type="number" min="1" step="0.1" inputmode="decimal"><span class="tv-hint">Average frequency for the whole schedule, for the selected target, as quoted for the schedule.</span></label>
       <div class="tv-group">Digital Video</div>
-      <label class="az-field"><span>Digital Video CPM ($)</span><input id="dcpm" type="number" min="0" step="0.5" inputmode="decimal" value="45"><span class="tv-hint">Starts at the $45 planning CPM; edit to match the buy.</span></label>
+      <label class="az-field"><span>Digital Video product</span><select id="dprod"><option value="50">CTV / Advanced TV ($50 CPM)</option><option value="45">Dynamic Video ($45 CPM)</option><option value="24">Pre-roll ($24 CPM)</option></select><span class="tv-hint">Adtaxi rate card (Nov 2025). Picking a product fills in its CPM.</span></label>
+      <label class="az-field"><span>Digital Video CPM ($)</span><input id="dcpm" type="number" min="0" step="0.5" inputmode="decimal" value="50"><span class="tv-hint">Starts at the selected product's rate card CPM; edit to match the buy.</span></label>
       <label class="az-field"><span>Frequency cap, whole campaign</span><input id="dfreq" type="number" min="1" step="0.1" inputmode="decimal"></label>
     </div>
   </section>
@@ -378,7 +379,7 @@
     $("printSum").innerHTML = '<div style="display:flex;justify-content:space-between;align-items:baseline"><b style="font-size:18px;color:#0f2742">' + esc(M.name) + " · " + esc(demoLabel()) + '</b><span style="font-size:12px;color:#5f7286">' + today + "</span></div>" +
       '<div class="tv-psum">' + it("Campaign budget", money0(inp.budget)) + it("Split", Math.round((1 - p) * 100) + "% Broadcast / " + Math.round(p * 100) + "% Digital") +
       it("Broadcast CPM (A18+)", money(cpmVal(M))) + it("Average :30 spot", money(inp.spot)) + it("Target audience per spot", fmt(inp.avgT)) +
-      it("Broadcast frequency", inp.tvfreq.toFixed(1)) + it("Digital Video CPM", money(inp.dcpm)) + it("Digital frequency cap", p > 0 ? inp.dfreq.toFixed(1) : "—") + "</div>";
+      it("Broadcast frequency", inp.tvfreq.toFixed(1)) + it("Digital Video", $("dprod").options[$("dprod").selectedIndex].text.replace(/ \(.*$/, "")) + it("Digital Video CPM", money(inp.dcpm)) + it("Digital frequency cap", p > 0 ? inp.dfreq.toFixed(1) : "—") + "</div>";
   }
 
   function renderResults() {
@@ -588,6 +589,7 @@
   });
   $("market").addEventListener("change", function () { selectMarket(this.value, true); });
   ["budget", "bcpm", "spot", "avgaud", "tvfreq", "dcpm", "dfreq", "shift"].forEach(function (id) { $(id).addEventListener("input", refresh); });
+  $("dprod").addEventListener("change", function () { $("dcpm").value = this.value; refresh(); });   // rate card CPM for the chosen Digital Video product
 
   Promise.all([
     fetch("data/markets.json").then(function (r) { if (!r.ok) throw new Error("markets"); return r.json(); }),
