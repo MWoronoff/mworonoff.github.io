@@ -15,11 +15,11 @@ window.ADTAXI_RADIUS = {
   filters: ["age", "income5", "home", "employ", "car", "divsep", "lep"],
   profileLabel: "Target audience",
   profiles: [
-    { id: "pi", label: "Personal injury", note: "Employed adults who commute by car.", sel: { employ: ["emp"], car: true } },
-    { id: "family", label: "Family law and divorce", note: "Adults 25–54 who are divorced or separated.", sel: { age: ["25_34", "35_44", "45_54"], divsep: true } },
-    { id: "estate", label: "Estate planning and elder law", note: "Homeowners 55 and older.", sel: { age: ["55p"], home: ["ownlt200", "own200_400", "own400_750", "own750p"] } },
-    { id: "bankruptcy", label: "Bankruptcy and debt relief", note: "Adults 25–54 with household income under $50K.", sel: { age: ["25_34", "35_44", "45_54"], income5: ["lt50"] } },
-    { id: "employment", label: "Employment law", note: "Adults 25–54 in the workforce, employed or recently unemployed.", sel: { age: ["25_34", "35_44", "45_54"], employ: ["emp", "unemp"] } }
+    { id: "pi", filters: ["age", "employ", "car", "lep"], label: "Personal injury", note: "Employed adults who commute by car.", sel: { employ: ["emp"], car: true } },
+    { id: "family", filters: ["age", "divsep", "income5"], label: "Family law and divorce", note: "Adults 25–54 who are divorced or separated.", sel: { age: ["25_34", "35_44", "45_54"], divsep: true } },
+    { id: "estate", filters: ["age", "home", "income5"], label: "Estate planning and elder law", note: "Homeowners 55 and older.", sel: { age: ["55p"], home: ["ownlt200", "own200_400", "own400_750", "own750p"] } },
+    { id: "bankruptcy", filters: ["age", "income5", "home", "employ"], label: "Bankruptcy and debt relief", note: "Adults 25–54 with household income under $50K.", sel: { age: ["25_34", "35_44", "45_54"], income5: ["lt50"] } },
+    { id: "employment", filters: ["age", "employ", "income5"], label: "Employment law", note: "Adults 25–54 in the workforce, employed or recently unemployed.", sel: { age: ["25_34", "35_44", "45_54"], employ: ["emp", "unemp"] } }
   ],
   methodology: [
     { title: "Family law audience", body: "Census counts people who are already divorced or separated, not married couples heading toward divorce, so the Family law profile is strongest for custody, support and modification cases." },

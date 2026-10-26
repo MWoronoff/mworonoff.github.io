@@ -18,10 +18,10 @@ window.ADTAXI_RADIUS = {
   filters: ["gender", "age", "income", "vehicles", "car", "kids", "home"],
   profileLabel: "Target audience",
   profiles: [
-    { id: "newcar", label: "New cars", note: "Adults 35 and older with household income of $100K or more.", sel: { age: ["35_44", "45_54", "55p"], income: ["100_150", "150_200", "200p"] } },
-    { id: "newtruck", label: "New trucks and SUVs", note: "Adults 25–54 with household income of $75K or more in households with 2 or more vehicles.", sel: { age: ["25_34", "35_44", "45_54"], income: ["75_100", "100_150", "150_200", "200p"], vehicles: ["2", "3p"] } },
-    { id: "usedcar", label: "Used cars", note: "Adults 18–44 with household income of $35K–$99K.", sel: { age: ["18_24", "25_34", "35_44"], income: ["35_50", "50_75", "75_100"] } },
-    { id: "usedtruck", label: "Used trucks and SUVs", note: "Adults 25–54 with household income of $35K–$99K in households with 2 or more vehicles.", sel: { age: ["25_34", "35_44", "45_54"], income: ["35_50", "50_75", "75_100"], vehicles: ["2", "3p"] } }
+    { id: "newcar", filters: ["gender", "age", "income", "kids", "home"], label: "New cars", note: "Adults 35 and older with household income of $100K or more.", sel: { age: ["35_44", "45_54", "55p"], income: ["100_150", "150_200", "200p"] } },
+    { id: "newtruck", filters: ["gender", "age", "income", "vehicles", "kids", "home"], label: "New trucks and SUVs", note: "Adults 25–54 with household income of $75K or more in households with 2 or more vehicles.", sel: { age: ["25_34", "35_44", "45_54"], income: ["75_100", "100_150", "150_200", "200p"], vehicles: ["2", "3p"] } },
+    { id: "usedcar", filters: ["gender", "age", "income", "vehicles", "car"], label: "Used cars", note: "Adults 18–44 with household income of $35K–$99K.", sel: { age: ["18_24", "25_34", "35_44"], income: ["35_50", "50_75", "75_100"] } },
+    { id: "usedtruck", filters: ["gender", "age", "income", "vehicles", "car"], label: "Used trucks and SUVs", note: "Adults 25–54 with household income of $35K–$99K in households with 2 or more vehicles.", sel: { age: ["25_34", "35_44", "45_54"], income: ["35_50", "50_75", "75_100"], vehicles: ["2", "3p"] } }
   ],
   methodology: [
     { title: "Vehicles in household", body: "The share of households in the ZIP with no vehicle, 1, 2, or 3 or more vehicles available (Census), applied to the adults selected." },

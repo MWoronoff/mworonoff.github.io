@@ -14,11 +14,11 @@ window.ADTAXI_RADIUS = {
   filters: ["age", "income5", "parented", "enrolled", "somecollege", "veterans", "hispanic"],
   profileLabel: "Target audience",
   profiles: [
-    { id: "fouryear", label: "Four-year colleges and universities", note: "Ages 15–24 in households with income of $75K or more.", sel: { age: ["15_17", "18_24"], income5: ["75_100", "100_150", "150p"] } },
-    { id: "community", label: "Community colleges", note: "Ages 18–34 in households with income under $75K.", sel: { age: ["18_24", "25_34"], income5: ["lt50", "50_75"] } },
-    { id: "trade", label: "Trade and career schools", note: "Ages 18–34 in households whose head has no college.", sel: { age: ["18_24", "25_34"], parented: ["nocol"] } },
-    { id: "graduate", label: "Graduate and professional programs", note: "Ages 25–44 in households whose head has a bachelor's degree or higher.", sel: { age: ["25_34", "35_44"], parented: ["ba"] } },
-    { id: "adult", label: "Adult and online degree completion", note: "Ages 25–54 who started college but didn't finish.", sel: { age: ["25_34", "35_44", "45_54"], somecollege: true } }
+    { id: "fouryear", filters: ["age", "income5", "parented", "hispanic"], label: "Four-year colleges and universities", note: "Ages 15–24 in households with income of $75K or more.", sel: { age: ["15_17", "18_24"], income5: ["75_100", "100_150", "150p"] } },
+    { id: "community", filters: ["age", "income5", "parented", "somecollege", "veterans", "hispanic"], label: "Community colleges", note: "Ages 18–34 in households with income under $75K.", sel: { age: ["18_24", "25_34"], income5: ["lt50", "50_75"] } },
+    { id: "trade", filters: ["age", "income5", "parented", "veterans", "hispanic"], label: "Trade and career schools", note: "Ages 18–34 in households whose head has no college.", sel: { age: ["18_24", "25_34"], parented: ["nocol"] } },
+    { id: "graduate", filters: ["age", "income5", "parented", "enrolled", "veterans"], label: "Graduate and professional programs", note: "Ages 25–44 in households whose head has a bachelor's degree or higher.", sel: { age: ["25_34", "35_44"], parented: ["ba"] } },
+    { id: "adult", filters: ["age", "income5", "somecollege", "veterans", "hispanic"], label: "Adult and online degree completion", note: "Ages 25–54 who started college but didn't finish.", sel: { age: ["25_34", "35_44", "45_54"], somecollege: true } }
   ],
   methodology: [
     { title: "Graduate program audience", body: "Census doesn't publish, by ZIP, how many people of each age hold a bachelor's degree, so the Graduate profile uses the household head's education. For adults 25–44, who usually head their own household, this is a close stand-in." },

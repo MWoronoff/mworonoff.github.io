@@ -18,12 +18,12 @@ window.ADTAXI_RADIUS = {
   filters: ["age", "renter", "rinc", "rtype", "rmoved", "rburden", "enrolled"],
   profileLabel: "Target audience",
   profiles: [
-    { id: "all", label: "All apartments", note: "Adults renting in apartment buildings with 5 or more units.", sel: { rtype: ["apt"] } },
-    { id: "luxury", label: "Luxury / Class A", note: "Adults renting in apartment buildings, in renter households earning $100K+.", sel: { rinc: ["100_150", "150p"], rtype: ["apt"] } },
-    { id: "mid", label: "Mid-market / workforce", note: "Adults renting in apartment buildings, in renter households earning $35K–$99K.", sel: { rinc: ["35_50", "50_75", "75_100"], rtype: ["apt"] } },
-    { id: "affordable", label: "Affordable housing", note: "Adults in renter households earning under $35K.", sel: { rinc: ["lt35"] } },
-    { id: "student", label: "Student housing", note: "Renters 18–24 enrolled in college or graduate school.", sel: { age: ["18_24"], renter: true, enrolled: true } },
-    { id: "senior", label: "Active adult / 55+", note: "Renters 55 and older.", sel: { age: ["55p"], renter: true } }
+    { id: "all", filters: ["age", "renter", "rinc", "rtype", "rmoved", "rburden"], label: "All apartments", note: "Adults renting in apartment buildings with 5 or more units.", sel: { rtype: ["apt"] } },
+    { id: "luxury", filters: ["age", "rinc", "rtype", "rmoved"], label: "Luxury / Class A", note: "Adults renting in apartment buildings, in renter households earning $100K+.", sel: { rinc: ["100_150", "150p"], rtype: ["apt"] } },
+    { id: "mid", filters: ["age", "rinc", "rtype", "rmoved", "rburden"], label: "Mid-market / workforce", note: "Adults renting in apartment buildings, in renter households earning $35K–$99K.", sel: { rinc: ["35_50", "50_75", "75_100"], rtype: ["apt"] } },
+    { id: "affordable", filters: ["age", "rinc", "rtype", "rburden"], label: "Affordable housing", note: "Adults in renter households earning under $35K.", sel: { rinc: ["lt35"] } },
+    { id: "student", filters: ["age", "renter", "rtype", "enrolled"], label: "Student housing", note: "Renters 18–24 enrolled in college or graduate school.", sel: { age: ["18_24"], renter: true, enrolled: true } },
+    { id: "senior", filters: ["age", "renter", "rinc", "rtype"], label: "Active adult / 55+", note: "Renters 55 and older.", sel: { age: ["55p"], renter: true } }
   ],
   methodology: [
     { title: "Renter rate by age", body: "Census reports whether a household rents by the age of the head of household, so the tool uses each age group's own renter rate. Counts are adults living in renter households." },

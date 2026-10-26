@@ -8,7 +8,7 @@
  * Traits Census publishes by age (insurance, hearing, vision, living alone, home ownership, health conditions for adults)
  * are applied within each age group, so "hearing difficulty" among people 75+ uses the 75+ rate, not the all-ages rate.
  * A site picks its age groups with cfg.ageSet: "default" (15+, Higher Education), "health" (all ages) or "adult" (18+).
- * Best-prospect profiles (cfg.profiles): a category's starting audience. A profile's "either" list adds an or-condition
+ * Target audience profiles (cfg.profiles; optional filters: [...] lists the filter groups shown for that audience): a category's starting audience. A profile's "either" list adds an or-condition
  * (e.g. 65+ OR diabetes), combined within each sex x age group as 1 - (1 - a)(1 - b), treating the two as independent.
  */
 (function () {
@@ -435,7 +435,7 @@
     var flags = cfg.filters.filter(function (k) { return defs[k].type === "flag"; });
     var groups = cfg.filters.filter(function (k) { return defs[k].type !== "flag"; }).map(function (key) {
       var f = defs[key];
-      return el("fieldset", { class: "rz-group" }, [el("legend", { text: f.label }), el("div", { class: "rz-chips" }, f.options.map(function (o) {
+      return el("fieldset", { class: "rz-group", "data-key": key }, [el("legend", { text: f.label }), el("div", { class: "rz-chips" }, f.options.map(function (o) {
         return el("label", { class: "rz-chip" }, [el("input", { type: "checkbox", "data-f": key, value: o[0], onchange: function () {
           var cur = s.sel[key] || [], i = cur.indexOf(o[0]);
           if (this.checked && i < 0) cur.push(o[0]); if (!this.checked && i >= 0) cur.splice(i, 1);
@@ -446,7 +446,7 @@
     });
     if (flags.length) groups.push(el("fieldset", { class: "rz-group rz-flags" }, [el("legend", { text: cfg.flagsLabel || "Narrow to" })].concat(flags.map(function (key) {
       var f = defs[key];
-      return el("label", { class: "rz-check", title: f.label }, [el("input", { type: "checkbox", "data-f": key, onchange: function () { if (this.checked) s.sel[key] = true; else delete s.sel[key]; self.update(false); } }), el("span", { text: f.text })]);
+      return el("label", { class: "rz-check", title: f.label, "data-key": key }, [el("input", { type: "checkbox", "data-f": key, onchange: function () { if (this.checked) s.sel[key] = true; else delete s.sel[key]; self.update(false); } }), el("span", { text: f.text })]);
     }))));
     var presets = (cfg.presets || []).length ? el("div", { class: "rz-presets" }, [el("span", { class: "rz-presets-label", text: cfg.profiles ? "More audiences" : "Start from" })].concat(cfg.presets.map(function (p) {
       return el("button", { type: "button", class: "az-btn", text: p.label, onclick: function () { s.sel = JSON.parse(JSON.stringify(p.sel)); s.profile = null; self.syncFilters(); self.update(false); } });
@@ -514,6 +514,10 @@
         this.eitherBox.appendChild(el("button", { type: "button", class: "rz-clear", text: "Remove", onclick: function () { s.profile = null; self.syncFilters(); self.update(false); } }));
       }
     }
+    // A target audience can list the filters that pertain to it (profile.filters); the rest are hidden. Custom audience shows them all.
+    var shown = p && p.filters ? p.filters.concat(Object.keys(p.sel || {})) : null;
+    Array.prototype.forEach.call(this.filterPanel.querySelectorAll("[data-key]"), function (g) { g.hidden = !!shown && shown.indexOf(g.getAttribute("data-key")) < 0; });
+    Array.prototype.forEach.call(this.filterPanel.querySelectorAll(".rz-flags"), function (g) { g.hidden = !g.querySelector(".rz-check:not([hidden])"); });
     Array.prototype.forEach.call(this.filterPanel.querySelectorAll("input[data-f]"), function (inp) {
       var v = s.sel[inp.getAttribute("data-f")];
       inp.checked = inp.value && inp.value !== "on" ? !!(v && v.indexOf && v.indexOf(inp.value) >= 0) : v === true;
@@ -790,7 +794,7 @@
     if (window.AdtaxiPlan) { done(); return; }
     if (loadPlan.waiting) { loadPlan.waiting.push(done); return; }
     loadPlan.waiting = [done];
-    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261026f";
+    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261026g";
     sc.onload = function () { var w = loadPlan.waiting; loadPlan.waiting = null; w.forEach(function (f) { f(); }); };
     sc.onerror = function () { loadPlan.waiting = null; };
     document.head.appendChild(sc);
@@ -1042,7 +1046,7 @@
   Radius.prototype.proposalBase = function () { return (this.cfg.planScript || "../shared/media-plan.js").replace(/media-plan\.js.*$/, ""); };
   Radius.prototype.benchmarks = function () {
     var self = this;
-    if (!this._bench) this._bench = fetch(this.cfg.benchmarksData || this.proposalBase() + "benchmarks.json?v=20261026f").then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
+    if (!this._bench) this._bench = fetch(this.cfg.benchmarksData || this.proposalBase() + "benchmarks.json?v=20261026g").then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
     return this._bench.then(function (B) {
       if (!B) return null;
       var cat = self.cfg.planCategory && self.cfg.planCategory !== "none" ? self.cfg.planCategory : String(self.cfg.exportName || "").replace(/-radius$/, "").replace(/^apartment$/, "apartments");
@@ -1188,7 +1192,7 @@
     if (!b.amount || !A.strat || !A.withDollars || !A.plan || !A.plan.tier || !A.channels.length) { st.textContent = "Enter a monthly budget and choose a media strategy first."; return Promise.resolve(null); }
     st.textContent = "Building…";
     var base = this.proposalBase();
-    return Promise.all([loadScriptOnce(this.cfg.pptxScript || "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261026f"), this.benchmarks(), this.logoImage()])
+    return Promise.all([loadScriptOnce(this.cfg.pptxScript || "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261026g"), this.benchmarks(), this.logoImage()])
       .then(function (res) { return window.AdtaxiProposal.build(self.proposalContext(res[2], res[3]), opt); })
       .then(function (out) { st.textContent = "Downloaded. Open it in PowerPoint or Google Slides to edit."; return out; })
       .catch(function (e) { st.textContent = "The proposal couldn't be built (" + e.message + "). Try again in a minute."; throw e; });
@@ -1482,7 +1486,7 @@
       ["Everything else is an estimate", list(traits).replace(/^./, function (x) { return x.toUpperCase(); }) + " come from separate tables. The tool multiplies the base count by each trait's share in that ZIP, which assumes the traits are independent within a ZIP. That's the standard approach, but real overlaps can be higher or lower, so combined counts are labeled as estimates."]
     ];
     if (aged.length) secs.push(["Traits applied by age group", list(aged).replace(/^./, function (x) { return x.toUpperCase(); }) + " are published by age, so the tool applies each age group's own rate in each ZIP. For example, hearing difficulty among people 75 and older uses the 75+ rate, which is far higher than the rate for all ages."]);
-    if ((this.cfg.profiles || []).length) secs.push(["Target audiences", "Each category starts from a profile of its likely customers, built from the same Census and CDC data. A profile is a starting point: change any filter to fit the client. When a profile includes an \"either\" condition (such as 65 and older, or diabetes), people who meet either one are counted once. The ZIP list is sorted by index, so the ZIPs where likely customers are most concentrated come first; ZIPs with fewer than 1,000 residents are listed after the rest, since a high share of a tiny ZIP is too few people to reach. Sort by Est. audience to see the largest counts."]);
+    if ((this.cfg.profiles || []).length) secs.push(["Target audiences", "Each category starts from a profile of its likely customers, built from the same Census and CDC data. A profile is a starting point: change any filter to fit the client. Each target audience shows only the filters that pertain to it; choose Custom audience to see them all. When a profile includes an \"either\" condition (such as 65 and older, or diabetes), people who meet either one are counted once. The ZIP list is sorted by index, so the ZIPs where likely customers are most concentrated come first; ZIPs with fewer than 1,000 residents are listed after the rest, since a high share of a tiny ZIP is too few people to reach. Sort by Est. audience to see the largest counts."]);
     if (cf.indexOf("built") >= 0) secs.push(["Homeowners", "Year built, home value, single-family detached and years in the home are Census counts of owner-occupied homes in each ZIP. The tool applies the homeowner rate for each age of householder once, then each selected trait's share among owner homes, so combining them doesn't count owners twice."]);
     if (cf.indexOf("renter") >= 0) secs.push(["Renters", "Renter income, rental type, recent moves, rent burden and children at home are Census counts of renter households in each ZIP. The tool applies the renter rate for each age of householder once, then each selected trait's share among renter households, so combining them doesn't count renters twice. Counts are adults in renter households."]);
     if (cf.indexOf("parented") >= 0) secs.push(["Parents' education", "This is the education of the head of household in every household in the ZIP. Combine it with Children at home to estimate households with children whose head of household has no college."]);
