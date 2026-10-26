@@ -400,7 +400,28 @@
     return box;
   }
 
+  /* Page-level channels: a page can add a channel of its own (e.g. LinkedIn on the Franchise analyzer only). Each page
+     loads its own copy of this file, so nothing changes on other pages or in the Media Mix Planner.
+     x: { channels: { id: {label, short, role, prog, color, job} }, weights: { strategyId: { id: weight } },
+          minimums: { id: $ }, mgmtPct: { id: share }, cpm: { id: benchmark CPM }, tiers: [service tier labels offering it] } */
+  function extend(x) {
+    if (!x) return;
+    Object.keys(x.channels || {}).forEach(function (k) { CHANNELS[k] = x.channels[k]; });
+    Object.keys(x.weights || {}).forEach(function (sid) {
+      var st = STRATEGIES.filter(function (t) { return t.id === sid; })[0]; if (!st) return;
+      Object.keys(x.weights[sid]).forEach(function (k) { st.weights[k] = x.weights[sid][k]; });
+    });
+    Object.keys(x.minimums || {}).forEach(function (k) { MINIMUMS[k] = DEFAULTS.min[k] = x.minimums[k]; });
+    Object.keys(x.mgmtPct || {}).forEach(function (k) { MGMT.pct[k] = DEFAULTS.pct[k] = x.mgmtPct[k]; });
+    Object.keys(x.cpm || {}).forEach(function (k) { BENCH_CPM[k] = DEFAULTS.cpm[k] = x.cpm[k]; CPM_ALL[k] = BENCH_CPM; });
+    Object.keys(x.channels || {}).forEach(function (k) {
+      SERVICE_TIERS.forEach(function (t) { if ((x.tiers || []).indexOf(t.label) >= 0 && t.available.indexOf(k) < 0) t.available.push(k); });
+    });
+    try { var sv = localStorage.getItem(RATE_KEY); if (sv) applyRates(JSON.parse(sv)); } catch (e) {}   // edits saved on this device still apply
+  }
+
   window.AdtaxiPlan = {
+    extend: extend,
     CHANNELS: CHANNELS, ROLES: ROLES, STRATEGIES: STRATEGIES, MIN_BUDGET: MIN_BUDGET, TIERS: TIERS,
     SERVICE_TIERS: SERVICE_TIERS, CUSTOM_PLAN_BUDGET: CUSTOM_PLAN_BUDGET, FEES: FEES,
     serviceTier: serviceTier, minFor: minFor, buildPlan: buildPlan, applyFees: applyFees, termNote: termNote,

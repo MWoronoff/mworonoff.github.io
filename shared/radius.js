@@ -971,6 +971,7 @@
         el("label", { class: "az-field rz-pcomp" }, [el("span", { text: "Local competitors" }), this.pComp]),
         el("div", { class: "rz-pact" }, [el("button", { type: "button", class: "az-btn primary", text: "Download PowerPoint", onclick: function () { self.buildProposal().catch(function () {}); } }), this.pStatus])])]);
     loadPlan(this.cfg.planScript, function () {
+      if (self.cfg.planExtend && AdtaxiPlan.extend && !AdtaxiPlan.extended) { AdtaxiPlan.extend(self.cfg.planExtend); AdtaxiPlan.extended = true; }   // this page's own channels (e.g. LinkedIn)
       AdtaxiPlan.STRATEGIES.forEach(function (st) { self.bStrat.appendChild(el("option", { value: st.id, text: st.label })); });
       self.bRates.appendChild(AdtaxiPlan.rateEditor(function () { self.renderBudget(); }));
       self.renderBudget();
@@ -1177,7 +1178,8 @@
     social: [/social network/i, "a social media ad"], tiktok: [/social network/i, "a social media ad"], snapchat: [/social network/i, "a social media ad"],
     ctv: [/streaming tv/i, "a streaming TV ad"], youtube: [/before or during the video/i, "a video ad before or during a video"],
     display: [/online display/i, "an online display ad"], retarget: [/online display/i, "an online display ad"],
-    audio: [/radio/i, "a radio or streaming audio ad"], dooh: [/outdoor|billboard/i, "an outdoor or billboard ad"] };
+    audio: [/radio/i, "a radio or streaming audio ad"], dooh: [/outdoor|billboard/i, "an outdoor or billboard ad"],
+    linkedin: [/social network/i, "a social media ad"] };
   Radius.prototype.proposalBase = function () { return (this.cfg.planScript || "../shared/media-plan.js").replace(/media-plan\.js.*$/, ""); };
   Radius.prototype.benchmarks = function () {
     var self = this;

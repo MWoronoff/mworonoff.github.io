@@ -28,12 +28,47 @@ window.ADTAXI_RADIUS = {
   }
  ],
  "zipGeo": "../shared/geo/zip/{level}/{id}.json",
- "planScript": "../shared/media-plan.js?v=20261026o",
+ "planScript": "../shared/media-plan.js?v=20261026p",
  "mediaMixUrl": "../media-mix/",
  "planCategory": "none",
  "customArea": true,
  "countiesFirst": true,
  "blendScore": true,
+ "planExtend": {
+  "channels": {
+   "linkedin": {
+    "label": "LinkedIn",
+    "short": "LinkedIn",
+    "role": "consideration",
+    "prog": false,
+    "term": 3,
+    "color": "#0a66c2",
+    "job": "Reaches professionals by job title, seniority, industry and company size: the closest match to the executives and business owners who buy franchises, with lead forms that fill from their profiles."
+   }
+  },
+  "weights": {
+   "leads": {
+    "linkedin": 28
+   },
+   "awareness": {
+    "linkedin": 10
+   },
+   "growth": {
+    "linkedin": 15
+   }
+  },
+  "minimums": {
+   "linkedin": 3000
+  },
+  "cpm": {
+   "linkedin": 45
+  },
+  "tiers": [
+   "Tier 3",
+   "Tier 2",
+   "Strategic"
+  ]
+ },
  "ageSet": "adult65",
  "radii": [
   5,

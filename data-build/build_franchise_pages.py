@@ -7,7 +7,7 @@ import glob, json, os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-V = "20261026o"   # version tag for the shared engine files on these pages (keep in step with the other analyzers)
+V = "20261026p"   # version tag for the shared engine files on these pages (keep in step with the other analyzers)
 
 SUBS = [{"id": "exec", "label": "Master franchise candidates"}, {"id": "owner", "label": "First-time franchise buyers"}]
 # AudienceSCAN 2026, Small Business Owners (4.5% of U.S. adults): saw or heard an ad of each type that led them to take
@@ -105,7 +105,14 @@ def radius_cfg(title, export, depth, links):
                       {"url": f"{up}shared/audience/zip_audience_inc.json", "label": "Household income at $125K and ages 55–64", "source": "Census ACS household income (B19001) and sex by age (B01001)"}],
         "zipGeo": f"{up}shared/geo/zip/{{level}}/{{id}}.json",
         "planScript": f"{up}shared/media-plan.js?v={V}", "mediaMixUrl": f"{up}media-mix/", "planCategory": "none",
-        "customArea": True, "countiesFirst": True, "blendScore": True, "ageSet": "adult65", "radii": [5, 10, 15, 25, 50, 100], "radiusLabel": "Up to {r} miles",
+        "customArea": True, "countiesFirst": True, "blendScore": True,
+        # LinkedIn on the Franchise analyzer only (shared/media-plan.js extend). Adtaxi's rate card has no LinkedIn line yet:
+        # the $3,000 minimum matches Meta as a placeholder and no management fee is set; both can be changed in Edit rates.
+        # CPM: 2026 median, Benly LinkedIn Ads cost benchmarks ($45; range $25-95).
+        "planExtend": {"channels": {"linkedin": {"label": "LinkedIn", "short": "LinkedIn", "role": "consideration", "prog": False, "term": 3, "color": "#0a66c2",
+                                                 "job": "Reaches professionals by job title, seniority, industry and company size: the closest match to the executives and business owners who buy franchises, with lead forms that fill from their profiles."}},
+                       "weights": {"leads": {"linkedin": 28}, "awareness": {"linkedin": 10}, "growth": {"linkedin": 15}},
+                       "minimums": {"linkedin": 3000}, "cpm": {"linkedin": 45}, "tiers": ["Tier 3", "Tier 2", "Strategic"]}, "ageSet": "adult65", "radii": [5, 10, 15, 25, 50, 100], "radiusLabel": "Up to {r} miles",
         "filters": ["age", "income8", "veterans"],
         "profileLabel": "Owner profile", "proposal": PROPOSAL,
         # The count is a planning pool (everyone who fits the age and income box), not a count of likely buyers
