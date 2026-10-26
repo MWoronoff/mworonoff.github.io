@@ -101,6 +101,10 @@
       show: cfg.defaultShow || 25, query: "", area: null, parent: null
     };
     this.readHash();
+    // Footprint navigation (cfg.footprint): rank DMAs or metros nationally, or counties and ZIPs inside a selected market.
+    // There is no U.S. summary view or national county list; old links to them open the national DMA ranking.
+    this.state.chain = this.state.chain || [];
+    if (cfg.footprint && (this.state.level === "us" || (this.state.level === "county" && !this.state.parent))) { this.state.level = "dma"; this.state.parent = null; }
   }
 
   Analyzer.prototype.measure = function (key) {
@@ -140,6 +144,7 @@
   /* ---------- Levels: U.S., DMA, Metro, and ZIPs inside one DMA or metro ---------- */
   Analyzer.prototype.key = function (level) {
     var p = this.state.parent;
+    if (level === "county" && this.cfg.footprint && this.state.level === "county" && p && p.level !== "county") return "county:" + p.level + ":" + p.id;
     return level === "zip" ? (p ? "zip:" + p.level + ":" + p.id : null) : level;
   };
   Analyzer.prototype.d = function (level) { var k = this.key(level); return k ? this.data[k] : null; };
@@ -167,6 +172,93 @@
     this.refresh();
   };
 
+  /* ---------- Footprint navigation (cfg.footprint) ---------- */
+  Analyzer.prototype.countyMarket = function () {
+    if (!this.cmLoad) this.cmLoad = this.loadJSON(this.cfg.countyMarket || "../shared/geo/county_market.json").catch(function () { return {}; });
+    return this.cmLoad;
+  };
+  // The market the "inside" rankings use: the selected DMA or metro, or the one being looked inside
+  Analyzer.prototype.footprintFor = function (kind) {
+    var s = this.state, p = s.parent;
+    if (p) {
+      if (p.level === "county") return kind === "zip" ? p : (s.chain[0] || null);
+      return p;
+    }
+    return (s.level === "dma" || s.level === "metro") && s.area ? { level: s.level, id: s.area } : null;
+  };
+  Analyzer.prototype.marketName = function (f) {
+    var d = f && this.data[f.level], row = d && d.byId[f.id];
+    return row ? row.name + (f.level === "county" ? "" : " " + LEVEL_LABELS[f.level]) : "";
+  };
+  Analyzer.prototype.goNational = function (lv) {
+    var s = this.state, back = s.parent && s.parent.level === lv ? s.parent.id : (s.chain[0] && s.chain[0].level === lv ? s.chain[0].id : (s.level === lv ? s.area : null));
+    if (this.mode === "radius") this.closeRadius();
+    s.level = lv; s.parent = null; s.chain = []; s.area = back; s.sortKey = null; s.query = ""; if (this.search) this.search.value = "";
+    this.resetView = true; this.refresh();
+  };
+  Analyzer.prototype.goInside = function (kind, f) {
+    var s = this.state;
+    f = f || this.footprintFor(kind); if (!f) return;
+    if (this.mode === "radius") this.closeRadius();
+    if (f.level === "county") { if (!(s.parent && s.parent.level === "county" && s.parent.id === f.id)) s.chain = s.parent && s.parent.level !== "county" ? [s.parent] : s.chain; }
+    else s.chain = [];
+    s.parent = { level: f.level, id: f.id }; s.level = kind; s.area = null; s.sortKey = null; s.query = ""; if (this.search) this.search.value = "";
+    this.refresh();
+  };
+  // A row's "Inside" button: a DMA or metro opens its counties; a county opens its ZIPs
+  Analyzer.prototype.openInside = function (id) {
+    var s = this.state;
+    if (s.level === "county") this.goInside("zip", { level: "county", id: id });
+    else this.goInside("county", { level: s.level, id: id });
+  };
+  Analyzer.prototype.renderNav = function () {
+    if (!this.nav) return;
+    var self = this, s = this.state, N = this.nav, radius = this.mode === "radius";
+    N.nat.forEach(function (b) { b.setAttribute("aria-pressed", String(!radius && !s.parent && s.level === b.getAttribute("data-nat"))); });
+    var any = false;
+    N.inside.forEach(function (b) {
+      var kind = b.getAttribute("data-in"), f = self.footprintFor(kind), ok = !!f;
+      b.disabled = !ok; b.setAttribute("aria-disabled", String(!ok));
+      var on = !radius && !!s.parent && s.level === kind; b.setAttribute("aria-pressed", String(on));
+      if (ok) any = true;
+    });
+    var f = this.footprintFor("zip");
+    N.insideLabel.textContent = any && f ? "Inside " + (this.marketName(f) || "the selected market") : "Inside the selected market";
+    N.insideLabel.title = N.insideLabel.textContent;
+    N.radius.setAttribute("aria-pressed", String(radius));
+  };
+  Analyzer.prototype.renderCrumbs = function () {
+    var self = this, s = this.state, box = this.crumbs;
+    if (!box) return;
+    box.innerHTML = "";
+    box.hidden = !s.parent;
+    if (!s.parent) return;
+    var top = s.chain[0] || s.parent, items = [el("button", { type: "button", class: "az-crumb", text: "U.S. " + (top.level === "metro" ? "metros" : "DMAs"), onclick: function () { self.goNational(top.level === "county" ? "dma" : top.level); } })];
+    if (s.chain[0]) items.push(el("button", { type: "button", class: "az-crumb", text: this.marketName(s.chain[0]), onclick: function () { self.goInside("county", s.chain[0]); } }));
+    items.push(el("span", { class: "az-crumb-here", text: this.marketName(s.parent) }));
+    items.forEach(function (x, i) { if (i) box.appendChild(el("span", { class: "az-crumb-sep", "aria-hidden": "true", text: "\u203a" })); box.appendChild(x); });
+  };
+  // Search for a county by name from any view: suggestions open its ZIPs
+  Analyzer.prototype.countySuggest = function (q, td) {
+    var self = this;
+    if (!this.cfg.footprint || !this.cfg.levels.county || q.length < 3 || /^\d+$/.test(q)) return;
+    Promise.all([this.ensureLevel("county", true), this.countyMarket()]).then(function (r) {
+      if (self.state.query !== q || !td.isConnected) return;
+      var cm = r[1] || {}, dmaOf = {};
+      Object.keys(cm.dma || {}).forEach(function (d) { cm.dma[d].forEach(function (c) { if (!dmaOf[c]) dmaOf[c] = d; }); });
+      var hits = self.data.county.rows.filter(function (x) { return x.name.toLowerCase().indexOf(q) >= 0; }).slice(0, 6);
+      if (!hits.length) return;
+      td.innerHTML = "";
+      td.appendChild(el("span", { text: "Counties matching \u201c" + q + "\u201d: " }));
+      hits.forEach(function (x, i) {
+        td.appendChild(el("button", { type: "button", class: "az-inbtn", text: x.name, title: "Rank the ZIPs in " + x.name, onclick: function () {
+          self.state.chain = dmaOf[x.id] ? [{ level: "dma", id: dmaOf[x.id] }] : [];
+          self.state.parent = null; self.goInside("zip", { level: "county", id: x.id });
+        } }));
+      });
+    });
+  };
+
   // A full ZIP typed into search that isn't in the current list: open that ZIP inside its own market, keeping the
   // market type in use (county, metro or DMA), or the DMA from the national views.
   Analyzer.prototype.maybeFindZip = function () {
@@ -188,6 +280,7 @@
       for (var i = 0; i < order.length; i++) { var L0 = order[i]; if (ids[L0] && self.cfg.levels[L0] && (L0 !== "county" || self.cfg.levels.county)) { lv = L0; break; } }
       if (!lv) { self.zipMiss(q, "ZIP " + q + " isn't in a market this site covers."); return; }
       s.parent = { level: lv, id: ids[lv] };
+      s.chain = lv === "county" && ids.dma && self.cfg.levels.dma ? [{ level: "dma", id: ids.dma }] : [];
       s.level = "zip"; s.area = q; s.sortKey = null; s.query = ""; self.search.value = "";
       self.refresh();
     }).catch(function () { self.zipMiss(q, "The ZIP lookup didn't load; try again in a minute."); });
@@ -235,6 +328,12 @@
       var m = /^(dma|metro|county|territory):(.+)$/.exec(p["in"] || "");
       if (m && cfg.levels.zip && cfg.levels[m[1]]) this.state.parent = { level: m[1], id: m[2] }; else this.state.level = cfg.defaultLevel || "dma";
     }
+    if (p.level === "county" && cfg.footprint) {
+      var mc = /^(dma|metro):(.+)$/.exec(p["in"] || "");
+      if (mc && cfg.levels[mc[1]]) this.state.parent = { level: mc[1], id: mc[2] };
+    }
+    var mv = /^(dma|metro):(.+)$/.exec(p.via || "");
+    this.state.chain = mv && cfg.footprint && this.state.parent && this.state.parent.level === "county" ? [{ level: mv[1], id: mv[2] }] : [];
     if ((cfg.subcategories || []).some(function (s) { return s.id === p.sub; })) this.state.sub = p.sub;
     if ((cfg.rankBy || []).indexOf(p.rank) >= 0) this.state.rank = p.rank;
     if (p.area) this.state.area = p.area;
@@ -257,7 +356,8 @@
     }
     if (s.sub) parts.push("sub=" + encodeURIComponent(s.sub));
     if (s.rank) parts.push("rank=" + encodeURIComponent(s.rank));
-    if (s.level === "zip" && s.parent) parts.push("in=" + s.parent.level + ":" + encodeURIComponent(s.parent.id));
+    if ((s.level === "zip" || s.level === "county") && s.parent) parts.push("in=" + s.parent.level + ":" + encodeURIComponent(s.parent.id));
+    if (s.parent && s.chain && s.chain[0]) parts.push("via=" + s.chain[0].level + ":" + encodeURIComponent(s.chain[0].id));
     if (s.area && s.level !== "us") parts.push("area=" + encodeURIComponent(s.area));
     var onPts = (this.ptLayers || []).filter(function (L0) { return s.pts && s.pts[L0.key]; }).map(function (L0) { return L0.key; });
     if (onPts.length) parts.push("pts=" + (this.cfg.pointLayers ? onPts.join(",") : "1"));
@@ -272,9 +372,21 @@
       return r.json();
     });
   };
-  Analyzer.prototype.ensureLevel = function (level) {
-    var self = this, L = this.cfg.levels[level], jobs = [], key = this.key(level);
-    if (level === "zip") jobs.push(this.ensureLevel(this.state.parent.level));  // parent names and outline
+  Analyzer.prototype.ensureLevel = function (level, plain) {
+    var self = this, L = this.cfg.levels[level], jobs = [], key = plain ? level : this.key(level);
+    if (!plain && level === "county" && key !== "county") {
+      // Counties inside a DMA or metro: the national county rows for that market's counties (shared/geo/county_market.json)
+      var p = this.state.parent;
+      return Promise.all([this.ensureLevel("county", true), this.ensureLevel(p.level, true), this.countyMarket()]).then(function (r) {
+        if (self.data[key]) return;
+        var nat = self.data.county, ids = ((r[2] || {})[p.level] || {})[p.id] || [], byId = {};
+        var rows = ids.map(function (id) { return nat.byId[id]; }).filter(Boolean);
+        rows.forEach(function (x) { byId[x.id] = x; });
+        self.data[key] = { rows: rows, byId: byId, meta: nat.meta };
+      });
+    }
+    if (level === "zip") jobs.push(this.ensureLevel(this.state.parent.level, true));  // parent names and outline
+    if (level === "zip" && this.cfg.footprint && this.state.chain && this.state.chain[0]) jobs.push(this.ensureLevel(this.state.chain[0].level, true));   // breadcrumb names
     if (key && !this.data[key]) jobs.push(this.loadJSON(level === "zip" ? this.url(L.data) : L.data).then(function (d) {
       var byId = {};
       d.rows.forEach(function (r) { byId[r.id] = r; });
@@ -359,6 +471,24 @@
           onclick: function () { if (self.mode === "radius") self.closeRadius(); self.setLevel(lv); } });
       }));
     var controls = [el("div", { class: "az-field" }, [el("span", { text: "Geography" }), this.levelSeg])];
+    if (cfg.footprint) {
+      // Rank nationally (DMAs or metros) | inside the selected market (counties or ZIPs) | Trade area
+      var natB = ["dma", "metro"].filter(function (lv) { return cfg.levels[lv]; }).map(function (lv) {
+        return el("button", { type: "button", "data-nat": lv, text: lv === "dma" ? "DMAs" : "Metros", title: "Rank every " + (lv === "dma" ? "DMA" : "metro") + " in the U.S.", onclick: function () { self.goNational(lv); } });
+      });
+      var inB = [["county", "Counties"], ["zip", "ZIPs"]].filter(function (k) { return cfg.levels[k[0]]; }).map(function (k) {
+        return el("button", { type: "button", "data-in": k[0], text: k[1], title: "Rank the " + k[1].toLowerCase() + " inside the selected market", onclick: function () { self.goInside(k[0]); } });
+      });
+      var radB = cfg.radius ? el("button", { type: "button", text: "Trade area",
+        title: "Count likely customers in a business's trade area: a radius around a ZIP or town, or a custom list of ZIPs, counties, towns, DMAs or metros", onclick: function () { self.openRadius(); } }) : null;
+      this.nav = { nat: natB, inside: inB, radius: radB || el("span"), insideLabel: el("span", { text: "Inside the selected market" }) };
+      this.levelSeg = el("div");   // the level buttons other code updates; not shown with footprint navigation
+      controls = [
+        el("div", { class: "az-field" }, [el("span", { text: "Rank nationally" }), el("div", { class: "az-seg", role: "group", "aria-label": "Rank nationally" }, natB)]),
+        el("div", { class: "az-field az-inside-field" }, [this.nav.insideLabel, el("div", { class: "az-seg", role: "group", "aria-label": "Rank inside the selected market" }, inB)]),
+        radB ? el("div", { class: "az-field" }, [el("span", { text: "Or" }), el("div", { class: "az-seg", role: "group", "aria-label": "Trade area" }, [radB])]) : null
+      ].filter(Boolean);
+    }
     if ((cfg.subcategories || []).length) {
       this.subSel = el("select", { "aria-label": cfg.subcategoryLabel || "Category", onchange: function () { self.state.sub = this.value; self.state.sortKey = null;
         if (self.mode === "radius") { if (self.radius) self.radius.usePreset(self.state.sub); self.writeHash(); } else self.refresh(); } },
@@ -414,6 +544,7 @@
     this.pick = { level: null, ids: {} };
     this.pickBar = el("div", { class: "az-pickbar", hidden: true, role: "status" });
     this.tablePanel = el("section", { class: "az-panel az-table-panel" }, [
+      this.crumbs = cfg.footprint ? el("nav", { class: "az-crumbs", "aria-label": "Where you are", hidden: true }) : null,
       el("div", { class: "az-table-head" }, [el("div", { class: "az-table-title" }, [this.tableTitle, this.backBtn]), this.tableNote]),
       this.pickBar,
       el("div", { class: "az-tablewrap" }, [el("table", { class: "az-table" }, [this.thead, this.tbody])])
@@ -484,6 +615,7 @@
     this.anaParts.forEach(function (x) { x.hidden = true; });
     Array.prototype.forEach.call(this.controlBar.querySelectorAll(".az-only"), function (x) { x.hidden = true; });
     this.radiusBox.hidden = false;
+    this.renderNav();
     Array.prototype.forEach.call(this.levelSeg.children, function (b) {
       var on = b.getAttribute("data-level") === "radius"; b.setAttribute("aria-pressed", on);
       if (b.getAttribute("data-level") === "zip") b.disabled = false;
@@ -509,7 +641,7 @@
     }
     if (window.AdtaxiRadius) go();
     else {
-      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261026i";   // version tag: browsers fetch the new file after an update
+      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261026k";   // version tag: browsers fetch the new file after an update
       sc.onload = go; sc.onerror = function () { self.showError("The radius tool didn't load. Refresh the page and try again."); };
       document.head.appendChild(sc);
     }
@@ -581,6 +713,7 @@
       self.renderMap();
       self.renderTable();
       self.renderDetail();
+      self.renderNav(); self.renderCrumbs();
       self.renderAd();
       self.writeHash();
     }).catch(function (e) {
@@ -744,6 +877,8 @@
     var m = this.measure(s.rank), d = this.d(lv);
     var fc = this.geo[lv === "zip" ? this.url(L0.geo) : L0.geo];
     var idField = L0.idField;
+    var inside = lv === "zip" || (lv === "county" && this.key("county") !== "county");   // a market's counties or ZIPs
+    if (fc && lv === "county" && inside) fc = { type: "FeatureCollection", features: fc.features.filter(function (f) { return d.byId[String(f.properties[idField])]; }) };
     var values = d.rows.map(function (r) { return self.val(r, m); });
     var br = this.breaks(values);
     this.currentBreaks = br;
@@ -783,12 +918,13 @@
       }
     });
     if (this.areaLayer) this.areaLayer.addTo(this.map);
-    if (lv === "zip") {
+    if (inside) {
       var P = this.cfg.levels[s.parent.level], pfc = this.geo[P.geo];
       var pf = pfc && pfc.features.filter(function (f) { return String(f.properties[P.idField]) === String(s.parent.id); })[0];
       if (pf) this.parentLayer = L.geoJSON(pf, { interactive: false, style: { color: "#0f2742", weight: 2.5, dashArray: "6 5", fill: false } }).addTo(this.map);
       var b = (this.areaLayer && this.areaLayer.getBounds().isValid()) ? this.areaLayer.getBounds() : (this.parentLayer && this.parentLayer.getBounds());
-      if (b && b.isValid()) this.map.fitBounds(b, { padding: [24, 24] });
+      if (b && b.isValid() && this.parentLayer && this.parentLayer.getBounds().isValid()) b = L.latLngBounds(b.getSouthWest(), b.getNorthEast()).extend(this.parentLayer.getBounds());
+      if (b && b.isValid()) this.map.fitBounds(b, { paddingTopLeft: [24, 80], paddingBottomRight: [24, 24] });   // room for the map heading
     } else if (this.resetView) {
       this.map.fitBounds([[24.4, -125], [49.5, -66.9]]);
     }
@@ -799,7 +935,7 @@
     // Header and legend
     this.mapHead.innerHTML = "";
     this.mapHead.appendChild(el("b", { text: (m ? m.label : "") + (m && m.perSub && this.subLabel() ? ": " + this.subLabel() : "") }));
-    this.mapHead.appendChild(el("span", { text: lv === "zip" ? "ZIPs in " + this.parentName() + ", ranked within this market." :
+    this.mapHead.appendChild(el("span", { text: inside ? (lv === "zip" ? "ZIPs" : "Counties") + " in " + this.parentName() + ", ranked within this market." :
       "By " + this.levelLabel(lv) + (s.level === "us" ? ". Click a market to rank at that level." : ". Click a market for details.") }));
     (this.ptLayers || []).forEach(function (P0) {
       var pm = self.measure(P0.key);
@@ -911,11 +1047,12 @@
     var rows = all.filter(function (r) { return !s.query || r.name.toLowerCase().indexOf(s.query) >= 0; });
     var shown = s.show && !s.query ? rows.slice(0, s.show) : rows;
     var isZip = s.level === "zip", lvLabel = isZip ? "ZIP" : this.levelLabel(s.level);
-    this.tableTitle.textContent = (isZip ? "ZIPs in " + this.parentName() : lvLabel + " rankings") + (this.subLabel() ? ": " + this.subLabel() : "");
-    this.backBtn.hidden = !isZip;
+    var inCounties = s.level === "county" && this.key("county") !== "county", fp = !!this.cfg.footprint;
+    this.tableTitle.textContent = (isZip ? "ZIPs in " + this.parentName() : inCounties ? "Counties in " + this.parentName() : (fp ? lvLabel + "s nationally" : lvLabel + " rankings")) + (this.subLabel() ? ": " + this.subLabel() : "");
+    this.backBtn.hidden = !isZip || fp;
     this.search.placeholder = isZip ? "Find a ZIP or town" : "Find a market";
     if (isZip) this.backBtn.textContent = "Back to " + LEVEL_LABELS[s.parent.level] + " rankings";
-    this.tableNote.textContent = "Showing " + NF0.format(shown.length) + " of " + NF0.format(all.length) + (isZip ? " ZIPs" : " markets") + ", ranked by " + (rankM ? rankM.label.toLowerCase() : "") + ". Click a column to sort.";
+    this.tableNote.textContent = "Showing " + NF0.format(shown.length) + " of " + NF0.format(all.length) + (isZip ? " ZIPs" : inCounties ? " counties" : " markets") + ", ranked by " + (rankM ? rankM.label.toLowerCase() : "") + ". Click a column to sort.";
 
     this.thead.innerHTML = "";
     var cfg = this.cfg, RCf = cfg.radius === true ? window.ADTAXI_RADIUS : cfg.radius;
@@ -923,6 +1060,7 @@
     if (this.pick.level !== s.level) this.pick = { level: s.level, ids: {} };
     var hr = el("tr", null, [pickable ? el("th", { scope: "col", class: "az-pickcol", title: "Select markets to combine into one trade area" }, [el("span", { class: "az-visually-hidden", text: "Select" })]) : null,
       el("th", { scope: "col", text: "Rank" }), el("th", { scope: "col", text: lvLabel })]);
+    var inCol = fp && !isZip && this.cfg.levels.zip;   // "Inside" button: a DMA or metro's counties, a county's ZIPs
     cols.forEach(function (m) {
       var active = (s.sortKey || s.rank) === m.key;
       var dir = s.sortKey ? s.sortDir : (m.lowerIsBetter ? "asc" : "desc");
@@ -934,6 +1072,7 @@
         } })
       ]));
     });
+    if (inCol) hr.appendChild(el("th", { scope: "col", class: "az-incol", text: "Look inside" }));
     this.thead.appendChild(hr);
 
     var frag = document.createDocumentFragment(), anyMark = false;
@@ -952,10 +1091,13 @@
         else if (v == null) tr.appendChild(el("td", { class: "az-na", title: "No data for this area", text: "No data" }));
         else { var mk = self.mark(r, m); if (mk) anyMark = true; tr.appendChild(el("td", { class: "num", title: mk ? "Uses estimated values; see this market's Data notes" : null, text: v + mk })); }
       });
+      if (inCol) tr.appendChild(el("td", { class: "az-incol" }, [el("button", { type: "button", class: "az-inbtn", text: s.level === "county" ? "ZIPs \u203a" : "Counties \u203a",
+        title: (s.level === "county" ? "Rank the ZIPs in " : "Rank the counties and ZIPs in ") + r.name, onclick: function (e) { e.stopPropagation(); self.openInside(r.id); } })]));
       frag.appendChild(tr);
     });
     this.tbody.innerHTML = "";
-    if (!shown.length) this.tbody.appendChild(el("tr", null, [el("td", { colspan: String(cols.length + (pickable ? 3 : 2)), class: "az-empty", text: "No markets match \u201c" + s.query + "\u201d. Clear the search to see all markets." })]));
+    if (!shown.length) { var emptyTd = el("td", { colspan: String(cols.length + (pickable ? 3 : 2) + (inCol ? 1 : 0)), class: "az-empty", text: "No markets match \u201c" + s.query + "\u201d. Clear the search to see all markets." });
+      this.tbody.appendChild(el("tr", null, [emptyTd])); if (s.query) this.countySuggest(s.query, emptyTd); }
     this.tbody.appendChild(frag);
     if (anyMark) this.tableNote.textContent += " * Uses estimated health values; select the market and see its Data notes.";
     if (pickable) this.tableNote.textContent += " Tick several to open them together as one trade area.";
@@ -984,7 +1126,7 @@
 
     var head = this.measure(cfg.headlineMeasure || s.rank);
     // Rank among the other markets at this level (ties share the better rank); null at the U.S. level or with no value
-    var LEVEL_PLURAL = { territory: "territories", dma: "DMAs", metro: "metros", county: "counties", zip: "ZIPs in this market" };
+    var LEVEL_PLURAL = { territory: "territories", dma: "DMAs", metro: "metros", county: this.key("county") !== "county" && s.level === "county" ? "counties in this market" : "counties", zip: "ZIPs in this market" };
     var rankOf = function (m, v) {
       if (s.level === "us" || typeof v !== "number") return null;
       var vals = [], tm = self.tieMeasure(m), tv = self.tieVal(row, tm), better = 0, ties = 0;
@@ -1005,7 +1147,7 @@
         var sorted = hr.vals.slice().sort(function (a, b) { return head.lowerIsBetter ? a - b : b - a; });
         var mid = sorted.length % 2 ? sorted[(sorted.length - 1) / 2] : (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2;
         var lvNoun = LEVEL_PLURAL[s.level] || "markets";
-        var typical = s.level === "zip" ? "typical ZIP here " : "typical " + (s.level === "county" ? "county" : s.level === "metro" ? "metro" : s.level === "territory" ? "territory" : "DMA") + " ";
+        var typical = s.level === "zip" ? "typical ZIP here " : "typical " + (s.level === "county" ? (this.key("county") !== "county" ? "county here" : "county") : s.level === "metro" ? "metro" : s.level === "territory" ? "territory" : "DMA") + " ";
         var ties = hr.ties;
         var nextBest = sorted.filter(function (x) { return x !== hv; })[0];
         var ref = hr.rank === 1 ? (nextBest != null ? "next best " + fmt(nextBest, head.format) : null) : "#1 " + (head.format === "score" ? "scores " : "is ") + fmt(sorted[0], head.format);
@@ -1058,7 +1200,9 @@
         return el("div", { class: "az-measure", title: (mk ? "Estimated for this area; see Data notes. " : "") + (m.help || "") || null }, [el("span", { text: m.label }), el("b", { class: "num" + (v == null ? " az-na" : ""), text: v == null ? "No data" : v + mk })]);
       })));
     }
-    if (this.cfg.levels.zip && this.drillable(s.level)) {
+    if (cfg.footprint && s.level !== "zip" && this.cfg.levels.zip) {
+      box.appendChild(el("button", { type: "button", class: "az-btn primary az-drill", text: s.level === "county" ? "Rank the ZIPs in this county" : "Rank the counties and ZIPs in this market", onclick: function () { self.openInside(row.id); } }));
+    } else if (this.cfg.levels.zip && this.drillable(s.level)) {
       box.appendChild(el("button", { type: "button", class: "az-btn primary az-drill", text: "See ZIPs in this market", onclick: function () { self.drill(); } }));
     }
     if (s.level === "zip") {
@@ -1066,7 +1210,7 @@
         text: cfg.radiusProfiles && this.subLabel() ? "Find likely customers around this ZIP" : "Build a radius audience from this ZIP" }));
       else if (cfg.radiusPage) box.appendChild(el("a", { class: "az-btn primary az-drill", href: cfg.radiusPage + "#zip=" + encodeURIComponent(row.id) + "&r=" + (cfg.radiusDefault || 10) + (cfg.radiusProfiles && this.state.sub ? "&p=" + encodeURIComponent(this.state.sub) : ""),
         text: cfg.radiusProfiles && this.subLabel() ? "Find likely customers around this ZIP" : "Build a radius audience from this ZIP" }));
-      box.appendChild(el("button", { type: "button", class: "az-btn az-drill", text: "Back to " + this.parentName(), onclick: function () { self.setLevel(s.parent.level); } }));
+      if (!cfg.footprint) box.appendChild(el("button", { type: "button", class: "az-btn az-drill", text: "Back to " + this.parentName(), onclick: function () { self.setLevel(s.parent.level); } }));
     }
     if (row.f && row.f.length) box.appendChild(el("div", { class: "az-flags" }, [el("b", { text: "Data notes" }), el("ul", null, row.f.map(function (t) { return el("li", { text: t }); }))]));
   };
