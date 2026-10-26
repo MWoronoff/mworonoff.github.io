@@ -851,25 +851,75 @@
       "Online display ads (banners and pop-up ads)": "online display", "Emailed ad or newsletter": "email" };
     var media = adSub ? adSub.rows.slice().sort(function (a, b) { return b[1] - a[1]; }).slice(0, 4) : [];
     var short = function (t) { return SHORTS[t] || t.replace(/ \(.*\)$/, "").toLowerCase(); };
-    // Narrative, only from the figures above
-    var top2 = incMix.slice().sort(function (a, b) { return b[1] - a[1]; })[0];
-    var story = [];
-    // "25–44" + "45–64" reads as "25 to 64"; anything ending in "65+" as "25 and older"
+    // Narrative: a written profile in short paragraphs, built only from the figures in "See the figures", each saying where it comes from
     var ageSpan = function () { var l = ageMix.map(function (x) { return x[0]; }), lo = l[0].split(/[–+]/)[0], last = l[l.length - 1];
-      return /\+$/.test(last) ? lo + " and older" : lo + " to " + last.split("–")[1]; };
-    if (cfg.hhCount) story.push("Households headed by someone " + ageSpan() + ", earning " + (incs.length === 1 ? lab(defs.income8.options, incs[0]) : lab(defs.income8.options, incs[0]).replace(/–.*$/, "") + (incs[incs.length - 1] === "200p" ? "+" : "") ) + (top2 && top2[1] / tot >= 0.4 ? "; the largest group earns " + top2[0] + " (" + pct(top2[1] / tot) + ")" : "") + ".");
-    if (own != null) story.push(pct(own) + " of householders this age here own their home.");
-    if (hood.ba != null) story.push("They live in ZIPs where " + pct(hood.ba) + " of adults have a bachelor's degree (U.S. " + pct(US.ba) + ")" + (hood.sfd != null ? " and " + pct(hood.sfd) + " of homes are single-family detached" : "") + ".");
-    if (media.length >= 3) story.push("Most likely to act on " + short(media[0][0]) + ", " + short(media[1][0]) + " and " + short(media[2][0]) + " ads.");
+      return /\+$/.test(last) ? lo + " and older" : lo + " to " + last.split("–")[1]; };   // "25–44" + "45–64" reads "25 to 64"
+    var incPhrase = function () { var f = lab(defs.income8.options, incs[0]), l = incs[incs.length - 1];
+      if (incs.length === 1) return f;
+      return l === "200p" ? f.replace(/–.*$/, "") + " or more" : f.replace(/–.*$/, "") + " to " + lab(defs.income8.options, l).split("–").pop(); };
+    var list = function (a) { return a.length < 3 ? a.join(" and ") : a.slice(0, -1).join(", ") + " and " + a[a.length - 1]; };
+    var cap = function (t) { return t.replace(/^./, function (x) { return x.toUpperCase(); }); };
+    var paras = [];
+    var para = function (lead, text) { if (text) paras.push(el("p", { class: "rz-p-para" }, [el("b", { text: lead + " " }), text])); };
+    // 1. Who they are (this group: Census counts)
+    var p1 = [];
+    var conc = idx == null ? "" : idx >= 105 ? ", " + NF0.format(idx - 100) + "% more concentrated than the U.S. average" : idx <= 95 ? ", " + NF0.format(100 - idx) + "% less concentrated than the U.S. average" : ", about the U.S. average";
+    if (cfg.hhCount && ageMix.length) p1.push("In this trade area, " + NF0.format(Math.round(A)) + " households fit the profile: households headed by someone " + ageSpan() + " earning " + incPhrase() + ". That is " + pct(share) + " of all households here" + conc + ".");
+    else p1.push("In this trade area, " + NF0.format(Math.round(A)) + " " + (cfg.audienceNoun || "people").toLowerCase() + " fit the profile, " + pct(share) + " of the total" + conc + ".");
+    var topInc = incMix.slice().sort(function (a, b) { return b[1] - a[1]; })[0];
+    var p1b = [];
+    if (cfg.hhCount && incMix.length > 1 && topInc && topInc[1] / tot >= 0.35)
+      p1b.push(topInc[0] === lab(defs.income8.options, "200p") ? "many are well past that threshold, with " + pct(topInc[1] / tot) + " earning $200K or more" : "the largest share, " + pct(topInc[1] / tot) + ", earns " + topInc[0]);
+    if (own != null) p1b.push(pct(own) + " of householders their age here own their home");
+    if (p1b.length) p1.push(cap(p1b.join("; ")) + ".");
+    para("Who they are.", p1.join(" ") + (cfg.hhCount ? " (Census counts of these households.)" : ""));
+    // 2. Where they live (their neighborhoods: ZIP-wide rates weighted to where these households live)
+    var p2 = [], rates = P.rates || [];
+    var t3 = topTowns.slice(0, 3), st = t3.map(function (t) { var m = /, ([A-Z]{2})$/.exec(t); return m ? m[1] : ""; });
+    if (st.every(function (x) { return x && x === st[0]; })) t3 = t3.map(function (t) { return t.replace(/, [A-Z]{2}$/, ""); });   // one state: "Denver, Littleton and Aurora"
+    if (t3.length) p2.push("Most live in and around " + list(t3) + ".");
+    var STAND = { ba: "adults with a bachelor's degree or higher", grad: "adults with graduate degrees", mgmt: "workers in management jobs", hi200: "tax returns of $200K+",
+      cg: "tax returns with capital gains", val500: "owner homes worth $500K+" };
+    var stand = Object.keys(STAND).filter(function (k) { return rates.indexOf(k) >= 0 && hood[k] != null && US[k] && hood[k] / US[k] >= 1.1; })
+      .sort(function (a, b) { return hood[b] / US[b] - hood[a] / US[a]; }).slice(0, 3);
+    if (stand.length) p2.push("Their neighborhoods stand out for " + list(stand.map(function (k) { return STAND[k] + " (" + pct(hood[k]) + ", vs. " + pct(US[k]) + " nationally)"; })) + ".");
+    var fam = [];
+    if (rates.indexOf("married") >= 0 && hood.married != null) fam.push(pct(hood.married) + " of households are married couples");
+    if (rates.indexOf("kids") >= 0 && hood.kids != null) fam.push(pct(hood.kids) + " have children at home");
+    if (rates.indexOf("sfd") >= 0 && hood.sfd != null) fam.push(pct(hood.sfd) + " of homes are single-family detached");
+    if (fam.length) p2.push("Around them, " + list(fam) + ".");
+    if (p2.length) para("Where they live.", p2.join(" ") + " (Census and IRS figures for their ZIPs, weighted to where these households live.)");
+    // 3. What drives them (national survey of the closest groups)
+    if (nat) {
+      var p3 = [], it = {}; nat.items.forEach(function (x) { it[x[0]] = x; });
+      var nb = [];
+      if (it["Men"]) nb.push(NF0.format(it["Men"][1]) + "% are men");
+      if (it["Household income $150K+"]) nb.push(NF0.format(it["Household income $150K+"][1]) + "% have household income of $150K+ (all adults " + NF0.format(it["Household income $150K+"][2]) + "%)");
+      if (it["Own their home"]) nb.push(NF0.format(it["Own their home"][1]) + "% own their home");
+      if (nb.length) p3.push("Nationally, among the people most like them, " + list(nb) + ".");
+      if (it["Live in a city"] && it["Live in a suburb"]) p3.push("Of that group, " + NF0.format(it["Live in a city"][1]) + "% live in a city and " + NF0.format(it["Live in a suburb"][1]) + "% in a suburb.");
+      if (nat.mindset && nat.mindset.items.length) {
+        var m = nat.mindset.items;
+        p3.push((nat.mindset.lead || "Among small business owners nationally,") + " " + list(m.map(function (x) { return x[1] + "% " + x[0].replace(/^./, function (y) { return y.toLowerCase(); }); })) +
+          ", well above all adults (" + list(m.map(function (x) { return x[2] + "%"; })) + ").");
+      }
+      p3.push("(AudienceSCAN, " + (nat.weights || "national survey") + "; national, not local.)");
+      para("What drives them.", p3.join(" "));
+    }
+    // 4. How to reach them (ad response; blended where the site blends groups)
+    if (media.length >= 3) para("How to reach them.", "They are most likely to act on " + list(media.map(function (x) { return short(x[0]) + " (" + x[1] + "%)"; })) + " ads, compared with " +
+      list(media.map(function (x) { return x[2] + "%"; })) + " of all adults. (Share who acted on an ad in the past 30 days; " + (adSub && adSub.blend ? "blended " : "") + "AudienceSCAN, national.)");
     var title = (P.titles && P.titles[key]) || "Your selected households";
-    var kicker = "Persona \u00b7 " + ((P.kickers && P.kickers[key]) || (prof ? prof.label + " (edited)" : "Custom audience"));
+    var kicker = "Persona · " + ((P.kickers && P.kickers[key]) || (prof ? prof.label + " (edited)" : "Custom audience"));
     box.appendChild(el("summary", null, [el("span", { class: "rz-p-kicker", text: kicker }), el("b", { class: "rz-p-title", text: title })]));
-    box.appendChild(el("p", { class: "rz-p-sub", text: this.describe() + " \u00b7 " + (s.mode === "area" ? "Custom area (" + this.areaPhrase() + ")" : s.r + " miles around " + s.zip) }));
-    box.appendChild(el("p", { class: "rz-p-story", text: story.join(" ") }));
+    box.appendChild(el("p", { class: "rz-p-sub", text: this.describe() + " · " + (s.mode === "area" ? "Custom area (" + this.areaPhrase() + ")" : s.r + " miles around " + s.zip) }));
+    box.appendChild(el("div", { class: "rz-p-story" }, paras));
+    // The figures behind the story, collapsed by default; prints only if opened
     var stat = function (v, t) { return el("div", { class: "rz-p-stat" }, [el("b", { text: v }), el("span", { text: t })]); };
-    box.appendChild(el("div", { class: "rz-p-stats" }, [stat(NF0.format(Math.round(A)), (cfg.audienceNoun || "Audience").toLowerCase() + " here"),
-      stat(pct(share), (cfg.shareLabel || "Share of population").toLowerCase()), stat(idx == null ? "\u2014" : NF0.format(idx), "index vs. U.S. (100 = average)"),
-      stat(topTowns.slice(0, 2).join("; ") || "\u2014", "most of these households")]));
+    var figs = el("details", { class: "rz-p-figs" }, [el("summary", { text: "See the figures behind this profile" })]);
+    figs.appendChild(el("div", { class: "rz-p-stats" }, [stat(NF0.format(Math.round(A)), (cfg.audienceNoun || "Audience").toLowerCase() + " here"),
+      stat(pct(share), (cfg.shareLabel || "Share of population").toLowerCase()), stat(idx == null ? "—" : NF0.format(idx), "index vs. U.S. (100 = average)"),
+      stat(topTowns.slice(0, 2).join("; ") || "—", "most of these households")]));
     var row = function (l, v, ref) { return el("div", { class: "rz-p-row" }, [el("span", { text: l }), el("b", null, [v, ref ? el("i", { text: " \u00b7 " + ref }) : null])]); };
     var col = function (h, tag, kids) { return el("div", { class: "rz-p-col" }, [el("h3", null, [h, el("span", { class: "rz-p-tag", text: tag })])].concat(kids)); };
     var cols = [];
@@ -895,7 +945,8 @@
       media.forEach(function (m) { natKids.push(row(short(m[0]).replace(/^./, function (x) { return x.toUpperCase(); }), m[1] + "%", "all adults " + m[2] + "%")); });
     }
     if (natKids.length) cols.push(col("Who they are and how they respond", nat ? nat.tag : "National survey", natKids));
-    box.appendChild(el("div", { class: "rz-p-cols" }, cols));
+    figs.appendChild(el("div", { class: "rz-p-cols" }, cols));
+    box.appendChild(figs);
     box.appendChild(el("p", { class: "rz-p-note", text: "Composite portrait for planning. \u201cThis group\u201d figures are Census counts of the selected households; \u201cZIP-wide\u201d figures describe the neighborhoods where they live, each ZIP weighted by how many of these households it holds (higher-income households usually exceed their neighborhood on education and income); national figures are AudienceSCAN survey results for the closest groups" + (nat && nat.weights ? " (" + nat.weights + ")" : "") + ". Census doesn't publish a householder's gender or net worth with age and income by ZIP. It describes a group of households, not an individual." + (P.source ? " " + P.source : "") }));
   };
   // Context columns for the current preset (or the tool's default list when no preset is chosen)
