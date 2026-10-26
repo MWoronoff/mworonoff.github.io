@@ -453,10 +453,10 @@
     }))) : null;
     var profileBox = null;
     if ((cfg.profiles || []).length) {
-      this.profileSel = el("select", { "aria-label": "Best prospects for", onchange: function () { self.applyProfile(this.value); } },
+      this.profileSel = el("select", { "aria-label": "Target audience", onchange: function () { self.applyProfile(this.value); } },
         [el("option", { value: "", text: "Custom audience" })].concat(cfg.profiles.map(function (p) { return el("option", { value: p.id, text: p.label }); })));
       this.eitherBox = el("div", { class: "rz-either", hidden: true });
-      profileBox = el("div", { class: "rz-profile" }, [el("label", { class: "az-field" }, [el("span", { text: cfg.profileLabel || "Best prospects for" }), this.profileSel]),
+      profileBox = el("div", { class: "rz-profile" }, [el("label", { class: "az-field" }, [el("span", { text: cfg.profileLabel || "Target audience" }), this.profileSel]),
         this.profileNote = el("p", { class: "rz-note" }), this.eitherBox]);
     }
     this.filterPanel = el("aside", { class: "az-panel rz-filters", "aria-label": "Audience filters" }, [
@@ -717,7 +717,7 @@
       label = cfg.audienceNoun + (est ? " (estimated)" : "") + where + minTxt +
         (s.profile && cfg.audienceFit ? ": " + cfg.audienceFit.replace("{profile}", this.profiles[s.profile].label) : "");
     } else {
-      label = (s.profile ? "Best prospects for " + this.profiles[s.profile].label + ", e" : est ? "E" : "") + (s.profile || est ? "stimated audience" : "Audience") + where + minTxt;
+      label = (s.profile ? "Target audience: " + this.profiles[s.profile].label + ", e" : est ? "E" : "") + (s.profile || est ? "stimated audience" : "Audience") + where + minTxt;
     }
     this.summary.appendChild(el("div", { class: "rz-stat rz-stat-main" }, [el("b", { class: "num", text: NF0.format(Math.round(A)) }), el("span", { text: label })]));
     var shareStat = stat(share == null ? "—" : NF1.format(share * 100) + "%", "Share of population");
@@ -790,7 +790,7 @@
     if (window.AdtaxiPlan) { done(); return; }
     if (loadPlan.waiting) { loadPlan.waiting.push(done); return; }
     loadPlan.waiting = [done];
-    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261026e";
+    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261026f";
     sc.onload = function () { var w = loadPlan.waiting; loadPlan.waiting = null; w.forEach(function (f) { f(); }); };
     sc.onerror = function () { loadPlan.waiting = null; };
     document.head.appendChild(sc);
@@ -1042,7 +1042,7 @@
   Radius.prototype.proposalBase = function () { return (this.cfg.planScript || "../shared/media-plan.js").replace(/media-plan\.js.*$/, ""); };
   Radius.prototype.benchmarks = function () {
     var self = this;
-    if (!this._bench) this._bench = fetch(this.cfg.benchmarksData || this.proposalBase() + "benchmarks.json?v=20261026e").then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
+    if (!this._bench) this._bench = fetch(this.cfg.benchmarksData || this.proposalBase() + "benchmarks.json?v=20261026f").then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
     return this._bench.then(function (B) {
       if (!B) return null;
       var cat = self.cfg.planCategory && self.cfg.planCategory !== "none" ? self.cfg.planCategory : String(self.cfg.exportName || "").replace(/-radius$/, "").replace(/^apartment$/, "apartments");
@@ -1115,7 +1115,7 @@
     // Trade-area counts describe the audience chosen in the tool; ad-response reasons describe AudienceSCAN's target group
     var hasSel = Object.keys(s.sel || {}).some(function (k) { return s.sel[k]; });
     var PC = this.cfg.proposal || {};   // page-specific proposal wording (franchise pages): goals by strategy, platform roles, a footnote line
-    var audienceNoun = prof && PC.nouns && PC.nouns[s.profile] ? PC.nouns[s.profile] : prof ? prof.label.toLowerCase() + (/candidates|buyers|prospects|owners/i.test(prof.label) ? "" : " prospects") : hasSel ? "people in the selected audience" : "residents";
+    var audienceNoun = prof && PC.nouns && PC.nouns[s.profile] ? PC.nouns[s.profile] : prof ? (/candidates|buyers|prospects|owners/i.test(prof.label) ? prof.label.toLowerCase() : "likely " + prof.label.toLowerCase() + " customers") : hasSel ? "people in the selected audience" : "residents";
     var adNoun = adSub && adSub.audience ? adSub.audience : audienceNoun;
     var rows = this.visible(), aud = 0, pop = 0;
     rows.forEach(function (r) { if (r.aud != null) { aud += r.aud; pop += r.pop || 0; } });
@@ -1188,7 +1188,7 @@
     if (!b.amount || !A.strat || !A.withDollars || !A.plan || !A.plan.tier || !A.channels.length) { st.textContent = "Enter a monthly budget and choose a media strategy first."; return Promise.resolve(null); }
     st.textContent = "Building…";
     var base = this.proposalBase();
-    return Promise.all([loadScriptOnce(this.cfg.pptxScript || "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261026e"), this.benchmarks(), this.logoImage()])
+    return Promise.all([loadScriptOnce(this.cfg.pptxScript || "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261026f"), this.benchmarks(), this.logoImage()])
       .then(function (res) { return window.AdtaxiProposal.build(self.proposalContext(res[2], res[3]), opt); })
       .then(function (out) { st.textContent = "Downloaded. Open it in PowerPoint or Google Slides to edit."; return out; })
       .catch(function (e) { st.textContent = "The proposal couldn't be built (" + e.message + "). Try again in a minute."; throw e; });
@@ -1440,7 +1440,7 @@
     var p = this.state.profile && this.profiles[this.state.profile];
     if (p && p.either) parts.push("and either " + p.either.map(function (x) { return x.text; }).join(" or "));
     var out = parts.length ? parts.join("; ") : "Everyone";
-    return p ? (this.cfg.audienceNoun ? this.cfg.audienceNoun + ", " + p.label + " profile: " : "Best prospects for " + p.label + ": ") + out : out;
+    return p ? (this.cfg.audienceNoun ? this.cfg.audienceNoun + ", " + p.label + " profile: " : "Target audience, " + p.label + ": ") + out : out;
   };
   Radius.prototype.exportCSV = function () {
     if (!this.rows) return;
@@ -1482,7 +1482,7 @@
       ["Everything else is an estimate", list(traits).replace(/^./, function (x) { return x.toUpperCase(); }) + " come from separate tables. The tool multiplies the base count by each trait's share in that ZIP, which assumes the traits are independent within a ZIP. That's the standard approach, but real overlaps can be higher or lower, so combined counts are labeled as estimates."]
     ];
     if (aged.length) secs.push(["Traits applied by age group", list(aged).replace(/^./, function (x) { return x.toUpperCase(); }) + " are published by age, so the tool applies each age group's own rate in each ZIP. For example, hearing difficulty among people 75 and older uses the 75+ rate, which is far higher than the rate for all ages."]);
-    if ((this.cfg.profiles || []).length) secs.push(["Best prospects", "Each category starts from a profile of its likely customers, built from the same Census and CDC data. A profile is a starting point: change any filter to fit the client. When a profile includes an \"either\" condition (such as 65 and older, or diabetes), people who meet either one are counted once. The ZIP list is sorted by index, so the ZIPs where prospects are most concentrated come first; ZIPs with fewer than 1,000 residents are listed after the rest, since a high share of a tiny ZIP is too few people to reach. Sort by Est. audience to see the largest counts."]);
+    if ((this.cfg.profiles || []).length) secs.push(["Target audiences", "Each category starts from a profile of its likely customers, built from the same Census and CDC data. A profile is a starting point: change any filter to fit the client. When a profile includes an \"either\" condition (such as 65 and older, or diabetes), people who meet either one are counted once. The ZIP list is sorted by index, so the ZIPs where likely customers are most concentrated come first; ZIPs with fewer than 1,000 residents are listed after the rest, since a high share of a tiny ZIP is too few people to reach. Sort by Est. audience to see the largest counts."]);
     if (cf.indexOf("built") >= 0) secs.push(["Homeowners", "Year built, home value, single-family detached and years in the home are Census counts of owner-occupied homes in each ZIP. The tool applies the homeowner rate for each age of householder once, then each selected trait's share among owner homes, so combining them doesn't count owners twice."]);
     if (cf.indexOf("renter") >= 0) secs.push(["Renters", "Renter income, rental type, recent moves, rent burden and children at home are Census counts of renter households in each ZIP. The tool applies the renter rate for each age of householder once, then each selected trait's share among renter households, so combining them doesn't count renters twice. Counts are adults in renter households."]);
     if (cf.indexOf("parented") >= 0) secs.push(["Parents' education", "This is the education of the head of household in every household in the ZIP. Combine it with Children at home to estimate households with children whose head of household has no college."]);

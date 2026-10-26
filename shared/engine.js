@@ -352,7 +352,7 @@
       Object.keys(cfg.levels).concat(cfg.radius ? ["radius"] : []).map(function (lv) {
         // Trade area: the Zip Code Radius Tool, which draws the area as a radius or, where the site turns it on, a custom list of ZIPs, counties and towns
         if (lv === "radius") return el("button", { type: "button", "data-level": "radius", text: "Trade area",
-          title: "Count prospects in a business's trade area: a radius around a ZIP or town, or a custom list of ZIPs, counties, towns, DMAs or metros", onclick: function () { self.openRadius(); } });
+          title: "Count likely customers in a business's trade area: a radius around a ZIP or town, or a custom list of ZIPs, counties, towns, DMAs or metros", onclick: function () { self.openRadius(); } });
         if (lv === "zip") return el("button", { type: "button", "data-level": "zip", text: cfg.levels.zip.label || "ZIPs in market",
           title: "Pick a DMA, metro or county first, then see the ZIPs inside it", onclick: function () { if (self.mode === "radius") self.closeRadius(); if (self.state.level !== "zip") self.drill(); } });
         return el("button", { type: "button", "data-level": lv, text: cfg.levels[lv].label || LEVEL_LABELS[lv],
@@ -472,7 +472,7 @@
     bar.hidden = false;
     bar.appendChild(el("p", null, [el("b", { text: NF0.format(ids.length) + " " + noun + " selected" }), ": " + names + (pop ? " · " + NF0.format(pop) + " people" : "")]));
     bar.appendChild(el("div", { class: "az-pickact" }, [
-      el("button", { type: "button", class: "az-btn primary", text: "Open as trade area", title: "Count prospects, rank ZIPs, split a budget and build a proposal for these " + PICK_NOUN[s.level][1] + " together",
+      el("button", { type: "button", class: "az-btn primary", text: "Open as trade area", title: "Count likely customers, rank ZIPs, split a budget and build a proposal for these " + PICK_NOUN[s.level][1] + " together",
         onclick: function () { self.openRadius({ mode: "area", ca: ids.map(function (id) { return PICK_PREFIX[s.level] + id; }).join(","), p: cfg.radiusProfiles ? s.sub : null }); } }),
       el("button", { type: "button", class: "az-btn", text: "Clear", onclick: function () { self.pick.ids = {}; self.renderPick(); self.renderTable(); } })]));
   };
@@ -509,7 +509,7 @@
     }
     if (window.AdtaxiRadius) go();
     else {
-      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261026e";   // version tag: browsers fetch the new file after an update
+      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261026f";   // version tag: browsers fetch the new file after an update
       sc.onload = go; sc.onerror = function () { self.showError("The radius tool didn't load. Refresh the page and try again."); };
       document.head.appendChild(sc);
     }
@@ -636,7 +636,7 @@
     var barW = function (v) { return top > base ? Math.max(1, (v - base) / (top - base) * 100) : 100; };
     box.appendChild(el("div", { class: "az-ad-head" }, [
       el("div", null, [
-        el("h2", { text: (A.title || "How prospects respond to advertising").replace("{sub}", this.subLabel()).replace("{aud}", (d.short || "").toLowerCase()) }),
+        el("h2", { text: (A.title || "How likely customers respond to advertising").replace("{sub}", this.subLabel()).replace("{aud}", (d.short || "").toLowerCase()) }),
         el("p", { text: d.audience ? "Percent of the target group (" + d.audience + ") and of all U.S. adults who saw or heard an ad on each medium that led them to take action in the past 30 days. Percentages are based on everyone in each group, not only people who use that medium." : "" })
       ]),
       el("div", { class: "az-seg", role: "group", "aria-label": "Sort ad types" }, [["aud", "Sort by response"], ["diff", "Sort by vs. average"]].map(function (o) {
@@ -1063,9 +1063,9 @@
     }
     if (s.level === "zip") {
       if (cfg.radius) box.appendChild(el("button", { type: "button", class: "az-btn primary az-drill", onclick: function () { self.openRadius({ zip: row.id, p: cfg.radiusProfiles ? self.state.sub : null }); },
-        text: cfg.radiusProfiles && this.subLabel() ? "Find best prospects around this ZIP" : "Build a radius audience from this ZIP" }));
+        text: cfg.radiusProfiles && this.subLabel() ? "Find likely customers around this ZIP" : "Build a radius audience from this ZIP" }));
       else if (cfg.radiusPage) box.appendChild(el("a", { class: "az-btn primary az-drill", href: cfg.radiusPage + "#zip=" + encodeURIComponent(row.id) + "&r=" + (cfg.radiusDefault || 10) + (cfg.radiusProfiles && this.state.sub ? "&p=" + encodeURIComponent(this.state.sub) : ""),
-        text: cfg.radiusProfiles && this.subLabel() ? "Find best prospects around this ZIP" : "Build a radius audience from this ZIP" }));
+        text: cfg.radiusProfiles && this.subLabel() ? "Find likely customers around this ZIP" : "Build a radius audience from this ZIP" }));
       box.appendChild(el("button", { type: "button", class: "az-btn az-drill", text: "Back to " + this.parentName(), onclick: function () { self.setLevel(s.parent.level); } }));
     }
     if (row.f && row.f.length) box.appendChild(el("div", { class: "az-flags" }, [el("b", { text: "Data notes" }), el("ul", null, row.f.map(function (t) { return el("li", { text: t }); }))]));

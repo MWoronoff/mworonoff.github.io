@@ -16,7 +16,7 @@ window.ADTAXI_RADIUS = {
   radiusLabels: { 100: "50+ miles (covers up to 100)" },
   radiusLabel: "Up to {r} miles",
   filters: ["age", "renter", "rinc", "rtype", "rmoved", "rburden", "enrolled"],
-  profileLabel: "Best prospects for",
+  profileLabel: "Target audience",
   profiles: [
     { id: "all", label: "All apartments", note: "Adults renting in apartment buildings with 5 or more units.", sel: { rtype: ["apt"] } },
     { id: "luxury", label: "Luxury / Class A", note: "Adults renting in apartment buildings, in renter households earning $100K+.", sel: { rinc: ["100_150", "150p"], rtype: ["apt"] } },

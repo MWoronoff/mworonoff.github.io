@@ -17,7 +17,7 @@ window.ADTAXI_RADIUS = {
   radii: [5, 10, 15, 25, 50, 100],
   radiusLabel: "Up to {r} miles",
   filters: ["gender", "age", "income5", "insurance", "hearing", "vision", "alone"],
-  profileLabel: "Best prospects for",
+  profileLabel: "Target audience",
   profiles: [
     { id: "urgent", label: "Urgent and emergency care", note: "Families: children and adults under 65 with health insurance.",
       sel: { age: ["u18", "18_34", "35_64"], insurance: ["ins"] } },

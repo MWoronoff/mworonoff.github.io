@@ -1,7 +1,7 @@
 """Builds the Auto Market Analyzer data (Market Potential Scores) into auto/data/, plus the radius tool's vehicle
 columns in shared/audience/zip_audience_auto.json.
 
-The analyzer shows auto dealers where their best prospects are and how to focus ad dollars geographically, for four
+The analyzer shows auto dealers where their likely customers are and how to focus ad dollars geographically, for four
 lines: new cars, new trucks and SUVs, used cars, and used trucks and SUVs.
 
 Sources (public with no key, already in the repo, plus Adtaxi's EASI files in data-build/sources):

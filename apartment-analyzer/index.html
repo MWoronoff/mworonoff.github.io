@@ -10,18 +10,18 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
-<link rel="stylesheet" href="../shared/engine.css?v=20261026e">
+<link rel="stylesheet" href="../shared/engine.css?v=20261026f">
 </head>
 <body>
 <div id="app"><p class="az-loading">Loading the Apartment Market Analyzer…</p></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js" crossorigin=""></script>
-<script src="../shared/engine.js?v=20261026e"></script>
+<script src="../shared/engine.js?v=20261026f"></script>
 <script src="radius-config.js?v=20261023b"></script>
 <script>
 AdtaxiAnalyzer.start({
  "title": "Apartment Market Analyzer",
- "subtitle": "Where apartment advertisers' prospective residents are: Market Potential Scores for DMAs, metros, counties and ZIPs across six rental categories, to focus ad dollars on the highest-potential geographies.",
+ "subtitle": "Where apartment advertisers' likely residents are: Market Potential Scores for DMAs, metros, counties and ZIPs across six rental categories, to focus ad dollars on the highest-potential geographies.",
  "logo": "../shared/adtaxi-logo.svg",
  "exportName": "apartments",
  "links": [
@@ -197,7 +197,7 @@ AdtaxiAnalyzer.start({
    "label": "Households per square mile",
    "format": "int",
    "short": "HH/sq mi",
-   "help": "Households divided by land area (Census Gazetteer). Denser markets put more prospects inside each service area and radius."
+   "help": "Households divided by land area (Census Gazetteer). Denser markets put more likely customers inside each service area and radius."
   },
   {
    "key": "rent",
@@ -527,7 +527,7 @@ AdtaxiAnalyzer.start({
   {
    "title": "Market Potential Score",
    "body": [
-    "Where are an apartment advertiser's prospective residents, and which geographies deserve the most ad dollars?",
+    "Where are an apartment advertiser's likely residents, and which geographies deserve the most ad dollars?",
     "Score = 40% Consumer Demand + 25% Category Spending + 15% Spending Power + 20% Competition. Each part is a percentile (0–100) against markets at the same level. Affordable and Student housing leave out Spending Power (those renters aren't defined by what they can pay). No score is shown when a part has no data."
    ]
   },
@@ -561,7 +561,7 @@ AdtaxiAnalyzer.start({
   },
   {
    "title": "Rank and map by",
-   "body": "Market Potential Score (where to spend), rent spending index (how much households spend on rent), total rent spending (market size in dollars) and households per square mile (prospects a service area can reach)."
+   "body": "Market Potential Score (where to spend), rent spending index (how much households spend on rent), total rent spending (market size in dollars) and households per square mile (likely customers a service area can reach)."
   },
   {
    "title": "Households per square mile",
@@ -576,7 +576,7 @@ AdtaxiAnalyzer.start({
    "body": [
     "Trade area view only, after the area is chosen: the percent of the target group and of all U.S. adults who acted on an ad in each of 17 media in the past 30 days (AudienceSCAN 2026). Rates cover everyone in each group, not just media users, and measure response, not reach. National data, the same for every market.",
     "\"Vs. average\" is a percent difference: 53.5% vs. 36.7% is 46% more likely, not 17 points.",
-    "The panel follows the radius tool's \"Best prospects for\" preset. Student housing uses full-time students; every other category uses potential apartment switchers, the closest group for renters (not specific to luxury, workforce, affordable or 55+).",
+    "The panel follows the radius tool's \"Target audience\" preset. Student housing uses full-time students; every other category uses potential apartment switchers, the closest group for renters (not specific to luxury, workforce, affordable or 55+).",
     "Why switchers, not all renters: renters as a whole sit at or below all adults on nearly every medium (+1% Mobile to −21% Magazine). Switchers, the renters actually looking, run up to 19% above average on digital (Pre-roll +19%, Social +15%, Mobile +14%)."
    ]
   }

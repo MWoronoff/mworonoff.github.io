@@ -1,7 +1,7 @@
 """Builds the Financial Market Analyzer data (Market Potential Scores) into financial/data/, plus the radius tool's
 financial columns in shared/audience/zip_audience_fin.json.
 
-The analyzer shows financial advertisers where their best prospects are and how to focus ad dollars geographically,
+The analyzer shows financial advertisers where their likely customers are and how to focus ad dollars geographically,
 for five lines: tax preparation, wealth management, retirement planning, home purchase mortgages, and refinance and
 home equity.
 

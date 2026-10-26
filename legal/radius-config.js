@@ -13,7 +13,7 @@ window.ADTAXI_RADIUS = {
   radii: [5, 10, 15, 25, 50, 100],
   radiusLabel: "Up to {r} miles",
   filters: ["age", "income5", "home", "employ", "car", "divsep", "lep"],
-  profileLabel: "Best prospects for",
+  profileLabel: "Target audience",
   profiles: [
     { id: "pi", label: "Personal injury", note: "Employed adults who commute by car.", sel: { employ: ["emp"], car: true } },
     { id: "family", label: "Family law and divorce", note: "Adults 25–54 who are divorced or separated.", sel: { age: ["25_34", "35_44", "45_54"], divsep: true } },
@@ -22,7 +22,7 @@ window.ADTAXI_RADIUS = {
     { id: "employment", label: "Employment law", note: "Adults 25–54 in the workforce, employed or recently unemployed.", sel: { age: ["25_34", "35_44", "45_54"], employ: ["emp", "unemp"] } }
   ],
   methodology: [
-    { title: "Family law prospects", body: "Census counts people who are already divorced or separated, not married couples heading toward divorce, so the Family law profile is strongest for custody, support and modification cases." },
+    { title: "Family law audience", body: "Census counts people who are already divorced or separated, not married couples heading toward divorce, so the Family law profile is strongest for custody, support and modification cases." },
     { title: "Home and home value", body: "Owner and renter shares come from Census by the age of the head of household, so they use each age group's own rate; a homeowner 55+ selection uses the share of households headed by someone 55 or older that own their home. Home value bands are the share of owner-occupied homes in each value range in the ZIP." },
     { title: "Employment and commuting", body: "Employment status is the share of people 16 and older. Everyone who commutes by car is employed, so combining Commutes by car with Employed doesn't count employment twice." }
   ]

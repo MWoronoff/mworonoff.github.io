@@ -12,7 +12,7 @@ window.ADTAXI_RADIUS = {
   radii: [5, 10, 15, 25, 50, 100, 200, 300],
   radiusLabel: "Up to {r} miles",
   filters: ["age", "income5", "parented", "enrolled", "somecollege", "veterans", "hispanic"],
-  profileLabel: "Best prospects for",
+  profileLabel: "Target audience",
   profiles: [
     { id: "fouryear", label: "Four-year colleges and universities", note: "Ages 15–24 in households with income of $75K or more.", sel: { age: ["15_17", "18_24"], income5: ["75_100", "100_150", "150p"] } },
     { id: "community", label: "Community colleges", note: "Ages 18–34 in households with income under $75K.", sel: { age: ["18_24", "25_34"], income5: ["lt50", "50_75"] } },
@@ -21,7 +21,7 @@ window.ADTAXI_RADIUS = {
     { id: "adult", label: "Adult and online degree completion", note: "Ages 25–54 who started college but didn't finish.", sel: { age: ["25_34", "35_44", "45_54"], somecollege: true } }
   ],
   methodology: [
-    { title: "Graduate program prospects", body: "Census doesn't publish, by ZIP, how many people of each age hold a bachelor's degree, so the Graduate profile uses the household head's education. For adults 25–44, who usually head their own household, this is a close stand-in." },
+    { title: "Graduate program audience", body: "Census doesn't publish, by ZIP, how many people of each age hold a bachelor's degree, so the Graduate profile uses the household head's education. For adults 25–44, who usually head their own household, this is a close stand-in." },
     { title: "Enrollment, veterans and some college", body: "Currently enrolled uses each age group's own college enrollment rate in the ZIP (Census publishes it for 15–17, 18–24, 25–34 and 35+). Veterans count only adults 18+, and Some college, no degree only adults 25+, the groups Census measures them for." }
   ]
 };

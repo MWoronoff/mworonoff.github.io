@@ -28,7 +28,7 @@ window.ADTAXI_RADIUS = {
   }
  ],
  "zipGeo": "../shared/geo/zip/{level}/{id}.json",
- "planScript": "../shared/media-plan.js?v=20261026e",
+ "planScript": "../shared/media-plan.js?v=20261026f",
  "mediaMixUrl": "../media-mix/",
  "planCategory": "none",
  "customArea": true,
@@ -54,11 +54,11 @@ window.ADTAXI_RADIUS = {
    "owner": "adults who fit the first-time franchise buyer profile"
   },
   "goals": {
-   "awareness": "Awareness among prospective franchise owners in the top candidate ZIPs",
+   "awareness": "Awareness among potential franchise owners in the top candidate ZIPs",
    "leads": "Qualified franchise inquiries and discovery calls",
    "online": "Visits to the franchise opportunity site and completed inquiry forms",
    "offline": "Discovery calls and Discovery Day attendance",
-   "growth": "New prospective owners plus captured franchise searches"
+   "growth": "New potential owners plus captured franchise searches"
   },
   "jobs": {
    "search": "Captures people already researching franchise ownership, such as \"franchise opportunities\" and searches for the concept's category.",

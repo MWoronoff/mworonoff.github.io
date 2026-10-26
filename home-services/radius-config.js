@@ -14,7 +14,7 @@ window.ADTAXI_RADIUS = {
   radiusLabel: "Up to {r} miles",
   customArea: true,   // Geography > Custom area: a list or file of ZIPs, counties, towns or locations (pilot, Oct 2026)
   filters: ["age", "income4", "built", "ownval", "sfd", "longten"],
-  profileLabel: "Best prospects for",
+  profileLabel: "Target audience",
   profiles: [
     { id: "any", label: "Any home service", note: "Homeowners 35 and older in single-family detached homes built before 2000.", sel: { age: ["35_44", "45_54", "55p"], built: ["pre1980", "80_99"], sfd: true } },
     { id: "hvac", label: "HVAC", note: "Homeowners 35 and older in homes built before 2000, when original systems are due for replacement.", sel: { age: ["35_44", "45_54", "55p"], built: ["pre1980", "80_99"] } },

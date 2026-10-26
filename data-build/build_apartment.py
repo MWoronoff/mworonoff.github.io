@@ -1,6 +1,6 @@
 """Builds the Apartment Market Analyzer data (Market Potential Scores) into apartment-analyzer/data/.
 
-The analyzer shows apartment communities and property managers where their prospective residents are, and how to focus
+The analyzer shows apartment communities and property managers where their likely residents are, and how to focus
 ad dollars geographically.
 
 Sources, all public downloads with no key (plus Adtaxi's EASI and Deluxe files in data-build/sources):
@@ -31,7 +31,7 @@ MIN_POP = 500
 NAICS = ["531110", "531311"]          # lessors of residential buildings and dwellings; residential property managers
 PALM_SPRINGS, RIVERSIDE_METRO = "804", "40140"
 
-# Market Potential Score: where an apartment advertiser's prospective residents are. Each part is a percentile (0-100).
+# Market Potential Score: where an apartment advertiser's likely residents are. Each part is a percentile (0-100).
 WEIGHTS = {"demand": 0.40, "category": 0.25, "spend": 0.15, "comp": 0.20}
 ZIP_PARTS = ("demand", "spend")       # ZIPs: no EASI spending by ZIP, and ZIP business counts are suppressed under 3
 

@@ -7,7 +7,7 @@ import glob, json, os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-V = "20261026e"   # version tag for the shared engine files on these pages (keep in step with the other analyzers)
+V = "20261026f"   # version tag for the shared engine files on these pages (keep in step with the other analyzers)
 
 SUBS = [{"id": "exec", "label": "Master franchise candidates"}, {"id": "owner", "label": "First-time franchise buyers"}]
 # AudienceSCAN 2026, Small Business Owners (4.5% of U.S. adults): saw or heard an ad of each type that led them to take
@@ -41,11 +41,11 @@ AD_RESPONSE = {
 # Proposal wording for franchise development (shared/radius.js reads cfg.proposal)
 PROPOSAL = {
     "nouns": {"exec": "adults who fit the master franchise candidate profile", "owner": "adults who fit the first-time franchise buyer profile"},
-    "goals": {"awareness": "Awareness among prospective franchise owners in the top candidate ZIPs",
+    "goals": {"awareness": "Awareness among potential franchise owners in the top candidate ZIPs",
               "leads": "Qualified franchise inquiries and discovery calls",
               "online": "Visits to the franchise opportunity site and completed inquiry forms",
               "offline": "Discovery calls and Discovery Day attendance",
-              "growth": "New prospective owners plus captured franchise searches"},
+              "growth": "New potential owners plus captured franchise searches"},
     "jobs": {"search": "Captures people already researching franchise ownership, such as \"franchise opportunities\" and searches for the concept's category.",
              "social": "Reaches the owner profile by age, income and location in the top candidate ZIPs, with lead forms that pre-qualify on capital and timeline.",
              "ctv": "Tells the ownership story on the big screen to households in the top candidate ZIPs.",

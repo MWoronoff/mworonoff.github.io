@@ -16,7 +16,7 @@ window.ADTAXI_RADIUS = {
   radii: [5, 10, 15, 25, 50, 100],
   radiusLabel: "Up to {r} miles",
   filters: ["gender", "age", "income", "vehicles", "car", "kids", "home"],
-  profileLabel: "Best prospects for",
+  profileLabel: "Target audience",
   profiles: [
     { id: "newcar", label: "New cars", note: "Adults 35 and older with household income of $100K or more.", sel: { age: ["35_44", "45_54", "55p"], income: ["100_150", "150_200", "200p"] } },
     { id: "newtruck", label: "New trucks and SUVs", note: "Adults 25–54 with household income of $75K or more in households with 2 or more vehicles.", sel: { age: ["25_34", "35_44", "45_54"], income: ["75_100", "100_150", "150_200", "200p"], vehicles: ["2", "3p"] } },

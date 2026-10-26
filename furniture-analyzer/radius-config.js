@@ -13,7 +13,7 @@ window.ADTAXI_RADIUS = {
   radii: [5, 10, 15, 25, 50, 100],
   radiusLabel: "Up to {r} miles",
   filters: ["age", "income5", "home"],
-  profileLabel: "Best prospects for",
+  profileLabel: "Target audience",
   profiles: [
     { id: "any", label: "Any furniture", note: "Adults 25–54 with household income of $50K or more.", sel: { age: ["25_34", "35_44", "45_54"], income5: ["50_75", "75_100", "100_150", "150p"] } },
     { id: "living", label: "Sofas and living room", note: "Adults 25–44 with household income of $50K or more.", sel: { age: ["25_34", "35_44"], income5: ["50_75", "75_100", "100_150", "150p"] } },
@@ -24,7 +24,7 @@ window.ADTAXI_RADIUS = {
     { id: "baby", label: "Baby and nursery", note: "Adults 25–34, the main age for first-time parents.", sel: { age: ["25_34"] } }
   ],
   methodology: [
-    { title: "Furniture prospects", body: "Each preset picks the Census ages, income and homeownership that fit its furniture line. You can change any selection after picking a preset." },
+    { title: "Furniture audiences", body: "Each preset picks the Census ages, income and homeownership that fit its furniture line. You can change any selection after picking a preset." },
     { title: "Home and home value", body: "Owner and renter shares come from Census by the age of the head of household, so they use each age group's own rate. Home value bands are the share of owner-occupied homes in each value range in the ZIP." }
   ]
 };

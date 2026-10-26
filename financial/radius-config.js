@@ -1,7 +1,7 @@
 /* Zip Code Radius Tool settings for this analyzer (opened from Geography > Radius on the analyzer page). */
 window.ADTAXI_RADIUS = {
   title: "Zip Code Radius Tool - Financial",
-  subtitle: "Pick a center ZIP or town and a radius, then choose the prospects you want to reach to see how many live there and which ZIPs over-index.",
+  subtitle: "Pick a center ZIP or town and a radius, then choose the customers you want to reach to see how many live there and which ZIPs over-index.",
   logo: "../shared/adtaxi-logo.svg",
   exportName: "financial-radius",
   links: [ { label: "Financial Market Analyzer", url: "./" }, { label: "Home", url: "../analyzers/" } ],
@@ -18,7 +18,7 @@ window.ADTAXI_RADIUS = {
   radii: [5, 10, 15, 25, 50, 100],
   radiusLabel: "Up to {r} miles",
   filters: ["age", "income", "mortg", "renter", "mover", "kids"],
-  profileLabel: "Best prospects for",
+  profileLabel: "Target audience",
   profiles: [
     { id: "tax", label: "Tax preparation", note: "All adults, with ZIPs ranked by the share of tax returns filed by a paid preparer (IRS). The Earned Income Credit share shows alongside.", sel: {}, context: ["prep", "eitc"], sortBy: "prep" },
     { id: "wealth", label: "Wealth management", note: "Adults 45 and older with household income of $100K or more. Dividend and capital gains shares (IRS) show by ZIP.", sel: { age: ["45_54", "55p"], income: ["100_150", "150_200", "200p"] }, context: ["div", "cg"] },

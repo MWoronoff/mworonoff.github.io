@@ -59,7 +59,7 @@
     var hdr = { bold: true, color: C.white, fill: { color: C.gray }, fontSize: 8.5 };
     // When every top ZIP is in the same town, the town goes in the heading and the column shows population instead
     var townCol = !ctx.topTown;
-    var rows = [[{ text: "ZIP", options: hdr }, { text: townCol ? "Town" : "Population", options: townCol ? hdr : Object.assign({ align: "right" }, hdr) }, { text: "Prospects", options: Object.assign({ align: "right" }, hdr) }, { text: "Index", options: Object.assign({ align: "right" }, hdr) }]];
+    var rows = [[{ text: "ZIP", options: hdr }, { text: townCol ? "Town" : "Population", options: townCol ? hdr : Object.assign({ align: "right" }, hdr) }, { text: "Likely customers", options: Object.assign({ align: "right" }, hdr) }, { text: "Index", options: Object.assign({ align: "right" }, hdr) }]];
     ctx.topZips.slice(0, 5).forEach(function (z) {
       rows.push([z.zip, townCol ? z.town : { text: nf(z.pop || 0), options: { align: "right" } }, { text: nf(z.aud), options: { align: "right" } }, { text: z.idx == null ? "—" : nf(z.idx), options: { align: "right" } }]);
     });
