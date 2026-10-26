@@ -294,6 +294,40 @@
     return Promise.all(jobs);
   };
 
+  /* ---------- Results panel ----------
+     Case study slides and testimonials for the selected category. Materials go in cfg.results as
+     { "<category id>": { caseStudies: [{ title, summary, url }], testimonials: [{ quote, name, role, business }] } }.
+     Until any are loaded, the panel shows a layout preview. */
+  Analyzer.prototype.openResults = function () {
+    var self = this, cfg = this.cfg;
+    var subId = this.subSel ? this.subSel.value : "";
+    var subLabel = this.subSel && this.subSel.selectedIndex >= 0 ? this.subSel.options[this.subSel.selectedIndex].text : "";
+    var mat = (cfg.results && typeof cfg.results === "object" && cfg.results[subId]) || {};
+    var cases = mat.caseStudies || [], quotes = mat.testimonials || [];
+    var body = this.resultsBody; body.innerHTML = "";
+    body.appendChild(el("div", { class: "az-results-head" }, [
+      el("div", null, [
+        el("h2", { id: "az-results-title", text: "Results" }),
+        el("p", { class: "az-results-sub", text: (cfg.title || "").replace(/ Market Analyzer$/, "") + (subLabel ? " \u00b7 " + subLabel : "") })
+      ]),
+      el("button", { type: "button", class: "az-modal-close", "aria-label": "Close", text: "\u00d7", onclick: function () { self.resultsPanel.close(); } })
+    ]));
+    function section(title, items, render, emptyText) {
+      return el("section", { class: "az-results-sec" }, [el("h3", { text: title })].concat(items.length ? items.map(render)
+        : [el("div", { class: "az-results-ph" }, [el("span", { text: emptyText })])]));
+    }
+    body.appendChild(section("Case studies", cases, function (c) {
+      return el("article", { class: "az-results-card" }, [el("h4", { text: c.title || "" }), c.summary ? el("p", { text: c.summary }) : null,
+        c.url ? el("a", { href: c.url, target: "_blank", rel: "noopener", text: "Open the case study" }) : null]);
+    }, "Case study slides for this category will appear here."));
+    body.appendChild(section("Client testimonials", quotes, function (q) {
+      return el("blockquote", { class: "az-results-quote" }, [el("p", { text: "\u201c" + (q.quote || "") + "\u201d" }),
+        el("footer", { text: [q.name, q.role, q.business].filter(Boolean).join(", ") })]);
+    }, "Short client quotes for this category will appear here."));
+    if (!cases.length && !quotes.length) body.appendChild(el("p", { class: "az-results-note", text: "Layout preview: no materials are loaded for this category yet." }));
+    if (this.resultsPanel.showModal) this.resultsPanel.showModal(); else this.resultsPanel.setAttribute("open", "");
+  };
+
   /* ---------- Layout ---------- */
   Analyzer.prototype.build = function () {
     var cfg = this.cfg, self = this;
@@ -331,6 +365,9 @@
         cfg.subcategories.map(function (s) { return el("option", { value: s.id, text: s.label }); }));
       controls.push(el("label", { class: "az-field" }, [el("span", { text: cfg.subcategoryLabel || "Category" }), this.subSel]));
     }
+    // Results: case studies and testimonials for the selected category, in a side panel (layout preview until materials are loaded)
+    if (cfg.results !== false) controls.push(el("button", { type: "button", class: "az-btn az-results-btn", text: "Results",
+      title: "Case studies and client testimonials for this category", "aria-haspopup": "dialog", onclick: function () { self.openResults(); } }));
     this.rankSel = el("select", { onchange: function () { self.state.rank = this.value; self.state.sortKey = null; self.refresh(); } });
     controls.push(el("label", { class: "az-field az-only" }, [el("span", { text: "Rank and map by" }), this.rankSel]));
     this.showSel = el("select", { onchange: function () { self.state.show = +this.value; self.renderTable(); } },
@@ -406,6 +443,10 @@
     this.root.appendChild(header);
     this.root.appendChild(main);
     this.root.appendChild(this.modal);
+    this.resultsBody = el("div", { class: "az-results-body" });
+    this.resultsPanel = el("dialog", { class: "az-results", "aria-labelledby": "az-results-title" }, [this.resultsBody]);
+    this.resultsPanel.addEventListener("click", function (e) { if (e.target === self.resultsPanel) self.resultsPanel.close(); });
+    this.root.appendChild(this.resultsPanel);
 
     // Leaflet map with no tile basemap: the boundaries are the map.
     this.map = L.map(this.mapEl, { zoomControl: false, zoomSnap: 0.25, minZoom: 2, maxZoom: 10, attributionControl: true, worldCopyJump: false });
@@ -465,7 +506,7 @@
     }
     if (window.AdtaxiRadius) go();
     else {
-      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261024c";   // version tag: browsers fetch the new file after an update
+      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261026a";   // version tag: browsers fetch the new file after an update
       sc.onload = go; sc.onerror = function () { self.showError("The radius tool didn't load. Refresh the page and try again."); };
       document.head.appendChild(sc);
     }
