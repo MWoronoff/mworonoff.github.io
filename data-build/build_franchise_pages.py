@@ -7,7 +7,7 @@ import glob, json, os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-V = "20261026h"   # version tag for the shared engine files on these pages (keep in step with the other analyzers)
+V = "20261026i"   # version tag for the shared engine files on these pages (keep in step with the other analyzers)
 
 SUBS = [{"id": "exec", "label": "Master franchise candidates"}, {"id": "owner", "label": "First-time franchise buyers"}]
 # AudienceSCAN 2026, Small Business Owners (4.5% of U.S. adults): saw or heard an ad of each type that led them to take
@@ -222,7 +222,7 @@ def analyzer_cfg(client):
         "radiusScript": f"{up}shared/radius.js?v={V}", "benchmarks": False, "timing": False,
         "subcategoryLabel": "Owner profile", "subcategories": SUBS,
         "measures": measures(client),
-        "rankBy": ["score", "x125", "x125_share", "hi200_share", "ba_share", "mgmt_share", "o100", "o100_share", "avg_wage", "buyers", "buyer_jobs", "vets", "population"],
+        "rankBy": ["score", "x125", "x125_share", "mgmt_share", "o100", "o100_share", "married_share", "buyers"],   # one per question a client asks; every measure still shows in the detail panel
         "defaultRank": "score",
         "components": ["demand", "category", "comp"] if client else ["demand", "category"],
         "detailMeasures": ["x125", "x125_share", "hi200_share", "cg_share", "ba_share", "mgmt_share", "o100", "o100_share", "avg_wage", "married_share", "buyers", "buyer_jobs", "buyers_per1k"]
