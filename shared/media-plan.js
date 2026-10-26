@@ -50,7 +50,7 @@
       weights: { search: 30, ctv: 30, social: 25, display: 15 } }
   ];
 
-  var MIN_BUDGET = 3000;   // Adtaxi monthly minimum ad spend (Oct 26 2026; was $1,000). Tier 3 below sits under it and no longer applies.
+  var MIN_BUDGET = 1000;   // Adtaxi monthly minimum ad spend (kept at $1,000 so Tier 3 applies)
   var TIERS = [ { max: 7500, channels: 1, label: "Under $7.5K: one primary channel" },
                 { max: 12000, channels: 2, label: "$7.5K–$12K: one to two complementary channels" },
                 { max: 20000, channels: 3, label: "$12K–$20K: two to three channels with distinct roles" },
