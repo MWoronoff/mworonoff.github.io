@@ -348,7 +348,7 @@
     this.filterDefs = {};
     for (var k in FILTERS) this.filterDefs[k] = FILTERS[k];
     this.filterDefs.age = { label: "Age", type: "multi", options: this.ages.options };
-    this.state = { unit: "zip", zip: cfg.defaultZip || "", r: cfg.defaultRadius || 0, minIndex: 0, sortKey: "aud", sortDir: "desc", show: 50, sel: {}, profile: null,
+    this.state = { unit: cfg.countiesFirst ? "county" : "zip", zip: cfg.defaultZip || "", r: cfg.defaultRadius || 0, minIndex: 0, sortKey: cfg.blendScore ? "score" : "aud", sortDir: "desc", show: 50, sel: {}, profile: null,
                    mode: "radius", area: null, areaTokens: null };
     this.profiles = {};
     (cfg.profiles || []).forEach(function (p) { this.profiles[p.id] = p; }, this);
@@ -356,7 +356,7 @@
       var ini = cfg.initial || {};
       if (/^\d{5}$/.test(ini.zip || "")) this.state.zip = ini.zip;
       if (+ini.r > 0) this.state.r = +ini.r;
-      if (ini.p && this.profiles[ini.p]) { this.state.profile = ini.p; this.state.sel = JSON.parse(JSON.stringify(this.profiles[ini.p].sel)); this.state.sortKey = presetSort(this.profiles[ini.p]); }
+      if (ini.p && this.profiles[ini.p]) { this.state.profile = ini.p; this.state.sel = JSON.parse(JSON.stringify(this.profiles[ini.p].sel)); this.state.sortKey = this.cfg.blendScore ? "score" : presetSort(this.profiles[ini.p]); }
       if (ini.mode === "area" && cfg.customArea) { this.state.mode = "area"; if (ini.ca) this.pendingCA = ini.ca; }
     } else this.readHash();
   }
@@ -382,7 +382,7 @@
       }); }
     });
     // A link from the analyzer carries only the category: start from that category's profile
-    if (s.profile && !hasF) { s.sel = JSON.parse(JSON.stringify(this.profiles[s.profile].sel)); s.sortKey = presetSort(this.profiles[s.profile]); s.sortDir = "desc"; }
+    if (s.profile && !hasF) { s.sel = JSON.parse(JSON.stringify(this.profiles[s.profile].sel)); s.sortKey = this.cfg.blendScore ? "score" : presetSort(this.profiles[s.profile]); s.sortDir = "desc"; }
   };
   Radius.prototype.writeHash = function () {
     if (this.cfg.embedded) { if (this.cfg.onState) this.cfg.onState(this.state); return; }
@@ -430,7 +430,7 @@
       this.radiusField = el("label", { class: "az-field" }, [el("span", { text: "Radius" }), this.rSel]),
       el("label", { class: "az-field" }, [el("span", { text: "Show" }), this.minSel]),
       el("div", { class: "az-field" }, [el("span", { text: "Rank and map" }), this.unitSeg = el("div", { class: "az-seg", role: "group", "aria-label": "Rank and map by ZIP or county" },
-        [["zip", "ZIPs"], ["county", "Counties"]].map(function (u) {
+        (cfg.countiesFirst ? [["county", "Counties"], ["zip", "ZIPs"]] : [["zip", "ZIPs"], ["county", "Counties"]]).map(function (u) {
           return el("button", { type: "button", "data-unit": u[0], text: u[1], "aria-pressed": String(s.unit === u[0]), title: u[0] === "county" ? "Add up the area's ZIPs by county" : "Rank each ZIP in the area",
             onclick: function () { self.setUnit(u[0]); } });
         }))]),
@@ -511,7 +511,7 @@
   Radius.prototype.applyProfile = function (id) {
     var s = this.state, p = this.profiles[id];
     s.profile = p ? id : null;
-    if (p) { s.sel = JSON.parse(JSON.stringify(p.sel)); s.sortKey = presetSort(p); s.sortDir = "desc"; }
+    if (p) { s.sel = JSON.parse(JSON.stringify(p.sel)); s.sortKey = this.cfg.blendScore ? "score" : presetSort(p); s.sortDir = "desc"; }
     this.syncFilters(); this.update(false);
   };
   Radius.prototype.syncFilters = function () {
@@ -756,10 +756,44 @@
     rows.forEach(function (r) { keys.forEach(function (k) { r["x_" + k] = CONTEXT[k].value(c, r.i); }); });
     return keys;
   };
+  /* ---------- Blended score (sites with cfg.blendScore) ----------
+     0-100 within this trade area: 40% concentration (index), 30% size (estimated audience), 30% the profile's ZIP-wide
+     rates (e.g. $200K+ income, capital gains, bachelor's+, managers). Each part is a percentile among the area's ZIPs
+     (or counties). With no ZIP-wide rates for the profile, index and audience split 4:3. Under 1,000 residents: not scored. */
+  var SCORE_W = { idx: 0.4, aud: 0.3, ctx: 0.3 };
+  function percentiler(vals) {
+    var v = vals.filter(function (x) { return typeof x === "number" && isFinite(x); }).sort(function (a, b) { return a - b; }), n = v.length;
+    return function (x) {
+      if (typeof x !== "number" || !isFinite(x) || !n) return null;
+      if (n === 1) return 100;
+      var lo = 0, hi = n; while (lo < hi) { var m = (lo + hi) >> 1; if (v[m] < x) lo = m + 1; else hi = m; }
+      var eq = 0; while (lo + eq < n && v[lo + eq] === x) eq++;
+      return (lo + (eq - 1) / 2) / (n - 1) * 100;   // ties share the middle rank
+    };
+  }
+  Radius.prototype.addScore = function (rows, ctx) {
+    if (!this.cfg.blendScore) return;
+    var ok = rows.filter(function (r) { return r.idx != null && r.aud != null && (r.pop || 0) >= SMALL_ZIP; });
+    var P = { idx: percentiler(ok.map(function (r) { return r.idx; })), aud: percentiler(ok.map(function (r) { return r.aud; })) };
+    ctx.forEach(function (k) { P["x_" + k] = percentiler(ok.map(function (r) { return r["x_" + k]; })); });
+    rows.forEach(function (r) { r.score = null; });
+    ok.forEach(function (r) {
+      var parts = [[P.idx(r.idx), SCORE_W.idx], [P.aud(r.aud), SCORE_W.aud]];
+      var cv = ctx.map(function (k) { return P["x_" + k](r["x_" + k]); }).filter(function (x) { return x != null; });
+      if (cv.length) parts.push([cv.reduce(function (a, b) { return a + b; }, 0) / cv.length, SCORE_W.ctx]);
+      var w = 0, t = 0; parts.forEach(function (p) { if (p[0] != null) { t += p[0] * p[1]; w += p[1]; } });
+      r.score = w ? t / w : null;
+    });
+  };
+  Radius.prototype.scoreNote = function (ctx, noun) {
+    return " Score (0\u2013100) ranks " + noun + " within this area: 40% index, 30% estimated audience" + (ctx.length ? ", 30% " + listAnd(ctx.map(function (k) { return CONTEXT[k].label; })) : "") +
+      ", each compared with the area's other " + noun + (ctx.length ? "" : " (index and audience only for this audience)") + ". Under " + NF0.format(SMALL_ZIP) + " residents: not scored.";
+  };
+
   /* ---------- Counties: the trade area's ZIPs added up by county ---------- */
   Radius.prototype.setUnit = function (u) {
     var s = this.state; if (s.unit === u) return;
-    s.unit = u; s.sortKey = "aud"; s.sortDir = "desc";
+    s.unit = u; s.sortKey = this.cfg.blendScore ? "score" : "aud"; s.sortDir = "desc";
     Array.prototype.forEach.call(this.unitSeg.children, function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-unit") === u)); });
     if (!this.rows) return;
     this.renderTable(); this.renderMap(false);
@@ -786,14 +820,15 @@
     var self = this, s = this.state, est = this.isEstimate(), area = s.mode === "area";
     if (!this.zipCounty) { this.tableTitle.textContent = "Counties"; this.tableNote.textContent = "Loading counties…"; this.thead.innerHTML = ""; this.tbody.innerHTML = "";
       this.loadCounties().then(function () { if (self.state.unit === "county" && self.rows) { self.renderTable(); self.renderMap(false); } }); return; }
-    var rows = this.countyRows(), ctx = this.contextKeys();
-    if (["town", "zips", "pop", "aud", "share", "idx"].indexOf(s.sortKey) < 0 && !/^x_/.test(s.sortKey)) { s.sortKey = "aud"; s.sortDir = "desc"; }
-    var cols = [["town", "County", "l"], ["zips", "ZIPs", "n"], ["pop", "Population", "n"], ["aud", est ? "Est. audience" : "Audience", "n"], ["share", "Share", "n"], ["idx", "Index", "n"]]
+    var rows = this.countyRows(), ctx = this.contextKeys(), sc = !!this.cfg.blendScore;
+    this.addScore(rows, ctx);
+    if (["town", "zips", "pop", "aud", "share", "idx"].concat(sc ? ["score"] : []).indexOf(s.sortKey) < 0 && !/^x_/.test(s.sortKey)) { s.sortKey = sc ? "score" : "aud"; s.sortDir = "desc"; }
+    var cols = [["town", "County", "l"]].concat(sc ? [["score", "Score", "n"]] : []).concat([["zips", "ZIPs", "n"], ["pop", "Population", "n"]]).concat([ ["aud", est ? "Est. audience" : "Audience", "n"], ["share", "Share", "n"], ["idx", "Index", "n"]])
       .concat(ctx.map(function (k) { return ["x_" + k, CONTEXT[k].label, "n", CONTEXT[k].long + "; ZIPs averaged by population"]; }));
     this.sortRows(rows);
     var k = s.sortKey;
     this.tableTitle.textContent = area ? "Counties in the custom area" : "Counties within " + s.r + " miles";
-    this.tableNote.textContent = NF0.format(rows.length) + (rows.length === 1 ? " county" : " counties") + ". Each county adds up the area's ZIPs in that county, so a county partly outside the area counts only the part inside. Click a column to sort.";
+    this.tableNote.textContent = NF0.format(rows.length) + (rows.length === 1 ? " county" : " counties") + ". Each county adds up the area's ZIPs in that county, so a county partly outside the area counts only the part inside. Click a column to sort." + (sc ? this.scoreNote(ctx, "counties") : "");
     this.thead.innerHTML = "";
     var hr = el("tr");
     cols.forEach(function (cdef) {
@@ -810,7 +845,8 @@
     var frag = document.createDocumentFragment();
     rows.forEach(function (r, n) {
       frag.appendChild(el("tr", { tabindex: "0", onclick: function () { self.flashCounty(r.fips); }, onkeydown: function (e) { if (e.key === "Enter") self.flashCounty(r.fips); } }, [
-        el("td", { class: "rz-l", style: "font-weight:600", text: r.town }), el("td", { class: "num", style: "font-weight:400", text: NF0.format(r.zips) }),
+        el("td", { class: "rz-l", style: "font-weight:600", text: r.town }), sc ? el("td", { class: "num", style: "font-weight:600", text: r.score == null ? "\u2014" : NF0.format(r.score) }) : null,
+        el("td", { class: "num", style: "font-weight:400", text: NF0.format(r.zips) }),
         el("td", { class: "num", text: NF0.format(r.pop) }),
         el("td", { class: "num", text: r.aud == null ? "No data" : NF0.format(Math.round(r.aud)) }),
         el("td", { class: "num", text: r.share == null ? "—" : NF1.format(r.share * 100) + "%" }),
@@ -841,16 +877,19 @@
     var self = this, s = this.state, rows = this.visible().slice(), est = this.isEstimate();
     if (s.unit === "county") return this.renderCountyTable();
     var area = s.mode === "area", circ = area && s.area && s.area.circles.length;
-    var ctx = this.addContext(rows);
-    if (/^x_/.test(s.sortKey) && ctx.indexOf(s.sortKey.slice(2)) < 0) { s.sortKey = "idx"; s.sortDir = "desc"; }
-    var cols = [["zip", "ZIP", "l"], ["town", "Town", "l"]].concat(area ? [["county", "County", "l"]] : []).concat(!area || circ ? [["dist", area ? "Miles to location" : "Miles", "n"]] : [])
+    var ctx = this.addContext(rows), sc = !!this.cfg.blendScore;
+    this.addScore(rows, ctx);
+    if (/^x_/.test(s.sortKey) && ctx.indexOf(s.sortKey.slice(2)) < 0) { s.sortKey = sc ? "score" : "idx"; s.sortDir = "desc"; }
+    if (s.sortKey === "score" && !sc) s.sortKey = "idx";
+    var cols = [["zip", "ZIP", "l"], ["town", "Town", "l"]].concat(area ? [["county", "County", "l"]] : []).concat(sc ? [["score", "Score", "n"]] : []).concat(!area || circ ? [["dist", area ? "Miles to location" : "Miles", "n"]] : [])
       .concat([["pop", "Population", "n"], ["aud", est ? "Est. audience" : "Audience", "n"], ["share", "Share", "n"], ["idx", "Index", "n"]])
       .concat(ctx.map(function (k) { return ["x_" + k, CONTEXT[k].label, "n", CONTEXT[k].long]; }));
     this.sortRows(rows);
-    var k = s.sortKey, nSmall = (k === "idx" || /^x_/.test(k)) ? rows.filter(function (r) { return (r.pop || 0) < SMALL_ZIP; }).length : 0;
+    var k = s.sortKey, nSmall = (k === "idx" || k === "score" || /^x_/.test(k)) ? rows.filter(function (r) { return (r.pop || 0) < SMALL_ZIP; }).length : 0;
     this.tableTitle.textContent = area ? "ZIPs in the custom area" : "ZIPs within " + s.r + " miles";
     this.tableNote.textContent = (rows.length > s.show ? "Showing " + s.show + " of " + NF0.format(rows.length) + " ZIPs. Export includes all." : NF0.format(rows.length) + " ZIPs.") + (nSmall ? " ZIPs under " + NF0.format(SMALL_ZIP) + " residents are listed last." : "") + " Click a column to sort." +
-      (ctx.length ? " " + listAnd(ctx.map(function (k) { return CONTEXT[k].label; })) + (ctx.length > 1 ? " are ZIP-wide rates" : " is a ZIP-wide rate") + ", shown for context and not applied to the audience; point to a heading for its source." : "");
+      (ctx.length ? " " + listAnd(ctx.map(function (k) { return CONTEXT[k].label; })) + (ctx.length > 1 ? " are ZIP-wide rates" : " is a ZIP-wide rate") + (sc ? ", part of the Score but not applied to the audience count" : ", shown for context and not applied to the audience") + "; point to a heading for its source." : "") +
+      (sc ? this.scoreNote(ctx, "ZIPs") : "");
     this.thead.innerHTML = "";
     var hr = el("tr");
     cols.forEach(function (cdef) {
@@ -869,6 +908,7 @@
       frag.appendChild(el("tr", { tabindex: "0", onclick: function () { self.flash(r.zip); }, onkeydown: function (e) { if (e.key === "Enter") self.flash(r.zip); } }, [
         el("td", { class: "rz-l num", text: r.zip }), el("td", { class: "rz-l", text: r.town }),
         area ? el("td", { class: "rz-l rz-county", text: r.county || "—" }) : null,
+        sc ? el("td", { class: "num", style: "font-weight:600", text: r.score == null ? "\u2014" : NF0.format(r.score) }) : null,
         !area || circ ? el("td", { class: "num", text: r.dist == null ? "—" : NF1.format(r.dist) }) : null,
         el("td", { class: "num", text: r.pop == null ? "—" : NF0.format(r.pop) }),
         el("td", { class: "num", text: r.aud == null ? "No data" : NF0.format(Math.round(r.aud)) }),
@@ -1304,7 +1344,7 @@
   Radius.prototype.sortRows = function (rows) {
     var s = this.state, k = s.sortKey, dir = s.sortDir === "asc" ? 1 : -1;
     rows.sort(function (a, b) {
-      if (k === "idx" || /^x_/.test(k)) { var sa = (a.pop || 0) < SMALL_ZIP, sb = (b.pop || 0) < SMALL_ZIP; if (sa !== sb) return sa ? 1 : -1; }
+      if (k === "idx" || k === "score" || /^x_/.test(k)) { var sa = (a.pop || 0) < SMALL_ZIP, sb = (b.pop || 0) < SMALL_ZIP; if (sa !== sb) return sa ? 1 : -1; }
       var x = a[k], y = b[k];
       if (x == null && y == null) return 0; if (x == null) return 1; if (y == null) return -1;
       return typeof x === "string" ? dir * x.localeCompare(y) : dir * (x - y);
@@ -1560,11 +1600,14 @@
     var rows = this.sortRows(this.visible().slice());   // same order as the table
     var area = s.mode === "area", circ = area && s.area.circles.length;
     var head = ["ZIP", "Town"].concat(area ? ["County"] : []).concat(!area ? ["Miles from center"] : circ ? ["Miles to nearest location"] : []);
-    var ctx = this.addContext(rows);
+    var ctx = this.addContext(rows), sc = !!this.cfg.blendScore;
+    this.addScore(rows, ctx); this.sortRows(rows);
+    if (sc) head.push("Score (within this area)");
     var lines = [head.concat(["Population", est ? "Estimated audience" : "Audience", "Audience share", "Index vs US"]).concat(ctx.map(function (k) { return CONTEXT[k].long; })).concat(["Audience definition"]).map(csvCell).join(",")];
     var def = this.describe();
     rows.forEach(function (r) {
       var lead = [r.zip, r.town].concat(area ? [r.county || ""] : []).concat(!area || circ ? [r.dist == null ? "" : r.dist.toFixed(1)] : []);
+      if (sc) lead.push(r.score == null ? "" : Math.round(r.score));
       lines.push(lead.concat([r.pop, r.aud == null ? "" : Math.round(r.aud), r.share == null ? "" : (r.share * 100).toFixed(1) + "%", r.idx == null ? "" : Math.round(r.idx)])
         .concat(ctx.map(function (k) { var v = r["x_" + k]; return v == null ? "" : (v * 100).toFixed(1) + "%"; })).concat([def]).map(csvCell).join(","));
     });

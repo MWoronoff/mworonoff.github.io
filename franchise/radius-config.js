@@ -28,10 +28,12 @@ window.ADTAXI_RADIUS = {
   }
  ],
  "zipGeo": "../shared/geo/zip/{level}/{id}.json",
- "planScript": "../shared/media-plan.js?v=20261026m",
+ "planScript": "../shared/media-plan.js?v=20261026n",
  "mediaMixUrl": "../media-mix/",
  "planCategory": "none",
  "customArea": true,
+ "countiesFirst": true,
+ "blendScore": true,
  "ageSet": "adult65",
  "radii": [
   5,
@@ -138,7 +140,11 @@ window.ADTAXI_RADIUS = {
   },
   {
    "title": "ZIP-wide rates",
-   "body": "The $200K+ income, capital gains and self-employment figures are IRS shares of tax returns in each ZIP, Bachelor's+ is the Census share of adults 25+ with a bachelor's degree or higher, and Managers is the Census share of employed people in management occupations. They describe the ZIP, not individual households, so they show as columns and aren't applied to the count. Census doesn't publish education by age and income for ZIPs, and degrees are far more common among high earners than among all adults, so applying the ZIP rate would badly undercount."
+   "body": "The $200K+ income, capital gains and self-employment figures are IRS shares of tax returns in each ZIP, Bachelor's+ is the Census share of adults 25+ with a bachelor's degree or higher, and Managers is the Census share of employed people in management occupations. They describe the ZIP, not individual households, so they aren't applied to the count; they count toward the Score instead. Census doesn't publish education by age and income for ZIPs, and degrees are far more common among high earners than among all adults, so applying the ZIP rate would badly undercount."
+  },
+  {
+   "title": "Score",
+   "body": "The Score (0–100) ranks the trade area's counties and ZIPs against each other: 40% index (how concentrated candidates are), 30% estimated audience (how many there are) and 30% the profile's ZIP-wide rates ($200K+ income, capital gains, bachelor's+ and managers for master franchise candidates; $200K+ income for first-time buyers). Each part is a percentile among the area's counties or ZIPs, so the same ZIP can score differently in a different trade area. Counties come first, then ZIPs. ZIPs and county parts under 1,000 residents aren't scored."
   },
   {
    "title": "Reaching these candidates",

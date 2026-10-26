@@ -147,7 +147,7 @@
     var p = this.state.parent;
     if (level === "county" && this.cfg.footprint && this.state.level === "county" && p && p.level !== "county") return "county:" + p.level + ":" + p.id;
     // Drill-down (cfg.drill): a DMA's metros, or a DMA's or metro's counties
-    if (this.cfg.drill && p && this.state.level === level && ((level === "county" && (p.level === "dma" || p.level === "metro")) || (level === "metro" && p.level === "dma"))) return level + ":" + p.level + ":" + p.id;
+    if (this.cfg.drill && p && this.state.level === level && ((level === "county" && (p.level === "dma" || p.level === "metro" || p.level === "sel")) || (level === "metro" && (p.level === "dma" || p.level === "sel")))) return level + ":" + p.level + ":" + p.id;
     return level === "zip" ? (p ? "zip:" + p.level + ":" + p.id : null) : level;
   };
   Analyzer.prototype.isInside = function (level) { var k = this.key(level); return level === "zip" || (k !== level && k !== null); };
@@ -161,7 +161,9 @@
   };
   Analyzer.prototype.levelLabel = function (level) { return (this.cfg.levels[level] && this.cfg.levels[level].label) || LEVEL_LABELS[level]; };
   Analyzer.prototype.parentName = function () {
-    var p = this.state.parent, pd = p && this.data[p.level], row = pd && pd.byId[p.id];
+    var p = this.state.parent;
+    if (p && p.level === "sel") return this.marketName(p);
+    var pd = p && this.data[p.level], row = pd && pd.byId[p.id];
     return row ? row.name + (p.level === "county" ? "" : " " + LEVEL_LABELS[p.level]) : "";   // county names already say County/Parish
   };
   Analyzer.prototype.canDrill = function () {
@@ -193,6 +195,7 @@
     return (s.level === "dma" || s.level === "metro") && s.area ? { level: s.level, id: s.area } : null;
   };
   Analyzer.prototype.marketName = function (f) {
+    if (f && f.level === "sel") { var n = selIds(f).length; return NF0.format(n) + " selected DMA" + (n === 1 ? "" : "s"); }
     var d = f && this.data[f.level], row = d && d.byId[f.id];
     return row ? row.name + (f.level === "county" ? "" : " " + LEVEL_LABELS[f.level]) : "";
   };
@@ -248,12 +251,14 @@
      U.S. totals with the DMAs ranked underneath -> inside a DMA: its metros, counties or ZIPs -> inside a metro: its counties
      or ZIPs -> inside a county: its ZIPs. A breadcrumb shows the path; tabs switch what is ranked inside the current market.
      The Geography buttons still open the national DMA, metro and county lists. */
-  var US_FILL = "#84cac0";   // the U.S. map: one color, halfway between the 34-44 and 44-54 legend shades
+  var US_FILL = "#84cac0";
+  // "sel": several DMAs looked at together (the DMAs ticked in the combined area); its id lists their codes
+  function selIds(f) { return f.level === "sel" ? String(f.id).split(",") : [f.id]; }   // the U.S. map: one color, halfway between the 34-44 and 44-54 legend shades
   Analyzer.prototype.drillTabs = function (p) {
     var L = this.cfg.levels, out = [];
     if (!p) return out;
-    if (p.level === "dma" && L.metro) out.push(["metro", "Metros"]);
-    if ((p.level === "dma" || p.level === "metro") && L.county) out.push(["county", "Counties"]);
+    if ((p.level === "dma" || p.level === "sel") && L.metro) out.push(["metro", "Metros"]);
+    if ((p.level === "dma" || p.level === "sel" || p.level === "metro") && L.county) out.push(["county", "Counties"]);
     if (L.zip) out.push(["zip", "ZIPs"]);
     return out;
   };
@@ -264,7 +269,8 @@
       Array.prototype.forEach.call(this.controlBar.querySelectorAll(".az-only"), function (x) { x.hidden = false; }); var m = this.map; setTimeout(function () { m.invalidateSize(); }, 0); }
     s.chain = chain || [];
     s.parent = { level: f.level, id: f.id };
-    s.level = kind || (f.level === "county" ? "zip" : this.cfg.levels.county ? "county" : "zip");   // counties first: they nest cleanly in DMAs and metros
+    // Inside DMAs: metros first; inside a metro: counties; inside a county: ZIPs
+    s.level = kind || (f.level === "county" ? "zip" : (f.level === "dma" || f.level === "sel") && this.cfg.levels.metro ? "metro" : this.cfg.levels.county ? "county" : "zip");
     this.clearView();
     this.refresh();
   };
@@ -295,7 +301,7 @@
     if (bar.hidden) return;
     var top = s.chain[0] || s.parent, here = this.marketName(s.parent);
     var items = [el("button", { type: "button", class: "az-crumb", text: "U.S.", onclick: function () { self.goLevel("us"); } }),
-      el("button", { type: "button", class: "az-crumb", text: top.level === "metro" ? "Metros" : top.level === "county" ? "Counties" : "DMAs", onclick: function () { self.goLevel(top.level); } })];
+      el("button", { type: "button", class: "az-crumb", text: top.level === "metro" ? "Metros" : top.level === "county" ? "Counties" : "DMAs", onclick: function () { self.goLevel(top.level === "sel" ? "dma" : top.level); } })];
     s.chain.forEach(function (x, i) {
       items.push(el("button", { type: "button", class: "az-crumb", text: self.marketName(x), onclick: function () { self.drillInto(x, null, s.chain.slice(0, i)); } }));
     });
@@ -304,6 +310,16 @@
     items.forEach(function (x, i) { if (i) crumbs.appendChild(el("span", { class: "az-crumb-sep", "aria-hidden": "true", text: "›" })); crumbs.appendChild(x); });
     var tabs = this.drillTabs(s.parent);
     bar.appendChild(crumbs);
+    if (s.parent.level === "sel" || (s.chain[0] && s.chain[0].level === "sel")) {
+      var dd = this.data.dma, sp = s.parent.level === "sel" ? s.parent : s.chain[0];
+      crumbs.appendChild(el("span", { class: "az-crumb-list", text: "(" + selIds(sp).map(function (id) { var r = dd && dd.byId[id]; return r ? r.name : id; }).join("; ") + ")" }));
+    }
+    if (s.parent.level === "sel" || s.parent.level === "dma") {
+      var whole = selIds(s.parent);
+      crumbs.appendChild(el("button", { type: "button", class: "az-inbtn az-whole", text: whole.length === 1 ? "Whole DMA as trade area" : "Whole DMAs as trade area",
+        title: "Open " + (whole.length === 1 ? "this DMA" : "all " + NF0.format(whole.length) + " DMAs") + " together in the Trade area",
+        onclick: function () { self.openRadius({ mode: "area", ca: whole.map(function (id) { return "d" + id; }).join(","), p: self.cfg.radiusProfiles ? s.sub : null }); } }));
+    }
     bar.appendChild(el("div", { class: "az-drill-tabs" }, [el("span", { text: "Rank inside " + here }),
       el("div", { class: "az-seg", role: "group", "aria-label": "Rank inside " + here }, tabs.map(function (t) {
         return el("button", { type: "button", "aria-pressed": String(s.level === t[0]), text: t[1], onclick: function () { self.drillTab(t[0]); } });
@@ -351,6 +367,14 @@
       self.afterBasket();
     });
   };
+  // The ticked DMAs become the frame for the next level: their metros (then counties and ZIPs) ranked together.
+  // They leave the combined area, so the metros, counties or ZIPs ticked next build the trade area.
+  Analyzer.prototype.rankInsideDmas = function (dmas) {
+    var ids = dmas.map(function (b) { return b.id; }), one = ids.length === 1;
+    this.basket = this.basket.filter(function (b) { return b.level !== "dma"; });
+    this.basketMsg = (one ? dmas[0].name + " is" : "The " + NF0.format(ids.length) + " DMAs are") + " now the view above. Tick the metros, counties or ZIPs you want for the trade area, or use \u201cWhole " + (one ? "DMA" : "DMAs") + " as trade area\u201d to keep " + (one ? "all of it" : "them all") + ".";
+    this.drillInto(one ? { level: "dma", id: ids[0] } : { level: "sel", id: ids.join(",") }, "metro", []);
+  };
   Analyzer.prototype.afterBasket = function () {
     if (this.state.level !== "us" || this.cfg.drill) this.renderTable(); else this.renderPick();
     this.renderDetail();
@@ -375,8 +399,12 @@
         return el("span", { class: "az-chip" }, [b.name, el("button", { type: "button", "aria-label": "Remove " + b.name, title: "Remove", text: "×", onclick: function () { self.toggleBasket(b.level, b.id, null, false); } })]);
       })),
       msg]));
+    var dmas = B.filter(function (b) { return b.level === "dma"; }), rk = dmas.length && this.cfg.levels.metro;
     bar.appendChild(el("div", { class: "az-pickact" }, [
-      el("button", { type: "button", class: "az-btn primary", text: "Open as trade area", title: "Count likely customers and rank the ZIPs across these areas together; each ZIP is counted once",
+      rk ? el("button", { type: "button", class: "az-btn primary", text: dmas.length === 1 ? "Rank metros in this DMA" : "Rank metros in these DMAs",
+        title: "Rank the metros, counties and ZIPs inside the " + (dmas.length === 1 ? "selected DMA" : NF0.format(dmas.length) + " selected DMAs") + ", then tick the ones you want for the trade area",
+        onclick: function () { self.rankInsideDmas(dmas); } }) : null,
+      el("button", { type: "button", class: "az-btn" + (rk ? "" : " primary"), text: "Open as trade area", title: "Count likely customers and rank the ZIPs across these areas together; each ZIP is counted once",
         onclick: function () { self.openRadius({ mode: "area", ca: B.map(function (b) { return AREA_PREFIX[b.level] + b.id; }).join(","), p: cfg.radiusProfiles ? s.sub : null }); } }),
       el("button", { type: "button", class: "az-btn", text: "Clear", onclick: function () { self.basket = []; self.basketMsg = ""; self.afterBasket(); } })]));
   };
@@ -469,7 +497,8 @@
     if (cfg.levels[p.level]) this.state.level = p.level;
     if (p.level === "zip") {
       var m = /^(dma|metro|county|territory):(.+)$/.exec(p["in"] || "");
-      if (m && cfg.levels.zip && cfg.levels[m[1]]) this.state.parent = { level: m[1], id: m[2] }; else this.state.level = cfg.defaultLevel || "dma";
+      if (!m && cfg.drill) m = /^(sel):(\d+(?:,\d+)*)$/.exec(p["in"] || "");
+      if (m && cfg.levels.zip && (cfg.levels[m[1]] || m[1] === "sel")) this.state.parent = { level: m[1], id: m[2] }; else this.state.level = cfg.defaultLevel || "dma";
     }
     if (p.level === "county" && cfg.footprint) {
       var mc = /^(dma|metro):(.+)$/.exec(p["in"] || "");
@@ -480,9 +509,10 @@
     if (cfg.drill) {
       // Inside a market: in= is the market, via= the markets above it (e.g. in=metro:14460&via=dma:506)
       if (p.level !== "zip") this.state.parent = null;
-      var md = /^(dma|metro):(.+)$/.exec(p["in"] || "");
-      if (md && cfg.levels[md[1]] && (p.level === "county" || (p.level === "metro" && md[1] === "dma"))) this.state.parent = { level: md[1], id: md[2] };
-      this.state.chain = this.state.parent ? (p.via || "").split(",").map(function (x) { return /^(dma|metro|county):(.+)$/.exec(x); }).filter(function (m) { return m && cfg.levels[m[1]]; })
+      var md = /^(dma|metro|sel):(.+)$/.exec(p["in"] || "");
+      if (md && (cfg.levels[md[1]] || md[1] === "sel") && (p.level === "county" || (p.level === "metro" && md[1] !== "metro"))) this.state.parent = { level: md[1], id: md[2] };
+      var vv = (p.via || "").split("|"); if (vv.length === 1 && !/^sel:/.test(vv[0])) vv = vv[0].split(",");   // older links used commas
+      this.state.chain = this.state.parent ? vv.map(function (x) { return /^(dma|metro|county|sel):(.+)$/.exec(x); }).filter(function (m) { return m && (cfg.levels[m[1]] || m[1] === "sel"); })
         .map(function (m) { return { level: m[1], id: m[2] }; }) : [];
     }
     if ((cfg.subcategories || []).some(function (s) { return s.id === p.sub; })) this.state.sub = p.sub;
@@ -508,7 +538,7 @@
     if (s.sub) parts.push("sub=" + encodeURIComponent(s.sub));
     if (s.rank) parts.push("rank=" + encodeURIComponent(s.rank));
     if ((s.level === "zip" || s.level === "county" || s.level === "metro") && s.parent) parts.push("in=" + s.parent.level + ":" + encodeURIComponent(s.parent.id));
-    if (s.parent && s.chain && s.chain[0]) parts.push("via=" + (this.cfg.drill ? s.chain : s.chain.slice(0, 1)).map(function (x) { return x.level + ":" + encodeURIComponent(x.id); }).join(","));
+    if (s.parent && s.chain && s.chain[0]) parts.push("via=" + (this.cfg.drill ? s.chain : s.chain.slice(0, 1)).map(function (x) { return x.level + ":" + encodeURIComponent(x.id); }).join(this.cfg.drill ? "|" : ","));
     if (s.area && s.level !== "us") parts.push("area=" + encodeURIComponent(s.area));
     var onPts = (this.ptLayers || []).filter(function (L0) { return s.pts && s.pts[L0.key]; }).map(function (L0) { return L0.key; });
     if (onPts.length) parts.push("pts=" + (this.cfg.pointLayers ? onPts.join(",") : "1"));
@@ -525,21 +555,27 @@
   };
   Analyzer.prototype.ensureLevel = function (level, plain) {
     var self = this, L = this.cfg.levels[level], jobs = [], key = plain ? level : this.key(level);
-    var chainJobs = !plain && this.cfg.drill ? (this.state.chain || []).map(function (x) { return self.ensureLevel(x.level, true); }) : [];   // breadcrumb names
+    var chainJobs = !plain && this.cfg.drill ? (this.state.chain || []).map(function (x) { return self.ensureLevel(x.level === "sel" ? "dma" : x.level, true); }) : [];   // breadcrumb names
     if (!plain && (level === "county" || level === "metro") && key !== level) {
       // Counties inside a DMA or metro: the national county rows for that market's counties (shared/geo/county_market.json).
       // Metros inside a DMA: every metro with at least one county in the DMA, tagged when part of it lies outside.
-      var p = this.state.parent;
-      return Promise.all([this.ensureLevel(level, true), this.ensureLevel(p.level, true), this.countyMarket()].concat(chainJobs)).then(function (r) {
+      // Several selected DMAs ("sel"): the same, across all of them, with a DMA column (row.mk)
+      var p = this.state.parent, isSel = p.level === "sel";
+      return Promise.all([this.ensureLevel(level, true), this.ensureLevel(isSel ? "dma" : p.level, true), this.countyMarket()].concat(chainJobs)).then(function (r) {
         if (self.data[key]) return;
-        var nat = self.data[level], cm = r[2] || {}, ids = (cm[p.level] || {})[p.id] || [], byId = {}, rows;
-        if (level === "county") rows = ids.map(function (id) { return nat.byId[id]; }).filter(Boolean);
+        var nat = self.data[level], cm = r[2] || {}, byId = {}, rows, ids = [], dmaOf = {}, dd = self.data.dma;
+        if (isSel) selIds(p).forEach(function (d) { ((cm.dma || {})[d] || []).forEach(function (c) { if (!dmaOf[c]) { dmaOf[c] = d; ids.push(c); } }); });
+        else ids = (cm[p.level] || {})[p.id] || [];
+        var dmaName = function (d) { var x = dd && dd.byId[d]; return x ? x.name : d; };
+        var tag = function (row, mk) { if (!isSel) return row; var c = {}; for (var x in row) c[x] = row[x]; c.mk = mk; return c; };
+        if (level === "county") rows = ids.map(function (id) { return nat.byId[id] && tag(nat.byId[id], dmaName(dmaOf[id])); }).filter(Boolean);
         else {
           var inMkt = {}; ids.forEach(function (c) { inMkt[c] = 1; });
           rows = [];
           Object.keys(cm.metro || {}).forEach(function (mid) {
             var mc = cm.metro[mid], row = nat.byId[mid], k = mc.filter(function (c) { return inMkt[c]; }).length;
             if (!k || !row) return;
+            if (isSel) { var dl = []; mc.forEach(function (c) { var d = dmaOf[c]; if (d && dl.indexOf(d) < 0) dl.push(d); }); row = tag(row, dl.map(dmaName).join("; ")); }
             if (k < mc.length) {
               var copy = {}; for (var x in row) copy[x] = row[x];
               copy.t = "Partly outside";
@@ -553,6 +589,7 @@
         self.data[key] = { rows: rows, byId: byId, meta: nat.meta };
       });
     }
+    if (level === "zip" && !plain && this.state.parent && this.state.parent.level === "sel") return this.ensureSelZips(key, chainJobs);
     if (level === "zip") jobs.push(this.ensureLevel(this.state.parent.level, true));  // parent names and outline
     if (level === "zip" && this.cfg.footprint && this.state.chain && this.state.chain[0]) jobs.push(this.ensureLevel(this.state.chain[0].level, true));   // breadcrumb names
     if (level === "zip") jobs = jobs.concat(chainJobs);
@@ -573,6 +610,48 @@
       self.geo[states] = topojson.mesh(t, t.objects[Object.keys(t.objects)[0]], function (a, b) { return a !== b; });
     }));
     return Promise.all(jobs);
+  };
+
+  // ZIPs across several selected DMAs: each DMA's ZIP file and boundaries, merged. ZIP scores in those files rank ZIPs
+  // within their own DMA, so they're re-ranked across all the selected DMAs the same way the data build does (cfg.zipScore:
+  // each owner profile's inputs, each a percentile among ranked ZIPs, averaged).
+  Analyzer.prototype.ensureSelZips = function (key, chainJobs) {
+    var self = this, L = this.cfg.levels.zip, p = this.state.parent, ids = selIds(p);
+    var fill = function (t, d) { return (typeof t === "object" ? t.dma || t["default"] : t).replace("{level}", "dma").replace("{id}", encodeURIComponent(d)); };
+    var geoKey = this.url(L.geo), states = this.cfg.statesGeo;
+    var jobs = [this.ensureLevel("dma", true)].concat(chainJobs);
+    if (states && !this.geo[states]) jobs.push(this.loadJSON(states).then(function (t) { self.geo[states] = topojson.mesh(t, t.objects[Object.keys(t.objects)[0]], function (a, b) { return a !== b; }); }));
+    if (this.data[key] && geoKey in this.geo) return Promise.all(jobs);
+    var parts = ids.map(function (d) {
+      return Promise.all([self.loadJSON(fill(L.data, d)), L.geo ? self.loadJSON(fill(L.geo, d)).catch(function () { return null; }) : null]).then(function (r) { return { d: d, data: r[0], topo: r[1] }; });
+    });
+    return Promise.all(jobs.concat([Promise.all(parts).then(function (got) {
+      var rows = [], byId = {}, feats = [], dd = self.data.dma;
+      got.forEach(function (g) {
+        var nm = dd && dd.byId[g.d] ? dd.byId[g.d].name : g.d;
+        g.data.rows.forEach(function (r) { if (byId[r.id]) return; var c = {}; for (var x in r) c[x] = r[x]; c.v = {}; for (var y in r.v) c.v[y] = r.v[y]; c.mk = nm; byId[c.id] = c; rows.push(c); });
+        if (g.topo) feats = feats.concat(topojson.feature(g.topo, g.topo.objects[Object.keys(g.topo.objects)[0]]).features);
+      });
+      self.rescoreZips(rows);
+      self.data[key] = { rows: rows, byId: byId, meta: got[0] ? got[0].data : {} };
+      self.geo[geoKey] = feats.length ? { type: "FeatureCollection", features: feats } : null;
+    })]));
+  };
+  Analyzer.prototype.rescoreZips = function (rows) {
+    var Z = this.cfg.zipScore; if (!Z) return;
+    var ok = rows.filter(function (r) { return !r.u; });
+    Object.keys(Z).forEach(function (sub) {
+      var pc = {};
+      Z[sub].forEach(function (k) {
+        var have = ok.filter(function (r) { return typeof r.v[k] === "number"; }).sort(function (a, b) { return a.v[k] - b.v[k]; }), n = have.length, i = 0;
+        while (i < n) { var j = i; while (j + 1 < n && have[j + 1].v[k] === have[i].v[k]) j++;
+          var pr = ((i + 1 + j + 1) / 2) / n * 100; for (var q = i; q <= j; q++) (pc[have[q].id] = pc[have[q].id] || []).push(pr); i = j + 1; }   // pandas rank(pct=True, average)
+      });
+      rows.forEach(function (r) {
+        var a = !r.u && pc[r.id], v = a && a.length ? Math.round(a.reduce(function (x, y) { return x + y; }, 0) / a.length * 1000) / 1000 : null;
+        r.v["demand@" + sub] = v; r.v["score@" + sub] = v;
+      });
+    });
   };
 
   /* ---------- Results panel ----------
@@ -903,7 +982,7 @@
         // ZIP data for this market didn't load: step back to the market so the page stays usable.
         self.errorBox.textContent = "The ZIPs for this market couldn't be loaded (" + e.message + "). Showing the market instead; try again in a minute.";
         s.level = s.parent.level; s.area = s.parent.id;
-        if (self.cfg.drill) { s.parent = null; s.chain = []; }
+        if (self.cfg.drill) { if (s.level === "sel") { s.level = "dma"; s.area = null; } s.parent = null; s.chain = []; }
         self.refresh(true);
         return;
       }
@@ -1103,8 +1182,9 @@
     });
     if (this.areaLayer) this.areaLayer.addTo(this.map);
     if (inside) {
-      var P = this.cfg.levels[s.parent.level], pfc = this.geo[P.geo];
-      var pf = pfc && pfc.features.filter(function (f) { return String(f.properties[P.idField]) === String(s.parent.id); })[0];
+      var P = this.cfg.levels[s.parent.level === "sel" ? "dma" : s.parent.level], pfc = this.geo[P.geo], pids = selIds(s.parent).map(String);
+      var pfs = pfc && pfc.features.filter(function (f) { return pids.indexOf(String(f.properties[P.idField])) >= 0; });
+      var pf = pfs && pfs.length ? { type: "FeatureCollection", features: pfs } : null;
       if (pf) this.parentLayer = L.geoJSON(pf, { interactive: false, style: { color: "#0f2742", weight: 2.5, dashArray: "6 5", fill: false } }).addTo(this.map);
       var b = (this.areaLayer && this.areaLayer.getBounds().isValid()) ? this.areaLayer.getBounds() : (this.parentLayer && this.parentLayer.getBounds());
       if (b && b.isValid() && this.parentLayer && this.parentLayer.getBounds().isValid()) b = L.latLngBounds(b.getSouthWest(), b.getNorthEast()).extend(this.parentLayer.getBounds());
@@ -1252,8 +1332,9 @@
     // Tick boxes: with drill-down, any list (DMAs, metros, counties, ZIPs) adds to one combined area that lasts across views
     var pickable = !!(RCf && RCf.customArea) && (drillNav ? AREA_PREFIX[tl] != null : PICK_PREFIX[s.level] != null);
     if (!drillNav && this.pick.level !== s.level) this.pick = { level: s.level, ids: {} };
+    var mkCol = drillNav && !!s.parent && s.parent.level === "sel";   // several DMAs: which DMA each row is in
     var hr = el("tr", null, [pickable ? el("th", { scope: "col", class: "az-pickcol", title: drillNav ? "Add to a combined trade area" : "Select markets to combine into one trade area" }, [el("span", { class: "az-visually-hidden", text: "Select" })]) : null,
-      el("th", { scope: "col", text: "Rank" }), el("th", { scope: "col", text: lvLabel })]);
+      el("th", { scope: "col", text: "Rank" }), el("th", { scope: "col", text: lvLabel }), mkCol ? el("th", { scope: "col", class: "az-mkcol", text: "DMA" }) : null]);
     var inCol = (fp || drillNav) && !isZip && this.cfg.levels.zip;   // "Inside" button: a DMA or metro's counties, a county's ZIPs
     cols.forEach(function (m) {
       var active = (s.sortKey || s.rank) === m.key;
@@ -1281,7 +1362,8 @@
             if (drillNav) { self.toggleBasket(tl, r.id, r, this.checked); return; }
             if (this.checked) self.pick.ids[r.id] = 1; else delete self.pick.ids[r.id]; self.renderPick(); } })]) : null,
         el("td", { class: "az-rank num", text: rankOf[r.id] ? String(rankOf[r.id]) : "–" }),
-        el("td", null, [r.name, r.t ? el("span", { class: "az-tag", title: (r.f && r.f[0]) || null, text: r.t }) : null])
+        el("td", null, [r.name, r.t ? el("span", { class: "az-tag", title: (r.f && r.f[0]) || null, text: r.t }) : null]),
+        mkCol ? el("td", { class: "az-mkcol", text: r.mk || "" }) : null
       ]);
       cols.forEach(function (m) {
         var v = fmt(self.val(r, m), m.format);
@@ -1296,7 +1378,7 @@
       frag.appendChild(tr);
     });
     this.tbody.innerHTML = "";
-    if (!shown.length) { var emptyTd = el("td", { colspan: String(cols.length + (pickable ? 3 : 2) + (inCol ? 1 : 0)), class: "az-empty", text: "No markets match \u201c" + s.query + "\u201d. Clear the search to see all markets." });
+    if (!shown.length) { var emptyTd = el("td", { colspan: String(cols.length + (pickable ? 3 : 2) + (inCol ? 1 : 0) + (mkCol ? 1 : 0)), class: "az-empty", text: "No markets match \u201c" + s.query + "\u201d. Clear the search to see all markets." });
       this.tbody.appendChild(el("tr", null, [emptyTd])); if (s.query) this.countySuggest(s.query, emptyTd); }
     this.tbody.appendChild(frag);
     if (anyMark) this.tableNote.textContent += " * Uses estimated health values; select the market and see its Data notes.";
@@ -1327,7 +1409,7 @@
     var head = this.measure(cfg.headlineMeasure || s.rank);
     // Rank among the other markets at this level (ties share the better rank); null at the U.S. level or with no value
     var metroIn = s.level === "metro" && this.key("metro") !== "metro";
-    var LEVEL_PLURAL = { territory: "territories", dma: "DMAs", metro: metroIn ? "metros in this DMA" : "metros", county: this.key("county") !== "county" && s.level === "county" ? "counties in this market" : "counties", zip: "ZIPs in this market" };
+    var LEVEL_PLURAL = { territory: "territories", dma: "DMAs", metro: metroIn ? (s.parent.level === "sel" ? "metros in these DMAs" : "metros in this DMA") : "metros", county: this.key("county") !== "county" && s.level === "county" ? "counties in this market" : "counties", zip: "ZIPs in this market" };
     var rankOf = function (m, v) {
       if (s.level === "us" || typeof v !== "number") return null;
       var vals = [], tm = self.tieMeasure(m), tv = self.tieVal(row, tm), better = 0, ties = 0;

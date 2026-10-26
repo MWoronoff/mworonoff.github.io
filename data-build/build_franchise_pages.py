@@ -7,7 +7,7 @@ import glob, json, os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-V = "20261026m"   # version tag for the shared engine files on these pages (keep in step with the other analyzers)
+V = "20261026n"   # version tag for the shared engine files on these pages (keep in step with the other analyzers)
 
 SUBS = [{"id": "exec", "label": "Master franchise candidates"}, {"id": "owner", "label": "First-time franchise buyers"}]
 # AudienceSCAN 2026, Small Business Owners (4.5% of U.S. adults): saw or heard an ad of each type that led them to take
@@ -105,7 +105,7 @@ def radius_cfg(title, export, depth, links):
                       {"url": f"{up}shared/audience/zip_audience_inc.json", "label": "Household income at $125K and ages 55–64", "source": "Census ACS household income (B19001) and sex by age (B01001)"}],
         "zipGeo": f"{up}shared/geo/zip/{{level}}/{{id}}.json",
         "planScript": f"{up}shared/media-plan.js?v={V}", "mediaMixUrl": f"{up}media-mix/", "planCategory": "none",
-        "customArea": True, "ageSet": "adult65", "radii": [5, 10, 15, 25, 50, 100], "radiusLabel": "Up to {r} miles",
+        "customArea": True, "countiesFirst": True, "blendScore": True, "ageSet": "adult65", "radii": [5, 10, 15, 25, 50, 100], "radiusLabel": "Up to {r} miles",
         "filters": ["age", "income8", "veterans"],
         "profileLabel": "Owner profile", "proposal": PROPOSAL,
         # The count is a planning pool (everyone who fits the age and income box), not a count of likely buyers
@@ -120,7 +120,8 @@ def radius_cfg(title, export, depth, links):
             {"title": "Who counts", "body": "Counts are adults by age and household income (Census). Census doesn't publish net worth or job titles by ZIP, so household income stands in for capital, and the profiles are planning estimates, not lists of people."},
             {"title": "Qualified adults vs. buyers", "body": "Qualified adults are everyone who fits the owner profile's age and income, the pool that ads can reach. Only a small fraction buy a franchise in any year (the industry adds roughly 12,000 to 13,000 net new units a year, and many go to existing multi-unit owners), so the count sizes the reachable audience, not the number of buyers. The index is the better guide to where to spend."},
             {"title": "Age", "body": "First-time buyers start at 35: most people who buy a business are 40 to 60 (BizBuySell Small Business Study). Census age groups end at 55 and older, so that group includes some retirees."},
-            {"title": "ZIP-wide rates", "body": "The $200K+ income, capital gains and self-employment figures are IRS shares of tax returns in each ZIP, Bachelor's+ is the Census share of adults 25+ with a bachelor's degree or higher, and Managers is the Census share of employed people in management occupations. They describe the ZIP, not individual households, so they show as columns and aren't applied to the count. Census doesn't publish education by age and income for ZIPs, and degrees are far more common among high earners than among all adults, so applying the ZIP rate would badly undercount."},
+            {"title": "ZIP-wide rates", "body": "The $200K+ income, capital gains and self-employment figures are IRS shares of tax returns in each ZIP, Bachelor's+ is the Census share of adults 25+ with a bachelor's degree or higher, and Managers is the Census share of employed people in management occupations. They describe the ZIP, not individual households, so they aren't applied to the count; they count toward the Score instead. Census doesn't publish education by age and income for ZIPs, and degrees are far more common among high earners than among all adults, so applying the ZIP rate would badly undercount."},
+            {"title": "Score", "body": "The Score (0–100) ranks the trade area's counties and ZIPs against each other: 40% index (how concentrated candidates are), 30% estimated audience (how many there are) and 30% the profile's ZIP-wide rates ($200K+ income, capital gains, bachelor's+ and managers for master franchise candidates; $200K+ income for first-time buyers). Each part is a percentile among the area's counties or ZIPs, so the same ZIP can score differently in a different trade area. Counties come first, then ZIPs. ZIPs and county parts under 1,000 residents aren't scored."},
             {"title": "Reaching these candidates", "body": "Census doesn't publish job titles or net worth by ZIP, so these counts describe the owner profile by age and household income. Use the top ZIPs to set the geography for search, Meta, streaming TV, programmatic display and direct mail, and to pick where a franchise's markets have the most candidates."}],
     }
 
@@ -221,6 +222,8 @@ def analyzer_cfg(client):
                      if client else "Where franchise systems' best owner candidates are: Franchise Opportunity Scores for DMAs, metros, counties and ZIPs, by owner profile, to focus franchise-development ad dollars."),
         "logo": f"{up}shared/adtaxi-logo.svg", "exportName": "franchise-" + client["id"] if client else "franchise", "links": links,
         "radiusDefault": 25, "radiusProfiles": True, "defaultLevel": "us", "usMapLevel": "territory" if client else "dma", "drill": not client,
+        # ZIPs across several selected DMAs are re-ranked in the page with the same inputs as build_franchise.py SUBCATS
+        **({} if client else {"zipScore": {"exec": ["x125", "x125_share", "hi200_share", "cg_share", "avg_wage", "ba_share", "mgmt_share"], "owner": ["o100", "o100_share", "avg_wage", "married_share"]}}),
         "levels": levels, "statesGeo": f"{up}shared/geo/states.topo.json", "zipIndex": f"{up}shared/geo/zip_market.json",
         "radiusScript": f"{up}shared/radius.js?v={V}", "benchmarks": False, "timing": False,
         "subcategoryLabel": "Owner profile", "subcategories": SUBS,
