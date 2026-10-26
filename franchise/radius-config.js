@@ -23,8 +23,8 @@ window.ADTAXI_RADIUS = {
   },
   {
    "url": "../shared/audience/zip_audience_inc.json",
-   "label": "Household income at $125K",
-   "source": "Census ACS household income (B19001)"
+   "label": "Household income at $125K and ages 55–64",
+   "source": "Census ACS household income (B19001) and sex by age (B01001)"
   }
  ],
  "zipGeo": "../shared/geo/zip/{level}/{id}.json",
@@ -32,7 +32,7 @@ window.ADTAXI_RADIUS = {
  "mediaMixUrl": "../media-mix/",
  "planCategory": "none",
  "customArea": true,
- "ageSet": "adult",
+ "ageSet": "adult65",
  "radii": [
   5,
   10,
@@ -81,12 +81,12 @@ window.ADTAXI_RADIUS = {
   {
    "id": "exec",
    "label": "Master franchise candidates",
-   "note": "Adults 35 and older in households earning $125K+, including first-time franchise buyers. IRS shares of returns with $200K+ income and with capital gains, and the share of adults with a bachelor's degree or higher, show by ZIP.",
+   "note": "Adults 35–64 in households earning $125K+, including first-time franchise buyers. IRS shares of returns with $200K+ income and with capital gains, the share of adults with a bachelor's degree or higher and the share of workers in management jobs show by ZIP.",
    "sel": {
     "age": [
      "35_44",
      "45_54",
-     "55p"
+     "55_64"
     ],
     "income8": [
      "125_150",
@@ -97,18 +97,19 @@ window.ADTAXI_RADIUS = {
    "context": [
     "hi200",
     "cg",
-    "ba"
+    "ba",
+    "mgmt"
    ]
   },
   {
    "id": "owner",
    "label": "First-time franchise buyers",
-   "note": "Adults 35 and older in households earning $100K+: most people who buy a business are 40 to 60, often making a career change. The IRS share of returns with $200K+ income shows by ZIP.",
+   "note": "Adults 35–64 in households earning $100K+: most people who buy a business are 40 to 60, often making a career change. The IRS share of returns with $200K+ income shows by ZIP.",
    "sel": {
     "age": [
      "35_44",
      "45_54",
-     "55p"
+     "55_64"
     ],
     "income8": [
      "100_125",
@@ -137,7 +138,7 @@ window.ADTAXI_RADIUS = {
   },
   {
    "title": "ZIP-wide rates",
-   "body": "The $200K+ income, capital gains and self-employment figures are IRS shares of tax returns in each ZIP, and Bachelor's+ is the Census share of adults 25+ with a bachelor's degree or higher. They describe the ZIP, not individual households, so they show as columns and aren't applied to the count. Census doesn't publish education by age and income for ZIPs, and degrees are far more common among high earners than among all adults, so applying the ZIP rate would badly undercount."
+   "body": "The $200K+ income, capital gains and self-employment figures are IRS shares of tax returns in each ZIP, Bachelor's+ is the Census share of adults 25+ with a bachelor's degree or higher, and Managers is the Census share of employed people in management occupations. They describe the ZIP, not individual households, so they show as columns and aren't applied to the count. Census doesn't publish education by age and income for ZIPs, and degrees are far more common among high earners than among all adults, so applying the ZIP rate would badly undercount."
   },
   {
    "title": "Reaching these candidates",
