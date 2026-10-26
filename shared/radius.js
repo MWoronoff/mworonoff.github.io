@@ -7,7 +7,7 @@
  * within a ZIP. Gender x age is one Census table, so that part is exact; anything combined with it is an estimate.
  * Traits Census publishes by age (insurance, hearing, vision, living alone, home ownership, health conditions for adults)
  * are applied within each age group, so "hearing difficulty" among people 75+ uses the 75+ rate, not the all-ages rate.
- * A site picks its age groups with cfg.ageSet: "default" (15+, Higher Education), "health" (all ages) or "adult" (18+).
+ * A site picks its age groups with cfg.ageSet: "default" (15+, Higher Education), "health" (all ages), "adult" (18+) or "adult65" (18+, 55+ split at 65; franchise tools).
  * Target audience profiles (cfg.profiles; optional filters: [...] lists the filter groups shown for that audience): a category's starting audience. A profile's "either" list adds an or-condition
  * (e.g. 65+ OR diabetes), combined within each sex x age group as 1 - (1 - a)(1 - b), treating the two as independent.
  */
@@ -23,6 +23,11 @@
                  col: function (sex, b) { return sex + "h" + b; }, all: "acs_pop",
                  note: "Ages cover everyone. Leave a group blank to include everyone.",
                  method: "Counts of people by sex and age come from one Census table, so a gender and age selection is an exact count. The age groups match the ones Census uses for insurance, hearing and vision, so those filters use the rate for each age group." },
+    // Franchise tools: 55+ split at 65 (sex x age columns m55_64, m65p, f55_64, f65p in zip_audience_inc.json)
+    adult65:   { options: [["18_24", "18–24"], ["25_34", "25–34"], ["35_44", "35–44"], ["45_54", "45–54"], ["55_64", "55–64"], ["65p", "65+"]],
+                 col: function (sex, b) { return sex + b; }, all: "adults18",
+                 note: "Counts cover adults 18 and older. Leave a group blank to include every adult.",
+                 method: "The audience starts from adults 18 and older. Counts of adults by sex and age come from one Census table, so a gender and age selection is an exact count." },
     adult:     { options: [["18_24", "18–24"], ["25_34", "25–34"], ["35_44", "35–44"], ["45_54", "45–54"], ["55p", "55+"]],
                  col: function (sex, b) { return sex + b; }, all: "adults18",
                  note: "Counts cover adults 18 and older. Leave a group blank to include every adult.",
@@ -236,6 +241,8 @@
     depression:{ label: "Depression", long: "Share of adults ever told they have depression (CDC PLACES)", value: function (c, i) { return per1000(c, i, "depression"); } },
     mhlth:    { label: "Mental distress", long: "Share of adults with frequent mental distress (CDC PLACES)", value: function (c, i) { return per1000(c, i, "mhlth"); } },
     nodental: { label: "No dental visit", long: "Share of adults with no dental visit in the past year (CDC PLACES)", value: function (c, i) { return per1000(c, i, "nodental"); } },
+    mgmt:     { label: "Managers", long: "Share of employed people 16+ in management occupations (Census ACS)",
+                value: function (c, i) { var m = c.mgmt && c.mgmt[i], t = c.occ_tot && c.occ_tot[i]; return m == null || !t ? null : ratio(m, t); } },
     ba:       { label: "Bachelor's+", long: "Share of adults 25+ with a bachelor's degree or higher (Census ACS)",
                 value: function (c, i) { var a = c.ba_only && c.ba_only[i], g = c.grad_deg && c.grad_deg[i]; return a == null || g == null ? null : ratio(a + g, c.adults25[i]); } }
   };
@@ -794,7 +801,7 @@
     if (window.AdtaxiPlan) { done(); return; }
     if (loadPlan.waiting) { loadPlan.waiting.push(done); return; }
     loadPlan.waiting = [done];
-    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261026g";
+    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261026h";
     sc.onload = function () { var w = loadPlan.waiting; loadPlan.waiting = null; w.forEach(function (f) { f(); }); };
     sc.onerror = function () { loadPlan.waiting = null; };
     document.head.appendChild(sc);
@@ -1046,7 +1053,7 @@
   Radius.prototype.proposalBase = function () { return (this.cfg.planScript || "../shared/media-plan.js").replace(/media-plan\.js.*$/, ""); };
   Radius.prototype.benchmarks = function () {
     var self = this;
-    if (!this._bench) this._bench = fetch(this.cfg.benchmarksData || this.proposalBase() + "benchmarks.json?v=20261026g").then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
+    if (!this._bench) this._bench = fetch(this.cfg.benchmarksData || this.proposalBase() + "benchmarks.json?v=20261026h").then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
     return this._bench.then(function (B) {
       if (!B) return null;
       var cat = self.cfg.planCategory && self.cfg.planCategory !== "none" ? self.cfg.planCategory : String(self.cfg.exportName || "").replace(/-radius$/, "").replace(/^apartment$/, "apartments");
@@ -1192,7 +1199,7 @@
     if (!b.amount || !A.strat || !A.withDollars || !A.plan || !A.plan.tier || !A.channels.length) { st.textContent = "Enter a monthly budget and choose a media strategy first."; return Promise.resolve(null); }
     st.textContent = "Building…";
     var base = this.proposalBase();
-    return Promise.all([loadScriptOnce(this.cfg.pptxScript || "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261026g"), this.benchmarks(), this.logoImage()])
+    return Promise.all([loadScriptOnce(this.cfg.pptxScript || "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261026h"), this.benchmarks(), this.logoImage()])
       .then(function (res) { return window.AdtaxiProposal.build(self.proposalContext(res[2], res[3]), opt); })
       .then(function (out) { st.textContent = "Downloaded. Open it in PowerPoint or Google Slides to edit."; return out; })
       .catch(function (e) { st.textContent = "The proposal couldn't be built (" + e.message + "). Try again in a minute."; throw e; });

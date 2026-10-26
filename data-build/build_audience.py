@@ -72,6 +72,8 @@ REQUESTS = {
     "B25070": [v("B25070", n) for n in range(1, 12)],                 # gross rent as a percentage of household income
     "B25004": [v("B25004", n) for n in range(1, 9)],                  # vacancy status
     "B25115": [v("B25115", n) for n in range(1, 28)],                 # tenure by household type and presence of own children
+    # Franchise tools: management occupations (male line 5, female line 41) of civilian employed 16+ (line 1)
+    "C24010": [v("C24010", n) for n in (1, 5, 41)],
 }
 # B25118 renter lines: 14 renter total, 15 under $5,000 ... 20 $25,000-$34,999, 21 $35-49K, 22 $50-74K, 23 $75-99K, 24 $100-149K, 25 $150K+
 RINC = {"lt35": range(15, 21), "35_50": [21], "50_75": [22], "75_100": [23], "100_150": [24], "150p": [25]}
@@ -316,6 +318,10 @@ def main():
         for band, lines in AGE_LINES.items():
             out[f"{sex}{band}"] = sum(acs[v("B01001", n + off)] for n in lines)
     out["adults18"] = sum(out[f"{s}{b}"] for s in "mf" for b in ("18_24", "25_34", "35_44", "45_54", "55p"))
+    for sex, off in (("m", 0), ("f", 24)):   # franchise tools: 55+ split into 55-64 (lines 17-19) and 65+ (lines 20-25)
+        out[f"{sex}55_64"] = sum(acs[v("B01001", n + off)] for n in (17, 18, 19))
+        out[f"{sex}65p"] = sum(acs[v("B01001", n + off)] for n in range(20, 26))
+    out["occ_tot"], out["mgmt"] = acs[v("C24010", 1)], acs[v("C24010", 5)] + acs[v("C24010", 41)]   # franchise tools: management occupations
     for g, lines in AGE_GROUPS.items():
         out[g] = sum(acs[v("B01001", n)] + acs[v("B01001", n + 24)] for n in lines)
     for band, lines in INC.items():
@@ -612,7 +618,7 @@ def main():
              "zip_audience_apt.json": ["r_tot", "r_sfd", "r_5p", "r_20p", "r_mtot", "r_moved21", "r_moved20", "rinc_tot"] + [f"rinc_{b}" for b in RINC] +
                                       ["rb_base", "rb_30p", "vac_rent", "vac_rented", "rk_tot", "r_kids"],
              "zip_audience_enroll.json": [f"{t}_{b}" for t in ("enr", "ent") for b in ENR_AGES],
-             "zip_audience_inc.json": ["inc_100_125", "inc_125_150"],
+             "zip_audience_inc.json": ["inc_100_125", "inc_125_150", "m55_64", "m65p", "f55_64", "f65p", "occ_tot", "mgmt"],
              "zip_audience_home.json": ["hb_tot"] + [f"hb_{b}" for b in BUILT] + ["hu_tot", "sfd_own", "hm_tot", "lt_own", "o_moved20"]}
     cols = {"zip": m.zip.tolist(), "city": m.city.fillna("").tolist(), "state": m.state.tolist(),
             "lat": m.lat.round(4).tolist(), "lon": m.lon.round(4).tolist(),

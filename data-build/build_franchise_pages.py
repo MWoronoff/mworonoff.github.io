@@ -7,7 +7,7 @@ import glob, json, os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-V = "20261026g"   # version tag for the shared engine files on these pages (keep in step with the other analyzers)
+V = "20261026h"   # version tag for the shared engine files on these pages (keep in step with the other analyzers)
 
 SUBS = [{"id": "exec", "label": "Master franchise candidates"}, {"id": "owner", "label": "First-time franchise buyers"}]
 # AudienceSCAN 2026, Small Business Owners (4.5% of U.S. adults): saw or heard an ad of each type that led them to take
@@ -58,7 +58,7 @@ PROPOSAL = {
     "note": "Franchise leads: the 2026 Annual Franchise Development Report puts average cost per lead at $142 to $802 and average cost per franchise sale at $6,700 to $25,145, depending on the sector; this proposal doesn't forecast sales.",
 }
 SOURCES = [
-    {"label": "Census American Community Survey 5-year (age of householder by household income, educational attainment, veterans)", "url": "https://www.census.gov/programs-surveys/acs"},
+    {"label": "Census American Community Survey 5-year (age of householder by household income, educational attainment, occupation, veterans)", "url": "https://www.census.gov/programs-surveys/acs"},
     {"label": "IRS Statistics of Income, individual income tax ZIP Code data", "url": "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-statistics-zip-code-data-soi"},
     {"label": "Census ZIP Code Business Patterns", "url": "https://www.census.gov/programs-surveys/cbp.html"},
     {"label": "Census LEHD Origin-Destination Employment Statistics (jobs by industry)", "url": "https://lehd.ces.census.gov/data/"},
@@ -102,25 +102,25 @@ def radius_cfg(title, export, depth, links):
         "logo": f"{up}shared/adtaxi-logo.svg", "exportName": export, "links": links,
         "audienceData": f"{up}shared/audience/zip_audience.json",
         "extraData": [{"url": f"{up}shared/audience/zip_audience_fin.json", "label": "Tax return data", "source": "IRS Statistics of Income ZIP data"},
-                      {"url": f"{up}shared/audience/zip_audience_inc.json", "label": "Household income at $125K", "source": "Census ACS household income (B19001)"}],
+                      {"url": f"{up}shared/audience/zip_audience_inc.json", "label": "Household income at $125K and ages 55–64", "source": "Census ACS household income (B19001) and sex by age (B01001)"}],
         "zipGeo": f"{up}shared/geo/zip/{{level}}/{{id}}.json",
         "planScript": f"{up}shared/media-plan.js?v={V}", "mediaMixUrl": f"{up}media-mix/", "planCategory": "none",
-        "customArea": True, "ageSet": "adult", "radii": [5, 10, 15, 25, 50, 100], "radiusLabel": "Up to {r} miles",
+        "customArea": True, "ageSet": "adult65", "radii": [5, 10, 15, 25, 50, 100], "radiusLabel": "Up to {r} miles",
         "filters": ["age", "income8", "veterans"],
         "profileLabel": "Owner profile", "proposal": PROPOSAL,
         # The count is a planning pool (everyone who fits the age and income box), not a count of likely buyers
         "audienceNoun": "Qualified adults", "audienceFit": "fit the {profile} profile by age and income", "leadWithIndex": True,
         "summaryNote": "A planning pool, not a buyer count: only a small fraction of qualified adults buy a franchise in any year. The index shows where candidates are most concentrated, so use it to decide where to spend.",
         "profiles": [
-            {"id": "exec", "label": "Master franchise candidates", "note": "Adults 35 and older in households earning $125K+, including first-time franchise buyers. IRS shares of returns with $200K+ income and with capital gains, and the share of adults with a bachelor's degree or higher, show by ZIP.",
-             "sel": {"age": ["35_44", "45_54", "55p"], "income8": ["125_150", "150_200", "200p"]}, "context": ["hi200", "cg", "ba"]},
-            {"id": "owner", "label": "First-time franchise buyers", "note": "Adults 35 and older in households earning $100K+: most people who buy a business are 40 to 60, often making a career change. The IRS share of returns with $200K+ income shows by ZIP.",
-             "sel": {"age": ["35_44", "45_54", "55p"], "income8": ["100_125", "125_150", "150_200", "200p"]}, "context": ["hi200"]}],
+            {"id": "exec", "label": "Master franchise candidates", "note": "Adults 35–64 in households earning $125K+, including first-time franchise buyers. IRS shares of returns with $200K+ income and with capital gains, the share of adults with a bachelor's degree or higher and the share of workers in management jobs show by ZIP.",
+             "sel": {"age": ["35_44", "45_54", "55_64"], "income8": ["125_150", "150_200", "200p"]}, "context": ["hi200", "cg", "ba", "mgmt"]},
+            {"id": "owner", "label": "First-time franchise buyers", "note": "Adults 35–64 in households earning $100K+: most people who buy a business are 40 to 60, often making a career change. The IRS share of returns with $200K+ income shows by ZIP.",
+             "sel": {"age": ["35_44", "45_54", "55_64"], "income8": ["100_125", "125_150", "150_200", "200p"]}, "context": ["hi200"]}],
         "methodology": [
             {"title": "Who counts", "body": "Counts are adults by age and household income (Census). Census doesn't publish net worth or job titles by ZIP, so household income stands in for capital, and the profiles are planning estimates, not lists of people."},
             {"title": "Qualified adults vs. buyers", "body": "Qualified adults are everyone who fits the owner profile's age and income, the pool that ads can reach. Only a small fraction buy a franchise in any year (the industry adds roughly 12,000 to 13,000 net new units a year, and many go to existing multi-unit owners), so the count sizes the reachable audience, not the number of buyers. The index is the better guide to where to spend."},
             {"title": "Age", "body": "First-time buyers start at 35: most people who buy a business are 40 to 60 (BizBuySell Small Business Study). Census age groups end at 55 and older, so that group includes some retirees."},
-            {"title": "ZIP-wide rates", "body": "The $200K+ income, capital gains and self-employment figures are IRS shares of tax returns in each ZIP, and Bachelor's+ is the Census share of adults 25+ with a bachelor's degree or higher. They describe the ZIP, not individual households, so they show as columns and aren't applied to the count. Census doesn't publish education by age and income for ZIPs, and degrees are far more common among high earners than among all adults, so applying the ZIP rate would badly undercount."},
+            {"title": "ZIP-wide rates", "body": "The $200K+ income, capital gains and self-employment figures are IRS shares of tax returns in each ZIP, Bachelor's+ is the Census share of adults 25+ with a bachelor's degree or higher, and Managers is the Census share of employed people in management occupations. They describe the ZIP, not individual households, so they show as columns and aren't applied to the count. Census doesn't publish education by age and income for ZIPs, and degrees are far more common among high earners than among all adults, so applying the ZIP rate would badly undercount."},
             {"title": "Reaching these candidates", "body": "Census doesn't publish job titles or net worth by ZIP, so these counts describe the owner profile by age and household income. Use the top ZIPs to set the geography for search, Meta, streaming TV, programmatic display and direct mail, and to pick where a franchise's markets have the most candidates."}],
     }
 
@@ -155,7 +155,9 @@ def measures(client):
         {"key": "o100_share", "label": "Share of householders 25–64 earning $100K+", "format": "pct", "subs": ["owner"]},
         {"key": "avg_wage", "label": "Average salary per wage earner", "format": "money", "help": "IRS wages divided by returns with wages, area-level: higher where more corporate and professional earners live."},
         {"key": "ba_share", "label": "Share of adults 25+ with a bachelor's degree or higher", "format": "pct", "subs": ["exec"],
-         "help": "Census ACS, area-level. A master franchisee recruits and supports sub-franchisees, so a professional and management background matters; education is the best public stand-in for it."},
+         "help": "Census ACS, area-level. A master franchisee recruits and supports sub-franchisees, so a professional background matters."},
+        {"key": "mgmt_share", "label": "Share of workers in management occupations", "format": "pct", "subs": ["exec"],
+         "help": "Census ACS, area-level: employed people 16+ working as managers (operations, sales, general and top executives and others). The closest public measure of the management background a master franchisee needs."},
         {"key": "married_share", "label": "Share of households that are married couples", "format": "pct", "subs": ["owner"], "help": "Census ACS. Most new franchise buyers are married, often with a spouse's income covering household costs while the business starts."},
         {"key": "vets", "label": "Veterans", "format": "int", "help": "Civilian veterans 18+ (Census ACS). Many franchise systems offer veteran discounts (VetFran). Shown, not scored."},
         {"key": "vet_share", "label": "Share of adults who are veterans", "format": "pct"},
@@ -179,7 +181,7 @@ def methodology(client):
         ("Score = 50% Candidates + 30% Territory Opportunity + 20% Competition." if client else "Score = 62.5% Candidates + 37.5% Market Opportunity .")
         + " Each part is a percentile (0–100) against areas at the same level. No score is shown when a part has no data."]},
         {"title": "Candidates", "body": [
-            "Master franchise candidates, first-time or not: householders 45–64 earning $125K+ (count and share), the IRS shares of returns with income of $200K+ and with capital gains, the IRS average salary per wage earner, and the share of adults 25+ with a bachelor's degree or higher (a master franchisee recruits and supports sub-franchisees, so professional and management background matters). Each input counts equally.",
+            "Master franchise candidates, first-time or not: householders 45–64 earning $125K+ (count and share), the IRS shares of returns with income of $200K+ and with capital gains, the IRS average salary per wage earner, the share of adults 25+ with a bachelor's degree or higher and the share of workers in management occupations (a master franchisee recruits and supports sub-franchisees, so professional and management background matters). Each input counts equally. Census reports householder age only as 25–44 and 45–64, so the score uses 45–64; the Trade area audience uses 35–64.",
             "First-time franchise buyers: householders 25–64 earning $100K+ (count and share), the IRS average salary per wage earner (corporate earners, who make up most first-time buyers) and the share of married-couple households (the dual-income cushion many new owners rely on). Education isn't used here: many good single-unit buyers are career changers without a degree. Census groups householders 25–44 together, so the market score can't start at 35 the way the Trade area audience does.",
             "Census doesn't publish net worth, liquid capital or job titles for areas, so household income and investment income stand in for them. IRS figures are area-level rates, not facts about individuals."]},
         {"title": "Territory Opportunity" if client else "Market Opportunity", "body":
@@ -220,10 +222,10 @@ def analyzer_cfg(client):
         "radiusScript": f"{up}shared/radius.js?v={V}", "benchmarks": False, "timing": False,
         "subcategoryLabel": "Owner profile", "subcategories": SUBS,
         "measures": measures(client),
-        "rankBy": ["score", "x125", "x125_share", "hi200_share", "ba_share", "o100", "o100_share", "avg_wage", "buyers", "buyer_jobs", "vets", "population"],
+        "rankBy": ["score", "x125", "x125_share", "hi200_share", "ba_share", "mgmt_share", "o100", "o100_share", "avg_wage", "buyers", "buyer_jobs", "vets", "population"],
         "defaultRank": "score",
         "components": ["demand", "category", "comp"] if client else ["demand", "category"],
-        "detailMeasures": ["x125", "x125_share", "hi200_share", "cg_share", "ba_share", "o100", "o100_share", "avg_wage", "married_share", "buyers", "buyer_jobs", "buyers_per1k"]
+        "detailMeasures": ["x125", "x125_share", "hi200_share", "cg_share", "ba_share", "mgmt_share", "o100", "o100_share", "avg_wage", "married_share", "buyers", "buyer_jobs", "buyers_per1k"]
                           + (["est", "per1k", "under"] if client else []) + ["vets", "vet_share", "population", "households", "density"],
         "tableColumns": ["score", "population", "buyers"] + (["under"] if client else []),
         "methodology": methodology(client),
