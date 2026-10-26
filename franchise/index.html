@@ -10,14 +10,14 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
-<link rel="stylesheet" href="../shared/engine.css?v=20261026s">
+<link rel="stylesheet" href="../shared/engine.css?v=20261026u">
 </head>
 <body>
 <div id="app"><p class="az-loading">Loading the Franchise Development Analyzer…</p></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js" crossorigin=""></script>
-<script src="../shared/engine.js?v=20261026s"></script>
-<script src="radius-config.js?v=20261026s"></script>
+<script src="../shared/engine.js?v=20261026u"></script>
+<script src="radius-config.js?v=20261026u"></script>
 <script>
 AdtaxiAnalyzer.start({
  "title": "Franchise Development Analyzer",
@@ -84,7 +84,7 @@ AdtaxiAnalyzer.start({
  },
  "statesGeo": "../shared/geo/states.topo.json",
  "zipIndex": "../shared/geo/zip_market.json",
- "radiusScript": "../shared/radius.js?v=20261026s",
+ "radiusScript": "../shared/radius.js?v=20261026u",
  "benchmarks": false,
  "timing": false,
  "subcategoryLabel": "Owner profile",
@@ -367,191 +367,337 @@ AdtaxiAnalyzer.start({
  "sourcesNote": "Candidates: Census ACS and IRS. Businesses: Census Business Patterns. Jobs: Census LODES.",
  "radius": true,
  "adResponse": {
-  "title": "How small business owners respond to advertising",
+  "title": "How likely franchise candidates respond to advertising",
   "source": "2026 AudienceSCAN® study",
-  "note": "National survey data: the percent who saw or heard an ad of each type that led them to take action in the past 30 days. Percentages are based on all U.S. adults and on everyone in the target group, not on users of each medium. Small business owners (4.5% of U.S. adults) are the closest AudienceSCAN group to franchise candidates, so the same figures show for both owner profiles. \"Vs. average\" is how much more likely the group is to have responded than all U.S. adults (a percent difference, not percentage points). The same national figures apply to every market.",
+  "note": "National survey data: the percent who saw or heard an ad of each type that led them to take action in the past 30 days. Percentages are based on all U.S. adults and on everyone in each group, not on users of each medium. \"Vs. average\" is how much more likely than all U.S. adults (a percent difference, not percentage points). Executives report more ad response on every medium, so the order of media matters more than how far above average they sit. The same national figures apply to every market.",
   "subs": {
    "exec": {
-    "short": "Small business owners",
-    "audience": "small business owners",
+    "short": "Blended estimate",
+    "audience": "blended: executive managers 50%, financial planning clients 25%, small business owners 25%",
+    "noun": "likely franchise candidates (blended estimate: executive managers 50%, financial planning clients 25%, small business owners 25%)",
     "rows": [
      [
       "Ad on a social network",
-      41.2,
+      49.2,
       35.9
      ],
      [
       "Streaming TV advertising (such as Hulu, Pluto TV or YouTube TV)",
-      41.3,
+      49.9,
       36.7
      ],
      [
       "Ad on search results pages (like on Google, Yahoo or Bing)",
-      39.2,
+      47.5,
       35.8
      ],
      [
       "Television (traditional, including cable or satellite subscription)",
-      38.9,
+      46.4,
       34.7
      ],
      [
       "Mobile phone app or text message",
-      38.8,
+      47.2,
       36.6
      ],
      [
       "Ad that plays before or during the video you want to watch",
-      37.5,
+      42.3,
       31.1
      ],
      [
       "Ads/Coupons in your mailbox",
-      34.3,
+      38.7,
       29.9
      ],
      [
       "Emailed ad or newsletter",
-      33.7,
+      40.6,
       28.6
      ],
      [
       "Online display ads (banners and pop-up ads)",
-      33.0,
+      42.5,
       30.0
      ],
      [
       "Text link ad on a website",
-      31.6,
+      38.5,
       27.3
      ],
      [
       "Ad on a podcast",
-      30.4,
+      37.2,
       22.7
      ],
      [
       "Outdoor ad/sign/billboard/transit",
-      29.7,
+      35.9,
       23.6
      ],
      [
       "Newspaper (print, online, mobile or tablet)",
-      29.2,
+      36.2,
       23.5
      ],
      [
       "Advertising circulars in your mailbox or inserted in the newspaper",
-      29.1,
+      36.4,
       27.2
      ],
      [
       "Radio (over-the-air, online, mobile or tablet)",
-      28.1,
+      35.7,
       25.5
      ],
      [
       "Magazine (print, online, mobile or on tablet)",
-      26.5,
+      34.3,
       21.5
      ],
      [
       "Ads at movie theater",
-      24.7,
+      34.7,
       21.5
      ]
-    ]
+    ],
+    "blend": [
+     {
+      "short": "Executive managers",
+      "weight": 0.5,
+      "values": [
+       56.1,
+       57.2,
+       53.7,
+       52.4,
+       54.3,
+       47.1,
+       42.1,
+       46.3,
+       50.6,
+       44.8,
+       44.5,
+       42.3,
+       42.6,
+       41.2,
+       42.2,
+       41.0,
+       43.6
+      ]
+     },
+     {
+      "short": "Financial planning clients",
+      "weight": 0.25,
+      "values": [
+       43.4,
+       44.0,
+       43.3,
+       41.7,
+       41.4,
+       37.6,
+       36.3,
+       36.2,
+       35.9,
+       32.9,
+       29.6,
+       29.1,
+       30.6,
+       34.2,
+       30.1,
+       28.7,
+       26.8
+      ]
+     },
+     {
+      "short": "Small business owners",
+      "weight": 0.25,
+      "values": [
+       41.2,
+       41.3,
+       39.2,
+       38.9,
+       38.8,
+       37.5,
+       34.3,
+       33.7,
+       33.0,
+       31.6,
+       30.4,
+       29.7,
+       29.2,
+       29.1,
+       28.1,
+       26.5,
+       24.7
+      ]
+     }
+    ],
+    "blendNote": "Blended estimate: executive managers 50%, financial planning clients 25%, small business owners 25% (national AudienceSCAN groups closest to this owner profile, weighted by fit). The groups overlap, so this is a weighted estimate, not a measured group; point to a row for each group's figure."
    },
    "owner": {
-    "short": "Small business owners",
-    "audience": "small business owners",
+    "short": "Blended estimate",
+    "audience": "blended: executive managers 25%, financial planning clients 25%, small business owners 50%",
+    "noun": "likely franchise candidates (blended estimate: executive managers 25%, financial planning clients 25%, small business owners 50%)",
     "rows": [
      [
       "Ad on a social network",
-      41.2,
+      45.5,
       35.9
      ],
      [
       "Streaming TV advertising (such as Hulu, Pluto TV or YouTube TV)",
-      41.3,
+      46.0,
       36.7
      ],
      [
       "Ad on search results pages (like on Google, Yahoo or Bing)",
-      39.2,
+      43.9,
       35.8
      ],
      [
       "Television (traditional, including cable or satellite subscription)",
-      38.9,
+      43.0,
       34.7
      ],
      [
       "Mobile phone app or text message",
-      38.8,
+      43.3,
       36.6
      ],
      [
       "Ad that plays before or during the video you want to watch",
-      37.5,
+      39.9,
       31.1
      ],
      [
       "Ads/Coupons in your mailbox",
-      34.3,
+      36.8,
       29.9
      ],
      [
       "Emailed ad or newsletter",
-      33.7,
+      37.5,
       28.6
      ],
      [
       "Online display ads (banners and pop-up ads)",
-      33.0,
+      38.1,
       30.0
      ],
      [
       "Text link ad on a website",
-      31.6,
+      35.2,
       27.3
      ],
      [
       "Ad on a podcast",
-      30.4,
+      33.7,
       22.7
      ],
      [
       "Outdoor ad/sign/billboard/transit",
-      29.7,
+      32.7,
       23.6
      ],
      [
       "Newspaper (print, online, mobile or tablet)",
-      29.2,
+      32.9,
       23.5
      ],
      [
       "Advertising circulars in your mailbox or inserted in the newspaper",
-      29.1,
+      33.4,
       27.2
      ],
      [
       "Radio (over-the-air, online, mobile or tablet)",
-      28.1,
+      32.1,
       25.5
      ],
      [
       "Magazine (print, online, mobile or on tablet)",
-      26.5,
+      30.7,
       21.5
      ],
      [
       "Ads at movie theater",
-      24.7,
+      29.9,
       21.5
      ]
-    ]
+    ],
+    "blend": [
+     {
+      "short": "Executive managers",
+      "weight": 0.25,
+      "values": [
+       56.1,
+       57.2,
+       53.7,
+       52.4,
+       54.3,
+       47.1,
+       42.1,
+       46.3,
+       50.6,
+       44.8,
+       44.5,
+       42.3,
+       42.6,
+       41.2,
+       42.2,
+       41.0,
+       43.6
+      ]
+     },
+     {
+      "short": "Financial planning clients",
+      "weight": 0.25,
+      "values": [
+       43.4,
+       44.0,
+       43.3,
+       41.7,
+       41.4,
+       37.6,
+       36.3,
+       36.2,
+       35.9,
+       32.9,
+       29.6,
+       29.1,
+       30.6,
+       34.2,
+       30.1,
+       28.7,
+       26.8
+      ]
+     },
+     {
+      "short": "Small business owners",
+      "weight": 0.5,
+      "values": [
+       41.2,
+       41.3,
+       39.2,
+       38.9,
+       38.8,
+       37.5,
+       34.3,
+       33.7,
+       33.0,
+       31.6,
+       30.4,
+       29.7,
+       29.2,
+       29.1,
+       28.1,
+       26.5,
+       24.7
+      ]
+     }
+    ],
+    "blendNote": "Blended estimate: executive managers 25%, financial planning clients 25%, small business owners 50% (national AudienceSCAN groups closest to this owner profile, weighted by fit). The groups overlap, so this is a weighted estimate, not a measured group; point to a row for each group's figure."
    }
   }
  }

@@ -33,7 +33,7 @@ window.ADTAXI_RADIUS = {
   }
  ],
  "zipGeo": "../shared/geo/zip/{level}/{id}.json",
- "planScript": "../shared/media-plan.js?v=20261026s",
+ "planScript": "../shared/media-plan.js?v=20261026u",
  "mediaMixUrl": "../media-mix/",
  "planCategory": "none",
  "customArea": true,
@@ -76,6 +76,153 @@ window.ADTAXI_RADIUS = {
  },
  "ageSet": "householder",
  "hhCount": true,
+ "persona": {
+  "titles": {
+   "exec": "The established executive household",
+   "owner": "The established professional household"
+  },
+  "kickers": {
+   "exec": "Master franchise candidate household",
+   "owner": "First-time franchise buyer household"
+  },
+  "rates": [
+   "ba",
+   "grad",
+   "mgmt",
+   "hi200",
+   "cg",
+   "married",
+   "kids",
+   "sfd",
+   "val500",
+   "vets"
+  ],
+  "national": {
+   "exec": {
+    "tag": "National survey · blended AudienceSCAN groups",
+    "weights": "blended executive managers 50%, financial planning clients 25%, small business owners 25%",
+    "items": [
+     [
+      "Men",
+      59.9,
+      50.0
+     ],
+     [
+      "Age 25–44",
+      47.5,
+      34.4
+     ],
+     [
+      "Age 45–64",
+      34.6,
+      30.9
+     ],
+     [
+      "Household income $150K+",
+      44.2,
+      24.0
+     ],
+     [
+      "Own their home",
+      83.2,
+      63.0
+     ],
+     [
+      "Live in a city",
+      53.9,
+      38.9
+     ],
+     [
+      "Live in a suburb",
+      34.8,
+      41.8
+     ]
+    ],
+    "mindset": {
+     "title": "Small business owners' plans (national)",
+     "items": [
+      [
+       "Want to start a business in the next year",
+       14.7,
+       9.5
+      ],
+      [
+       "Want to invest more",
+       23.9,
+       18.7
+      ],
+      [
+       "Plan to buy an investment property",
+       8.8,
+       5.7
+      ]
+     ]
+    }
+   },
+   "owner": {
+    "tag": "National survey · blended AudienceSCAN groups",
+    "weights": "blended executive managers 25%, financial planning clients 25%, small business owners 50%",
+    "items": [
+     [
+      "Men",
+      57.2,
+      50.0
+     ],
+     [
+      "Age 25–44",
+      43.8,
+      34.4
+     ],
+     [
+      "Age 45–64",
+      34.7,
+      30.9
+     ],
+     [
+      "Household income $150K+",
+      39.0,
+      24.0
+     ],
+     [
+      "Own their home",
+      78.8,
+      63.0
+     ],
+     [
+      "Live in a city",
+      47.3,
+      38.9
+     ],
+     [
+      "Live in a suburb",
+      38.3,
+      41.8
+     ]
+    ],
+    "mindset": {
+     "title": "Small business owners' plans (national)",
+     "items": [
+      [
+       "Want to start a business in the next year",
+       14.7,
+       9.5
+      ],
+      [
+       "Want to invest more",
+       23.9,
+       18.7
+      ],
+      [
+       "Plan to buy an investment property",
+       8.8,
+       5.7
+      ]
+     ]
+    }
+   }
+  },
+  "source": "Sources: Census ACS 5-year 2020–2024, IRS Statistics of Income 2022, 2026 AudienceSCAN® (Executive Managers, Financial/Retirement Planning Clients and Small Business Owners)."
+ },
  "audienceUnit": "households",
  "shareLabel": "Share of households",
  "shareShort": "Share",

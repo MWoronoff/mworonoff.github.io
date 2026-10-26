@@ -7,7 +7,7 @@ import glob, json, os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-V = "20261026s"   # version tag for the shared engine files on these pages (keep in step with the other analyzers)
+V = "20261026u"   # version tag for the shared engine files on these pages (keep in step with the other analyzers)
 
 SUBS = [{"id": "exec", "label": "Master franchise candidates"}, {"id": "owner", "label": "First-time franchise buyers"}]
 # AudienceSCAN 2026, Small Business Owners (4.5% of U.S. adults): saw or heard an ad of each type that led them to take
@@ -31,12 +31,101 @@ SBO_ROWS = [
     ["Magazine (print, online, mobile or on tablet)", 26.5, 21.5],
     ["Ads at movie theater", 24.7, 21.5],
 ]
-SBO = {"short": "Small business owners", "audience": "small business owners", "rows": SBO_ROWS}
+# AudienceSCAN 2026 (AdMall reports supplied Oct 26 2026), same question and the same all-adults column as above.
+# Executive Managers: 8.9% of U.S. adults. Financial/Retirement Planning Clients: 10.2% (plan to pay for financial or
+# retirement planning services within a year).
+EXEC_ROWS = [
+    ["Streaming TV advertising (such as Hulu, Pluto TV or YouTube TV)", 57.2, 36.7],
+    ["Mobile phone app or text message", 54.3, 36.6],
+    ["Ad on a social network", 56.1, 35.9],
+    ["Ad on search results pages (like on Google, Yahoo or Bing)", 53.7, 35.8],
+    ["Television (traditional, including cable or satellite subscription)", 52.4, 34.7],
+    ["Ad that plays before or during the video you want to watch", 47.1, 31.1],
+    ["Online display ads (banners and pop-up ads)", 50.6, 30.0],
+    ["Ads/Coupons in your mailbox", 42.1, 29.9],
+    ["Emailed ad or newsletter", 46.3, 28.6],
+    ["Text link ad on a website", 44.8, 27.3],
+    ["Advertising circulars in your mailbox or inserted in the newspaper", 41.2, 27.2],
+    ["Radio (over-the-air, online, mobile or tablet)", 42.2, 25.5],
+    ["Outdoor ad/sign/billboard/transit", 42.3, 23.6],
+    ["Newspaper (print, online, mobile or tablet)", 42.6, 23.5],
+    ["Ad on a podcast", 44.5, 22.7],
+    ["Magazine (print, online, mobile or on tablet)", 41.0, 21.5],
+    ["Ads at movie theater", 43.6, 21.5],
+]
+FIN_ROWS = [
+    ["Streaming TV advertising (such as Hulu, Pluto TV or YouTube TV)", 44.0, 36.7],
+    ["Mobile phone app or text message", 41.4, 36.6],
+    ["Ad on a social network", 43.4, 35.9],
+    ["Ad on search results pages (like on Google, Yahoo or Bing)", 43.3, 35.8],
+    ["Television (traditional, including cable or satellite subscription)", 41.7, 34.7],
+    ["Ad that plays before or during the video you want to watch", 37.6, 31.1],
+    ["Online display ads (banners and pop-up ads)", 35.9, 30.0],
+    ["Ads/Coupons in your mailbox", 36.3, 29.9],
+    ["Emailed ad or newsletter", 36.2, 28.6],
+    ["Text link ad on a website", 32.9, 27.3],
+    ["Advertising circulars in your mailbox or inserted in the newspaper", 34.2, 27.2],
+    ["Radio (over-the-air, online, mobile or tablet)", 30.1, 25.5],
+    ["Outdoor ad/sign/billboard/transit", 29.1, 23.6],
+    ["Newspaper (print, online, mobile or tablet)", 30.6, 23.5],
+    ["Ad on a podcast", 29.6, 22.7],
+    ["Ads at movie theater", 26.8, 21.5],
+    ["Magazine (print, online, mobile or on tablet)", 28.7, 21.5],
+]
+# No AudienceSCAN group is exactly a franchise candidate, so each owner profile blends the closest groups, weighted by fit
+# (approved Oct 26 2026). The groups overlap and AudienceSCAN doesn't publish the overlap, so the blend is a weighted
+# estimate, not a measured group; the panel says so and shows each group's figure.
+GROUPS = {"execm": ("Executive managers", EXEC_ROWS), "fin": ("Financial planning clients", FIN_ROWS), "sbo": ("Small business owners", SBO_ROWS)}
+BLEND_W = {"exec": [("execm", 0.50), ("fin", 0.25), ("sbo", 0.25)], "owner": [("execm", 0.25), ("fin", 0.25), ("sbo", 0.50)]}
+
+
+def blend(sub):
+    w = BLEND_W[sub]
+    by = {g: {r[0]: r[1] for r in GROUPS[g][1]} for g, _ in w}
+    rows = [[lab, round(sum(by[g][lab] * x for g, x in w), 1), us] for lab, _, us in SBO_ROWS]
+    parts = [{"short": GROUPS[g][0], "weight": x, "values": [by[g][r[0]] for r in rows]} for g, x in w]
+    names = ", ".join(f"{GROUPS[g][0].lower()} {round(x * 100)}%" for g, x in w)
+    noun = "likely franchise candidates (blended estimate: " + names + ")"
+    return {"short": "Blended estimate", "audience": "blended: " + names, "noun": noun, "rows": rows, "blend": parts,
+            "blendNote": "Blended estimate: " + names + " (national AudienceSCAN groups closest to this owner profile, weighted by fit). The groups overlap, so this is a weighted estimate, not a measured group; point to a row for each group's figure."}
+
+
+# Persona, national level: AudienceSCAN 2026 Lifestyle profiles (who they are), blended with the same weights as the ad
+# response. Values are % of each group; "us" is all U.S. adults. Age shares add 25-34 + 35-44 and 45-54 + 55-64.
+DEMO = {  # label: (execm, fin, sbo, all U.S.)
+    "Men": (64.8, 55.8, 54.1, 50.0),
+    "Age 25–44": (57.1, 34.1, 41.9, 34.4),
+    "Age 45–64": (34.5, 34.6, 34.9, 30.9),
+    "Household income $150K+": (53.0, 39.2, 31.8, 24.0),
+    "Own their home": (90.0, 80.5, 72.3, 63.0),
+    "Live in a city": (66.4, 43.1, 39.8, 38.9),
+    "Live in a suburb": (27.3, 43.0, 41.5, 41.8),
+}
+SBO_GOALS = [("Want to start a business in the next year", 14.7, 9.5), ("Want to invest more", 23.9, 18.7), ("Plan to buy an investment property", 8.8, 5.7)]
+
+
+def persona_national(sub):
+    w = dict(BLEND_W[sub]); idx = {"execm": 0, "fin": 1, "sbo": 2}
+    items = [[lab, round(sum(v[idx[g]] * x for g, x in w.items()), 1), v[3]] for lab, v in DEMO.items()]
+    names = ", ".join(f"{GROUPS[g][0].lower()} {round(x * 100)}%" for g, x in BLEND_W[sub])
+    return {"tag": "National survey \u00b7 blended AudienceSCAN groups", "weights": "blended " + names, "items": items,
+            "mindset": {"title": "Small business owners' plans (national)", "items": [list(x) for x in SBO_GOALS]}}
+
+
+PERSONA = {
+    "titles": {"exec": "The established executive household", "owner": "The established professional household"},
+    "kickers": {"exec": "Master franchise candidate household", "owner": "First-time franchise buyer household"},
+    "rates": ["ba", "grad", "mgmt", "hi200", "cg", "married", "kids", "sfd", "val500", "vets"],
+    "national": {"exec": persona_national("exec"), "owner": persona_national("owner")},
+    "source": "Sources: Census ACS 5-year 2020–2024, IRS Statistics of Income 2022, 2026 AudienceSCAN® (Executive Managers, Financial/Retirement Planning Clients and Small Business Owners).",
+}
+
+
 AD_RESPONSE = {
-    "title": "How small business owners respond to advertising",
+    "title": "How likely franchise candidates respond to advertising",
     "source": "2026 AudienceSCAN® study",
-    "note": "National survey data: the percent who saw or heard an ad of each type that led them to take action in the past 30 days. Percentages are based on all U.S. adults and on everyone in the target group, not on users of each medium. Small business owners (4.5% of U.S. adults) are the closest AudienceSCAN group to franchise candidates, so the same figures show for both owner profiles. \"Vs. average\" is how much more likely the group is to have responded than all U.S. adults (a percent difference, not percentage points). The same national figures apply to every market.",
-    "subs": {"exec": SBO, "owner": SBO},
+    "note": "National survey data: the percent who saw or heard an ad of each type that led them to take action in the past 30 days. Percentages are based on all U.S. adults and on everyone in each group, not on users of each medium. \"Vs. average\" is how much more likely than all U.S. adults (a percent difference, not percentage points). Executives report more ad response on every medium, so the order of media matters more than how far above average they sit. The same national figures apply to every market.",
+    "subs": {"exec": blend("exec"), "owner": blend("owner")},
 }
 # Proposal wording for franchise development (shared/radius.js reads cfg.proposal)
 PROPOSAL = {
@@ -114,7 +203,7 @@ def radius_cfg(title, export, depth, links):
                                                  "job": "Reaches professionals by job title, seniority, industry and company size: the closest match to the executives and business owners who buy franchises, with lead forms that fill from their profiles."}},
                        "weights": {"leads": {"linkedin": 28}, "awareness": {"linkedin": 10}, "growth": {"linkedin": 15}},
                        "minimums": {"linkedin": 3000}, "cpm": {"linkedin": 45}, "tiers": ["Tier 3", "Tier 2", "Strategic"]},
-        "ageSet": "householder", "hhCount": True,
+        "ageSet": "householder", "hhCount": True, "persona": PERSONA,
         # Households counted directly (Census B19037); share and index are against all households
         "audienceUnit": "households", "shareLabel": "Share of households", "shareShort": "Share", "radii": [5, 10, 15, 25, 50, 100], "radiusLabel": "Up to {r} miles",
         "filters": ["age", "income8", "veterans"],

@@ -1032,7 +1032,9 @@
     box.innerHTML = "";
     if (!d) { var sp0 = this.spendPanel(); if (sp0) { box.hidden = false; box.appendChild(sp0); } else box.hidden = true; return; }
     box.hidden = false;
-    var rows = d.rows.map(function (r) { return { label: r[0], aud: r[1], us: r[2], diff: r[2] ? r[1] / r[2] - 1 : null }; });
+    // A blended audience (d.blend: several AudienceSCAN groups weighted by fit) keeps each group's figure for the row's hover text
+    var rows = d.rows.map(function (r, i) { return { label: r[0], aud: r[1], us: r[2], diff: r[2] ? r[1] / r[2] - 1 : null,
+      parts: (d.blend || []).map(function (g) { return g.short + " (" + Math.round(g.weight * 100) + "%): " + g.values[i] + "%"; }) }; });
     var sortKey = this.adSort || "aud";
     var pct = function (x) { return (Math.round(x * 10) / 10).toFixed(1) + "%"; };
     var dif = function (x) { var n = Math.round(Math.abs(x) * 100); return (n === 0 ? "" : x > 0 ? "+" : "−") + n + "%"; };
@@ -1058,7 +1060,7 @@
     box.appendChild(el("div", { class: "az-ad-head" }, [
       el("div", null, [
         el("h2", { text: (A.title || "How likely customers respond to advertising").replace("{sub}", this.subLabel()).replace("{aud}", (d.short || "").toLowerCase()) }),
-        el("p", { text: d.audience ? "Percent of the target group (" + d.audience + ") and of all U.S. adults who saw or heard an ad on each medium that led them to take action in the past 30 days. Percentages are based on everyone in each group, not only people who use that medium." : "" })
+        el("p", { text: d.blend ? "Blended estimate of the percent of likely candidates, and of all U.S. adults, who saw or heard an ad on each medium that led them to take action in the past 30 days. Point to a row for each source group's figure." : d.audience ? "Percent of the target group (" + d.audience + ") and of all U.S. adults who saw or heard an ad on each medium that led them to take action in the past 30 days. Percentages are based on everyone in each group, not only people who use that medium." : "" })
       ]),
       el("div", { class: "az-seg", role: "group", "aria-label": "Sort ad types" }, [["aud", "Sort by response"], ["diff", "Sort by vs. average"]].map(function (o) {
         return el("button", { type: "button", "aria-pressed": String(sortKey === o[0]), text: o[1], onclick: function () { self.adSort = o[0]; self.renderAd(); } });
@@ -1075,7 +1077,7 @@
     };
     var adRow = function (r, rank) {
       return el("div", { class: "az-ad-row", role: "row" }, [
-        el("span", { class: "az-ad-label", role: "cell", title: r.label }, [el("span", { class: "az-ad-rank", text: rank + "." }), short(r.label)]),
+        el("span", { class: "az-ad-label", role: "cell", title: r.label + (r.parts.length ? "\n" + r.parts.join("\n") : "") }, [el("span", { class: "az-ad-rank", text: rank + "." }), short(r.label)]),
         el("span", { class: "az-ad-bars", role: "cell", "aria-hidden": "true" }, [
           el("span", { class: "az-ad-bar aud", style: "width:" + barW(r.aud) + "%" })]),
         el("span", { class: "num", role: "cell", text: pct(r.aud) }),
@@ -1092,7 +1094,7 @@
       cols.appendChild(t);
     });
     box.appendChild(cols);
-    box.appendChild(el("p", { class: "az-ad-note", text: (A.note || "") + " Bar scale runs from " + base + "% to " + top + "%" + (base > 0 ? ", not from zero, to make the differences easier to see." : ".") + (d.source ? " Source: " + d.source + "." : A.source ? " Source: " + A.source + "." : "") }));
+    box.appendChild(el("p", { class: "az-ad-note", text: (A.note || "") + (d.blendNote ? " " + d.blendNote : "") + " Bar scale runs from " + base + "% to " + top + "%" + (base > 0 ? ", not from zero, to make the differences easier to see." : ".") + (d.source ? " Source: " + d.source + "." : A.source ? " Source: " + A.source + "." : "") }));
     var sp = this.spendPanel(); if (sp) box.appendChild(sp);
   };
 

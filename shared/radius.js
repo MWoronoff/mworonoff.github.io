@@ -504,7 +504,9 @@
     this.budgetBox = this.buildBudget();
 
     // Order: who and where (map, ZIPs) -> how they respond (ad response, category ad spend) -> Recommended allocation
-    var main = el("main", { class: "az-main" }, [controls, this.areaPanel, this.errorBox, el("section", { class: "rz-stage" }, [this.filterPanel, right]), table, this.extra, this.budgetBox, sources]);
+    // Persona (sites with cfg.persona): a composite portrait of the selected households, between the map and the rankings
+    this.personaBox = cfg.persona ? el("details", { class: "az-panel rz-persona", open: true, hidden: true }) : null;
+    var main = el("main", { class: "az-main" }, [controls, this.areaPanel, this.errorBox, el("section", { class: "rz-stage" }, [this.filterPanel, right]), this.personaBox, table, this.extra, this.budgetBox, sources]);
     this.root.innerHTML = ""; if (header) this.root.appendChild(header); this.root.appendChild(main); this.root.appendChild(this.modal);
     this.rSel.value = s.r ? String(s.r) : ""; this.minSel.value = String(s.minIndex);
     this.syncFilters();
@@ -775,6 +777,126 @@
     this.summary.appendChild(stat(NF0.format(rows.length), "ZIPs"));
     this.summary.appendChild(stat(NF0.format(pop), "Population"));
     if (cfg.summaryNote) this.summary.appendChild(el("p", { class: "rz-summary-note", text: cfg.summaryNote }));
+    this.renderPersona(rows, A, share, idx);
+  };
+
+  /* ---------- Persona (cfg.persona) ----------
+     A composite portrait of the selected households in this trade area, at three levels, each labeled:
+       This group:          direct Census counts of the selected households (householder age by income; ownership by age)
+       Their neighborhoods: ZIP-wide rates, averaged with each ZIP weighted by how many of the selected households live there
+       National survey:     AudienceSCAN groups closest to the profile (cfg.persona.national), and the blended ad response
+     Nothing is shown that the data can't back; it describes a group of households, not an individual. */
+  var PERSONA_RATES = [
+    ["ba", "Adults with a bachelor's degree or higher", function (c, i) { return c.ba_only && c.grad_deg ? [c.ba_only[i] + c.grad_deg[i], c.adults25[i]] : null; }],
+    ["grad", "Adults with a graduate degree", function (c, i) { return c.grad_deg ? [c.grad_deg[i], c.adults25[i]] : null; }],
+    ["mgmt", "Workers in management jobs", function (c, i) { return c.mgmt ? [c.mgmt[i], c.occ_tot[i]] : null; }],
+    ["hi200", "Tax returns with income of $200K+", function (c, i) { return c.hi200 ? [c.hi200[i], c.returns[i]] : null; }],
+    ["cg", "Tax returns with capital gains", function (c, i) { return c.cg ? [c.cg[i], c.returns[i]] : null; }],
+    ["married", "Households that are married couples", function (c, i) { return c.hh_married ? [c.hh_married[i], c.hh_type[i]] : null; }],
+    ["kids", "Households with children under 18", function (c, i) { return c.hh_kids ? [c.hh_kids[i], c.households[i]] : null; }],
+    ["sfd", "Homes that are single-family detached", function (c, i) { return c.sfd ? [c.sfd[i], c.units[i]] : null; }],
+    ["val500", "Owner homes valued at $500K+", function (c, i) { return c.val500 ? [c.val500[i], c.val_own[i]] : null; }],
+    ["vets", "Adults who are veterans", function (c, i) { return c.veterans ? [c.veterans[i], c.vet_tot[i]] : null; }]
+  ];
+  Radius.prototype.personaUS = function () {
+    if (this._pUS) return this._pUS;
+    var c = this.c, out = {};
+    PERSONA_RATES.forEach(function (d) {
+      var n = 0, t = 0;
+      for (var i = 0; i < this.n; i++) { var x = d[2](c, i); if (x && x[0] != null && x[1]) { n += x[0]; t += x[1]; } }
+      out[d[0]] = t ? n / t : null;
+    }, this);
+    return (this._pUS = out);
+  };
+  Radius.prototype.renderPersona = function (rows, A, share, idx) {
+    var box = this.personaBox, cfg = this.cfg, P = cfg.persona, s = this.state, c = this.c, self = this;
+    if (!box) return;
+    box.innerHTML = "";
+    rows = rows.filter(function (r) { return r.aud != null && r.aud > 0; });
+    if (!rows.length || !A) { box.hidden = true; return; }
+    box.hidden = false;
+    var pct = function (x) { return x == null ? "\u2014" : NF0.format(x * 100) + "%"; };
+    var prof = s.profile && this.profiles[s.profile];
+    var defs = this.filterDefs, sel = s.sel;
+    var same = prof && JSON.stringify(prof.sel) === JSON.stringify(sel);   // the profile as defined, not edited
+    var key = same ? s.profile : "_custom";
+    var ctx = cfg.context ? cfg.context() : {}, ad = ctx.ad, adSub = ad && ad.subs ? ad.subs[s.profile] || ad.subs[ctx.sub] : null;
+    var nat = P.national && P.national[s.profile] ? P.national[s.profile] : null;
+    // This group: direct counts (households by householder age and income)
+    var ages = sel.age && sel.age.length ? sel.age : this.ages.options.map(function (x) { return x[0]; });
+    var incs = sel.income8 && sel.income8.length ? sel.income8 : defs.income8.options.map(function (x) { return x[0]; });
+    var lab = function (opts, k) { var o = opts.filter(function (x) { return x[0] === k; })[0]; return o ? o[1] : k; };
+    var sumCol = function (name) { var t = 0; rows.forEach(function (r) { var v = c[name] && c[name][r.i]; if (v) t += v; }); return t; };
+    var direct = !!cfg.hhCount && Object.keys(sel).every(function (k) { return k === "age" || k === "income8" || !picked(sel[k]); });
+    var incMix = [], ageMix = [], own = null;
+    if (cfg.hhCount) {
+      incs.forEach(function (b) { var t = 0; ages.forEach(function (a) { t += sumCol("h" + a + "_" + b); }); incMix.push([lab(defs.income8.options, b), t]); });
+      ages.forEach(function (a) { var t = 0; incs.forEach(function (b) { t += sumCol("h" + a + "_" + b); }); ageMix.push([lab(this.ages.options, a), t]); }, this);
+      var o = 0, rt = 0; ages.forEach(function (a) { o += sumCol("own" + a); rt += sumCol("rent" + a); });
+      own = o + rt ? o / (o + rt) : null;
+    }
+    var tot = incMix.reduce(function (x, y) { return x + y[1]; }, 0) || 1;
+    // Their neighborhoods: ZIP rates weighted by the selected households in each ZIP
+    var US = this.personaUS(), hood = {};
+    PERSONA_RATES.forEach(function (d) {
+      var w = 0, t = 0; rows.forEach(function (r) { var x = d[2](c, r.i); if (x && x[0] != null && x[1]) { t += r.aud * x[0] / x[1]; w += r.aud; } });
+      hood[d[0]] = w ? t / w : null;
+    });
+    // Where they are: towns holding the most of these households
+    var towns = {}; rows.forEach(function (r) { towns[r.town] = (towns[r.town] || 0) + r.aud; });
+    var topTowns = Object.keys(towns).sort(function (a, b) { return towns[b] - towns[a]; }).slice(0, 6);
+    // How they respond: the profile's ad response (blended where the site blends groups)
+    var SHORTS = { "Ad on a social network": "social", "Streaming TV advertising (such as Hulu, Pluto TV or YouTube TV)": "streaming TV", "Ad on search results pages (like on Google, Yahoo or Bing)": "search",
+      "Mobile phone app or text message": "mobile apps and texts", "Television (traditional, including cable or satellite subscription)": "TV", "Ad that plays before or during the video you want to watch": "pre-roll video",
+      "Online display ads (banners and pop-up ads)": "online display", "Emailed ad or newsletter": "email" };
+    var media = adSub ? adSub.rows.slice().sort(function (a, b) { return b[1] - a[1]; }).slice(0, 4) : [];
+    var short = function (t) { return SHORTS[t] || t.replace(/ \(.*\)$/, "").toLowerCase(); };
+    // Narrative, only from the figures above
+    var top2 = incMix.slice().sort(function (a, b) { return b[1] - a[1]; })[0];
+    var story = [];
+    // "25–44" + "45–64" reads as "25 to 64"; anything ending in "65+" as "25 and older"
+    var ageSpan = function () { var l = ageMix.map(function (x) { return x[0]; }), lo = l[0].split(/[–+]/)[0], last = l[l.length - 1];
+      return /\+$/.test(last) ? lo + " and older" : lo + " to " + last.split("–")[1]; };
+    if (cfg.hhCount) story.push("Households headed by someone " + ageSpan() + ", earning " + (incs.length === 1 ? lab(defs.income8.options, incs[0]) : lab(defs.income8.options, incs[0]).replace(/–.*$/, "") + (incs[incs.length - 1] === "200p" ? "+" : "") ) + (top2 && top2[1] / tot >= 0.4 ? "; the largest group earns " + top2[0] + " (" + pct(top2[1] / tot) + ")" : "") + ".");
+    if (own != null) story.push(pct(own) + " of householders this age here own their home.");
+    if (hood.ba != null) story.push("They live in ZIPs where " + pct(hood.ba) + " of adults have a bachelor's degree (U.S. " + pct(US.ba) + ")" + (hood.sfd != null ? " and " + pct(hood.sfd) + " of homes are single-family detached" : "") + ".");
+    if (media.length >= 3) story.push("Most likely to act on " + short(media[0][0]) + ", " + short(media[1][0]) + " and " + short(media[2][0]) + " ads.");
+    var title = (P.titles && P.titles[key]) || "Your selected households";
+    var kicker = "Persona \u00b7 " + ((P.kickers && P.kickers[key]) || (prof ? prof.label + " (edited)" : "Custom audience"));
+    box.appendChild(el("summary", null, [el("span", { class: "rz-p-kicker", text: kicker }), el("b", { class: "rz-p-title", text: title })]));
+    box.appendChild(el("p", { class: "rz-p-sub", text: this.describe() + " \u00b7 " + (s.mode === "area" ? "Custom area (" + this.areaPhrase() + ")" : s.r + " miles around " + s.zip) }));
+    box.appendChild(el("p", { class: "rz-p-story", text: story.join(" ") }));
+    var stat = function (v, t) { return el("div", { class: "rz-p-stat" }, [el("b", { text: v }), el("span", { text: t })]); };
+    box.appendChild(el("div", { class: "rz-p-stats" }, [stat(NF0.format(Math.round(A)), (cfg.audienceNoun || "Audience").toLowerCase() + " here"),
+      stat(pct(share), (cfg.shareLabel || "Share of population").toLowerCase()), stat(idx == null ? "\u2014" : NF0.format(idx), "index vs. U.S. (100 = average)"),
+      stat(topTowns.slice(0, 2).join("; ") || "\u2014", "most of these households")]));
+    var row = function (l, v, ref) { return el("div", { class: "rz-p-row" }, [el("span", { text: l }), el("b", null, [v, ref ? el("i", { text: " \u00b7 " + ref }) : null])]); };
+    var col = function (h, tag, kids) { return el("div", { class: "rz-p-col" }, [el("h3", null, [h, el("span", { class: "rz-p-tag", text: tag })])].concat(kids)); };
+    var cols = [];
+    if (cfg.hhCount) {
+      var bar = el("div", { class: "rz-p-bar" }, incMix.filter(function (x) { return x[1] > 0; }).map(function (x, i) {
+        return el("div", { style: "flex:" + x[1] + ";opacity:" + (0.45 + 0.55 * (i + 1) / incMix.length), title: x[0] + ": " + pct(x[1] / tot) }, [x[1] / tot >= 0.12 ? pct(x[1] / tot) : ""]); }));
+      cols.push(col("The household", direct ? "This group \u00b7 Census, counted directly" : "This group \u00b7 Census", [
+        el("p", { class: "rz-p-lab", text: "Household income" }), bar,
+        el("p", { class: "rz-p-legend", text: incMix.filter(function (x) { return x[1] > 0; }).map(function (x) { return x[0] + " " + pct(x[1] / tot); }).join(" \u00b7 ") }),
+        row("Householder age", ageMix.length > 1 ? ageMix.map(function (x) { return x[0] + " " + pct(x[1] / tot); }).join(", ") : ageMix[0][0]),
+        own != null ? row("Own their home", pct(own), "householders this age, all incomes") : null,
+        P.capital ? row(P.capital[0], P.capital[1]) : null]));
+    }
+    cols.push(col("Their neighborhoods", "ZIP-wide, weighted to where they live", PERSONA_RATES.filter(function (d) { return hood[d[0]] != null && (P.rates || []).indexOf(d[0]) >= 0; })
+      .map(function (d) { return row(d[1], pct(hood[d[0]]), "U.S. " + pct(US[d[0]])); })));
+    var natKids = [];
+    if (nat) {
+      nat.items.forEach(function (it) { natKids.push(row(it[0], it[1] + "%", "all adults " + it[2] + "%")); });
+      if (nat.mindset) { natKids.push(el("p", { class: "rz-p-lab", text: nat.mindset.title })); nat.mindset.items.forEach(function (it) { natKids.push(row(it[0], it[1] + "%", "all adults " + it[2] + "%")); }); }
+    }
+    if (media.length) {
+      natKids.push(el("p", { class: "rz-p-lab", text: "Acted on an ad in the past 30 days" }));
+      media.forEach(function (m) { natKids.push(row(short(m[0]).replace(/^./, function (x) { return x.toUpperCase(); }), m[1] + "%", "all adults " + m[2] + "%")); });
+    }
+    if (natKids.length) cols.push(col("Who they are and how they respond", nat ? nat.tag : "National survey", natKids));
+    box.appendChild(el("div", { class: "rz-p-cols" }, cols));
+    box.appendChild(el("p", { class: "rz-p-note", text: "Composite portrait for planning. \u201cThis group\u201d figures are Census counts of the selected households; \u201cZIP-wide\u201d figures describe the neighborhoods where they live, each ZIP weighted by how many of these households it holds (higher-income households usually exceed their neighborhood on education and income); national figures are AudienceSCAN survey results for the closest groups" + (nat && nat.weights ? " (" + nat.weights + ")" : "") + ". Census doesn't publish a householder's gender or net worth with age and income by ZIP. It describes a group of households, not an individual." + (P.source ? " " + P.source : "") }));
   };
   // Context columns for the current preset (or the tool's default list when no preset is chosen)
   Radius.prototype.contextKeys = function () {
@@ -1302,7 +1424,7 @@
     var hasSel = Object.keys(s.sel || {}).some(function (k) { return s.sel[k]; });
     var PC = this.cfg.proposal || {};   // page-specific proposal wording (franchise pages): goals by strategy, platform roles, a footnote line
     var audienceNoun = prof && PC.nouns && PC.nouns[s.profile] ? PC.nouns[s.profile] : prof ? (/candidates|buyers|prospects|owners/i.test(prof.label) ? prof.label.toLowerCase() : "likely " + prof.label.toLowerCase() + " customers") : hasSel ? "people in the selected audience" : "residents";
-    var adNoun = adSub && adSub.audience ? adSub.audience : audienceNoun;
+    var adNoun = adSub && (adSub.noun || adSub.audience) ? adSub.noun || adSub.audience : audienceNoun;   // noun: how a blended audience reads in a sentence
     var rows = this.visible(), aud = 0, pop = 0;
     var basis = 0;
     rows.forEach(function (r) { if (r.aud != null) { aud += r.aud; pop += r.pop || 0; basis += r.base || 0; } });
