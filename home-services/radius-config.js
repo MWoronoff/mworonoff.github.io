@@ -12,7 +12,7 @@ window.ADTAXI_RADIUS = {
   ageSet: "adult",
   radii: [5, 10, 15, 25, 50, 100],
   radiusLabel: "Up to {r} miles",
-  customArea: true,   // Geography > Custom area: a list or file of ZIPs, counties, towns or locations (pilot, Oct 2026)
+  customArea: true, countiesFirst: true, blendScore: true,   // Geography > Custom area: a list or file of ZIPs, counties, towns or locations (pilot, Oct 2026)
   filters: ["age", "income4", "built", "ownval", "sfd", "longten"],
   profileLabel: "Target audience",
   profiles: [

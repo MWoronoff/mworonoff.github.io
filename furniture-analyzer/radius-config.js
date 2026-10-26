@@ -8,7 +8,7 @@ window.ADTAXI_RADIUS = {
   audienceData: "../shared/audience/zip_audience.json",
   extraData: [ { url: "../shared/audience/zip_audience_legal.json", label: "Home and home value data" } ],
   zipGeo: "../shared/geo/zip/{level}/{id}.json",
-  customArea: true,   // Geography > Custom area: a list or file of ZIPs, counties, towns or locations
+  customArea: true, countiesFirst: true, blendScore: true,   // Geography > Custom area: a list or file of ZIPs, counties, towns or locations
   ageSet: "adult",
   radii: [5, 10, 15, 25, 50, 100],
   radiusLabel: "Up to {r} miles",

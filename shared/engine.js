@@ -637,19 +637,47 @@
       self.geo[geoKey] = feats.length ? { type: "FeatureCollection", features: feats } : null;
     })]));
   };
+  // cfg.zipScore: { weights: { demand, spend }, derived: { key: ["max", a, b] }, subs: { sub: { demand: [inputs], spend: key or null } } }
+  // (or the short form { sub: [demand inputs] }, demand only). Same steps as the data builds: each input a percentile
+  // (pandas rank(pct=True), average ties, 2 decimals) among ranked ZIPs (no "u"), demand = mean of the available ones,
+  // score = demand, or demand and spend weighted when the category has a spend part.
   Analyzer.prototype.rescoreZips = function (rows) {
     var Z = this.cfg.zipScore; if (!Z) return;
-    var ok = rows.filter(function (r) { return !r.u; });
-    Object.keys(Z).forEach(function (sub) {
-      var pc = {};
-      Z[sub].forEach(function (k) {
-        var have = ok.filter(function (r) { return typeof r.v[k] === "number"; }).sort(function (a, b) { return a.v[k] - b.v[k]; }), n = have.length, i = 0;
-        while (i < n) { var j = i; while (j + 1 < n && have[j + 1].v[k] === have[i].v[k]) j++;
-          var pr = ((i + 1 + j + 1) / 2) / n * 100; for (var q = i; q <= j; q++) (pc[have[q].id] = pc[have[q].id] || []).push(pr); i = j + 1; }   // pandas rank(pct=True, average)
-      });
+    var subs = Z.subs || Z, W = Z.weights || { demand: 0.4, spend: 0.15 }, derived = Z.derived || {};
+    var ok = rows.filter(function (r) { return !r.u; }), memo = {};
+    var val = function (r, k) { var x = r.v[k]; return typeof x === "number" && isFinite(x) ? x : null; };
+    var pctMap = function (getter) {
+      var have = ok.map(function (r) { return [r.id, getter(r)]; }).filter(function (x) { return x[1] != null; }).sort(function (a, b) { return a[1] - b[1]; });
+      var n = have.length, out = {}, i = 0;
+      while (i < n) { var j = i; while (j + 1 < n && have[j + 1][1] === have[i][1]) j++;
+        var pr = Math.round(((i + j + 2) / 2) / n * 10000) / 100; for (var q = i; q <= j; q++) out[have[q][0]] = pr; i = j + 1; }
+      return out;
+    };
+    var P = function (k) {
+      if (memo[k]) return memo[k];
+      var d = derived[k];
+      if (d && d[0] === "max") {   // e.g. climate stress = the higher of the heating and cooling percentiles, then ranked again
+        var a = P(d[1]), b = P(d[2]), m = {};
+        ok.forEach(function (r) { var x = a[r.id], y = b[r.id]; m[r.id] = x == null ? (y == null ? null : y) : (y == null ? x : Math.max(x, y)); });
+        return (memo[k] = pctMap(function (r) { return m[r.id]; }));
+      }
+      return (memo[k] = pctMap(function (r) { return val(r, k); }));
+    };
+    Object.keys(subs).forEach(function (sub) {
+      var def = Array.isArray(subs[sub]) ? { demand: subs[sub], spend: null } : subs[sub];
+      var ins = def.demand.filter(function (k) { return derived[k] || ok.some(function (r) { return val(r, k) != null; }); }).map(P);
+      var sp = def.spend ? P(def.spend) : null;
       rows.forEach(function (r) {
-        var a = !r.u && pc[r.id], v = a && a.length ? Math.round(a.reduce(function (x, y) { return x + y; }, 0) / a.length * 1000) / 1000 : null;
-        r.v["demand@" + sub] = v; r.v["score@" + sub] = v;
+        var dem = null, spd = null, sc = null;
+        if (!r.u) {
+          var a = ins.map(function (m) { return m[r.id]; }).filter(function (x) { return x != null; });
+          dem = a.length ? a.reduce(function (x, y) { return x + y; }, 0) / a.length : null;
+          spd = sp ? (sp[r.id] == null ? null : sp[r.id]) : null;
+          sc = sp ? (dem != null && spd != null ? (W.demand * dem + W.spend * spd) / (W.demand + W.spend) : null) : dem;
+        }
+        r.v["demand@" + sub] = dem == null ? null : Math.round(dem * 100) / 100;
+        if (sp) r.v["spend@" + sub] = spd;
+        r.v["score@" + sub] = sc == null ? null : Math.round(sc * 1000) / 1000;
       });
     });
   };

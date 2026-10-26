@@ -10,14 +10,14 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
-<link rel="stylesheet" href="../shared/engine.css?v=20261026l">
+<link rel="stylesheet" href="../shared/engine.css?v=20261026o">
 </head>
 <body>
 <div id="app"><p class="az-loading">Loading the Home Services Market Analyzer…</p></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js" crossorigin=""></script>
-<script src="../shared/engine.js?v=20261026l"></script>
-<script src="radius-config.js?v=20261026l"></script>
+<script src="../shared/engine.js?v=20261026o"></script>
+<script src="radius-config.js?v=20261026o"></script>
 <script>
 AdtaxiAnalyzer.start({
  "title": "Home Services Market Analyzer",
@@ -38,6 +38,8 @@ AdtaxiAnalyzer.start({
  "radiusProfiles": true,
  "defaultLevel": "us",
  "usMapLevel": "dma",
+ "drill": true,
+ "zipScore": {"weights": {"demand": 0.4, "spend": 0.15}, "subs": {"any": {"demand": ["owners", "pre2000_share", "sfd_share", "lt_share"], "spend": "inc75_share"}, "hvac": {"demand": ["owners", "clim_stress"], "spend": "inc75_share"}, "roof": {"demand": ["sfd_own", "hail_days", "pre2000_share"], "spend": "inc75_share"}, "plumb": {"demand": ["owners", "pre1980_share"], "spend": "inc75_share"}, "elec": {"demand": ["owners", "pre1980_share", "val300_share"], "spend": "inc75_share"}, "paint": {"demand": ["owners", "val300_share", "lt_share"], "spend": "inc75_share"}, "floor": {"demand": ["owners", "pre2000_share", "lt_share"], "spend": "inc75_share"}}, "derived": {"clim_stress": ["max", "hdd", "cdd"]}},
  "levels": {
   "us": {
    "label": "U.S.",
@@ -838,8 +840,8 @@ AdtaxiAnalyzer.start({
    "body": "Tested against HVAC and plumbing contractor employees per 1,000 households (Census Business Patterns). Scoring climate on the greater of heating or cooling need, and dropping home age, roughly doubled the match at the DMA level. Extra climate weight or less EASI weight didn't help, so HVAC uses the standard weights. The check reruns with every build."
   },
   {
-   "title": "ZIPs in a market",
-   "body": "Pick a DMA, metro or county, then ZIPs in market. ZIP scores use Consumer Demand (73%) and Spending Power (27%). ZIPs under 500 residents, or mostly group quarters, are shown but not ranked."
+   "title": "Finding markets",
+   "body": "Start with the U.S. totals and the DMAs ranked under them. Look inside a DMA to rank its metros, counties and ZIPs within that market; look inside a metro for its counties and ZIPs, or a county for its ZIPs. The breadcrumb above the map steps back. Tick DMAs and choose Rank metros in these DMAs to rank the metros, counties and ZIPs across all of them. Metros that reach past a DMA's edge are marked Partly outside. Tick boxes in any list (DMAs, metros, counties or ZIPs) to build one combined trade area; each ZIP is counted once. ZIP scores use Consumer Demand (73%) and Spending Power (27%). ZIPs under 500 residents, or mostly group quarters, are shown but not ranked."
   },
   {
    "title": "Advertising response",

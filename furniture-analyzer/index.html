@@ -10,14 +10,14 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
-<link rel="stylesheet" href="../shared/engine.css?v=20261026l">
+<link rel="stylesheet" href="../shared/engine.css?v=20261026o">
 </head>
 <body>
 <div id="app"><p class="az-loading">Loading the Furniture Market Analyzer…</p></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js" crossorigin=""></script>
-<script src="../shared/engine.js?v=20261026l"></script>
-<script src="radius-config.js?v=20261026l"></script>
+<script src="../shared/engine.js?v=20261026o"></script>
+<script src="radius-config.js?v=20261026o"></script>
 <script>
 AdtaxiAnalyzer.start({
  "title": "Furniture Market Analyzer",
@@ -34,6 +34,8 @@ AdtaxiAnalyzer.start({
  "radiusProfiles": true,
  "defaultLevel": "us",
  "usMapLevel": "dma",
+ "drill": true,
+ "zipScore": {"weights": {"demand": 0.4, "spend": 0.15}, "subs": {"any": {"demand": ["movers", "movers_share", "owners", "households"], "spend": "inc75_share"}, "living": {"demand": ["movers", "movers_share", "households"], "spend": "inc75_share"}, "bedroom": {"demand": ["movers", "movers_share", "kids_share"], "spend": "inc75_share"}, "mattress": {"demand": ["households", "movers", "pop18_34"], "spend": "inc75_share"}, "dining": {"demand": ["owners", "movers", "kids_share"], "spend": "inc75_share"}, "outdoor": {"demand": ["owners", "sfd_own", "sfd_share"], "spend": "inc75_share"}, "baby": {"demand": ["f25_34", "hh_kids", "movers_share"], "spend": "inc75_share"}}},
  "levels": {
   "us": {
    "label": "U.S.",
@@ -422,8 +424,8 @@ AdtaxiAnalyzer.start({
    "body": "Households divided by land area. Not scored; denser markets put more buyers inside each delivery area or radius."
   },
   {
-   "title": "ZIPs in a market",
-   "body": "Pick a DMA, metro or county, then ZIPs in market to rank its ZIPs on Consumer Demand and Spending Power. ZIPs under 500 residents, or mostly group quarters, are shown but not ranked."
+   "title": "Finding markets",
+   "body": "Start with the U.S. totals and the DMAs ranked under them. Look inside a DMA to rank its metros, counties and ZIPs within that market; look inside a metro for its counties and ZIPs, or a county for its ZIPs. The breadcrumb above the map steps back. Tick DMAs and choose Rank metros in these DMAs to rank the metros, counties and ZIPs across all of them. Metros that reach past a DMA's edge are marked Partly outside. Tick boxes in any list (DMAs, metros, counties or ZIPs) to build one combined trade area; each ZIP is counted once. ZIPs are ranked on Consumer Demand and Spending Power. ZIPs under 500 residents, or mostly group quarters, are shown but not ranked."
   },
   {
    "title": "Advertising response",

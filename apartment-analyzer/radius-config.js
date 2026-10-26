@@ -10,7 +10,7 @@ window.ADTAXI_RADIUS = {
                 { url: "../shared/audience/zip_audience_enroll.json", label: "College enrollment by age" },
                { url: "../shared/audience/zip_audience_apt.json", label: "Renter household data" } ],
   zipGeo: "../shared/geo/zip/{level}/{id}.json",
-  customArea: true,   // Geography > Custom area: a list or file of ZIPs, counties, towns or locations
+  customArea: true, countiesFirst: true, blendScore: true,   // Geography > Custom area: a list or file of ZIPs, counties, towns or locations
   ageSet: "adult",
   radii: [5, 10, 15, 25, 100],
   radiusLabels: { 100: "50+ miles (covers up to 100)" },
