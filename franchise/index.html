@@ -10,14 +10,14 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
-<link rel="stylesheet" href="../shared/engine.css?v=20261026q">
+<link rel="stylesheet" href="../shared/engine.css?v=20261026s">
 </head>
 <body>
 <div id="app"><p class="az-loading">Loading the Franchise Development Analyzer…</p></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js" crossorigin=""></script>
-<script src="../shared/engine.js?v=20261026q"></script>
-<script src="radius-config.js?v=20261026q"></script>
+<script src="../shared/engine.js?v=20261026s"></script>
+<script src="radius-config.js?v=20261026s"></script>
 <script>
 AdtaxiAnalyzer.start({
  "title": "Franchise Development Analyzer",
@@ -84,7 +84,7 @@ AdtaxiAnalyzer.start({
  },
  "statesGeo": "../shared/geo/states.topo.json",
  "zipIndex": "../shared/geo/zip_market.json",
- "radiusScript": "../shared/radius.js?v=20261026q",
+ "radiusScript": "../shared/radius.js?v=20261026s",
  "benchmarks": false,
  "timing": false,
  "subcategoryLabel": "Owner profile",
@@ -219,6 +219,12 @@ AdtaxiAnalyzer.start({
    "help": "Census ACS, area-level: employed people 16+ working as managers (operations, sales, general and top executives and others). The closest public measure of the management background a master franchisee needs."
   },
   {
+   "key": "selfemp_share",
+   "label": "Share of tax returns with self-employment income",
+   "format": "pct",
+   "help": "IRS, area-level: returns reporting business or self-employment income. Shown, not scored: it mixes gig and side income with business owners, so it doesn't track franchise candidates."
+  },
+  {
    "key": "married_share",
    "label": "Share of households that are married couples",
    "format": "pct",
@@ -300,6 +306,7 @@ AdtaxiAnalyzer.start({
   "o100_share",
   "avg_wage",
   "married_share",
+  "selfemp_share",
   "buyers",
   "buyer_jobs",
   "buyers_per1k",
@@ -325,8 +332,8 @@ AdtaxiAnalyzer.start({
   {
    "title": "Candidates",
    "body": [
-    "Master franchise candidates, first-time or not: householders 45–64 earning $125K+ (count and share), the IRS shares of returns with income of $200K+ and with capital gains, the IRS average salary per wage earner, the share of adults 25+ with a bachelor's degree or higher and the share of workers in management occupations (a master franchisee recruits and supports sub-franchisees, so professional and management background matters). Each input counts equally. Census reports householder age only as 25–44 and 45–64, so the score uses 45–64; the Trade area audience uses 35–64.",
-    "First-time franchise buyers: householders 25–64 earning $100K+ (count and share), the IRS average salary per wage earner (corporate earners, who make up most first-time buyers) and the share of married-couple households (the dual-income cushion many new owners rely on). Education isn't used here: many good single-unit buyers are career changers without a degree. Census groups householders 25–44 together, so the market score can't start at 35 the way the Trade area audience does.",
+    "Master franchise candidates, first-time or not: householders 45–64 earning $125K+ (count and share), the IRS shares of returns with income of $200K+ and with capital gains, the IRS average salary per wage earner, the share of adults 25+ with a bachelor's degree or higher, and the share of workers in management occupations (a master franchisee recruits and supports sub-franchisees, so professional and management background matters). Each input counts equally. Census reports householder age only as 25–44 and 45–64, so the score uses 45–64, as does the Trade area.",
+    "First-time franchise buyers: householders 25–64 earning $100K+ (count and share), the IRS average salary per wage earner (corporate earners, who make up most first-time buyers) and the share of married-couple households (the dual-income cushion many new owners rely on). Education isn't used here: many good single-unit buyers are career changers without a degree. Census groups householders 25–44 together, so the score starts at 25, as does the Trade area.",
     "Census doesn't publish net worth, liquid capital or job titles for areas, so household income and investment income stand in for them. IRS figures are area-level rates, not facts about individuals."
    ]
   },

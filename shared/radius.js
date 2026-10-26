@@ -802,23 +802,37 @@
       return (lo + (eq - 1) / 2) / (n - 1) * 100;   // ties share the middle rank
     };
   }
+  // A profile can group its signals (scoreGroups: [[keys], ...]) so overlapping ones (e.g. $200K+ income and capital gains)
+  // share one vote: the signals part is then the average of the groups, each group the average of its signals.
+  // Signals shown as columns but not in any group are display only.
+  Radius.prototype.scoreGroups = function (ctx) {
+    var p = this.state.profile && this.profiles[this.state.profile];
+    if (p && p.scoreGroups) return p.scoreGroups.map(function (g) { return g.filter(function (k) { return ctx.indexOf(k) >= 0; }); }).filter(function (g) { return g.length; });
+    return ctx.map(function (k) { return [k]; });
+  };
   Radius.prototype.addScore = function (rows, ctx) {
     if (!this.cfg.blendScore) return;
+    var groups = this.scoreGroups(ctx);
     var ok = rows.filter(function (r) { return r.idx != null && r.aud != null && (r.pop || 0) >= SMALL_ZIP; });
     var P = { idx: percentiler(ok.map(function (r) { return r.idx; })), aud: percentiler(ok.map(function (r) { return r.aud; })) };
     ctx.forEach(function (k) { P["x_" + k] = percentiler(ok.map(function (r) { return r["x_" + k]; })); });
     rows.forEach(function (r) { r.score = null; });
     ok.forEach(function (r) {
       var parts = [[P.idx(r.idx), SCORE_W.idx], [P.aud(r.aud), SCORE_W.aud]];
-      var cv = ctx.map(function (k) { return P["x_" + k](r["x_" + k]); }).filter(function (x) { return x != null; });
-      if (cv.length) parts.push([cv.reduce(function (a, b) { return a + b; }, 0) / cv.length, SCORE_W.ctx]);
+      var avg = function (a) { a = a.filter(function (x) { return x != null; }); return a.length ? a.reduce(function (x, y) { return x + y; }, 0) / a.length : null; };
+      var cv = avg(groups.map(function (g) { return avg(g.map(function (k) { return P["x_" + k](r["x_" + k]); })); }));
+      if (cv != null) parts.push([cv, SCORE_W.ctx]);
       var w = 0, t = 0; parts.forEach(function (p) { if (p[0] != null) { t += p[0] * p[1]; w += p[1]; } });
       r.score = w ? t / w : null;
     });
   };
   Radius.prototype.scoreNote = function (ctx, noun) {
-    return " Score (0\u2013100) ranks " + noun + " within this area: 40% index, 30% estimated audience" + (ctx.length ? ", 30% " + listAnd(ctx.map(function (k) { return CONTEXT[k].label; })) : "") +
-      ", each compared with the area's other " + noun + (ctx.length ? "" : " (index and audience only for this audience)") + ". Under " + NF0.format(SMALL_ZIP) + " residents: not scored.";
+    var groups = this.scoreGroups(ctx), inScore = [].concat.apply([], groups), shown = ctx.filter(function (k) { return inScore.indexOf(k) < 0; });
+    var lab = function (k) { return CONTEXT[k].label; };
+    var sig = groups.length ? ", 30% " + (groups.some(function (g) { return g.length > 1; }) ? (groups.length === 2 ? "two" : NF0.format(groups.length)) + " equal groups of area-wide signals (" + groups.map(function (g) { return listAnd(g.map(lab)); }).join("; ") + ")" : listAnd(inScore.map(lab))) : "";
+    return " Score (0\u2013100) ranks " + noun + " within this area: 40% index, 30% " + (this.isEstimate() ? "estimated " : "") + "audience" + sig +
+      ", each compared with the area's other " + noun + (groups.length ? "" : " (index and audience only for this audience)") + "." +
+      (shown.length ? " " + listAnd(shown.map(lab)) + (shown.length > 1 ? " are" : " is") + " shown for context only." : "") + " Under " + NF0.format(SMALL_ZIP) + " residents: not scored.";
   };
 
   /* ---------- Counties: the trade area's ZIPs added up by county ---------- */
@@ -919,7 +933,7 @@
     var k = s.sortKey, nSmall = (k === "idx" || k === "score" || /^x_/.test(k)) ? rows.filter(function (r) { return (r.pop || 0) < SMALL_ZIP; }).length : 0;
     this.tableTitle.textContent = area ? "ZIPs in the custom area" : "ZIPs within " + s.r + " miles";
     this.tableNote.textContent = (rows.length > s.show ? "Showing " + s.show + " of " + NF0.format(rows.length) + " ZIPs. Export includes all." : NF0.format(rows.length) + " ZIPs.") + (nSmall ? " ZIPs under " + NF0.format(SMALL_ZIP) + " residents are listed last." : "") + " Click a column to sort." +
-      (ctx.length ? " " + listAnd(ctx.map(function (k) { return CONTEXT[k].label; })) + (ctx.length > 1 ? " are ZIP-wide rates" : " is a ZIP-wide rate") + (sc ? ", part of the Score but not applied to the audience count" : ", shown for context and not applied to the audience") + "; point to a heading for its source." : "") +
+      (ctx.length ? " " + listAnd(ctx.map(function (k) { return CONTEXT[k].label; })) + (ctx.length > 1 ? " are ZIP-wide rates" : " is a ZIP-wide rate") + (sc ? ", not applied to the audience count (see Score below)" : ", shown for context and not applied to the audience") + "; point to a heading for its source." : "") +
       (sc ? this.scoreNote(ctx, "ZIPs") : "");
     this.thead.innerHTML = "";
     var hr = el("tr");

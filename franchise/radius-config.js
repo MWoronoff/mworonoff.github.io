@@ -33,7 +33,7 @@ window.ADTAXI_RADIUS = {
   }
  ],
  "zipGeo": "../shared/geo/zip/{level}/{id}.json",
- "planScript": "../shared/media-plan.js?v=20261026q",
+ "planScript": "../shared/media-plan.js?v=20261026s",
  "mediaMixUrl": "../media-mix/",
  "planCategory": "none",
  "customArea": true,
@@ -127,7 +127,7 @@ window.ADTAXI_RADIUS = {
   {
    "id": "exec",
    "label": "Master franchise candidates",
-   "note": "Households headed by someone 45–64 earning $125K+, counted directly by Census, including first-time franchise buyers (add 25–44 to widen). ZIP-wide signals of capital and background feed the Score: $200K+ income, capital gains, dividends, self-employment, homes owned free and clear, $500K+ homes, bachelor's degrees and managers.",
+   "note": "Households headed by someone 45–64 earning $125K+, counted directly by Census, including first-time franchise buyers (add 25–44 to widen). ZIP-wide signals feed the Score in two equal groups: affluence ($200K+ income, capital gains) and background (bachelor's degrees, managers). Self-employment and $500K+ homes show for context.",
    "sel": {
     "age": [
      "4564"
@@ -141,18 +141,26 @@ window.ADTAXI_RADIUS = {
    "context": [
     "hi200",
     "cg",
-    "div",
     "selfemp",
-    "nomortg",
-    "val500",
     "ba",
-    "mgmt"
+    "mgmt",
+    "val500"
+   ],
+   "scoreGroups": [
+    [
+     "hi200",
+     "cg"
+    ],
+    [
+     "ba",
+     "mgmt"
+    ]
    ]
   },
   {
    "id": "owner",
    "label": "First-time franchise buyers",
-   "note": "Households headed by someone 25–64 earning $100K+, counted directly by Census: most people who buy a business are 40 to 60, often making a career change. ZIP-wide signals feed the Score: $200K+ income, self-employment, homes owned free and clear and $500K+ homes.",
+   "note": "Households headed by someone 25–64 earning $100K+, counted directly by Census: most people who buy a business are 40 to 60, often making a career change. The ZIP-wide $200K+ income share feeds the Score; self-employment and $500K+ homes show for context.",
    "sel": {
     "age": [
      "2544",
@@ -168,8 +176,12 @@ window.ADTAXI_RADIUS = {
    "context": [
     "hi200",
     "selfemp",
-    "nomortg",
     "val500"
+   ],
+   "scoreGroups": [
+    [
+     "hi200"
+    ]
    ]
   }
  ],
@@ -188,11 +200,11 @@ window.ADTAXI_RADIUS = {
   },
   {
    "title": "ZIP-wide rates",
-   "body": "The $200K+ income, capital gains, dividends and self-employment figures are IRS shares of tax returns in each ZIP. Owned free and clear is the Census share of owner-occupied homes with no mortgage, and $500K+ homes the share valued at $500,000 or more: home equity is a common way to fund a franchise. Bachelor's+ is the Census share of adults 25+ with a bachelor's degree or higher, and Managers is the Census share of employed people in management occupations. They describe the ZIP, not individual households, so they aren't applied to the count; they count toward the Score instead. Census doesn't publish education by age and income for ZIPs, and degrees are far more common among high earners than among all adults, so applying the ZIP rate would badly undercount."
+   "body": "The $200K+ income, capital gains and self-employment figures are IRS shares of tax returns in each ZIP, and $500K+ homes is the Census share of owner-occupied homes valued at $500,000 or more. Bachelor's+ is the Census share of adults 25+ with a bachelor's degree or higher, and Managers is the Census share of employed people in management occupations. They describe the ZIP, not individual households, so they aren't applied to the count; they count toward the Score instead. Census doesn't publish education by age and income for ZIPs, and degrees are far more common among high earners than among all adults, so applying the ZIP rate would badly undercount."
   },
   {
    "title": "Score",
-   "body": "The Score (0–100) ranks the trade area's counties and ZIPs against each other: 40% index (how concentrated candidates are), 30% estimated audience (how many there are) and 30% the profile's ZIP-wide rates, averaged equally ($200K+ income, capital gains, dividends, self-employment, homes owned free and clear, $500K+ homes, bachelor's+ and managers for master franchise candidates; $200K+ income, self-employment, homes owned free and clear and $500K+ homes for first-time buyers). Each part is a percentile among the area's counties or ZIPs, so the same ZIP can score differently in a different trade area. Counties come first, then ZIPs. ZIPs and county parts under 1,000 residents aren't scored."
+   "body": "The Score (0–100) ranks the trade area's counties and ZIPs against each other: 40% index (how concentrated candidates are), 30% estimated audience (how many there are) and 30% the profile's ZIP-wide signals (master franchise candidates: two equal groups, affluence = $200K+ income and capital gains, background = bachelor's+ and managers; first-time buyers: $200K+ income). Grouping keeps overlapping signals from counting twice: across ZIPs, $200K+ income, capital gains and bachelor's+ rise and fall together. Self-employment shows for context only: the IRS count mixes gig and side income with business owners, so it barely varies with income across ZIPs and, in market scores, would lift border and Gulf Coast markets with much gig work rather than places with more franchise candidates. Dividends (which track capital gains almost exactly) and homes owned free and clear (most common in older, rural, lower-value areas, so it ran opposite to candidate concentration) were tested and left out. $500K+ homes shows for context only: it mostly repeats income and tilts toward high-cost areas. Each part is a percentile among the area's counties or ZIPs, so the same ZIP can score differently in a different trade area. Counties come first, then ZIPs. ZIPs and county parts under 1,000 residents aren't scored."
   },
   {
    "title": "Reaching these candidates",
