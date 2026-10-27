@@ -851,52 +851,79 @@
       "Online display ads (banners and pop-up ads)": "online display", "Emailed ad or newsletter": "email" };
     var media = adSub ? adSub.rows.slice().sort(function (a, b) { return b[1] - a[1]; }).slice(0, 4) : [];
     var short = function (t) { return SHORTS[t] || t.replace(/ \(.*\)$/, "").toLowerCase(); };
-    // Narrative, only from the figures above
-    var top2 = incMix.slice().sort(function (a, b) { return b[1] - a[1]; })[0];
-    var story = [];
-    // "25–44" + "45–64" reads as "25 to 64"; anything ending in "65+" as "25 and older"
+    // Layout: one lead sentence, a stat strip, then three columns (Personal, Household, Media and lifestyle).
+    // Every row carries its level: Local (Census counts for this area), ZIP-wide (neighborhood rates) or National (AudienceSCAN).
     var ageSpan = function () { var l = ageMix.map(function (x) { return x[0]; }), lo = l[0].split(/[–+]/)[0], last = l[l.length - 1];
       return /\+$/.test(last) ? lo + " and older" : lo + " to " + last.split("–")[1]; };
-    if (cfg.hhCount) story.push("Households headed by someone " + ageSpan() + ", earning " + (incs.length === 1 ? lab(defs.income8.options, incs[0]) : lab(defs.income8.options, incs[0]).replace(/–.*$/, "") + (incs[incs.length - 1] === "200p" ? "+" : "") ) + (top2 && top2[1] / tot >= 0.4 ? "; the largest group earns " + top2[0] + " (" + pct(top2[1] / tot) + ")" : "") + ".");
-    if (own != null) story.push(pct(own) + " of householders this age here own their home.");
-    if (hood.ba != null) story.push("They live in ZIPs where " + pct(hood.ba) + " of adults have a bachelor's degree (U.S. " + pct(US.ba) + ")" + (hood.sfd != null ? " and " + pct(hood.sfd) + " of homes are single-family detached" : "") + ".");
-    if (media.length >= 3) story.push("Most likely to act on " + short(media[0][0]) + ", " + short(media[1][0]) + " and " + short(media[2][0]) + " ads.");
+    var incTxt = cfg.hhCount ? (incs.length === 1 ? lab(defs.income8.options, incs[0]) : lab(defs.income8.options, incs[0]).replace(/–.*$/, "") + (incs[incs.length - 1] === "200p" ? " or more" : " to " + lab(defs.income8.options, incs[incs.length - 1]).replace(/^.*–/, ""))) : "";
+    var tw = topTowns.slice(0, 3), st = tw.map(function (t) { var m = /,\s*([A-Z]{2})$/.exec(t); return m ? m[1] : ""; });
+    var oneSt = st[0] && st.every(function (x) { return x === st[0]; });
+    if (oneSt) tw = tw.map(function (t) { return t.replace(/,\s*[A-Z]{2}$/, ""); });
+    var list = function (a) { return a.length < 2 ? (a[0] || "") : a.slice(0, -1).join(", ") + " and " + a[a.length - 1]; };
+    var lead = "About " + NF0.format(Math.round(A)) + " households in this area fit the profile" + (cfg.hhCount ? ": householders " + ageSpan() + " earning " + incTxt : "") +
+      (tw.length ? ", most of them in and around " + list(tw) + (oneSt ? ", " + st[0] : "") : "") + ".";
     var title = (P.titles && P.titles[key]) || "Your selected households";
-    var kicker = "Persona \u00b7 " + ((P.kickers && P.kickers[key]) || (prof ? prof.label + " (edited)" : "Custom audience"));
+    var kicker = "Persona · " + ((P.kickers && P.kickers[key]) || (prof ? prof.label + " (edited)" : "Custom audience"));
     box.appendChild(el("summary", null, [el("span", { class: "rz-p-kicker", text: kicker }), el("b", { class: "rz-p-title", text: title })]));
-    box.appendChild(el("p", { class: "rz-p-sub", text: this.describe() + " \u00b7 " + (s.mode === "area" ? "Custom area (" + this.areaPhrase() + ")" : s.r + " miles around " + s.zip) }));
-    box.appendChild(el("p", { class: "rz-p-story", text: story.join(" ") }));
+    box.appendChild(el("p", { class: "rz-p-sub", text: this.describe() + " · " + (s.mode === "area" ? "Custom area (" + this.areaPhrase() + ")" : s.r + " miles around " + s.zip) }));
+    box.appendChild(el("p", { class: "rz-p-story", text: lead }));
     var stat = function (v, t) { return el("div", { class: "rz-p-stat" }, [el("b", { text: v }), el("span", { text: t })]); };
     box.appendChild(el("div", { class: "rz-p-stats" }, [stat(NF0.format(Math.round(A)), (cfg.audienceNoun || "Audience").toLowerCase() + " here"),
-      stat(pct(share), (cfg.shareLabel || "Share of population").toLowerCase()), stat(idx == null ? "\u2014" : NF0.format(idx), "index vs. U.S. (100 = average)"),
-      stat(topTowns.slice(0, 2).join("; ") || "\u2014", "most of these households")]));
-    var row = function (l, v, ref) { return el("div", { class: "rz-p-row" }, [el("span", { text: l }), el("b", null, [v, ref ? el("i", { text: " \u00b7 " + ref }) : null])]); };
-    var col = function (h, tag, kids) { return el("div", { class: "rz-p-col" }, [el("h3", null, [h, el("span", { class: "rz-p-tag", text: tag })])].concat(kids)); };
-    var cols = [];
+      stat(pct(share), (cfg.shareLabel || "Share of population").toLowerCase()), stat(idx == null ? "—" : NF0.format(idx), "index vs. U.S. (100 = average)"),
+      stat(topTowns.slice(0, 2).join("; ") || "—", "most of these households")]));
+    var LV = { L: ["Local", "rz-lv-l"], Z: ["ZIP-wide", "rz-lv-z"], N: ["National", "rz-lv-n"] };
+    var row = function (l, v, ref, lv) { return el("div", { class: "rz-p-row" }, [el("span", null, [l, lv ? el("em", { class: "rz-lv " + LV[lv][1], text: LV[lv][0] }) : null]), el("b", null, [v, ref ? el("i", { text: " · " + ref }) : null])]); };
+    var sub = function (t) { return el("p", { class: "rz-p-lab", text: t }); };
+    var col = function (h, kids) { return el("div", { class: "rz-p-col" }, [el("h3", { text: h })].concat(kids.filter(Boolean))); };
+    var it = {}; if (nat) nat.items.forEach(function (x) { it[x[0]] = x; });
+    var natRow = function (k, label) { var x = it[k]; return x ? row(label || k, x[1] + "%", "all adults " + x[2] + "%", "N") : null; };
+    var hoodRow = function (k) { var d = PERSONA_RATES.filter(function (x) { return x[0] === k; })[0]; return d && hood[k] != null && (P.rates || []).indexOf(k) >= 0 ? row(d[1], pct(hood[k]), "U.S. " + pct(US[k]), "Z") : null; };
+    // Each column: a short narrative (figures from the data, source said in words), then a few key bullets
+    var story = function (parts) { parts = parts.filter(Boolean); return parts.length ? el("p", { class: "rz-p-narr", text: parts.join(" ") }) : null; };
+    var vs = function (k) { return pct(hood[k]) + " vs. " + pct(US[k]) + " nationally"; };
+    var has = function (k) { return hood[k] != null && (P.rates || []).indexOf(k) >= 0; };
+    var lower1 = function (t) { return t.replace(/^./, function (y) { return y.toLowerCase(); }); };
+    // 1. Personal
+    var pN = [];
+    if (cfg.hhCount) pN.push("Householders are " + ageSpan() + (ageMix.length > 1 ? ", with the largest share " + ageMix.slice().sort(function (a, b) { return b[1] - a[1]; })[0][0] + " (" + pct(ageMix.slice().sort(function (a, b) { return b[1] - a[1]; })[0][1] / tot) + ")" : "") + ".");
+    if (it["Men"]) pN.push("In national surveys of the closest groups, men make up " + it["Men"][1] + "% (all adults " + it["Men"][2] + "%).");
+    if (has("ba")) pN.push("They live in well-educated neighborhoods, where " + pct(hood.ba) + " of adults hold a bachelor's degree" + (has("grad") ? " and " + pct(hood.grad) + " a graduate degree" : "") + " (U.S. " + pct(US.ba) + (has("grad") ? " and " + pct(US.grad) : "") + ")" + (has("mgmt") ? ", and " + pct(hood.mgmt) + " of workers hold management jobs (U.S. " + pct(US.mgmt) + ")" : "") + ".");
+    var personal = [story(pN)];
+    if (cfg.hhCount) personal.push(row("Householder age", ageMix.length > 1 ? ageMix.map(function (x) { return x[0] + " " + pct(x[1] / tot); }).join(", ") : ageMix[0][0], null, "L"));
+    personal.push(natRow("Men", "Men"), hoodRow("ba"), hoodRow("mgmt"));
+    // 2. Household
+    var hN = [];
+    if (cfg.hhCount) { var topI = incMix.slice().sort(function (a, b) { return b[1] - a[1]; })[0];
+      hN.push("They earn " + incTxt + (incs.length > 1 && topI ? ", and the largest share earns " + topI[0] + " (" + pct(topI[1] / tot) + ")" : "") + "."); }
+    if (own != null) hN.push("Among householders this age here, " + pct(own) + " own their home.");
+    var wealth = ["val500", "hi200", "cg"].filter(has).map(function (k) { return { val500: "$500K+ homes", hi200: "$200K+ tax returns", cg: "capital gains" }[k] + " (" + vs(k) + ")"; });
+    if (wealth.length) hN.push("Their ZIPs stand out for " + list(wealth) + ".");
+    var fam = []; if (has("married")) fam.push(pct(hood.married) + " are married couples"); if (has("kids")) fam.push(pct(hood.kids) + " have children at home");
+    if (fam.length) hN.push("Of the households around them, " + list(fam) + (has("sfd") ? ", and " + pct(hood.sfd) + " of homes are single-family detached" : "") + ".");
+    var household = [story(hN)];
     if (cfg.hhCount) {
       var bar = el("div", { class: "rz-p-bar" }, incMix.filter(function (x) { return x[1] > 0; }).map(function (x, i) {
         return el("div", { style: "flex:" + x[1] + ";opacity:" + (0.45 + 0.55 * (i + 1) / incMix.length), title: x[0] + ": " + pct(x[1] / tot) }, [x[1] / tot >= 0.12 ? pct(x[1] / tot) : ""]); }));
-      cols.push(col("The household", direct ? "This group \u00b7 Census, counted directly" : "This group \u00b7 Census", [
-        el("p", { class: "rz-p-lab", text: "Household income" }), bar,
-        el("p", { class: "rz-p-legend", text: incMix.filter(function (x) { return x[1] > 0; }).map(function (x) { return x[0] + " " + pct(x[1] / tot); }).join(" \u00b7 ") }),
-        row("Householder age", ageMix.length > 1 ? ageMix.map(function (x) { return x[0] + " " + pct(x[1] / tot); }).join(", ") : ageMix[0][0]),
-        own != null ? row("Own their home", pct(own), "householders this age, all incomes") : null,
-        P.capital ? row(P.capital[0], P.capital[1]) : null]));
+      household.push(el("p", { class: "rz-p-lab" }, ["Household income", el("em", { class: "rz-lv rz-lv-l", text: "Local" })]), bar,
+        el("p", { class: "rz-p-legend", text: incMix.filter(function (x) { return x[1] > 0; }).map(function (x) { return x[0] + " " + pct(x[1] / tot); }).join(" · ") }));
     }
-    cols.push(col("Their neighborhoods", "ZIP-wide, weighted to where they live", PERSONA_RATES.filter(function (d) { return hood[d[0]] != null && (P.rates || []).indexOf(d[0]) >= 0; })
-      .map(function (d) { return row(d[1], pct(hood[d[0]]), "U.S. " + pct(US[d[0]])); })));
-    var natKids = [];
-    if (nat) {
-      nat.items.forEach(function (it) { natKids.push(row(it[0], it[1] + "%", "all adults " + it[2] + "%")); });
-      if (nat.mindset) { natKids.push(el("p", { class: "rz-p-lab", text: nat.mindset.title })); nat.mindset.items.forEach(function (it) { natKids.push(row(it[0], it[1] + "%", "all adults " + it[2] + "%")); }); }
+    if (own != null) household.push(row("Own their home", pct(own), "householders this age", "L"));
+    household.push(hoodRow("val500"), hoodRow("married"));
+    if (P.capital) household.push(row(P.capital[0], P.capital[1]));
+    // 3. Media and lifestyle
+    var oN = [];
+    if (media.length >= 3) oN.push("They act on ads more often than the average adult, led by " + short(media[0][0]) + " (" + media[0][1] + "% vs. " + media[0][2] + "%), then " + list(media.slice(1, 3).map(function (m) { return short(m[0]); })) + ".");
+    if (it["Live in a city"] && it["Live in a suburb"]) oN.push("Nationally, the closest groups lean " + (it["Live in a city"][1] > it["Live in a suburb"][1] ? "urban: " + it["Live in a city"][1] + "% live in a city and " + it["Live in a suburb"][1] + "% in a suburb." : "suburban: " + it["Live in a suburb"][1] + "% live in a suburb and " + it["Live in a city"][1] + "% in a city."));
+    if (nat && nat.mindset && nat.mindset.items.length) { var g = nat.mindset.items[0];
+      oN.push("Small business owners nationally are " + NF0.format((g[1] / g[2] - 1) * 100) + "% more likely than all adults to " + lower1(g[0]).replace(/^want to /, "want to ") + " (" + g[1] + "% vs. " + g[2] + "%).");
     }
-    if (media.length) {
-      natKids.push(el("p", { class: "rz-p-lab", text: "Acted on an ad in the past 30 days" }));
-      media.forEach(function (m) { natKids.push(row(short(m[0]).replace(/^./, function (x) { return x.toUpperCase(); }), m[1] + "%", "all adults " + m[2] + "%")); });
-    }
-    if (natKids.length) cols.push(col("Who they are and how they respond", nat ? nat.tag : "National survey", natKids));
-    box.appendChild(el("div", { class: "rz-p-cols" }, cols));
-    box.appendChild(el("p", { class: "rz-p-note", text: "Composite portrait for planning. \u201cThis group\u201d figures are Census counts of the selected households; \u201cZIP-wide\u201d figures describe the neighborhoods where they live, each ZIP weighted by how many of these households it holds (higher-income households usually exceed their neighborhood on education and income); national figures are AudienceSCAN survey results for the closest groups" + (nat && nat.weights ? " (" + nat.weights + ")" : "") + ". Census doesn't publish a householder's gender or net worth with age and income by ZIP. It describes a group of households, not an individual." + (P.source ? " " + P.source : "") }));
+    var other = [story(oN)];
+    if (media.length) { other.push(sub("Acted on an ad in the past 30 days"));
+      media.forEach(function (m) { other.push(row(short(m[0]).replace(/^./, function (x) { return x.toUpperCase(); }), m[1] + "%", "all adults " + m[2] + "%", "N")); }); }
+    if (nat && nat.mindset && nat.mindset.items.length > 1) other.push(sub(nat.mindset.title));
+    if (nat && nat.mindset) nat.mindset.items.slice(1).forEach(function (x) { other.push(row(x[0], x[1] + "%", "all adults " + x[2] + "%", "N")); });
+    box.appendChild(el("div", { class: "rz-p-cols" }, [col("Personal", personal), col("Household", household), col("Media and lifestyle", other)]));
+    box.appendChild(el("p", { class: "rz-p-note", text: "Composite portrait for planning. Local: Census counts of the selected households in this area. ZIP-wide: the neighborhoods where they live, each ZIP weighted by how many of these households it holds (higher-income households usually exceed their neighborhood on education and income). National: AudienceSCAN survey results for the closest groups" + (nat && nat.weights ? " (" + nat.weights + ")" : "") + "; the same in every market. Census doesn't publish a householder's gender or net worth with age and income by ZIP. It describes a group of households, not an individual." + (P.source ? " " + P.source : "") }));
   };
   // Context columns for the current preset (or the tool's default list when no preset is chosen)
   Radius.prototype.contextKeys = function () {
