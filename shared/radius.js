@@ -418,7 +418,7 @@
 
     this.zipIn = el("input", { type: "text", inputmode: "search", list: "rz-towns", placeholder: "ZIP or town", "aria-label": "Center ZIP or town", value: s.zip,
       onchange: function () { self.setCenter(this.value); }, onkeydown: function (e) { if (e.key === "Enter") self.setCenter(this.value); },
-      oninput: function () { self.suggest(this.value); } });
+      oninput: function () { self.suggest(this.value); var v = this.value.trim(); if (/^\d{5}$/.test(v) && self.byZip && self.byZip[v] !== undefined && v !== self.state.zip) self.setCenter(v); } });   // a full ZIP applies as soon as it is typed
     this.towns = el("datalist", { id: "rz-towns" });
     this.rSel = el("select", { "aria-label": "Radius", onchange: function () { s.r = +this.value; self.update(true); } },
       (function () {
