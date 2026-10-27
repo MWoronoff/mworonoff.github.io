@@ -33,7 +33,7 @@ window.ADTAXI_RADIUS = {
   }
  ],
  "zipGeo": "../shared/geo/zip/{level}/{id}.json",
- "planScript": "../shared/media-plan.js?v=20261027b",
+ "planScript": "../shared/media-plan.js?v=20261027c",
  "mediaMixUrl": "../media-mix/",
  "planCategory": "none",
  "customArea": true,
@@ -48,6 +48,7 @@ window.ADTAXI_RADIUS = {
     "prog": false,
     "term": 3,
     "color": "#0a66c2",
+    "placeholder": true,
     "job": "Reaches professionals by job title, seniority, industry and company size: the closest match to the executives and business owners who buy franchises, with lead forms that fill from their profiles."
    }
   },
@@ -64,6 +65,9 @@ window.ADTAXI_RADIUS = {
   },
   "minimums": {
    "linkedin": 3000
+  },
+  "mgmtPct": {
+   "linkedin": 0.2
   },
   "cpm": {
    "linkedin": 45

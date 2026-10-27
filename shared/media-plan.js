@@ -124,7 +124,7 @@
     }
     if (pct == null) return { kind: "none", media: media, total: media };
     if (total == null) total = Math.round(media / (1 - pct));
-    return { kind: "fee", pct: pct, media: media, fee: total - media, total: total };
+    return { kind: "fee", pct: pct, media: media, fee: total - media, total: total, placeholder: !!ch.placeholder };
   }
   /* Plan totals with fees added: media (the budget), fees, and total cost */
   function feeSummary(items) {
@@ -139,7 +139,7 @@
   }
   function usd0(x) { return "$" + Math.round(x).toLocaleString("en-US"); }
   function feeLine(f) {
-    if (f.kind === "fee") return "Media " + usd0(f.media) + " + management fee " + usd0(f.fee) + " (" + Math.round(f.pct * 1000) / 10 + "% of total) = " + usd0(f.total);
+    if (f.kind === "fee") return "Media " + usd0(f.media) + " + management fee " + usd0(f.fee) + " (" + Math.round(f.pct * 1000) / 10 + "% of total" + (f.placeholder ? ", placeholder rate" : "") + ") = " + usd0(f.total);
     if (f.kind === "cpm") return MGMT.cpmNote;
     return MGMT.unknownNote;
   }
@@ -385,7 +385,7 @@
         else feeCell = [input(R.pct[id], true, DEFAULTS.pct[id], function (v) { var o = currentRates(), x = String(v).trim() === "" ? null : num(v, 0, 90); if (x == null) delete o.pct[id]; else o.pct[id] = x / 100; setRates(o); }), "%"];
         var cpmCell = id in R.cpm ? ["$", field(R.cpm[id], DEFAULTS.cpm[id], 2, 1, ch.label + " CPM", function (v) { var o = currentRates(); o.cpm[id] = v; setRates(o); })]
                     : [id === "search" || id === "social" ? "Below" : "—"];
-        tbody.appendChild(E("tr", null, [E("td", { text: ch.label + (id === "search" ? " (under $3K / $3K+)" : "") }), E("td", null, minCell), E("td", null, feeCell), E("td", null, cpmCell)]));
+        tbody.appendChild(E("tr", null, [E("td", { text: ch.label + (id === "search" ? " (under $3K / $3K+)" : "") + (ch.placeholder ? " (placeholder rates)" : "") }), E("td", null, minCell), E("td", null, feeCell), E("td", null, cpmCell)]));
       });
       flag.textContent = customRates() ? " · custom rates in use" : "";
     }
@@ -402,7 +402,7 @@
 
   /* Page-level channels: a page can add a channel of its own (e.g. LinkedIn on the Franchise analyzer only). Each page
      loads its own copy of this file, so nothing changes on other pages or in the Media Mix Planner.
-     x: { channels: { id: {label, short, role, prog, color, job} }, weights: { strategyId: { id: weight } },
+     x: { channels: { id: {label, short, role, prog, color, job, placeholder (rates not yet confirmed)} }, weights: { strategyId: { id: weight } },
           minimums: { id: $ }, mgmtPct: { id: share }, cpm: { id: benchmark CPM }, tiers: [service tier labels offering it] } */
   function extend(x) {
     if (!x) return;
