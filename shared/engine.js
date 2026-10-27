@@ -927,7 +927,7 @@
     }
     if (window.AdtaxiRadius) go();
     else {
-      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261027f";   // version tag: browsers fetch the new file after an update
+      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261027m";   // version tag: browsers fetch the new file after an update
       sc.onload = go; sc.onerror = function () { self.showError("The radius tool didn't load. Refresh the page and try again."); };
       document.head.appendChild(sc);
     }
@@ -1251,10 +1251,14 @@
     if (br.length) {
       var lo = values.filter(function (x) { return typeof x === "number"; });
       var bounds = [Math.min.apply(null, lo)].concat(br).concat([Math.max.apply(null, lo)]);
+      // Close values can round to the same whole number ("43 – 43"); show one decimal for those legends
+      var lab = function (x) { return fmt(x, m.format); };
+      if (["score", "index", "int", undefined].indexOf(m.format) >= 0 && bounds.some(function (x, j) { return j > 0 && lab(x) === lab(bounds[j - 1]); }))
+        lab = function (x) { return NF1.format(x); };
       for (var i = 4; i >= 0; i--) {
         this.legend.appendChild(el("div", { class: "az-legend-row" }, [
           el("span", { class: "az-swatch", style: "background:" + colors[i] }),
-          el("span", { class: "num", text: fmt(bounds[i], m.format) + " – " + fmt(bounds[i + 1], m.format) })
+          el("span", { class: "num", text: lab(bounds[i]) + " – " + lab(bounds[i + 1]) })
         ]));
       }
     }

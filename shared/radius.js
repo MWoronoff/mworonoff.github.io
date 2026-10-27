@@ -503,7 +503,9 @@
       el("div", { class: "az-tablewrap" }, [el("table", { class: "az-table" }, [this.thead, this.tbody])])]);
     this.modalBody = el("div", { class: "az-modal-body" });
     this.modal = el("dialog", { class: "az-modal", "aria-labelledby": "rz-method-title" }, [this.modalBody]);
-    var sources = el("section", { class: "az-panel az-sources" }, [el("h2", { text: "Sources" }), this.sourcesP = el("p")]);
+    var sources = el("section", { class: "az-panel az-sources" }, [el("h2", { text: "Sources" }), this.sourcesP = el("p"),
+      el("p", { class: "az-disclaimer", text: cfg.disclaimer || "Estimates for planning. Scores and figures are modeled from public government and licensed third-party data." }),
+      el("p", { class: "az-version", text: "Adtaxi Market Analyzers · " + (cfg.version || "Fall 2026") })]);
     this.budgetBox = this.buildBudget();
 
     // Order: who and where (map, ZIPs) -> how they respond (ad response, category ad spend) -> Recommended allocation

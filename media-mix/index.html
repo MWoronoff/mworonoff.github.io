@@ -324,7 +324,7 @@ var P = window.AdtaxiPlan, CHANNELS = P.CHANNELS, ROLES = P.ROLES, STRATEGIES = 
   }
 
   function render() {
-    var c = CATEGORIES.filter(function (x) { return x.id === catSel.value; })[0];
+    var c = CATEGORIES.filter(function (x) { return x.id === catSel.value && !x.pending; })[0];
     var s = STRATEGIES.filter(function (x) { return x.id === stratSel.value; })[0];
     var ready = !!(c && s), budget = readBudget();
     var sheet = $("sheet"); sheet.innerHTML = "";
@@ -337,6 +337,7 @@ var P = window.AdtaxiPlan, CHANNELS = P.CHANNELS, ROLES = P.ROLES, STRATEGIES = 
     // Both frames always show; data fills in once both selections are made
     sheet.appendChild(el("div", { class: "mm-grid" }, [categoryPanel(ready ? c : null), planPanel(ready ? c : null, ready ? s : null, budget)]));
     sheet.appendChild(el("p", { class: "mm-foot", text: "A starting point for discussion, not a package: the right mix depends on the objective, geography, audience and competition. Estimates for planning. Category figures are national (EMARKETER 2026); scores and figures are modeled from public government and licensed third-party data." }));
+    sheet.appendChild(el("p", { class: "mm-foot", text: "Adtaxi Market Analyzers \u00b7 Fall 2026" }));
   }
   catSel.addEventListener("change", render); stratSel.addEventListener("change", render);
   // Editable rates (minimums and fees), saved on this device; the plan recalculates on every change
@@ -348,7 +349,7 @@ var P = window.AdtaxiPlan, CHANNELS = P.CHANNELS, ROLES = P.ROLES, STRATEGIES = 
   $("print").addEventListener("click", function () { window.print(); });
   // Email: opens the user's email program with a plain-text summary and a link back to this plan
   function mailtoLink() {
-    var c = CATEGORIES.filter(function (x) { return x.id === catSel.value; })[0];
+    var c = CATEGORIES.filter(function (x) { return x.id === catSel.value && !x.pending; })[0];
     var s = STRATEGIES.filter(function (x) { return x.id === stratSel.value; })[0];
     if (!c || !s) return null;
     var budget = readBudget(), plan = buildPlan(s, budget), withDollars = budget && plan.tier;
