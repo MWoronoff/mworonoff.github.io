@@ -333,12 +333,14 @@
   function parseMoney(t) { var v = parseFloat(String(t || "").replace(/[$,\s]/g, "")); return isFinite(v) && v > 0 ? v : null; }
 
   // Budget split: each ZIP's share follows its estimated audience (or audience x index, to lean toward above-average ZIPs).
+  // by "score" (sites with cfg.blendScore): the ZIPs are picked in Score order, the same ranking as the ZIP table, and each
+  // one's share follows audience x Score, so a larger ZIP with the same Score gets more. Unscored (tiny) ZIPs are left out.
   // Whole dollars that add up exactly to the budget (largest remainders get the leftover dollars).
   function splitBudget(rows, budget, by, n) {
-    var pick = rows.filter(function (r) { return r.aud != null && r.aud > 0; }).map(function (r) {
-      return { r: r, w: by === "weighted" ? r.aud * (r.idx == null ? 1 : r.idx / 100) : r.aud };
+    var pick = rows.filter(function (r) { return r.aud != null && r.aud > 0 && (by !== "score" || r.score != null); }).map(function (r) {
+      return { r: r, w: by === "score" ? r.aud * Math.max(r.score, 1) / 100 : by === "weighted" ? r.aud * (r.idx == null ? 1 : r.idx / 100) : r.aud };
     }).filter(function (x) { return x.w > 0; });
-    pick.sort(function (a, b) { return b.w - a.w; });
+    pick.sort(by === "score" ? function (a, b) { return (b.r.score - a.r.score) || (b.r.aud - a.r.aud); } : function (a, b) { return b.w - a.w; });
     if (n) pick = pick.slice(0, n);
     var W = pick.reduce(function (t, x) { return t + x.w; }, 0);
     pick.forEach(function (x) { x.share = W ? x.w / W : 0; });
@@ -1141,14 +1143,16 @@
     return out.map(function (o) { return o.v; });
   }
   Radius.prototype.buildBudget = function () {
-    var self = this, b = this.budget = { amount: null, by: "aud", n: 10, strat: "", fees: false };
+    var sc = !!this.cfg.blendScore;
+    var self = this, b = this.budget = { amount: null, by: sc && this.cfg.spreadBy === "score" ? "score" : "aud", n: 10, strat: "", fees: false };
     this.bAmount = el("input", { type: "text", inputmode: "decimal", placeholder: "$ per month", "aria-label": "Monthly budget",
       oninput: function () { b.amount = parseMoney(this.value); self.renderBudget(); },
       onchange: function () { if (b.amount) this.value = money(b.amount); } });
     this.bStrat = el("select", { "aria-label": "Media strategy", onchange: function () { b.strat = this.value; self.renderBudget(); } },
       [el("option", { value: "", text: "Choose a strategy" })]);
     var bySel = el("select", { "aria-label": "Spread by", onchange: function () { b.by = this.value; self.renderBudget(); } },
-      [["aud", "Audience size"], ["weighted", "Audience size, favoring above-average ZIPs"]].map(function (o) { return el("option", { value: o[0], text: o[1] }); }));
+      (sc ? [["score", "Score (same ranking as the ZIP table)"]] : []).concat([["aud", "Audience size"], ["weighted", "Audience size, favoring above-average ZIPs"]]).map(function (o) { return el("option", { value: o[0], text: o[1] }); }));
+    bySel.value = b.by;
     var nSel = el("select", { "aria-label": "ZIPs to include", onchange: function () { b.n = +this.value; self.renderBudget(); } },
       [[5, "Top 5 ZIPs"], [10, "Top 10 ZIPs"], [15, "Top 15 ZIPs"], [25, "Top 25 ZIPs"], [0, "All ZIPs shown"]].map(function (o) { return el("option", { value: o[0], text: o[1] }); }));
     nSel.value = "10";
@@ -1195,7 +1199,11 @@
         this.bFee])]);
   };
   Radius.prototype.budgetRows = function () {
-    return this.rows ? splitBudget(this.visible(), null, this.budget.by, this.budget.n) : [];
+    if (!this.rows) return [];
+    var rows = this.visible();
+    // ZIP Scores: the county view shows first, so score the ZIPs here too (same rows and signals as the ZIP table)
+    if (this.budget.by === "score" && this.cfg.blendScore) this.addScore(rows, this.addContext(rows));
+    return splitBudget(rows, null, this.budget.by, this.budget.n);
   };
   // Everything the allocation shows: ZIP shares, fee math, channel plan and dollars per ZIP per channel
   Radius.prototype.allocation = function () {
@@ -1291,28 +1299,29 @@
 
     // By ZIP
     this.bHead.innerHTML = "";
-    var heads = [["ZIP", 1], ["Town", 1], [est ? "Est. audience" : "Audience"], ["Index"], ["Share"]];
+    var bySc = b.by === "score";
+    var heads = [["ZIP", 1], ["Town", 1]].concat(bySc ? [["Score"]] : []).concat([[est ? "Est. audience" : "Audience"], ["Index"], ["Share"]]);
     chans.forEach(function (c) { heads.push([c.ch.short]); });
     heads.push([chans.length ? "Monthly total" : "Monthly amount"]);
     this.bHead.appendChild(el("tr", null, heads.map(function (h) { return el("th", { scope: "col", class: h[1] ? "rz-l" : null, text: h[0] }); })));
     this.bBody.innerHTML = "";
     var frag = document.createDocumentFragment();
     pick.forEach(function (x, i) {
-      var tds = [el("td", { class: "rz-l num", text: x.r.zip }), el("td", { class: "rz-l", text: x.r.town }),
+      var tds = [el("td", { class: "rz-l num", text: x.r.zip }), el("td", { class: "rz-l", text: x.r.town })].concat(bySc ? [el("td", { class: "num", style: "font-weight:600", text: NF0.format(x.r.score) })] : []).concat([
         el("td", { class: "num", text: NF0.format(Math.round(x.r.aud)) }), el("td", { class: "num", text: x.r.idx == null ? "\u2014" : NF0.format(x.r.idx) }),
-        el("td", { class: "num", text: NF1.format(x.share * 100) + "%" })];
+        el("td", { class: "num", text: NF1.format(x.share * 100) + "%" })]);
       chans.forEach(function (c) { tds.push(el("td", { class: "num", text: money(c.byZip[i]) })); });
       tds.push(el("td", { class: "num rz-alloc-strong", text: x.amt != null ? money(x.amt) : "\u2014" }));
       frag.appendChild(el("tr", null, tds));
     });
     if (A.withDollars) {
-      var tot = [el("td", { class: "rz-l", text: "Total" }), el("td"), el("td"), el("td"), el("td", { class: "num", text: "100%" })];
+      var tot = [el("td", { class: "rz-l", text: "Total" }), el("td"), el("td"), el("td")].concat(bySc ? [el("td")] : []).concat([el("td", { class: "num", text: "100%" })]);
       chans.forEach(function (c) { tot.push(el("td", { class: "num", text: money(c.cost != null ? c.cost : c.dollars) })); });
       tot.push(el("td", { class: "num", text: money(pick.reduce(function (t, x) { return t + x.amt; }, 0)) }));
       frag.appendChild(el("tr", { class: "rz-alloc-total" }, tot));
     }
     this.bBody.appendChild(frag);
-    this.bNote.textContent = (b.by === "weighted" ? "Each ZIP's share follows its estimated audience times its index, so above-average ZIPs get more. " : "Each ZIP's share follows its estimated audience. ") +
+    this.bNote.textContent = (b.by === "score" ? "ZIPs are picked by Score, the same ranking as the ZIP table, and each one's share follows its estimated audience times its Score, so a larger ZIP with the same Score gets more. ZIPs under " + NF0.format(SMALL_ZIP) + " residents aren't scored and are left out. " : b.by === "weighted" ? "Each ZIP's share follows its estimated audience times its index, so above-average ZIPs get more. " : "Each ZIP's share follows its estimated audience. ") +
       (!b.amount ? "Enter a monthly budget to see dollar amounts. " : "") + (!A.strat ? "Choose a media strategy to split by channel. " : "") +
       (chans.length ? "Channel minimums apply to each channel's monthly total, not to each ZIP. " : "") +
       "A planning recommendation; final targeting is set by platform.";
@@ -1334,7 +1343,7 @@
     chans.forEach(function (c) { head.push(c.ch.label); });
     head.push("Monthly total", "Media strategy", "Spread by", "Audience definition");
     var lines = [head.map(csvCell).join(",")];
-    var by = b.by === "weighted" ? "Audience x index" : "Audience", def = this.describe(), st = A.strat ? A.strat.label : "";
+    var by = b.by === "score" ? "Score (ZIPs picked by Score; share = audience x Score)" : b.by === "weighted" ? "Audience x index" : "Audience", def = this.describe(), st = A.strat ? A.strat.label : "";
     pick.forEach(function (x, i) {
       var row = [x.r.zip, x.r.town, Math.round(x.r.aud), x.r.idx == null ? "" : Math.round(x.r.idx), (x.share * 100).toFixed(1) + "%"];
       chans.forEach(function (c) { row.push(c.byZip[i]); });
@@ -1473,7 +1482,7 @@
     var pAud = 0, pPop = 0; A.pick.forEach(function (x) { pAud += x.r.aud || 0; pPop += x.r.base || 0; });
     var pIdx = pPop && this.natRate ? pAud / pPop / this.natRate * 100 : null, pShare = aud ? pAud / aud : null;
     var conc = A.pick.length < rows.length && pShare != null
-      ? "Geo-targeted to the " + A.pick.length + " ZIPs that hold " + Math.round(pShare * 100) + "% of the trade area's " + audienceNoun + (pIdx ? " (index " + Math.round(pIdx) + ")" : "") + "."
+      ? "Geo-targeted to the " + (this.budget.by === "score" ? "top " + A.pick.length + " ZIPs by Score, which hold " : A.pick.length + " ZIPs that hold ") + Math.round(pShare * 100) + "% of the trade area's " + audienceNoun + (pIdx ? " (index " + Math.round(pIdx) + ")" : "") + "."
       : "Geo-targeted to the trade area's " + rows.length + " ZIPs" + (idx ? " (index " + Math.round(idx) + ")" : "") + ".";
     var adRows = adSub && adSub.rows ? adSub.rows.slice().sort(function (a, z) { return z[1] - a[1]; }) : [];
     var usedConc = false;

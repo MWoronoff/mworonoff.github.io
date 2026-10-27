@@ -33,7 +33,7 @@ window.ADTAXI_RADIUS = {
   }
  ],
  "zipGeo": "../shared/geo/zip/{level}/{id}.json",
- "planScript": "../shared/media-plan.js?v=20261027c",
+ "planScript": "../shared/media-plan.js?v=20261027d",
  "mediaMixUrl": "../media-mix/",
  "planCategory": "none",
  "customArea": true,
@@ -80,6 +80,7 @@ window.ADTAXI_RADIUS = {
  },
  "ageSet": "householder",
  "hhCount": true,
+ "spreadBy": "score",
  "persona": {
   "titles": {
    "exec": "The established executive household",

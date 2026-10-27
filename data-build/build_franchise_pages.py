@@ -7,7 +7,7 @@ import glob, json, os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-V = "20261027c"   # version tag for the shared engine files on these pages (keep in step with the other analyzers)
+V = "20261027d"   # version tag for the shared engine files on these pages (keep in step with the other analyzers)
 
 SUBS = [{"id": "exec", "label": "Master franchise candidates"}, {"id": "owner", "label": "First-time franchise buyers"}]
 # AudienceSCAN 2026, Small Business Owners (4.5% of U.S. adults): saw or heard an ad of each type that led them to take
@@ -203,7 +203,7 @@ def radius_cfg(title, export, depth, links):
                                                  "job": "Reaches professionals by job title, seniority, industry and company size: the closest match to the executives and business owners who buy franchises, with lead forms that fill from their profiles."}},
                        "weights": {"leads": {"linkedin": 28}, "awareness": {"linkedin": 10}, "growth": {"linkedin": 15}},
                        "minimums": {"linkedin": 3000}, "mgmtPct": {"linkedin": 0.20}, "cpm": {"linkedin": 45}, "tiers": ["Tier 3", "Tier 2", "Strategic"]},
-        "ageSet": "householder", "hhCount": True, "persona": PERSONA,
+        "ageSet": "householder", "hhCount": True, "spreadBy": "score", "persona": PERSONA,
         # Households counted directly (Census B19037); share and index are against all households
         "audienceUnit": "households", "shareLabel": "Share of households", "shareShort": "Share", "radii": [5, 10, 15, 25, 50, 100], "radiusLabel": "Up to {r} miles",
         "filters": ["age", "income8", "veterans"],
