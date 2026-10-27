@@ -113,8 +113,7 @@ def persona_national(sub):
 
 
 PERSONA = {
-    "titles": {"exec": "The established executive household", "owner": "The established professional household"},
-    "kickers": {"exec": "Master franchise candidate household", "owner": "First-time franchise buyer household"},
+    "titles": {"exec": "Master Franchisee target", "owner": "First-Time Franchisee target"},
     "rates": ["ba", "grad", "mgmt", "hi200", "cg", "married", "kids", "sfd", "val500", "vets"],
     "national": {"exec": persona_national("exec"), "owner": persona_national("owner")},
     "source": "Sources: Census ACS 5-year 2020–2024, IRS Statistics of Income 2022, 2026 AudienceSCAN® (Executive Managers, Financial/Retirement Planning Clients and Small Business Owners).",

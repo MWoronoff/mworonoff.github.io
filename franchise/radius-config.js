@@ -78,12 +78,8 @@ window.ADTAXI_RADIUS = {
  "hhCount": true,
  "persona": {
   "titles": {
-   "exec": "The established executive household",
-   "owner": "The established professional household"
-  },
-  "kickers": {
-   "exec": "Master franchise candidate household",
-   "owner": "First-time franchise buyer household"
+   "exec": "Master Franchisee target",
+   "owner": "First-Time Franchisee target"
   },
   "rates": [
    "ba",
