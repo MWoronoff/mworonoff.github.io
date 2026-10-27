@@ -444,6 +444,7 @@
         }))]),
       el("div", { class: "az-actions" }, [
         el("button", { type: "button", class: "az-btn", text: "How estimates work", onclick: function () { self.openMethod(); } }),
+        cfg.persona ? el("button", { type: "button", class: "az-btn", text: "Persona", title: "A one-page portrait of the selected households in this area", onclick: function () { self.openPersona(); } }) : null,
         exportMenu([
           { label: "Leave-behind (PDF)", note: "A clean page of this trade area to send after the meeting", run: function () { self.leaveBehind(); } },
           { label: "ZIP list (CSV)", note: "Every ZIP in the area for a spreadsheet", run: function () { self.exportCSV(); } }])])]);
@@ -505,9 +506,14 @@
 
     // Order: who and where (map, ZIPs) -> how they respond (ad response, category ad spend) -> Recommended allocation
     // Persona (sites with cfg.persona): a composite portrait of the selected households, between the map and the rankings
-    this.personaBox = cfg.persona ? el("details", { class: "az-panel rz-persona", open: true, hidden: true }) : null;
-    var main = el("main", { class: "az-main" }, [controls, this.areaPanel, this.errorBox, el("section", { class: "rz-stage" }, [this.filterPanel, right]), this.personaBox, table, this.extra, this.budgetBox, sources]);
+    // Opened with the Persona button; kept up to date with every selection while closed
+    this.personaBox = cfg.persona ? el("div", { class: "rz-persona", hidden: true }) : null;
+    this.personaDlg = cfg.persona ? el("dialog", { class: "az-modal rz-persona-dlg", "aria-label": "Persona" }, [el("div", { class: "rz-persona-bar" }, [
+      el("button", { type: "button", class: "az-btn primary", text: "Print or save as PDF", onclick: function () { self.printPersona(); } }),
+      el("button", { type: "button", class: "az-modal-close", "aria-label": "Close", text: "\u00d7", onclick: function () { self.personaDlg.close(); } })]), this.personaBox]) : null;
+    var main = el("main", { class: "az-main" }, [controls, this.areaPanel, this.errorBox, el("section", { class: "rz-stage" }, [this.filterPanel, right]), table, this.extra, this.budgetBox, sources]);
     this.root.innerHTML = ""; if (header) this.root.appendChild(header); this.root.appendChild(main); this.root.appendChild(this.modal);
+    if (this.personaDlg) this.root.appendChild(this.personaDlg);
     this.rSel.value = s.r ? String(s.r) : ""; this.minSel.value = String(s.minIndex);
     this.syncFilters();
 
@@ -864,7 +870,7 @@
       (tw.length ? ", most of them in and around " + list(tw) + (oneSt ? ", " + st[0] : "") : "") + ".";
     var title = (P.titles && P.titles[key]) || "Your selected households";
     var kicker = "Persona · " + ((P.kickers && P.kickers[key]) || (prof ? prof.label + " (edited)" : "Custom audience"));
-    box.appendChild(el("summary", null, [el("span", { class: "rz-p-kicker", text: kicker }), el("b", { class: "rz-p-title", text: title })]));
+    box.appendChild(el("div", { class: "rz-p-head" }, [el("span", { class: "rz-p-kicker", text: kicker }), el("b", { class: "rz-p-title", text: title })]));
     box.appendChild(el("p", { class: "rz-p-sub", text: this.describe() + " · " + (s.mode === "area" ? "Custom area (" + this.areaPhrase() + ")" : s.r + " miles around " + s.zip) }));
     box.appendChild(el("p", { class: "rz-p-story", text: lead }));
     var stat = function (v, t) { return el("div", { class: "rz-p-stat" }, [el("b", { text: v }), el("span", { text: t })]); };
@@ -1528,6 +1534,22 @@
       .then(function (res) { return window.AdtaxiProposal.build(self.proposalContext(res[2], res[3]), opt); })
       .then(function (out) { st.textContent = "Downloaded. Open it in PowerPoint or Google Slides to edit."; return out; })
       .catch(function (e) { st.textContent = "The proposal couldn't be built (" + e.message + "). Try again in a minute."; throw e; });
+  };
+  Radius.prototype.openPersona = function () {
+    if (!this.personaBox || this.personaBox.hidden) { this.showError("Choose a center and radius (or map a custom area) with at least one qualifying household first, then open the persona."); return; }
+    this.errorBox.hidden = true;
+    this.personaDlg.showModal();
+  };
+  // Persona PDF: just the persona, with the Adtaxi heading, on its own page
+  Radius.prototype.printPersona = function () {
+    var cfg = this.cfg, box = this.personaBox;
+    var wrap = el("div", { class: "rz-persona-print" }, [el("div", { class: "az-print-head" }, [el("img", { src: cfg.logo || "../shared/adtaxi-logo.svg", alt: "Adtaxi" }),
+      el("div", null, [el("h1", { text: ((document.querySelector(".az-title h1") || {}).textContent || cfg.title || "Market analyzer") + ": Persona" }), el("p", { text: "Prepared " + new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) })])]), box.cloneNode(true)]);
+    document.body.appendChild(wrap); document.body.classList.add("rz-printing-persona");
+    var done = false;
+    function cleanup() { if (done) return; done = true; window.removeEventListener("afterprint", cleanup); wrap.remove(); document.body.classList.remove("rz-printing-persona"); }
+    window.addEventListener("afterprint", cleanup);
+    setTimeout(function () { window.print(); setTimeout(cleanup, 1000); }, 300);
   };
   Radius.prototype.leaveBehind = function () {
     if (!this.rows) { this.showError("Choose a center and radius (or map a custom area) first, then create the leave-behind."); return; }
