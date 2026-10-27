@@ -604,6 +604,7 @@
     });
   };
   Radius.prototype.setCenter = function (txt) {
+    if (!this.c) return;   // ZIP data still loading: start() applies whatever is in the box once it arrives
     var m = /(\d{5})/.exec(txt || ""), c = this.c, zip = null;
     if (m && this.byZip[m[1]] !== undefined) zip = m[1];
     else if (txt && c) {   // town name: use its most populous ZIP
@@ -750,7 +751,8 @@
   Radius.prototype.renderEmpty = function () {
     var s = this.state, hasZip = this.c && this.byZip[s.zip] !== undefined;
     if (s.mode === "area") hasZip = false;
-    var msg = s.mode === "area" ? "List ZIPs, counties, towns, DMAs or metros above, or upload a file, then select Map this area." : hasZip ? "Choose a radius to see the audience around " + s.zip + "." :
+    var msg = !this.c ? "Loading ZIP data… a ZIP or town entered above will apply as soon as it's ready." :
+              s.mode === "area" ? "List ZIPs, counties, towns, DMAs or metros above, or upload a file, then select Map this area." : hasZip ? "Choose a radius to see the audience around " + s.zip + "." :
               s.r ? "Enter a ZIP or town to see the audience within " + s.r + " miles." :
               "Enter a ZIP or town and choose a radius to see the audience.";
     this.rows = null; this.mapToken = (this.mapToken || 0) + 1;
@@ -2368,6 +2370,11 @@
       var app = new Radius(cfg, root || document.getElementById("app"));
       app.build();
       app.load().then(function () {
+        var typed = (app.zipIn.value || "").trim();
+        if (typed && app.state.mode !== "area" && !(app.state.zip && typed.indexOf(app.state.zip) === 0)) {
+          app.setCenter(typed);   // typed while the data was loading
+          if (app.state.zip) return;
+        }
         if (app.state.zip && app.byZip[app.state.zip] !== undefined) {
           var c = app.c, i = app.byZip[app.state.zip];
           app.zipIn.value = app.state.zip + " " + c.city[i] + ", " + c.state[i];
