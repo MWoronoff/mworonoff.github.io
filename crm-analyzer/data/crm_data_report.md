@@ -1,6 +1,6 @@
 # CRM analyzer data report
 
-Built 2026-10-13 from data-build/master/.
+Built 2026-10-28 from data-build/master/.
 
 - ZIPs with households: 32,817 (population 337,569,915; households 130,497,320).
 - Characteristics: 90 in 7 groups.

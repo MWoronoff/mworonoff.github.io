@@ -1,12 +1,11 @@
 {
  "facts": {
-  "deluxe": {
-   "release": "Deluxe ZIP database, update dated 10/01/2025",
-   "rows": 41558,
-   "residential": 33623,
-   "pop": 334723696,
-   "dups_dropped": 0,
-   "files": 10
+  "acs_api": {
+   "tried": [
+    "11717",
+    "11798"
+   ],
+   "filled": []
   },
   "acs": {
    "release": "ACS 5-year 2020\u20132024",
@@ -16,6 +15,14 @@
    "age_bad": 0,
    "inc_bad": 0,
    "labels": "table shells"
+  },
+  "deluxe": {
+   "release": "Deluxe ZIP database, update dated 10/01/2025",
+   "rows": 41558,
+   "residential": 33623,
+   "pop": 334723696,
+   "dups_dropped": 0,
+   "files": 10
   },
   "irs": {
    "release": "tax year 2022",
@@ -56,7 +63,7 @@
  },
  "built": {
   "deluxe": "2026-10-13",
-  "acs": "2026-10-13",
+  "acs": "2026-10-28",
   "irs": "2026-10-13",
   "cbp": "2026-10-13",
   "lodes": "2026-10-13",
