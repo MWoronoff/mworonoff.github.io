@@ -1147,7 +1147,7 @@
    Numbered step badges, one highlighted next thing (the customer file, then your location ZIPs, then Analyze
    customers), and one main button per step. Applied after each render, so the tool's own code is unchanged. */
 (function () {
-  var GUIDE_ON = false;
+  var GUIDE_ON = true;
   if (!(GUIDE_ON || window.ADTAXI_GUIDE === true || /[?&]guide=1(&|$)/.test(location.search))) return;
   var busy = false;
   function apply() {

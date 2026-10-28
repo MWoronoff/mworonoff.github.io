@@ -11,7 +11,7 @@
 (function () {
   "use strict";
   // Guided steps preview (?guide=1): a start line, quieter Export, a Trade area cue, top-5 ad response. Same switch as shared/radius.js.
-  var GUIDE_ON = false;
+  var GUIDE_ON = true;
   var GUIDE = GUIDE_ON || window.ADTAXI_GUIDE === true || /[?&]guide=1(&|$)/.test(location.search);
 
   var PICK_PREFIX = { dma: "d", metro: "m", county: "c" };   // Custom area tokens in the Trade area tool
@@ -958,7 +958,7 @@
     }
     if (window.AdtaxiRadius) go();
     else {
-      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261028l";   // version tag: browsers fetch the new file after an update
+      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261028m";   // version tag: browsers fetch the new file after an update
       sc.onload = go; sc.onerror = function () { self.showError("The radius tool didn't load. Refresh the page and try again."); };
       document.head.appendChild(sc);
     }
