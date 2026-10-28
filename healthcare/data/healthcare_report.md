@@ -7,11 +7,11 @@ Built 2026-10-28. Result: **PASSED**
 | Formula tests | PASS | percentile and weighted-average hand checks reproduce exactly |
 | Land area source | INFO | Census 2026 Gazetteer ZCTA file (33,791 ZIPs) |
 | Business Patterns years | INFO | 2023 (growth measured from 2022) |
-| Business ZIPs matched to the ZIP geography | PASS | 815 of 563,924 healthcare businesses sit in ZIPs not in the geography table |
-| ZIP detail coverage of county counts (cells under 3 businesses aren't published) | INFO | Urgent and emergency care 52%; Pharmacy 75%; Dental 95%; Hearing and audiology 78%; Eye care 65%; Chiropractic and physical therapy 83%; Behavioral health 80%; Med spa and aesthetics 96%; Senior and home care 77% |
+| Business ZIPs matched to the ZIP geography | PASS | 823 of 564,557 healthcare businesses sit in ZIPs not in the geography table |
+| ZIP detail coverage of county counts (cells under 3 businesses aren't published) | INFO | Primary care 96%; Hospitals and health systems 11%; Urgent and emergency care 52%; Pharmacy 75%; Dental 95%; Hearing and audiology 78%; Eye care 65%; Chiropractic and physical therapy 83%; Behavioral health 80%; Med spa and aesthetics 96%; Senior and home care 77% |
 | Published benchmark: dentist offices | PASS | 135,665 (expected 110,000–150,000) |
 | Published benchmark: pharmacies | PASS | 41,790 (expected 35,000–50,000) |
-| County businesses outside the ZIP geography | INFO | 632 of 653,445 (mostly Census 'statewide' records with no county); counted in U.S. totals only |
+| County businesses outside the ZIP geography | INFO | 632 of 659,222 (mostly Census 'statewide' records with no county); counted in U.S. totals only |
 | CDC PLACES release | INFO | 2025; measures found: fairpoor, diabetes, bphigh, nodental, hearing, vision, arthritis, obesity, depression, mhlth, indeplive |
 | CDC PLACES ZCTA gaps filled with county values | INFO | Fair or poor health 10,764 ZIPs; Diabetes 10,764 ZIPs; High blood pressure 10,764 ZIPs; No dental visit in past year 8,227 ZIPs; Hearing disability 10,764 ZIPs; Vision disability 10,764 ZIPs; Arthritis 10,764 ZIPs; Obesity 10,764 ZIPs; Depression 10,764 ZIPs; Frequent mental distress 10,764 ZIPs; Independent-living disability 10,764 ZIPs |
 | Adults covered by CDC PLACES | PASS | 94.7% |
@@ -32,21 +32,29 @@ Built 2026-10-28. Result: **PASSED**
 | CDC BRFSS rates by age (all-states median) | INFO | High blood pressure (2025, “Adults who have been told they have high blood pressure (var”): 18–34 12.3%, 35–64 34.6%, 65–74 59.8%, 75+ 59.8%; Arthritis (2025, “Adults who have been told they have arthritis (variable calc”): 18–34 6.0%, 35–64 26.1%, 65–74 52.2%, 75+ 52.2%; Obesity (2025, “Weight classification by Body Mass Index (BMI) (variable cal”): 18–34 28.2%, 35–64 39.1%, 65–74 30.9%, 75+ 30.9%; Depression (2025, “Ever told you that you have a form of depression?”): 18–34 27.3%, 35–64 23.0%, 65–74 15.2%, 75+ 15.2%; Frequent mental distress (2025, “Days when mental health status not good (variable calculated”): 18–34 20.6%, 35–64 16.3%, 65–74 9.3%, 75+ 9.3%; Fair or poor health (2025, “How is your general health?”): 18–34 12.8%, 35–64 18.8%, 65–74 22.7%, 75+ 22.7% |
 | CDC BRFSS rates by age: plausible | PASS | diabetes, high blood pressure and arthritis at least twice as common at 65+ as at 18–34 |
 | EASI healthcare spending: Palm Springs | INFO | EASI includes Palm Springs in Los Angeles; the provisional Palm Springs DMA uses the Riverside–San Bernardino metro's per-household spending |
-| EASI U.S. healthcare spending per household | INFO | Medical services $1,215.73; Prescription drugs $215.68 |
+| EASI U.S. healthcare spending per household | INFO | Medical services $1,215.73; Prescription drugs $215.68; Physician's services $237.83; Hospital room and services $156.94; Dental services $370.92; Eye care (eyecare services, eyeglasses and contact lenses) $154.04; Hearing aids $12.19; Personal care services $483.73 |
 | EASI healthcare spending matched to DMAs | PASS | 210 of 210 |
 | EASI healthcare spending matched to metros | PASS | 387 of 387 |
 | Score reality check: categories not checked | INFO | Urgent and emergency care; Hearing and audiology; Med spa and aesthetics (no Census industry matches these categories, so business employment isn't a meaningful benchmark) |
-| Score reality check, DMAs: rank correlation with category businesses' employees per 1,000 households, score (without Competition) | INFO | Pharmacy -0.14 (0.35); Dental 0.10 (0.45); Eye care -0.03 (0.29); Chiropractic and physical therapy -0.05 (0.32); Behavioral health 0.08 (0.40); Senior and home care 0.20 (0.43). None weak. |
-| Score reality check, metros: rank correlation with category businesses' employees per 1,000 households, score (without Competition) | INFO | Pharmacy -0.27 (0.21); Dental -0.06 (0.30); Eye care -0.17 (0.11); Chiropractic and physical therapy -0.10 (0.24); Behavioral health -0.05 (0.27); Senior and home care 0.05 (0.29). None weak. Reviewed and kept (benchmark doesn't fit): Eye care (need (age 45+, diabetes, vision difficulty) runs highest where providers are scarcer; the DMA check passes). |
+| Score reality check, DMAs: rank correlation with category businesses' employees per 1,000 households, score (without Competition) | INFO | Primary care 0.03 (0.23); Hospitals and health systems -0.03 (-0.09); Pharmacy -0.14 (0.35); Dental 0.09 (0.46); Eye care -0.06 (0.26); Chiropractic and physical therapy -0.05 (0.32); Behavioral health 0.08 (0.40); Senior and home care 0.20 (0.43). Weak (under 0.20 without Competition): Hospitals and health systems |
+| Score reality check, metros: rank correlation with category businesses' employees per 1,000 households, score (without Competition) | INFO | Primary care -0.09 (0.07); Hospitals and health systems -0.28 (-0.22); Pharmacy -0.27 (0.21); Dental -0.08 (0.28); Eye care -0.19 (0.08); Chiropractic and physical therapy -0.10 (0.24); Behavioral health -0.05 (0.27); Senior and home care 0.05 (0.29). Weak (under 0.20 without Competition): Primary care, Hospitals and health systems Reviewed and kept (benchmark doesn't fit): Eye care (need (age 45+, diabetes, vision difficulty) runs highest where providers are scarcer; the DMA check passes). |
 | EASI medical services total, DMAs vs. EASI's own total | PASS | 98.7% of EASI's $159.0B |
 | EASI prescription drugs total, DMAs vs. EASI's own total | PASS | 98.7% of EASI's $28.2B |
+| EASI physician's services total, DMAs vs. EASI's own total | PASS | 98.7% of EASI's $31.1B |
+| EASI hospital room and services total, DMAs vs. EASI's own total | PASS | 98.7% of EASI's $20.5B |
+| EASI dental services total, DMAs vs. EASI's own total | PASS | 98.7% of EASI's $48.5B |
+| EASI eye care (eyecare services, eyeglasses and contact lenses) total, DMAs vs. EASI's own total | PASS | 98.7% of EASI's $20.2B |
+| EASI hearing aids total, DMAs vs. EASI's own total | PASS | 98.7% of EASI's $1.6B |
+| EASI personal care services total, DMAs vs. EASI's own total | PASS | 98.7% of EASI's $63.3B |
 | Cross-check vs. EASI: Hearing disability | INFO | correlation with EASI hearing trouble: 0.49 across 22 metros with estimated values; 0.71 across 365 metros with CDC values |
 | Cross-check vs. EASI: Vision disability | INFO | correlation with EASI vision trouble: 0.37 across 22 metros with estimated values; 0.52 across 365 metros with CDC values |
 | EASI layer matched to metros | PASS | 387 of 387 metros |
-| DMA scores within 0–100 | PASS | 0 out of range; 1,890 scores computed, 0 not computed (missing input) |
+| DMA scores within 0–100 | PASS | 0 out of range; 2,310 scores computed, 0 not computed (missing input) |
 | DMA business counts never negative | PASS | 0 |
-| Metro scores within 0–100 | PASS | 0 out of range; 3,483 scores computed, 0 not computed (missing input) |
+| Metro scores within 0–100 | PASS | 0 out of range; 4,257 scores computed, 0 not computed (missing input) |
 | Metro business counts never negative | PASS | 0 |
+| DMA roll-up matches county totals: Primary care | PASS | DMAs 204,293 vs counties 204,303 |
+| DMA roll-up matches county totals: Hospitals and health systems | PASS | DMAs 5,762 vs counties 5,763 |
 | DMA roll-up matches county totals: Urgent and emergency care | PASS | DMAs 10,034 vs counties 10,035 |
 | DMA roll-up matches county totals: Pharmacy | PASS | DMAs 41,774 vs counties 41,780 |
 | DMA roll-up matches county totals: Dental | PASS | DMAs 135,635 vs counties 135,643 |
@@ -58,4 +66,4 @@ Built 2026-10-28. Result: **PASSED**
 | DMA roll-up matches county totals: Senior and home care | PASS | DMAs 61,448 vs counties 61,451 |
 | U.S. population (Deluxe) | INFO | 334,913,506 |
 | Counties built from ZIPs | PASS | 3,144 counties (2,400 with 10,000+ residents are ranked) |
-| County scores within 0–100 | PASS | 0 out of range; 21,600 scores computed |
+| County scores within 0–100 | PASS | 0 out of range; 26,400 scores computed |
