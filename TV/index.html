@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script>/* site-version: if this page is an old saved copy, reload it once with the current version (shared/version.json; bump both on each release) */
-(function(){var V="20261028g";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
+(function(){var V="20261028h";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>TV + Digital Video Allocation Analyzer</title>
 <meta name="robots" content="noindex">
@@ -228,7 +228,7 @@
     <p><b>Smaller Broadcast schedules.</b> The frequency entered describes the full schedule. When part of the budget moves to Digital Video, the remaining schedule's reach is shown as a range: the low end holds frequency steady (reach falls with GRPs); the high end holds reach steady (frequency falls with GRPs). The actual result for a trimmed schedule falls between the two.</p>
     <p><b>Streaming in the market.</b> Scarborough USA+ 2026 Release 1 DMA profiles: the share of adults 18+, and of adults 55+, in the market who streamed video in the past 7 and past 30 days and who have any connected-TV device, with the U.S. figure for comparison.</p>
     <p><b>Digital Video.</b> Impressions = spend ÷ CPM × 1,000. Digital Video is targeted by gender, age and household income, so every impression is counted as reaching the selected target (100% target efficiency). Target reach = target impressions ÷ frequency cap, limited to the target population.</p>
-    <p><b>Into the media mix.</b> The share entered is applied to the monthly campaign budget. CTV / Advanced TV goes to the analyzer's CTV line; Dynamic Video and Pre-roll go to its online video (YouTube) line. That amount is held in the Recommended allocation, which starts at Brand awareness with the smallest monthly budget at which that strategy would put at least that much on the line; the rep can change the budget and strategy.</p>
+    <p><b>Into the media mix.</b> The share entered is applied to the monthly campaign budget. CTV / Advanced TV goes to the analyzer's CTV line; Dynamic Video and Pre-roll go to its online video (YouTube) line. That amount is held in the Recommended allocation at the Digital Video CPM entered here (rate card, management included, so no fee is added to it), which starts at Brand awareness with the smallest monthly budget at which that strategy would put at least that much on the line; the rep can change the budget and strategy.</p>
     <p><b>Combined campaign.</b> Spend, target and off-target impressions, target efficiency and effective target CPM are added across Broadcast and Digital Video. Combined reach and frequency are not shown because the overlap between the Broadcast and Digital Video audiences is not measured.</p>
     <p class="az-disclaimer">Estimates for planning. Scores and figures are modeled from public government and licensed third-party data.</p>
     <p class="az-version">Adtaxi Market Analyzers · Fall 2026</p>
@@ -530,7 +530,7 @@
     else if (amt < L.min) { msg = money0(amt) + " is below the " + money0(L.min) + " monthly minimum for " + L.product + ". Raise the share to at least " + Math.ceil(L.min / budget * 100) + "%" + (L.id === "ctv" ? " or choose Pre-roll or Dynamic Video" : "") + "."; warn = true; }
     else if (!cat) msg = "Choose the client's business category.";
     else {
-      handUrl = "../" + cat + "/#level=area&ca=d" + encodeURIComponent(M.dma_code) + "&tvv=" + amt + "&tvl=" + L.id + "&tvp=" + encodeURIComponent(L.product) + "&tvm=" + encodeURIComponent(M.name);
+      handUrl = "../" + cat + "/#level=area&ca=d" + encodeURIComponent(M.dma_code) + "&tvv=" + amt + "&tvl=" + L.id + "&tvp=" + encodeURIComponent(L.product) + "&tvc=" + (num("dcpm") || "") + "&tvm=" + encodeURIComponent(M.name);
       msg = "Opens in a new tab with " + M.name + " as the trade area. This page keeps its inputs.";
     }
     $("handMsg").textContent = msg; $("handMsg").className = "tv-hand-msg" + (warn ? " warn" : "");

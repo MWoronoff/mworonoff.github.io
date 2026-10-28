@@ -101,6 +101,7 @@
     pct: { social: 0.40, tiktok: 0.40, snapchat: 0.40, youtube: 0.40 },
     search: [ { min: 0, max: 3000, pct: 0.25 }, { min: 3000, max: Infinity, pct: 0.20 } ],
     cpmNote: "Management included in CPM pricing",
+    heldNote: "Rate card CPM, management included",
     unknownNote: "Fee not on the rate card"
   };
   /* =========================  END OF SETTINGS  ========================= */
@@ -110,10 +111,12 @@
      total goes to media), so total = media / (1 - fee): $2,640 of Meta media costs $4,400, a $1,760 fee.
      Search's fee tier follows the resulting total (25% under $3,000, 20% at $3,000+).
      Returns { kind: "fee", pct, media, fee, total } | { kind: "cpm", media, total } | { kind: "none", media, total } */
-  function channelFee(id, media) {
+  function channelFee(id, media, held) {
     var ch = CHANNELS[id];
     if (!ch || media == null) return { kind: "none", media: media, total: media };
     if (ch.prog) return { kind: "cpm", media: media, total: media };
+    // A line held from the TV + Video tool was priced at the Adtaxi rate card CPM, which includes management
+    if (held) return { kind: "cpm", media: media, total: media, held: true };
     var pct = MGMT.pct[id];
     var total;
     if (id === "search") {
@@ -131,7 +134,7 @@
     var out = { media: 0, fee: 0, total: 0, cpm: 0, none: 0 };
     items.forEach(function (r) {
       if (r.dollars == null) return;
-      var f = channelFee(r.id, r.dollars);
+      var f = channelFee(r.id, r.dollars, r.fixed);
       out.media += f.media; out.total += f.total;
       if (f.kind === "fee") out.fee += f.fee; else if (f.kind === "cpm") out.cpm += f.media; else out.none += f.media;
     });
@@ -140,7 +143,7 @@
   function usd0(x) { return "$" + Math.round(x).toLocaleString("en-US"); }
   function feeLine(f) {
     if (f.kind === "fee") return "Media " + usd0(f.media) + " + management fee " + usd0(f.fee) + " (" + Math.round(f.pct * 1000) / 10 + "% of total" + (f.placeholder ? ", placeholder rate" : "") + ") = " + usd0(f.total);
-    if (f.kind === "cpm") return MGMT.cpmNote;
+    if (f.kind === "cpm") return f.held ? MGMT.heldNote : MGMT.cpmNote;
     return MGMT.unknownNote;
   }
 

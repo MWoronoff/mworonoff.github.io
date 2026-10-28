@@ -516,7 +516,7 @@
     // Radius view (also where the old radius.html links forward to): #level=radius&sub=..&zip=..&r=..
     this.wantRadius = (p.level === "radius" || p.level === "area") && cfg.radius ? { zip: p.zip, r: p.r, p: p.p, mode: p.level === "area" ? "area" : "radius", ca: p.ca } : null;
     // From the TV + Video tool: the Digital Video amount to hold in the Recommended allocation (tvv dollars, tvl line, tvp product)
-    if (this.wantRadius && +p.tvv > 0 && /^(ctv|youtube)$/.test(p.tvl || "")) this.wantRadius.hand = { dollars: Math.round(+p.tvv), id: p.tvl, product: (p.tvp || "").slice(0, 60), market: (p.tvm || "").slice(0, 80) };   // a profile applies only when the link names one (p=); no preset otherwise
+    if (this.wantRadius && +p.tvv > 0 && /^(ctv|youtube)$/.test(p.tvl || "")) this.wantRadius.hand = { dollars: Math.round(+p.tvv), id: p.tvl, product: (p.tvp || "").slice(0, 60), market: (p.tvm || "").slice(0, 80), cpm: +p.tvc > 0 && +p.tvc < 1000 ? +p.tvc : null };   // a profile applies only when the link names one (p=); no preset otherwise
     if (this.wantRadius && p.p && cfg.subcategories && cfg.subcategories.some(function (x) { return x.id === p.p; })) this.state.sub = p.p;
     if (cfg.levels[p.level]) this.state.level = p.level;
     if (p.level === "zip") {
@@ -952,7 +952,7 @@
     }
     if (window.AdtaxiRadius) go();
     else {
-      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261028g";   // version tag: browsers fetch the new file after an update
+      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261028h";   // version tag: browsers fetch the new file after an update
       sc.onload = go; sc.onerror = function () { self.showError("The radius tool didn't load. Refresh the page and try again."); };
       document.head.appendChild(sc);
     }

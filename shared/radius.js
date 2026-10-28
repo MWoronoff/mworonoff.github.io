@@ -1136,7 +1136,7 @@
     if (window.AdtaxiPlan) { done(); return; }
     if (loadPlan.waiting) { loadPlan.waiting.push(done); return; }
     loadPlan.waiting = [done];
-    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261028g";
+    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261028h";
     sc.onload = function () { var w = loadPlan.waiting; loadPlan.waiting = null; w.forEach(function (f) { f(); }); };
     sc.onerror = function () { loadPlan.waiting = null; };
     document.head.appendChild(sc);
@@ -1221,7 +1221,7 @@
     if (!h || !P || !P.CHANNELS[h.id]) return;
     var s = P.STRATEGIES.filter(function (x) { return x.id === "awareness"; })[0] || P.STRATEGIES[0];
     var label = h.product ? h.product + (h.id === "youtube" ? " (online video)" : "") : P.CHANNELS[h.id].label;
-    b.fixed = { id: h.id, dollars: h.dollars, label: label, short: h.product || P.CHANNELS[h.id].short, job: HAND_JOB[h.id] || null };
+    b.fixed = { id: h.id, dollars: h.dollars, label: label, short: h.product || P.CHANNELS[h.id].short, job: HAND_JOB[h.id] || null, cpm: h.cpm || null };
     b.strat = s.id; this.bStrat.value = s.id;
     b.amount = P.fixedBudget ? P.fixedBudget(s, h.id, h.dollars) : h.dollars;
     this.bAmount.value = money(b.amount);
@@ -1300,7 +1300,7 @@
     if (withDollars) {
       var media = out.money.media;
       if (out.strat && out.plan.tier) {
-        out.channels.forEach(function (c) { c.cost = b.fees && P ? P.channelFee(c.id, c.dollars).total : c.dollars; c.byZip = spread(c.cost, pick); });
+        out.channels.forEach(function (c) { c.cost = b.fees && P ? P.channelFee(c.id, c.dollars, c.fixed).total : c.dollars; c.byZip = spread(c.cost, pick); });
         pick.forEach(function (x, i) { x.amt = out.channels.reduce(function (t, c) { return t + c.byZip[i]; }, 0); });
       } else {
         var v = spread(media, pick); pick.forEach(function (x, i) { x.amt = v[i]; });
@@ -1349,9 +1349,9 @@
           el("td", { class: "rz-l", text: c.ch.role.charAt(0).toUpperCase() + c.ch.role.slice(1) }),
           el("td", { class: "num", text: c.pct + "%" }), el("td", { class: "num", text: A.withDollars && c.dollars != null ? money(c.dollars) : "\u2014" })];
         if (fees) {
-          var f = P.channelFee(c.id, c.dollars);
+          var f = P.channelFee(c.id, c.dollars, c.fixed);
           cells.push(f.kind === "fee" ? el("td", { class: "num", text: "+ " + money(f.fee) + " (" + Math.round(f.pct * 1000) / 10 + "%)" })
-                                      : el("td", { class: "rz-feena", text: f.kind === "cpm" ? "Included in CPM" : "Not on rate card" }));
+                                      : el("td", { class: "rz-feena", text: f.held ? "Rate card CPM, management included" : f.kind === "cpm" ? "Included in CPM" : "Not on rate card" }));
           cells.push(el("td", { class: "num rz-alloc-strong", text: money(f.total) }));
         }
         self.cBody.appendChild(el("tr", null, cells));
@@ -1439,8 +1439,8 @@
     if (b.fees && A.withDollars && P && A.channels.length) {
       lines.push("", ["Channel", "Media", "Management fee", "Total cost", "Note"].map(csvCell).join(","));
       A.channels.forEach(function (c) {
-        var f = P.channelFee(c.id, c.dollars);
-        lines.push([c.ch.label, c.dollars, f.kind === "fee" ? f.fee : "", f.total, f.kind === "fee" ? Math.round(f.pct * 1000) / 10 + "% of total" : f.kind === "cpm" ? P.MGMT.cpmNote : P.MGMT.unknownNote].map(csvCell).join(","));
+        var f = P.channelFee(c.id, c.dollars, c.fixed);
+        lines.push([c.ch.label, c.dollars, f.kind === "fee" ? f.fee : "", f.total, f.kind === "fee" ? Math.round(f.pct * 1000) / 10 + "% of total" : f.kind === "cpm" ? (f.held ? P.MGMT.heldNote : P.MGMT.cpmNote) : P.MGMT.unknownNote].map(csvCell).join(","));
       });
       var fsC = P.feeSummary(A.channels);
       lines.push(["Total", fsC.media, fsC.fee, fsC.total, "ZIP amounts above include fees"].map(csvCell).join(","));
@@ -1540,7 +1540,7 @@
     });
   };
   Radius.prototype.proposalContext = function (bench, logo) {
-    var s = this.state, c = this.c, A = this.allocation(), P = window.AdtaxiPlan;
+    var s = this.state, c = this.c, A = this.allocation(), P = window.AdtaxiPlan, held = this.budget.fixed;
     var ctx0 = this.cfg.context ? this.cfg.context() : {}, ad = ctx0.ad, prof = s.profile && this.profiles[s.profile];
     var adSub = ad && ad.subs ? (ad.subs[s.profile] || ad.subs[ctx0.sub]) : null;
     // Trade-area counts describe the audience chosen in the tool; ad-response reasons describe AudienceSCAN's target group
@@ -1582,7 +1582,9 @@
       reasons.push(intent || usedConc ? job : conc); if (!intent) usedConc = true;
       if (reasons.length < 2) reasons.push(job);
       return { id: ch.id, label: ch.id === "social" ? "Meta (Facebook & Instagram)" : ch.ch.label, role: ch.ch.role.charAt(0).toUpperCase() + ch.ch.role.slice(1),
-               amount: amount, reasons: reasons, est: P.estimate(ch.id, amount, bench) };
+               amount: amount, reasons: reasons,
+               // the held Digital Video line: impressions at the CPM the TV + Video tool used (rate card, management included)
+               est: ch.fixed && held && held.cpm > 0 ? { impr: amount / held.cpm * 1000, clicks: null, leads: null, views: ch.id === "ctv" ? amount / held.cpm * 1000 * P.EST.vcr : null, basis: "cpm", cpm: held.cpm } : P.estimate(ch.id, amount, bench) };
     });
     var total = plan.reduce(function (t, p) { return t + p.amount; }, 0);
     // Whole-number shares that add to 100 (largest remainder)
@@ -1620,7 +1622,7 @@
     if (!b.amount || !A.strat || !A.withDollars || !A.plan || !A.plan.tier || !A.channels.length) { st.textContent = "Enter a monthly budget and choose a media strategy first."; return Promise.resolve(null); }
     st.textContent = "Building…";
     var base = this.proposalBase();
-    return Promise.all([loadScriptOnce(this.cfg.pptxScript || "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261028g"), this.benchmarks(), this.logoImage()])
+    return Promise.all([loadScriptOnce(this.cfg.pptxScript || "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261028h"), this.benchmarks(), this.logoImage()])
       .then(function (res) { return window.AdtaxiProposal.build(self.proposalContext(res[2], res[3]), opt); })
       .then(function (out) { st.textContent = "Downloaded. Open it in PowerPoint or Google Slides to edit."; return out; })
       .catch(function (e) { st.textContent = "The proposal couldn't be built (" + e.message + "). Try again in a minute."; throw e; });
