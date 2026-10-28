@@ -37,9 +37,13 @@ MIN_POP = 500
 # data-build/sources; until then scores blend the other parts, re-weighted to 100%.
 WEIGHTS = {"demand": 0.40, "category": 0.25, "spend": 0.15, "comp": 0.20}
 # EASI 2025 measures used as Category Spending, by line (Adtaxi's files in data-build/sources/easi_finance_spend_*.csv)
-EASI = {"wealth": ("ret_value", "Value of retirement plans"), "retire": ("ret_change", "Change in value of retirement plans")}
+EASI = {"wealth": ("ret_value", "Value of retirement plans"), "retire": ("ret_change", "Change in value of retirement plans"),
+        "bank": ("deposits", "Value of savings, checking, money market and CDs"),
+        "cu": ("deposits", "Value of savings, checking, money market and CDs")}
+# Every EASI measure loaded (each once), including ones shown but not scored
+EASI_MEASURES = list(dict.fromkeys(list(EASI.values()) + [("bank_fees", "Checking accounts and other bank service charges")]))
 PALM_SPRINGS, RIVERSIDE_METRO = "804", "40140"
-NAICS = {"tax": ["541213"], "advice": ["523920", "523930"], "mortgage": ["522292", "522310"]}
+NAICS = {"tax": ["541213"], "advice": ["523920", "523930"], "mortgage": ["522292", "522310"], "bank": ["522110"], "cu": ["522130"]}
 SUBCATS = [
     {"id": "tax", "label": "Tax preparation", "naics": "tax", "spend": False,
      "demand": ["prep", "prep_share", "eitc_share"]},
@@ -51,6 +55,10 @@ SUBCATS = [
      "demand": ["purch", "purch_rate", "rent75", "mover_share"]},
     {"id": "refi", "label": "Refinance and home equity", "naics": "mortgage",
      "demand": ["refieq", "refieq_rate", "mortg", "mortg_share"]},
+    {"id": "bank", "label": "Banks", "naics": "bank",
+     "demand": ["adults", "mover_share", "selfemp_share"]},
+    {"id": "cu", "label": "Credit unions", "naics": "cu",
+     "demand": ["adults", "mover_share"]},
 ]
 DEMAND_LABELS = {
     "prep": "Returns with a paid preparer", "prep_share": "Share of returns with a paid preparer",
@@ -62,7 +70,8 @@ DEMAND_LABELS = {
     "purch": "Home purchase loans", "purch_rate": "Home purchase loans per 1,000 households",
     "rent75": "Renter households earning $75K+", "mover_share": "Share who moved in the past year",
     "refieq": "Refinance and home equity loans", "refieq_rate": "Refinance and home equity loans per 1,000 owner homes",
-    "mortg": "Owner homes with a mortgage", "mortg_share": "Share of owner homes with a mortgage"}
+    "mortg": "Owner homes with a mortgage", "mortg_share": "Share of owner homes with a mortgage",
+    "adults": "Adults 18+", "selfemp_share": "Share of returns with business income"}
 COUNTS = ["population", "households", "adults", "a50_64", "a65p", "prep", "eitc", "div", "cg", "ira", "pens", "selfemp",
           "returns", "purch", "refi", "equity", "refieq", "mortg", "rent75"]
 # rate: numerator, denominator (summed over ZIPs, so markets get true rates; IRS rates use only ZIPs with IRS data)
@@ -173,7 +182,7 @@ def main():
     co, co0 = cbp_county(y, a.cache), cbp_county(y - 1, a.cache)
     cpop = z.groupby("county_fips").population.transform("sum")
     z["cshare"] = (z.population / cpop).where(cpop > 0, 0)
-    bench = {"tax": (18000, 60000), "advice": (25000, 90000), "mortgage": (10000, 40000)}
+    bench = {"tax": (18000, 60000), "advice": (25000, 90000), "mortgage": (10000, 40000), "bank": (50000, 100000), "cu": (10000, 30000)}
     for k, codes in NAICS.items():
         for tag, src in (("", zb), ("_prev", zb0)):
             z[f"zest{tag}_{k}"] = z.zip.map(src[src.naics.isin(codes)].groupby("zip").est.sum()).fillna(0)
@@ -248,13 +257,13 @@ def main():
     key = lambda t: re.sub(r"[^a-z0-9]", "", str(t).lower())
     sm["cbsa_code"] = sm.market.map(key).map(dict(zip(em.metro.map(key), em.cbsa_code)))
     us_hh = {}
-    for e, lab in EASI.values():
+    for e, lab in EASI_MEASURES:
         us_hh[e] = sd[f"{e}_total"].sum() / sd.households.sum()
         rep.append((f"EASI U.S. {lab.lower()} per household", "INFO", f"${us_hh[e]:,.2f}"))
 
     def add_easi(df, table, idcol, label):
         t = table.dropna(subset=[idcol]).set_index(idcol)
-        for e, lab in EASI.values():
+        for e, lab in EASI_MEASURES:
             per = t[f"{e}_per_hh"].copy()
             if idcol == "dma_code" and PALM_SPRINGS not in per.index:
                 pm = sm.dropna(subset=["cbsa_code"]).set_index("cbsa_code")[f"{e}_per_hh"]
@@ -279,7 +288,7 @@ def main():
         us[f"est@{i}"], us[f"prev@{i}"] = nat_or(y, codes, co), nat_or(y - 1, codes, co0)   # national file
         us[f"per10k@{i}"] = us[f"est@{i}"] / us.population * 1e4
         us[f"growth@{i}"] = (us[f"est@{i}"] - us[f"prev@{i}"]) / us[f"prev@{i}"]
-    for e, lab in EASI.values():
+    for e, lab in EASI_MEASURES:
         us[f"easi_{e}_hh"], us[f"easi_{e}_idx"] = us_hh[e], 100.0
         us[f"easi_{e}_total"] = us_hh[e] * us.households
         r_ = dma[f"easi_{e}_total"].sum() / sd[f"{e}_total"].sum()
@@ -314,10 +323,10 @@ def main():
     if failed: sys.exit("A check failed; the Financial data was not updated. See financial/data/financial_report.md.")
 
     # ---------------- Write ----------------
-    keep = COUNTS + BR + RATES + ["density"] + [f"easi_{e}_{k}" for e, _ in EASI.values() for k in ("hh", "total", "idx")]
+    keep = COUNTS + BR + RATES + ["density"] + [f"easi_{e}_{k}" for e, _ in EASI_MEASURES for k in ("hh", "total", "idx")]
     per_sub = ["score", "demand", "category", "spend", "comp", "under", "est", "per10k", "growth"]
     SCORE_KEYS = ("score", "demand", "category", "spend", "comp")
-    INTS = set(COUNTS) | set(BR) | {"est"} | {f"easi_{e}_total" for e, _ in EASI.values()}
+    INTS = set(COUNTS) | set(BR) | {"est"} | {f"easi_{e}_total" for e, _ in EASI_MEASURES}
 
     def clean(v):
         if v is None: return None
