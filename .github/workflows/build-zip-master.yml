@@ -38,6 +38,8 @@ jobs:
           set -o pipefail
           if [ -n "${{ github.event.inputs.only }}" ]; then ARGS="--only ${{ github.event.inputs.only }}"; else ARGS=""; fi
           python3 data-build/build_zip_master.py $ARGS 2>&1 | tee master.log
+        env:
+          CENSUS_API_KEY: ${{ secrets.CENSUS_API_KEY }}   # optional, free from api.census.gov/data/key_signup.html
       - name: Build Customer Market Analyzer data
         run: python3 data-build/build_crm_data.py
       - name: Commit results

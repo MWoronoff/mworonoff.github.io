@@ -210,6 +210,7 @@ def acs_fill_missing(merged, y):
             frames = []
             for k in range(0, len(miss), 50):
                 url = ACS_API.format(y=yy, t=t, z=",".join(miss[k:k + 50]))
+                if os.environ.get("CENSUS_API_KEY"): url += "&key=" + os.environ["CENSUS_API_KEY"]   # free key; GitHub secret
                 try:
                     resp = get(url, timeout=120, tries=3)
                     body = resp.read().decode("utf-8")
