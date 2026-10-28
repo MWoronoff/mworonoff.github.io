@@ -32,30 +32,38 @@ MIN_POP = 500
 # Market Potential Score: where a healthcare advertiser's customers are. Each part is a percentile (0-100).
 WEIGHTS = {"demand": 0.40, "category": 0.25, "spend": 0.15, "comp": 0.20}
 ZIP_PARTS = ("demand", "spend")      # ZIPs: no EASI spending by ZIP, and ZIP business counts are suppressed under 3
-EASI_SPEND = {"med": ("medical_services", "Medical services"), "rx": ("prescription_drugs", "Prescription drugs")}
+EASI_SPEND = {"med": ("medical_services", "Medical services"), "rx": ("prescription_drugs", "Prescription drugs"),
+              "phys": ("physician_services", "Physician's services"), "hosp": ("hospital_services", "Hospital room and services"),
+              "dent": ("dental_services", "Dental services"), "eye": ("eye_care", "Eye care (eyecare services, eyeglasses and contact lenses)"),
+              "hear": ("hearing_aids", "Hearing aids"), "pcs": ("personal_care_services", "Personal care services")}
 PALM_SPRINGS, LA_DMA, RIVERSIDE_METRO = "804", "803", "40140"
 
 # ---------------- Subcategories ----------------
 # naics: industries counted as prospect businesses. demand: (input key, weight) pairs, defined in DEMAND_INPUTS below.
 SUBCATS = [
+    {"id": "primary", "label": "Primary care", "naics": ["621111"], "easi": "phys",
+     "demand": ["population", "a65s", "ins1864", "fairpoor"],
+     "note": "Competition counts all physician offices (Census doesn't separate primary care from specialists)."},
+    {"id": "hospital", "label": "Hospitals and health systems", "naics": ["622110"], "easi": "hosp",
+     "demand": ["adults", "a65s", "arthritis", "bphigh"]},
     {"id": "urgent",  "label": "Urgent and emergency care", "naics": ["621493"], "counts": False,
      "demand": ["population", "kids_share", "ins1864"],
      "note": "No Competition part: Census's urgent care industry is mostly outpatient surgery centers, and many urgent care clinics are counted as physician offices."},
     {"id": "pharmacy", "label": "Pharmacy", "naics": ["456110"], "easi": "rx", "spend": False,
      "demand": ["a65p", "a65s", "diabetes", "bphigh"],
      "note": "No Spending Power part: prescriptions follow age and health and are mostly paid by insurance, not household income."},
-    {"id": "dental", "label": "Dental", "naics": ["621210"],
+    {"id": "dental", "label": "Dental", "naics": ["621210"], "easi": "dent",
      "demand": ["adults", "nodental"]},          # income counts once, under Spending Power
-    {"id": "hearing", "label": "Hearing and audiology", "naics": ["621340", "456199"], "counts": False,
+    {"id": "hearing", "label": "Hearing and audiology", "naics": ["621340", "456199"], "counts": False, "easi": "hear",
      "demand": ["a65p", "hearing"],
      "note": "No Competition part: Census counts audiologists with physical, occupational and speech therapists (mostly physical therapy), so no clean hearing business count exists."},
-    {"id": "eye", "label": "Eye care", "naics": ["621320", "456130"],
+    {"id": "eye", "label": "Eye care", "naics": ["621320", "456130"], "easi": "eye",
      "demand": ["a45p", "a45s", "diabetes"]},
     {"id": "chiro", "label": "Chiropractic and physical therapy", "naics": ["621310", "621340"],
      "demand": ["a25_64", "arthritis", "obesity"]},
     {"id": "behavioral", "label": "Behavioral health", "naics": ["621330", "621420"],
      "demand": ["adults", "depression", "mhlth"]},
-    {"id": "medspa", "label": "Med spa and aesthetics", "naics": ["621111"], "counts": False,
+    {"id": "medspa", "label": "Med spa and aesthetics", "naics": ["621111"], "counts": False, "easi": "pcs", "catw": 0.10,
      "demand": ["a30_64", "a30_64s", "inc150_share"],
      "note": "No Competition part: Census has no med spa industry and counts aesthetics practices with all physician offices."},
     {"id": "senior", "label": "Senior and home care", "naics": ["621610", "623312"],
@@ -882,7 +890,8 @@ def main():
             df[f"comp@{i}"] = P(-df[f"per10k@{i}"]) if "comp" in use else np.nan
             cols = [df[f"{c}@{i}"] for c in use]
             full = pd.concat(cols, axis=1).notna().all(axis=1)
-            df[f"score@{i}"] = combine(cols, [WEIGHTS[c] for c in use]).where(full & mask).round(3)
+            wts = [s.get("catw", WEIGHTS[c]) if c == "category" else WEIGHTS[c] for c in use]   # med spa: broad personal care spending counts less
+            df[f"score@{i}"] = combine(cols, wts).where(full & mask).round(3)
             for c in WEIGHTS: df[f"{c}@{i}"] = df[f"{c}@{i}"].round(2)
             under = (df[f"demand@{i}"] >= 70) & (P(df[f"per10k@{i}"]) <= 30)
             known = df[f"demand@{i}"].notna() & df[f"per10k@{i}"].notna() & mask
