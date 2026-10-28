@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
-<link rel="stylesheet" href="../shared/engine.css">
+<link rel="stylesheet" href="../shared/engine.css?v=20261028a">
 <style>
   .mm-main { max-width: 1240px; margin: 0 auto; padding: 22px 20px 40px; }
   .mm-draft { background: var(--warn-bg); border: 1px solid var(--warn-line); border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; font-size: 13px; }
@@ -134,13 +134,14 @@
     <label>Media strategy<select id="strat" autocomplete="off"></select></label>
     <label>Monthly budget (optional)<input id="budget" type="text" inputmode="numeric" placeholder="e.g. 10,000" autocomplete="off"></label>
     <label class="mm-toggle"><input id="fees" type="checkbox" autocomplete="off"> Add management fees</label>
-    <div class="mm-btns"><button class="mm-print" id="print" type="button">Print leave-behind</button><button class="mm-print mm-email" id="email" type="button">Email</button></div>
+    <div class="mm-btns"><button class="mm-print" id="print" type="button">Print leave-behind</button><button class="mm-print mm-email" id="email" type="button">Email</button><button class="mm-print mm-email az-results-btn" id="results" type="button" aria-haspopup="dialog" title="Case studies from this category and from the same channels as this plan">Results</button></div>
   </section>
 
   <div class="mm-sheet" id="sheet" aria-live="polite"></div>
 </main>
 
 <script src="../shared/media-plan.js?v=20261026l"></script>
+<script src="../shared/results.js?v=20261028b"></script>
 <script>
 /* =====================  SETTINGS (draft: edit here)  =====================
    CATEGORIES: national category ad spend (EMARKETER 2026), $ billions.
@@ -328,7 +329,7 @@ var P = window.AdtaxiPlan, CHANNELS = P.CHANNELS, ROLES = P.ROLES, STRATEGIES = 
     var s = STRATEGIES.filter(function (x) { return x.id === stratSel.value; })[0];
     var ready = !!(c && s), budget = readBudget();
     var sheet = $("sheet"); sheet.innerHTML = "";
-    $("print").disabled = $("email").disabled = !ready;
+    $("print").disabled = $("email").disabled = $("results").disabled = !ready;
     var today = new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" });
     if (ready) sheet.appendChild(el("div", { class: "mm-head" }, [
       el("div", null, [el("h1", { text: "Digital media plan: " + c.label }), el("p", { text: s.label + (budget ? " · " + usd(budget) + " a month" : "") + " · " + today })]),
@@ -374,6 +375,17 @@ var P = window.AdtaxiPlan, CHANNELS = P.CHANNELS, ROLES = P.ROLES, STRATEGIES = 
     return "mailto:?subject=" + encodeURIComponent("Digital media plan: " + c.label + " · " + s.label) + "&body=" + encodeURIComponent(L.join("\n"));
   }
   window.mmMailto = mailtoLink;
+  // Results: case studies from this category, then from the same channels as this plan (shared/results.js)
+  var resBody = el("div", { class: "az-results-body" }), resPanel = el("dialog", { class: "az-results", "aria-labelledby": "az-results-title" }, [resBody]);
+  resPanel.addEventListener("click", function (e) { if (e.target === resPanel) resPanel.close(); });
+  document.body.appendChild(resPanel);
+  $("results").addEventListener("click", function () {
+    var c = CATEGORIES.filter(function (x) { return x.id === catSel.value && !x.pending; })[0];
+    var s = STRATEGIES.filter(function (x) { return x.id === stratSel.value; })[0];
+    if (!c || !s || !window.AdtaxiResults) return;
+    AdtaxiResults.render(resBody, { cat: c.id, plan: buildPlan(s, readBudget()).items.map(function (r) { return r.id; }), channels: CHANNELS, close: function () { resPanel.close(); } });
+    if (resPanel.showModal) resPanel.showModal(); else resPanel.setAttribute("open", "");
+  });
   $("email").addEventListener("click", function () { var m = mailtoLink(); if (m) location.href = m; });
   render();
 })();
