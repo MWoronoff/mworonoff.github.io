@@ -1179,7 +1179,8 @@
         el("label", { class: "az-field rz-pcomp" }, [el("span", { text: "Local competitors" }), this.pComp]),
         el("div", { class: "rz-pact" }, [el("button", { type: "button", class: "az-btn primary", text: "Download PowerPoint", onclick: function () { self.buildProposal().catch(function () {}); } }), this.pStatus])])]);
     // Results shows only when this category has case studies of its own
-    loadResults(this.cfg.resultsScript, function () { if (window.AdtaxiResults && AdtaxiResults.has(self.resultsCat())) self.resultsBtn.hidden = false; });
+    // Hidden only when the case-study file has loaded and says this category has none of its own
+    loadResults(this.cfg.resultsScript, function () { if (window.AdtaxiResults && AdtaxiResults.has && !AdtaxiResults.has(self.resultsCat())) self.resultsBtn.hidden = true; });
     loadPlan(this.cfg.planScript, function () {
       if (self.cfg.planExtend && AdtaxiPlan.extend && !AdtaxiPlan.extended) { AdtaxiPlan.extend(self.cfg.planExtend); AdtaxiPlan.extended = true; }   // this page's own channels (e.g. LinkedIn)
       AdtaxiPlan.STRATEGIES.forEach(function (st) { self.bStrat.appendChild(el("option", { value: st.id, text: st.label })); });
@@ -1198,7 +1199,7 @@
           el("div", { class: "rz-budget-actions" }, [
             el("button", { type: "button", class: "az-btn primary", text: "Build proposal", onclick: function () { self.pBox.hidden = !self.pBox.hidden; if (!self.pBox.hidden) self.pClient.focus(); } }),
             el("button", { type: "button", class: "az-btn", text: "Export allocation (CSV)", onclick: function () { self.exportBudget(); } }),
-            this.resultsBtn = el("button", { type: "button", class: "az-btn az-results-btn", text: "Results", "aria-haspopup": "dialog", hidden: true,
+            this.resultsBtn = el("button", { type: "button", class: "az-btn az-results-btn", text: "Results", "aria-haspopup": "dialog", hidden: RESULT_CATS.indexOf(this.resultsCat()) < 0 ? true : null,
               title: "Case studies from this category and from the same channels as this plan", onclick: function () { self.openResults(); } }),
             this.bLink])]),
         this.pBox, this.bRates, this.bSummary, this.bWarn, this.cWrap,
@@ -1209,11 +1210,12 @@
   /* ---------- Results: case studies for this plan (shared/results.js) ----------
      Category matches first, then case studies that used the most of the plan's channels. Four show and up to
      four more are behind "Show more". */
+  var RESULT_CATS = ["healthcare", "legal", "higher-ed", "home-services", "apartment", "auto", "financial", "furniture", "franchise"];
   function loadResults(src, done) {
     if (window.AdtaxiResults) { done(); return; }
     if (loadResults.waiting) { loadResults.waiting.push(done); return; }
     loadResults.waiting = [done];
-    var sc = document.createElement("script"); sc.src = src || "../shared/results.js?v=20261028c";
+    var sc = document.createElement("script"); sc.src = src || "../shared/results.js?v=20261028d";
     sc.onload = sc.onerror = function () { var w = loadResults.waiting; loadResults.waiting = null; w.forEach(function (f) { f(); }); };
     document.head.appendChild(sc);
   }
