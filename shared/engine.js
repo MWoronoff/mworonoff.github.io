@@ -329,15 +329,38 @@
   /* ---------- Combined area (cfg.drill): DMAs, metros, counties and ZIPs ticked in any list, opened together as one trade area.
      The Trade area tool counts every ZIP once, so overlaps aren't double counted; an area already inside another one is folded in. */
   var AREA_PREFIX = { dma: "d", metro: "m", county: "c", zip: "z" };
+  // ZIPs of a county, metro or DMA from the ZIP index (zip -> [county, metro, dma]); built once per index
+  var ZIP_POS = { county: 0, metro: 1, dma: 2 };
+  function zipsOf(level, id, zx) {
+    if (!zx || ZIP_POS[level] == null) return [];
+    if (!zx.__by) {
+      var by = { county: {}, metro: {}, dma: {} };
+      Object.keys(zx).forEach(function (z) { var e = zx[z]; if (!e || !e.length) return;
+        ["county", "metro", "dma"].forEach(function (L) { var k = e[ZIP_POS[L]]; if (k) (by[L][k] = by[L][k] || []).push(z); }); });
+      Object.defineProperty(zx, "__by", { value: by, enumerable: false });
+    }
+    return zx.__by[level][id] || [];
+  }
+  function zipIn(z, a, zx) { var e = zx[z]; return a.level === "zip" ? z === a.id : !!e && e[ZIP_POS[a.level]] === a.id; }
+  // a contains b when every one of b's ZIPs lies in a. Counties and metros can straddle a DMA line (Riverside County is
+  // split between Los Angeles and Palm Springs), so containment is decided by ZIP, not by the county lists.
   function containsArea(a, b, cm, zx) {
     if (a.level === b.level) return a.id === b.id;
-    if (b.level === "zip") { var e = zx[b.id]; return !!e && ((a.level === "county" && e[0] === a.id) || (a.level === "metro" && e[1] === a.id) || (a.level === "dma" && e[2] === a.id)); }
+    if (a.level === "zip") return false;
+    if (b.level === "zip") return zipIn(b.id, a, zx);
+    var zs = zipsOf(b.level, b.id, zx);
+    if (zs.length) return zs.every(function (z) { return zipIn(z, a, zx); });
     if (b.level === "county") return (a.level === "dma" || a.level === "metro") && ((cm[a.level] || {})[a.id] || []).indexOf(b.id) >= 0;
     if (b.level === "metro" && a.level === "dma") {
       var mc = (cm.metro || {})[b.id] || [], dc = (cm.dma || {})[a.id] || [];
       return mc.length > 0 && mc.every(function (c) { return dc.indexOf(c) >= 0; });
     }
     return false;
+  }
+  // Two areas share ZIPs (without one containing the other): their populations overlap in the combined total
+  function sharesZips(a, b, zx) {
+    if (a.level === "zip" || b.level === "zip") return false;
+    return zipsOf(a.level, a.id, zx).some(function (z) { return zipIn(z, b, zx); });
   }
   Analyzer.prototype.zipLookup = function () {
     if (!this.zipLk) this.zipLk = this.loadJSON(this.cfg.zipIndex || "../shared/geo/zip_market.json").catch(function () { return {}; });
@@ -357,7 +380,7 @@
     if (this.inBasket(level, id)) return;
     var item = { level: level, id: id, name: this.areaName(level, row), pop: (row && row.v && row.v.population) || 0 };
     Promise.all([this.countyMarket(), this.zipLookup()]).then(function (r) {
-      var cm = self.cmCache = r[0] || {}, zx = r[1] || {};
+      var cm = self.cmCache = r[0] || {}, zx = self.zxCache = r[1] || {};
       if (self.inBasket(level, id)) return;
       var holder = self.basket.filter(function (b) { return containsArea(b, item, cm, zx); })[0];
       if (holder) { self.basketMsg = item.name + " is already inside " + holder.name + ", so it wasn't added twice."; self.afterBasket(); return; }
@@ -387,9 +410,8 @@
     var msg = this.basketMsg ? el("p", { class: "az-pickmsg", text: this.basketMsg }) : null;
     if (!B.length) { bar.appendChild(el("div", { class: "az-pickinfo" }, [msg])); return; }
     var pop = 0; B.forEach(function (b) { pop += b.pop; });
-    // A metro can reach past a DMA's edge: then the sum below counts the shared part twice (the trade area won't)
-    var cm = this.cmCache || {}, overlap = B.some(function (a) { return a.level === "metro" && B.some(function (b) {
-      return b.level === "dma" && ((cm.metro || {})[a.id] || []).some(function (c) { return ((cm.dma || {})[b.id] || []).indexOf(c) >= 0; }); }); });
+    // A metro or county can reach past a DMA's edge: then the sum below counts the shared part twice (the trade area won't)
+    var zx = this.zxCache || {}, overlap = B.some(function (a, i) { return B.some(function (b, j) { return i < j && sharesZips(a, b, zx); }); });
     var count = {}; B.forEach(function (b) { count[b.level] = (count[b.level] || 0) + 1; });
     var NOUN = { dma: ["DMA", "DMAs"], metro: ["metro", "metros"], county: ["county", "counties"], zip: ["ZIP", "ZIPs"] };
     var mix = ["dma", "metro", "county", "zip"].filter(function (k) { return count[k]; }).map(function (k) { return NF0.format(count[k]) + " " + NOUN[k][count[k] === 1 ? 0 : 1]; }).join(", ");
@@ -927,7 +949,7 @@
     }
     if (window.AdtaxiRadius) go();
     else {
-      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261028e";   // version tag: browsers fetch the new file after an update
+      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261028f";   // version tag: browsers fetch the new file after an update
       sc.onload = go; sc.onerror = function () { self.showError("The radius tool didn't load. Refresh the page and try again."); };
       document.head.appendChild(sc);
     }

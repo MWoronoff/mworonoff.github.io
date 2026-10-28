@@ -50,7 +50,7 @@
       weights: { search: 30, ctv: 30, social: 25, display: 15 } }
   ];
 
-  var MIN_BUDGET = 1000;   // Adtaxi monthly minimum ad spend (kept at $1,000 so Tier 3 applies)
+  var MIN_BUDGET = 3000;   // Adtaxi monthly minimum ad spend (Oct 2026: $3,000; Tier 3 below it no longer applies)
   var TIERS = [ { max: 7500, channels: 1, label: "Under $7.5K: one primary channel" },
                 { max: 12000, channels: 2, label: "$7.5K–$12K: one to two complementary channels" },
                 { max: 20000, channels: 3, label: "$12K–$20K: two to three channels with distinct roles" },
@@ -420,8 +420,14 @@
     try { var sv = localStorage.getItem(RATE_KEY); if (sv) applyRates(JSON.parse(sv)); } catch (e) {}   // edits saved on this device still apply
   }
 
+  // Why this many channels. Below the custom-plan level, fewer fully funded channels beat a thin spread; at or above it
+  // the plan already has room for several channels and the "custom plan with more channels" note follows, so the
+  // "fewer channels" line would contradict it.
+  function whyLine(tier, budget) {
+    return tier.label + (budget >= CUSTOM_PLAN_BUDGET ? ". Every channel in the plan meets its monthly minimum." : ". Fully funding fewer channels outperforms spreading a budget thin.");
+  }
   window.AdtaxiPlan = {
-    extend: extend,
+    extend: extend, whyLine: whyLine,
     CHANNELS: CHANNELS, ROLES: ROLES, STRATEGIES: STRATEGIES, MIN_BUDGET: MIN_BUDGET, TIERS: TIERS,
     SERVICE_TIERS: SERVICE_TIERS, CUSTOM_PLAN_BUDGET: CUSTOM_PLAN_BUDGET, FEES: FEES,
     serviceTier: serviceTier, minFor: minFor, buildPlan: buildPlan, applyFees: applyFees, termNote: termNote,

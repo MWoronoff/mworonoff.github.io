@@ -129,7 +129,7 @@ AD_RESPONSE = {
 }
 # Proposal wording for franchise development (shared/radius.js reads cfg.proposal)
 PROPOSAL = {
-    "nouns": {"exec": "adults who fit the master franchise candidate profile", "owner": "adults who fit the first-time franchise buyer profile"},
+    "nouns": {"exec": "households that fit the master franchise candidate profile", "owner": "households that fit the first-time franchise buyer profile"}, "audCol": "Prospect households",
     "goals": {"awareness": "Awareness among potential franchise owners in the top candidate ZIPs",
               "leads": "Qualified franchise inquiries and discovery calls",
               "online": "Visits to the franchise opportunity site and completed inquiry forms",

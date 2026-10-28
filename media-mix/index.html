@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script>/* site-version: if this page is an old saved copy, reload it once with the current version (shared/version.json; bump both on each release) */
-(function(){var V="20261028e";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
+(function(){var V="20261028f";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Digital Media Mix Planner</title>
 <meta name="robots" content="noindex">
@@ -142,7 +142,7 @@
   <div class="mm-sheet" id="sheet" aria-live="polite"></div>
 </main>
 
-<script src="../shared/media-plan.js?v=20261026l"></script>
+<script src="../shared/media-plan.js?v=20261028f"></script>
 <script src="../shared/results.js?v=20261028e"></script>
 <script>
 /* =====================  SETTINGS (draft: edit here)  =====================
@@ -310,7 +310,7 @@ var P = window.AdtaxiPlan, CHANNELS = P.CHANNELS, ROLES = P.ROLES, STRATEGIES = 
           (fs.cpm ? " Programmatic (" + usd(fs.cpm) + ") is priced by CPM with management included, so it doesn't change." : "") +
           (fs.none ? " " + usd(fs.none) + " is in channels with no fee on the rate card." : "")]));
       }
-      if (plan.tier) kids.push(el("p", { class: "mm-why" }, [el("b", { text: "Why " + items.length + (items.length === 1 ? " channel" : " channels") + ": " }), plan.tier.label + ". Fully funding fewer channels outperforms spreading a budget thin."]));
+      if (plan.tier) kids.push(el("p", { class: "mm-why" }, [el("b", { text: "Why " + items.length + (items.length === 1 ? " channel" : " channels") + ": " }), P.whyLine(plan.tier, budget)]));
       if (plan.tier) {
         var notes = [];
         plan.raised.forEach(function (r) { notes.push(r.ch.label + " is set at its " + usd(plan.mins[r.id]) + " monthly minimum."); });

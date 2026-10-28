@@ -1135,7 +1135,7 @@
     if (window.AdtaxiPlan) { done(); return; }
     if (loadPlan.waiting) { loadPlan.waiting.push(done); return; }
     loadPlan.waiting = [done];
-    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261026l";
+    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261028f";
     sc.onload = function () { var w = loadPlan.waiting; loadPlan.waiting = null; w.forEach(function (f) { f(); }); };
     sc.onerror = function () { loadPlan.waiting = null; };
     document.head.appendChild(sc);
@@ -1256,6 +1256,9 @@
     out.below = !!(P && b.amount && out.money.tierBudget < P.MIN_BUDGET);
     if (out.strat) {
       out.plan = P.buildPlan(out.strat, out.below ? null : out.money.media, out.below ? null : out.money.tierBudget);
+      if (!out.below && out.plan.tier && !out.plan.items.length) {   // no channel's minimum fits: show shares without dollars
+        out.below = true; out.plan = P.buildPlan(out.strat, null, null);
+      }
       out.channels = out.plan.items;
     }
     var withDollars = b.amount && !out.below;
@@ -1328,7 +1331,7 @@
       }
       var notes = [];
       if (A.plan.tier) {
-        notes.push(A.plan.tier.label + ". Fully funding fewer channels outperforms spreading a budget thin.");
+        notes.push(P.whyLine ? P.whyLine(A.plan.tier, A.money.tierBudget) : A.plan.tier.label + ".");
         A.plan.unavailable.forEach(function (r) { var t = P.SERVICE_TIERS.filter(function (t) { return t.available.indexOf(r.id) >= 0; })[0]; notes.push(P.CHANNELS[r.id].label + " is available from " + money(t.min) + " a month."); });
         A.plan.skipped.forEach(function (x) { notes.push(P.CHANNELS[x.r.id].label + " needs at least " + money(x.min) + " a month on its own, so it isn't in this plan."); });
         var tn = P.termNote(A.channels); if (tn) notes.push(tn);
@@ -1569,7 +1572,7 @@
     return {
       client: client, place: place, placeShort: placeShort, logoPng: logo, mapPng: this.mapImage(),
       mapCaption: "ZIPs shaded by concentration of " + audienceNoun + " (index vs. U.S.; darker is higher)." + (s.mode === "area" ? "" : " Dashed ring: " + s.r + "-mile radius.") + " Prepared by Adtaxi, " + d.toLocaleDateString("en-US", { month: "long", year: "numeric" }) + ".",
-      audienceNoun: audienceNoun, stats: { aud: aud, idx: idx, zips: rows.length, pop: pop, planAud: pAud }, topZips: top, competitors: comps,
+      audienceNoun: audienceNoun, stats: { aud: aud, idx: idx, zips: rows.length, pop: pop, planAud: pAud }, topZips: top, competitors: comps, audCol: PC.audCol || null,
       topTitle: big ? "Largest above-average ZIPs" : "Highest-concentration ZIPs", topTown: oneTown ? top[0].town : null,
       strategy: PC.goals && PC.goals[A.strat.id] ? Object.assign({}, A.strat, { success: PC.goals[A.strat.id] }) : A.strat, plan: plan, total: total, footnote: foot,
       fileName: "Adtaxi proposal - " + client.replace(/[\\/:*?"<>|]/g, "") + " - " + d.toISOString().slice(0, 10) + ".pptx"
@@ -1580,7 +1583,7 @@
     if (!b.amount || !A.strat || !A.withDollars || !A.plan || !A.plan.tier || !A.channels.length) { st.textContent = "Enter a monthly budget and choose a media strategy first."; return Promise.resolve(null); }
     st.textContent = "Building…";
     var base = this.proposalBase();
-    return Promise.all([loadScriptOnce(this.cfg.pptxScript || "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261026l"), this.benchmarks(), this.logoImage()])
+    return Promise.all([loadScriptOnce(this.cfg.pptxScript || "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261028f"), this.benchmarks(), this.logoImage()])
       .then(function (res) { return window.AdtaxiProposal.build(self.proposalContext(res[2], res[3]), opt); })
       .then(function (out) { st.textContent = "Downloaded. Open it in PowerPoint or Google Slides to edit."; return out; })
       .catch(function (e) { st.textContent = "The proposal couldn't be built (" + e.message + "). Try again in a minute."; throw e; });
@@ -2252,12 +2255,28 @@
       if (hit.many) return bad(t, "matches " + hit.many.length + " " + (kind === "dma" ? "DMAs" : "metros") + " (" + hit.many.slice(0, 3).join("; ") + (hit.many.length > 3 ? "…" : "") + "); use more of the name"), true;
       return addMarket(kind, hit.code), true;
     };
-    String(text || "").split(/[\r\n;]+/).forEach(function (line) {
+    // A list pasted from a spreadsheet often has a value column next to the ZIPs (customers, sales). Lines that are a
+    // 5-digit ZIP plus one number are then "ZIP, value", not "ZIP, miles", when any line is tab-separated or any value
+    // couldn't be a radius (0, decimals, over 500 or 4+ digits). The value is ignored; without this, 1001 became the ZIP
+    // 01001 (Agawam, MA) and 350 a 350-mile circle.
+    var LINES = String(text || "").split(/[\r\n;]+/), pairs = 0, tableHint = false;
+    LINES.forEach(function (line) {
+      var raw = line.trim(); if (!/^[\d\s,\t.$-]+$/.test(raw)) return;
+      var ps = raw.split(/[\s,\t]+/).filter(Boolean);
+      if (ps.length < 2 || !/^\d{5}$/.test(ps[0])) return;
+      pairs++;
+      if (/\t/.test(raw) || ps.length > 2 || ps.slice(1).some(function (v) { return !/^\d{1,3}$/.test(v) || +v === 0 || +v > 500; })) tableHint = true;
+    });
+    var valueCol = pairs >= 2 && tableHint;
+    A.valueLines = 0;
+    LINES.forEach(function (line) {
       var t = line.replace(/\s+/g, " ").trim(), m;
       if (!t) return;
-      // Numbers only: a ZIP list, or "ZIP miles"
-      if (/^[\d\s,\t-]+$/.test(t)) {
+      if (/^(zip|zip ?code|postal ?code|zipcode)\b/i.test(t) && !/\d{5}/.test(t)) return;   // a header row
+      // Numbers only: a ZIP list, "ZIP miles", or "ZIP value" rows from a spreadsheet
+      if (/^[\d\s,\t.$-]+$/.test(t)) {
         var parts = t.split(/[\s,\t]+/).filter(function (x) { return x && x !== "-"; });
+        if (valueCol && parts.length >= 2 && /^\d{5}$/.test(parts[0]) && !parts.slice(1).every(function (x) { return /^\d{5}$/.test(x); })) { A.valueLines++; return addZip(parts[0]); }
         if (parts.length === 2 && /^\d{1,3}$/.test(parts[1]) && zipOf(parts[0])) return addCircle(parts[0], +parts[1], t);
         return parts.forEach(addZip);
       }
@@ -2364,6 +2383,7 @@
         var shown = items.slice(0, 12).map(function (x) { return x.label + (x.count != null ? " (" + NF0.format(x.count) + " ZIP" + (x.count === 1 ? "" : "s") + ")" : ""); });
         box.appendChild(el("p", { class: "rz-note", text: "Read as: " + shown.join("; ") + (items.length > 12 ? "; and " + (items.length - 12) + " more." : ".") }));
       }
+      if (A.valueLines) box.appendChild(el("p", { class: "rz-note", text: "Used the ZIP column only: the numbers next to the ZIPs on " + NF0.format(A.valueLines) + " line" + (A.valueLines === 1 ? "" : "s") + " (counts or sales) were left out. To map a radius, list one location per line, such as 46307, 15 miles." }));
       if (A.padded.length) box.appendChild(el("p", { class: "rz-note", text: "Added a leading zero to " + A.padded.slice(0, 5).join(", ") + (A.padded.length > 5 ? " and " + (A.padded.length - 5) + " more" : "") + "." }));
       if (A.tokens.length > MAX_LINK_TOKENS) box.appendChild(el("p", { class: "rz-note", text: "This area is too large to save in the page link. Export the ZIP list to keep it." }));
     } else if (!A.bad.length) box.appendChild(el("p", { class: "rz-note", text: "The list is empty. Enter ZIPs, counties, towns, DMAs or metros, or upload a file." }));

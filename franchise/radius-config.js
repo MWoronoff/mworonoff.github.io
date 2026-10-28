@@ -33,7 +33,7 @@ window.ADTAXI_RADIUS = {
   }
  ],
  "zipGeo": "../shared/geo/zip/{level}/{id}.json",
- "planScript": "../shared/media-plan.js?v=20261027d",
+ "planScript": "../shared/media-plan.js?v=20261028f",
  "mediaMixUrl": "../media-mix/",
  "planCategory": "none",
  "customArea": true,
@@ -248,9 +248,10 @@ window.ADTAXI_RADIUS = {
  "profileLabel": "Owner profile",
  "proposal": {
   "nouns": {
-   "exec": "adults who fit the master franchise candidate profile",
-   "owner": "adults who fit the first-time franchise buyer profile"
+   "exec": "households that fit the master franchise candidate profile",
+   "owner": "households that fit the first-time franchise buyer profile"
   },
+  "audCol": "Prospect households",
   "goals": {
    "awareness": "Awareness among potential franchise owners in the top candidate ZIPs",
    "leads": "Qualified franchise inquiries and discovery calls",
