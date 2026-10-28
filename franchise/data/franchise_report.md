@@ -1,6 +1,6 @@
 # Franchise Development data check report (national)
 
-Built 2026-10-26. Result: **PASSED**
+Built 2026-10-28. Result: **PASSED**
 
 | Check | Result | Detail |
 | --- | --- | --- |
@@ -20,7 +20,7 @@ Built 2026-10-26. Result: **PASSED**
 | U.S. householders 45–64 earning $125K+ | PASS | 17,852,632 |
 | DMA scores within 0–100 | PASS | 0 out of range; 420 computed |
 | Metro scores within 0–100 | PASS | 0 out of range; 774 computed |
-| Top DMAs: Master franchise candidates | INFO | San Francisco-Oakland-San Jose, Boston, Denver, New York, Seattle-Tacoma |
-| Top DMAs: First-time franchise buyers | INFO | San Francisco-Oakland-San Jose, Seattle-Tacoma, Dallas-Fort Worth, San Diego, Salt Lake City |
-| Counties built from ZIPs | PASS | 3,144 counties (2,399 with 10,000+ residents are ranked) |
-| County scores within 0–100 | PASS | 0 out of range; 4,798 scores computed |
+| Top DMAs: Master franchise candidates | INFO | San Francisco-Oakland-San Jose, New York, Boston, Denver, Seattle-Tacoma |
+| Top DMAs: First-time franchise buyers | INFO | San Francisco-Oakland-San Jose, Seattle-Tacoma, San Diego, Salt Lake City, Minneapolis-Saint Paul |
+| Counties built from ZIPs | PASS | 3,144 counties (2,400 with 10,000+ residents are ranked) |
+| County scores within 0–100 | PASS | 0 out of range; 4,800 scores computed |

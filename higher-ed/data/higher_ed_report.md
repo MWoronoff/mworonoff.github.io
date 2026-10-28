@@ -1,6 +1,6 @@
 # Higher Education data check report
 
-Built 2026-10-22. Result: **PASSED**
+Built 2026-10-28. Result: **PASSED**
 
 | Check | Result | Detail |
 | --- | --- | --- |
@@ -20,7 +20,7 @@ Built 2026-10-22. Result: **PASSED**
 | EASI U.S. college tuition per household | INFO | $758.85 |
 | EASI college tuition matched to DMAs | PASS | 210 of 210 |
 | EASI college tuition matched to metros | PASS | 387 of 387 |
-| EASI college tuition total, DMAs vs. EASI's own total | PASS | 96.9% of EASI's $99.3B |
+| EASI college tuition total, DMAs vs. EASI's own total | PASS | 98.7% of EASI's $99.3B |
 | DMA scores within 0–100 | PASS | 0 out of range; 1,050 scores computed, 0 not computed (missing input) |
 | Metro scores within 0–100 | PASS | 0 out of range; 1,935 scores computed, 0 not computed (missing input) |
 | DMA roll-up matches school list | PASS | DMAs 2,537 vs schools 2,537 (schools outside any DMA: 4) |
@@ -29,5 +29,5 @@ Built 2026-10-22. Result: **PASSED**
 | U.S. share whose highest is a bachelor's | PASS | 21.6% (expected 17%–26%) |
 | U.S. share of 25-64s with some college, no degree | PASS | 18.9% (expected 14%–25%) |
 | U.S. unemployment rate | PASS | 5.2% (expected 3%–8%) |
-| Counties built from ZIPs | PASS | 3,144 counties (2,399 with 10,000+ residents are ranked) |
-| County scores within 0–100 | PASS | 0 out of range; 11,995 scores computed |
+| Counties built from ZIPs | PASS | 3,144 counties (2,400 with 10,000+ residents are ranked) |
+| County scores within 0–100 | PASS | 0 out of range; 12,000 scores computed |
