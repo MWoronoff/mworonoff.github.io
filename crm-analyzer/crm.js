@@ -172,7 +172,7 @@
     root.appendChild(el("div", { id: "crm-setup" }));
     root.appendChild(el("div", { id: "crm-results" }));
     $("crm-method-link").onclick = function (e) { e.preventDefault(); method(); };
-    loadTests(); loadClients();
+    loadTests();
   }
 
   /* ---------- step 1: the customer file ---------- */
@@ -208,11 +208,6 @@
           } }),
           el("button", { class: "az-btn", type: "button", text: "Try sample data", onclick: sample })
         ])]),
-      el("details", { class: "crm-tests", id: "crm-clients" }, [
-        el("summary", { text: "Real advertiser files" }),
-        el("p", { class: "crm-note", text: "Customer files from real advertisers, reduced to customer counts (and sales, where available) by ZIP. No names or contact details are kept." }),
-        el("div", { class: "crm-test-list", id: "crm-client-list" }, [el("p", { class: "crm-note", text: "Loading advertiser files\u2026" })])
-      ]),
       el("details", { class: "crm-tests", id: "crm-tests" }, [
         el("summary", { text: "Practice with test files that have a known answer" }),
         el("p", { class: "crm-note", text: "Each file is a synthetic customer list with a hidden pattern built on real ZIP data. Load one, look at the results, decide what you think drives the business, then reveal the answer and see whether the tool found it." }),
@@ -234,33 +229,6 @@
         ]));
       });
     }).catch(function () { var box = $("crm-test-list"); if (box) box.innerHTML = "<p class='crm-note'>The test files couldn't be loaded.</p>"; });
-  }
-
-  function loadClients() {
-    fetch("clients/clients.json").then(function (r) { return r.json(); }).then(function (j) {
-      var box = $("crm-client-list"); if (!box) return; box.innerHTML = "";
-      j.clients.forEach(function (t) {
-        box.appendChild(el("div", { class: "crm-test" }, [
-          el("b", { text: t.title }), el("small", { text: t.client + " \u00b7 " + NF0.format(t.customers) + " customers \u00b7 " + (t.stores.length ? "locations " + t.stores.join(", ") : "store locations not set yet") }),
-          el("p", { text: t.setup }),
-          el("div", { class: "crm-test-actions" }, [
-            el("button", { class: "az-btn primary", type: "button", text: "Load this file", onclick: function () { loadClient(t); } }),
-            el("a", { class: "az-btn", href: "clients/" + t.file, download: t.file, text: "Download CSV" })])
-        ]));
-      });
-    }).catch(function () { var box = $("crm-client-list"); if (box) box.innerHTML = "<p class='crm-note'>The advertiser files couldn't be loaded.</p>"; });
-  }
-
-  function loadClient(t) {
-    fetch("clients/" + t.file).then(function (r) { return r.text(); }).then(function (txt) {
-      var lines = txt.trim().split(/\r?\n/), header = lines.shift().split(",");
-      S.file = { name: t.client + ": " + t.title, header: header, rows: lines.map(function (l) { return l.split(","); }) };
-      S.test = null; S.bizName = t.client;
-      S.params.locs = t.stores.join(", ");
-      guessColumns();
-      $("crm-locs").value = t.stores.join(", ");
-      $("crm-setup").scrollIntoView({ behavior: "smooth", block: "start" });
-    });
   }
 
   function loadTest(t) {
