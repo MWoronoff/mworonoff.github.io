@@ -798,8 +798,7 @@
       cfg.crm === false ? null : el("button", { type: "button", class: "az-btn az-only", text: "Analyze your footprint",
         title: "Upload a customer list to see the business's geographic footprint against this market's potential, ZIP by ZIP",
         onclick: function () { location.href = self.crmUrl(); } }),
-      cfg.results === false ? null : el("button", { type: "button", class: "az-btn az-results-btn", text: "Results",
-        title: "Case studies and client testimonials for this category", "aria-haspopup": "dialog", onclick: function () { self.openResults(); } }),
+      // Results lives in the Trade area's Recommended allocation (shared/radius.js), matched to the plan's channels
       exportBtn
     ]));
     var controlBar = el("section", { class: "az-controls", "aria-label": "Analyzer controls" }, controls);
@@ -913,7 +912,8 @@
         var rc = {}; for (var k in RC) rc[k] = RC[k];
         rc.embedded = true; rc.initial = { zip: opt.zip, r: opt.r, p: preset, mode: rmode, ca: opt.ca };
         rc.onState = function () { self.writeHash(); };
-        rc.context = function () { return { ad: cfg.adResponse, sub: self.state.sub }; };   // the proposal's ad-response reasons
+        rc.context = function () { return { ad: cfg.adResponse, sub: self.state.sub,
+          subLabel: self.subSel && self.subSel.selectedIndex >= 0 ? self.subSel.options[self.subSel.selectedIndex].text : "" }; };   // the proposal's ad-response reasons
         rc.onUpdate = function (ready) { self.radiusReady = ready; self.renderAd(); };
         self.radius = window.AdtaxiRadius.start(rc, self.radiusBox);
       } else {
@@ -927,7 +927,7 @@
     }
     if (window.AdtaxiRadius) go();
     else {
-      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261027m";   // version tag: browsers fetch the new file after an update
+      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261028a";   // version tag: browsers fetch the new file after an update
       sc.onload = go; sc.onerror = function () { self.showError("The radius tool didn't load. Refresh the page and try again."); };
       document.head.appendChild(sc);
     }

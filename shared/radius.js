@@ -1196,11 +1196,78 @@
           el("div", { class: "rz-budget-actions" }, [
             el("button", { type: "button", class: "az-btn primary", text: "Build proposal", onclick: function () { self.pBox.hidden = !self.pBox.hidden; if (!self.pBox.hidden) self.pClient.focus(); } }),
             el("button", { type: "button", class: "az-btn", text: "Export allocation (CSV)", onclick: function () { self.exportBudget(); } }),
+            el("button", { type: "button", class: "az-btn az-results-btn", text: "Results", "aria-haspopup": "dialog",
+              title: "Case studies from this category and from the same channels as this plan", onclick: function () { self.openResults(); } }),
             this.bLink])]),
         this.pBox, this.bRates, this.bSummary, this.bWarn, this.cWrap,
         el("div", { class: "rz-alloc-block" }, [el("h3", { text: "By ZIP" }),
           el("div", { class: "az-tablewrap" }, [el("table", { class: "az-table" }, [this.bHead, this.bBody])]), this.bNote]),
         this.bFee])]);
+  };
+  /* ---------- Results: case studies for this plan (shared/results.js) ----------
+     Category matches first, then case studies that used the most of the plan's channels. Four show and up to
+     four more are behind "Show more". */
+  var RESULT_CATS = { healthcare: "Healthcare", legal: "Legal", "higher-ed": "Higher Education", "home-services": "Home Services",
+    apartment: "Apartments", auto: "Auto", financial: "Financial", furniture: "Furniture", franchise: "Franchise" };
+  function loadResults(src, done) {
+    if (window.AdtaxiResults) { done(); return; }
+    var sc = document.createElement("script"); sc.src = src || "../shared/results.js?v=20261028a";
+    sc.onload = done; sc.onerror = done; document.head.appendChild(sc);
+  }
+  Radius.prototype.openResults = function () {
+    var self = this;
+    if (!this.resultsPanel) {
+      this.resultsBody = el("div", { class: "az-results-body" });
+      this.resultsPanel = el("dialog", { class: "az-results", "aria-labelledby": "rz-results-title" }, [this.resultsBody]);
+      this.resultsPanel.addEventListener("click", function (e) { if (e.target === self.resultsPanel) self.resultsPanel.close(); });
+      document.body.appendChild(this.resultsPanel);
+    }
+    loadResults(this.cfg.resultsScript, function () { self.renderResults(); });
+    if (this.resultsPanel.showModal) { if (!this.resultsPanel.open) this.resultsPanel.showModal(); } else this.resultsPanel.setAttribute("open", "");
+  };
+  Radius.prototype.renderResults = function () {
+    var self = this, R = window.AdtaxiResults, P = window.AdtaxiPlan, body = this.resultsBody; body.innerHTML = "";
+    var cat = String(this.cfg.resultsCategory || this.cfg.exportName || "").replace(/-radius$/, "");
+    if (!RESULT_CATS[cat]) cat = "";
+    var ctx = this.cfg.context ? this.cfg.context() || {} : {};
+    var A = this.allocation(), plan = (A.channels || []).map(function (c) { return c.id; });
+    var short = function (id) { return P && P.CHANNELS && P.CHANNELS[id] ? P.CHANNELS[id].short : id; };
+    var sub = [cat ? RESULT_CATS[cat] + (ctx.subLabel ? " \u00b7 " + ctx.subLabel : "") : "",
+      plan.length ? "Plan: " + plan.map(short).join(", ") : ""].filter(Boolean).join(" \u2014 ");
+    body.appendChild(el("div", { class: "az-results-head" }, [
+      el("div", null, [el("h2", { id: "rz-results-title", text: "Results" }), sub ? el("p", { class: "az-results-sub", text: sub }) : null]),
+      el("button", { type: "button", class: "az-modal-close", "aria-label": "Close", text: "\u00d7", onclick: function () { self.resultsPanel.close(); } })]));
+    if (!R) { body.appendChild(el("p", { class: "az-results-note", text: "The case studies couldn't be loaded. Check the connection and try again." })); return; }
+    var M = R.match(cat, plan), shown = 0, LIMIT = 4, MAX = 8, more = [];
+    M.byChannel = M.byChannel.slice(0, Math.max(0, MAX - M.inCat.length));   // the strongest matches only
+    function card(m) {
+      var it = m.item, chips = el("p", { class: "az-results-ch" });
+      it.channels.forEach(function (c, i) {
+        if (i) chips.appendChild(document.createTextNode(" \u00b7 "));
+        chips.appendChild(m.shared.indexOf(c) >= 0 ? el("b", { text: short(c) }) : el("span", { text: short(c) }));
+      });
+      return el("article", { class: "az-results-card" }, [el("h4", { text: it.client }), el("p", { text: it.headline }), chips,
+        el("a", { href: R.base + it.file, target: "_blank", rel: "noopener", text: "Open the case study" })]);
+    }
+    function section(title, list) {
+      if (!list.length) return;
+      var sec = el("section", { class: "az-results-sec" }, [el("h3", { text: title })]);
+      var vis = 0;
+      list.forEach(function (m) { var c = card(m); if (shown >= LIMIT) { c.hidden = true; more.push(c); } else vis++; shown++; sec.appendChild(c); });
+      if (!vis) { sec.hidden = true; more.push(sec); }
+      body.appendChild(sec);
+    }
+    section("In your category", M.inCat);
+    section("Same channels as your plan", plan.length ? M.byChannel : []);
+    if (more.length) {
+      var btn = el("button", { type: "button", class: "az-btn", text: "Show more (" + more.length + ")", onclick: function () {
+        more.forEach(function (c) { c.hidden = false; }); btn.remove();
+      } });
+      body.appendChild(btn);
+    }
+    if (!plan.length) body.appendChild(el("p", { class: "az-results-note", text: "Choose a media strategy above to also see case studies that used the same channels as your plan." }));
+    else if (!shown) body.appendChild(el("p", { class: "az-results-note", text: "No case studies match this plan's channels yet." }));
+    body.appendChild(el("p", { class: "az-results-note", text: "Channels in bold are in your plan. Results are from the client named in each case study, not a forecast for this business." }));
   };
   Radius.prototype.budgetRows = function () {
     if (!this.rows) return [];
