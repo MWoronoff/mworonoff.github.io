@@ -215,7 +215,8 @@ def acs_fill_missing(merged, y):
                     body = resp.read().decode("utf-8")
                     if not body.strip():
                         errs.append(f"{yy} {t}: empty response (HTTP {getattr(resp, 'status', '?')})"); continue
-                    rows = json.loads(body)
+                    try: rows = json.loads(body)
+                    except ValueError: errs.append(f"{yy} {t}: not data: {body.strip()[:90]!r}"); continue
                 except Exception as e:
                     errs.append(f"{yy} {t}: {type(e).__name__}: {str(e)[:100]}"); continue
                 if not rows or len(rows) < 2:
@@ -235,6 +236,32 @@ def acs_fill_missing(merged, y):
     REPORT["acs_api"]["errors"] = errs[:5]
     msg = (f"Census API fill: {len(miss)} ZIPs tried; " + (f"data from ACS 5-year {used - 4}–{used}" if used else "no data returned") +
            (f"; first errors: {' | '.join(errs[:3])}" if errs else ""))
+    if not parts:                                    # API unavailable: the prior release's bulk file, same server as above
+        need = set(miss)
+        for yy in (y - 1,):
+            for t in ACS_TABLES:
+                try:
+                    resp = get(ACS_BULK.format(y=yy, t=t.lower()), timeout=900)
+                    it = (b.decode("utf-8", "replace") for b in resp)
+                    hdr = next(it).rstrip("\r\n").split("|")
+                    gi = hdr.index("GEO_ID")
+                    keep = [i for i, h in enumerate(hdr) if re.fullmatch(rf"{t}_E\d+", h)]
+                    rows = []
+                    for line in it:
+                        if line.startswith("860Z200US") and line[9:14] in need:
+                            f = line.rstrip("\r\n").split("|")
+                            rows.append([f[gi][9:]] + [f[k] for k in keep])
+                except Exception as e:
+                    errs.append(f"bulk {yy} {t}: {type(e).__name__}: {str(e)[:80]}"); continue
+                if rows:
+                    d = pd.DataFrame(rows, columns=["zip"] + [hdr[k] for k in keep])
+                    for c in d.columns[1:]:
+                        d[c] = pd.to_numeric(d[c], errors="coerce")
+                    parts.append(d.set_index("zip"))
+            if parts:
+                used = yy; break
+        REPORT["acs_api"]["year"] = used
+        msg += "; bulk file fallback: " + (f"ACS 5-year {used - 4}–{used}" if used else "no data")
     log("  " + msg)
     print(f"::notice title=ACS gap fill::{msg}")
     if not parts:
@@ -243,7 +270,7 @@ def acs_fill_missing(merged, y):
     add = add[[c for c in add.columns if c == "zip" or c in merged.columns]]
     add = add[add.drop(columns="zip").notna().any(axis=1)]
     REPORT["acs_api"]["filled"] = sorted(add["zip"])
-    log(f"  filled from the Census API: {', '.join(sorted(add['zip'])) or 'none'}")
+    log(f"  filled: {', '.join(sorted(add['zip'])) or 'none'}")
     return pd.concat([merged, add], ignore_index=True)
 
 
@@ -729,7 +756,7 @@ def write_report(status, started):
     g = REPORT.get("acs_api")
     if g and g.get("tried"):
         left = [z for z in g["tried"] if z not in g["filled"]]
-        L.append(f"- ACS gaps: {len(g['tried'])} populated ZIPs missing from the bulk file; filled from the Census API: "
+        L.append(f"- ACS gaps: {len(g['tried'])} populated ZIPs missing from the bulk file; filled: "
                  f"{', '.join(g['filled']) or 'none'}" + (f" (ACS 5-year {g['year'] - 4}–{g['year']})" if g.get('year') else "") +
                  (f"; still missing: {len(left)}" if left else "") + (f"; API errors: {' | '.join(g.get('errors') or [])}" if g.get("errors") else "") + ".")
     i = REPORT.get("irs")
