@@ -1149,7 +1149,7 @@
     if (window.AdtaxiPlan) { done(); return; }
     if (loadPlan.waiting) { loadPlan.waiting.push(done); return; }
     loadPlan.waiting = [done];
-    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261028k";
+    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261028l";
     sc.onload = function () { var w = loadPlan.waiting; loadPlan.waiting = null; w.forEach(function (f) { f(); }); };
     sc.onerror = function () { loadPlan.waiting = null; };
     document.head.appendChild(sc);
@@ -1239,7 +1239,7 @@
     next.classList.add("az-next");
     var lab = next.tagName === "BUTTON" || next.tagName === "TEXTAREA" ? null : next.querySelector("span");
     var tag = el("span", { class: "az-nexttag", text: "Next" });
-    if (lab) lab.appendChild(tag); else if (next.parentNode) next.parentNode.insertBefore(tag, next);
+    if (lab) lab.appendChild(tag); else if (next.tagName === "TEXTAREA" && next.parentNode) next.parentNode.insertBefore(tag, next);   // a button gets the ring only
   };
   /* ---------- Hand-off from the TV + Video tool ----------
      The Digital Video amount the client chose there is held on its line (CTV, or YouTube for pre-roll and dynamic video),
@@ -1649,7 +1649,7 @@
     if (!b.amount || !A.strat || !A.withDollars || !A.plan || !A.plan.tier || !A.channels.length) { st.textContent = "Enter a monthly budget and choose a media strategy first."; return Promise.resolve(null); }
     st.textContent = "Building…";
     var base = this.proposalBase();
-    return Promise.all([loadScriptOnce(this.cfg.pptxScript || "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261028k"), this.benchmarks(), this.logoImage()])
+    return Promise.all([loadScriptOnce(this.cfg.pptxScript || "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261028l"), this.benchmarks(), this.logoImage()])
       .then(function (res) { return window.AdtaxiProposal.build(self.proposalContext(res[2], res[3]), opt); })
       .then(function (out) { st.textContent = "Downloaded. Open it in PowerPoint or Google Slides to edit."; return out; })
       .catch(function (e) { st.textContent = "The proposal couldn't be built (" + e.message + "). Try again in a minute."; throw e; });

@@ -1142,3 +1142,49 @@
 
   boot();
 })();
+
+/* ---------- Guided steps (preview with ?guide=1; same switch as the analyzers) ----------
+   Numbered step badges, one highlighted next thing (the customer file, then your location ZIPs, then Analyze
+   customers), and one main button per step. Applied after each render, so the tool's own code is unchanged. */
+(function () {
+  var GUIDE_ON = false;
+  if (!(GUIDE_ON || window.ADTAXI_GUIDE === true || /[?&]guide=1(&|$)/.test(location.search))) return;
+  var busy = false;
+  function apply() {
+    if (busy) return; busy = true;
+    try {
+      // "1. Add your customers" -> step badge + title
+      Array.prototype.forEach.call(document.querySelectorAll(".crm-step > h2, .crm-summary > h2"), function (h) {
+        if (h.querySelector(".az-step")) return;
+        var m = /^(\d)\.\s+(.*)$/.exec(h.textContent); if (!m) return;
+        h.textContent = ""; h.style.display = "flex"; h.style.alignItems = "center";
+        var b = document.createElement("span"); b.className = "az-step"; b.textContent = m[1];
+        h.appendChild(b); h.appendChild(document.createTextNode(m[2]));
+      });
+      // One main button: the similar-ZIPs Export CSV becomes a plain button (Print one-page summary stays the main one)
+      Array.prototype.forEach.call(document.querySelectorAll(".az-btn.primary"), function (x) { if (x.textContent === "Export CSV") x.classList.remove("primary"); });
+      // The next thing the page needs
+      Array.prototype.forEach.call(document.querySelectorAll(".az-next"), function (x) { x.classList.remove("az-next"); });
+      Array.prototype.forEach.call(document.querySelectorAll(".az-nexttag"), function (x) { x.remove(); });
+      var results = document.querySelector(".crm-summary"), locs = document.getElementById("crm-locs"), drop = document.getElementById("crm-drop");
+      var next = null, tagIn = null;
+      if (!results) {
+        if (locs) {
+          if (!locs.value.trim()) { next = locs.parentNode; tagIn = next; }
+          else { next = Array.prototype.filter.call(document.querySelectorAll(".crm-step .az-btn.primary"), function (x) { return x.textContent === "Analyze customers"; })[0]; }
+        } else if (drop) { next = drop; tagIn = drop.querySelector("b"); }
+      }
+      if (next) {
+        next.classList.add("az-next");
+        var t = document.createElement("span"); t.className = "az-nexttag"; t.textContent = "Next";
+        if (tagIn && tagIn !== next) tagIn.appendChild(t);
+        else if (tagIn) { var c = tagIn.firstChild; tagIn.insertBefore(t, c && c.nextSibling); }
+        // a button gets the highlight ring only
+      }
+    } finally { busy = false; }
+  }
+  var timer = null;
+  new MutationObserver(function () { if (busy) return; clearTimeout(timer); timer = setTimeout(apply, 30); }).observe(document.body, { childList: true, subtree: true });
+  document.addEventListener("input", function (e) { if (e.target && e.target.id === "crm-locs") apply(); });
+  apply();
+})();
