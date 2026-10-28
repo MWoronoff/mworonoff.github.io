@@ -127,5 +127,8 @@
     body.appendChild(el("p", { class: "az-results-note", text: "Channels in bold are in the plan. Results are from the client named in each case study, not a forecast for this business." }));
   }
 
-  window.AdtaxiResults = { ITEMS: ITEMS, match: match, render: render, base: BASE };
+  // True when the category has case studies of its own; the Results button shows only then
+  function has(cat) { cat = cat === "apartments" ? "apartment" : cat; return !!cat && ITEMS.some(function (it) { return it.cats.indexOf(cat) >= 0; }); }
+
+  window.AdtaxiResults = { ITEMS: ITEMS, match: match, render: render, has: has, base: BASE };
 })();

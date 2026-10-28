@@ -1178,6 +1178,8 @@
         el("label", { class: "az-field" }, [el("span", { text: "Client or business name" }), this.pClient]),
         el("label", { class: "az-field rz-pcomp" }, [el("span", { text: "Local competitors" }), this.pComp]),
         el("div", { class: "rz-pact" }, [el("button", { type: "button", class: "az-btn primary", text: "Download PowerPoint", onclick: function () { self.buildProposal().catch(function () {}); } }), this.pStatus])])]);
+    // Results shows only when this category has case studies of its own
+    loadResults(this.cfg.resultsScript, function () { if (window.AdtaxiResults && AdtaxiResults.has(self.resultsCat())) self.resultsBtn.hidden = false; });
     loadPlan(this.cfg.planScript, function () {
       if (self.cfg.planExtend && AdtaxiPlan.extend && !AdtaxiPlan.extended) { AdtaxiPlan.extend(self.cfg.planExtend); AdtaxiPlan.extended = true; }   // this page's own channels (e.g. LinkedIn)
       AdtaxiPlan.STRATEGIES.forEach(function (st) { self.bStrat.appendChild(el("option", { value: st.id, text: st.label })); });
@@ -1196,7 +1198,7 @@
           el("div", { class: "rz-budget-actions" }, [
             el("button", { type: "button", class: "az-btn primary", text: "Build proposal", onclick: function () { self.pBox.hidden = !self.pBox.hidden; if (!self.pBox.hidden) self.pClient.focus(); } }),
             el("button", { type: "button", class: "az-btn", text: "Export allocation (CSV)", onclick: function () { self.exportBudget(); } }),
-            el("button", { type: "button", class: "az-btn az-results-btn", text: "Results", "aria-haspopup": "dialog",
+            this.resultsBtn = el("button", { type: "button", class: "az-btn az-results-btn", text: "Results", "aria-haspopup": "dialog", hidden: true,
               title: "Case studies from this category and from the same channels as this plan", onclick: function () { self.openResults(); } }),
             this.bLink])]),
         this.pBox, this.bRates, this.bSummary, this.bWarn, this.cWrap,
@@ -1209,8 +1211,11 @@
      four more are behind "Show more". */
   function loadResults(src, done) {
     if (window.AdtaxiResults) { done(); return; }
-    var sc = document.createElement("script"); sc.src = src || "../shared/results.js?v=20261028b";
-    sc.onload = done; sc.onerror = done; document.head.appendChild(sc);
+    if (loadResults.waiting) { loadResults.waiting.push(done); return; }
+    loadResults.waiting = [done];
+    var sc = document.createElement("script"); sc.src = src || "../shared/results.js?v=20261028c";
+    sc.onload = sc.onerror = function () { var w = loadResults.waiting; loadResults.waiting = null; w.forEach(function (f) { f(); }); };
+    document.head.appendChild(sc);
   }
   Radius.prototype.openResults = function () {
     var self = this;
@@ -1223,9 +1228,10 @@
     loadResults(this.cfg.resultsScript, function () { self.renderResults(); });
     if (this.resultsPanel.showModal) { if (!this.resultsPanel.open) this.resultsPanel.showModal(); } else this.resultsPanel.setAttribute("open", "");
   };
+  Radius.prototype.resultsCat = function () { return String(this.cfg.resultsCategory || this.cfg.exportName || "").replace(/-radius$/, ""); };
   Radius.prototype.renderResults = function () {
     var R = window.AdtaxiResults, P = window.AdtaxiPlan;
-    var cat = String(this.cfg.resultsCategory || this.cfg.exportName || "").replace(/-radius$/, "");
+    var cat = this.resultsCat();
     var ctx = this.cfg.context ? this.cfg.context() || {} : {};
     var plan = (this.allocation().channels || []).map(function (c) { return c.id; });
     if (R && R.render) R.render(this.resultsBody, { cat: cat, subLabel: ctx.subLabel, plan: plan, channels: P && P.CHANNELS, close: function () { this.resultsPanel.close(); }.bind(this) });
