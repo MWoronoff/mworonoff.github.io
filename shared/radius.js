@@ -368,6 +368,7 @@
       if (+ini.r > 0) this.state.r = +ini.r;
       if (ini.p && this.profiles[ini.p]) { this.state.profile = ini.p; this.state.sel = JSON.parse(JSON.stringify(this.profiles[ini.p].sel)); this.state.sortKey = this.cfg.blendScore ? "score" : presetSort(this.profiles[ini.p]); }
       if (ini.mode === "area" && cfg.customArea) { this.state.mode = "area"; if (ini.ca) this.pendingCA = ini.ca; }
+      if (ini.hand) this.hand = ini.hand;   // Digital Video amount from the TV + Video tool
     } else this.readHash();
   }
 
@@ -1135,7 +1136,7 @@
     if (window.AdtaxiPlan) { done(); return; }
     if (loadPlan.waiting) { loadPlan.waiting.push(done); return; }
     loadPlan.waiting = [done];
-    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261028f";
+    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261028g";
     sc.onload = function () { var w = loadPlan.waiting; loadPlan.waiting = null; w.forEach(function (f) { f(); }); };
     sc.onerror = function () { loadPlan.waiting = null; };
     document.head.appendChild(sc);
@@ -1163,6 +1164,7 @@
     this.bLink = el("a", { class: "rz-mm", href: this.cfg.mediaMixUrl || "../media-mix/", text: "Open in the Media Mix Planner \u2192" });
     this.bSummary = el("p", { class: "rz-alloc-sum" });
     this.bWarn = el("p", { class: "rz-alloc-warn", hidden: true });
+    this.bHand = el("p", { class: "rz-hand", hidden: true });
     this.cHead = el("thead"); this.cBody = el("tbody");
     this.cWrap = el("div", { class: "rz-alloc-block", hidden: true }, [el("h3", { text: "By channel" }),
       el("div", { class: "az-tablewrap rz-alloc-chwrap" }, [el("table", { class: "az-table rz-alloc-ch" }, [this.cHead, this.cBody])]), this.cNote = el("p", { class: "rz-note" })]);
@@ -1185,6 +1187,7 @@
       if (self.cfg.planExtend && AdtaxiPlan.extend && !AdtaxiPlan.extended) { AdtaxiPlan.extend(self.cfg.planExtend); AdtaxiPlan.extended = true; }   // this page's own channels (e.g. LinkedIn)
       AdtaxiPlan.STRATEGIES.forEach(function (st) { self.bStrat.appendChild(el("option", { value: st.id, text: st.label })); });
       self.bRates.appendChild(AdtaxiPlan.rateEditor(function () { self.renderBudget(); }));
+      if (self.hand) self.applyHand();
       self.renderBudget();
     });
     return el("details", { class: "az-panel rz-budget", hidden: true }, [
@@ -1202,10 +1205,42 @@
             this.resultsBtn = el("button", { type: "button", class: "az-btn az-results-btn", text: "Results", "aria-haspopup": "dialog", hidden: RESULT_CATS.indexOf(this.resultsCat()) < 0 ? true : null,
               title: "Case studies from this category and from the same channels as this plan", onclick: function () { self.openResults(); } }),
             this.bLink])]),
-        this.pBox, this.bRates, this.bSummary, this.bWarn, this.cWrap,
+        this.pBox, this.bRates, this.bHand, this.bSummary, this.bWarn, this.cWrap,
         el("div", { class: "rz-alloc-block" }, [el("h3", { text: "By ZIP" }),
           el("div", { class: "az-tablewrap" }, [el("table", { class: "az-table" }, [this.bHead, this.bBody])]), this.bNote]),
         this.bFee])]);
+  };
+  /* ---------- Hand-off from the TV + Video tool ----------
+     The Digital Video amount the client chose there is held on its line (CTV, or YouTube for pre-roll and dynamic video),
+     the strategy starts at Brand awareness and the monthly budget starts at the smallest total at which that strategy
+     would put at least that much on the line. The rep can change the budget or strategy; the held line keeps its amount. */
+  var HAND_JOB = { youtube: "Online video before and during web, app and streaming content, targeted by audience and location." };
+  Radius.prototype.handoff = function (h) { this.hand = h; if (window.AdtaxiPlan && this.bStrat && this.bStrat.options.length > 1) { this.applyHand(); this.renderBudget(); } };
+  Radius.prototype.applyHand = function () {
+    var h = this.hand, P = window.AdtaxiPlan, b = this.budget;
+    if (!h || !P || !P.CHANNELS[h.id]) return;
+    var s = P.STRATEGIES.filter(function (x) { return x.id === "awareness"; })[0] || P.STRATEGIES[0];
+    var label = h.product ? h.product + (h.id === "youtube" ? " (online video)" : "") : P.CHANNELS[h.id].label;
+    b.fixed = { id: h.id, dollars: h.dollars, label: label, short: h.product || P.CHANNELS[h.id].short, job: HAND_JOB[h.id] || null };
+    b.strat = s.id; this.bStrat.value = s.id;
+    b.amount = P.fixedBudget ? P.fixedBudget(s, h.id, h.dollars) : h.dollars;
+    this.bAmount.value = money(b.amount);
+    this.budgetBox.open = true;
+    this.handScroll = true;
+    this.hand = null;
+  };
+  Radius.prototype.renderHand = function (A) {
+    var b = this.budget, self = this, f = b.fixed;
+    this.bHand.hidden = !f;
+    if (!f) return;
+    this.bHand.innerHTML = "";
+    var txt = "Digital Video set from the TV + Video plan: " + money(f.dollars) + " a month on " + f.label + ". The rest of the budget is split across the strategy's other channels, and this amount stays as set if the budget or strategy changes.";
+    var pf = A.plan && A.plan.fixed;
+    if (pf && pf.short) txt += " The monthly budget is below the Digital Video amount, so Digital Video is the whole plan.";
+    else if (pf && pf.leftover) txt += " The remaining " + money(pf.leftover) + " is below the next channel's minimum, so it stays on Digital Video.";
+    if (A.below) txt += " Enter at least " + money(window.AdtaxiPlan.MIN_BUDGET) + " a month to see the plan.";
+    this.bHand.appendChild(document.createTextNode(txt + " "));
+    this.bHand.appendChild(el("button", { type: "button", class: "rz-reset", text: "Release Digital Video", title: "Let the strategy set the Digital Video amount again", onclick: function () { b.fixed = null; self.renderBudget(); } }));
   };
   /* ---------- Results: case studies for this plan (shared/results.js) ----------
      Category matches first, then case studies that used the most of the plan's channels. Four show and up to
@@ -1255,7 +1290,7 @@
     out.strat = P && b.strat ? P.STRATEGIES.filter(function (x) { return x.id === b.strat; })[0] : null;
     out.below = !!(P && b.amount && out.money.tierBudget < P.MIN_BUDGET);
     if (out.strat) {
-      out.plan = P.buildPlan(out.strat, out.below ? null : out.money.media, out.below ? null : out.money.tierBudget);
+      out.plan = P.buildPlan(out.strat, out.below ? null : out.money.media, out.below ? null : out.money.tierBudget, b.fixed);
       if (!out.below && out.plan.tier && !out.plan.items.length) {   // no channel's minimum fits: show shares without dollars
         out.below = true; out.plan = P.buildPlan(out.strat, null, null);
       }
@@ -1279,6 +1314,8 @@
     var self = this, b = this.budget, A = this.allocation(), pick = A.pick, P = window.AdtaxiPlan;
     this.budgetBox.hidden = !this.rows || !pick.length;
     if (this.budgetBox.hidden) return;
+    this.renderHand(A);
+    if (this.handScroll) { this.handScroll = false; var bx = this.budgetBox; setTimeout(function () { bx.scrollIntoView({ behavior: "smooth", block: "start" }); }, 300); }
     var est = this.isEstimate(), chans = A.withDollars && A.plan && A.plan.tier && A.channels.length > 1 ? A.channels : [];
     var showFee = A.money && A.money.feesOn && P.FEES.showFee;
 
@@ -1308,7 +1345,7 @@
       this.cHead.appendChild(el("tr", null, [["Channel", 1], ["Role", 1], ["Share"]].concat(fees ? [["Media"], ["Management fee"], ["Total cost"]] : [["Monthly amount"]]).map(function (h) {
         return el("th", { scope: "col", class: h[1] ? "rz-l" : null, text: h[0] }); })));
       A.channels.forEach(function (c) {
-        var cells = [el("td", { class: "rz-l" }, [el("span", { class: "rz-swatch", style: "background:" + c.ch.color }), c.ch.label]),
+        var cells = [el("td", { class: "rz-l" }, [el("span", { class: "rz-swatch", style: "background:" + c.ch.color }), c.ch.label].concat(c.fixed ? [el("span", { class: "rz-held", text: "From TV + Video" })] : [])),
           el("td", { class: "rz-l", text: c.ch.role.charAt(0).toUpperCase() + c.ch.role.slice(1) }),
           el("td", { class: "num", text: c.pct + "%" }), el("td", { class: "num", text: A.withDollars && c.dollars != null ? money(c.dollars) : "\u2014" })];
         if (fees) {
@@ -1583,7 +1620,7 @@
     if (!b.amount || !A.strat || !A.withDollars || !A.plan || !A.plan.tier || !A.channels.length) { st.textContent = "Enter a monthly budget and choose a media strategy first."; return Promise.resolve(null); }
     st.textContent = "Building…";
     var base = this.proposalBase();
-    return Promise.all([loadScriptOnce(this.cfg.pptxScript || "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261028f"), this.benchmarks(), this.logoImage()])
+    return Promise.all([loadScriptOnce(this.cfg.pptxScript || "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261028g"), this.benchmarks(), this.logoImage()])
       .then(function (res) { return window.AdtaxiProposal.build(self.proposalContext(res[2], res[3]), opt); })
       .then(function (out) { st.textContent = "Downloaded. Open it in PowerPoint or Google Slides to edit."; return out; })
       .catch(function (e) { st.textContent = "The proposal couldn't be built (" + e.message + "). Try again in a minute."; throw e; });

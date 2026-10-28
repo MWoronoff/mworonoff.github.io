@@ -514,7 +514,9 @@
     h.split("&").forEach(function (kv) { var a = kv.split("="); if (a[0]) p[a[0]] = decodeURIComponent(a[1] || ""); });
     var cfg = this.cfg;
     // Radius view (also where the old radius.html links forward to): #level=radius&sub=..&zip=..&r=..
-    this.wantRadius = (p.level === "radius" || p.level === "area") && cfg.radius ? { zip: p.zip, r: p.r, p: p.p, mode: p.level === "area" ? "area" : "radius", ca: p.ca } : null;   // a profile applies only when the link names one (p=); no preset otherwise
+    this.wantRadius = (p.level === "radius" || p.level === "area") && cfg.radius ? { zip: p.zip, r: p.r, p: p.p, mode: p.level === "area" ? "area" : "radius", ca: p.ca } : null;
+    // From the TV + Video tool: the Digital Video amount to hold in the Recommended allocation (tvv dollars, tvl line, tvp product)
+    if (this.wantRadius && +p.tvv > 0 && /^(ctv|youtube)$/.test(p.tvl || "")) this.wantRadius.hand = { dollars: Math.round(+p.tvv), id: p.tvl, product: (p.tvp || "").slice(0, 60), market: (p.tvm || "").slice(0, 80) };   // a profile applies only when the link names one (p=); no preset otherwise
     if (this.wantRadius && p.p && cfg.subcategories && cfg.subcategories.some(function (x) { return x.id === p.p; })) this.state.sub = p.p;
     if (cfg.levels[p.level]) this.state.level = p.level;
     if (p.level === "zip") {
@@ -932,7 +934,7 @@
       if (!self.radius) {
         var RC = cfg.radius === true ? window.ADTAXI_RADIUS : cfg.radius;   // the site's radius-config.js sets ADTAXI_RADIUS
         var rc = {}; for (var k in RC) rc[k] = RC[k];
-        rc.embedded = true; rc.initial = { zip: opt.zip, r: opt.r, p: preset, mode: rmode, ca: opt.ca };
+        rc.embedded = true; rc.initial = { zip: opt.zip, r: opt.r, p: preset, mode: rmode, ca: opt.ca, hand: opt.hand };
         rc.onState = function () { self.writeHash(); };
         rc.context = function () { return { ad: cfg.adResponse, sub: self.state.sub,
           subLabel: self.subSel && self.subSel.selectedIndex >= 0 ? self.subSel.options[self.subSel.selectedIndex].text : "" }; };   // the proposal's ad-response reasons
@@ -942,6 +944,7 @@
         if (preset) self.radius.usePreset(preset);
         if (self.radius.setMode) self.radius.setMode(rmode, opt.ca);
         if (opt.zip && rmode === "radius") self.radius.centerOn(opt.zip);
+        if (opt.hand && self.radius.handoff) self.radius.handoff(opt.hand);
         self.radius.resize();
       }
       self.writeHash();
@@ -949,7 +952,7 @@
     }
     if (window.AdtaxiRadius) go();
     else {
-      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261028f";   // version tag: browsers fetch the new file after an update
+      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261028g";   // version tag: browsers fetch the new file after an update
       sc.onload = go; sc.onerror = function () { self.showError("The radius tool didn't load. Refresh the page and try again."); };
       document.head.appendChild(sc);
     }

@@ -181,8 +181,11 @@
   /* Channel plan for a strategy and a MEDIA budget.
      tierBudget (optional): the figure that sets the tier and channel count when it differs
      from the media budget (fees on, tierOn "gross"). Defaults to the media budget. */
-  function buildPlan(s, budget, tierBudget) {
+  /* fixed (optional): { id, dollars, label, job } a line set elsewhere (the TV + Video tool's Digital Video amount). It keeps
+     its dollars; the rest of the budget is split across the strategy's other channels as usual. */
+  function buildPlan(s, budget, tierBudget, fixed) {
     var tb = tierBudget || budget;
+    if (fixed && CHANNELS[fixed.id] && fixed.dollars > 0 && budget && budget >= MIN_BUDGET && tb >= MIN_BUDGET) return buildFixed(s, budget, tb, fixed);
     var list = Object.keys(s.weights).map(function (k) { return { id: k, w: s.weights[k] }; }).sort(function (a, b) { return b.w - a.w; });
     var tier = null, st = null, skipped = [], unavailable = [], raised = [], mins = {};
     if (budget && budget >= MIN_BUDGET && tb >= MIN_BUDGET) {
@@ -216,6 +219,53 @@
     var floorW = list.length ? list[list.length - 1].w : 0;
     unavailable = unavailable.filter(function (r) { return r.w >= floorW; });
     return { items: list, tier: tier, service: st, skipped: skipped, unavailable: unavailable, raised: raised, mins: mins };
+  }
+
+  /* Plan with one line held at a set amount. The tier still comes from the total; the held line counts as one of the
+     tier's channels, and when money is left over at least one other channel is added so the rest is spent. */
+  function buildFixed(s, budget, tb, fixed) {
+    var tier = TIERS.filter(function (t) { return tb < t.max; })[0], st = serviceTier(tb);
+    var F = Math.min(Math.round(fixed.dollars), Math.round(budget)), rest = Math.round(budget) - F;
+    var skipped = [], unavailable = [], raised = [], mins = {}, leftover = 0;
+    var others = Object.keys(s.weights).filter(function (k) { return k !== fixed.id; }).map(function (k) { return { id: k, w: s.weights[k] }; }).sort(function (a, b) { return b.w - a.w; });
+    var slots = rest > 0 ? Math.max(1, tier.channels - 1) : 0, chosen = [], result = null;
+    others.forEach(function (r) {
+      if (chosen.length >= slots) return;
+      if (st.available.indexOf(r.id) < 0) { unavailable.push(r); return; }
+      var trial = fit(chosen.concat([r]), rest, st);
+      if (trial) { chosen.push(r); result = trial; }
+      else skipped.push({ r: r, min: minFor(r.id, chosen.concat([r]), st) });
+    });
+    if (rest > 0 && !chosen.length) { leftover = rest; F += rest; }   // no other channel's minimum fits what's left: it stays on the held line
+    else if (chosen.length) {
+      chosen.forEach(function (r) { r.dollars = Math.round(result.dollars[r.id] / 50) * 50; mins[r.id] = result.mins[r.id]; if (result.raised[r.id]) raised.push(r); });
+      var diff = rest - chosen.reduce(function (a, r) { return a + r.dollars; }, 0);
+      chosen.slice().sort(function (a, b) { return b.dollars - a.dollars; })[0].dollars += diff;
+    }
+    var held = { id: fixed.id, w: s.weights[fixed.id] || 0, dollars: F, fixed: true };
+    mins[fixed.id] = MINIMUMS[fixed.id] || 0;
+    var list = [held].concat(chosen);
+    list.forEach(function (r) { r.share = r.dollars / budget; r.ch = CHANNELS[r.id]; r.pct = Math.floor(r.share * 100); });
+    held.ch = Object.assign({}, CHANNELS[fixed.id], fixed.label ? { label: fixed.label, short: fixed.short || fixed.label } : {}, fixed.job ? { job: fixed.job } : {});
+    var left = 100 - list.reduce(function (a, r) { return a + r.pct; }, 0);
+    list.slice().sort(function (a, b) { return (b.share * 100 - b.pct) - (a.share * 100 - a.pct); }).slice(0, left).forEach(function (r) { r.pct++; });
+    list.forEach(function (r) { r.share = r.pct / 100; });
+    var floorW = chosen.length ? chosen[chosen.length - 1].w : 0;
+    unavailable = unavailable.filter(function (r) { return r.w >= floorW; });
+    return { items: list, tier: tier, service: st, skipped: chosen.length ? skipped : [], unavailable: unavailable, raised: raised, mins: mins,
+             fixed: { id: fixed.id, dollars: Math.min(Math.round(fixed.dollars), Math.round(budget)), leftover: leftover, short: budget < fixed.dollars } };
+  }
+  /* A starting total for a held line: the smallest budget (in $500 steps, at least $7,500 so the plan has room for more
+     than one channel) at which the strategy would on its own put at least that amount on the line. */
+  function fixedBudget(s, id, dollars) {
+    if (!s || !dollars) return null;
+    var T = Math.max(7500, MIN_BUDGET, Math.ceil(dollars / 500) * 500);
+    for (var n = 0; n < 2000; n++, T += 500) {
+      var p = buildPlan(s, T, T);
+      var it = p.items.filter(function (r) { return r.id === id; })[0];
+      if (it && it.dollars >= dollars) return T;
+    }
+    return Math.max(MIN_BUDGET, Math.ceil(dollars / 500) * 500);   // the strategy doesn't use this line: start at the line itself
   }
 
   /* Budget entered -> media dollars, fee and the figure that sets the tier.
@@ -430,7 +480,7 @@
     extend: extend, whyLine: whyLine,
     CHANNELS: CHANNELS, ROLES: ROLES, STRATEGIES: STRATEGIES, MIN_BUDGET: MIN_BUDGET, TIERS: TIERS,
     SERVICE_TIERS: SERVICE_TIERS, CUSTOM_PLAN_BUDGET: CUSTOM_PLAN_BUDGET, FEES: FEES,
-    serviceTier: serviceTier, minFor: minFor, buildPlan: buildPlan, applyFees: applyFees, termNote: termNote,
+    serviceTier: serviceTier, minFor: minFor, buildPlan: buildPlan, fixedBudget: fixedBudget, applyFees: applyFees, termNote: termNote,
     MGMT: MGMT, channelFee: channelFee, feeSummary: feeSummary, feeLine: feeLine,
     RETAIL_CPM: RETAIL_CPM, BENCH_CPM: BENCH_CPM, EST: EST, estimate: estimate,
     rateEditor: rateEditor, setRates: setRates, resetRates: resetRates, customRates: customRates, CUSTOM_NOTE: CUSTOM_NOTE

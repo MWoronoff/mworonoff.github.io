@@ -684,3 +684,7 @@ h2 .az-tag { font-size: 12px; }
   .rz-persona-print .rz-p-row, .rz-persona-print .rz-p-note { font-size: 9px; }
   .rz-persona-print .rz-p-story { font-size: 12px; }
 }
+/* Hand-off from the TV + Video tool: the held Digital Video line */
+.rz-hand { margin: 0; padding: 8px 12px; border-radius: 8px; background: #e6f4f1; border: 1px solid #b9e0d8; color: var(--ink); font-size: 13px; line-height: 1.45; }
+.rz-hand[hidden] { display: none; }
+.rz-held { display: inline-block; margin-left: 8px; font-size: 10.5px; font-weight: 700; letter-spacing: .03em; padding: 2px 7px; border-radius: 999px; background: #e6f4f1; color: var(--teal); vertical-align: 1px; }
