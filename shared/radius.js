@@ -1136,7 +1136,7 @@
     if (window.AdtaxiPlan) { done(); return; }
     if (loadPlan.waiting) { loadPlan.waiting.push(done); return; }
     loadPlan.waiting = [done];
-    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261028i";
+    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261028j";
     sc.onload = function () { var w = loadPlan.waiting; loadPlan.waiting = null; w.forEach(function (f) { f(); }); };
     sc.onerror = function () { loadPlan.waiting = null; };
     document.head.appendChild(sc);
@@ -1161,7 +1161,6 @@
     var nSel = el("select", { "aria-label": "ZIPs to include", onchange: function () { b.n = +this.value; self.renderBudget(); } },
       [[5, "Top 5 ZIPs"], [10, "Top 10 ZIPs"], [15, "Top 15 ZIPs"], [25, "Top 25 ZIPs"], [0, "All ZIPs shown"]].map(function (o) { return el("option", { value: o[0], text: o[1] }); }));
     nSel.value = "10";
-    this.bLink = el("a", { class: "rz-mm", href: this.cfg.mediaMixUrl || "../media-mix/", text: "Open in the Media Mix Planner \u2192" });
     this.bSummary = el("p", { class: "rz-alloc-sum" });
     this.bWarn = el("p", { class: "rz-alloc-warn", hidden: true });
     this.bHand = el("p", { class: "rz-hand", hidden: true });
@@ -1203,8 +1202,7 @@
             el("button", { type: "button", class: "az-btn primary", text: "Build proposal", onclick: function () { self.pBox.hidden = !self.pBox.hidden; if (!self.pBox.hidden) self.pClient.focus(); } }),
             el("button", { type: "button", class: "az-btn", text: "Export allocation (CSV)", onclick: function () { self.exportBudget(); } }),
             this.resultsBtn = el("button", { type: "button", class: "az-btn az-results-btn", text: "Results", "aria-haspopup": "dialog", hidden: RESULT_CATS.indexOf(this.resultsCat()) < 0 ? true : null,
-              title: "Case studies from this category and from the same channels as this plan", onclick: function () { self.openResults(); } }),
-            this.bLink])]),
+              title: "Case studies from this category and from the same channels as this plan", onclick: function () { self.openResults(); } })])]),
         this.pBox, this.bRates, this.bHand, this.bSummary, this.bWarn, this.cWrap,
         el("div", { class: "rz-alloc-block" }, [el("h3", { text: "By ZIP" }),
           el("div", { class: "az-tablewrap" }, [el("table", { class: "az-table" }, [this.bHead, this.bBody])]), this.bNote]),
@@ -1318,12 +1316,6 @@
     if (this.handScroll) { this.handScroll = false; var bx = this.budgetBox; setTimeout(function () { bx.scrollIntoView({ behavior: "smooth", block: "start" }); }, 300); }
     var est = this.isEstimate(), chans = A.withDollars && A.plan && A.plan.tier && A.channels.length > 1 ? A.channels : [];
     var showFee = A.money && A.money.feesOn && P.FEES.showFee;
-
-    // Planner link carries the same choices
-    var q = new URLSearchParams(), pc = this.cfg.planCategory || String(this.cfg.exportName || "").replace(/-radius$/, "").replace(/^apartment$/, "apartments");
-    if (pc && !/^(zip|adtaxi|none)$/.test(pc)) q.set("category", pc);
-    if (b.strat) q.set("strategy", b.strat); if (b.amount) q.set("budget", Math.round(b.amount));
-    this.bLink.href = (this.cfg.mediaMixUrl || "../media-mix/") + (q.toString() ? "?" + q : "");
 
     // One-line summary (also what the leave-behind shows in place of the controls)
     var bits = [];
@@ -1622,7 +1614,7 @@
     if (!b.amount || !A.strat || !A.withDollars || !A.plan || !A.plan.tier || !A.channels.length) { st.textContent = "Enter a monthly budget and choose a media strategy first."; return Promise.resolve(null); }
     st.textContent = "Building…";
     var base = this.proposalBase();
-    return Promise.all([loadScriptOnce(this.cfg.pptxScript || "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261028i"), this.benchmarks(), this.logoImage()])
+    return Promise.all([loadScriptOnce(this.cfg.pptxScript || "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261028j"), this.benchmarks(), this.logoImage()])
       .then(function (res) { return window.AdtaxiProposal.build(self.proposalContext(res[2], res[3]), opt); })
       .then(function (out) { st.textContent = "Downloaded. Open it in PowerPoint or Google Slides to edit."; return out; })
       .catch(function (e) { st.textContent = "The proposal couldn't be built (" + e.message + "). Try again in a minute."; throw e; });
