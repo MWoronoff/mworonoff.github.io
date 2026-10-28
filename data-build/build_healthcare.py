@@ -175,6 +175,22 @@ def zbp(year, cache):
     return df
 
 
+# NAICS codes the analyzers count (6-digit). Census leaves a county out of the county file for an industry when it has
+# only 1 or 2 establishments there, so those counties read as 0 (Kenton County, KY: 0 furniture stores). The state file
+# still counts them, so each state's hidden total (state count minus its published counties) is spread over the
+# state's counties that have no row, at most 2 each. These are estimates; "est_imputed" marks them.
+IMPUTE_MAX = 2.0
+CBP_LOG = []
+
+
+def cbp_state(year, cache):
+    f = f"cbp{year % 100:02d}st.zip"
+    df = read_zip_table(fetch(f, CBP.format(y=year, f=f), cache), ["fipstate", "naics", "est"])
+    df["naics"] = naics_clean(df.naics); df["est"] = pd.to_numeric(df.est, errors="coerce")
+    df["st"] = df.fipstate.str.zfill(2)
+    return df.groupby(["st", "naics"]).est.max()
+
+
 def cbp_county(year, cache):
     f = f"cbp{year % 100:02d}co.zip"
     blob = fetch(f, CBP.format(y=year, f=f), cache)
@@ -183,7 +199,34 @@ def cbp_county(year, cache):
     df["naics"] = naics_clean(df.naics)
     df["county_fips"] = df.fipstate.str.zfill(2) + df.fipscty.str.zfill(3)
     for c in ("est", "ap", "emp"): df[c] = pd.to_numeric(df[c], errors="coerce")
-    return df[["county_fips", "naics", "est", "ap", "emp"]]
+    df = df[["county_fips", "naics", "est", "ap", "emp"]].copy()
+    df["est_imputed"] = 0.0
+    try:
+        st = cbp_state(year, cache)
+    except Exception as e:
+        CBP_LOG.append(f"{year}: state file unavailable ({type(e).__name__}); hidden county counts stay 0")
+        return df
+    six = df.naics.str.fullmatch(r"\d{6}")
+    d6 = df[six].assign(st=df.county_fips.str[:2])
+    pub = d6.groupby(["st", "naics"]).est.sum()
+    hidden = (st.reindex(pub.index) - pub).clip(lower=0)
+    hidden = hidden[hidden > 0]
+    real = df[df.county_fips.str[2:] != "999"]        # "999" rows are statewide, not a county: counted in pub, never filled
+    counties = real.groupby(real.county_fips.str[:2]).county_fips.unique()   # every county that appears in the file
+    pub_rows = d6[d6.est.notna()]                     # a row with a blank count is as hidden as a missing row
+    have = set(zip(pub_rows.county_fips, pub_rows.naics))
+    add = []
+    for (s_, n_), h in hidden.items():
+        miss = [c for c in counties.get(s_, []) if (c, n_) not in have]
+        if not miss: continue
+        each = min(IMPUTE_MAX, h / len(miss))
+        add.extend((c, n_, each) for c in miss)
+    if add:
+        a = pd.DataFrame(add, columns=["county_fips", "naics", "est"]); a["ap"] = np.nan; a["emp"] = np.nan; a["est_imputed"] = a.est
+        df = pd.concat([df, a], ignore_index=True)
+        CBP_LOG.append(f"{year}: {len(a):,} hidden county-industry counts filled from the state totals ({a.est.sum():,.0f} establishments)")
+        print("County Business Patterns " + CBP_LOG[-1], flush=True)
+    return df
 
 
 _NAT = {}
@@ -843,6 +886,7 @@ def main():
             for c in WEIGHTS: df[f"{c}@{i}"] = df[f"{c}@{i}"].round(2)
             under = (df[f"demand@{i}"] >= 70) & (P(df[f"per10k@{i}"]) <= 30)
             known = df[f"demand@{i}"].notna() & df[f"per10k@{i}"].notna() & mask
+            if "comp" not in parts: known &= df[f"per10k@{i}"] > 0   # ZIPs: a 0 count may be 1-2 hidden by Census
             df[f"under@{i}"] = np.where(under & known, "Yes", np.where(known, "No", None)) if COUNTED(s) else None
         return df
 

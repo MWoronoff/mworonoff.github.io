@@ -109,6 +109,48 @@ def degree_days_from_temp(t, days):
     return ((65 - t).clip(lower=0) * days, (t - 65).clip(lower=0) * days)
 
 
+# NOAA's county climate files skip Alaska and Hawaii. Their counties use NOAA 1991-2020 station climate normals
+# (annual heating and cooling degree days, base 65F) from the airport station that best represents each county.
+NORMALS = "https://www.ncei.noaa.gov/data/normals-annualseasonal/1991-2020/access/"
+NORMAL_STATIONS = {"USW00022521": "Honolulu", "USW00021504": "Hilo", "USW00022516": "Kahului", "USW00022536": "Lihue",
+                   "USW00026451": "Anchorage", "USW00026411": "Fairbanks", "USW00025309": "Juneau"}
+HI_AK_STATION = {"15003": "USW00022521", "15001": "USW00021504", "15009": "USW00022516", "15005": "USW00022516", "15007": "USW00022536",
+                 # Interior Alaska -> Fairbanks; Southeast -> Juneau; everything else -> Anchorage
+                 "02090": "USW00026411", "02240": "USW00026411", "02068": "USW00026411", "02290": "USW00026411",
+                 "02110": "USW00025309", "02220": "USW00025309", "02130": "USW00025309", "02195": "USW00025309", "02275": "USW00025309",
+                 "02100": "USW00025309", "02230": "USW00025309", "02105": "USW00025309", "02198": "USW00025309"}
+
+
+def hi_ak_normals(counties, cache, rep):
+    """{county_fips: (hdd, cdd)} for Alaska and Hawaii counties, or {} if the normals can't be read or fail the checks."""
+    vals = {}
+    for sid, name in NORMAL_STATIONS.items():
+        try:
+            df = pd.read_csv(io.BytesIO(fetch(f"normals_{sid}.csv", NORMALS + sid + ".csv", cache)))
+            cols = {c.strip().upper(): c for c in df.columns}
+            h, c = (pd.to_numeric(df[cols[k]], errors="coerce").iloc[0] for k in ("ANN-HTDD-NORMAL", "ANN-CLDD-NORMAL"))
+            if h == h and c == c: vals[sid] = (float(h), float(c))
+        except Exception as e:
+            rep.append(("Alaska and Hawaii climate normals", "WARN", f"{name} ({sid}) couldn't be read: {e}"))
+    # Sense checks: Hawaii is hot all year (no heating), interior Alaska is the coldest place in the U.S.
+    ok = (vals.get("USW00022521", (1e9, 0))[0] < 300 and vals.get("USW00022521", (0, 0))[1] > 2500
+          and vals.get("USW00026411", (0, 1e9))[0] > 11000 and vals.get("USW00026411", (0, 1e9))[1] < 300
+          and vals.get("USW00026451", (0, 0))[0] > vals.get("USW00025309", (1e9, 0))[0] * 0.9)
+    if not ok:
+        rep.append(("Alaska and Hawaii climate normals", "WARN", "station normals missing or implausible, so HVAC there leaves out climate: " +
+                    "; ".join(f"{NORMAL_STATIONS[k]} {v[0]:,.0f} HDD / {v[1]:,.0f} CDD" for k, v in vals.items())))
+        return {}
+    out = {}
+    for f in counties:
+        if f[:2] not in ("02", "15"): continue
+        sid = HI_AK_STATION.get(f, "USW00026451" if f[:2] == "02" else "USW00022521")
+        if sid in vals: out[f] = vals[sid]
+    rep.append(("Alaska and Hawaii climate normals", "PASS", "NOAA 1991-2020 station normals: " +
+                "; ".join(f"{NORMAL_STATIONS[k]} {v[0]:,.0f} HDD / {v[1]:,.0f} CDD" for k, v in vals.items()) +
+                f"; {len(out)} counties filled"))
+    return out
+
+
 def climdiv(cache, rep):
     """County heating and cooling degree days per year, average of the last YEARS complete years.
     Uses NOAA's county degree-day files when published, otherwise monthly mean temperatures."""
@@ -223,6 +265,11 @@ def main():
         z[key] = z.county_fips.map(ser)
         stm = ser.groupby(ser.index.str[:2]).mean()
         z[key] = z[key].fillna(st.map(stm))
+    # Alaska and Hawaii: station normals (NOAA's county files skip them; without this their HVAC score had no climate)
+    hiak = hi_ak_normals(sorted(z.county_fips.dropna().unique()), a.cache, rep)
+    for f, (h_, c_) in hiak.items():
+        sel = (z.county_fips == f) & z.hdd.isna()
+        z.loc[sel, "hdd"], z.loc[sel, "cdd"] = h_, c_
     dc = z.county_fips == "11001"                # NOAA files Washington DC under Maryland: use its neighbors
     for key, ser in (("hdd", hdd), ("cdd", cdd)):
         nb = ser.reindex(["24031", "24033"]).mean()
@@ -233,7 +280,7 @@ def main():
     z.loc[ct, "hail_days"] = ct_hail          # NOAA reports by Connecticut's former counties; ZIPs use planning regions
     noclim = z[z.hdd.isna() & (z.population > 0)]
     rep.append(("ZIPs with NOAA climate data", "INFO", f"{1 - noclim.population.sum() / z.population.sum():.1%} of population; "
-                f"none for {', '.join(sorted(noclim.state.dropna().unique())) or 'nobody'} (NOAA's county climate files skip Alaska and Hawaii)"))
+                f"none for {', '.join(sorted(noclim.state.dropna().unique())) or 'nobody'} (Alaska and Hawaii come from NOAA station normals when available)"))
     hot, cold = cdd.get("12086", np.nan), cdd.get("27053", np.nan)
     rep.append(("Climate sense check: Miami-Dade has more cooling and less heating than Minneapolis (Hennepin)",
                 "PASS" if hot > cold and hdd.get("12086", 1e9) < hdd.get("27053", -1) else "FAIL",
@@ -371,6 +418,7 @@ def main():
             for c in WEIGHTS: df[f"{c}@{i}"] = pd.to_numeric(df[f"{c}@{i}"], errors="coerce").round(2)
             under = (df[f"demand@{i}"] >= 70) & (P(df[f"per10k@{i}"]) <= 30)
             known = df[f"demand@{i}"].notna() & df[f"per10k@{i}"].notna() & mask
+            if "comp" not in parts: known &= df[f"per10k@{i}"] > 0   # ZIPs: a 0 count may be 1-2 hidden by Census
             df[f"under@{i}"] = np.where(under & known, "Yes", np.where(known, "No", None))
         return df
 

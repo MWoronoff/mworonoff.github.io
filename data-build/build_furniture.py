@@ -173,6 +173,7 @@ def main():
             for c in WEIGHTS: df[f"{c}@{i}"] = pd.to_numeric(df[f"{c}@{i}"], errors="coerce").round(2)
             under = (df[f"demand@{i}"] >= 70) & (P(df.per10k) <= 30)
             known = df[f"demand@{i}"].notna() & df.per10k.notna() & mask
+            if "comp" not in parts: known &= df.per10k > 0   # ZIPs: a 0 count may be 1-2 hidden by Census
             df[f"under@{i}"] = np.where(under & known, "Yes", np.where(known, "No", None))
         return df
 

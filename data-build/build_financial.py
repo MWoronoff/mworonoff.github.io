@@ -116,7 +116,8 @@ def load_inputs(rep):
     m = pd.DataFrame({"zip": acs.zip})
     m["a50_64"] = acs[[f"B01001_E{n:03d}" for n in list(range(16, 20)) + list(range(40, 44))]].sum(axis=1, min_count=8)
     m["own_units"] = acs.B25081_E001
-    m["mortg"] = acs.B25081_E002 + acs.B25081_E008            # first mortgage, or a home equity loan with no first mortgage
+    m["mortg"] = acs.B25081_E002            # with a mortgage (E002 + E009 = all owner homes; E008, a home equity loan
+                                            # with no first mortgage, sits inside E009 "without a mortgage", so it isn't added)
     m["mortg_free"] = acs.B25081_E009
     m["mob_tot"] = acs.B07003_E001
     m["movers"] = acs.B07003_E001 - acs.B07003_E004
@@ -232,6 +233,7 @@ def main():
             for c in WEIGHTS: df[f"{c}@{i}"] = df[f"{c}@{i}"].round(2)
             under = (df[f"demand@{i}"] >= 70) & (P(df[f"per10k@{i}"]) <= 30)
             known = df[f"demand@{i}"].notna() & df[f"per10k@{i}"].notna() & mask
+            if "comp" not in parts: known &= df[f"per10k@{i}"] > 0   # ZIPs: a 0 count may be 1-2 hidden by Census
             df[f"under@{i}"] = np.where(under & known, "Yes", np.where(known, "No", None))
         return df
 

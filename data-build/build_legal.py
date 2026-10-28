@@ -35,7 +35,8 @@ SUBCATS = [
     {"id": "pi", "label": "Personal injury", "demand": ["adults", "car_commute", "car_share"]},
     {"id": "family", "label": "Family law and divorce", "demand": ["divsep", "divsep_share", "kids_share"]},
     {"id": "estate", "label": "Estate planning and elder law", "demand": ["own55", "a65p", "val300_share"]},
-    {"id": "bankruptcy", "label": "Bankruptcy and debt relief", "demand": ["households", "pov_share", "inc_lt35_share", "unemp_rate"]},
+    # Bankruptcy leaves out Spending Power: its demand is financial strain, and a $75K+ share works against it
+    {"id": "bankruptcy", "label": "Bankruptcy and debt relief", "demand": ["households", "pov_share", "inc_lt35_share", "unemp_rate"], "spend": False},
     {"id": "employment", "label": "Employment law", "demand": ["employed", "unemp_rate"]},
 ]
 DEMAND_LABELS = {"adults": "Adults 18+", "car_commute": "Workers commuting by car", "car_share": "Share of workers commuting by car",
@@ -136,13 +137,16 @@ def main():
             i = s["id"]
             ins = [dem_pct[k] for k in s["demand"] if k in dem_pct and df[k].notna().any()]
             df[f"demand@{i}"] = combine(ins, [1] * len(ins)) if ins else np.nan
-            df[f"category@{i}"], df[f"spend@{i}"], df[f"comp@{i}"] = cat, spend, comp
-            cols = [df[f"{c}@{i}"] for c in parts]
+            use = [c for c in parts if not (c == "spend" and s.get("spend") is False)]
+            df[f"category@{i}"], df[f"comp@{i}"] = cat, comp
+            df[f"spend@{i}"] = spend if "spend" in use else np.nan
+            cols = [df[f"{c}@{i}"] for c in use]
             full = pd.concat(cols, axis=1).notna().all(axis=1)
-            df[f"score@{i}"] = combine(cols, [WEIGHTS[c] for c in parts]).where(full & mask).round(3)
+            df[f"score@{i}"] = combine(cols, [WEIGHTS[c] for c in use]).where(full & mask).round(3)
             for c in WEIGHTS: df[f"{c}@{i}"] = df[f"{c}@{i}"].round(2)
             under = (df[f"demand@{i}"] >= 70) & (P(df.per10k) <= 30)
             known = df[f"demand@{i}"].notna() & df.per10k.notna() & mask
+            if "comp" not in parts: known &= df.per10k > 0   # ZIPs: a 0 count may be 1-2 hidden by Census
             df[f"under@{i}"] = np.where(under & known, "Yes", np.where(known, "No", None))
         return df
 

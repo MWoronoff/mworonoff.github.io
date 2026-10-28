@@ -236,7 +236,7 @@ AdtaxiAnalyzer.start({
    "label": "Furniture stores (competitors)",
    "short": "Stores",
    "format": "int",
-   "help": "Furniture stores (NAICS 442110, now 449110), one count for every line. Complete County Business Patterns counts; ZIP counts under 3 aren't published and show as 0."
+   "help": "Furniture stores (NAICS 442110, now 449110), one count for every line. County Business Patterns counts. Census leaves out a county's count when it has only 1 or 2 businesses; those are estimated from the state total. ZIP counts under 3 aren't published and show as 0, so those ZIPs aren't flagged Underserved."
   },
   {
    "key": "per10k",

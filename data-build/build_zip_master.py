@@ -183,6 +183,58 @@ def acs_labels(y):
     return {}
 
 
+ACS_API = "https://api.census.gov/data/{y}/acs/acs5?get=group({t})&for=zip%20code%20tabulation%20area:{z}"
+
+
+def acs_fill_missing(merged, y):
+    """ZCTAs with residents (per Deluxe) that the bulk summary file left out (Brentwood 11717 and Wyandanch 11798 in
+    the 2020-2024 release), filled from the Census API one table at a time. Any that still fail stay missing."""
+    REPORT.setdefault("acs_api", {"tried": [], "filled": []})
+    try:
+        dlx = pd.read_csv(os.path.join(OUT, FILES["deluxe"]), dtype={"zip": str}, usecols=["zip", "dlx_population"])
+    except Exception as e:
+        log(f"  ACS gap check skipped (no Deluxe file: {e})")
+        return merged
+    have = set(merged["zip"])
+    # Puerto Rico and the territories (006-009, 96x) aren't in the ACS ZCTA file at all (Puerto Rico has its own survey)
+    terr = lambda z: z[:3] in ("006", "007", "008", "009") or z[:2] == "96"
+    miss = sorted(z for z, p in zip(z5(dlx["zip"]), pd.to_numeric(dlx["dlx_population"], errors="coerce").fillna(0))
+                  if p >= 1000 and z not in have and not terr(z))[:300]
+    REPORT["acs_api"]["tried"] = miss
+    if not miss:
+        return merged
+    log(f"  {len(miss)} populated ZIPs missing from the bulk file; trying the Census API: {', '.join(miss[:20])}{'…' if len(miss) > 20 else ''}")
+    parts = []
+    for t in ACS_TABLES:
+        frames = []
+        for k in range(0, len(miss), 50):
+            url = ACS_API.format(y=y, t=t, z=",".join(miss[k:k + 50]))
+            try:
+                rows = json.loads(get(url, timeout=120, tries=3).read().decode("utf-8"))
+            except Exception as e:
+                log(f"  API {t}: {type(e).__name__}: {str(e)[:120]}")
+                continue
+            if not rows or len(rows) < 2:
+                continue
+            hdr = rows[0]
+            zc = hdr.index("zip code tabulation area")
+            cols = {i: f"{t}_E{int(m.group(1)):03d}" for i, h in enumerate(hdr) for m in [re.fullmatch(rf"{t}_(\d+)E", h)] if m}
+            frames.append(pd.DataFrame([[r[zc]] + [r[i] for i in cols] for r in rows[1:]], columns=["zip"] + list(cols.values())))
+        if frames:
+            d = pd.concat(frames, ignore_index=True).drop_duplicates("zip")
+            for c in d.columns[1:]:
+                d[c] = pd.to_numeric(d[c], errors="coerce")
+            parts.append(d.set_index("zip"))
+    if not parts:
+        return merged
+    add = pd.concat(parts, axis=1).reset_index()
+    add = add[[c for c in add.columns if c == "zip" or c in merged.columns]]
+    add = add[add.drop(columns="zip").notna().any(axis=1)]
+    REPORT["acs_api"]["filled"] = sorted(add["zip"])
+    log(f"  filled from the Census API: {', '.join(sorted(add['zip'])) or 'none'}")
+    return pd.concat([merged, add], ignore_index=True)
+
+
 def build_acs():
     y = acs_year()
     log(f"  ACS 5-year {y - 4}-{y}")
@@ -204,6 +256,7 @@ def build_acs():
             d[c] = pd.to_numeric(d[c], errors="coerce")
         log(f"  {t}: {len(d):,} ZCTAs x {len(keep)} lines")
         merged = d if merged is None else merged.merge(d, on="zip", how="outer")
+    merged = acs_fill_missing(merged, y)
     # Census marks medians it can't compute with negative codes (-666666666 etc.); blank them
     for c in merged.columns[1:]:
         merged.loc[merged[c] < -1, c] = pd.NA
@@ -661,6 +714,11 @@ def write_report(status, started):
     if a:
         L.append(f"- ACS: {a['tables']} tables, {a['columns']:,} columns. Age lines that don't add up to total population: "
                  f"{a['age_bad']} ZCTAs. Income bands that don't add up to households: {a['inc_bad']} ZCTAs. Labels: {a['labels']}.")
+    g = REPORT.get("acs_api")
+    if g and g.get("tried"):
+        left = [z for z in g["tried"] if z not in g["filled"]]
+        L.append(f"- ACS gaps: {len(g['tried'])} populated ZIPs missing from the bulk file; filled from the Census API: "
+                 f"{', '.join(g['filled']) or 'none'}" + (f"; still missing (likely not a ZCTA): {len(left)}" if left else "") + ".")
     i = REPORT.get("irs")
     if i:
         L.append(f"- IRS: {i['returns']:,} returns across {i['rows']:,} ZIPs.")

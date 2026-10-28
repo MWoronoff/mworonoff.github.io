@@ -58,6 +58,22 @@ def main():
     z["county_fips"] = z.StateFIPS.astype(int).astype(str).str.zfill(2) + z.CountyFIPS.astype(int).astype(str).str.zfill(3)
     z["population"] = pd.to_numeric(z.Population, errors="coerce").fillna(0).astype(int)
     z["households"] = pd.to_numeric(z.HouseholdsPerZipCode, errors="coerce").fillna(0).astype(int)
+    # Headline population and households: Census ACS 5-year (the same vintage as every other Census measure), so fast-
+    # growing markets aren't understated. Deluxe's counts track an older base (Austin households 12% lower). ZIPs with
+    # no ACS row (PO box and business ZIPs, which have few or no residents) keep Deluxe's figures.
+    acs_path = os.path.join(HERE, "master", "zip_acs.csv.gz")
+    if os.path.exists(acs_path):
+        acs = pd.read_csv(acs_path, dtype={"zip": str}, usecols=["zip", "B01001_E001", "B11001_E001"]).set_index("zip")
+        ap_, ah_ = z.zip.map(acs.B01001_E001), z.zip.map(acs.B11001_E001)
+        use = ap_.notna() & ah_.notna()
+        d_pop, d_hh = int(z.population.sum()), int(z.households.sum())
+        z.loc[use, "population"] = ap_[use].round().astype(int)
+        z.loc[use, "households"] = ah_[use].round().astype(int)
+        rep.append(("Population and households source", "INFO",
+                    f"Census ACS 5-year for {int(use.sum()):,} ZIPs; Deluxe for {int((~use).sum()):,} without ACS. U.S. population "
+                    f"{int(z.population.sum()):,} (Deluxe {d_pop:,}); households {int(z.households.sum()):,} (Deluxe {d_hh:,})"))
+    else:
+        rep.append(("Population and households source", "REVIEW", "master/zip_acs.csv.gz not found; Deluxe counts used"))
     z["cbsa_code"] = z.CBSA.apply(lambda v: "" if pd.isna(v) else str(int(v)).zfill(5))
     z["cbsa_type"] = z.CBSA_Type.fillna("")
     z["cbsa_name"] = z.CBSA_Name.fillna("")
@@ -190,7 +206,7 @@ def main():
         f.write("\n## Largest DMA disagreements with the 2021 list\n\n| County | 2026 list (used) | 2021 list | Population |\n| --- | --- | --- | --- |\n")
         for r in dis.head(15).itertuples():
             f.write(f"| {r.county.title()}, {r.state} | {r.dma_2026_used.title()} | {r.dma_2021.title()} | {r.population:,} |\n")
-        f.write("\nSources: Deluxe ZIP file (Q4 2025); ZIP-level DMA list, github.com/BritCrit/dma_county_zip (March 2026); "
+        f.write("\nSources: Deluxe ZIP file (Q4 2025; population and households from Census ACS 5-year where available); ZIP-level DMA list, github.com/BritCrit/dma_county_zip (March 2026); "
                 "county DMA list, github.com/alex-patton/US-TVDMA-BY-COUNTY (2021, cross-check only).\n")
     for r in rep:
         print(f"[{r[1]}] {r[0]}: {r[2]}")

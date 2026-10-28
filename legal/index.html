@@ -37,7 +37,7 @@ AdtaxiAnalyzer.start({
  "defaultLevel": "us",
  "usMapLevel": "dma",
  "drill": true,
- "zipScore": {"weights": {"demand": 0.4, "spend": 0.15}, "subs": {"pi": {"demand": ["adults", "car_commute", "car_share"], "spend": "inc75_share"}, "family": {"demand": ["divsep", "divsep_share", "kids_share"], "spend": "inc75_share"}, "estate": {"demand": ["own55", "a65p", "val300_share"], "spend": "inc75_share"}, "bankruptcy": {"demand": ["households", "pov_share", "inc_lt35_share", "unemp_rate"], "spend": "inc75_share"}, "employment": {"demand": ["employed", "unemp_rate"], "spend": "inc75_share"}}},
+ "zipScore": {"weights": {"demand": 0.4, "spend": 0.15}, "subs": {"pi": {"demand": ["adults", "car_commute", "car_share"], "spend": "inc75_share"}, "family": {"demand": ["divsep", "divsep_share", "kids_share"], "spend": "inc75_share"}, "estate": {"demand": ["own55", "a65p", "val300_share"], "spend": "inc75_share"}, "bankruptcy": {"demand": ["households", "pov_share", "inc_lt35_share", "unemp_rate"], "spend": null}, "employment": {"demand": ["employed", "unemp_rate"], "spend": "inc75_share"}}},
  "levels": {
   "us": {
    "label": "U.S.",
@@ -172,7 +172,7 @@ AdtaxiAnalyzer.start({
    "label": "Law offices (competitors)",
    "short": "Law offices",
    "format": "int",
-   "help": "Law offices, all practice areas (Census doesn't split them). Complete County Business Patterns counts; ZIP counts under 3 aren't published and show as 0."
+   "help": "Law offices, all practice areas (Census doesn't split them). County Business Patterns counts. Census leaves out a county's count when it has only 1 or 2 businesses; those are estimated from the state total. ZIP counts under 3 aren't published and show as 0, so those ZIPs aren't flagged Underserved."
   },
   {
    "key": "per10k",
@@ -420,7 +420,8 @@ AdtaxiAnalyzer.start({
    "title": "Market Potential Score",
    "body": [
     "Where are a law firm's potential clients, and which geographies deserve the most ad dollars?",
-    "Score = 40% Consumer Demand + 25% Category Spending + 15% Spending Power + 20% Competition. Each part is a percentile (0–100) against markets at the same level. No score is shown when a part has no data."
+    "Score = 40% Consumer Demand + 25% Category Spending + 15% Spending Power + 20% Competition. Each part is a percentile (0–100) against markets at the same level. No score is shown when a part has no data.",
+    "Exception: Bankruptcy and debt relief leaves out Spending Power, since a high share of $75K+ households works against its demand (financial strain). Its other parts keep their relative weights."
    ]
   },
   {
