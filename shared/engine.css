@@ -688,3 +688,22 @@ h2 .az-tag { font-size: 12px; }
 .rz-hand { margin: 0; padding: 8px 12px; border-radius: 8px; background: #e6f4f1; border: 1px solid #b9e0d8; color: var(--ink); font-size: 13px; line-height: 1.45; }
 .rz-hand[hidden] { display: none; }
 .rz-held { display: inline-block; margin-left: 8px; font-size: 10.5px; font-weight: 700; letter-spacing: .03em; padding: 2px 7px; border-radius: 999px; background: #e6f4f1; color: var(--teal); vertical-align: 1px; }
+/* ---------- Guided steps (preview ?guide=1): numbered steps, one highlighted next field ---------- */
+.az-step { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; margin-right: 8px; border-radius: 50%; background: var(--teal); color: #fff; font-size: 12px; font-weight: 700; vertical-align: 2px; flex: none; }
+.az-stephead { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 10px; margin: 0 0 8px; }
+.az-stephead h2 { margin: 0; font-size: 17px; color: var(--navy); display: flex; align-items: center; }
+.az-stepsub { color: var(--muted); font-size: 13px; }
+.az-stepopt { margin-left: 8px; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: none; letter-spacing: 0; }
+.rz-filters-head h2 { display: flex; align-items: center; }
+.rz-pstep { display: flex; align-items: center; margin: 0 0 6px; font-weight: 700; color: var(--navy); font-size: 15px; }
+.az-next > input, .az-next > select, .az-next > textarea, textarea.az-next, button.az-next { background-color: #e9f6f3; border: 2px solid var(--teal) !important; box-shadow: 0 0 0 4px rgba(15,126,112,.14); }
+button.az-btn.primary.az-next { background: var(--teal); box-shadow: 0 0 0 4px rgba(15,126,112,.25); }
+.az-nexttag { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 999px; background: var(--teal); color: #fff; font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; vertical-align: 1px; }
+.az-startline { margin: -4px 2px 12px; font-size: 13px; color: #44586c; }
+.az-startline b { color: var(--navy); }
+.az-seg button.az-cue::after { content: "Next"; margin-left: 6px; padding: 1px 6px; border-radius: 999px; background: var(--teal); color: #fff; font-size: 9.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; vertical-align: 1px; }
+.az-showmore { margin: 8px 0 0; padding: 0; border: 0; background: none; color: var(--teal); font: inherit; font-size: 13px; font-weight: 600; text-decoration: underline; cursor: pointer; }
+.az-ad-fold, .az-fold { margin-top: 10px; }
+.az-ad-fold > summary, .az-fold > summary { cursor: pointer; font-size: 13px; font-weight: 600; color: var(--navy); }
+details.az-sources.az-fold > summary { font-size: 14px; font-weight: 700; }
+.rz-budget > summary .az-step { margin-right: 10px; }

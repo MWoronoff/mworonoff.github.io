@@ -10,6 +10,9 @@
  */
 (function () {
   "use strict";
+  // Guided steps preview (?guide=1): a start line, quieter Export, a Trade area cue, top-5 ad response. Same switch as shared/radius.js.
+  var GUIDE_ON = false;
+  var GUIDE = GUIDE_ON || window.ADTAXI_GUIDE === true || /[?&]guide=1(&|$)/.test(location.search);
 
   var PICK_PREFIX = { dma: "d", metro: "m", county: "c" };   // Custom area tokens in the Trade area tool
   var PICK_NOUN = { dma: ["DMA", "DMAs"], metro: ["metro", "metros"], county: ["county", "counties"] };
@@ -57,7 +60,7 @@
       return el("button", { type: "button", role: "menuitem", onclick: function () { close(); it.run(); } },
         [el("b", { text: it.label }), it.note ? el("small", { text: it.note }) : null]);
     }));
-    btn = el("button", { type: "button", class: "az-btn primary", "aria-haspopup": "menu", "aria-expanded": "false", text: "Export \u25be",
+    btn = el("button", { type: "button", class: GUIDE ? "az-btn" : "az-btn primary", "aria-haspopup": "menu", "aria-expanded": "false", text: "Export \u25be",
       onclick: function (e) { e.stopPropagation(); var open = menu.hidden; menu.hidden = !open; btn.setAttribute("aria-expanded", String(open)); if (open) menu.querySelector("button").focus(); } });
     wrap = el("div", { class: "az-export", onkeydown: function (e) { if (e.key === "Escape" && !menu.hidden) { close(); btn.focus(); } } }, [btn, menu]);
     document.addEventListener("click", function (e) { if (!wrap.contains(e.target)) close(); });
@@ -879,8 +882,10 @@
     this.benchPanel = el("section", { class: "az-bench", hidden: true, "aria-live": "polite" });
     this.timingPanel = el("section", { class: "az-bench az-timing", hidden: true, "aria-live": "polite" });
     this.tab = "markets";
-    this.tabParts = [controlBar, this.notice, this.errorBox, this.drillBar, stage, this.adPanel, this.tablePanel, sources, this.radiusBox];
-    var main = el("main", { class: "az-main" }, [controlBar, this.notice, this.errorBox, this.drillBar, stage, this.adPanel, this.tablePanel, sources, this.radiusBox, this.benchPanel, this.timingPanel]);
+    this.startLine = GUIDE ? el("p", { class: "az-startline az-only" }, [el("b", { text: "Start here: " }), "choose a category, then click a market on the map or in the ranked list. " +
+      (cfg.radius ? "Open Trade area to size a business's area and build its plan." : "")]) : null;
+    this.tabParts = [controlBar, this.startLine, this.notice, this.errorBox, this.drillBar, stage, this.adPanel, this.tablePanel, sources, this.radiusBox];
+    var main = el("main", { class: "az-main" }, [controlBar, this.startLine, this.notice, this.errorBox, this.drillBar, stage, this.adPanel, this.tablePanel, sources, this.radiusBox, this.benchPanel, this.timingPanel]);
     this.root.innerHTML = "";
     this.root.appendChild(header);
     this.root.appendChild(main);
@@ -919,6 +924,7 @@
   Analyzer.prototype.openRadius = function (opt) {
     var self = this, cfg = this.cfg, s = this.state; opt = opt || {};
     this.mode = "radius";
+    this.guideCue();
     // Radius or custom area: a link or a ZIP's "Build a radius audience" button says which; the Trade area button keeps the last one used (Radius at first)
     var rmode = this.radiusMode = opt.mode === "area" ? "area" : opt.mode === "radius" || opt.zip ? "radius" : (this.radius ? this.radius.state.mode : "radius");
     this.anaParts.forEach(function (x) { x.hidden = true; });
@@ -952,13 +958,14 @@
     }
     if (window.AdtaxiRadius) go();
     else {
-      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261028j";   // version tag: browsers fetch the new file after an update
+      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261028k";   // version tag: browsers fetch the new file after an update
       sc.onload = go; sc.onerror = function () { self.showError("The radius tool didn't load. Refresh the page and try again."); };
       document.head.appendChild(sc);
     }
   };
   Analyzer.prototype.closeRadius = function () {
     this.mode = null;
+    this.guideCue();
     this.radiusBox.hidden = true;
     this.anaParts.forEach(function (x) { x.hidden = false; });
     Array.prototype.forEach.call(this.controlBar.querySelectorAll(".az-only"), function (x) { x.hidden = false; });
@@ -975,8 +982,17 @@
     if (from === "zip") { s.query = ""; if (this.search) this.search.value = ""; this.resetView = true; }
     this.refresh();
   };
+  // Guided: the start line shows on the market views only; once a market is picked, Trade area carries a small "Next" cue
+  Analyzer.prototype.guideCue = function () {
+    if (!GUIDE) return;
+    var s = this.state, rad = this.mode === "radius";
+    if (this.startLine) this.startLine.hidden = rad;
+    var tb = this.levelSeg && this.levelSeg.querySelector('[data-level="radius"]');
+    if (tb) tb.classList.toggle("az-cue", !!s.area && s.level !== "us" && !rad);
+  };
   Analyzer.prototype.select = function (id, opts) {
     this.state.area = id;
+    this.guideCue();
     this.renderDetail();
     this.highlight();
     this.markRow();
@@ -988,6 +1004,7 @@
 
   Analyzer.prototype.refresh = function (keepError) {
     var self = this, s = this.state;
+    this.guideCue();
     // A ranking measure that isn't published at this level (e.g. a Metro-only layer) falls back to the default ranking.
     var rm = this.measure(s.rank), dm = this.measure(this.cfg.defaultRank);
     if (rm && dm && !this.availableAt(rm, s.level === "us" ? (this.cfg.usMapLevel || "dma") : s.level)) s.rank = this.cfg.defaultRank;
@@ -1111,7 +1128,9 @@
       ]);
     };
     var cols = el("div", { class: "az-ad-cols" });
-    [ordered.slice(0, SPLIT), ordered.slice(SPLIT)].forEach(function (part, c) {
+    var parts = [ordered.slice(0, SPLIT), ordered.slice(SPLIT)];
+    if (GUIDE && !this.adAll) parts = [ordered.slice(0, 5)];
+    parts.forEach(function (part, c) {
       if (!part.length) return;
       var t = el("div", { class: "az-ad-rows", role: "table", "aria-label": "Advertising response by type of ad, " + (c ? (SPLIT + 1) + " to " + ordered.length : "1 to " + Math.min(SPLIT, ordered.length)) });
       t.appendChild(colHead());
@@ -1119,7 +1138,10 @@
       cols.appendChild(t);
     });
     box.appendChild(cols);
-    box.appendChild(el("p", { class: "az-ad-note", text: (A.note || "") + (d.blendNote ? " " + d.blendNote : "") + " Bar scale runs from " + base + "% to " + top + "%" + (base > 0 ? ", not from zero, to make the differences easier to see." : ".") + (d.source ? " Source: " + d.source + "." : A.source ? " Source: " + A.source + "." : "") }));
+    if (GUIDE && ordered.length > 5) box.appendChild(el("button", { type: "button", class: "az-showmore", text: this.adAll ? "Show less" : "Show all " + ordered.length,
+      "aria-expanded": String(!!this.adAll), onclick: function () { self.adAll = !self.adAll; self.renderAd(); } }));
+    var adNoteP = el("p", { class: "az-ad-note", text: (A.note || "") + (d.blendNote ? " " + d.blendNote : "") + " Bar scale runs from " + base + "% to " + top + "%" + (base > 0 ? ", not from zero, to make the differences easier to see." : ".") + (d.source ? " Source: " + d.source + "." : A.source ? " Source: " + A.source + "." : "") });
+    box.appendChild(GUIDE ? el("details", { class: "az-ad-fold" }, [el("summary", { text: "About these figures" }), adNoteP]) : adNoteP);
     var sp = this.spendPanel(); if (sp) box.appendChild(sp);
   };
 

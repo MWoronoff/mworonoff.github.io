@@ -13,6 +13,10 @@
  */
 (function () {
   "use strict";
+  // Guided steps (numbered steps, one highlighted next field, allocation right after the results). Preview with ?guide=1;
+  // set window.ADTAXI_GUIDE = true (or GUIDE_ON below) to turn it on for everyone.
+  var GUIDE_ON = false;
+  var GUIDE = GUIDE_ON || window.ADTAXI_GUIDE === true || /[?&]guide=1(&|$)/.test(location.search);
 
   var AGE = [["15_17", "15–17"], ["18_24", "18–24"], ["25_34", "25–34"], ["35_44", "35–44"], ["45_54", "45–54"], ["55p", "55+"]];
   var AGE_SETS = {
@@ -302,7 +306,7 @@
       return el("button", { type: "button", role: "menuitem", onclick: function () { close(); it.run(); } },
         [el("b", { text: it.label }), it.note ? el("small", { text: it.note }) : null]);
     }));
-    btn = el("button", { type: "button", class: "az-btn primary", "aria-haspopup": "menu", "aria-expanded": "false", text: "Export \u25be",
+    btn = el("button", { type: "button", class: GUIDE ? "az-btn" : "az-btn primary", "aria-haspopup": "menu", "aria-expanded": "false", text: "Export \u25be",
       onclick: function (e) { e.stopPropagation(); var open = menu.hidden; menu.hidden = !open; btn.setAttribute("aria-expanded", String(open)); if (open) menu.querySelector("button").focus(); } });
     wrap = el("div", { class: "az-export", onkeydown: function (e) { if (e.key === "Escape" && !menu.hidden) { close(); btn.focus(); } } }, [btn, menu]);
     document.addEventListener("click", function (e) { if (!wrap.contains(e.target)) close(); });
@@ -516,7 +520,15 @@
     this.personaDlg = cfg.persona ? el("dialog", { class: "az-modal rz-persona-dlg", "aria-label": "Persona" }, [el("div", { class: "rz-persona-bar" }, [
       el("button", { type: "button", class: "az-btn primary", text: "Print or save as PDF", onclick: function () { self.printPersona(); } }),
       el("button", { type: "button", class: "az-modal-close", "aria-label": "Close", text: "\u00d7", onclick: function () { self.personaDlg.close(); } })]), this.personaBox]) : null;
-    var main = el("main", { class: "az-main" }, [controls, this.areaPanel, this.errorBox, el("section", { class: "rz-stage" }, [this.filterPanel, right]), table, this.extra, this.budgetBox, sources]);
+    var main;
+    if (GUIDE) {
+      var stepHead = el("div", { class: "az-stephead" }, [el("h2", null, [el("span", { class: "az-step", text: "1" }), "Trade area"]),
+        el("span", { class: "az-stepsub", text: cfg.customArea ? "A center ZIP or town and a radius, or a custom list of places." : "A center ZIP or town and a radius." })]);
+      var fh = this.filterPanel.querySelector(".rz-filters-head h2");
+      if (fh) { fh.insertBefore(el("span", { class: "az-step", text: "2" }), fh.firstChild); fh.appendChild(el("span", { class: "az-stepopt", text: "optional" })); }
+      var srcD = el("details", { class: "az-panel az-sources az-fold" }, [el("summary", { text: "Sources" })].concat(Array.prototype.slice.call(sources.childNodes, 1)));
+      main = el("main", { class: "az-main az-guided" }, [stepHead, controls, this.areaPanel, this.errorBox, el("section", { class: "rz-stage" }, [this.filterPanel, right]), table, this.budgetBox, this.extra, srcD]);
+    } else main = el("main", { class: "az-main" }, [controls, this.areaPanel, this.errorBox, el("section", { class: "rz-stage" }, [this.filterPanel, right]), table, this.extra, this.budgetBox, sources]);
     this.root.innerHTML = ""; if (header) this.root.appendChild(header); this.root.appendChild(main); this.root.appendChild(this.modal);
     if (this.personaDlg) this.root.appendChild(this.personaDlg);
     this.rSel.value = s.r ? String(s.r) : ""; this.minSel.value = String(s.minIndex);
@@ -766,6 +778,7 @@
     this.summary.appendChild(el("p", { class: "az-empty", text: msg }));
     this.tbody.innerHTML = ""; this.thead.innerHTML = ""; this.tableTitle.textContent = s.mode === "area" ? "ZIPs in the area" : "ZIPs in range"; this.tableNote.textContent = "";
     if (this.budgetBox) this.budgetBox.hidden = true;
+    this.guideNext();
   };
   Radius.prototype.renderSummary = function () {
     var s = this.state, c = this.c, rows = this.visible(), A = 0, P = 0, pop = 0;
@@ -1136,7 +1149,7 @@
     if (window.AdtaxiPlan) { done(); return; }
     if (loadPlan.waiting) { loadPlan.waiting.push(done); return; }
     loadPlan.waiting = [done];
-    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261028j";
+    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261028k";
     sc.onload = function () { var w = loadPlan.waiting; loadPlan.waiting = null; w.forEach(function (f) { f(); }); };
     sc.onerror = function () { loadPlan.waiting = null; };
     document.head.appendChild(sc);
@@ -1170,10 +1183,11 @@
     this.bHead = el("thead"); this.bBody = el("tbody"); this.bNote = el("p", { class: "rz-note" });
     this.bFee = el("p", { class: "rz-note rz-alloc-fee" });
     this.bRates = el("div", { class: "rz-rates" });
-    this.pClient = el("input", { type: "text", placeholder: "e.g. Bright Smile Dental", "aria-label": "Client or business name" });
+    this.pClient = el("input", { type: "text", placeholder: "e.g. Bright Smile Dental", "aria-label": "Client or business name", oninput: function () { self.guideNext(); } });
     this.pComp = el("textarea", { rows: "3", placeholder: "One per line (optional)", "aria-label": "Local competitors" });
     this.pStatus = el("span", { class: "rz-pstatus", role: "status" });
     this.pBox = el("div", { class: "rz-proposal", hidden: true }, [
+      GUIDE ? el("p", { class: "rz-pstep" }, [el("span", { class: "az-step", text: "4" }), "Proposal"]) : null,
       el("p", { class: "rz-ptitle", text: "Proposal (PowerPoint, 2 slides): your trade area, then a package summary (investment, targeted impressions, reach and frequency, average CPM, clicks and leads) and the recommended platforms with why each one. Investment includes Adtaxi management. The file is editable." }),
       el("div", { class: "rz-pfields" }, [
         el("label", { class: "az-field" }, [el("span", { text: "Client or business name" }), this.pClient]),
@@ -1190,7 +1204,7 @@
       self.renderBudget();
     });
     return el("details", { class: "az-panel rz-budget", hidden: true }, [
-      el("summary", { text: "Recommended allocation" }),
+      GUIDE ? el("summary", null, [el("span", { class: "az-step", text: "3" }), "Recommended allocation"]) : el("summary", { text: "Recommended allocation" }),
       el("div", { class: "rz-budget-body" }, [
         el("div", { class: "rz-budget-controls" }, [
           el("label", { class: "az-field" }, [el("span", { text: "Monthly budget" }), this.bAmount]),
@@ -1199,7 +1213,7 @@
           el("label", { class: "az-field" }, [el("span", { text: "Include" }), nSel]),
           el("label", { class: "rz-feetoggle" }, [el("input", { type: "checkbox", onchange: function () { b.fees = this.checked; self.renderBudget(); } }), "Add management fees"]),
           el("div", { class: "rz-budget-actions" }, [
-            el("button", { type: "button", class: "az-btn primary", text: "Build proposal", onclick: function () { self.pBox.hidden = !self.pBox.hidden; if (!self.pBox.hidden) self.pClient.focus(); } }),
+            this.pBtn = el("button", { type: "button", class: "az-btn primary", text: "Build proposal", onclick: function () { self.pBox.hidden = !self.pBox.hidden; if (!self.pBox.hidden) self.pClient.focus(); self.guideNext(); } }),
             el("button", { type: "button", class: "az-btn", text: "Export allocation (CSV)", onclick: function () { self.exportBudget(); } }),
             this.resultsBtn = el("button", { type: "button", class: "az-btn az-results-btn", text: "Results", "aria-haspopup": "dialog", hidden: RESULT_CATS.indexOf(this.resultsCat()) < 0 ? true : null,
               title: "Case studies from this category and from the same channels as this plan", onclick: function () { self.openResults(); } })])]),
@@ -1207,6 +1221,25 @@
         el("div", { class: "rz-alloc-block" }, [el("h3", { text: "By ZIP" }),
           el("div", { class: "az-tablewrap" }, [el("table", { class: "az-table" }, [this.bHead, this.bBody])]), this.bNote]),
         this.bFee])]);
+  };
+  /* ---------- Guided steps: highlight only the next thing the page needs ---------- */
+  Radius.prototype.guideNext = function () {
+    if (!GUIDE || !this.root) return;
+    var s = this.state, b = this.budget || {}, area = s.mode === "area";
+    var hasZip = this.c && this.byZip && this.byZip[s.zip] !== undefined;
+    var allocOpen = this.budgetBox && !this.budgetBox.hidden && this.budgetBox.open;
+    var steps = area ? [[!!(this.rows && this.rows.length), this.areaIn]] : [[hasZip || (!this.c && !!s.zip), this.centerField], [!!s.r, this.radiusField]];
+    if (allocOpen) steps = steps.concat([[!!b.amount, this.bAmount && this.bAmount.parentNode], [!!b.strat, this.bStrat && this.bStrat.parentNode],
+      [this.pBox && !this.pBox.hidden, this.pBtn], [!!(this.pClient && this.pClient.value.trim()), this.pClient && this.pClient.parentNode]]);
+    var next = null;
+    for (var i = 0; i < steps.length; i++) if (!steps[i][0]) { next = steps[i][1]; break; }
+    Array.prototype.forEach.call(this.root.querySelectorAll(".az-next"), function (x) { x.classList.remove("az-next"); });
+    Array.prototype.forEach.call(this.root.querySelectorAll(".az-nexttag"), function (x) { x.remove(); });
+    if (!next) return;
+    next.classList.add("az-next");
+    var lab = next.tagName === "BUTTON" || next.tagName === "TEXTAREA" ? null : next.querySelector("span");
+    var tag = el("span", { class: "az-nexttag", text: "Next" });
+    if (lab) lab.appendChild(tag); else if (next.parentNode) next.parentNode.insertBefore(tag, next);
   };
   /* ---------- Hand-off from the TV + Video tool ----------
      The Digital Video amount the client chose there is held on its line (CTV, or YouTube for pre-roll and dynamic video),
@@ -1311,8 +1344,10 @@
     if (!this.budgetBox) return;
     var self = this, b = this.budget, A = this.allocation(), pick = A.pick, P = window.AdtaxiPlan;
     this.budgetBox.hidden = !this.rows || !pick.length;
-    if (this.budgetBox.hidden) return;
+    if (this.budgetBox.hidden) { this.guideNext(); return; }
+    if (GUIDE && !this.autoOpened) { this.autoOpened = true; this.budgetBox.open = true; }
     this.renderHand(A);
+    this.guideNext();
     if (this.handScroll) { this.handScroll = false; var bx = this.budgetBox; setTimeout(function () { bx.scrollIntoView({ behavior: "smooth", block: "start" }); }, 300); }
     var est = this.isEstimate(), chans = A.withDollars && A.plan && A.plan.tier && A.channels.length > 1 ? A.channels : [];
     var showFee = A.money && A.money.feesOn && P.FEES.showFee;
@@ -1614,7 +1649,7 @@
     if (!b.amount || !A.strat || !A.withDollars || !A.plan || !A.plan.tier || !A.channels.length) { st.textContent = "Enter a monthly budget and choose a media strategy first."; return Promise.resolve(null); }
     st.textContent = "Building…";
     var base = this.proposalBase();
-    return Promise.all([loadScriptOnce(this.cfg.pptxScript || "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261028j"), this.benchmarks(), this.logoImage()])
+    return Promise.all([loadScriptOnce(this.cfg.pptxScript || "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261028k"), this.benchmarks(), this.logoImage()])
       .then(function (res) { return window.AdtaxiProposal.build(self.proposalContext(res[2], res[3]), opt); })
       .then(function (out) { st.textContent = "Downloaded. Open it in PowerPoint or Google Slides to edit."; return out; })
       .catch(function (e) { st.textContent = "The proposal couldn't be built (" + e.message + "). Try again in a minute."; throw e; });
