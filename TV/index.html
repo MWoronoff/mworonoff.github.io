@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script>/* site-version: if this page is an old saved copy, reload it once with the current version (shared/version.json; bump both on each release) */
-(function(){var V="20261028h";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
+(function(){var V="20261028i";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>TV + Digital Video Allocation Analyzer</title>
 <meta name="robots" content="noindex">
@@ -111,6 +111,25 @@
   .tv-hand-amt b { color: var(--teal); font-size: 16px; }
   .tv-hand-msg { margin: 10px 0 0; font-size: 12.5px; color: var(--muted); }
   .tv-hand-msg.warn { color: #8a5a00; }
+  /* Guided steps: one highlighted field at a time; step numbers; source tags */
+  .tv-step { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; margin-right: 8px; border-radius: 50%; background: var(--teal); color: #fff; font-size: 12px; font-weight: 700; vertical-align: 2px; }
+  .tv-stephead { display: flex; align-items: baseline; gap: 10px; margin: 0 0 8px; }
+  .tv-stephead h2 { margin: 0; font-size: 17px; color: var(--navy); }
+  .tv-stephead span.tv-sub { color: var(--muted); font-size: 13px; }
+  .az-field.tv-next > input, .az-field.tv-next > select, .az-field.tv-next .az-seg { background: #e9f6f3; border: 2px solid var(--teal) !important; box-shadow: 0 0 0 4px rgba(15,126,112,.14); }
+  .tv-slider.tv-next { background: #e9f6f3; border: 2px solid var(--teal); box-shadow: 0 0 0 4px rgba(15,126,112,.14); }
+  .tv-nexttag { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 999px; background: var(--teal); color: #fff; font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; vertical-align: 1px; }
+  .tv-src { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 999px; background: #eef2f5; color: #5f7286; font-size: 10px; font-weight: 600; vertical-align: 1px; }
+  .tv-src.edited { background: #fff3d6; color: #8a5a00; }
+  .tv-inputs .az-field .tv-hint { display: none; }
+  .tv-inputs .az-field.tv-next .tv-hint, .tv-inputs .az-field:focus-within .tv-hint, .tv-inputs .az-field.tv-edited .tv-hint { display: block; }
+  .az-btn:disabled { opacity: .45; cursor: not-allowed; }
+  .tv-dim { opacity: .5; transition: opacity .2s; }
+  .tv-dim:focus-within, .tv-dim:hover { opacity: .8; }
+  .tv-lock { margin: 0 0 10px; font-size: 13px; color: var(--muted); }
+  .tv-lock[hidden], .tv-hand-body[hidden] { display: none; }
+  details.tv-method > summary { cursor: pointer; font-size: 14px; font-weight: 700; color: var(--navy); }
+  details.tv-method[open] > summary { margin-bottom: 8px; }
   .tv-need { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; background: var(--warn-bg); border: 1px solid var(--warn-line); border-radius: 10px; padding: 14px 16px; font-size: 14px; color: var(--ink); }
   .tv-need b { color: var(--navy); }
   .az-field input.tv-missing { border: 2px solid #d99a00; background: #fffbea; }
@@ -132,8 +151,9 @@
 </header>
 
 <main class="az-main">
+  <div class="tv-stephead"><h2><span class="tv-step">1</span>Market and target audience</h2><span class="tv-sub">Choose the market from the list or the map, then the audience.</span></div>
   <div class="az-controls">
-    <label class="az-field"><span>Market (DMA)</span><select id="market"><option value="">Choose a market…</option></select></label>
+    <label class="az-field" id="fMarket"><span>Market (DMA)</span><select id="market"><option value="">Choose a market…</option></select></label>
     <div class="az-field"><span>Gender</span>
       <div class="az-seg" id="gender" role="group" aria-label="Gender">
         <button type="button" data-g="A" aria-pressed="true">Adults</button><button type="button" data-g="M" aria-pressed="false">Men</button><button type="button" data-g="W" aria-pressed="false">Women</button>
@@ -170,29 +190,30 @@
 
   <section class="az-panel tv-stream" id="streamPanel" hidden aria-live="polite"></section>
 
-  <section class="az-panel tv-plan">
-    <h2>Campaign inputs</h2>
-    <p>The Broadcast CPM, spot price and audience per spot fill in with the market averages, and the Digital Video CPM with the selected product's rate card CPM (CTV / Advanced TV, $50, to start). Adjust any of them to match the schedule. Results appear once the budget and frequencies are entered.</p>
+  <section class="az-panel tv-plan" id="planPanel">
+    <div class="tv-stephead"><h2><span class="tv-step">2</span>Campaign inputs</h2></div>
+    <p class="tv-lock" id="planLock">Choose a market first: the CPM, spot price and audience fill in with its averages.</p>
+    <p id="planNote">Fields tagged <span class="tv-src">Market avg.</span> or <span class="tv-src">Rate card</span> are filled in for you; adjust any of them to match the schedule.</p>
     <div class="tv-inputs">
       <div class="tv-group">Campaign</div>
       <label class="az-field"><span>Monthly campaign budget ($)</span><input id="budget" type="number" min="0" step="1000" inputmode="decimal"><span class="tv-hint">Broadcast TV and Digital Video together, per month.</span></label>
       <div class="tv-group">Broadcast TV schedule</div>
-      <label class="az-field"><span>Broadcast CPM, adults 18+ ($)</span><input id="bcpm" type="number" min="0" step="0.01" inputmode="decimal"><span class="tv-hint"><span id="cpmHint">Filled in with the market's planning CPM once a market is chosen; the spot price follows it.</span> <button type="button" class="tv-reset" id="cpmReset" hidden>Reset to average</button></span></label>
-      <label class="az-field"><span>Average :30 spot price ($)</span><input id="spot" type="number" min="0" step="0.01" inputmode="decimal"><span class="tv-hint"><span id="spotHint">Filled in with the market average once a market is chosen; edit to match the schedule.</span> <button type="button" class="tv-reset" id="spotReset" hidden>Reset to average</button></span></label>
-      <label class="az-field"><span id="avgLabel">Average target audience per spot</span><input id="avgaud" type="number" min="0" step="1" inputmode="decimal"><span class="tv-hint"><span id="avgHint">Filled in with the Scarborough average for the selected target; edit to match the schedule.</span> <button type="button" class="tv-reset" id="avgReset" hidden>Reset to average</button></span></label>
+      <label class="az-field"><span>Broadcast CPM, adults 18+ ($)<span class="tv-src" data-src="bcpm"></span></span><input id="bcpm" type="number" min="0" step="0.01" inputmode="decimal"><span class="tv-hint"><span id="cpmHint">Filled in with the market's planning CPM once a market is chosen; the spot price follows it.</span> <button type="button" class="tv-reset" id="cpmReset" hidden>Reset to average</button></span></label>
+      <label class="az-field"><span>Average :30 spot price ($)<span class="tv-src" data-src="spot"></span></span><input id="spot" type="number" min="0" step="0.01" inputmode="decimal"><span class="tv-hint"><span id="spotHint">Filled in with the market average once a market is chosen; edit to match the schedule.</span> <button type="button" class="tv-reset" id="spotReset" hidden>Reset to average</button></span></label>
+      <label class="az-field"><span><span id="avgLabel">Average target audience per spot</span><span class="tv-src" data-src="avgaud"></span></span><input id="avgaud" type="number" min="0" step="1" inputmode="decimal"><span class="tv-hint"><span id="avgHint">Filled in with the Scarborough average for the selected target; edit to match the schedule.</span> <button type="button" class="tv-reset" id="avgReset" hidden>Reset to average</button></span></label>
       <label class="az-field"><span id="freqLabel">Schedule frequency, selected target</span><input id="tvfreq" type="number" min="1" step="0.1" inputmode="decimal"><span class="tv-hint">Average frequency for the month's schedule, for the selected target, as quoted for the schedule.</span></label>
       <div class="tv-group">Digital Video</div>
       <label class="az-field"><span>Digital Video product</span><select id="dprod"><option value="50">CTV / Advanced TV ($50 CPM)</option><option value="45">Dynamic Video ($45 CPM)</option><option value="24">Pre-roll ($24 CPM)</option></select><span class="tv-hint">Adtaxi rate card (Nov 2025). Picking a product fills in its CPM.</span></label>
-      <label class="az-field"><span>Digital Video CPM ($)</span><input id="dcpm" type="number" min="0" step="0.5" inputmode="decimal" value="50"><span class="tv-hint">Starts at the selected product's rate card CPM; edit to match the buy.</span></label>
+      <label class="az-field"><span>Digital Video CPM ($)<span class="tv-src" data-src="dcpm"></span></span><input id="dcpm" type="number" min="0" step="0.5" inputmode="decimal" value="50"><span class="tv-hint">Starts at the selected product's rate card CPM; edit to match the buy.</span></label>
       <label class="az-field"><span>Frequency cap, per month</span><input id="dfreq" type="number" min="1" step="0.1" inputmode="decimal"></label>
     </div>
   </section>
 
   <section class="az-panel tv-results" id="results">
     <div class="tv-reshead">
-      <div><h2>Shifting budget from Broadcast TV to Digital Video</h2>
+      <div><h2><span class="tv-step">3</span>Compare: shift budget from Broadcast TV to Digital Video</h2>
       <p id="resSub" style="margin:0 0 12px;color:var(--muted);font-size:13px">Compared with spending the whole budget on Broadcast TV.</p></div>
-      <button type="button" class="az-btn primary" id="printBtn" disabled title="Enter the campaign inputs first">Download PDF summary</button>
+      <button type="button" class="az-btn" id="printBtn" disabled title="Enter the campaign inputs first">Download PDF summary</button>
     </div>
     <div class="tv-print-only" id="printSum"></div>
     <div class="tv-slider">
@@ -206,22 +227,25 @@
     </div>
     <div id="resBody"><p class="tv-wait">Choose a market and enter the campaign inputs to see results.</p></div>
     <div class="tv-hand" id="hand">
-      <h3>Take Digital Video into the media mix</h3>
+      <h3><span class="tv-step">4</span>Take Digital Video into the media mix</h3>
+      <p class="tv-lock" id="handLock">Available once the comparison above shows results.</p>
+      <div class="tv-hand-body" id="handBody">
       <p>Enter the share of the monthly budget the client wants to move to Digital Video and their business category. The category's analyzer opens with that amount held in its Recommended allocation, the market as the trade area, and the rest of a suggested budget split across the other channels.</p>
       <div class="tv-hand-row">
-        <label class="az-field"><span>% of TV budget to Digital Video</span><input id="handPct" type="number" min="1" max="100" step="1" inputmode="decimal" placeholder="e.g. 20"></label>
-        <label class="az-field"><span>Business category</span><select id="handCat"><option value="">Choose a category…</option></select></label>
+        <label class="az-field" id="fHandPct"><span>% of TV budget to Digital Video</span><input id="handPct" type="number" min="1" max="100" step="1" inputmode="decimal" placeholder="e.g. 20"></label>
+        <label class="az-field" id="fHandCat"><span>Business category</span><select id="handCat"><option value="">Choose a category…</option></select></label>
         <div class="tv-hand-amt" id="handAmt"></div>
         <button type="button" class="az-btn primary" id="handBtn" disabled>See how Digital Video fits into your media mix</button>
       </div>
       <p class="tv-hand-msg" id="handMsg"></p>
+      </div>
     </div>
   </section>
 
   <p class="tv-print-only" id="printFoot" style="font-size:11px;color:#5f7286;margin:8px 2px 0">Source: Scarborough USA+ 2026 Release 1 (Jan 2025–May 2026): broadcast audiences for ABC, CBS, CW, FOX and NBC, and DMA streaming profiles. Spot price and CPMs are planning figures unless entered from the schedule. Digital Video is counted as 100% on target. Combined reach is not modeled. Prepared by Adtaxi.</p>
 
-  <section class="az-panel az-sources tv-method">
-    <h2>How the numbers work</h2>
+  <details class="az-panel az-sources tv-method">
+    <summary>How the numbers work</summary>
     <p><b>Broadcast audience.</b> Scarborough USA+ 2026 Release 1: average audience per half-hour across ABC, CBS, CW, FOX and NBC (635 network and half-hour observations per market, all dayparts). Spanish-language and independent stations are not included, which matters most in markets with large Hispanic populations such as Miami and Los Angeles.</p>
     <p><b>Targets.</b> Adults 18+, 18–34, 18–49, 25–54 and 50+, and Men and Women 18+, 18–49, 25–54 and 50+ are measured by Scarborough. Other age ranges for adults are built from measured age bands. Other gender and age combinations, and any household income selection, are estimates: income shares are applied on the assumption that income is independent of gender and age within a market. Estimated targets are labeled.</p>
     <p><b>Broadcast delivery.</b> Spots = Broadcast spend ÷ average spot price. Target impressions = spots × average target audience per spot. Target GRPs = target impressions ÷ target population × 100. Target reach = GRPs ÷ the schedule's frequency. Off-target (wasted) impressions are the spots' audience outside the selected target. The spot price starts at the market average: the market's average adult audience per spot × the Broadcast CPM ÷ 1,000. The Broadcast CPM starts at a planning figure that declines with DMA rank, set so Denver (DMA 17) is $7.00 for adults 18+; it is not a quoted market rate, so adjust the CPM or the spot price to match the schedule. The average audience per spot starts at Scarborough's average for the selected target and can also be adjusted. Changing the market resets the CPM, spot price and audience to that market's averages; changing the target resets the audience.</p>
@@ -232,7 +256,7 @@
     <p><b>Combined campaign.</b> Spend, target and off-target impressions, target efficiency and effective target CPM are added across Broadcast and Digital Video. Combined reach and frequency are not shown because the overlap between the Broadcast and Digital Video audiences is not measured.</p>
     <p class="az-disclaimer">Estimates for planning. Scores and figures are modeled from public government and licensed third-party data.</p>
     <p class="az-version">Adtaxi Market Analyzers · Fall 2026</p>
-  </section>
+  </details>
 </main>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
@@ -415,7 +439,7 @@
     if (M && budget) $("shiftDollars").textContent = money0(budget * (1 - p)) + " Broadcast / " + money0(budget * p) + " Digital Video";
     else $("shiftDollars").textContent = "";
     var missing = [], firstId = null;
-    var need = function (ok, id, label) { $(id).classList.toggle("tv-missing", !ok && !!M); if (!ok) { missing.push(label); if (!firstId) firstId = id; } };
+    var need = function (ok, id, label) { if (!ok) { missing.push(label); if (!firstId) firstId = id; } };
     if (!M) { missing.push("a market"); firstId = "market"; }
     need(budget > 0, "budget", "the campaign budget");
     need(tvfreq >= 1, "tvfreq", "the Broadcast schedule frequency (1 or more)");
@@ -536,10 +560,41 @@
     $("handMsg").textContent = msg; $("handMsg").className = "tv-hand-msg" + (warn ? " warn" : "");
     $("handBtn").disabled = !handUrl;
   }
-  $("handPct").addEventListener("input", renderHand);
-  $("handCat").addEventListener("change", renderHand);
+  $("handPct").addEventListener("input", function () { renderHand(); guide(); });
+  $("handCat").addEventListener("change", function () { renderHand(); guide(); });
   $("handBtn").addEventListener("click", function () { if (handUrl) window.open(handUrl, "_blank", "noopener"); });
-  function refresh() { syncAverages(); renderBench(); renderStreaming(); renderResults(); renderHand(); }
+  /* ---------- Guided steps: highlight only the next field the page needs ---------- */
+  function fieldOf(id) { var e = $(id); return e.closest(".az-field") || e; }
+  function guide() {
+    var budget = num("budget"), p = +$("shift").value / 100, ready = !!M && budget > 0 && num("tvfreq") >= 1 && (p === 0 || (num("dcpm") > 0 && num("dfreq") >= 1));
+    var steps = [
+      [!!M, "fMarket"], [budget > 0, "budget"], [num("tvfreq") >= 1, "tvfreq"],
+      [p > 0, "slider"], [num("dcpm") > 0, "dcpm"], [num("dfreq") >= 1, "dfreq"],
+      [num("handPct") > 0, "fHandPct"], [!!$("handCat").value, "fHandCat"]
+    ];
+    var next = null;
+    for (var i = 0; i < steps.length; i++) if (!steps[i][0]) { next = steps[i][1]; break; }
+    Array.prototype.forEach.call(document.querySelectorAll(".tv-next"), function (x) { x.classList.remove("tv-next"); });
+    Array.prototype.forEach.call(document.querySelectorAll(".tv-nexttag"), function (x) { x.remove(); });
+    if (next) {
+      var box = next === "slider" ? document.querySelector(".tv-slider") : next.charAt(0) === "f" ? $(next) : fieldOf(next);
+      box.classList.add("tv-next");
+      var lab = next === "slider" ? box.querySelector("label") : box.querySelector("span");
+      if (lab) lab.appendChild(Object.assign(document.createElement("span"), { className: "tv-nexttag", textContent: "Next" }));
+    }
+    // Step 2 waits for a market; step 4 waits for results
+    $("planPanel").classList.toggle("tv-dim", !M); $("planLock").hidden = !!M; $("planNote").hidden = !M;
+    $("handLock").hidden = ready; $("handBody").hidden = !ready;
+    // Where each filled-in figure comes from
+    var srcs = { bcpm: M && (edited.bcpm ? "Edited" : "Market avg."), spot: M && (edited.spot ? "Edited" : "Market avg."), avgaud: M && (edited.avgaud ? "Edited" : "Market avg."),
+                 dcpm: String(num("dcpm")) === $("dprod").value ? "Rate card" : "Edited" };
+    Object.keys(srcs).forEach(function (k) {
+      var t = document.querySelector('[data-src="' + k + '"]'); t.textContent = srcs[k] || ""; t.hidden = !srcs[k];
+      t.classList.toggle("edited", srcs[k] === "Edited");
+      fieldOf(k).classList.toggle("tv-edited", srcs[k] === "Edited");
+    });
+  }
+  function refresh() { syncAverages(); renderBench(); renderStreaming(); renderResults(); renderHand(); guide(); }
   function selectMarket(name, pan) {
     M = name ? DATA.byName[name] : null;
     edited.bcpm = false; edited.spot = false; edited.avgaud = false;  // a new market starts from its own averages
