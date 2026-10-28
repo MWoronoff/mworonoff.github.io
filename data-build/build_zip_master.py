@@ -204,27 +204,39 @@ def acs_fill_missing(merged, y):
     if not miss:
         return merged
     log(f"  {len(miss)} populated ZIPs missing from the bulk file; trying the Census API: {', '.join(miss[:20])}{'…' if len(miss) > 20 else ''}")
-    parts = []
-    for t in ACS_TABLES:
-        frames = []
-        for k in range(0, len(miss), 50):
-            url = ACS_API.format(y=y, t=t, z=",".join(miss[k:k + 50]))
-            try:
-                rows = json.loads(get(url, timeout=120, tries=3).read().decode("utf-8"))
-            except Exception as e:
-                log(f"  API {t}: {type(e).__name__}: {str(e)[:120]}")
-                continue
-            if not rows or len(rows) < 2:
-                continue
-            hdr = rows[0]
-            zc = hdr.index("zip code tabulation area")
-            cols = {i: f"{t}_E{int(m.group(1)):03d}" for i, h in enumerate(hdr) for m in [re.fullmatch(rf"{t}_(\d+)E", h)] if m}
-            frames.append(pd.DataFrame([[r[zc]] + [r[i] for i in cols] for r in rows[1:]], columns=["zip"] + list(cols.values())))
-        if frames:
-            d = pd.concat(frames, ignore_index=True).drop_duplicates("zip")
-            for c in d.columns[1:]:
-                d[c] = pd.to_numeric(d[c], errors="coerce")
-            parts.append(d.set_index("zip"))
+    parts, errs, used = [], [], None
+    for yy in (y, y - 1):                           # this release, then the one before if this one has nothing for them
+        for t in ACS_TABLES:
+            frames = []
+            for k in range(0, len(miss), 50):
+                url = ACS_API.format(y=yy, t=t, z=",".join(miss[k:k + 50]))
+                try:
+                    resp = get(url, timeout=120, tries=3)
+                    body = resp.read().decode("utf-8")
+                    if not body.strip():
+                        errs.append(f"{yy} {t}: empty response (HTTP {getattr(resp, 'status', '?')})"); continue
+                    rows = json.loads(body)
+                except Exception as e:
+                    errs.append(f"{yy} {t}: {type(e).__name__}: {str(e)[:100]}"); continue
+                if not rows or len(rows) < 2:
+                    continue
+                hdr = rows[0]
+                zc = hdr.index("zip code tabulation area")
+                cols = {i: f"{t}_E{int(m.group(1)):03d}" for i, h in enumerate(hdr) for m in [re.fullmatch(rf"{t}_(\d+)E", h)] if m}
+                frames.append(pd.DataFrame([[r[zc]] + [r[i] for i in cols] for r in rows[1:]], columns=["zip"] + list(cols.values())))
+            if frames:
+                d = pd.concat(frames, ignore_index=True).drop_duplicates("zip")
+                for c in d.columns[1:]:
+                    d[c] = pd.to_numeric(d[c], errors="coerce")
+                parts.append(d.set_index("zip"))
+        if parts:
+            used = yy; break
+    REPORT["acs_api"]["year"] = used
+    REPORT["acs_api"]["errors"] = errs[:5]
+    msg = (f"Census API fill: {len(miss)} ZIPs tried; " + (f"data from ACS 5-year {used - 4}–{used}" if used else "no data returned") +
+           (f"; first errors: {' | '.join(errs[:3])}" if errs else ""))
+    log("  " + msg)
+    print(f"::notice title=ACS gap fill::{msg}")
     if not parts:
         return merged
     add = pd.concat(parts, axis=1).reset_index()
@@ -718,7 +730,8 @@ def write_report(status, started):
     if g and g.get("tried"):
         left = [z for z in g["tried"] if z not in g["filled"]]
         L.append(f"- ACS gaps: {len(g['tried'])} populated ZIPs missing from the bulk file; filled from the Census API: "
-                 f"{', '.join(g['filled']) or 'none'}" + (f"; still missing (likely not a ZCTA): {len(left)}" if left else "") + ".")
+                 f"{', '.join(g['filled']) or 'none'}" + (f" (ACS 5-year {g['year'] - 4}–{g['year']})" if g.get('year') else "") +
+                 (f"; still missing: {len(left)}" if left else "") + (f"; API errors: {' | '.join(g.get('errors') or [])}" if g.get("errors") else "") + ".")
     i = REPORT.get("irs")
     if i:
         L.append(f"- IRS: {i['returns']:,} returns across {i['rows']:,} ZIPs.")
