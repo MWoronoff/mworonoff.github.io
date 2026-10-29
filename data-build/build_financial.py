@@ -37,11 +37,18 @@ MIN_POP = 500
 # data-build/sources; until then scores blend the other parts, re-weighted to 100%.
 WEIGHTS = {"demand": 0.40, "category": 0.25, "spend": 0.15, "comp": 0.20}
 # EASI 2025 measures used as Category Spending, by line (Adtaxi's files in data-build/sources/easi_finance_spend_*.csv)
-EASI = {"wealth": ("ret_value", "Value of retirement plans"), "retire": ("ret_change", "Change in value of retirement plans"),
+EASI = {"tax": ("acct_fees", "Accounting fees"),
+        "wealth": ("stocks", "Value of stocks, bonds and mutual funds"),
+        "retire": ("ret_contrib", "Contributions to retirement plans"),
+        "purchase": ("home_purchase", "Purchase price of property (owned home)"),
+        "refi": ("home_value", "Estimated market value of owned home"),
         "bank": ("deposits", "Value of savings, checking, money market and CDs"),
         "cu": ("deposits", "Value of savings, checking, money market and CDs")}
 # Every EASI measure loaded (each once), including ones shown but not scored
-EASI_MEASURES = list(dict.fromkeys(list(EASI.values()) + [("bank_fees", "Checking accounts and other bank service charges")]))
+EASI_MEASURES = list(dict.fromkeys(list(EASI.values()) + [
+    ("bank_fees", "Checking accounts and other bank service charges"), ("ret_value", "Value of retirement plans"),
+    ("net_property", "Change in net property holdings (owned home)"),
+    ("mortg_principal", "Change in mortgage principal (owned home)")]))
 PALM_SPRINGS, RIVERSIDE_METRO = "804", "40140"
 NAICS = {"tax": ["541213"], "advice": ["523920", "523930"], "mortgage": ["522292", "522310"], "bank": ["522110"], "cu": ["522130"]}
 SUBCATS = [

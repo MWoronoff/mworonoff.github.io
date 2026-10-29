@@ -172,7 +172,7 @@ AdtaxiAnalyzer.start({
    "label": "Market Potential Score",
    "format": "score",
    "short": "Score",
-   "help": "0–100. Consumer Demand 40%, Category Spending 25%, Spending Power 15%, Competition 20%, each a percentile among markets at the same level. Category Spending applies to Wealth, Retirement, Banks and Credit unions only; Tax omits Spending Power. ZIPs use Demand and Spending Power only. Counties have no Category Spending; under 10,000 residents aren't ranked.",
+   "help": "0–100. Consumer Demand 40%, Category Spending 25%, Spending Power 15%, Competition 20%, each a percentile among markets at the same level. Tax omits Spending Power. ZIPs use Demand and Spending Power only. Counties have no Category Spending; under 10,000 residents aren't ranked.",
    "perSub": true,
    "levels": [
     "dma",
@@ -206,12 +206,15 @@ AdtaxiAnalyzer.start({
     "metro"
    ],
    "subs": [
+    "tax",
     "wealth",
     "retire",
+    "purchase",
+    "refi",
     "bank",
     "cu"
    ],
-   "help": "Average of the percentiles for EASI spending per household and in total: value of retirement plans for Wealth management, change in value of retirement plans for Retirement planning, and the value of savings, checking, money market accounts and CDs (deposits) for Banks and Credit unions."
+   "help": "Average of the percentiles for EASI spending per household and in total: accounting fees for Tax preparation, value of stocks, bonds and mutual funds for Wealth management, contributions to retirement plans for Retirement planning, purchase price of homes bought for Home purchase, market value of owned homes for Refinance and home equity, and the value of savings, checking, money market accounts and CDs (deposits) for Banks and Credit unions."
   },
   {
    "key": "spend",
@@ -530,6 +533,278 @@ AdtaxiAnalyzer.start({
    "format": "pct"
   },
   {
+   "key": "easi_acct_fees_hh",
+   "label": "Accounting fees per household (EASI)",
+   "short": "Accounting fees $/HH",
+   "format": "money",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "subs": [
+    "tax"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "EASI 2025 annual spending per household on accounting fees, including tax preparation."
+  },
+  {
+   "key": "easi_acct_fees_idx",
+   "label": "Accounting fees: index vs. U.S.",
+   "short": "Accounting fees idx",
+   "format": "index",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "subs": [
+    "tax"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "Per household divided by the U.S. average, times 100."
+  },
+  {
+   "key": "easi_acct_fees_total",
+   "label": "Accounting fees, est. total",
+   "short": "Accounting fees total",
+   "format": "moneyM",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "subs": [
+    "tax"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "EASI per household times the households in this market."
+  },
+  {
+   "key": "easi_stocks_hh",
+   "label": "Value of stocks, bonds and mutual funds per household (EASI)",
+   "short": "Investments $/HH",
+   "format": "money",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "subs": [
+    "wealth"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "EASI 2025 estimate per household. The taxable investments households hold: the core of what wealth managers and financial advisers manage."
+  },
+  {
+   "key": "easi_stocks_idx",
+   "label": "Value of stocks, bonds and mutual funds: index vs. U.S.",
+   "short": "Investments idx",
+   "format": "index",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "subs": [
+    "wealth"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "Per household divided by the U.S. average, times 100."
+  },
+  {
+   "key": "easi_stocks_total",
+   "label": "Value of stocks, bonds and mutual funds, est. total",
+   "short": "Investments total",
+   "format": "moneyM",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "subs": [
+    "wealth"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "EASI per household times the households in this market."
+  },
+  {
+   "key": "easi_ret_contrib_hh",
+   "label": "Contributions to retirement plans per household (EASI)",
+   "short": "Retirement contrib. $/HH",
+   "format": "money",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "subs": [
+    "retire"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "EASI 2025 estimate per household. What households put into retirement plans in the year: households actively saving for retirement."
+  },
+  {
+   "key": "easi_ret_contrib_idx",
+   "label": "Contributions to retirement plans: index vs. U.S.",
+   "short": "Retirement contrib. idx",
+   "format": "index",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "subs": [
+    "retire"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "Per household divided by the U.S. average, times 100."
+  },
+  {
+   "key": "easi_ret_contrib_total",
+   "label": "Contributions to retirement plans, est. total",
+   "short": "Retirement contrib. total",
+   "format": "moneyM",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "subs": [
+    "retire"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "EASI per household times the households in this market."
+  },
+  {
+   "key": "easi_home_purchase_hh",
+   "label": "Purchase price of owned homes bought per household (EASI)",
+   "short": "Home purchases $/HH",
+   "format": "money",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "subs": [
+    "purchase"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "EASI 2025 estimate per household of what households spent buying homes in the year."
+  },
+  {
+   "key": "easi_home_purchase_idx",
+   "label": "Purchase price of owned homes bought: index vs. U.S.",
+   "short": "Home purchases idx",
+   "format": "index",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "subs": [
+    "purchase"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "Per household divided by the U.S. average, times 100."
+  },
+  {
+   "key": "easi_home_purchase_total",
+   "label": "Purchase price of owned homes bought, est. total",
+   "short": "Home purchases total",
+   "format": "moneyM",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "subs": [
+    "purchase"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "EASI per household times the households in this market."
+  },
+  {
+   "key": "easi_home_value_hh",
+   "label": "Estimated market value of owned homes per household (EASI)",
+   "short": "Home value $/HH",
+   "format": "money",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "subs": [
+    "refi"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "EASI 2025 estimate per household. The home value that refinancing and home equity loans draw on."
+  },
+  {
+   "key": "easi_home_value_idx",
+   "label": "Estimated market value of owned homes: index vs. U.S.",
+   "short": "Home value idx",
+   "format": "index",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "subs": [
+    "refi"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "Per household divided by the U.S. average, times 100."
+  },
+  {
+   "key": "easi_home_value_total",
+   "label": "Estimated market value of owned homes, est. total",
+   "short": "Home value total",
+   "format": "moneyM",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "subs": [
+    "refi"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "EASI per household times the households in this market."
+  },
+  {
+   "key": "easi_net_property_hh",
+   "label": "Change in net property holdings per household (EASI)",
+   "short": "Net property chg $/HH",
+   "format": "money",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "subs": [
+    "purchase"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "EASI 2025 estimate per household for owned homes. Mixes purchases, sales and paydown, so it's shown, not scored."
+  },
+  {
+   "key": "easi_mortg_principal_hh",
+   "label": "Change in mortgage principal per household (EASI)",
+   "short": "Principal chg $/HH",
+   "format": "money",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "subs": [
+    "refi"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "EASI 2025 estimate per household: mortgage principal paid down on owned homes in the year. Shown, not scored."
+  },
+  {
    "key": "easi_ret_value_hh",
    "label": "Value of retirement plans per household (EASI)",
    "short": "Retirement plan $/HH",
@@ -543,7 +818,7 @@ AdtaxiAnalyzer.start({
     "wealth"
    ],
    "hideWhenUnavailable": true,
-   "help": "EASI 2025 estimate per household. The retirement assets households hold: the money a wealth manager can manage."
+   "help": "EASI 2025 estimate per household. The retirement assets households hold. Shown, not scored."
   },
   {
    "key": "easi_ret_value_idx",
@@ -575,55 +850,7 @@ AdtaxiAnalyzer.start({
     "wealth"
    ],
    "hideWhenUnavailable": true,
-   "help": "EASI per household times the households in this market."
-  },
-  {
-   "key": "easi_ret_change_hh",
-   "label": "Change in value of retirement plans per household (EASI)",
-   "short": "Retirement $ change/HH",
-   "format": "money",
-   "levels": [
-    "us",
-    "dma",
-    "metro"
-   ],
-   "subs": [
-    "retire"
-   ],
-   "hideWhenUnavailable": true,
-   "help": "EASI 2025 estimate per household. How much households' retirement plans grew in the year, from new contributions and gains: households actively building savings."
-  },
-  {
-   "key": "easi_ret_change_idx",
-   "label": "Change in value of retirement plans: index vs. U.S.",
-   "short": "Retirement $ change idx",
-   "format": "index",
-   "levels": [
-    "us",
-    "dma",
-    "metro"
-   ],
-   "subs": [
-    "retire"
-   ],
-   "hideWhenUnavailable": true,
-   "help": "Per household divided by the U.S. average, times 100."
-  },
-  {
-   "key": "easi_ret_change_total",
-   "label": "Change in value of retirement plans, est. total",
-   "short": "Retirement $ change total",
-   "format": "moneyM",
-   "levels": [
-    "us",
-    "dma",
-    "metro"
-   ],
-   "subs": [
-    "retire"
-   ],
-   "hideWhenUnavailable": true,
-   "help": "EASI per household times the households in this market."
+   "help": "EASI per household times the households in this market. Shown, not scored."
   },
   {
    "key": "easi_deposits_hh",
@@ -743,10 +970,16 @@ AdtaxiAnalyzer.start({
   "purch_rate",
   "refieq",
   "mortg",
-  "easi_ret_value_idx",
-  "easi_ret_value_total",
-  "easi_ret_change_idx",
-  "easi_ret_change_total",
+  "easi_acct_fees_idx",
+  "easi_acct_fees_total",
+  "easi_stocks_idx",
+  "easi_stocks_total",
+  "easi_ret_contrib_idx",
+  "easi_ret_contrib_total",
+  "easi_home_purchase_idx",
+  "easi_home_purchase_total",
+  "easi_home_value_idx",
+  "easi_home_value_total",
   "easi_deposits_idx",
   "easi_deposits_total",
   "density"
@@ -764,9 +997,23 @@ AdtaxiAnalyzer.start({
   "easi_deposits_total",
   "easi_bank_fees_hh",
   "easi_bank_fees_total",
-  "easi_ret_change_hh",
-  "easi_ret_change_idx",
-  "easi_ret_change_total",
+  "easi_acct_fees_hh",
+  "easi_acct_fees_idx",
+  "easi_acct_fees_total",
+  "easi_stocks_hh",
+  "easi_stocks_idx",
+  "easi_stocks_total",
+  "easi_ret_contrib_hh",
+  "easi_ret_contrib_idx",
+  "easi_ret_contrib_total",
+  "easi_home_purchase_hh",
+  "easi_home_purchase_idx",
+  "easi_home_purchase_total",
+  "easi_home_value_hh",
+  "easi_home_value_idx",
+  "easi_home_value_total",
+  "easi_net_property_hh",
+  "easi_mortg_principal_hh",
   "easi_ret_value_hh",
   "easi_ret_value_idx",
   "easi_ret_value_total",
@@ -820,7 +1067,7 @@ AdtaxiAnalyzer.start({
    "body": [
     "Where are a financial advertiser's likely customers, and which geographies deserve the most ad dollars?",
     "Score = 40% Consumer Demand + 25% Category Spending + 15% Spending Power + 20% Competition. Each part is a percentile (0–100) against markets at the same level. No score is shown when a part has no data.",
-    "Category Spending applies to Wealth management, Retirement planning, Banks and Credit unions only (no matching EASI measure for the others); Tax preparation also leaves out Spending Power (its clients skew to moderate incomes). Remaining parts keep their relative weights."
+    "Every line has its own Category Spending measure. Tax preparation leaves out Spending Power (its clients skew to moderate incomes); its remaining parts keep their relative weights."
    ]
   },
   {
@@ -832,7 +1079,7 @@ AdtaxiAnalyzer.start({
   },
   {
    "title": "Category Spending",
-   "body": "EASI 2025, half per household, half market total. Wealth management: value of retirement plans (assets households hold). Retirement planning: change in value of retirement plans (what households add). Banks and Credit unions: the value of savings, checking, money market accounts and CDs (the deposits they compete for); checking and bank service charges are shown, not scored. Palm Springs uses the Riverside–San Bernardino metro's rate. Not available by county or ZIP."
+   "body": "EASI 2025, half per household, half market total. Tax preparation: accounting fees (EASI's measure covers all household accounting fees, of which tax preparation is the largest part). Wealth management: value of stocks, bonds and mutual funds (the investments advisers manage). Retirement planning: contributions to retirement plans (what households put in each year). Home purchase: purchase price of homes bought in the year. Refinance and home equity: estimated market value of owned homes (the value refinancing and equity loans draw on). Banks and Credit unions: the value of savings, checking, money market accounts and CDs (the deposits they compete for). Shown, not scored: value of retirement plans, checking and bank service charges, change in net property holdings and change in mortgage principal. Palm Springs uses the Riverside–San Bernardino metro's rate. Not available by county or ZIP."
   },
   {
    "title": "Data sources and timing",
@@ -863,7 +1110,7 @@ AdtaxiAnalyzer.start({
   },
   {
    "title": "Rank and map by",
-   "body": "Market Potential Score, EASI retirement plan spending (index and total) for Wealth and Retirement, savings and checking balances for Banks and Credit unions, each line's key demand measures, and households per square mile."
+   "body": "Market Potential Score, each line's EASI Category Spending measure (index and total), each line's key demand measures, and households per square mile."
   },
   {
    "title": "Advertising rules",
@@ -882,7 +1129,7 @@ AdtaxiAnalyzer.start({
    "body": [
     "Trade area view only, after the area is chosen: the percent of the target group and of all U.S. adults who acted on an ad in each of 17 media in the past 30 days (AudienceSCAN 2026). Rates cover everyone in each group, not just media users, and measure response, not reach. National data, the same for every market.",
     "\"Vs. average\" is a percent difference: 53.5% vs. 36.7% is 46% more likely, not 17 points.",
-    "The panel follows the radius tool's \"Target audience\" preset. Groups: accounting and tax service clients (Tax), financial and retirement planning clients (Wealth, Retirement), homebuyers buying a larger or smaller home (Home purchase), mortgage refinancing customers (Refinance), potential bank switchers (Banks), credit union members (Credit unions). For financial planning clients, AudienceSCAN gives the group's percentages only; the all-adults figures are the same national figures used everywhere."
+    "The panel follows the radius tool's \"Target audience\" preset. Groups: accounting and tax service clients (Tax), financial / retirement planning clients (Wealth, Retirement), homebuyers buying a larger or smaller home (Home purchase), mortgage refinancing customers (Refinance), potential bank switchers (Banks), credit union members (Credit unions). For financial / retirement planning clients, AudienceSCAN gives the group's percentages only; the all-adults figures are the same national figures used everywhere."
    ]
   }
  ],
@@ -921,7 +1168,7 @@ AdtaxiAnalyzer.start({
    "url": "https://ncua.gov/analysis/credit-union-corporate-call-report-data/quarterly-data"
   }
  ],
- "sourcesNote": "Retirement plans and savings and checking balances: EASI. Tax returns: IRS. Mortgages: HMDA. Bank branches: FDIC. Credit unions: NCUA. Ages, income, homeownership and moves: Census ACS. Competitors: Census Business Patterns. Population and households: Deluxe. Ad response: AudienceSCAN 2026.",
+ "sourcesNote": "Accounting fees, investments, retirement plans, home purchases and values, and savings and checking balances: EASI. Tax returns: IRS. Mortgages: HMDA. Bank branches: FDIC. Credit unions: NCUA. Ages, income, homeownership and moves: Census ACS. Competitors: Census Business Patterns. Population and households: Deluxe. Ad response: AudienceSCAN 2026.",
  "radius": true,
  "adResponse": {
   "title": "How your target group responds to advertising",
@@ -1020,7 +1267,7 @@ AdtaxiAnalyzer.start({
     ]
    },
    "wealth": {
-    "short": "Financial planning clients",
+    "short": "Financial / retirement planning clients",
     "audience": "financial and retirement planning clients",
     "rows": [
      [
@@ -1111,7 +1358,7 @@ AdtaxiAnalyzer.start({
     ]
    },
    "retire": {
-    "short": "Financial planning clients",
+    "short": "Financial / retirement planning clients",
     "audience": "financial and retirement planning clients",
     "rows": [
      [
