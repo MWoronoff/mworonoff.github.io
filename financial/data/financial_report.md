@@ -1,6 +1,6 @@
 # Financial data check report
 
-Built 2026-10-28. Result: **PASSED**
+Built 2026-10-29. Result: **PASSED**
 
 | Check | Result | Detail |
 | --- | --- | --- |
@@ -15,18 +15,30 @@ Built 2026-10-28. Result: **PASSED**
 | Published benchmark: mortgage establishments | PASS | 26,374 (expected 10,000–40,000) |
 | Published benchmark: bank establishments | PASS | 82,989 (expected 50,000–100,000) |
 | Published benchmark: cu establishments | PASS | 19,601 (expected 10,000–30,000) |
-| EASI U.S. value of retirement plans per household | INFO | $112,816.19 |
-| EASI U.S. change in value of retirement plans per household | INFO | $1,141.34 |
+| EASI U.S. accounting fees per household | INFO | $105.48 |
+| EASI U.S. value of stocks, bonds and mutual funds per household | INFO | $20,684.68 |
+| EASI U.S. contributions to retirement plans per household | INFO | $2,173.41 |
+| EASI U.S. purchase price of property (owned home) per household | INFO | $4,464.03 |
+| EASI U.S. estimated market value of owned home per household | INFO | $321,456.46 |
 | EASI U.S. value of savings, checking, money market and cds per household | INFO | $21,464.34 |
 | EASI U.S. checking accounts and other bank service charges per household | INFO | $25.37 |
+| EASI U.S. value of retirement plans per household | INFO | $112,816.19 |
+| EASI U.S. change in net property holdings (owned home) per household | INFO | $4,372.12 |
+| EASI U.S. change in mortgage principal (owned home) per household | INFO | $3,352.51 |
 | EASI finance matched to DMAs | PASS | 210 of 210 |
 | EASI finance matched to metros | PASS | 387 of 387 |
-| Score reality check, DMAs: rank correlation with category businesses' employees per 1,000 households, score (without Competition) | INFO | Tax preparation -0.37 (0.14); Wealth management 0.73 (0.83); Retirement planning 0.40 (0.68); Home purchase mortgage 0.33 (0.67); Refinance and home equity 0.35 (0.63); Banks -0.17 (0.04); Credit unions -0.13 (0.09). Weak (under 0.20 without Competition): Banks, Credit unions Reviewed and kept (benchmark doesn't fit): Tax preparation (offices follow market size; the score uses IRS counts of returns filed through paid preparers, the direct measure of customers). |
-| Score reality check, metros: rank correlation with category businesses' employees per 1,000 households, score (without Competition) | INFO | Tax preparation -0.29 (0.20); Wealth management 0.51 (0.68); Retirement planning 0.13 (0.47); Home purchase mortgage 0.29 (0.62); Refinance and home equity 0.29 (0.56); Banks -0.11 (0.12); Credit unions -0.22 (0.02). Weak (under 0.20 without Competition): Banks, Credit unions Reviewed and kept (benchmark doesn't fit): Tax preparation (offices follow market size; the score uses IRS counts of returns filed through paid preparers, the direct measure of customers). |
-| EASI value of retirement plans, DMAs vs. EASI's own total | PASS | 98.7% |
-| EASI change in value of retirement plans, DMAs vs. EASI's own total | PASS | 98.8% |
+| Score reality check, DMAs: rank correlation with category businesses' employees per 1,000 households, score (without Competition) | INFO | Tax preparation -0.20 (0.22); Wealth management 0.75 (0.84); Retirement planning 0.50 (0.74); Home purchase mortgage 0.44 (0.66); Refinance and home equity 0.45 (0.63); Banks -0.17 (0.04); Credit unions -0.13 (0.09). Weak (under 0.20 without Competition): Banks, Credit unions |
+| Score reality check, metros: rank correlation with category businesses' employees per 1,000 households, score (without Competition) | INFO | Tax preparation -0.19 (0.19); Wealth management 0.54 (0.70); Retirement planning 0.26 (0.56); Home purchase mortgage 0.45 (0.64); Refinance and home equity 0.41 (0.59); Banks -0.11 (0.12); Credit unions -0.22 (0.02). Weak (under 0.20 without Competition): Banks, Credit unions Reviewed and kept (benchmark doesn't fit): Tax preparation (offices follow market size; the score uses IRS counts of returns filed through paid preparers, the direct measure of customers). |
+| EASI accounting fees, DMAs vs. EASI's own total | PASS | 98.7% |
+| EASI value of stocks, bonds and mutual funds, DMAs vs. EASI's own total | PASS | 98.7% |
+| EASI contributions to retirement plans, DMAs vs. EASI's own total | PASS | 98.7% |
+| EASI purchase price of property (owned home), DMAs vs. EASI's own total | PASS | 98.7% |
+| EASI estimated market value of owned home, DMAs vs. EASI's own total | PASS | 98.7% |
 | EASI value of savings, checking, money market and cds, DMAs vs. EASI's own total | PASS | 98.7% |
 | EASI checking accounts and other bank service charges, DMAs vs. EASI's own total | PASS | 98.8% |
+| EASI value of retirement plans, DMAs vs. EASI's own total | PASS | 98.7% |
+| EASI change in net property holdings (owned home), DMAs vs. EASI's own total | PASS | 98.7% |
+| EASI change in mortgage principal (owned home), DMAs vs. EASI's own total | PASS | 98.7% |
 | U.S. share of returns with a paid preparer | PASS | 53.0% (expected 40%–65%) |
 | U.S. share of returns claiming the earned income credit | PASS | 15.1% (expected 10%–22%) |
 | U.S. share of returns with dividends | PASS | 20.4% (expected 12%–30%) |
@@ -42,11 +54,11 @@ Built 2026-10-28. Result: **PASSED**
 | HMDA purchase loans placed in ZIPs vs. national total | PASS | 98.5% |
 | DMA scores within 0–100 | PASS | 0 out of range; 1,470 computed, 0 not computed (missing input) |
 | Metro scores within 0–100 | PASS | 0 out of range; 2,709 computed, 0 not computed (missing input) |
-| Top DMAs: Tax preparation | INFO | Jackson, Ms, Columbus-Tupelo-West Point, Monroe-El Dorado, Paducah-Cape Girardeau-Harrisburg, Shreveport |
-| Top DMAs: Wealth management | INFO | Washington, Dc-Hagrstwn, New York, Seattle-Tacoma, San Francisco-Oakland-San Jose, Honolulu |
-| Top DMAs: Retirement planning | INFO | Harrisburg-Lancaster-Lebanon-York, Wilkes Barre-Scranton, Albany-Schenectady-Troy, Hartford-New Haven, Portland-Auburn |
-| Top DMAs: Home purchase mortgage | INFO | Madison, Houston, Austin, Omaha, Columbus, Oh |
-| Top DMAs: Refinance and home equity | INFO | Madison, Milwaukee, Boston, Harrisburg-Lancaster-Lebanon-York, Omaha |
+| Top DMAs: Tax preparation | INFO | Philadelphia, New York, Wilkes Barre-Scranton, Nashville, Paducah-Cape Girardeau-Harrisburg |
+| Top DMAs: Wealth management | INFO | Washington, Dc-Hagrstwn, New York, Seattle-Tacoma, San Francisco-Oakland-San Jose, Philadelphia |
+| Top DMAs: Retirement planning | INFO | Harrisburg-Lancaster-Lebanon-York, Albany-Schenectady-Troy, Hartford-New Haven, Honolulu, Detroit |
+| Top DMAs: Home purchase mortgage | INFO | Austin, Denver, Madison, Washington, Dc-Hagrstwn, Seattle-Tacoma |
+| Top DMAs: Refinance and home equity | INFO | Boston, Madison, Washington, Dc-Hagrstwn, Milwaukee, Seattle-Tacoma |
 | Top DMAs: Banks | INFO | Austin, Phoenix, Washington, Dc-Hagrstwn, Salt Lake City, Dallas-Fort Worth |
 | Top DMAs: Credit unions | INFO | Phoenix, Denver, Seattle-Tacoma, San Francisco-Oakland-San Jose, Austin |
 | Counties built from ZIPs | PASS | 3,144 counties (2,400 with 10,000+ residents are ranked) |
