@@ -52,9 +52,9 @@
     { client: "Health system (nurse hiring)", headline: "4,000+ conversions for a nursing hiring event",
       cats: [], channels: ["display"], file: "recruitment-nurse-hiring-programmatic-2206.pdf", date: 2206 },
     { client: "Online pet supply retailer", headline: "Peak ROAS of 1,633% on 50% less ad spend",
-      cats: [], channels: ["shopping", "search"], group: "pet-supply", file: "ecommerce-pet-supply-shopping-2202.pdf", date: 2202 },
+      cats: [], channels: ["shopping", "search"], file: "ecommerce-pet-supply-shopping-2202.pdf", date: 2202 },
     { client: "National CBD brand", headline: "2x revenue; brand share from 19th to 3rd",
-      cats: [], channels: ["display", "social", "youtube", "retarget"], group: "cbd", file: "ecommerce-cbd-programmatic-2202.pdf", date: 2202 },
+      cats: [], channels: ["display", "social", "youtube", "retarget"], file: "ecommerce-cbd-programmatic-2202.pdf", date: 2202 },
     // Added Oct 29 2026
     { client: "Law offices", headline: "300% more new cases and 3x the qualified leads within 90 days",
       cats: ["legal"], channels: ["search", "social", "ctv", "youtube", "display", "retarget"], related: [{ cat: "home-services", why: "Same business model: lead generation measured in qualified leads and cost per lead, using CRM data." }], file: "legal-law-offices-omnichannel-2011.pdf", date: 2011 },
@@ -85,11 +85,7 @@
     { client: "Loyalty rewards app", headline: "1,442 app installs from an 8-day CTV test; CTV cost per install down 45%",
       cats: [], channels: ["ctv", "display", "retarget"], file: "app-loyalty-rewards-ctv-2010.pdf", date: 2010 },
     { client: "Regional transportation company", headline: "2,428 app downloads at $1.35 each, 1/15th of the goal cost",
-      cats: [], channels: ["search"], file: "app-transportation-mobile-search-1910.pdf", date: 1910 },
-    { client: "National CBD brand", headline: "7.4x average ROAS against a 2.3 goal; a $4K test grew to nearly six figures a month",
-      cats: [], channels: ["display", "retarget"], group: "cbd", file: "ecommerce-cbd-display-2011.pdf", date: 2011 },
-    { client: "Online pet supply retailer", headline: "729% more client profit; 120% more revenue",
-      cats: [], channels: ["shopping", "search", "retarget"], group: "pet-supply", file: "ecommerce-pet-supply-shopping-1908.pdf", date: 1908 }
+      cats: [], channels: ["search"], file: "app-transportation-mobile-search-1910.pdf", date: 1910 }
   ];
 
   // Category matches first, then other case studies by how many of the plan's channels they share.
