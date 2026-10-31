@@ -967,7 +967,7 @@
     }
     if (window.AdtaxiRadius) go();
     else {
-      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261031c";   // version tag: browsers fetch the new file after an update
+      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261031d";   // version tag: browsers fetch the new file after an update
       sc.onload = go; sc.onerror = function () { self.showError("The radius tool didn't load. Refresh the page and try again."); };
       document.head.appendChild(sc);
     }
@@ -1649,7 +1649,18 @@
       (Array.isArray(sec.body) ? sec.body : [sec.body]).forEach(function (p) { b.appendChild(el("p", { text: p })); });
     });
     var dd = this.d(this.state.level), meta = dd && dd.meta;
-    if (meta && meta.built) b.appendChild(el("p", { class: "az-empty", text: "Data built " + meta.built + "." }));
+    if (meta && meta.meta) meta = meta.meta;   // some levels keep the whole data file here, with its meta inside
+    // Data years from the build (meta): what each source's figures cover, then when the files were built
+    if (meta) {
+      var yrs = [["acsYears", "Census ACS", "5-year estimates"], ["cbpYear", "Census Business Patterns"], ["placesRelease", "CDC PLACES", "release"], ["ipedsYear", "IPEDS"],
+                 ["irsYear", "IRS Statistics of Income"], ["hmdaYear", "HMDA"], ["permitsYear", "Census building permits"], ["zoriMonth", "Zillow rents"]]
+        .filter(function (y) { return meta[y[0]] !== undefined && meta[y[0]] !== null && meta[y[0]] !== ""; })
+        .map(function (y) { var v = String(meta[y[0]]), m = /^(\d{4})-(\d{2})$/.exec(v);
+          if (m) v = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"][+m[2] - 1] + " " + m[1];
+          return y[1] + " " + v + (y[2] ? " " + y[2] : ""); });
+      if (yrs.length) b.appendChild(el("p", { class: "az-empty", text: "Data years: " + yrs.join("; ") + "." }));
+      if (meta.built) b.appendChild(el("p", { class: "az-empty", text: "Data built " + meta.built + "." }));
+    }
     if (this.modal.showModal) this.modal.showModal(); else this.modal.setAttribute("open", "");
   };
   /* ---------- Benchmarks tab: typical search and social results for the category ---------- */

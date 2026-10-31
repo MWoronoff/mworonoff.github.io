@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script>/* site-version: if this page is an old saved copy, reload it once with the current version (shared/version.json; bump both on each release) */
-(function(){var V="20261031c";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
+(function(){var V="20261031d";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Adtaxi Market Analyzers</title>
 <meta name="robots" content="noindex">
@@ -169,7 +169,7 @@
     <div class="wrap">
       <div class="block-head">
         <h2 id="cat-title">Category analyzers</h2>
-        <p>Each analyzer ranks DMAs, metros, counties and ZIPs by Market Potential Score for one category, shows why an area scores well, and sizes the audience around any location with its ZIP radius tool.</p>
+        <p>Each analyzer ranks DMAs, metros, counties and ZIPs by Market Potential Score for one category, shows why an area scores well, and sizes the audience in any trade area, and builds the plan and proposal.</p>
       </div>
       <div class="cats" id="cats"></div>
     </div>
@@ -185,10 +185,10 @@
         <article class="tool">
           <div class="tool-art"><canvas id="radius-art" width="640" height="400" role="img" aria-label="Denver-area ZIP codes shaded by distance from a business, with 5, 10, 15 and 20 mile rings"></canvas></div>
           <div class="tool-body">
-            <h3>ZIP Radius Audience Builder</h3>
+            <h3>Trade Area Tool</h3>
             <p>Pick a ZIP and a radius, choose the audience, and get the people in range, how they respond to ads, and a ranked ZIP list to export.</p>
             <div class="tool-actions">
-              <a class="btn btn-navy" href="/radius/">Open radius tool</a>
+              <a class="btn btn-navy" href="/radius/">Open trade area tool</a>
             </div>
           </div>
         </article>
@@ -197,7 +197,7 @@
           <div class="tool-body">
             <h3>Customer Analysis (CRM)</h3>
             <p>Upload a client's customer list or a Google Ads or Meta report. See where they over- and under-perform, what their best ZIPs share, and look-alike ZIPs to target. The file never leaves the browser.</p>
-            <div class="tool-actions"><a class="btn btn-navy" href="/crm-analyzer/">Analyze customers</a></div>
+            <div class="tool-actions"><a class="btn btn-navy" href="/crm-analyzer/">Your CRM footprint</a></div>
           </div>
         </article>
         <article class="tool">
@@ -216,20 +216,23 @@
     <div class="wrap">
       <div class="block-head">
         <h2 id="data-title">Where the numbers come from</h2>
-        <p>Every score is built from published data, with no estimates invented by the tools. Government sources refresh automatically each month; each analyzer's "How scores work" lists its exact data dates.</p>
+        <p>Every score starts from published government and licensed data. Trade-area audiences and reach and frequency are modeled from it, and labeled as estimates. Data is rebuilt as sources release new figures (the CRM ZIP data monthly); each analyzer's "How scores work" lists its data years.</p>
       </div>
       <div class="table-scroll">
         <table class="sources">
           <thead><tr><th scope="col">Source</th><th scope="col">What it adds</th><th scope="col">Used in</th></tr></thead>
           <tbody>
             <tr><td>U.S. Census Bureau ACS</td><td>Population, age, income, education, households, housing and commuting for every ZIP and county</td><td>All analyzers and tools</td></tr>
-            <tr><td>Deluxe ZIP database</td><td>235 demographic and household measures for 41,558 ZIP codes</td><td>Customer Analysis (CRM)</td></tr>
+            <tr><td>Deluxe ZIP database</td><td>235 demographic and household measures for 41,558 ZIP codes</td><td>All analyzers and tools (population and households)</td></tr>
             <tr><td>EASI Demographics</td><td>Consumer spending by category: medical, legal, tuition, home repair, furniture, rent, retirement savings, vehicles</td><td>Category analyzers</td></tr>
             <tr><td>Census Business Patterns</td><td>Competing businesses by ZIP and county</td><td>Category analyzers, Customer Analysis (CRM)</td></tr>
             <tr><td>CDC PLACES</td><td>Local health estimates such as hearing, dental and chronic conditions</td><td>Healthcare, Customer Analysis (CRM)</td></tr>
             <tr><td>IRS Statistics of Income</td><td>Household income and tax-return detail by ZIP</td><td>Financial, Customer Analysis (CRM)</td></tr>
             <tr><td>HMDA mortgage data (FFIEC/CFPB)</td><td>Home purchase, refinance and home equity loans made in each ZIP</td><td>Financial</td></tr>
             <tr><td>AudienceSCAN</td><td>How each buyer group responds to different kinds of advertising</td><td>Category analyzers, radius tool</td></tr>
+            <tr><td>Comscore Media Trend</td><td>Monthly visits to category websites</td><td>Timing tab</td></tr>
+            <tr><td>EMARKETER</td><td>Ad spending by category, digital and traditional, by format</td><td>Media Mix Planner, Auto</td></tr>
+            <tr><td>WordStream, Hubfluence, Innovid</td><td>Search and social benchmarks, video CPMs and CTV completion rates for proposal estimates</td><td>Plan tab and proposals, Benchmarks tab</td></tr>
             <tr><td>Scarborough USA+</td><td>Measured broadcast TV audiences by market</td><td>TV + Digital Video</td></tr>
             <tr><td>Other federal and market data</td><td>Department of Education (IPEDS), NOAA climate and hail, Census building permits, LEHD jobs, USDA rural codes, FHFA home prices, Zillow rents</td><td>Higher Ed, Home Services, Apartments, Customer Analysis (CRM)</td></tr>
           </tbody>
@@ -294,16 +297,16 @@
   CATS.forEach(function (c) {
     catBox.appendChild(el("article", { class: "cat" }, [
       el("div", { class: "cat-map" }, [
-        el("canvas", { width: 975, height: 613, "data-cat": c.key, role: "img", "aria-label": c.name + ": market potential by county for " + c.shown.toLowerCase() }),
-        el("small", { text: "Market potential by county: " + c.shown.toLowerCase() })
+        el("canvas", { width: 975, height: 613, "data-cat": c.key, role: "img", "aria-label": c.name + ": market potential by county for " + c.shown.toLowerCase().replace(/\bsuvs\b/g, "SUVs") }),
+        el("small", { text: "Market potential by county: " + c.shown.toLowerCase().replace(/\bsuvs\b/g, "SUVs") })
       ]),
       el("h3", { text: c.name }),
       el("p", { text: c.desc }),
       el("div", { class: "lines", text: c.lines }),
       el("div", { class: "cat-actions" }, [
         el("a", { class: "go", href: c.path, text: "Open analyzer" }),
-        el("a", { href: c.path + "#level=radius", text: "ZIP radius tool" }),
-        c.crm === false ? null : el("a", { href: "/crm-analyzer/?category=" + c.key + "&from=" + encodeURIComponent(c.name), text: "Analyze customers" })
+        el("a", { href: c.path + "#level=radius", text: "Trade area" }),
+        c.crm === false ? null : el("a", { href: "/crm-analyzer/?category=" + c.key + "&from=" + encodeURIComponent(c.name), text: "Your CRM footprint" })
       ])
     ]));
   });

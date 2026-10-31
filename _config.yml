@@ -1,0 +1,8 @@
+# GitHub Pages build settings. Working folders are left out of the published site: old page versions (archive),
+# data build scripts and raw source files (data-build), and engine tests (engine-test). Nothing is deleted from the repo.
+exclude:
+  - archive
+  - data-build
+  - engine-test
+  - .github
+  - README.md
