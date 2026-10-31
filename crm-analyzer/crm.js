@@ -750,7 +750,7 @@
       box.innerHTML = "";
       box.appendChild(el("h3", { text: "What your strongest ZIPs have in common" }));
       if (R.weakSignal) box.appendChild(el("p", { class: "crm-warn", text: "Treat this profile as tentative: " + NF0.format(R.nOver) +
-        " ZIPs over-perform, and chance alone would produce about " + NF0.format(Math.max(1, Math.round(R.chanceOver))) +
+        (R.nOver === 1 ? " ZIP over-performs" : " ZIPs over-perform") + ", and chance alone would produce about " + NF0.format(Math.max(1, Math.round(R.chanceOver))) +
         ". Your customers may simply follow population, or the list may be too small to show a clear pattern." }));
       box.appendChild(el("p", { class: "crm-note", text: "Your " + R.strongLabel + " (" + NF0.format(R.strong.length) + ") compared with your whole trade area. Bars show how far apart they are, in standard deviations across the trade area's ZIPs." }));
       var list = R.prof.slice().filter(function (p) { return showAll || p.f.sim; }).sort(function (a, b) { return Math.abs(b.std) - Math.abs(a.std); });

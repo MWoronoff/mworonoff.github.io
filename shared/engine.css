@@ -745,3 +745,4 @@ details.az-sources.az-fold > summary { font-size: 14px; font-weight: 700; }
 .az-tm-dtable td a { color: #0b5d53; }
 .az-tm-dtable td:first-child { white-space: nowrap; font-weight: 600 !important; }
 @media (max-width: 640px) { .az-tm-dtable td:first-child { white-space: normal; } }
+@media (max-width: 640px) { .rz-alloc-ch th:nth-child(2), .rz-alloc-ch td:nth-child(2) { display: none; } .rz-alloc-ch { min-width: 0 !important; } }
