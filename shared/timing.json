@@ -353,5 +353,97 @@
    "url": null,
    "note": "Online index: visits per day to the category's websites compared with an average month (100), January 2025–September 2026. Based on 21 months, so the pattern will firm up as more months are added. Year-to-date change compares January–September 2026 with the same months of 2025."
   }
+ },
+ "drivers": {
+  "healthcare": [
+   {
+    "applies": "Urgent care, pharmacy, primary care",
+    "text": "Flu activity most often peaks between December and February.",
+    "src": "CDC",
+    "url": "https://www.cdc.gov/flu/about/season/"
+   },
+   {
+    "applies": "Senior care, hospitals, primary care",
+    "text": "Medicare open enrollment runs October 15 to December 7 every year.",
+    "src": "CMS",
+    "url": "https://www.cms.gov/center/openenrollment.asp"
+   },
+   {
+    "applies": "All healthcare",
+    "text": "Marketplace (HealthCare.gov) enrollment opens November 1; December 15 is the last day to enroll for coverage that starts January 1.",
+    "src": "HealthCare.gov",
+    "url": "https://www.healthcare.gov/quick-guide/dates-and-deadlines/"
+   },
+   {
+    "applies": "Eye care, hearing, dental, med spa",
+    "text": "Health FSA money is generally use-it-or-lose-it at the end of the plan year; some plans allow a grace period to March 15 or a limited carryover.",
+    "src": "IRS",
+    "url": "https://www.irs.gov/newsroom/irs-eligible-employees-can-use-tax-free-dollars-for-medical-expenses"
+   },
+   {
+    "applies": "Dental",
+    "text": "A dental plan's annual maximum resets at the start of each benefit period, which prompts \"use your benefits\" visits late in the year.",
+    "src": "Delta Dental of Kansas",
+    "url": "https://deltadentalks.com/knowledge/what-is-an-annual-maximum"
+   }
+  ],
+  "higher-ed": [
+   {
+    "applies": "All schools",
+    "text": "The FAFSA for the next school year opens in the fall; the 2027-28 form opened in September 2026, its earliest launch yet.",
+    "src": "WEAR-TV (ABC)",
+    "url": "https://weartv.com/news/nation-world/education-department-opens-2027-28-fafsa-early-marking-programs-earliest-launch"
+   }
+  ],
+  "financial": [
+   {
+    "applies": "Tax preparation",
+    "text": "The IRS filing season opens in late January; the filing deadline is April 15.",
+    "src": "IRS",
+    "url": "https://www.irs.gov/newsroom/irs-announces-first-day-of-2026-filing-season-online-tools-and-resources-help-with-tax-filing"
+   }
+  ],
+  "auto": [
+   {
+    "applies": "Used cars and trucks",
+    "text": "Used retail sales historically peak in March or April as tax refunds arrive.",
+    "src": "Cox Automotive",
+    "url": "https://www.coxautoinc.com/insights/used-retail-vehicle-sales-feb-2024/"
+   }
+  ],
+  "legal": [
+   {
+    "applies": "Family law",
+    "text": "Divorce filings peak in March and August, after the winter and summer holidays.",
+    "src": "University of Washington",
+    "url": "https://www.washington.edu/news/2016/08/21/is-divorce-seasonal-uw-research-shows-biannual-spike-in-divorce-filings/"
+   },
+   {
+    "applies": "Bankruptcy",
+    "text": "Filings spike in late winter and early spring, then ease through the rest of the year.",
+    "src": "Credit Slips",
+    "url": "https://creditslips.org/2012/03/06/no-surprise-bankruptcy-filings-jump-in-february/"
+   },
+   {
+    "applies": "Personal injury",
+    "text": "Traffic deaths peak in July and August, when miles driven are highest (NHTSA data).",
+    "src": "Stacker",
+    "url": "https://stacker.com/stories/safety/do-traffic-accidents-increase-during-back-school-season-what-data-shows"
+   },
+   {
+    "applies": "Estate planning",
+    "text": "Demand follows life events more than seasons: a health diagnosis, marriage or a birth, and new assets are leading reasons to make or update a will.",
+    "src": "Caring.com 2025 survey",
+    "url": "https://www.caring.com/about/news/2025-will-and-estate-planning-survey"
+   }
+  ],
+  "apartments": [
+   {
+    "applies": "All apartments",
+    "text": "June is the most popular month to move, then August; renters move more evenly through the year than owners.",
+    "src": "U.S. Census Bureau (2009 data)",
+    "url": "https://www.census.gov/content/dam/Census/library/working-papers/2011/demo/2009-Seasonality.pdf"
+   }
+  ]
  }
 }

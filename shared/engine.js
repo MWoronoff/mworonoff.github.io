@@ -967,7 +967,7 @@
     }
     if (window.AdtaxiRadius) go();
     else {
-      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261031d";   // version tag: browsers fetch the new file after an update
+      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261031e";   // version tag: browsers fetch the new file after an update
       sc.onload = go; sc.onerror = function () { self.showError("The radius tool didn't load. Refresh the page and try again."); };
       document.head.appendChild(sc);
     }
@@ -1668,11 +1668,11 @@
     var self = this, cfg = this.cfg;
     function load(url, key, tab) {
       fetch(url).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
-        .then(function (b) { if (b.map && b.map[cfg.exportName]) { self[key] = b; self.tabBar.querySelector('[data-tab="' + tab + '"]').hidden = false; self.tabBar.hidden = false; } })
+        .then(function (b) { if (b.map && (b.map[cfg.exportName] || (b.drivers && b.drivers[cfg.exportName]))) { self[key] = b; self.tabBar.querySelector('[data-tab="' + tab + '"]').hidden = false; self.tabBar.hidden = false; } })
         .catch(function () { /* no tab without data */ });
     }
     if (cfg.benchmarks !== false) load(cfg.benchmarksData || "../shared/benchmarks.json?v=20261022f", "bench", "bench");
-    if (cfg.timing !== false) load(cfg.timingData || "../shared/timing.json?v=20261022g", "timing", "timing");
+    if (cfg.timing !== false) load(cfg.timingData || "../shared/timing.json?v=20261031e", "timing", "timing");
   };
   Analyzer.prototype.setTab = function (tab) {
     var self = this, prev = this.tab;
@@ -1709,6 +1709,24 @@
     if (!T) return;
     box.innerHTML = "";
     var m = T.map[cfg.exportName];
+    var drv = (T.drivers || {})[cfg.exportName] || [];
+    // What drives timing: documented seasonal patterns for the category, each with its source
+    var driversPanel = function () {
+      if (!drv.length) return null;
+      return el("section", { class: "az-panel az-tm-drivers" }, [el("h2", { text: "What drives timing" }),
+        el("p", { class: "az-bench-ind", text: "Documented seasonal patterns and deadlines in this category. Plan campaigns to start ahead of them." }),
+        el("table", { class: "az-table az-tm-dtable" }, [el("thead", null, [el("tr", null, [el("th", { scope: "col", class: "rz-l", text: "Applies to" }), el("th", { scope: "col", class: "rz-l", text: "What happens" }), el("th", { scope: "col", class: "rz-l", text: "Source" })])]),
+          el("tbody", null, drv.map(function (x) { return el("tr", null, [el("td", { class: "rz-l", text: x.applies }), el("td", { class: "rz-l", text: x.text }),
+            el("td", { class: "rz-l" }, [x.url ? el("a", { href: x.url, target: "_blank", rel: "noopener", text: x.src }) : x.src])]); }))])]);
+    };
+    if (!m) {   // no monthly series for this category (e.g. Legal): the documented patterns alone
+      box.appendChild(this.tabControls(this.renderTiming, "A clean page of these timing patterns to send after the meeting", true));
+      box.appendChild(el("section", { class: "az-panel az-bench-panel" }, [el("h2", { text: "When demand peaks: " + (cfg.title || "").replace(/ Market Analyzer$/, "") }),
+        el("p", { class: "az-bench-ind", text: "There's no monthly sales or website series for this category, so this tab lists documented seasonal patterns by practice area." })]));
+      var dp = driversPanel(); if (dp) box.appendChild(dp);
+      box.appendChild(el("p", { class: "az-bench-note", text: T.note }));
+      return;
+    }
     // Industry-level data (one pattern for every category type): no category menu, and the title names what is measured,
     // so the same numbers never appear under different category names
     var industry = !Object.keys(m).some(function (k) { return k !== "_default"; });
@@ -1755,6 +1773,7 @@
     if (!L && P.ytd) cards.push(card("Online audience, " + P.ytd.period, pc(P.ytd.visitors), "Visitors vs. " + P.ytd.period + " " + (P.ytd.year - 1) + "; visits " + pc(P.ytd.visits)));
     if (L) cards.push(card("Latest month", (L.yoy >= 0 ? "+" : "") + NF1.format(L.yoy) + "%", MONTHS_LONG[L.month - 1] + " " + L.year + " sales vs. a year earlier" + (L.prelim ? " (preliminary)" : "")));
     box.appendChild(el("section", { class: "az-tm-cards" + (cards.length === 3 ? " az-tm-cards3" : "") }, cards));
+    var dpn = driversPanel(); if (dpn) box.appendChild(dpn);
     var used = {}; codes.forEach(function (c) { used[T.series[c].source] = 1; });
     box.appendChild(el("p", { class: "az-bench-note", text: Object.keys(used).map(function (k) { return T.sources[k].note; }).concat([T.note]).join(" ") }));
     box.appendChild(el("section", { class: "az-panel az-sources" }, [el("h2", { text: "Sources" }),

@@ -739,3 +739,9 @@ details.az-sources.az-fold > summary { font-size: 14px; font-weight: 700; }
 .rz-sugtag { margin-left: 6px; font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: 6px; background: #e9f6f3; color: #0b5d53; }
 .rz-sugtag[hidden], .rz-suggest[hidden] { display: none; }
 .rz-suggest { margin: 0; font-size: 13px; color: #3d5266; }
+.az-tm-drivers { padding: 16px 18px; margin-top: 14px; }
+.az-tm-drivers h2 { margin: 0 0 4px; }
+.az-tm-dtable td { vertical-align: top; font-size: 13px; font-weight: 400 !important; }
+.az-tm-dtable td a { color: #0b5d53; }
+.az-tm-dtable td:first-child { white-space: nowrap; font-weight: 600 !important; }
+@media (max-width: 640px) { .az-tm-dtable td:first-child { white-space: normal; } }
