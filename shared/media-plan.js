@@ -15,7 +15,8 @@
                   each additional one. DOOH keeps its own minimum.
                   Channel availability by tier is from the 2024 tier sheet; minimums are from the Adtaxi rate card (Nov 2025).
    TERMS:         channels with term: 3 are sold with a 3-month minimum (rate card).
-   FEES:          management fees. OFF until real rates are supplied (see below). */
+   FEES:          management fees. Clients see one monthly cost per channel; "Budget includes fees" (Edit rates) decides
+                  whether platform fees come out of the budget (default) or are added to it. */
 (function () {
   var CHANNELS = {
     ctv:      { label: "CTV / streaming TV",     short: "CTV",              role: "awareness",     prog: true,  color: "#0b5d53", job: "Reaches new households on the big screen, targeted by audience and ZIP instead of whole TV markets." },
@@ -89,7 +90,7 @@
     rates: { "Tier 3": { pct: null, flat: null }, "Tier 2": { pct: null, flat: null }, "Strategic": { pct: null, flat: null } },
     minFee: null,
     showFee: true,
-    offNote: "Amounts allocate the full budget by platform. Turn on Add management fees to add each platform's fee to its cost."
+    offNote: "Amounts are each channel's total monthly cost."
   };
   /* MANAGEMENT FEE SCHEDULE (Adtaxi rate card, Nov 2025), shown only when a user turns on "Show management fees".
      Budgets are gross: the fee comes out of each channel's amount, and the rest is media spend.
@@ -139,6 +140,16 @@
       if (f.kind === "fee") out.fee += f.fee; else if (f.kind === "cpm") out.cpm += f.media; else out.none += f.media;
     });
     return out;
+  }
+  /* What a channel costs the client. "Budget includes fees" (a rep setting in Edit rates, on by default): the channel's
+     allocated amount is its total cost, and any platform fee comes out of it (estimate() uses the media portion).
+     Off: the allocated amount is media, so platform channels cost more (channelFee); fee-in-CPM channels don't change.
+     Only this total is ever shown to a client; media and fee splits stay inside the math. */
+  var INCLUDE_FEES = true;
+  function feesIncluded() { return INCLUDE_FEES; }
+  function channelCost(id, amount, held) {
+    if (amount == null) return amount;
+    return INCLUDE_FEES ? amount : channelFee(id, amount, held).total;
   }
   function usd0(x) { return "$" + Math.round(x).toLocaleString("en-US"); }
   function feeLine(f) {
@@ -344,7 +355,7 @@
   var CPM_ALL = {}; Object.keys(RETAIL_CPM).forEach(function (k) { CPM_ALL[k] = RETAIL_CPM; }); Object.keys(BENCH_CPM).forEach(function (k) { CPM_ALL[k] = BENCH_CPM; });
   function cpmNow() { var o = {}; Object.keys(CPM_ALL).forEach(function (k) { o[k] = CPM_ALL[k][k]; }); return o; }
   function estNow() { return JSON.parse(JSON.stringify(EST)); }
-  var DEFAULTS = { min: JSON.parse(JSON.stringify(MINIMUMS)), pct: JSON.parse(JSON.stringify(MGMT.pct)), search: MGMT.search.map(function (t) { return t.pct; }), cpm: cpmNow(), est: estNow() };
+  var DEFAULTS = { min: JSON.parse(JSON.stringify(MINIMUMS)), pct: JSON.parse(JSON.stringify(MGMT.pct)), search: MGMT.search.map(function (t) { return t.pct; }), cpm: cpmNow(), est: estNow(), inc: true };
   var RATE_KEY = "adtaxi-plan-rates-v1", listeners = [];
   function num(v, lo, hi) { v = typeof v === "string" ? parseFloat(v.replace(/[$,%\s]/g, "")) : v; return isFinite(v) && v >= lo && v <= hi ? v : null; }
   function applyRates(o) {
@@ -358,6 +369,7 @@
     });
     MGMT.search.forEach(function (t, i) { var v = o.search && num(o.search[i], 0, 0.9); t.pct = v != null ? v : DEFAULTS.search[i]; });
     Object.keys(CPM_ALL).forEach(function (k) { var v = o.cpm && num(o.cpm[k], 0.01, 1e4); CPM_ALL[k][k] = v != null ? v : DEFAULTS.cpm[k]; });
+    INCLUDE_FEES = o.inc === false ? false : true;
     var e = o.est || {}, D = DEFAULTS.est;
     var c = num(e.ctr, 0, 1); EST.ctr = c != null ? c : D.ctr;
     var vc = num(e.vcr, 0, 1); EST.vcr = vc != null ? vc : D.vcr;
@@ -365,7 +377,7 @@
       ["cpc", "ctr", "cpl"].forEach(function (k) { var v = e[id] && e[id][k] != null ? num(e[id][k], 0.0001, 1e5) : null; EST[id][k] = v != null ? v : null; });
     });
   }
-  function currentRates() { return { min: JSON.parse(JSON.stringify(MINIMUMS)), pct: JSON.parse(JSON.stringify(MGMT.pct)), search: MGMT.search.map(function (t) { return t.pct; }), cpm: cpmNow(), est: estNow() }; }
+  function currentRates() { return { min: JSON.parse(JSON.stringify(MINIMUMS)), pct: JSON.parse(JSON.stringify(MGMT.pct)), search: MGMT.search.map(function (t) { return t.pct; }), cpm: cpmNow(), est: estNow(), inc: INCLUDE_FEES }; }
   function customRates() { return JSON.stringify(currentRates()) !== JSON.stringify(DEFAULTS); }
   function setRates(o) {
     applyRates(o);
@@ -374,7 +386,7 @@
   }
   function resetRates() { setRates(null); }
   try { var saved = localStorage.getItem(RATE_KEY); if (saved) applyRates(JSON.parse(saved)); } catch (e) {}
-  var CUSTOM_NOTE = "Custom rates in use: minimums, management fees or estimate rates were edited on this device.";
+  var CUSTOM_NOTE = "Custom rates in use: minimums, fees, estimate rates or the budget setting were edited on this device.";
 
   // The editor: a closed panel listing each channel's minimum and fee. onChange runs after every edit and on reset.
   function rateEditor(onChange) {
@@ -386,7 +398,7 @@
         ".ap-rates th:first-child,.ap-rates td:first-child{text-align:left}.ap-rates td{padding:3px 6px;border-top:1px solid #eef2f5;text-align:right;white-space:nowrap}" +
         ".ap-rates input{width:84px;padding:4px 6px;border:1px solid #c9d5e0;border-radius:6px;font:inherit;text-align:right}.ap-rates input.ap-pct{width:56px}" +
         ".ap-rates .ap-edited{background:#fff7db;border-color:#ead58d}.ap-rates button{margin-top:8px;padding:6px 12px;border:1px solid #c9d5e0;border-radius:8px;background:#fff;font:inherit;font-weight:600;color:#0f2742;cursor:pointer}" +
-        ".ap-rates .ap-flag{color:#6b5200;font-weight:600}@media print{.ap-rates{display:none!important}}";
+        ".ap-rates .ap-flag{color:#6b5200;font-weight:600}.ap-rates .ap-inc{display:block;margin:10px 0 4px;font-size:13px;color:#0f2742}.ap-rates .ap-inc span{color:#5f7286;font-size:12px}.ap-rates .ap-inc input{width:auto;margin-right:4px;vertical-align:-2px}.ap-rates .ap-edited-row{background:#fff7db;border-radius:6px;padding:4px 6px}@media print{.ap-rates{display:none!important}}";
       document.head.appendChild(st);
     }
     function E(tag, attrs, kids) {
@@ -431,7 +443,7 @@
         var ch = CHANNELS[id], minDef = DEFAULTS.min[id];
         var minCell = id in R.min ? ["$", input(R.min[id], false, minDef, function (v) { var o = currentRates(); o.min[id] = num(v, 0, 1e7) != null ? num(v, 0, 1e7) : minDef; setRates(o); })] : ["—"];
         var feeCell;
-        if (ch.prog) feeCell = ["In CPM"];
+        if (ch.prog) feeCell = ["Fee in CPM"];
         else if (id === "search") feeCell = MGMT.search.map(function (t, i) {
           return E("span", null, [i ? " / " : "", input(R.search[i], true, DEFAULTS.search[i], function (v) { var o = currentRates(), x = num(v, 0, 90); o.search[i] = x != null ? x / 100 : DEFAULTS.search[i]; setRates(o); }), "%"]);
         });
@@ -441,10 +453,15 @@
         tbody.appendChild(E("tr", null, [E("td", { text: ch.label + (id === "search" ? " (under $3K / $3K+)" : "") + (ch.placeholder ? " (placeholder rates)" : "") }), E("td", null, minCell), E("td", null, feeCell), E("td", null, cpmCell)]));
       });
       flag.textContent = customRates() ? " · custom rates in use" : "";
+      incBox.checked = INCLUDE_FEES; incRow.classList.toggle("ap-edited-row", !INCLUDE_FEES);
     }
+    var incBox = E("input", { type: "checkbox", onchange: function () { var o = currentRates(); o.inc = this.checked; setRates(o); } });
+    var incRow = E("label", { class: "ap-inc" }, [incBox, E("b", { text: " Budget includes fees" }),
+      E("span", { text: " On: each channel's cost comes out of the monthly budget, so the plan totals what the client said. Off: the budget is treated as media, and platform channels (fee %) cost more; Fee in CPM channels never change. Clients only ever see each channel's monthly cost." })]);
     box.appendChild(E("summary", null, ["Edit rates", flag]));
-    box.appendChild(E("p", { text: "Minimums, fees and programmatic CPMs default to the Adtaxi rate card (Nov 2025); YouTube, TikTok and Snapchat CPMs and the estimate rates below default to industry benchmarks. Changes recalculate the plan and the proposal's targeted impressions right away and are saved on this device only; they don't change anyone else's view. Leave a fee blank for none." }));
-    box.appendChild(E("table", null, [E("thead", null, [E("tr", null, [E("th", { text: "Channel" }), E("th", { text: "Monthly minimum" }), E("th", { text: "Management fee" }), E("th", { text: "CPM (for estimates)" })])]), tbody]));
+    box.appendChild(incRow);
+    box.appendChild(E("p", { text: "Minimums, fees and programmatic CPMs default to the Adtaxi rate card (Nov 2025); YouTube, TikTok and Snapchat CPMs and the estimate rates below default to industry benchmarks. Changes recalculate the plan and the proposal's targeted impressions right away and are saved on this device only; they don't change anyone else's view. Pricing: Fee in CPM means management is built into the CPM (rate card), so no fee is ever added; a % is the platform channel's management fee, taken from its cost before impressions are estimated. Leave a fee blank for none." }));
+    box.appendChild(E("table", null, [E("thead", null, [E("tr", null, [E("th", { text: "Channel" }), E("th", { text: "Monthly minimum" }), E("th", { text: "Pricing (management fee)" }), E("th", { text: "CPM (for estimates)" })])]), tbody]));
     box.appendChild(E("p", { text: "Estimate rates. Search and Meta set to auto use the WordStream 2026 benchmark for the category; enter your own from campaign results to replace any of them." }));
     box.appendChild(E("table", null, [E("thead", null, [E("tr", null, [E("th", { text: "Platform" }), E("th", { text: "Cost per click" }), E("th", { text: "Click-through / completion rate" }), E("th", { text: "Cost per lead" })])]), ebody]));
     box.appendChild(E("button", { type: "button", text: "Reset to rate card", onclick: function () { resetRates(); } }));
@@ -484,7 +501,7 @@
     CHANNELS: CHANNELS, ROLES: ROLES, STRATEGIES: STRATEGIES, MIN_BUDGET: MIN_BUDGET, TIERS: TIERS,
     SERVICE_TIERS: SERVICE_TIERS, CUSTOM_PLAN_BUDGET: CUSTOM_PLAN_BUDGET, FEES: FEES,
     serviceTier: serviceTier, minFor: minFor, buildPlan: buildPlan, fixedBudget: fixedBudget, applyFees: applyFees, termNote: termNote,
-    MGMT: MGMT, channelFee: channelFee, feeSummary: feeSummary, feeLine: feeLine,
+    MGMT: MGMT, channelFee: channelFee, feeSummary: feeSummary, feeLine: feeLine, channelCost: channelCost, feesIncluded: feesIncluded,
     RETAIL_CPM: RETAIL_CPM, BENCH_CPM: BENCH_CPM, EST: EST, estimate: estimate,
     rateEditor: rateEditor, setRates: setRates, resetRates: resetRates, customRates: customRates, CUSTOM_NOTE: CUSTOM_NOTE
   };
