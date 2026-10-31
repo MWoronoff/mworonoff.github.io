@@ -13,7 +13,7 @@
                   progFirst / progAdd: programmatic channels without a fixed minimum
                   need progFirst for the first (highest-weight) one and progAdd for
                   each additional one. DOOH keeps its own minimum.
-                  Channel availability by tier is from the 2024 tier sheet; minimums are from the Adtaxi rate card (Nov 2025).
+                  Channel availability by tier is from the current Adtaxi tier sheet (its heading still reads 2024); minimums are from the Adtaxi rate card (Nov 2025).
    TERMS:         channels with term: 3 are sold with a 3-month minimum (rate card).
    FEES:          management fees. Clients see one monthly cost per channel; "Budget includes fees" (Edit rates) decides
                   whether platform fees come out of the budget (default) or are added to it. */
