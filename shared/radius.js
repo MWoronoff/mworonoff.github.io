@@ -1255,7 +1255,7 @@
     if (window.AdtaxiPlan) { done(); return; }
     if (loadPlan.waiting) { loadPlan.waiting.push(done); return; }
     loadPlan.waiting = [done];
-    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261031b";
+    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261031c";
     sc.onload = function () { var w = loadPlan.waiting; loadPlan.waiting = null; w.forEach(function (f) { f(); }); };
     sc.onerror = function () { loadPlan.waiting = null; };
     document.head.appendChild(sc);
@@ -1480,32 +1480,33 @@
     if (!this.benchVal && !this.benchAsked && this.benchmarks) { this.benchAsked = true; this.benchmarks().then(function (v) { self.benchVal = v; if (self.state.view === "plan") self.renderBudget(); }); }
     if (!this.gReach) {
       var num = function (v) { var x = parseFloat(String(v).replace(/[^0-9.]/g, "")); return x > 0 ? x : null; };
-      this.gReach = el("input", { type: "text", inputmode: "numeric", placeholder: "e.g. 20,000", "aria-label": "People to reach",
-        oninput: function () { b.goalReach = num(this.value); self.renderGoals(); self.renderDeliver(); }, onchange: function () { if (b.goalReach) this.value = NF0.format(b.goalReach); } });
-      this.gFreq = el("input", { type: "text", inputmode: "decimal", placeholder: "e.g. 5", "aria-label": "Times each, per month",
+      // Reach is a percent of the audience, as TV plans it; b.goalPct holds it and b.goalReach the people it stands for
+      this.gReach = el("input", { type: "text", inputmode: "decimal", placeholder: "e.g. 40", "aria-label": "Reach, percent of the audience",
+        oninput: function () { b.goalPct = num(this.value); self.renderGoals(); self.renderDeliver(); } });
+      this.gFreq = el("input", { type: "text", inputmode: "decimal", placeholder: "e.g. 5", "aria-label": "Average frequency per month",
         oninput: function () { b.goalFreq = num(this.value); self.renderGoals(); self.renderDeliver(); } });
       this.gOut = el("p", { class: "rz-goal-out", "aria-live": "polite" });
       box.appendChild(el("div", { class: "rz-goal-row" }, [
-        el("span", { class: "rz-goal-q", text: "Goal (optional): how many people should the campaign reach, and how often?" }),
-        el("label", { class: "az-field" }, [el("span", { text: "People to reach" }), this.gReach]),
-        el("label", { class: "az-field" }, [el("span", { text: "Times each, per month" }), this.gFreq])]));
+        el("span", { class: "rz-goal-q", text: "Goal (optional): what percent of the audience should the campaign reach, and how often?" }),
+        el("label", { class: "az-field rz-goal-pct" }, [el("span", { text: "Reach (% of audience)" }), this.gReach]),
+        el("label", { class: "az-field" }, [el("span", { text: "Average frequency, per month" }), this.gFreq])]));
       box.appendChild(this.gOut);
     }
     var out = this.gOut; out.innerHTML = ""; out.className = "rz-goal-out";
-    var aud = this.planAudience(), R = b.goalReach, F = b.goalFreq;
-    if (!R && !F) { out.textContent = "Leave blank to plan from a budget instead."; return; }
-    if (!R || !F) { out.textContent = "Enter both: people to reach and times each."; return; }
+    var aud = this.planAudience(), pc = b.goalPct, F = b.goalFreq;
+    b.goalReach = pc && aud ? pc / 100 * aud : null;
+    var R = b.goalReach;
+    if (!pc && !F) { out.textContent = "Leave blank to plan from a budget instead."; return; }
+    if (!pc || !F) { out.textContent = "Enter both: reach % and average frequency."; return; }
     if (!P || !aud) return;
-    var ceiling = Math.floor(aud * P.RF.MAX);
-    if (R > aud * P.RF.MAX) {
+    if (pc >= P.RF.MAX * 100) {
       out.classList.add("rz-goal-warn");
-      out.textContent = "The plan's " + NF0.format(this.budgetRows().length) + " ZIPs hold " + NF0.format(Math.round(aud)) + " people in this audience, and a campaign realistically reaches at most about " + NF0.format(ceiling) +
-        " of them (85%). Lower the goal, or include more ZIPs in the allocation below.";
+      out.textContent = "A campaign realistically reaches at most about " + Math.round(P.RF.MAX * 100) + "% of an audience. Lower the reach goal.";
       return;
     }
     var need = P.imprForGoal(R, F, aud), strat = b.strat ? P.STRATEGIES.filter(function (x) { return x.id === b.strat; })[0] : null;
     var goalTrp = R * F / aud * 100;
-    var txt = NF0.format(R) + " people about " + (Math.round(F * 10) / 10) + " times is " + Math.round(R / aud * 100) + "% of the audience in the plan's ZIPs \u00d7 " + (Math.round(F * 10) / 10) + " = " + NF0.format(Math.round(goalTrp)) + " TRPs, about " + NF0.format(Math.round(need / 1000) * 1000) + " targeted impressions a month.";
+    var txt = (Math.round(pc * 10) / 10) + "% reach \u00d7 " + (Math.round(F * 10) / 10) + " frequency = " + NF0.format(Math.round(goalTrp)) + " TRPs (" + NF0.format(Math.round(R / 100) * 100) + " of the " + NF0.format(Math.round(aud)) + " people in the plan's ZIPs), about " + NF0.format(Math.round(need / 1000) * 1000) + " targeted impressions a month.";
     if (!strat) { out.textContent = txt + " Choose a media strategy below to size the budget."; return; }
     var found = null;
     for (var T = Math.max(P.MIN_BUDGET, 1000); T <= 1000000; T += T < 20000 ? 500 : T < 100000 ? 2500 : 10000) {
@@ -1540,8 +1541,8 @@
       tile(NF0.format(Math.round(R.trp)), "Targeted rating points (TRPs)"),
       tile(money(d.cost / R.trp), "Targeted CPP"),
       tile("$" + (d.cost / d.impr * 1000).toFixed(2), "Average CPM")]));
-    var gT = b.goalReach && b.goalFreq ? b.goalReach * b.goalFreq / aud * 100 : null;
-    var goal = gT ? (R.trp >= gT * 0.98 && R.reach >= b.goalReach * 0.98 ? " Meets the goal: " : " Short of the goal: ") + NF0.format(Math.round(R.trp)) + " TRPs vs. " + NF0.format(Math.round(gT)) + " needed for " + NF0.format(b.goalReach) + " people about " + (Math.round(b.goalFreq * 10) / 10) + " times." : "";
+    var gT = b.goalPct && b.goalFreq ? b.goalPct * b.goalFreq : null;   // TRPs = reach % x frequency
+    var goal = gT ? (R.trp >= gT * 0.98 && R.share * 100 >= b.goalPct * 0.98 ? " Meets the goal: " : " Short of the goal: ") + NF0.format(Math.round(R.trp)) + " TRPs vs. " + NF0.format(Math.round(gT)) + " needed for " + (Math.round(b.goalPct * 10) / 10) + "% reach at a " + (Math.round(b.goalFreq * 10) / 10) + " frequency." : "";
     box.appendChild(el("p", { class: "rz-note", text: "Modeled for planning, against the " + NF0.format(Math.round(aud)) + " people in the plan's ZIPs. TRPs add up every channel's rating points, duplication included, as in TV: TRPs = reach % \u00d7 frequency. Targeted CPP = cost \u00f7 TRPs." +
       (partial ? " Channels without an impression estimate are left out." : "") + (this.benchVal ? "" : " Search and Meta are added once their benchmarks load.") + goal }));
   };
@@ -1839,7 +1840,7 @@
     if (!b.amount || !A.strat || !A.withDollars || !A.plan || !A.plan.tier || !A.channels.length) { st.textContent = "Enter a monthly budget and choose a media strategy first."; return Promise.resolve(null); }
     st.textContent = "Building…";
     var base = this.proposalBase();
-    return Promise.all([loadScriptOnce(this.cfg.pptxScript || "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261031b"), this.benchmarks(), this.logoImage()])
+    return Promise.all([loadScriptOnce(this.cfg.pptxScript || "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261031c"), this.benchmarks(), this.logoImage()])
       .then(function (res) { return window.AdtaxiProposal.build(self.proposalContext(res[2], res[3]), opt); })
       .then(function (out) { st.textContent = "Downloaded. Open it in PowerPoint or Google Slides to edit."; return out; })
       .catch(function (e) { st.textContent = "The proposal couldn't be built (" + e.message + "). Try again in a minute."; throw e; });
