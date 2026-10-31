@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
-<link rel="stylesheet" href="../shared/engine.css?v=20261028m">
+<link rel="stylesheet" href="../shared/engine.css?v=20261031b">
 <style>
   .tv-map { height: 440px; }
   .tv-side { max-height: 440px; }
@@ -45,10 +45,24 @@
   .tv-reset { border: 0; background: none; padding: 0; color: var(--teal); font-size: 11px; font-weight: 600; text-decoration: underline; cursor: pointer; }
   .tv-reset[hidden] { display: none; }
   .tv-slider { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; background: #f7fafc; border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; }
-  .tv-slider-track { flex: 1 1 320px; display: flex; flex-direction: column; gap: 6px; padding-top: 6px; }
+  .tv-slider-track { flex: 1 1 320px; display: flex; flex-direction: column; gap: 6px; padding-top: 20px; }
   .tv-slider input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 12px; border-radius: 999px; background: #dce4ec; outline-offset: 6px; cursor: pointer; margin: 0; }
   .tv-slider input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 30px; height: 30px; border-radius: 50%; background: var(--teal); border: 4px solid #fff; box-shadow: 0 1px 6px rgba(15,39,66,.35); cursor: grab; }
   .tv-slider input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; background: var(--teal); border: 4px solid #fff; box-shadow: 0 1px 6px rgba(15,39,66,.35); cursor: grab; }
+  .tv-goal { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; margin: 10px 0 0; padding: 12px 14px; background: #fff; border: 1px solid var(--line); border-radius: 10px; }
+  .tv-goal-q { flex: 1 1 100%; font-size: 14px; font-weight: 600; color: var(--navy); }
+  .tv-goal .az-field input { width: 160px; }
+  .tv-goal-out { flex: 1 1 280px; margin: 0; font-size: 13px; color: #3d5266; }
+  .tv-goal-out.warn { color: #6b5200; }
+  .tv-adv { grid-column: 1 / -1; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: #fafcfd; }
+  .tv-adv > summary { cursor: pointer; font-weight: 700; color: var(--navy); font-size: 14px; }
+  .tv-adv > summary span { font-weight: 400; color: var(--muted); font-size: 12px; margin-left: 6px; }
+  .tv-adv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px 18px; margin-top: 12px; }
+  .tv-shiftwrap { position: relative; }
+  .tv-shiftwrap input { width: 100%; }
+  .tv-goalmark { position: absolute; top: -8px; bottom: -8px; width: 0; pointer-events: none; }
+  .tv-goalmark i { position: absolute; top: 0; bottom: 0; left: -1px; border-left: 2px dashed #b7791f; }
+  .tv-goalmark span { position: absolute; top: -18px; left: 4px; white-space: nowrap; font-size: 11px; font-weight: 700; color: #8a5a00; }
   .tv-ticks { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
   .tv-ticks em { font-style: normal; font-weight: 600; color: var(--navy); }
   .tv-slider b { font-size: 26px; color: var(--navy); min-width: 52px; text-align: right; }
@@ -151,7 +165,7 @@
 </header>
 
 <main class="az-main">
-  <div class="tv-stephead"><h2><span class="tv-step">1</span>Market and target audience</h2><span class="tv-sub">Choose the market from the list or the map, then the audience.</span></div>
+  <div class="tv-stephead"><h2><span class="tv-step">1</span>Market, audience and goal</h2><span class="tv-sub">Choose the market from the list or the map, then the audience; a reach goal is optional.</span></div>
   <div class="az-controls">
     <label class="az-field" id="fMarket"><span>Market (DMA)</span><select id="market"><option value="">Choose a market…</option></select></label>
     <div class="az-field"><span>Gender</span>
@@ -170,6 +184,12 @@
         <label><input type="checkbox" value="u25" checked>&lt;$25K</label><label><input type="checkbox" value="25to49" checked>$25–49K</label><label><input type="checkbox" value="50to74" checked>$50–74K</label><label><input type="checkbox" value="75to99" checked>$75–99K</label><label><input type="checkbox" value="100to149" checked>$100–149K</label><label><input type="checkbox" value="150to249" checked>$150–249K</label><label><input type="checkbox" value="250plus" checked>$250K+</label>
       </div>
     </div>
+  </div>
+  <div class="tv-goal" id="goalRow">
+    <span class="tv-goal-q">Goal (optional): how many people in the target should the campaign reach, and how often?</span>
+    <label class="az-field" id="fGoalR"><span>People to reach</span><input id="goalR" type="text" inputmode="numeric" placeholder="e.g. 200,000"></label>
+    <label class="az-field" id="fGoalF"><span>Times each, per month</span><input id="goalF" type="number" min="1" step="0.5" inputmode="decimal" placeholder="e.g. 5"></label>
+    <p class="tv-goal-out" id="goalOut" aria-live="polite"></p>
   </div>
   <div class="az-error" id="err" role="alert" hidden></div>
 
@@ -198,10 +218,13 @@
       <div class="tv-group">Campaign</div>
       <label class="az-field"><span>Monthly campaign budget ($)</span><input id="budget" type="number" min="0" step="1000" inputmode="decimal"><span class="tv-hint">Broadcast TV and Digital Video together, per month.</span></label>
       <div class="tv-group">Broadcast TV schedule</div>
+      <label class="az-field"><span id="freqLabel">Schedule frequency, selected target</span><input id="tvfreq" type="number" min="1" step="0.1" inputmode="decimal"><span class="tv-hint">Average frequency for the month's schedule, for the selected target, as quoted for the schedule.</span></label>
+      <details class="tv-adv" id="tvAdv"><summary>Adjust schedule details <span>Broadcast CPM, :30 spot price and audience per spot, filled in with market averages</span></summary><div class="tv-adv-grid">
       <label class="az-field"><span>Broadcast CPM, adults 18+ ($)<span class="tv-src" data-src="bcpm"></span></span><input id="bcpm" type="number" min="0" step="0.01" inputmode="decimal"><span class="tv-hint"><span id="cpmHint">Filled in with the market's planning CPM once a market is chosen; the spot price follows it.</span> <button type="button" class="tv-reset" id="cpmReset" hidden>Reset to average</button></span></label>
       <label class="az-field"><span>Average :30 spot price ($)<span class="tv-src" data-src="spot"></span></span><input id="spot" type="number" min="0" step="0.01" inputmode="decimal"><span class="tv-hint"><span id="spotHint">Filled in with the market average once a market is chosen; edit to match the schedule.</span> <button type="button" class="tv-reset" id="spotReset" hidden>Reset to average</button></span></label>
       <label class="az-field"><span><span id="avgLabel">Average target audience per spot</span><span class="tv-src" data-src="avgaud"></span></span><input id="avgaud" type="number" min="0" step="1" inputmode="decimal"><span class="tv-hint"><span id="avgHint">Filled in with the Scarborough average for the selected target; edit to match the schedule.</span> <button type="button" class="tv-reset" id="avgReset" hidden>Reset to average</button></span></label>
-      <label class="az-field"><span id="freqLabel">Schedule frequency, selected target</span><input id="tvfreq" type="number" min="1" step="0.1" inputmode="decimal"><span class="tv-hint">Average frequency for the month's schedule, for the selected target, as quoted for the schedule.</span></label>
+      </div></details>
+      
       <div class="tv-group">Digital Video</div>
       <label class="az-field"><span>Digital Video product</span><select id="dprod"><option value="50">CTV / Advanced TV ($50 CPM)</option><option value="45">Dynamic Video ($45 CPM)</option><option value="24">Pre-roll ($24 CPM)</option></select><span class="tv-hint">Adtaxi rate card (Nov 2025). Picking a product fills in its CPM.</span></label>
       <label class="az-field"><span>Digital Video CPM ($)<span class="tv-src" data-src="dcpm"></span></span><input id="dcpm" type="number" min="0" step="0.5" inputmode="decimal" value="50"><span class="tv-hint">Starts at the selected product's rate card CPM; edit to match the buy.</span></label>
@@ -219,7 +242,7 @@
     <div class="tv-slider">
       <label for="shift" style="font-weight:700;color:#0f2742;font-size:14px">Drag to shift budget<br><span style="font-weight:400">from Broadcast TV to Digital Video</span></label>
       <div class="tv-slider-track">
-        <input id="shift" type="range" min="0" max="100" step="5" value="0" aria-label="Share of budget shifted to Digital Video">
+        <div class="tv-shiftwrap"><input id="shift" type="range" min="0" max="100" step="5" value="0" aria-label="Share of budget shifted to Digital Video"><div class="tv-goalmark" id="goalMark" hidden><i></i><span></span></div></div>
         <div class="tv-ticks" aria-hidden="true"><em>All Broadcast</em><span>25%</span><span>50%</span><span>75%</span><em>All Digital</em></div>
       </div>
       <b id="shiftLab">0% digital</b>
@@ -451,6 +474,7 @@
       body.innerHTML = '<div class="tv-need"><span>To see results, enter <b>' + missing.join(", ").replace(/, ([^,]*)$/, " and $1") +
         '</b>.</span><button type="button" class="az-btn primary" id="goMissing">Go to ' + (firstId === "market" ? "market" : "the field") + "</button></div>";
       $("goMissing").addEventListener("click", function () { var f = $(firstId); f.scrollIntoView({ behavior: "smooth", block: "center" }); setTimeout(function () { f.focus(); }, 350); });
+      renderGoal(null, M ? target(M, gender, $("age").value, hhiChecked()) : null, null, p);
       return;
     }
     var t = target(M, gender, $("age").value, hhiChecked());
@@ -474,10 +498,13 @@
     var digCol = p === 0 ? '<p class="tv-wait">Move the slider to shift budget to Digital Video.</p>' :
       row("Spend", money0(b.ds)) + row("Impressions", fmt(b.dImp)) + row("Target impressions", fmt(b.dT)) +
       row("Target efficiency", pct(inp.ontarget)) +
+      row("Target GRPs", (b.dT / t.universe * 100).toFixed(1)) +
       row("Frequency", b.dFreq.toFixed(1)) + row("Target reach", fmt(b.dReach)) + row("Target reach %", pct(b.dReach / t.universe)) +
+      row("Target CPP", b.dT ? money(b.ds / (b.dT / t.universe * 100)) : "—") +
       row("Effective target CPM", b.dT ? money(b.ds / b.dT * 1000) : "—");
     var comb = row("Spend", money0(b.ts + b.ds)) + row("Target impressions", fmt(b.totT)) + row("Off-target impressions", fmt(b.waste), "tv-loss") +
-      row("Target efficiency", pct(b.eff)) + row("Effective target CPM", money(b.cpm)) +
+      row("Target efficiency", pct(b.eff)) + row("Target GRPs", (b.totT / t.universe * 100).toFixed(1)) +
+      row("Target CPP", b.totT ? money((b.ts + b.ds) / (b.totT / t.universe * 100)) : "—") + row("Effective target CPM", money(b.cpm)) +
       row("Combined reach", '<span class="az-na">Not modeled</span>') + row("Combined frequency", '<span class="az-na">Not modeled</span>');
 
     // Plausibility checks
@@ -507,7 +534,31 @@
       "</div>" +
       (p > 0 && p < 1 ? '<p class="tv-hint" style="margin:8px 0 0">Ranges for the trimmed Broadcast schedule: the low reach holds the entered frequency; the high reach holds the full schedule\'s reach.</p>' : "") +
       '<div class="tv-insights">' + ins.map(function (x) { return '<div class="tv-insight"><span>' + x[0] + "</span><b class=\"num\">" + x[1] + "</b><small>" + x[2] + "</small></div>"; }).join("") + "</div>";
+    renderGoal(inp, t, a, p);
     printSummary(inp, t, p);
+  }
+
+  /* Goal: people to reach x times each = target GRPs needed (reach % x frequency, as TV plans). The slider marks the
+     smallest digital share at which the combined campaign's target GRPs meet it. */
+  function goalNums() { var r = parseFloat(String($("goalR").value).replace(/[^0-9.]/g, "")); return { r: r > 0 ? r : null, f: num("goalF") >= 1 ? num("goalF") : null }; }
+  function renderGoal(inp, t, a, p) {
+    var g = goalNums(), out = $("goalOut"), mark = $("goalMark");
+    mark.hidden = true; out.className = "tv-goal-out";
+    if (!g.r && !g.f) { out.textContent = "Leave blank to compare from the budget alone."; return; }
+    if (!g.r || !g.f) { out.textContent = "Enter both: people to reach and times each."; return; }
+    if (!M || !t) { out.textContent = "Choose a market to size the goal."; return; }
+    if (g.r > t.universe) { out.className += " warn"; out.textContent = M.name + " has about " + fmt(t.universe) + " " + demoLabel() + "; the goal is larger than the target."; return; }
+    var need = g.r * g.f / t.universe * 100;
+    var txt = fmt(g.r) + " people about " + g.f + " times = " + pct(g.r / t.universe) + " of " + demoLabel() + " \u00d7 " + g.f + " = " + need.toFixed(0) + " target GRPs.";
+    if (!inp) { out.textContent = txt + " Enter the campaign inputs to see where the plan meets it."; return; }
+    var first = null;
+    for (var q = 0; q <= 100; q += 5) { var sc = scenario(q / 100, inp, t, a); if (sc.totT / t.universe * 100 >= need) { first = q; break; } }
+    var now = scenario(p, inp, t, a).totT / t.universe * 100;
+    if (first == null) { out.className += " warn"; out.textContent = txt + " No split of " + money0(inp.budget) + " reaches it (all Broadcast: " + a.grp.toFixed(0) + " GRPs); raise the budget or lower the goal."; return; }
+    mark.hidden = false; mark.style.left = "calc(" + first + "% + " + (9 - first * 0.18) + "px)";
+    mark.querySelector("span").textContent = first === 0 ? "Goal met from 0%" : "Goal met at " + first + "%";
+    out.textContent = txt + (first === 0 ? " All Broadcast already delivers " + a.grp.toFixed(0) + " GRPs." : " All Broadcast delivers " + a.grp.toFixed(0) + "; the combined plan meets it from " + first + "% digital.") +
+      " At " + Math.round(p * 100) + "% digital: " + now.toFixed(0) + " GRPs" + (now >= need ? " (meets the goal)." : " (short of the goal).");
   }
 
   // Fill the spot price and audience fields with the averages unless the user has adjusted them.
@@ -561,6 +612,9 @@
     $("handBtn").disabled = !handUrl;
   }
   $("handPct").addEventListener("input", function () { renderHand(); guide(); });
+  $("goalR").addEventListener("input", function () { renderResults(); });
+  $("goalR").addEventListener("change", function () { var g = goalNums(); if (g.r) this.value = Math.round(g.r).toLocaleString("en-US"); });
+  $("goalF").addEventListener("input", function () { renderResults(); });
   $("handCat").addEventListener("change", function () { renderHand(); guide(); });
   $("handBtn").addEventListener("click", function () { if (handUrl) window.open(handUrl, "_blank", "noopener"); });
   /* ---------- Guided steps: highlight only the next field the page needs ---------- */
@@ -568,8 +622,9 @@
   function guide() {
     var budget = num("budget"), p = +$("shift").value / 100, ready = !!M && budget > 0 && num("tvfreq") >= 1 && (p === 0 || (num("dcpm") > 0 && num("dfreq") >= 1));
     var steps = [
+      // In the order the fields appear: step 2 is finished (Digital Video CPM and frequency cap included) before the slider
       [!!M, "fMarket"], [budget > 0, "budget"], [num("tvfreq") >= 1, "tvfreq"],
-      [p > 0, "slider"], [num("dcpm") > 0, "dcpm"], [num("dfreq") >= 1, "dfreq"],
+      [num("dcpm") > 0, "dcpm"], [num("dfreq") >= 1, "dfreq"], [p > 0, "slider"],
       [num("handPct") > 0, "fHandPct"], [!!$("handCat").value, "fHandCat"]
     ];
     var next = null;
@@ -582,6 +637,7 @@
       var lab = next === "slider" ? box.querySelector("label") : box.querySelector("span");
       if (lab) lab.appendChild(Object.assign(document.createElement("span"), { className: "tv-nexttag", textContent: "Next" }));
     }
+    if ((edited.bcpm || edited.spot || edited.avgaud) && !$("tvAdv").open) $("tvAdv").open = true;   // an edited figure stays in view
     // Step 2 waits for a market; step 4 waits for results
     $("planPanel").classList.toggle("tv-dim", !M); $("planLock").hidden = !!M; $("planNote").hidden = !M;
     $("handLock").hidden = ready; $("handBody").hidden = !ready;

@@ -363,7 +363,7 @@
     for (var k in FILTERS) this.filterDefs[k] = FILTERS[k];
     this.filterDefs.age = { label: cfg.hhCount ? "Householder age" : "Age", type: "multi", options: this.ages.options };
     this.state = { unit: cfg.countiesFirst ? "county" : "zip", zip: cfg.defaultZip || "", r: cfg.defaultRadius || 0, minIndex: 0, sortKey: cfg.blendScore ? "score" : "aud", sortDir: "desc", show: 50, sel: {}, profile: null,
-                   mode: "radius", area: null, areaTokens: null };
+                   mode: "radius", area: null, areaTokens: null, view: "area" };
     this.profiles = {};
     (cfg.profiles || []).forEach(function (p) { this.profiles[p.id] = p; }, this);
     if (cfg.embedded) {   // inside an analyzer page: the analyzer owns the URL and passes the starting ZIP, radius and preset
@@ -373,6 +373,8 @@
       if (ini.p && this.profiles[ini.p]) { this.state.profile = ini.p; this.state.sel = JSON.parse(JSON.stringify(this.profiles[ini.p].sel)); this.state.sortKey = this.cfg.blendScore ? "score" : presetSort(this.profiles[ini.p]); }
       if (ini.mode === "area" && cfg.customArea) { this.state.mode = "area"; if (ini.ca) this.pendingCA = ini.ca; }
       if (ini.hand) this.hand = ini.hand;   // Digital Video amount from the TV + Video tool
+      if (ini.view === "plan" || ini.hand) this.wantPlan = true;   // open on the Plan tab once the trade area has ZIPs
+      if (ini.carry) this.carry = ini.carry;   // what the analyzer's market views passed in (shown as "From your market analysis")
     } else this.readHash();
   }
 
@@ -387,6 +389,7 @@
       if (k === "zip" && /^\d{5}$/.test(val)) s.zip = val;
       else if (k === "r" && +val > 0) s.r = +val;
       else if (k === "min") s.minIndex = +val || 0;
+      else if (k === "tab" && val === "plan") self.wantPlan = true;
       else if (k === "p" && self.profiles[val]) s.profile = val;
       else if (k === "f" && val) { hasF = true; val.split(";").forEach(function (part) {
         var p = part.split(":"), f = self.filterDefs[p[0]];
@@ -407,7 +410,7 @@
       if (v === true) f.push(k); else if (v && v.length) f.push(k + ":" + v.join(","));
     });
     var h = "#zip=" + s.zip + "&r=" + s.r + (s.minIndex ? "&min=" + s.minIndex : "") + (s.profile ? "&p=" + s.profile : "") +
-            "&f=" + encodeURIComponent(f.join(";"));
+            "&f=" + encodeURIComponent(f.join(";")) + (s.view === "plan" ? "&tab=plan" : "");
     if (location.hash !== h) history.replaceState(null, "", h);
   };
 
@@ -520,19 +523,37 @@
     this.personaDlg = cfg.persona ? el("dialog", { class: "az-modal rz-persona-dlg", "aria-label": "Persona" }, [el("div", { class: "rz-persona-bar" }, [
       el("button", { type: "button", class: "az-btn primary", text: "Print or save as PDF", onclick: function () { self.printPersona(); } }),
       el("button", { type: "button", class: "az-modal-close", "aria-label": "Close", text: "\u00d7", onclick: function () { self.personaDlg.close(); } })]), this.personaBox]) : null;
-    var main;
+    /* Two tabs: Trade area (where and who: controls, map, ranked ZIPs) and Plan (what to do about it: ad response,
+       category ad spend, Recommended allocation, proposal). The Trade area ends with a hand-off to the Plan. */
+    this.handBar = el("div", { class: "rz-handoff", hidden: true }, [this.handText = el("p"),
+      this.handBtn = el("button", { type: "button", class: "az-btn primary", text: "Build a plan from these ZIPs \u2192", onclick: function () { self.setView("plan"); } })]);
+    table.appendChild(this.handBar);
+    this.planHead = el("section", { class: "az-panel rz-planhead", hidden: true }, [
+      el("div", { class: "rz-planhead-top" }, [el("h2", null, GUIDE ? [el("span", { class: "az-step", text: "3" }), "Plan"] : ["Plan"]),
+        el("button", { type: "button", class: "az-btn", text: "\u2190 Change trade area", onclick: function () { self.setView("area"); } })]),
+      this.planFrom = el("p", { class: "rz-planfrom" }), this.goalBox = el("div", { class: "rz-goals" })]);
+    this.extraWrap = el("div", { class: "rz-extra-wrap", hidden: true }, [this.extra]);
+    this.viewSeg = cfg.embedded ? null : el("div", { class: "az-seg rz-viewseg", role: "group", "aria-label": "Section" }, [["area", "Trade area"], ["plan", "Plan"]].map(function (v) {
+      return el("button", { type: "button", "data-view": v[0], text: v[1], "aria-pressed": String(v[0] === "area"), onclick: function () { self.setView(v[0]); } });
+    }));
+    var stage = el("section", { class: "rz-stage" }, [this.filterPanel, right]);
+    var main, stepHead = null, srcBox = sources;
     if (GUIDE) {
-      var stepHead = el("div", { class: "az-stephead" }, [el("h2", null, [el("span", { class: "az-step", text: "1" }), "Trade area"]),
+      stepHead = el("div", { class: "az-stephead" }, [el("h2", null, [el("span", { class: "az-step", text: "1" }), "Trade area"]),
         el("span", { class: "az-stepsub", text: cfg.customArea ? "A center ZIP or town and a radius, or a custom list of places." : "A center ZIP or town and a radius." })]);
       var fh = this.filterPanel.querySelector(".rz-filters-head h2");
       if (fh) { fh.insertBefore(el("span", { class: "az-step", text: "2" }), fh.firstChild); fh.appendChild(el("span", { class: "az-stepopt", text: "optional" })); }
-      var srcD = el("details", { class: "az-panel az-sources az-fold" }, [el("summary", { text: "Sources" })].concat(Array.prototype.slice.call(sources.childNodes, 1)));
-      main = el("main", { class: "az-main az-guided" }, [stepHead, controls, this.areaPanel, this.errorBox, el("section", { class: "rz-stage" }, [this.filterPanel, right]), table, this.budgetBox, this.extra, srcD]);
-    } else main = el("main", { class: "az-main" }, [controls, this.areaPanel, this.errorBox, el("section", { class: "rz-stage" }, [this.filterPanel, right]), table, this.extra, this.budgetBox, sources]);
+      srcBox = el("details", { class: "az-panel az-sources az-fold" }, [el("summary", { text: "Sources" })].concat(Array.prototype.slice.call(sources.childNodes, 1)));
+    }
+    this.carryBar = el("div", { class: "rz-carry", hidden: true });
+    this.areaParts = [stepHead, this.carryBar, controls, this.areaPanel, stage, table].filter(Boolean);
+    this.planParts = [this.planHead, this.extraWrap, this.budgetBox];
+    main = el("main", { class: "az-main" + (GUIDE ? " az-guided" : "") }, [this.viewSeg ? el("div", { class: "rz-viewbar" }, [this.viewSeg]) : null].concat(this.areaParts.slice(0, 2), [this.errorBox], this.areaParts.slice(2), this.planParts, [srcBox]).filter(Boolean));
     this.root.innerHTML = ""; if (header) this.root.appendChild(header); this.root.appendChild(main); this.root.appendChild(this.modal);
     if (this.personaDlg) this.root.appendChild(this.personaDlg);
     this.rSel.value = s.r ? String(s.r) : ""; this.minSel.value = String(s.minIndex);
     this.syncFilters();
+    if (this.carry) this.showCarry(this.carry);
 
     this.map = L.map(this.mapEl, { zoomControl: false, zoomSnap: 0.25, minZoom: 3, maxZoom: 12 });
     L.control.zoom({ position: "topright" }).addTo(this.map);
@@ -540,6 +561,82 @@
     this.map.attributionControl.addAttribution("Boundaries: U.S. Census Bureau");
     this.map.fitBounds([[24.4, -125], [49.5, -66.9]]);
     this.showMode();
+  };
+  /* ---------- Tabs: Trade area | Plan ---------- */
+  Radius.prototype.hasZips = function () { return !!(this.rows && this.visible().length); };
+  Radius.prototype.setView = function (v) {
+    var s = this.state;
+    if (v === "plan" && !this.hasZips()) { v = "area"; this.wantPlan = true; }
+    s.view = v;
+    var plan = v === "plan";
+    this.areaParts.forEach(function (x) { x.hidden = plan; });
+    if (!plan && this.areaPanel) this.showMode();
+    this.planParts.forEach(function (x) { x.hidden = !plan; });
+    if (this.viewSeg) Array.prototype.forEach.call(this.viewSeg.children, function (b) { var me = b.getAttribute("data-view"); b.setAttribute("aria-pressed", String(me === v)); if (me === "plan") b.disabled = !this.hasZips(); }, this);
+    if (plan) { this.wantPlan = false; this.budgetBox.open = true; this.renderPlanHead(); this.renderBudget(); }
+    else { this.resize(); this.renderHandoff(); }
+    this.extraWrap.hidden = !plan;
+    this.writeHash();
+    if (this.cfg.onView) this.cfg.onView(v);
+    this.guideNext();
+    if (this.root && this.root.scrollIntoView) window.scrollTo(0, 0);
+  };
+  /* ---------- Carried from the market views (analyzer pages) ---------- */
+  Radius.prototype.showCarry = function (c) {
+    var self = this;
+    this.carry = c;
+    var bar = this.carryBar; bar.innerHTML = ""; bar.classList.remove("rz-carry-new");
+    if (!c) { bar.hidden = true; return; }
+    bar.hidden = false;
+    var clear = el("button", { type: "button", class: "az-btn", text: "Clear all and start fresh", onclick: function () {
+      if (!this.getAttribute("data-sure")) { this.setAttribute("data-sure", "1"); this.textContent = "Select again to clear"; return; }
+      self.clearAll(); } });
+    bar.appendChild(el("p", null, [el("b", { text: "From your market analysis: " }), c.label + (c.sub ? " \u00b7 " + c.sub : "") + ". Edit the area below, or start over."]));
+    bar.appendChild(clear);
+  };
+  // The market views changed since the trade area was filled in: offer to update, never change it silently
+  Radius.prototype.offerCarry = function (c, accepted) {
+    var self = this, prev = this.carry, bar = this.carryBar;
+    if (this.state.view === "plan") this.setView("area");
+    bar.innerHTML = ""; bar.hidden = false; bar.classList.add("rz-carry-new");
+    bar.appendChild(el("p", null, [el("b", { text: "Your market selection changed: " }), c.label + (c.sub ? " \u00b7 " + c.sub : "") + ". Update the trade area to match?"]));
+    bar.appendChild(el("button", { type: "button", class: "az-btn primary", text: "Update the trade area", onclick: function () {
+      if (c.p) self.usePreset(c.p);
+      self.setMode("area", c.ca); self.showCarry(c); if (accepted) accepted(); } }));
+    bar.appendChild(el("button", { type: "button", class: "az-btn", text: "Keep current", onclick: function () { if (accepted) accepted(); self.showCarry(prev || null); } }));
+  };
+  // Clear all and start fresh: an empty radius, no audience filters, nothing carried
+  Radius.prototype.clearAll = function () {
+    var s = this.state;
+    s.zip = ""; s.r = 0; s.sel = {}; s.profile = null; s.minIndex = 0; s.area = null; s.areaTokens = null; this.pendingCA = null;
+    if (this.areaIn) this.areaIn.value = "";
+    this.zipIn.value = ""; this.rSel.value = ""; this.minSel.value = "0";
+    s.mode = "radius"; this.showMode();
+    this.syncFilters(); this.showCarry(null);
+    this.renderEmpty(); this.writeHash();
+    if (this.cfg.onUpdate) this.cfg.onUpdate(false);
+  };
+  // The end of the Trade area: what the plan will use, and the button to it
+  Radius.prototype.renderHandoff = function () {
+    if (!this.handBar) return;
+    var rows = this.rows ? this.visible() : [], A = 0;
+    this.handBar.hidden = !rows.length;
+    if (this.viewSeg) { var pb = this.viewSeg.querySelector('[data-view="plan"]'); if (pb) pb.disabled = !rows.length; }
+    if (!rows.length) return;
+    rows.forEach(function (r) { if (r.aud != null) A += r.aud; });
+    var noun = this.cfg.audienceNoun ? this.cfg.audienceNoun.toLowerCase() : this.isEstimate() ? "estimated audience" : "audience";
+    this.handText.textContent = NF0.format(rows.length) + " ZIP" + (rows.length === 1 ? "" : "s") + " \u00b7 " + NF0.format(Math.round(A)) + " " + noun + ". Next: the plan, with ad response, the recommended allocation and the proposal." +
+      (this.wantPlan && (this.hand || (this.budget && this.budget.fixed)) ? " Digital Video from the TV + Video plan is waiting there." : "");
+  };
+  // Top of the Plan: where it came from, with a way back
+  Radius.prototype.renderPlanHead = function () {
+    if (!this.planFrom || !this.rows) return;
+    var s = this.state, c = this.c, rows = this.visible(), A = 0, ci = this.byZip[s.zip];
+    rows.forEach(function (r) { if (r.aud != null) A += r.aud; });
+    var where = s.mode === "area" ? "Custom area (" + this.areaPhrase() + ")" : s.r + " miles around " + s.zip + (ci !== undefined ? " " + c.city[ci] + ", " + c.state[ci] : "");
+    var who = s.profile ? this.profiles[s.profile].label : this.describe();
+    this.planFrom.textContent = "From your trade area: " + where + " \u00b7 Audience: " + who + " \u00b7 " + NF0.format(Math.round(A)) + " " + (this.cfg.audienceNoun ? this.cfg.audienceNoun.toLowerCase() : "audience") + " in " + NF0.format(rows.length) + " ZIPs.";
+    if (this.renderGoals) this.renderGoals();
   };
   Radius.prototype.applyProfile = function (id) {
     var s = this.state, p = this.profiles[id];
@@ -756,7 +853,14 @@
     this.renderSummary();
     this.renderTable();
     this.renderMap(moved);
+    this.afterRows();
     if (this.cfg.onUpdate) this.cfg.onUpdate(true);   // a center and radius are set: the analyzer can show what comes next
+  };
+  // After the ZIPs change: refresh the hand-off and the plan header, and open the Plan if a link or the TV tool asked for it
+  Radius.prototype.afterRows = function () {
+    this.renderHandoff();
+    if (this.state.view === "plan") { if (!this.hasZips()) this.setView("area"); else this.renderPlanHead(); }
+    else if (this.wantPlan && this.hasZips() && window.AdtaxiPlan && this.bStrat && this.bStrat.options.length > 1) this.setView("plan");
   };
   Radius.prototype.visible = function () {
     var m = this.state.minIndex;
@@ -778,6 +882,8 @@
     this.summary.appendChild(el("p", { class: "az-empty", text: msg }));
     this.tbody.innerHTML = ""; this.thead.innerHTML = ""; this.tableTitle.textContent = s.mode === "area" ? "ZIPs in the area" : "ZIPs in range"; this.tableNote.textContent = "";
     if (this.budgetBox) this.budgetBox.hidden = true;
+    if (this.handBar) this.renderHandoff();
+    if (this.state.view === "plan" && this.areaParts) this.setView("area");
     this.guideNext();
   };
   Radius.prototype.renderSummary = function () {
@@ -1149,7 +1255,7 @@
     if (window.AdtaxiPlan) { done(); return; }
     if (loadPlan.waiting) { loadPlan.waiting.push(done); return; }
     loadPlan.waiting = [done];
-    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261031a";
+    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261031b";
     sc.onload = function () { var w = loadPlan.waiting; loadPlan.waiting = null; w.forEach(function (f) { f(); }); };
     sc.onerror = function () { loadPlan.waiting = null; };
     document.head.appendChild(sc);
@@ -1181,13 +1287,14 @@
     this.cWrap = el("div", { class: "rz-alloc-block", hidden: true }, [el("h3", { text: "By channel" }),
       el("div", { class: "az-tablewrap rz-alloc-chwrap" }, [el("table", { class: "az-table rz-alloc-ch" }, [this.cHead, this.cBody])]), this.cNote = el("p", { class: "rz-note" })]);
     this.bHead = el("thead"); this.bBody = el("tbody"); this.bNote = el("p", { class: "rz-note" });
+    this.bDeliver = el("div", { class: "rz-deliver", hidden: true });
     this.bFee = el("p", { class: "rz-note rz-alloc-fee" });
     this.bRates = el("div", { class: "rz-rates" });
     this.pClient = el("input", { type: "text", placeholder: "e.g. Bright Smile Dental", "aria-label": "Client or business name", oninput: function () { self.guideNext(); } });
     this.pComp = el("textarea", { rows: "3", placeholder: "One per line (optional)", "aria-label": "Local competitors" });
     this.pStatus = el("span", { class: "rz-pstatus", role: "status" });
     this.pBox = el("div", { class: "rz-proposal", hidden: true }, [
-      GUIDE ? el("p", { class: "rz-pstep" }, [el("span", { class: "az-step", text: "4" }), "Proposal"]) : null,
+      GUIDE ? el("p", { class: "rz-pstep" }, [el("span", { class: "az-step", text: "5" }), "Proposal"]) : null,
       el("p", { class: "rz-ptitle", text: "Proposal (PowerPoint, 2 slides): your trade area, then a package summary (investment, targeted impressions, reach and frequency, average CPM, clicks and leads) and the recommended platforms with why each one. Investment includes Adtaxi management. The file is editable." }),
       el("div", { class: "rz-pfields" }, [
         el("label", { class: "az-field" }, [el("span", { text: "Client or business name" }), this.pClient]),
@@ -1202,9 +1309,10 @@
       self.bRates.appendChild(AdtaxiPlan.rateEditor(function () { self.renderBudget(); }));
       if (self.hand) self.applyHand();
       self.renderBudget();
+      if (self.rows) self.afterRows();
     });
     return el("details", { class: "az-panel rz-budget", hidden: true }, [
-      GUIDE ? el("summary", null, [el("span", { class: "az-step", text: "3" }), "Recommended allocation"]) : el("summary", { text: "Recommended allocation" }),
+      GUIDE ? el("summary", null, [el("span", { class: "az-step", text: "4" }), "Recommended allocation"]) : el("summary", { text: "Recommended allocation" }),
       el("div", { class: "rz-budget-body" }, [
         el("div", { class: "rz-budget-controls" }, [
           el("label", { class: "az-field" }, [el("span", { text: "Monthly budget" }), this.bAmount]),
@@ -1216,7 +1324,7 @@
             el("button", { type: "button", class: "az-btn", text: "Export allocation (CSV)", onclick: function () { self.exportBudget(); } }),
             this.resultsBtn = el("button", { type: "button", class: "az-btn az-results-btn", text: "Results", "aria-haspopup": "dialog", hidden: RESULT_CATS.indexOf(this.resultsCat()) < 0 ? true : null,
               title: "Case studies from this category and from the same channels as this plan", onclick: function () { self.openResults(); } })])]),
-        this.pBox, this.bRates, this.bHand, this.bSummary, this.bWarn, this.cWrap,
+        this.pBox, this.bRates, this.bHand, this.bSummary, this.bWarn, this.cWrap, this.bDeliver,
         el("div", { class: "rz-alloc-block" }, [el("h3", { text: "By ZIP" }),
           el("div", { class: "az-tablewrap" }, [el("table", { class: "az-table" }, [this.bHead, this.bBody])]), this.bNote]),
         this.bFee])]);
@@ -1226,8 +1334,10 @@
     if (!GUIDE || !this.root) return;
     var s = this.state, b = this.budget || {}, area = s.mode === "area";
     var hasZip = this.c && this.byZip && this.byZip[s.zip] !== undefined;
-    var allocOpen = this.budgetBox && !this.budgetBox.hidden && this.budgetBox.open;
+    var allocOpen = s.view === "plan" && this.budgetBox && !this.budgetBox.hidden && this.budgetBox.open;
     var steps = area ? [[!!(this.rows && this.rows.length), this.areaIn]] : [[hasZip || (!this.c && !!s.zip), this.centerField], [!!s.r, this.radiusField]];
+    if (s.view !== "plan" && this.handBar && !this.handBar.hidden) steps.push([false, this.handBtn]);   // the trade area is set: the plan is next
+    if (s.view === "plan") steps = [];
     if (allocOpen) steps = steps.concat([[!!b.amount, this.bAmount && this.bAmount.parentNode], [!!b.strat, this.bStrat && this.bStrat.parentNode],
       [this.pBox && !this.pBox.hidden, this.pBtn], [!!(this.pClient && this.pClient.value.trim()), this.pClient && this.pClient.parentNode]]);
     var next = null;
@@ -1256,8 +1366,9 @@
     b.amount = P.fixedBudget ? P.fixedBudget(s, h.id, h.dollars) : h.dollars;
     this.bAmount.value = money(b.amount);
     this.budgetBox.open = true;
-    this.handScroll = true;
     this.hand = null;
+    this.wantPlan = true;
+    if (this.hasZips()) this.setView("plan"); else this.renderHandoff();
   };
   Radius.prototype.renderHand = function (A) {
     var b = this.budget, self = this, f = b.fixed;
@@ -1339,10 +1450,105 @@
     out.withDollars = !!withDollars;
     return out;
   };
+  /* ---------- Delivery, goals and TV terms on the Plan tab ----------
+     Targeted impressions per channel come from the same estimates as the proposal (AdtaxiPlan.estimate, on each
+     channel's cost; a line held from the TV + Video tool at its own CPM). Reach, frequency, TRPs and targeted CPP use
+     AdtaxiPlan.reachFreq against the audience in the plan's ZIPs. */
+  Radius.prototype.planAudience = function (pick) { var a = 0; (pick || this.budgetRows()).forEach(function (x) { a += x.r.aud || 0; }); return a; };
+  Radius.prototype.channelImpr = function (channels) {
+    var P = window.AdtaxiPlan, bench = this.benchVal || null, held = this.budget.fixed, out = { impr: 0, cost: 0, n: 0, with: 0 };
+    channels.forEach(function (c) {
+      var amount = c.cost != null ? c.cost : c.dollars; if (!amount) return;
+      out.n++;
+      var e = c.fixed && held && held.cpm > 0 ? { impr: amount / held.cpm * 1000 } : P.estimate(c.id, amount, bench);
+      if (e && e.impr != null) { out.impr += e.impr; out.cost += amount; out.with++; }
+    });
+    return out;
+  };
+  // The plan's delivery at a monthly budget, without the ZIP spread (used to size a budget for a goal)
+  Radius.prototype.deliveryAt = function (amount, strat) {
+    var P = window.AdtaxiPlan, b = this.budget, m = P.applyFees(amount);
+    if (m.tierBudget < P.MIN_BUDGET) return null;
+    var plan = P.buildPlan(strat, m.media, m.tierBudget, b.fixed);
+    if (!plan.tier || !plan.items.length) return null;
+    plan.items.forEach(function (c) { c.cost = P.channelCost ? P.channelCost(c.id, c.dollars, c.fixed) : c.dollars; });
+    return this.channelImpr(plan.items);
+  };
+  Radius.prototype.renderGoals = function () {
+    var self = this, b = this.budget, box = this.goalBox, P = window.AdtaxiPlan;
+    if (!box || !b) return;
+    if (!this.benchVal && !this.benchAsked && this.benchmarks) { this.benchAsked = true; this.benchmarks().then(function (v) { self.benchVal = v; if (self.state.view === "plan") self.renderBudget(); }); }
+    if (!this.gReach) {
+      var num = function (v) { var x = parseFloat(String(v).replace(/[^0-9.]/g, "")); return x > 0 ? x : null; };
+      this.gReach = el("input", { type: "text", inputmode: "numeric", placeholder: "e.g. 20,000", "aria-label": "People to reach",
+        oninput: function () { b.goalReach = num(this.value); self.renderGoals(); self.renderDeliver(); }, onchange: function () { if (b.goalReach) this.value = NF0.format(b.goalReach); } });
+      this.gFreq = el("input", { type: "text", inputmode: "decimal", placeholder: "e.g. 5", "aria-label": "Times each, per month",
+        oninput: function () { b.goalFreq = num(this.value); self.renderGoals(); self.renderDeliver(); } });
+      this.gOut = el("p", { class: "rz-goal-out", "aria-live": "polite" });
+      box.appendChild(el("div", { class: "rz-goal-row" }, [
+        el("span", { class: "rz-goal-q", text: "Goal (optional): how many people should the campaign reach, and how often?" }),
+        el("label", { class: "az-field" }, [el("span", { text: "People to reach" }), this.gReach]),
+        el("label", { class: "az-field" }, [el("span", { text: "Times each, per month" }), this.gFreq])]));
+      box.appendChild(this.gOut);
+    }
+    var out = this.gOut; out.innerHTML = ""; out.className = "rz-goal-out";
+    var aud = this.planAudience(), R = b.goalReach, F = b.goalFreq;
+    if (!R && !F) { out.textContent = "Leave blank to plan from a budget instead."; return; }
+    if (!R || !F) { out.textContent = "Enter both: people to reach and times each."; return; }
+    if (!P || !aud) return;
+    var ceiling = Math.floor(aud * P.RF.MAX);
+    if (R > aud * P.RF.MAX) {
+      out.classList.add("rz-goal-warn");
+      out.textContent = "The plan's " + NF0.format(this.budgetRows().length) + " ZIPs hold " + NF0.format(Math.round(aud)) + " people in this audience, and a campaign realistically reaches at most about " + NF0.format(ceiling) +
+        " of them (85%). Lower the goal, or include more ZIPs in the allocation below.";
+      return;
+    }
+    var need = P.imprForGoal(R, F, aud), strat = b.strat ? P.STRATEGIES.filter(function (x) { return x.id === b.strat; })[0] : null;
+    var goalTrp = R * F / aud * 100;
+    var txt = NF0.format(R) + " people about " + (Math.round(F * 10) / 10) + " times is " + Math.round(R / aud * 100) + "% of the audience in the plan's ZIPs \u00d7 " + (Math.round(F * 10) / 10) + " = " + NF0.format(Math.round(goalTrp)) + " TRPs, about " + NF0.format(Math.round(need / 1000) * 1000) + " targeted impressions a month.";
+    if (!strat) { out.textContent = txt + " Choose a media strategy below to size the budget."; return; }
+    var found = null;
+    for (var T = Math.max(P.MIN_BUDGET, 1000); T <= 1000000; T += T < 20000 ? 500 : T < 100000 ? 2500 : 10000) {
+      var d = this.deliveryAt(T, strat);
+      if (d && d.impr >= need) { found = T; break; }
+    }
+    if (!found) { out.textContent = txt + " That's more than " + money(1000000) + " a month with " + strat.label + "; the strategy team can plan a goal this size."; return; }
+    out.appendChild(document.createTextNode(txt + " With " + strat.label + ", that takes about "));
+    out.appendChild(el("b", { text: money(found) + " a month" }));
+    out.appendChild(document.createTextNode(". "));
+    if (b.amount !== found) out.appendChild(el("button", { type: "button", class: "az-btn", text: "Use " + money(found), onclick: function () {
+      b.amount = found; self.bAmount.value = money(found); self.renderBudget(); } }));
+    else out.appendChild(el("span", { class: "rz-goal-ok", text: "The budget below is set to this." }));
+  };
+  // Under the channel table: what the plan delivers, in TV terms
+  Radius.prototype.renderDeliver = function (A) {
+    var box = this.bDeliver, P = window.AdtaxiPlan, b = this.budget;
+    if (!box) return;
+    A = A || this.allocation();
+    box.innerHTML = "";
+    if (!P || !P.reachFreq || !A.withDollars || !A.plan || !A.plan.tier || !A.channels.length) { box.hidden = true; return; }
+    var d = this.channelImpr(A.channels), aud = this.planAudience(A.pick), R = P.reachFreq(d.impr, aud);
+    if (!d.impr || !R) { box.hidden = true; return; }
+    box.hidden = false;
+    var partial = d.with < d.n;
+    var tile = function (v, l) { return el("div", { class: "rz-dtile" }, [el("b", { class: "num", text: v }), el("span", { text: l })]); };
+    box.appendChild(el("h3", { text: "Estimated monthly delivery" }));
+    box.appendChild(el("div", { class: "rz-dtiles" }, [
+      tile(NF0.format(Math.round(d.impr / 1000) * 1000), "Targeted impressions"),
+      tile(NF0.format(Math.round(R.reach / 100) * 100), "Reach (" + Math.round(R.share * 100) + "% of the audience)"),
+      tile(NF1.format(R.freq), "Average frequency"),
+      tile(NF0.format(Math.round(R.trp)), "Targeted rating points (TRPs)"),
+      tile(money(d.cost / R.trp), "Targeted CPP"),
+      tile("$" + (d.cost / d.impr * 1000).toFixed(2), "Average CPM")]));
+    var gT = b.goalReach && b.goalFreq ? b.goalReach * b.goalFreq / aud * 100 : null;
+    var goal = gT ? (R.trp >= gT * 0.98 && R.reach >= b.goalReach * 0.98 ? " Meets the goal: " : " Short of the goal: ") + NF0.format(Math.round(R.trp)) + " TRPs vs. " + NF0.format(Math.round(gT)) + " needed for " + NF0.format(b.goalReach) + " people about " + (Math.round(b.goalFreq * 10) / 10) + " times." : "";
+    box.appendChild(el("p", { class: "rz-note", text: "Modeled for planning, against the " + NF0.format(Math.round(aud)) + " people in the plan's ZIPs. TRPs add up every channel's rating points, duplication included, as in TV: TRPs = reach % \u00d7 frequency. Targeted CPP = cost \u00f7 TRPs." +
+      (partial ? " Channels without an impression estimate are left out." : "") + (this.benchVal ? "" : " Search and Meta are added once their benchmarks load.") + goal }));
+  };
   Radius.prototype.renderBudget = function () {
     if (!this.budgetBox) return;
     var self = this, b = this.budget, A = this.allocation(), pick = A.pick, P = window.AdtaxiPlan;
-    this.budgetBox.hidden = !this.rows || !pick.length;
+    this.budgetBox.hidden = this.state.view !== "plan" || !this.rows || !pick.length;
     if (this.budgetBox.hidden) { this.guideNext(); return; }
     if (GUIDE && !this.autoOpened) { this.autoOpened = true; this.budgetBox.open = true; }
     this.renderHand(A);
@@ -1399,6 +1605,8 @@
       } else notes.push(b.amount ? "Strategy mix shown for reference." : "Enter a monthly budget to size the plan: the channel count and minimums depend on it.");
       this.cNote.textContent = notes.join(" ");
     }
+    this.renderDeliver(A);
+    if (this.state.view === "plan") this.renderGoals();
 
     // By ZIP
     this.bHead.innerHTML = "";
@@ -1611,7 +1819,7 @@
       (has(["ctv"]) ? " and CTV completed views at a " + Math.round(P.EST.vcr * 1000) / 10 + "% completion rate (Innovid)" : "") +
       "; Google Search and Meta from WordStream 2026 benchmarks (" + (bench && bench.label ? bench.label : "all industries") + ", U.S. medians)" +
       (has(["youtube", "tiktok", "snapchat"]) ? "; YouTube, TikTok and Snapchat at 2026 cross-platform benchmark CPMs (Hubfluence)" : "") +
-      ", on the media portion of each investment. Reach and frequency are modeled: about 70% of targeted impressions assumed to land on the audience in the targeted ZIPs, with reach leveling off as frequency builds (at most 85% of the audience). Leads: Search and Meta only; display, video and CTV also drive " + (PC.drives || "store visits and branded searches") + " not counted here." +
+      ", on the media portion of each investment. Reach and frequency are modeled: about 70% of targeted impressions assumed to land on the audience in the targeted ZIPs, with reach leveling off as frequency builds (at most 85% of the audience). Targeted rating points (TRPs): on-target impressions as a percent of the audience, added across platforms with duplication counted, as in TV (TRPs = reach % x frequency); targeted CPP = investment / TRPs. Leads: Search and Meta only; display, video and CTV also drive " + (PC.drives || "store visits and branded searches") + " not counted here." +
       (adSub ? " Ad response: 2026 AudienceSCAN®, " + adNoun + " vs. all U.S. adults." : "") +
       (PC.note ? " " + PC.note : "") + " Audience: Census ACS and Adtaxi estimates." + (P.customRates() ? " Custom rates in use." : "");
     var client = (this.pClient.value || "").trim() || "Prepared for you";
@@ -1631,7 +1839,7 @@
     if (!b.amount || !A.strat || !A.withDollars || !A.plan || !A.plan.tier || !A.channels.length) { st.textContent = "Enter a monthly budget and choose a media strategy first."; return Promise.resolve(null); }
     st.textContent = "Building…";
     var base = this.proposalBase();
-    return Promise.all([loadScriptOnce(this.cfg.pptxScript || "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261028m"), this.benchmarks(), this.logoImage()])
+    return Promise.all([loadScriptOnce(this.cfg.pptxScript || "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261031b"), this.benchmarks(), this.logoImage()])
       .then(function (res) { return window.AdtaxiProposal.build(self.proposalContext(res[2], res[3]), opt); })
       .then(function (out) { st.textContent = "Downloaded. Open it in PowerPoint or Google Slides to edit."; return out; })
       .catch(function (e) { st.textContent = "The proposal couldn't be built (" + e.message + "). Try again in a minute."; throw e; });
@@ -2410,6 +2618,7 @@
     this.renderSummary();
     this.renderTable();
     this.renderMap(moved);
+    this.afterRows();
     if (this.cfg.onUpdate) this.cfg.onUpdate(rows.length > 0);
   };
   Radius.prototype.areaPhrase = function () {

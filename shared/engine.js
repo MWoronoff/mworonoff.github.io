@@ -321,7 +321,8 @@
       var whole = selIds(s.parent);
       crumbs.appendChild(el("button", { type: "button", class: "az-inbtn az-whole", text: whole.length === 1 ? "Whole DMA as trade area" : "Whole DMAs as trade area",
         title: "Open " + (whole.length === 1 ? "this DMA" : "all " + NF0.format(whole.length) + " DMAs") + " together in the Trade area",
-        onclick: function () { self.openRadius({ mode: "area", ca: whole.map(function (id) { return "d" + id; }).join(","), p: self.cfg.radiusProfiles ? s.sub : null }); } }));
+        onclick: function () { var ca = whole.map(function (id) { return "d" + id; }).join(","), sub = self.cfg.radiusProfiles ? s.sub : null;
+          self.openRadius({ mode: "area", ca: ca, p: sub, view: "area", carry: { key: ca + "|" + (sub || ""), label: self.marketName(s.parent) || "the selected DMA", sub: self.subSel && self.subSel.selectedIndex >= 0 ? self.subSel.options[self.subSel.selectedIndex].text : "", ca: ca, p: sub } }); } }));
     }
     bar.appendChild(el("div", { class: "az-drill-tabs" }, [el("span", { text: "Rank inside " + here }),
       el("div", { class: "az-seg", role: "group", "aria-label": "Rank inside " + here }, tabs.map(function (t) {
@@ -430,7 +431,7 @@
         title: "Rank the metros, counties and ZIPs inside the " + (dmas.length === 1 ? "selected DMA" : NF0.format(dmas.length) + " selected DMAs") + ", then tick the ones you want for the trade area",
         onclick: function () { self.rankInsideDmas(dmas); } }) : null,
       el("button", { type: "button", class: "az-btn" + (rk ? "" : " primary"), text: "Open as trade area", title: "Count likely customers and rank the ZIPs across these areas together; each ZIP is counted once",
-        onclick: function () { self.openRadius({ mode: "area", ca: B.map(function (b) { return AREA_PREFIX[b.level] + b.id; }).join(","), p: cfg.radiusProfiles ? s.sub : null }); } }),
+        onclick: function () { var o = self.carryOpt(); if (!o.carry) o = { mode: "area", ca: B.map(function (b) { return AREA_PREFIX[b.level] + b.id; }).join(","), p: cfg.radiusProfiles ? s.sub : null }; o.view = "area"; self.openRadius(o); } }),
       el("button", { type: "button", class: "az-btn", text: "Clear", onclick: function () { self.basket = []; self.basketMsg = ""; self.afterBasket(); } })]));
   };
 
@@ -517,7 +518,7 @@
     h.split("&").forEach(function (kv) { var a = kv.split("="); if (a[0]) p[a[0]] = decodeURIComponent(a[1] || ""); });
     var cfg = this.cfg;
     // Radius view (also where the old radius.html links forward to): #level=radius&sub=..&zip=..&r=..
-    this.wantRadius = (p.level === "radius" || p.level === "area") && cfg.radius ? { zip: p.zip, r: p.r, p: p.p, mode: p.level === "area" ? "area" : "radius", ca: p.ca } : null;
+    this.wantRadius = (p.level === "radius" || p.level === "area") && cfg.radius ? { zip: p.zip, r: p.r, p: p.p, mode: p.level === "area" ? "area" : "radius", ca: p.ca, view: p.tab === "plan" ? "plan" : null } : null;
     // From the TV + Video tool: the Digital Video amount to hold in the Recommended allocation (tvv dollars, tvl line, tvp product)
     if (this.wantRadius && +p.tvv > 0 && /^(ctv|youtube)$/.test(p.tvl || "")) this.wantRadius.hand = { dollars: Math.round(+p.tvv), id: p.tvl, product: (p.tvp || "").slice(0, 60), market: (p.tvm || "").slice(0, 80), cpm: +p.tvc > 0 && +p.tvc < 1000 ? +p.tvc : null };   // a profile applies only when the link names one (p=); no preset otherwise
     if (this.wantRadius && p.p && cfg.subcategories && cfg.subcategories.some(function (x) { return x.id === p.p; })) this.state.sub = p.p;
@@ -559,6 +560,7 @@
       if (rs && rs.profile) parts.push("p=" + encodeURIComponent(rs.profile));
       if (isArea) { if (rs && rs.areaTokens && rs.areaTokens.length <= 2000) parts.push("ca=" + encodeURIComponent(rs.areaTokens.join(","))); }   // custom area: ZIPs, counties, towns and locations
       else { if (rs && rs.zip) parts.push("zip=" + rs.zip); if (rs && rs.r) parts.push("r=" + rs.r); }
+      if (rs && rs.view === "plan") parts.push("tab=plan");
       var hr = "#" + parts.join("&"); if (location.hash !== hr) history.replaceState(null, "", hr);
       return;
     }
@@ -764,10 +766,13 @@
 
     // Controls
     this.levelSeg = el("div", { class: "az-seg", role: "group", "aria-label": "Geography level" },
-      Object.keys(cfg.levels).concat(cfg.radius ? ["radius"] : []).map(function (lv) {
+      Object.keys(cfg.levels).concat(cfg.radius ? ["radius", "plan"] : []).map(function (lv) {
+        // Plan: the second half of the trade area (ad response, Recommended allocation, proposal), open once the trade area has ZIPs
+        if (lv === "plan") return self.planBtn = el("button", { type: "button", "data-level": "plan", text: "Plan", disabled: "disabled",
+          title: "Build a trade area first; then see ad response, the recommended allocation and the proposal", onclick: function () { self.openRadius({ view: "plan" }); } });
         // Trade area: the Zip Code Radius Tool, which draws the area as a radius or, where the site turns it on, a custom list of ZIPs, counties and towns
         if (lv === "radius") return el("button", { type: "button", "data-level": "radius", text: "Trade area",
-          title: "Count likely customers in a business's trade area: a radius around a ZIP or town, or a custom list of ZIPs, counties, towns, DMAs or metros", onclick: function () { self.openRadius(); } });
+          title: "Count likely customers in a business's trade area: a radius around a ZIP or town, or a custom list of ZIPs, counties, towns, DMAs or metros", onclick: function () { self.openTradeArea(); } });
         if (lv === "zip") return el("button", { type: "button", "data-level": "zip", text: cfg.levels.zip.label || "ZIPs in market",
           title: "Pick a DMA, metro or county first, then see the ZIPs inside it", onclick: function () {
             var s = self.state;
@@ -822,8 +827,8 @@
     exportBtn.classList.add("az-only");
     controls.push(el("div", { class: "az-actions" }, [
       el("button", { type: "button", class: "az-btn az-only", text: "How scores work", onclick: function () { self.openMethod(); } }),
-      cfg.crm === false ? null : el("button", { type: "button", class: "az-btn az-only", text: "Analyze your footprint",
-        title: "Upload a customer list to see the business's geographic footprint against this market's potential, ZIP by ZIP",
+      cfg.crm === false ? null : el("button", { type: "button", class: "az-btn az-only", text: "Your CRM footprint",
+        title: "Customer Analysis (CRM): upload the advertiser's customer list to see where its customers are against this market's potential, ZIP by ZIP",
         onclick: function () { location.href = self.crmUrl(); } }),
       // Results lives in the Trade area's Recommended allocation (shared/radius.js), matched to the plan's channels
       exportBtn
@@ -932,25 +937,29 @@
     this.radiusBox.hidden = false;
     this.renderNav();
     Array.prototype.forEach.call(this.levelSeg.children, function (b) {
-      var on = b.getAttribute("data-level") === "radius"; b.setAttribute("aria-pressed", on);
       if (b.getAttribute("data-level") === "zip") b.disabled = false;
     });
+    this.syncRadiusTabs(opt.view || (this.radius ? this.radius.state.view : "area"));
     var preset = cfg.radiusProfiles && opt.p ? opt.p : null;   // no best-prospect preset unless asked for
     function go() {
       if (!self.radius) {
         var RC = cfg.radius === true ? window.ADTAXI_RADIUS : cfg.radius;   // the site's radius-config.js sets ADTAXI_RADIUS
         var rc = {}; for (var k in RC) rc[k] = RC[k];
-        rc.embedded = true; rc.initial = { zip: opt.zip, r: opt.r, p: preset, mode: rmode, ca: opt.ca, hand: opt.hand };
+        rc.embedded = true; rc.initial = { zip: opt.zip, r: opt.r, p: preset, mode: rmode, ca: opt.ca, hand: opt.hand, view: opt.view, carry: opt.carry };
+        if (opt.carry) self.lastCarry = opt.carry.key;
         rc.onState = function () { self.writeHash(); };
+        rc.onView = function (v) { self.syncRadiusTabs(v); self.writeHash(); };
         rc.context = function () { return { ad: cfg.adResponse, sub: self.state.sub,
           subLabel: self.subSel && self.subSel.selectedIndex >= 0 ? self.subSel.options[self.subSel.selectedIndex].text : "" }; };   // the proposal's ad-response reasons
-        rc.onUpdate = function (ready) { self.radiusReady = ready; self.renderAd(); };
+        rc.onUpdate = function (ready) { self.radiusReady = ready; self.renderAd(); self.syncRadiusTabs(); };
         self.radius = window.AdtaxiRadius.start(rc, self.radiusBox);
       } else {
         if (preset) self.radius.usePreset(preset);
         if (self.radius.setMode) self.radius.setMode(rmode, opt.ca);
         if (opt.zip && rmode === "radius") self.radius.centerOn(opt.zip);
         if (opt.hand && self.radius.handoff) self.radius.handoff(opt.hand);
+        if (opt.carry && self.radius.showCarry) { self.lastCarry = opt.carry.key; self.radius.showCarry(opt.carry); }
+        if (self.radius.setView) self.radius.setView(opt.view === "plan" || opt.hand ? "plan" : "area");
         self.radius.resize();
       }
       self.writeHash();
@@ -958,9 +967,50 @@
     }
     if (window.AdtaxiRadius) go();
     else {
-      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261031a";   // version tag: browsers fetch the new file after an update
+      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261031b";   // version tag: browsers fetch the new file after an update
       sc.onload = go; sc.onerror = function () { self.showError("The radius tool didn't load. Refresh the page and try again."); };
       document.head.appendChild(sc);
+    }
+  };
+  // Trade area and Plan buttons: which one is on, and Plan only once the trade area has ZIPs
+  Analyzer.prototype.syncRadiusTabs = function (view) {
+    var rad = this.mode === "radius", v = view || (this.radius ? this.radius.state.view : "area");
+    var ready = !!(this.radius && this.radius.hasZips && this.radius.hasZips());
+    Array.prototype.forEach.call(this.levelSeg.children, function (b) {
+      var lv = b.getAttribute("data-level");
+      if (lv === "radius") b.setAttribute("aria-pressed", String(rad && v !== "plan"));
+      else if (lv === "plan") { b.setAttribute("aria-pressed", String(rad && v === "plan")); b.disabled = !ready; b.title = ready ? "Ad response, the recommended allocation and the proposal for this trade area" : "Build a trade area first; then see ad response, the recommended allocation and the proposal"; }
+      else if (rad) b.setAttribute("aria-pressed", "false");
+    });
+    if (this.nav && this.nav.radius) this.nav.radius.setAttribute("aria-pressed", String(rad));
+  };
+  /* Carry the market views into the Trade area: areas ticked in the lists, or else the market selected or looked inside,
+     plus the category's audience. Returns openRadius options (empty when nothing is selected). */
+  Analyzer.prototype.carryOpt = function () {
+    var s = this.state, cfg = this.cfg, self = this, tokens = [], label = "";
+    if (cfg.drill && this.basket && this.basket.length) {
+      tokens = this.basket.map(function (b) { return AREA_PREFIX[b.level] + b.id; });
+      label = this.basket.length === 1 ? (this.marketName(this.basket[0]) || "1 selected area") : NF0.format(this.basket.length) + " selected areas";
+    } else {
+      // The market being looked inside (ZIPs or counties in market). A row merely highlighted in a national list isn't carried:
+      // the lists open on the top-ranked market, which the rep may never have chosen.
+      var f = s.parent && s.parent.level !== "territory" ? s.parent : null;
+      if (f && f.level === "sel") { tokens = selIds(f).map(function (id) { return "d" + id; }); label = this.marketName(f); }
+      else if (f && AREA_PREFIX[f.level]) { tokens = [AREA_PREFIX[f.level] + f.id]; label = this.marketName(f) || f.id; }
+    }
+    if (!tokens.length || !cfg.customArea && !(cfg.radius === true ? (window.ADTAXI_RADIUS || {}).customArea : (cfg.radius || {}).customArea)) return {};
+    var sub = cfg.radiusProfiles && s.sub ? s.sub : null;
+    var subLabel = this.subSel && this.subSel.selectedIndex >= 0 ? this.subSel.options[this.subSel.selectedIndex].text : "";
+    return { mode: "area", ca: tokens.join(","), p: sub, carry: { key: tokens.join(",") + "|" + (sub || ""), label: label, sub: subLabel, ca: tokens.join(","), p: sub } };
+  };
+  // The Trade area button: the first time, start from the market views; later, offer to update if they changed
+  Analyzer.prototype.openTradeArea = function () {
+    var o = this.carryOpt();
+    if (!this.radius) { this.openRadius(o.carry ? o : {}); return; }
+    this.openRadius({});
+    if (o.carry && o.carry.key !== this.lastCarry && this.radius.offerCarry) {
+      var self = this;
+      this.radius.offerCarry(o.carry, function () { self.lastCarry = o.carry.key; });
     }
   };
   Analyzer.prototype.closeRadius = function () {
@@ -970,6 +1020,7 @@
     this.anaParts.forEach(function (x) { x.hidden = false; });
     Array.prototype.forEach.call(this.controlBar.querySelectorAll(".az-only"), function (x) { x.hidden = false; });
     this.adPanel.hidden = true;
+    this.syncRadiusTabs();
     var m = this.map; setTimeout(function () { m.invalidateSize(); }, 0);
     this.refresh();
   };
@@ -1628,8 +1679,8 @@
     }
   };
   // Category picker shared by the Timing and Benchmarks tabs; it drives the same category as the Markets tab
-  Analyzer.prototype.tabControls = function (render, note) {
-    var self = this, cfg = this.cfg, s = this.state, subs = cfg.subcategories || [];
+  Analyzer.prototype.tabControls = function (render, note, noMenu) {
+    var self = this, cfg = this.cfg, s = this.state, subs = noMenu ? [] : cfg.subcategories || [];
     var sel = subs.length ? el("select", { "aria-label": cfg.subcategoryLabel || "Category", onchange: function () {
       if (self.subSel) { self.subSel.value = this.value; self.subSel.dispatchEvent(new Event("change")); } else s.sub = this.value;
       render.call(self); } }, subs.map(function (x) { return el("option", { value: x.id, text: x.label }); })) : null;
@@ -1646,8 +1697,12 @@
     var cfg = this.cfg, T = this.timing, box = this.timingPanel;
     if (!T) return;
     box.innerHTML = "";
-    box.appendChild(this.tabControls(this.renderTiming, "A clean page of this calendar to send after the meeting"));
-    var m = T.map[cfg.exportName], codes = [].concat(m[this.state.sub] || m._default), sub = this.subLabel ? this.subLabel() : "";
+    var m = T.map[cfg.exportName];
+    // Industry-level data (one pattern for every category type): no category menu, and the title names what is measured,
+    // so the same numbers never appear under different category names
+    var industry = !Object.keys(m).some(function (k) { return k !== "_default"; });
+    box.appendChild(this.tabControls(this.renderTiming, "A clean page of this calendar to send after the meeting", industry));
+    var codes = [].concat(m[this.state.sub] || m._default), sub = industry ? "" : this.subLabel ? this.subLabel() : "";
     var names = function (list) { return list.slice().sort(function (a, b) { return a - b; }).map(function (i) { return MONTHS_LONG[i]; }).join(", "); };
     var level = function (v) { if (v >= 105) return 4; if (v >= 101) return 3; if (v > 96) return 2; return 1; };
     var peaks = function (idx, n) { return idx.map(function (v, i) { return i; }).sort(function (a, b) { return idx[b] - idx[a]; }).slice(0, n); };
@@ -1663,10 +1718,10 @@
     var legend = el("div", { class: "az-tm-legend", "aria-hidden": "true" }, [el("span", { text: "Below average" }), el("i", { class: "az-tm-l1" }), el("i", { class: "az-tm-l2" }), el("i", { class: "az-tm-l3" }), el("i", { class: "az-tm-l4" }), el("span", { text: "Above average" })]);
     // a short online history only names peaks when some month runs at least 10% above average
     var steady = function (S) { return S.kind === "online" && Math.max.apply(null, S.index) < 110; };
-    var head = function (S) { return S.kind === "online" ? "When people shop online" : "When sales peak"; };
+    var head = function (S) { var l = S.label.replace(/\s*\(.*\)$/, "").toLowerCase(); return S.kind === "online" ? "When people visit " + l : "When sales peak at " + l.replace(/^building mat\./, "building materials"); };
     var desc = function (S) { return "U.S. " + (S.kind === "online" ? "visits to " : "") + S.label.toLowerCase() + ", typical month = 100. " + (S.kind === "sales" ? ((T.proxyNote || {})[cfg.exportName] || "") : ""); };
     var P = T.series[codes[0]], panel = el("section", { class: "az-panel az-bench-panel" }, [
-      el("h2", { text: head(P) + (sub ? ": " + sub : "") }), el("p", { class: "az-bench-ind", text: desc(P) }), stripFor(P), legend]);
+      el("h2", { text: head(P) + (sub ? ": " + sub : "") }), el("p", { class: "az-bench-ind", text: desc(P) + (industry ? (P.kind === "sales" ? "" : " ") + "An industry-wide pattern: it applies to every " + ((cfg.subcategoryLabel || "category").toLowerCase()) + " in this analyzer." : "") }), stripFor(P), legend]);
     codes.slice(1).forEach(function (c) {
       var S = T.series[c];
       panel.appendChild(el("h3", { class: "az-tm-h3", text: head(S) }));
@@ -1682,8 +1737,8 @@
     var card = function (k, v, n) { return el("div", { class: "az-panel az-tm-card" }, [el("span", { text: k }), el("b", { text: v }), n ? el("small", { text: n }) : null]); };
     var L = P.latest, cards = steady(P) ? [card("Seasonal swing", "Fairly steady year-round", "No month runs 10% or more above average"),
       card("Highest months", names(hi), "Small lifts, not true peaks"), card("Timing advice", "Keep a steady presence", "Spend can follow budget cycles rather than season")] :
-      [card("Peak months", names(hi), P.kind === "online" ? "Most online shopping activity" : "Highest typical sales"),
-      card("Slowest months", names(lo), P.kind === "online" ? "Least online shopping activity" : "Lowest typical sales"),
+      [card("Peak months", names(hi), P.kind === "online" ? "Most online visits" : "Highest typical sales"),
+      card("Slowest months", names(lo), P.kind === "online" ? "Fewest online visits" : "Lowest typical sales"),
       card("Start campaigns by", ahead, "About a month ahead of each peak")];
     var pc = function (v) { return (v >= 0 ? "+" : "") + NF1.format(v) + "%"; };
     if (!L && P.ytd) cards.push(card("Online audience, " + P.ytd.period, pc(P.ytd.visitors), "Visitors vs. " + P.ytd.period + " " + (P.ytd.year - 1) + "; visits " + pc(P.ytd.visits)));

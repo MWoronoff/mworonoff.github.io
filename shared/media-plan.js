@@ -349,6 +349,28 @@
     return out;
   }
 
+  /* ---------- Reach, frequency and rating points (shared by the Plan tab and the proposal) ----------
+     Modeled, not measured: ON_TARGET of targeted impressions land on the audience in the trade area; reach follows a
+     standard saturation curve, reach = MAX x (1 - e^(-OTS / K)), where OTS is on-target impressions per person.
+     TRPs (targeted rating points) = on-target impressions / audience x 100, the sum of every channel's points with
+     duplication counted, as TV does; so TRPs = reach % x average frequency. Targeted CPP = investment / TRPs. */
+  var RF = { ON_TARGET: 0.70, MAX: 0.85, K: 3 };
+  function reachFreq(impr, aud) {
+    if (!impr || !aud || aud <= 0) return null;
+    var on = impr * RF.ON_TARGET, ots = on / aud, share = RF.MAX * (1 - Math.exp(-ots / RF.K));
+    var reach = share * aud;
+    return reach >= 1 ? { reach: reach, share: share, freq: on / reach, trp: ots * 100, onTarget: on } : null;
+  }
+  /* Targeted impressions needed for a goal of reaching `people` about `freq` times: enough on-target impressions for
+     people x freq, and at least enough for the curve to reach that many people. null when the goal is past the
+     curve's ceiling (MAX of the audience). */
+  function imprForGoal(people, freq, aud) {
+    if (!people || !freq || !aud) return null;
+    var r = people / aud; if (r >= RF.MAX) return null;
+    var onReach = -RF.K * Math.log(1 - r / RF.MAX) * aud;
+    return Math.max(people * freq, onReach) / RF.ON_TARGET;
+  }
+
   /* ---------- Editable rates ----------
      A user can change channel minimums and management fees on their own device (saved in this browser only).
      Plans recalculate from the edited values; "Reset to rate card" restores the settings above. */
@@ -502,7 +524,7 @@
     SERVICE_TIERS: SERVICE_TIERS, CUSTOM_PLAN_BUDGET: CUSTOM_PLAN_BUDGET, FEES: FEES,
     serviceTier: serviceTier, minFor: minFor, buildPlan: buildPlan, fixedBudget: fixedBudget, applyFees: applyFees, termNote: termNote,
     MGMT: MGMT, channelFee: channelFee, feeSummary: feeSummary, feeLine: feeLine, channelCost: channelCost, feesIncluded: feesIncluded,
-    RETAIL_CPM: RETAIL_CPM, BENCH_CPM: BENCH_CPM, EST: EST, estimate: estimate,
+    RETAIL_CPM: RETAIL_CPM, BENCH_CPM: BENCH_CPM, EST: EST, estimate: estimate, RF: RF, reachFreq: reachFreq, imprForGoal: imprForGoal,
     rateEditor: rateEditor, setRates: setRates, resetRates: resetRates, customRates: customRates, CUSTOM_NOTE: CUSTOM_NOTE
   };
 })();

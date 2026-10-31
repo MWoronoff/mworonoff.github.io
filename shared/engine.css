@@ -707,3 +707,32 @@ button.az-btn.primary.az-next { background: var(--teal); box-shadow: 0 0 0 4px r
 .az-ad-fold > summary, .az-fold > summary { cursor: pointer; font-size: 13px; font-weight: 600; color: var(--navy); }
 details.az-sources.az-fold > summary { font-size: 14px; font-weight: 700; }
 .rz-budget > summary .az-step { margin-right: 10px; }
+
+/* Trade area | Plan tabs (Oct 2026) */
+.rz-handoff { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-top: 12px; padding: 12px 14px; border: 1px solid #cfe3df; border-radius: 10px; background: #f3faf8; }
+.rz-handoff[hidden], .rz-planhead[hidden], .rz-extra-wrap[hidden], .rz-carry[hidden] { display: none; }
+.rz-handoff p { margin: 0; font-size: 14px; color: var(--navy); }
+.rz-planhead { padding: 14px 16px; }
+.rz-planhead-top { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; }
+.rz-planhead h2 { margin: 0; font-size: 19px; color: var(--navy); display: flex; align-items: center; gap: 8px; }
+.rz-planfrom { margin: 8px 0 0; font-size: 14px; color: #3d5266; }
+.rz-viewbar { display: flex; justify-content: flex-start; }
+.rz-carry { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 10px 14px; border: 1px solid #dce4ec; border-radius: 10px; background: #fff; font-size: 14px; color: var(--navy); }
+.rz-carry p { margin: 0; flex: 1 1 320px; }
+.rz-carry.rz-carry-new { border-color: #ead58d; background: #fffaea; }
+.az-seg button:disabled { opacity: .45; cursor: not-allowed; }
+@media print { .rz-handoff, .rz-viewbar, .rz-carry, .rz-planhead button { display: none !important; } }
+.rz-goals { margin-top: 12px; }
+.rz-goal-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
+.rz-goal-q { flex: 1 1 100%; font-size: 14px; font-weight: 600; color: var(--navy); }
+.rz-goal-row .az-field input { width: 150px; }
+.rz-goal-out { margin: 10px 0 0; font-size: 14px; color: #3d5266; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.rz-goal-out.rz-goal-warn { color: #6b5200; background: #fffaea; border: 1px solid #ead58d; border-radius: 8px; padding: 8px 10px; }
+.rz-goal-ok { color: #0b5d53; font-weight: 600; }
+.rz-deliver[hidden] { display: none; }
+.rz-deliver h3 { margin: 4px 0 8px; }
+.rz-dtiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+.rz-dtile { background: #f3faf8; border: 1px solid #cfe3df; border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; }
+.rz-dtile b { font-size: 20px; color: #0b5d53; }
+.rz-dtile span { font-size: 12px; color: #3d5266; }
+.rz-deliver .rz-note { margin-top: 8px; }
