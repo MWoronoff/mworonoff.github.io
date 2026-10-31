@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script>/* site-version: if this page is an old saved copy, reload it once with the current version (shared/version.json; bump both on each release) */
-(function(){var V="20261031h";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
+(function(){var V="20261031i";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Digital Media Mix Planner</title>
 <meta name="robots" content="noindex">
@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
-<link rel="stylesheet" href="../shared/engine.css?v=20261031h">
+<link rel="stylesheet" href="../shared/engine.css?v=20261031i">
 <style>
   .mm-main { max-width: 1240px; margin: 0 auto; padding: 22px 20px 40px; }
   .mm-draft { background: var(--warn-bg); border: 1px solid var(--warn-line); border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; font-size: 13px; }
@@ -145,7 +145,7 @@
   <div class="mm-sheet" id="sheet" aria-live="polite"></div>
 </main>
 
-<script src="../shared/media-plan.js?v=20261031h"></script>
+<script src="../shared/media-plan.js?v=20261031i"></script>
 <script src="../shared/results.js?v=20261028e"></script>
 <script>
 /* =====================  SETTINGS (draft: edit here)  =====================
@@ -184,8 +184,8 @@ var CATEGORIES = [
     facts: [ "Banks, 2026 ad budgets: social 23%, paid search 17%, video/OTT 14%, display 10%, influencer 8%, TV and radio 6%, direct mail 3%.",
              "83% of bank marketers plan to increase digital in 2026, and 63% search (paid and SEO); only 7% plan to increase TV and 2% newspapers." ],
     source: "EMARKETER forecasts, 2026; bank budgets: ABA Banking Journal, Where bank marketers are investing for 2026 (October 2025), via SalesFuel AdMall",
-    short: "financial services", mod: { search: 1.2, youtube: 1.15, ctv: 1.15, shopping: 0 },
-    tuned: "search and video, matching how financial advertisers spend.",
+    short: "financial services", mod: { search: 1.2, social: 1.2, youtube: 1.1, ctv: 1.1, shopping: 0 },
+    tuned: "search and social, where banks put the largest shares of their budgets, with video to build familiarity.",
     rules: "credit and lending ads fall under Google's and Meta's special ad category rules, which limit targeting by age, gender and ZIP code.",
     note: "National totals for all financial services advertisers, including national banks, card issuers and insurers; local bank, credit union and advisor mixes vary." },
   { id: "furniture", label: "Furniture", noun: "home furnishings", digital: 15.01, traditional: 1.970, social: 5.660,
