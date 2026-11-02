@@ -341,6 +341,7 @@
       desc: "Potential franchise owners by age, household income, management background, tax-return wealth signals and local businesses.",
       lines: "Master and multi-unit candidates, first-time franchise buyers" }
   ];
+  CATS.sort(function (a, b) { return a.name.localeCompare(b.name); });   // panels, map chips and rotation in A–Z order
   var css = getComputedStyle(document.documentElement);
   var RAMP = ["--r0", "--r1", "--r2", "--r3", "--r4"].map(function (v) { return css.getPropertyValue(v).trim(); });
   var NODATA = css.getPropertyValue("--rx").trim();
