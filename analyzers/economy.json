@@ -1,0 +1,91 @@
+{
+  "updated": "Nov. 2, 2026",
+  "takeaway": "Consumers can still buy but need a clear reason: lead with value, proof and payment options, and give big-ticket categories more time to convert.",
+  "slides": [
+    {
+      "id": "retail",
+      "pill": "Retail sales",
+      "label": "Retail sales vs. a year ago",
+      "value": "+6.3%",
+      "change": "+0.8% from August",
+      "tone": "pos",
+      "period": "September 2026",
+      "bullet": "Spending is running near this year's high, but part of the gain is higher prices: gas station sales are up 28.1% from a year ago. Furniture (+4.9%), building materials (+4.5%) and auto dealers (+2.5%) trail the total.",
+      "source": "U.S. Census Bureau, Advance Monthly Retail Trade (seasonally adjusted). Released Oct. 15; next release Nov. 17.",
+      "url": "https://www.census.gov/retail/sales.html",
+      "chart": {
+        "type": "bar",
+        "title": "Retail sales, % change from a year earlier",
+        "unit": "%",
+        "ticks": [0, 2, 4, 6, 8],
+        "labels": ["Sep '25", "Oct '25", "Nov '25", "Dec '25", "Jan '26", "Feb '26", "Mar '26", "Apr '26", "May '26", "Jun '26", "Jul '26", "Aug '26", "Sep '26"],
+        "values": [3.7, 2.8, 2.9, 2.1, 2.2, 3.5, 3.6, 4.1, 6.7, 5.9, 4.5, 5.6, 6.3]
+      }
+    },
+    {
+      "id": "confidence",
+      "pill": "Consumer confidence",
+      "label": "Consumer Confidence Index",
+      "value": "91.7",
+      "change": "▲ 7.5 from September",
+      "tone": "pos",
+      "period": "October 2026",
+      "bullet": "Confidence rose to its highest level since June as gas prices eased, but the Expectations Index (72.6) is still below 80, the Conference Board's recession-signal line.",
+      "source": "The Conference Board, Consumer Confidence Index. Released Oct. 27; September revised to 84.2.",
+      "url": "https://www.conference-board.org/topics/consumer-confidence",
+      "chart": {
+        "type": "line",
+        "title": "Consumer Confidence Index (1985 = 100)",
+        "unit": "",
+        "ticks": [75, 80, 85, 90, 95, 100],
+        "bands": [
+          { "from": 75, "to": 80, "label": "Below 80: recessionary", "color": "red" },
+          { "from": 80, "to": 95, "label": "80–95: slowed growth", "color": "amber" }
+        ],
+        "labels": ["Oct '25", "Nov '25", "Dec '25", "Jan '26", "Feb '26", "Mar '26", "Apr '26", "May '26", "Jun '26", "Jul '26", "Aug '26", "Sep '26", "Oct '26"],
+        "values": [95.5, 92.9, 94.2, 89.0, 91.0, 91.8, 93.8, 90.6, 92.2, 90.2, 88.6, 84.2, 91.7]
+      }
+    },
+    {
+      "id": "sentiment",
+      "pill": "Consumer sentiment",
+      "label": "Index of Consumer Sentiment",
+      "value": "48.0",
+      "change": "▼ 0.1 from September",
+      "tone": "neg",
+      "period": "October 2026, final",
+      "bullet": "Sentiment is at its lowest in five months. Buying conditions for big-ticket goods fell 18% on interest rates and affordability, and consumers expect 4.7% inflation over the next year.",
+      "source": "University of Michigan, Surveys of Consumers. Final October reading released Oct. 23.",
+      "url": "https://www.sca.isr.umich.edu/",
+      "chart": {
+        "type": "line",
+        "title": "Index of Consumer Sentiment (1966 = 100)",
+        "unit": "",
+        "ticks": [40, 45, 50, 55, 60],
+        "labels": ["Oct '25", "Nov '25", "Dec '25", "Jan '26", "Feb '26", "Mar '26", "Apr '26", "May '26", "Jun '26", "Jul '26", "Aug '26", "Sep '26", "Oct '26"],
+        "values": [53.6, 51.0, 52.9, 56.4, 56.6, 53.3, 49.8, 44.8, 49.5, 55.2, 51.7, 48.1, 48.0]
+      }
+    },
+    {
+      "id": "beige",
+      "pill": "Fed Beige Book",
+      "label": "Fed districts reporting growth",
+      "value": "9 of 12",
+      "change": "",
+      "tone": "",
+      "period": "October 2026 edition (overall economic activity)",
+      "bullet": "Consumer spending was little changed in most districts and led by higher-income households. Price-sensitive shoppers are pushing back on increases, squeezing margins for consumer-facing businesses.",
+      "source": "Federal Reserve Beige Book, released Oct. 14 (information collected through Oct. 5).",
+      "url": "https://www.federalreserve.gov/monetarypolicy/publications/beige-book-default.htm",
+      "chart": {
+        "type": "grid",
+        "title": "Consumer spending by Fed district",
+        "districts": [
+          ["Boston", "Flat"], ["New York", "Up"], ["Philadelphia", "Down"], ["Cleveland", "Flat"],
+          ["Richmond", "Up"], ["Atlanta", "Up"], ["Chicago", "Flat"], ["St. Louis", "Mixed"],
+          ["Minneapolis", "Down"], ["Kansas City", "Down"], ["Dallas", "Up"], ["San Francisco", "Down"]
+        ]
+      }
+    }
+  ]
+}

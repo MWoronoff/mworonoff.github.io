@@ -110,6 +110,46 @@
   .sources tr:last-child td { border-bottom: 0; }
   .table-scroll { overflow-x: auto; }
 
+  /* economic snapshot banner (data: economy.json) */
+  #economy { padding-top: 48px; scroll-margin-top: 12px; }
+  .econ { background: var(--card); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .econ-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px; padding: 16px 22px; border-bottom: 1px solid var(--line); }
+  .econ-head h2 { font-family: var(--display); font-stretch: 118%; font-weight: 720; font-size: 22px; line-height: 1.1; margin: 0; color: var(--navy); }
+  .econ-head .upd { font-size: 13px; color: var(--muted); margin-left: 10px; font-weight: 500; }
+  .econ-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+  .econ-pills button { font: inherit; font-size: 13px; color: var(--navy); background: transparent; border: 1px solid #c3d0dc; border-radius: 999px; padding: 4px 12px; cursor: pointer; }
+  .econ-pills button:hover { border-color: var(--navy); }
+  .econ-pills button[aria-pressed="true"] { background: var(--navy); color: #fff; border-color: var(--navy); font-weight: 600; }
+  .econ-pills .pause { border-style: dashed; }
+  .econ-stage { display: grid; }
+  .econ-slide { grid-area: 1 / 1; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 32px; padding: 22px 22px 20px;
+                opacity: 0; visibility: hidden; transition: opacity .6s ease, visibility 0s linear .6s; }
+  .econ-slide.on { opacity: 1; visibility: visible; transition: opacity .6s ease, visibility 0s; }
+  @media (prefers-reduced-motion: reduce) { .econ-slide, .econ-slide.on { transition: none; } }
+  .econ-label { font-size: 13px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--teal); margin: 0 0 4px; }
+  .econ-value { font-family: var(--display); font-stretch: 112%; font-weight: 750; font-size: 52px; line-height: 1; color: var(--navy); margin: 0; }
+  .econ-change { font-weight: 600; font-size: 15px; margin: 8px 0 0; }
+  .econ-change.pos { color: #1d7a4f; } .econ-change.neg { color: #b3392a; }
+  .econ-period { font-size: 14px; color: var(--muted); margin: 2px 0 12px; }
+  .econ-bullet { margin: 0 0 12px; padding-left: 18px; position: relative; font-size: 15px; }
+  .econ-bullet::before { content: ""; position: absolute; left: 2px; top: .62em; width: 7px; height: 7px; border-radius: 50%; background: var(--teal-2); }
+  .econ-src { font-size: 12.5px; color: var(--muted); margin: 0; }
+  .econ-chart { min-width: 0; }
+  .econ-chart h3 { font-size: 13px; font-weight: 600; color: var(--muted); margin: 0 0 6px; }
+  .econ-chart svg { display: block; width: 100%; overflow: visible; }
+  .econ-key { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; color: var(--muted); margin-top: 6px; }
+  .econ-key i { display: inline-block; width: 12px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+  .fed-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+  .fed-tile { border-radius: 6px; padding: 10px 10px 9px; font-size: 13.5px; line-height: 1.25; border: 1px solid transparent; }
+  .fed-tile b { display: block; font-weight: 600; }
+  .fed-tile span { font-size: 12.5px; }
+  .fed-Up { background: #dff3e8; border-color: #9fd8b8; color: #145c3a; }
+  .fed-Flat { background: #eef2f6; border-color: #cfd8e1; color: #3f5164; }
+  .fed-Mixed { background: #fcefd6; border-color: #efc679; color: #7a4f0c; }
+  .fed-Down { background: #fbe3df; border-color: #eaa99f; color: #8d2c1f; }
+  .econ-foot { padding: 14px 22px; background: #eef3f7; border-top: 1px solid var(--line); font-size: 14.5px; color: var(--ink); margin: 0; }
+  .econ-foot b { color: var(--navy); }
+
   footer { margin-top: 72px; background: var(--navy); color: #cfe0ee; padding: 34px 0 40px; font-size: 14px; }
   .foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 18px 40px; }
   footer a { color: #fff; }
@@ -118,6 +158,7 @@
   @media (max-width: 1000px) {
     .hero-grid, .block-head { grid-template-columns: 1fr; gap: 24px; }
     .cats, .tools { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .econ-slide { grid-template-columns: 1fr; gap: 18px; }
   }
   @media (max-width: 640px) {
     .wrap { padding: 0 18px; }
@@ -126,6 +167,12 @@
     .cats, .tools { grid-template-columns: 1fr; }
     .hero-lead { font-size: 16px; }
     section.block { padding-top: 52px; }
+    #economy { padding-top: 32px; }
+    .econ-head, .econ-slide, .econ-foot { padding-left: 16px; padding-right: 16px; }
+    .econ-value { font-size: 42px; }
+    .econ-head .upd { display: block; margin: 4px 0 0; }
+    .fed-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+    .fed-tile { padding: 8px; font-size: 12.5px; }
   }
 </style>
 </head>
@@ -135,6 +182,7 @@
   <div class="wrap bar">
     <a class="brand" href="/analyzers/"><img src="/shared/adtaxi-logo.svg" alt=""><span>Adtaxi Market Analyzers</span></a>
     <nav aria-label="Sections">
+      <a href="#economy" id="nav-economy" hidden>Economy</a>
       <a href="#categories">Categories</a>
       <a href="#tools">Planning tools</a>
       <a href="#data">Data sources</a>
@@ -165,6 +213,19 @@
 </header>
 
 <main>
+  <section id="economy" aria-labelledby="econ-title" hidden>
+    <div class="wrap">
+      <div class="econ" id="econ">
+        <div class="econ-head">
+          <h2 id="econ-title">Economic snapshot<span class="upd" id="econ-upd"></span></h2>
+          <div class="econ-pills" id="econ-pills" role="group" aria-label="Choose an indicator"></div>
+        </div>
+        <div class="econ-stage" id="econ-stage" aria-live="polite"></div>
+        <p class="econ-foot"><b>What it means for local advertisers:</b> <span id="econ-take"></span></p>
+      </div>
+    </div>
+  </section>
+
   <section class="block" id="categories" aria-labelledby="cat-title">
     <div class="wrap">
       <div class="block-head">
@@ -443,6 +504,139 @@
   }).catch(function () {
     document.getElementById("hero-now").textContent = "The maps couldn't be loaded. Reload the page to try again.";
   });
+})();
+</script>
+<script>
+/* Economic snapshot banner: all figures come from economy.json (update that file monthly). If it can't load, the banner stays hidden. */
+(function () {
+  var NS = "http://www.w3.org/2000/svg", reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var sec = document.getElementById("economy"), box = document.getElementById("econ"), stage = document.getElementById("econ-stage");
+  var pills = document.getElementById("econ-pills");
+  function el(tag, attrs, kids) {
+    var e = document.createElement(tag);
+    Object.keys(attrs || {}).forEach(function (k) { if (k === "text") e.textContent = attrs[k]; else e.setAttribute(k, attrs[k]); });
+    (kids || []).forEach(function (c) { if (c) e.appendChild(typeof c === "string" ? document.createTextNode(c) : c); });
+    return e;
+  }
+  function sv(parent, tag, a, text) { var n = document.createElementNS(NS, tag); Object.keys(a).forEach(function (k) { n.setAttribute(k, a[k]); }); if (text != null) n.textContent = text; parent.appendChild(n); return n; }
+  function fmt(v, unit) { return (+v).toFixed(1) + (unit || ""); }
+
+  // 13-month chart, drawn at the container's real pixel width so text stays readable on phones
+  function drawChart(holder, c) {
+    holder.innerHTML = "";
+    var W = Math.max(260, Math.round(holder.getBoundingClientRect().width || 520)), narrow = W < 480;
+    var H = narrow ? 210 : 240, L = 40, R = 18, T = 26, B = 28, pw = W - L - R, ph = H - T - B;
+    var n = c.values.length, tk = c.ticks, lo = tk[0], hi = tk[tk.length - 1];
+    var fs = narrow ? 11.5 : 12.5;
+    function y(v) { return T + ph - (v - lo) / (hi - lo) * ph; }
+    var svg = sv(holder, "svg", { viewBox: "0 0 " + W + " " + H, width: W, height: H, role: "img",
+      "aria-label": c.title + ", " + c.labels[0] + " to " + c.labels[n - 1] + ": " + c.values.map(function (v, i) { return c.labels[i] + " " + fmt(v, c.unit); }).join(", ") });
+    var band = pw / n, xs = c.values.map(function (v, i) { return c.type === "bar" ? L + band * (i + .5) : L + 8 + i * (pw - 16) / (n - 1); });
+    (c.bands || []).forEach(function (b) {
+      sv(svg, "rect", { x: L, width: pw, y: y(b.to), height: y(b.from) - y(b.to), fill: b.color === "red" ? "rgba(214,80,60,.13)" : "rgba(232,163,61,.16)" });
+    });
+    tk.forEach(function (v) {
+      sv(svg, "line", { x1: L, x2: L + pw, y1: y(v), y2: y(v), stroke: v === lo ? "#b6c4d1" : "#e3e9ef" });
+      sv(svg, "text", { x: L - 8, y: y(v) + 4, fill: "#5a6d81", "font-size": fs, "text-anchor": "end", "font-family": "Inter, sans-serif" }, v + (c.unit || ""));
+    });
+    var step = 3;
+    c.labels.forEach(function (lab, i) {
+      if ((n - 1 - i) % step) return;
+      sv(svg, "text", { x: xs[i], y: H - 8, fill: "#5a6d81", "font-size": fs, "text-anchor": i === n - 1 && c.type !== "bar" ? "end" : "middle", "font-family": "Inter, sans-serif" }, lab);
+    });
+    var last = n - 1, lx = xs[last], ly = y(c.values[last]);
+    if (c.type === "bar") {
+      var bw = Math.max(6, band * .62);
+      c.values.forEach(function (v, i) {
+        sv(svg, "rect", { x: xs[i] - bw / 2, y: y(v), width: bw, height: y(lo) - y(v), rx: 2, fill: i === last ? "#0f7e70" : "#b7d8d2" });
+      });
+      sv(svg, "text", { x: lx, y: ly - 7, fill: "#0f2742", "font-size": fs + 1.5, "font-weight": 700, "text-anchor": "middle", "font-family": "Inter, sans-serif" }, fmt(c.values[last], c.unit));
+    } else {
+      var d = c.values.map(function (v, i) { return (i ? "L" : "M") + xs[i].toFixed(1) + " " + y(v).toFixed(1); }).join("");
+      sv(svg, "path", { d: d, fill: "none", stroke: "#0f2742", "stroke-width": 2.5, "stroke-linejoin": "round", "stroke-linecap": "round" });
+      c.values.forEach(function (v, i) { if (i < last) sv(svg, "circle", { cx: xs[i], cy: y(v), r: 2.6, fill: "#0f2742" }); });
+      sv(svg, "circle", { cx: lx, cy: ly, r: 5.5, fill: "#0f7e70", stroke: "#fff", "stroke-width": 2 });
+      var above = ly - T > 18;
+      sv(svg, "text", { x: lx, y: above ? ly - 11 : ly + 20, fill: "#0f2742", "font-size": fs + 1.5, "font-weight": 700, "text-anchor": "end", "font-family": "Inter, sans-serif" }, fmt(c.values[last], c.unit));
+    }
+  }
+
+  function fedGrid(c) {
+    var counts = {};
+    var grid = el("div", { class: "fed-grid", role: "list", "aria-label": c.title });
+    c.districts.forEach(function (d) {
+      counts[d[1]] = (counts[d[1]] || 0) + 1;
+      grid.appendChild(el("div", { class: "fed-tile fed-" + d[1], role: "listitem" }, [el("b", { text: d[0] }), el("span", { text: d[1] })]));
+    });
+    var key = el("div", { class: "econ-key" });
+    [["Up", "#9fd8b8"], ["Flat", "#cfd8e1"], ["Mixed", "#efc679"], ["Down", "#eaa99f"]].forEach(function (k) {
+      if (counts[k[0]]) key.appendChild(el("span", {}, [el("i", { style: "background:" + k[1] }), k[0] + ": " + counts[k[0]]]));
+    });
+    return [grid, key];
+  }
+
+  fetch("economy.json?t=" + Date.now(), { cache: "no-store" }).then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (E) {
+    if (!E || !E.slides || !E.slides.length) throw 0;
+    document.getElementById("econ-upd").textContent = E.updated ? "Updated " + E.updated : "";
+    document.getElementById("econ-take").textContent = E.takeaway || "";
+    var slides = [], charts = [];
+    E.slides.forEach(function (s, i) {
+      var chartBox = el("div", { class: "econ-chart" }), c = s.chart || {};
+      chartBox.appendChild(el("h3", { text: c.title || "" }));
+      if (c.type === "grid") fedGrid(c).forEach(function (n) { chartBox.appendChild(n); });
+      else {
+        var holder = el("div", {}); chartBox.appendChild(holder); charts.push([holder, c]);
+        if (c.bands) {
+          var key = el("div", { class: "econ-key" });
+          c.bands.forEach(function (b) { key.appendChild(el("span", {}, [el("i", { style: "background:" + (b.color === "red" ? "rgba(214,80,60,.28)" : "rgba(232,163,61,.34)") }), b.label])); });
+          chartBox.appendChild(key);
+        }
+      }
+      var src = el("p", { class: "econ-src" }, ["Source: " + s.source + " "]);
+      if (s.url) src.appendChild(el("a", { href: s.url, target: "_blank", rel: "noopener", text: "View release" }));
+      var slide = el("div", { class: "econ-slide" + (i ? "" : " on"), id: "econ-s" + i, role: "group", "aria-roledescription": "slide", "aria-label": s.pill + " (" + (i + 1) + " of " + E.slides.length + ")" }, [
+        el("div", {}, [
+          el("p", { class: "econ-label", text: s.label }),
+          el("p", { class: "econ-value", text: s.value }),
+          s.change ? el("p", { class: "econ-change " + (s.tone || ""), text: s.change }) : null,
+          el("p", { class: "econ-period", text: s.period }),
+          el("p", { class: "econ-bullet", text: s.bullet }),
+          src
+        ]),
+        chartBox
+      ]);
+      if (i) { slide.setAttribute("aria-hidden", "true"); slide.inert = true; }
+      stage.appendChild(slide); slides.push(slide);
+      pills.appendChild(el("button", { type: "button", "data-i": i, "aria-controls": "econ-s" + i, "aria-pressed": i ? "false" : "true", text: s.pill }));
+    });
+    var paused = reduce, hover = false, cur = 0, timer = null;
+    var pauseBtn = el("button", { type: "button", class: "pause", text: paused ? "Play" : "Pause" });
+    pills.appendChild(pauseBtn);
+    function show(i) {
+      cur = i;
+      slides.forEach(function (s, j) { s.classList.toggle("on", j === i); s.setAttribute("aria-hidden", j === i ? "false" : "true"); s.inert = j !== i; });
+      Array.prototype.forEach.call(pills.querySelectorAll("button[data-i]"), function (b) { b.setAttribute("aria-pressed", +b.getAttribute("data-i") === i ? "true" : "false"); });
+    }
+    function schedule() {
+      clearTimeout(timer);
+      stage.setAttribute("aria-live", paused ? "polite" : "off");   // don't announce automatic changes to screen readers
+      if (!paused && !hover) timer = setTimeout(function () { show((cur + 1) % slides.length); schedule(); }, 8000);
+    }
+    pills.addEventListener("click", function (e) {
+      var b = e.target.closest("button"); if (!b) return;
+      if (b === pauseBtn) { paused = !paused; pauseBtn.textContent = paused ? "Play" : "Pause"; schedule(); return; }
+      paused = true; pauseBtn.textContent = "Play"; show(+b.getAttribute("data-i")); schedule();   // a chosen slide stays on screen
+    });
+    box.addEventListener("mouseenter", function () { hover = true; schedule(); });
+    box.addEventListener("mouseleave", function () { hover = box.contains(document.activeElement); schedule(); });
+    box.addEventListener("focusin", function () { hover = true; schedule(); });
+    box.addEventListener("focusout", function (e) { if (!box.contains(e.relatedTarget)) { hover = box.matches(":hover"); schedule(); } });
+
+    sec.hidden = false; document.getElementById("nav-economy").hidden = false;
+    function drawAll() { charts.forEach(function (c) { drawChart(c[0], c[1]); }); }
+    drawAll(); schedule();
+    var rt; window.addEventListener("resize", function () { clearTimeout(rt); rt = setTimeout(drawAll, 150); });
+  }).catch(function () { sec.hidden = true; });
 })();
 </script>
 </body>
