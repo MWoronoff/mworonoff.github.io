@@ -126,6 +126,16 @@
       dental: ["dentists-orthodontists"], hearing: ["hearing-aid-centers"], eye: ["optical-optometrists"],
       chiro: ["chiropractors", "physical-occupational-therapists"], behavioral: ["mental-health-professionals"], medspa: ["medical-spas"], senior: ["senior-living-care"] }
   };
+  // "Primary care" -> "Primary Care", "Med spa and aesthetics" -> "Med Spa and Aesthetics"; acronyms (HVAC, SUVs) kept.
+  function titleCase(t) {
+    var small = { and: 1, or: 1, of: 1, the: 1, a: 1, an: 1, "in": 1, to: 1, "for": 1 };
+    return t.split(" ").map(function (w, i) {
+      if (i && small[w]) return w;   // only words already lowercase, so "Class A" keeps its capital
+      return w.split("-").map(function (p) { return p.charAt(0).toUpperCase() + p.slice(1); }).join("-");
+    }).join(" ");
+  }
+  // Button wording where the category name reads better singular ("New Car report", not "New Cars report").
+  var REPORT_LABELS = { auto: { newcar: "New Car", newtruck: "New Truck and SUV", usedcar: "Used Car", usedtruck: "Used Truck and SUV" } };
   function analyzerFolder() { return (location.pathname.split("/").filter(Boolean)[0] || "").toLowerCase(); }
   function categoryReports(sub) {
     var map = CATEGORY_REPORTS[analyzerFolder()];
@@ -138,7 +148,7 @@
     function close() { menu.hidden = true; btn.setAttribute("aria-expanded", "false"); }
     function open(r) { window.open(r.file, "_blank", "noopener"); }
     menu = el("div", { class: "az-export-menu", role: "menu", hidden: true });
-    btn = el("button", { type: "button", class: "az-btn", "aria-haspopup": "menu", "aria-expanded": "false", text: "Category Report",
+    btn = el("button", { type: "button", class: "az-btn", "aria-haspopup": "menu", "aria-expanded": "false", text: "Category report",
       title: "AdMall category report for the selected category (opens in a new tab)",
       onclick: function (e) {
         e.stopPropagation();
@@ -156,9 +166,9 @@
     wrap = el("div", { class: "az-export", onkeydown: function (e) { if (e.key === "Escape" && !menu.hidden) { close(); btn.focus(); } } }, [btn, menu]);
     document.addEventListener("click", function (e) { if (!wrap.contains(e.target)) close(); });
     wrap.sync = function () {
-      var list = categoryReports(getSub()), label = getLabel();
+      var list = categoryReports(getSub()), fixed = REPORT_LABELS[analyzerFolder()], label = (fixed && fixed[getSub()]) || getLabel();
       wrap.hidden = !list.length;
-      btn.textContent = (label ? label + " Report" : "Category Report") + (list.length > 1 ? " \u25be" : "");
+      btn.textContent = (label ? titleCase(label) + " report" : "Category report") + (list.length > 1 ? " \u25be" : "");
       if (!menu.hidden) close();
     };
     wrap.sync();
@@ -1068,7 +1078,7 @@
     }
     if (window.AdtaxiRadius) go();
     else {
-      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261102a";   // version tag: browsers fetch the new file after an update
+      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261102b";   // version tag: browsers fetch the new file after an update
       sc.onload = go; sc.onerror = function () { self.showError("The radius tool didn't load. Refresh the page and try again."); };
       document.head.appendChild(sc);
     }
