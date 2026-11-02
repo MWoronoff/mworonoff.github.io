@@ -66,7 +66,6 @@
                   border-radius: 999px; padding: 4px 12px; cursor: pointer; }
   .chips button:hover { border-color: rgba(207, 224, 238, .7); color: #fff; }
   .chips button[aria-pressed="true"] { background: var(--mint); color: var(--navy); border-color: var(--mint); font-weight: 600; }
-  .chips .pause { border-style: dashed; }
 
   /* ---------- sections ---------- */
   section.block { padding: 72px 0 8px; }
@@ -484,17 +483,18 @@
         draw(e); if (t < 1) sweep = requestAnimationFrame(step); else { sweep = null; prev = cur; }
       })(performance.now());
     }
-    function schedule() { clearInterval(timer); if (!paused) timer = setInterval(function () { go((cur + 1) % CATS.length); }, 5200); }
+    var stage = hero.closest(".map-stage"), held = false;   // the map holds while the pointer or keyboard focus is on it
+    function schedule() { clearInterval(timer); if (!paused && !held) timer = setInterval(function () { go((cur + 1) % CATS.length); }, 5200); }
+    stage.addEventListener("mouseenter", function () { held = true; schedule(); });
+    stage.addEventListener("mouseleave", function () { held = stage.contains(document.activeElement); schedule(); });
+    stage.addEventListener("focusin", function () { held = true; schedule(); });
+    stage.addEventListener("focusout", function (e) { if (!stage.contains(e.relatedTarget)) { held = stage.matches(":hover"); schedule(); } });
     CATS.forEach(function (c, i) {
       chipBox.appendChild(el("button", { type: "button", "data-i": i, "aria-pressed": i === 0 ? "true" : "false", text: c.chip || c.name }));
     });
-    var pauseBtn = el("button", { type: "button", class: "pause", text: paused ? "Play" : "Pause" });
-    chipBox.appendChild(pauseBtn);
     chipBox.addEventListener("click", function (e) {
       var b = e.target.closest("button"); if (!b) return;
-      if (b === pauseBtn) { paused = !paused; pauseBtn.textContent = paused ? "Play" : "Pause"; schedule(); return; }
-      paused = true; pauseBtn.textContent = "Play"; schedule();   // choosing a category holds it on screen
-      go(+b.getAttribute("data-i"));
+      go(+b.getAttribute("data-i")); schedule();   // a chosen category stays while the pointer or focus is on the map, then rotation resumes
     });
     caption(0); draw(1); schedule();
     var rt; window.addEventListener("resize", function () { clearTimeout(rt); rt = setTimeout(function () {
