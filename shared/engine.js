@@ -136,8 +136,6 @@
   }
   // Button wording where the category name reads better singular ("New Car report", not "New Cars report").
   var REPORT_LABELS = { auto: { newcar: "New Car", newtruck: "New Truck and SUV", usedcar: "Used Car", usedtruck: "Used Truck and SUV" } };
-  // Analyzers whose button lists every report in a menu instead of following the selected category.
-  var REPORT_MENUS = { financial: "Finance reports" };
   function analyzerFolder() { return (location.pathname.split("/").filter(Boolean)[0] || "").toLowerCase(); }
   function categoryReports(sub) {
     var map = CATEGORY_REPORTS[analyzerFolder()];
@@ -145,19 +143,8 @@
   }
   // Category report button, labeled with the selected category ("Dental Report"): one report opens straight away in a
   // new tab; two show a short menu to pick from.
-  function reportButton(getSub, getLabel, subs) {
-    var btn, menu, wrap, menuLabel = REPORT_MENUS[analyzerFolder()];
-    // Every report for this analyzer, once each, in category order, with the categories it covers.
-    function allReports() {
-      var seen = {}, out = [];
-      (subs || []).forEach(function (sc) {
-        categoryReports(sc.id).forEach(function (r) {
-          if (!seen[r.file]) { seen[r.file] = r = { file: r.file, title: r.title, market: r.market, covers: [] }; out.push(r); }
-          seen[r.file].covers.push(sc.label);
-        });
-      });
-      return out;
-    }
+  function reportButton(getSub, getLabel) {
+    var btn, menu, wrap;
     function close() { menu.hidden = true; btn.setAttribute("aria-expanded", "false"); }
     function open(r) { window.open(r.file, "_blank", "noopener"); }
     menu = el("div", { class: "az-export-menu", role: "menu", hidden: true });
@@ -165,21 +152,20 @@
       title: "AdMall category report for the selected category (opens in a new tab)",
       onclick: function (e) {
         e.stopPropagation();
-        var list = menuLabel ? allReports() : categoryReports(getSub());
+        var list = categoryReports(getSub());
         if (!list.length) return;
-        if (list.length === 1 && !menuLabel) { close(); open(list[0]); return; }
+        if (list.length === 1) { close(); open(list[0]); return; }
         if (!menu.hidden) { close(); return; }
         menu.innerHTML = "";
         list.forEach(function (r) {
           menu.appendChild(el("button", { type: "button", role: "menuitem", onclick: function () { close(); open(r); } },
-            [el("b", { text: r.title }), el("small", { text: (r.covers ? "For " + r.covers.join(", ").toLowerCase() + " \u00b7 " : "AdMall category report \u00b7 ") + r.market })]));
+            [el("b", { text: r.title }), el("small", { text: "AdMall category report · " + r.market })]));
         });
         menu.hidden = false; btn.setAttribute("aria-expanded", "true"); menu.querySelector("button").focus();
       } });
     wrap = el("div", { class: "az-export", onkeydown: function (e) { if (e.key === "Escape" && !menu.hidden) { close(); btn.focus(); } } }, [btn, menu]);
     document.addEventListener("click", function (e) { if (!wrap.contains(e.target)) close(); });
     wrap.sync = function () {
-      if (menuLabel) { wrap.hidden = !allReports().length; btn.textContent = menuLabel + " \u25be"; if (!menu.hidden) close(); return; }
       var list = categoryReports(getSub()), fixed = REPORT_LABELS[analyzerFolder()], label = (fixed && fixed[getSub()]) || getLabel();
       wrap.hidden = !list.length;
       btn.textContent = (label ? titleCase(label) + " report" : "Category report") + (list.length > 1 ? " \u25be" : "");
@@ -955,7 +941,7 @@
       // Results lives in the Trade area's Recommended allocation (shared/radius.js), matched to the plan's channels
       (this.reportBtn = reportButton(function () { return self.state.sub; }, function () {
         var s = (cfg.subcategories || []).filter(function (x) { return x.id === self.state.sub; })[0];
-        return s ? s.label : ""; }, cfg.subcategories)),
+        return s ? s.label : ""; })),
       exportBtn
     ]));
     var controlBar = el("section", { class: "az-controls", "aria-label": "Analyzer controls" }, controls);
@@ -1092,7 +1078,7 @@
     }
     if (window.AdtaxiRadius) go();
     else {
-      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261102c";   // version tag: browsers fetch the new file after an update
+      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261102d";   // version tag: browsers fetch the new file after an update
       sc.onload = go; sc.onerror = function () { self.showError("The radius tool didn't load. Refresh the page and try again."); };
       document.head.appendChild(sc);
     }
