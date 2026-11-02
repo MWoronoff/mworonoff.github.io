@@ -120,7 +120,6 @@
   .econ-pills button { font: inherit; font-size: 13px; color: var(--navy); background: transparent; border: 1px solid #c3d0dc; border-radius: 999px; padding: 4px 12px; cursor: pointer; }
   .econ-pills button:hover { border-color: var(--navy); }
   .econ-pills button[aria-pressed="true"] { background: var(--navy); color: #fff; border-color: var(--navy); font-weight: 600; }
-  .econ-pills .pause { border-style: dashed; }
   .econ-stage { display: grid; }
   .econ-slide { grid-area: 1 / 1; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 32px; padding: 22px 22px 20px;
                 opacity: 0; visibility: hidden; transition: opacity .6s ease, visibility 0s linear .6s; }
@@ -609,9 +608,7 @@
       stage.appendChild(slide); slides.push(slide);
       pills.appendChild(el("button", { type: "button", "data-i": i, "aria-controls": "econ-s" + i, "aria-pressed": i ? "false" : "true", text: s.pill }));
     });
-    var paused = reduce, hover = false, cur = 0, timer = null;
-    var pauseBtn = el("button", { type: "button", class: "pause", text: paused ? "Play" : "Pause" });
-    pills.appendChild(pauseBtn);
+    var paused = reduce, hover = false, cur = 0, timer = null;   // reduced motion: no automatic rotation
     function show(i) {
       cur = i;
       slides.forEach(function (s, j) { s.classList.toggle("on", j === i); s.setAttribute("aria-hidden", j === i ? "false" : "true"); s.inert = j !== i; });
@@ -619,13 +616,12 @@
     }
     function schedule() {
       clearTimeout(timer);
-      stage.setAttribute("aria-live", paused ? "polite" : "off");   // don't announce automatic changes to screen readers
+      stage.setAttribute("aria-live", paused || hover ? "polite" : "off");   // don't announce automatic changes to screen readers
       if (!paused && !hover) timer = setTimeout(function () { show((cur + 1) % slides.length); schedule(); }, 8000);
     }
     pills.addEventListener("click", function (e) {
       var b = e.target.closest("button"); if (!b) return;
-      if (b === pauseBtn) { paused = !paused; pauseBtn.textContent = paused ? "Play" : "Pause"; schedule(); return; }
-      paused = true; pauseBtn.textContent = "Play"; show(+b.getAttribute("data-i")); schedule();   // a chosen slide stays on screen
+      show(+b.getAttribute("data-i")); schedule();   // a chosen slide stays while the pointer or focus is on the banner, then rotation resumes
     });
     box.addEventListener("mouseenter", function () { hover = true; schedule(); });
     box.addEventListener("mouseleave", function () { hover = box.contains(document.activeElement); schedule(); });
