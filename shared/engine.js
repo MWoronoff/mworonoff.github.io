@@ -67,6 +67,104 @@
     return wrap;
   }
 
+  // Category reports: AdMall Local Account Intelligence PDFs in /reports/ (kept out of search engines by robots.txt).
+  // Keyed by analyzer folder, then category id. Some categories have two reports.
+  var REPORT_INFO = {
+    "auto-dealerships": ["Auto Dealerships (All Makes)", "Boston TV market"],
+    "used-car-dealers": ["Used Car Dealers", "New York TV market"],
+    "tax-preparation": ["Tax Preparation Services", "Minnesota"],
+    "accounting-services": ["Accounting Services", "New York TV market"],
+    "financial-advisory": ["Financial Advisory Services", "Minnesota"],
+    "mortgage-companies": ["Mortgage Companies", "Minnesota"],
+    "banks-community": ["Banks (Community)", "Minnesota"],
+    "banks-regional-national": ["Banks (Regional and National)", "Minnesota"],
+    "credit-unions": ["Credit Unions", "New York TV market"],
+    "general-contractors": ["General Contractors", "New York TV market"],
+    "hvac-dealers": ["Heating/Ventilation/Cooling Dealers", "Minnesota"],
+    "roofing-siding": ["Roofing/Siding Contractors", "Minnesota"],
+    "plumbing-contractors": ["Plumbing Contractors", "New York TV market"],
+    "electrical-contractors": ["Electrical Contractors", "New York TV market"],
+    "painting-services": ["Painting and Power Washing Services", "Minnesota"],
+    "floor-covering-stores": ["Floor Covering Stores", "Minnesota"],
+    "attorneys-personal-injury": ["Attorneys – Personal Injury", "Minnesota"],
+    "attorneys-wills-probate": ["Attorneys, Wills and Probate", "Minnesota"],
+    "attorneys-bankruptcy": ["Attorneys, Bankruptcy", "Minnesota"],
+    "attorneys-legal-services": ["Attorneys/Legal Services", "Minnesota"],
+    "colleges-universities": ["Colleges, Universities and Professional Schools", "Minnesota"],
+    "community-colleges": ["Colleges, Community", "Minnesota"],
+    "technical-trade-schools": ["Technical and Trade Schools", "Minnesota"],
+    "apartment-rental-management": ["Apartment Rental and Management Companies", "Minnesota"],
+    "senior-living-care": ["Senior Living and Care Services", "Minnesota"],
+    "furniture-stores": ["Furniture Stores", "Minnesota"],
+    "bedding-mattress-stores": ["Bedding/Mattress Stores", "Minnesota"],
+    "dentists-orthodontists": ["Dentists and Orthodontists", "Minnesota"],
+    "optical-optometrists": ["Optical Stores/Optometrists", "Minnesota"],
+    "hearing-aid-centers": ["Hearing Aid Centers", "Minnesota"],
+    "urgent-care-centers": ["Urgent Care Centers", "Minnesota"],
+    "drugstores-pharmacies": ["Drugstores/Pharmacies", "Minnesota"],
+    "medical-spas": ["Medical Spas", "Minnesota"],
+    "medical-clinics": ["Medical Clinics", "Minnesota"],
+    "chiropractors": ["Doctors, Chiropractors", "Minnesota"],
+    "physical-occupational-therapists": ["Physical/Occupational Therapists", "Minnesota"],
+    "mental-health-professionals": ["Mental Health Professionals", "Minnesota"]
+  };
+  var CATEGORY_REPORTS = {
+    "auto": { newcar: ["auto-dealerships"], newtruck: ["auto-dealerships"], usedcar: ["used-car-dealers"], usedtruck: ["used-car-dealers"] },
+    "financial": { tax: ["tax-preparation", "accounting-services"], wealth: ["financial-advisory"], retire: ["financial-advisory"],
+      purchase: ["mortgage-companies"], refi: ["mortgage-companies"], bank: ["banks-community", "banks-regional-national"], cu: ["credit-unions"] },
+    "home-services": { any: ["general-contractors"], hvac: ["hvac-dealers"], roof: ["roofing-siding"], plumb: ["plumbing-contractors"],
+      elec: ["electrical-contractors"], paint: ["painting-services"], floor: ["floor-covering-stores"] },
+    "legal": { pi: ["attorneys-personal-injury"], family: ["attorneys-legal-services"], estate: ["attorneys-wills-probate"],
+      bankruptcy: ["attorneys-bankruptcy"], employment: ["attorneys-legal-services"] },
+    "higher-ed": { fouryear: ["colleges-universities"], community: ["community-colleges"], trade: ["technical-trade-schools"],
+      graduate: ["colleges-universities"], adult: ["colleges-universities"] },
+    "apartment-analyzer": { all: ["apartment-rental-management"], luxury: ["apartment-rental-management"], mid: ["apartment-rental-management"],
+      affordable: ["apartment-rental-management"], student: ["apartment-rental-management"], senior: ["senior-living-care"] },
+    "furniture-analyzer": { any: ["furniture-stores"], living: ["furniture-stores"], bedroom: ["furniture-stores"], mattress: ["bedding-mattress-stores"],
+      dining: ["furniture-stores"], outdoor: ["furniture-stores"], baby: ["furniture-stores"] },
+    "healthcare": { primary: ["medical-clinics"], hospital: ["medical-clinics"], urgent: ["urgent-care-centers"], pharmacy: ["drugstores-pharmacies"],
+      dental: ["dentists-orthodontists"], hearing: ["hearing-aid-centers"], eye: ["optical-optometrists"],
+      chiro: ["chiropractors", "physical-occupational-therapists"], behavioral: ["mental-health-professionals"], medspa: ["medical-spas"], senior: ["senior-living-care"] }
+  };
+  function analyzerFolder() { return (location.pathname.split("/").filter(Boolean)[0] || "").toLowerCase(); }
+  function categoryReports(sub) {
+    var map = CATEGORY_REPORTS[analyzerFolder()];
+    return ((map && map[sub]) || []).map(function (k) { return { file: "../reports/" + k + ".pdf", title: REPORT_INFO[k][0], market: REPORT_INFO[k][1] }; });
+  }
+  // Category report button, labeled with the selected category ("Dental Report"): one report opens straight away in a
+  // new tab; two show a short menu to pick from.
+  function reportButton(getSub, getLabel) {
+    var btn, menu, wrap;
+    function close() { menu.hidden = true; btn.setAttribute("aria-expanded", "false"); }
+    function open(r) { window.open(r.file, "_blank", "noopener"); }
+    menu = el("div", { class: "az-export-menu", role: "menu", hidden: true });
+    btn = el("button", { type: "button", class: "az-btn", "aria-haspopup": "menu", "aria-expanded": "false", text: "Category Report",
+      title: "AdMall category report for the selected category (opens in a new tab)",
+      onclick: function (e) {
+        e.stopPropagation();
+        var list = categoryReports(getSub());
+        if (!list.length) return;
+        if (list.length === 1) { close(); open(list[0]); return; }
+        if (!menu.hidden) { close(); return; }
+        menu.innerHTML = "";
+        list.forEach(function (r) {
+          menu.appendChild(el("button", { type: "button", role: "menuitem", onclick: function () { close(); open(r); } },
+            [el("b", { text: r.title }), el("small", { text: "AdMall category report · " + r.market })]));
+        });
+        menu.hidden = false; btn.setAttribute("aria-expanded", "true"); menu.querySelector("button").focus();
+      } });
+    wrap = el("div", { class: "az-export", onkeydown: function (e) { if (e.key === "Escape" && !menu.hidden) { close(); btn.focus(); } } }, [btn, menu]);
+    document.addEventListener("click", function (e) { if (!wrap.contains(e.target)) close(); });
+    wrap.sync = function () {
+      var list = categoryReports(getSub()), label = getLabel();
+      wrap.hidden = !list.length;
+      btn.textContent = (label ? label + " Report" : "Category Report") + (list.length > 1 ? " \u25be" : "");
+      if (!menu.hidden) close();
+    };
+    wrap.sync();
+    return wrap;
+  }
+
   // Leave-behind: the current view laid out for print (the browser's Save as PDF), with an Adtaxi heading and no controls.
   // Maps are redrawn at page width for the print, then put back.
   function printLeaveBehind(logo, lines, maps) {
@@ -805,7 +903,7 @@
       ].filter(Boolean);
     }
     if ((cfg.subcategories || []).length) {
-      this.subSel = el("select", { "aria-label": cfg.subcategoryLabel || "Category", onchange: function () { self.state.sub = this.value; self.state.sortKey = null;
+      this.subSel = el("select", { "aria-label": cfg.subcategoryLabel || "Category", onchange: function () { self.state.sub = this.value; self.state.sortKey = null; if (self.reportBtn) self.reportBtn.sync();
         if (self.mode === "radius") { if (self.radius) self.radius.usePreset(self.state.sub); self.writeHash(); } else self.refresh(); } },
         cfg.subcategories.map(function (s) { return el("option", { value: s.id, text: s.label }); }));
       controls.push(el("label", { class: "az-field" }, [el("span", { text: cfg.subcategoryLabel || "Category" }), this.subSel]));
@@ -831,6 +929,9 @@
         title: "Customer Analysis (CRM): upload the advertiser's customer list to see where its customers are against this market's potential, ZIP by ZIP",
         onclick: function () { location.href = self.crmUrl(); } }),
       // Results lives in the Trade area's Recommended allocation (shared/radius.js), matched to the plan's channels
+      (this.reportBtn = reportButton(function () { return self.state.sub; }, function () {
+        var s = (cfg.subcategories || []).filter(function (x) { return x.id === self.state.sub; })[0];
+        return s ? s.label : ""; })),
       exportBtn
     ]));
     var controlBar = el("section", { class: "az-controls", "aria-label": "Analyzer controls" }, controls);
@@ -967,7 +1068,7 @@
     }
     if (window.AdtaxiRadius) go();
     else {
-      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261031j";   // version tag: browsers fetch the new file after an update
+      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261102a";   // version tag: browsers fetch the new file after an update
       sc.onload = go; sc.onerror = function () { self.showError("The radius tool didn't load. Refresh the page and try again."); };
       document.head.appendChild(sc);
     }
@@ -1055,6 +1156,7 @@
 
   Analyzer.prototype.refresh = function (keepError) {
     var self = this, s = this.state;
+    if (this.reportBtn) this.reportBtn.sync();
     this.guideCue();
     // A ranking measure that isn't published at this level (e.g. a Metro-only layer) falls back to the default ranking.
     var rm = this.measure(s.rank), dm = this.measure(this.cfg.defaultRank);
