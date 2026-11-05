@@ -1,6 +1,6 @@
 # CRM analyzer data report
 
-Built 2026-10-28 from data-build/master/.
+Built 2026-11-05 from data-build/master/.
 
 - ZIPs with households: 32,817 (population 337,569,915; households 130,497,320).
 - Characteristics: 90 in 7 groups.
@@ -44,13 +44,13 @@ Built 2026-10-28 from data-build/master/.
 | Households receiving SNAP | Income | 12.4 % | 32,817 | U.S. Census Bureau, ACS 5-year ACS 5-year 2020–2024 |
 | Social Security income | Income | 31.4 % | 32,817 | U.S. Census Bureau, ACS 5-year ACS 5-year 2020–2024 |
 | Retirement income | Income | 24.2 % | 32,817 | U.S. Census Bureau, ACS 5-year ACS 5-year 2020–2024 |
-| Average adjusted gross income per tax return | Income | 94035 $ | 27,574 | IRS Statistics of Income tax year 2022 |
-| Tax returns with income $200K+ | Income | 7.9 % | 27,574 | IRS Statistics of Income tax year 2022 |
-| Returns with business income | Income | 18.8 % | 27,574 | IRS Statistics of Income tax year 2022 |
-| Returns with capital gains | Income | 18.9 % | 27,574 | IRS Statistics of Income tax year 2022 |
-| Returns with dividends | Income | 20.4 % | 27,574 | IRS Statistics of Income tax year 2022 |
-| Returns deducting mortgage interest | Income | 7.3 % | 27,574 | IRS Statistics of Income tax year 2022 |
-| Returns with earned income credit | Income | 15.1 % | 27,574 | IRS Statistics of Income tax year 2022 |
+| Average adjusted gross income per tax return | Income | 96529 $ | 27,666 | IRS Statistics of Income tax year 2023 |
+| Tax returns with income $200K+ | Income | 8.5 % | 27,666 | IRS Statistics of Income tax year 2023 |
+| Returns with business income | Income | 19.0 % | 27,666 | IRS Statistics of Income tax year 2023 |
+| Returns with capital gains | Income | 18.2 % | 27,666 | IRS Statistics of Income tax year 2023 |
+| Returns with dividends | Income | 20.9 % | 27,666 | IRS Statistics of Income tax year 2023 |
+| Returns deducting mortgage interest | Income | 7.2 % | 27,666 | IRS Statistics of Income tax year 2023 |
+| Returns with earned income credit | Income | 15.0 % | 27,666 | IRS Statistics of Income tax year 2023 |
 | High school or less | Education and work | 36.5 % | 32,803 | U.S. Census Bureau, ACS 5-year ACS 5-year 2020–2024 |
 | Some college or associate's | Education and work | 27.8 % | 32,803 | U.S. Census Bureau, ACS 5-year ACS 5-year 2020–2024 |
 | Bachelor's degree or higher | Education and work | 35.6 % | 32,803 | U.S. Census Bureau, ACS 5-year ACS 5-year 2020–2024 |
@@ -86,8 +86,8 @@ Built 2026-10-28 from data-build/master/.
 | Retail stores per 1,000 residents | Place and economy | 3.05 per 1,000 | 31,269 | Census ZIP Code Business Patterns 2023 |
 | Restaurants and lodging per 1,000 residents | Place and economy | 2.28 per 1,000 | 31,269 | Census ZIP Code Business Patterns 2023 |
 | Health care businesses per 1,000 residents | Place and economy | 2.93 per 1,000 | 31,269 | Census ZIP Code Business Patterns 2023 |
-| Jobs located here per resident | Place and economy | 0.44 ratio | 31,269 | Census LEHD (LODES) 2021–2023 (latest available per state) |
-| Resident workers earning over $3,333/month | Place and economy | 57.3 % | 32,571 | Census LEHD (LODES) 2021–2023 (latest available per state) |
+| Jobs located here per resident | Place and economy | 0.45 ratio | 31,269 | Census LEHD (LODES) 2021–2024 (latest available per state) |
+| Resident workers earning over $3,333/month | Place and economy | 59.0 % | 32,580 | Census LEHD (LODES) 2021–2024 (latest available per state) |
 | Obesity (% of adults, CDC estimate) | Health (CDC estimates) | 33.4 % | 29,576 | CDC PLACES (model-based) PLACES: ZCTA Data (GIS Friendly Format), 2025 release |
 | Diabetes (% of adults, CDC estimate) | Health (CDC estimates) | 12.0 % | 29,576 | CDC PLACES (model-based) PLACES: ZCTA Data (GIS Friendly Format), 2025 release |
 | High blood pressure (% of adults, CDC estimate) | Health (CDC estimates) | 34.1 % | 29,576 | CDC PLACES (model-based) PLACES: ZCTA Data (GIS Friendly Format), 2025 release |
