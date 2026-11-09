@@ -387,6 +387,19 @@ def main():
     out["nodeg18_34"] = sum(G(g, k) for g in ("18_24", "25_34") for k in (1, 2, 3, 4))   # no college degree
     out["pop25_64"] = sum(G(g, 0) for g in ("25_34", "35_44", "45_64"))
     out["somecol25_64"] = sum(G(g, 4) for g in ("25_34", "35_44", "45_64"))
+    # Trade Area Tool (general audience): education by age, in the radius tool's healthcare age groups (65-74 and 75+
+    # both use B15001's 65+ group). Levels: high school or less (lines 1-3), some college or associate's (4-5),
+    # bachelor's (6), graduate (7).
+    EDU_GROUPS = {"18_34": ("18_24", "25_34"), "35_64": ("35_44", "45_64"), "65p": ("65p",)}
+    EDU_LEVELS = {"hsless": (1, 2, 3), "some": (4, 5), "ba": (6,), "grad": (7,)}
+    for g, parts in EDU_GROUPS.items():
+        out[f"edt_{g}"] = sum(G(x, 0) for x in parts)
+        for lvl, ks in EDU_LEVELS.items(): out[f"ed_{lvl}_{g}"] = sum(G(x, k) for x in parts for k in ks)
+    # Marital status, 15+ (B12001): never married 3/12; now married 4/13, less separated 7/16; widowed 9/18 and divorced
+    # 10/19 join separated as "divorced, separated or widowed"
+    out["mar_never"] = acs[v("B12001", 3)] + acs[v("B12001", 12)]
+    out["mar_married"] = acs[v("B12001", 4)] - acs[v("B12001", 7)] + acs[v("B12001", 13)] - acs[v("B12001", 16)]
+    out["mar_other"] = sum(acs[v("B12001", n)] for n in (7, 9, 10, 16, 18, 19))
     # Home Services analyzer
     out["hb_tot"] = acs[v("B25036", 2)]                                     # owner homes (year built table)
     for b, lines in BUILT.items(): out[f"hb_{b}"] = sum(acs[v("B25036", n)] for n in lines)
@@ -459,6 +472,11 @@ def main():
         n = int((out[part] > out[total] + 1).sum())
         rep.append((f"{name} never exceeds its total", "PASS" if n == 0 else "FAIL", f"{n} ZIPs over"))
 
+    # Trade Area Tool: education levels add up to each age group, and marital groups add up to the 15+ total
+    n = sum(int(((sum(out[f"ed_{l}_{g}"] for l in ("hsless", "some", "ba", "grad")) - out[f"edt_{g}"]).abs() > 1).sum()) for g in ("18_34", "35_64", "65p"))
+    rep.append(("Education by age group: levels add up (Trade Area Tool)", "PASS" if n == 0 else "FAIL", f"{n} ZIP-groups off"))
+    n = int(((out.mar_never + out.mar_married + out.mar_other - out.marital_tot).abs() > 1).sum())
+    rep.append(("Marital status: never married + married + divorced/separated/widowed = total", "PASS" if n == 0 else "FAIL", f"{n} ZIPs off"))
     # Higher Education tables: every B15001 age group adds up, and the 25+ figures agree with B15003 (catches wrong line numbers)
     bad = 0
     for g, (ml, fl) in B15001_GROUPS.items():
@@ -619,6 +637,9 @@ def main():
                                       ["rb_base", "rb_30p", "vac_rent", "vac_rented", "rk_tot", "r_kids"],
              "zip_audience_enroll.json": [f"{t}_{b}" for t in ("enr", "ent") for b in ENR_AGES],
              "zip_audience_inc.json": ["inc_100_125", "inc_125_150", "m55_64", "m65p", "f55_64", "f65p", "occ_tot", "mgmt"],
+             "zip_audience_demo.json": [f"edt_{g}" for g in ("18_34", "35_64", "65p")] +
+                                       [f"ed_{l}_{g}" for l in ("hsless", "some", "ba", "grad") for g in ("18_34", "35_64", "65p")] +
+                                       ["mar_never", "mar_married", "mar_other"],
              "zip_audience_home.json": ["hb_tot"] + [f"hb_{b}" for b in BUILT] + ["hu_tot", "sfd_own", "hm_tot", "lt_own", "o_moved20"]}
     cols = {"zip": m.zip.tolist(), "city": m.city.fillna("").tolist(), "state": m.state.tolist(),
             "lat": m.lat.round(4).tolist(), "lon": m.lon.round(4).tolist(),
