@@ -942,6 +942,10 @@
       (this.reportBtn = reportButton(function () { return self.state.sub; }, function () {
         var s = (cfg.subcategories || []).filter(function (x) { return x.id === self.state.sub; })[0];
         return s ? s.label : ""; })),
+      // Category slides (market size and buyers, then media use): an opening conversation, so on every tab from the start
+      SLIDE_CATS[cfg.exportName] ? el("button", { type: "button", class: "az-btn az-slides-btn", "aria-haspopup": "dialog", text: SLIDE_CATS[cfg.exportName] + " slides",
+        title: "U.S. market size, buyers and how they use media", onclick: function () {
+          loadSlides(function () { if (window.AdtaxiSlides) AdtaxiSlides.open({ cat: cfg.exportName, only: "category" }); }); } }) : null,
       exportBtn
     ]));
     var controlBar = el("section", { class: "az-controls", "aria-label": "Analyzer controls" }, controls);
@@ -1078,7 +1082,7 @@
     }
     if (window.AdtaxiRadius) go();
     else {
-      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261109b";   // version tag: browsers fetch the new file after an update
+      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261109c";   // version tag: browsers fetch the new file after an update
       sc.onload = go; sc.onerror = function () { self.showError("The radius tool didn't load. Refresh the page and try again."); };
       document.head.appendChild(sc);
     }
@@ -1223,6 +1227,17 @@
     });
   };
 
+  /* ---------- Slides (shared/slides.js) ---------- */
+  var SLIDE_CATS = { auto: "Auto", "higher-ed": "Education", financial: "Finance", furniture: "Furniture", healthcare: "Healthcare" };
+  function loadSlides(done) {
+    if (window.AdtaxiSlides) { done(); return; }
+    if (loadSlides.waiting) { loadSlides.waiting.push(done); return; }
+    loadSlides.waiting = [done];
+    var sc = document.createElement("script"); sc.src = "../shared/slides.js?v=20261109c";
+    sc.onload = sc.onerror = function () { var w = loadSlides.waiting; loadSlides.waiting = null; w.forEach(function (f) { f(); }); };
+    document.head.appendChild(sc);
+  }
+
   /* ---------- Ad response (optional, national survey data per category) ---------- */
   Analyzer.prototype.renderAd = function () {
     // Ad response comes at the end of the process: only in the Radius view, under the radius map, after a center and radius are chosen
@@ -1271,8 +1286,8 @@
         el("div", { class: "az-seg", role: "group", "aria-label": "Sort ad types" }, [["aud", "Sort by response"], ["diff", "Sort by vs. average"]].map(function (o) {
           return el("button", { type: "button", "aria-pressed": String(sortKey === o[0]), text: o[1], onclick: function () { self.adSort = o[0]; self.renderAd(); } });
         })),
-        this.radius.openSlides ? el("button", { type: "button", class: "az-btn az-slides-btn", "aria-haspopup": "dialog", text: this.radius.slidesLabel(),
-          title: "Category slides and platform guides, starting with the ad types and platforms that matter for this plan",
+        this.radius.openSlides ? el("button", { type: "button", class: "az-btn az-slides-btn", "aria-haspopup": "dialog", text: "Platform guides",
+          title: "Reach and audience slides for streaming TV, social, search and other platforms, starting with this plan's",
           onclick: function () { self.radius.openSlides(byAud.map(function (r) { return short(r.label); })); } }) : null])
     ]));
     this.radius.adOrder = byAud.map(function (r) { return short(r.label); });

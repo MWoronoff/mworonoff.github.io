@@ -49,16 +49,17 @@
   window.AdtaxiSlides = {
     has: function (key) { return !!cat(key); },
     label: function (key) { var c = cat(key); return c ? c.name + " slides" : "Platform guides"; },
-    // o: { cat, plan: [channel ids], strategy, adOrder: [ad response short names, best first], channels, close }
+    // o: { cat, only: "category" | "platforms", plan: [channel ids], strategy, adOrder: [ad response short names, best first], channels, close }
     render: function (body, o) {
       body.innerHTML = "";
-      var c = cat(o.cat), CH = o.channels || {}, plan = o.plan || [];
+      var c = o.only === "platforms" ? null : cat(o.cat), CH = o.channels || {}, plan = o.plan || [];
       var sub = plan.length ? "Plan: " + plan.map(function (id) { return CH[id] ? CH[id].short : id; }).join(", ") : "";
       body.appendChild(el("div", { class: "az-results-head" }, [
-        el("div", null, [el("h2", { id: "az-slides-title", text: c ? c.name + " and platform slides" : "Platform guides" }), sub ? el("p", { class: "az-results-sub", text: sub }) : null]),
+        el("div", null, [el("h2", { id: "az-slides-title", text: o.only === "category" && c ? c.name + " slides" : "Platform guides" }), sub && o.only !== "category" ? el("p", { class: "az-results-sub", text: sub }) : null]),
         el("button", { type: "button", class: "az-modal-close", "aria-label": "Close", text: "×", onclick: o.close })]));
       if (c) body.appendChild(el("section", { class: "az-results-sec" }, [el("h3", { text: c.title }),
         slide(c.id + "-market", c.name + ": market size and buyers"), slide(c.id + "-media", c.name + ": how buyers use media")]));
+      if (o.only === "category") { body.appendChild(el("p", { class: "az-results-note", text: "Source: Nielsen Scarborough USA+ Spring 2026 and AdMall. National figures. Select a slide to open it full size." })); return; }
       // Platforms tied to the plan first, then (no plan) the ad response ranking, then the rest
       var first = [], add = function (ids) { (ids || []).forEach(function (id) { if (first.indexOf(id) < 0) first.push(id); }); };
       plan.forEach(function (id) { add(FROM_CHANNEL[id]); });
@@ -71,7 +72,7 @@
         .concat(inPlan.map(function (id, i) { return platform(byId[id], i === 0); }))));
       var others = (inPlan.length ? [] : first.map(function (id) { return byId[id]; })).concat(rest);
       body.appendChild(el("section", { class: "az-results-sec" }, [el("h3", { text: inPlan.length ? "Other platforms" : "Platform guides" })]
-        .concat(others.map(function (p, i) { return platform(p, !inPlan.length && !c && i === 0); }))));
+        .concat(others.map(function (p, i) { return platform(p, !inPlan.length && i === 0); }))));
       body.appendChild(el("p", { class: "az-results-note", text: "Source: Nielsen Scarborough USA+ Spring 2026; ad spend from EMARKETER. National figures. Select a slide to open it full size." }));
     }
   };
