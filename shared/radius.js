@@ -1290,7 +1290,7 @@
     if (window.AdtaxiPlan) { done(); return; }
     if (loadPlan.waiting) { loadPlan.waiting.push(done); return; }
     loadPlan.waiting = [done];
-    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261109a";
+    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261109b";
     sc.onload = function () { var w = loadPlan.waiting; loadPlan.waiting = null; w.forEach(function (f) { f(); }); };
     sc.onerror = function () { loadPlan.waiting = null; };
     document.head.appendChild(sc);
@@ -1358,6 +1358,8 @@
           el("div", { class: "rz-budget-actions" }, [
             this.pBtn = el("button", { type: "button", class: "az-btn primary", text: "Build proposal", onclick: function () { self.pBox.hidden = !self.pBox.hidden; if (!self.pBox.hidden) self.pClient.focus(); self.guideNext(); } }),
             el("button", { type: "button", class: "az-btn", text: "Export allocation (CSV)", onclick: function () { self.exportBudget(); } }),
+            el("button", { type: "button", class: "az-btn", text: this.slidesLabel(), "aria-haspopup": "dialog",
+              title: "Category slides and platform guides, with this plan's platforms first", onclick: function () { self.openSlides(); } }),
             this.resultsBtn = el("button", { type: "button", class: "az-btn az-results-btn", text: "Results", "aria-haspopup": "dialog", hidden: RESULT_CATS.indexOf(this.resultsCat()) < 0 ? true : null,
               title: "Case studies from this category and from the same channels as this plan", onclick: function () { self.openResults(); } })])]),
         this.bSuggest, this.pBox, this.bRates, this.bHand, this.bSummary, this.bWarn, this.cWrap, this.bDeliver,
@@ -1441,6 +1443,25 @@
     }
     loadResults(this.cfg.resultsScript, function () { self.renderResults(); });
     if (this.resultsPanel.showModal) { if (!this.resultsPanel.open) this.resultsPanel.showModal(); } else this.resultsPanel.setAttribute("open", "");
+  };
+  /* ---------- Slides: category slides and platform guides (shared/slides.js) ---------- */
+  function loadSlides(done) {
+    if (window.AdtaxiSlides) { done(); return; }
+    if (loadSlides.waiting) { loadSlides.waiting.push(done); return; }
+    loadSlides.waiting = [done];
+    var sc = document.createElement("script"); sc.src = "../shared/slides.js?v=20261109b";
+    sc.onload = sc.onerror = function () { var w = loadSlides.waiting; loadSlides.waiting = null; w.forEach(function (f) { f(); }); };
+    document.head.appendChild(sc);
+  }
+  var SLIDE_CATS = { auto: "Auto", "higher-ed": "Education", financial: "Finance", furniture: "Furniture", "furniture-analyzer": "Furniture", healthcare: "Healthcare" };
+  Radius.prototype.slidesLabel = function () { var n = SLIDE_CATS[this.resultsCat()]; return n ? n + " slides" : "Platform guides"; };
+  Radius.prototype.openSlides = function (adOrder) {
+    var self = this, P = window.AdtaxiPlan;
+    loadSlides(function () {
+      if (!window.AdtaxiSlides) { self.showError("The slides couldn't be loaded. Check the connection and try again."); return; }
+      var plan = P && self.budget && self.budget.strat ? (self.allocation().channels || []).map(function (c) { return c.id; }) : [];
+      AdtaxiSlides.open({ cat: self.resultsCat(), plan: plan, strategy: self.budget && self.budget.strat, adOrder: adOrder || self.adOrder || [], channels: P && P.CHANNELS });
+    });
   };
   Radius.prototype.resultsCat = function () { return String(this.cfg.resultsCategory || this.cfg.exportName || "").replace(/-radius$/, ""); };
   Radius.prototype.renderResults = function () {
@@ -1909,7 +1930,7 @@
     if (!b.amount || !A.strat || !A.withDollars || !A.plan || !A.plan.tier || !A.channels.length) { st.textContent = "Enter a monthly budget and choose a media strategy first."; return Promise.resolve(null); }
     st.textContent = "Building…";
     var base = this.proposalBase();
-    return Promise.all([loadScriptOnce(this.cfg.pptxScript || "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261109a"), this.benchmarks(), this.logoImage()])
+    return Promise.all([loadScriptOnce(this.cfg.pptxScript || "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261109b"), this.benchmarks(), this.logoImage()])
       .then(function (res) { return window.AdtaxiProposal.build(self.proposalContext(res[2], res[3]), opt); })
       .then(function (out) { st.textContent = "Downloaded. Open it in PowerPoint or Google Slides to edit."; return out; })
       .catch(function (e) { st.textContent = "The proposal couldn't be built (" + e.message + "). Try again in a minute."; throw e; });

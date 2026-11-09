@@ -1078,7 +1078,7 @@
     }
     if (window.AdtaxiRadius) go();
     else {
-      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261109a";   // version tag: browsers fetch the new file after an update
+      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261109b";   // version tag: browsers fetch the new file after an update
       sc.onload = go; sc.onerror = function () { self.showError("The radius tool didn't load. Refresh the page and try again."); };
       document.head.appendChild(sc);
     }
@@ -1267,10 +1267,15 @@
         el("h2", { text: (A.title || "How likely customers respond to advertising").replace("{sub}", this.subLabel()).replace("{aud}", (d.short || "").toLowerCase()) }),
         el("p", { text: d.blend ? "Blended estimate of the percent of likely candidates, and of all U.S. adults, who saw or heard an ad on each medium that led them to take action in the past 30 days. Point to a row for each source group's figure." : d.audience ? "Percent of the target group (" + d.audience + ") and of all U.S. adults who saw or heard an ad on each medium that led them to take action in the past 30 days. Percentages are based on everyone in each group, not only people who use that medium." : "" })
       ]),
-      el("div", { class: "az-seg", role: "group", "aria-label": "Sort ad types" }, [["aud", "Sort by response"], ["diff", "Sort by vs. average"]].map(function (o) {
-        return el("button", { type: "button", "aria-pressed": String(sortKey === o[0]), text: o[1], onclick: function () { self.adSort = o[0]; self.renderAd(); } });
-      }))
+      el("div", { class: "az-ad-tools" }, [
+        el("div", { class: "az-seg", role: "group", "aria-label": "Sort ad types" }, [["aud", "Sort by response"], ["diff", "Sort by vs. average"]].map(function (o) {
+          return el("button", { type: "button", "aria-pressed": String(sortKey === o[0]), text: o[1], onclick: function () { self.adSort = o[0]; self.renderAd(); } });
+        })),
+        this.radius.openSlides ? el("button", { type: "button", class: "az-btn az-slides-btn", "aria-haspopup": "dialog", text: this.radius.slidesLabel(),
+          title: "Category slides and platform guides, starting with the ad types and platforms that matter for this plan",
+          onclick: function () { self.radius.openSlides(byAud.map(function (r) { return short(r.label); })); } }) : null])
     ]));
+    this.radius.adOrder = byAud.map(function (r) { return short(r.label); });
     box.appendChild(el("div", { class: "az-ad-take" }, [
       el("p", null, [el("b", { text: "Highest response: " }), list(byAud.slice(0, 3), function (r) { return pct(r.aud); })])
     ]));

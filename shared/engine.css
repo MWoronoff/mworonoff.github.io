@@ -588,7 +588,18 @@ h2 .az-tag { font-size: 12px; }
 .az-results-why { font-size: 12.5px; color: var(--teal, #0b5d53); font-style: italic; }
 .az-results-ch b { color: var(--navy); }
 .az-results-card a { font-size: 13px; font-weight: 600; }
-@media print { .az-results-btn, .az-results { display: none !important; } }
+.az-results.az-slides { width: min(640px, 100vw); }
+.az-ad-tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: flex-end; }
+.az-slide { margin: 0 0 14px; }
+.az-slide a img { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 6px; background: #fff; }
+.az-slide figcaption { display: flex; justify-content: space-between; gap: 10px; margin-top: 5px; font-size: 12.5px; color: var(--muted); }
+.az-slide figcaption a { font-weight: 600; white-space: nowrap; }
+.az-slide-pf { border: 1px solid var(--line); border-radius: 10px; padding: 0 12px; margin: 0 0 8px; background: #fff; }
+.az-slide-pf summary { cursor: pointer; padding: 10px 0; display: flex; flex-direction: column; gap: 2px; }
+.az-slide-pf summary b { color: var(--navy); font-size: 14.5px; }
+.az-slide-pf summary span { color: var(--muted); font-size: 12.5px; }
+.az-slide-pf[open] summary { border-bottom: 1px solid var(--line); margin-bottom: 10px; }
+@media print { .az-results-btn, .az-results, .az-slides-btn { display: none !important; } }
 .rz-filters [hidden] { display: none !important; }   /* filters that don't pertain to the selected target audience */
 
 /* Footprint navigation: rank nationally, or inside the selected market (counties, ZIPs) */
