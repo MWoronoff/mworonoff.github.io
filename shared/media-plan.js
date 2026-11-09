@@ -518,7 +518,28 @@
   function whyLine(tier, budget) {
     return tier.label + (budget >= CUSTOM_PLAN_BUDGET ? ". Every channel in the plan meets its monthly minimum." : ". Fully funding fewer channels outperforms spreading a budget thin.");
   }
+  /* Category tuning: each category scales the strategy's channel weights (0 drops a channel), so the Media Mix Planner
+     and the analyzers' Recommended allocation give the same plan for the same category, strategy and budget. */
+  var CAT_TUNE = {
+    auto:            { mod: { youtube: 1.2, ctv: 1.2 }, note: "more YouTube and CTV, since video takes nearly half of auto digital spend." },
+    healthcare:      { mod: { search: 1.3, social: 1.1, retarget: 0.5, display: 0.9, shopping: 0 } },
+    financial:       { mod: { search: 1.2, social: 1.2, youtube: 1.1, ctv: 1.1, shopping: 0 } },
+    furniture:       { mod: { shopping: 1.3, social: 1.2, retarget: 1.2, display: 1.1 } },
+    legal:           { mod: { search: 1.3, retarget: 1.2, youtube: 1.2, ctv: 1.2, display: 0.8, dooh: 0.8, shopping: 0 } },
+    "higher-ed":     { mod: { social: 1.4, youtube: 1.3, ctv: 1.2, retarget: 1.1, display: 0.9, shopping: 0 } },
+    "home-services": { mod: { search: 1.3, social: 1.4, retarget: 1.2, ctv: 0.7, youtube: 0.6, dooh: 0.7, shopping: 0 } },
+    apartments:      { mod: { search: 1.2, social: 1.3, retarget: 1.2, youtube: 0.8, ctv: 0.8, dooh: 0.7, shopping: 0 } }
+  };
+  var CAT_ALIAS = { apartment: "apartments", "apartment-analyzer": "apartments", "furniture-analyzer": "furniture" };
+  function tune(s, cat) {
+    var t = CAT_TUNE[CAT_ALIAS[cat] || cat];
+    if (!s || !t) return s;
+    var w = {}; Object.keys(s.weights).forEach(function (k) { var m = t.mod[k] != null ? t.mod[k] : 1, v = Math.round(s.weights[k] * m * 10) / 10; if (v > 0) w[k] = v; });
+    return Object.assign({}, s, { weights: w, tunedFor: CAT_ALIAS[cat] || cat });
+  }
+
   window.AdtaxiPlan = {
+    CAT_TUNE: CAT_TUNE, tune: tune,
     extend: extend, whyLine: whyLine,
     CHANNELS: CHANNELS, ROLES: ROLES, STRATEGIES: STRATEGIES, MIN_BUDGET: MIN_BUDGET, TIERS: TIERS,
     SERVICE_TIERS: SERVICE_TIERS, CUSTOM_PLAN_BUDGET: CUSTOM_PLAN_BUDGET, FEES: FEES,

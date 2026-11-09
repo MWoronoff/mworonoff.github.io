@@ -1290,7 +1290,7 @@
     if (window.AdtaxiPlan) { done(); return; }
     if (loadPlan.waiting) { loadPlan.waiting.push(done); return; }
     loadPlan.waiting = [done];
-    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261109d";
+    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261109e";
     sc.onload = function () { var w = loadPlan.waiting; loadPlan.waiting = null; w.forEach(function (f) { f(); }); };
     sc.onerror = function () { loadPlan.waiting = null; };
     document.head.appendChild(sc);
@@ -1392,10 +1392,16 @@
      would put at least that much on the line. The rep can change the budget or strategy; the held line keeps its amount. */
   var HAND_JOB = { youtube: "Online video before and during web, app and streaming content, targeted by audience and location." };
   Radius.prototype.handoff = function (h) { this.hand = h; if (window.AdtaxiPlan && this.bStrat && this.bStrat.options.length > 1) { this.applyHand(); this.renderBudget(); } };
+  // The strategy with this category's channel tuning (shared with the Media Mix Planner); Franchise and Custom use it as is
+  Radius.prototype.stratFor = function (id) {
+    var P = window.AdtaxiPlan; if (!P || !id) return null;
+    var s = P.STRATEGIES.filter(function (x) { return x.id === id; })[0];
+    return s && P.tune ? P.tune(s, this.resultsCat()) : s;
+  };
   Radius.prototype.applyHand = function () {
     var h = this.hand, P = window.AdtaxiPlan, b = this.budget;
     if (!h || !P || !P.CHANNELS[h.id]) return;
-    var s = P.STRATEGIES.filter(function (x) { return x.id === "awareness"; })[0] || P.STRATEGIES[0];
+    var s = this.stratFor("awareness") || P.STRATEGIES[0];
     var label = h.product ? h.product + (h.id === "youtube" ? " (online video)" : "") : P.CHANNELS[h.id].label;
     b.fixed = { id: h.id, dollars: h.dollars, label: label, short: h.product || P.CHANNELS[h.id].short, job: HAND_JOB[h.id] || null, cpm: h.cpm || null };
     b.strat = s.id; this.bStrat.value = s.id;
@@ -1467,7 +1473,7 @@
     if (window.AdtaxiSlides) { done(); return; }
     if (loadSlides.waiting) { loadSlides.waiting.push(done); return; }
     loadSlides.waiting = [done];
-    var sc = document.createElement("script"); sc.src = "../shared/slides.js?v=20261109d";
+    var sc = document.createElement("script"); sc.src = "../shared/slides.js?v=20261109e";
     sc.onload = sc.onerror = function () { var w = loadSlides.waiting; loadSlides.waiting = null; w.forEach(function (f) { f(); }); };
     document.head.appendChild(sc);
   }
@@ -1503,7 +1509,7 @@
     var out = { pick: pick, money: null, strat: null, plan: null, channels: [], below: false };
     if (!pick.length) return out;
     out.money = P ? P.applyFees(b.amount) : { entered: b.amount, media: b.amount, fee: 0, total: b.amount, tierBudget: b.amount, feesOn: false };
-    out.strat = P && b.strat ? P.STRATEGIES.filter(function (x) { return x.id === b.strat; })[0] : null;
+    out.strat = P && b.strat ? this.stratFor(b.strat) : null;
     out.below = !!(P && b.amount && out.money.tierBudget < P.MIN_BUDGET);
     if (out.strat) {
       out.plan = P.buildPlan(out.strat, out.below ? null : out.money.media, out.below ? null : out.money.tierBudget, b.fixed);
@@ -1567,7 +1573,7 @@
   Radius.prototype.suggestBudget = function () {
     var b = this.budget, P = window.AdtaxiPlan, self = this;
     if (!P || !this.bSuggest) return;
-    var strat = b.strat ? P.STRATEGIES.filter(function (x) { return x.id === b.strat; })[0] : null;
+    var strat = b.strat ? this.stratFor(b.strat) : null;
     var mine = b.goalPct && b.goalFreq && b.goalPct < P.RF.MAX * 100, g = mine ? [b.goalPct, b.goalFreq] : DEFAULT_GOALS[b.strat] || [30, 5];
     var T = strat && !b.fixed ? this.budgetFor(g[0], g[1], strat) : null;
     b.suggested = T ? { amount: T, pct: g[0], freq: g[1], mine: mine } : null;
@@ -1615,7 +1621,7 @@
       out.textContent = "A campaign realistically reaches at most about " + Math.round(P.RF.MAX * 100) + "% of an audience. Lower the reach goal.";
       return;
     }
-    var need = P.imprForGoal(R, F, aud), strat = b.strat ? P.STRATEGIES.filter(function (x) { return x.id === b.strat; })[0] : null;
+    var need = P.imprForGoal(R, F, aud), strat = b.strat ? this.stratFor(b.strat) : null;
     var goalTrp = R * F / aud * 100;
     var txt = (Math.round(pc * 10) / 10) + "% reach \u00d7 " + (Math.round(F * 10) / 10) + " frequency = " + NF0.format(Math.round(goalTrp)) + " TRPs (" + NF0.format(Math.round(R / 100) * 100) + " of the " + NF0.format(Math.round(aud)) + " people in the plan's ZIPs), about " + NF0.format(Math.round(need / 1000) * 1000) + " targeted impressions a month.";
     // One reach curve sets reach and frequency together: a low-reach, high-frequency goal gets its TRPs spread wider
@@ -1624,9 +1630,7 @@
     if (!strat) { out.textContent = txt + " Choose a media strategy below to size the budget."; return; }
     var found = this.budgetFor(pc, F, strat);
     if (!found) { out.textContent = txt + " That's more than " + money(1000000) + " a month with " + strat.label + "; the strategy team can plan a goal this size."; return; }
-    out.appendChild(document.createTextNode(txt + " With " + strat.label + ", that takes about "));
-    out.appendChild(el("b", { text: money(found) + " a month" }));
-    out.appendChild(document.createTextNode(". "));
+    out.appendChild(el("span", null, [txt + " With " + strat.label + ", that takes about ", el("b", { text: money(found) + " a month" }), "."]));
     if (b.amount !== found) out.appendChild(el("button", { type: "button", class: "az-btn", text: "Use " + money(found), onclick: function () {
       b.amount = found; b.userBudget = true; self.bAmount.value = money(found); self.renderBudget(); } }));
     else out.appendChild(el("span", { class: "rz-goal-ok", text: "The budget below is set to this." }));
@@ -1951,7 +1955,7 @@
     if (!b.amount || !A.strat || !A.withDollars || !A.plan || !A.plan.tier || !A.channels.length) { st.textContent = "Enter a monthly budget and choose a media strategy first."; return Promise.resolve(null); }
     st.textContent = "Building…";
     var base = this.proposalBase();
-    return Promise.all([loadScriptOnce(this.cfg.pptxScript || "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261109d"), this.benchmarks(), this.logoImage()])
+    return Promise.all([loadScriptOnce(this.cfg.pptxScript || "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261109e"), this.benchmarks(), this.logoImage()])
       .then(function (res) { return window.AdtaxiProposal.build(self.proposalContext(res[2], res[3]), opt); })
       .then(function (out) { st.textContent = "Downloaded. Open it in PowerPoint or Google Slides to edit."; return out; })
       .catch(function (e) { st.textContent = "The proposal couldn't be built (" + e.message + "). Try again in a minute."; throw e; });

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script>/* site-version: if this page is an old saved copy, reload it once with the current version (shared/version.json; bump both on each release) */
-(function(){var V="20261109d";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
+(function(){var V="20261109e";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Digital Media Mix Planner</title>
 <meta name="robots" content="noindex">
@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
-<link rel="stylesheet" href="../shared/engine.css?v=20261109d">
+<link rel="stylesheet" href="../shared/engine.css?v=20261109e">
 <style>
   .mm-main { max-width: 1240px; margin: 0 auto; padding: 22px 20px 40px; }
   .mm-draft { background: var(--warn-bg); border: 1px solid var(--warn-line); border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; font-size: 13px; }
@@ -145,7 +145,7 @@
   <div class="mm-sheet" id="sheet" aria-live="polite"></div>
 </main>
 
-<script src="../shared/media-plan.js?v=20261109d"></script>
+<script src="../shared/media-plan.js?v=20261109e"></script>
 <script src="../shared/results.js?v=20261028e"></script>
 <script>
 /* =====================  SETTINGS (draft: edit here)  =====================
@@ -162,8 +162,7 @@ var CATEGORIES = [
     formats: [ { label: "Digital video", value: 11.96, sub: "incl. CTV $3.3B" }, { label: "Search", value: 8.23 },
                { label: "Display", value: 3.84 }, { label: "Other digital", value: 0.75 } ],
     programmatic: 14.73,
-    short: "auto advertisers", mod: { youtube: 1.2, ctv: 1.2 },
-    tuned: "more YouTube and CTV, since video takes nearly half of auto digital spend.",
+    short: "auto advertisers", tuned: "more YouTube and CTV, since video takes nearly half of auto digital spend.",
     note: "National totals for all automotive advertisers; local dealer mixes vary." },
   { id: "healthcare", label: "Healthcare", noun: "healthcare", digital: 8.58, traditional: 2.14, social: 1.60,
     formats: [ { label: "Search", value: 4.80 }, { label: "Digital video", value: 2.53, sub: "incl. CTV $1.3B" },
@@ -173,8 +172,7 @@ var CATEGORIES = [
              "52.8% of Gen Z and 36.9% of millennials who look up health information use social media to do it, versus 14.4% of baby boomers.",
              "Local practices: 65% of patients search online before contacting a doctor, and more than 70% read reviews first." ],
     source: "EMARKETER forecasts, 2026; patient research: Digital Silk, Modern Healthcare Marketing and Behavior (May 2025), via SalesFuel AdMall",
-    short: "healthcare", mod: { search: 1.3, social: 1.1, retarget: 0.5, display: 0.9, shopping: 0 },
-    tuned: "search first, for patients looking for care now, with lighter retargeting because health-related tracking is restricted.",
+    short: "healthcare", tuned: "search first, for patients looking for care now, with lighter retargeting because health-related tracking is restricted.",
     rules: "privacy rules limit tracking on patient-facing web pages, and Google and Meta restrict targeting based on health conditions.",
     note: "Healthcare providers only, excluding pharma. EMARKETER reports the healthcare-only digital total; the format split and traditional spend are estimated from its combined healthcare and pharma shares. National totals; local practice and hospital mixes vary." },
   { id: "financial", label: "Financial", noun: "financial services", digital: 57.94, traditional: 9.55, social: 16.50,
@@ -184,8 +182,7 @@ var CATEGORIES = [
     facts: [ "Banks, 2026 ad budgets: social 23%, paid search 17%, video/OTT 14%, display 10%, influencer 8%, TV and radio 6%, direct mail 3%.",
              "83% of bank marketers plan to increase digital in 2026, and 63% search (paid and SEO); only 7% plan to increase TV and 2% newspapers." ],
     source: "EMARKETER forecasts, 2026; bank budgets: ABA Banking Journal, Where bank marketers are investing for 2026 (October 2025), via SalesFuel AdMall",
-    short: "financial services", mod: { search: 1.2, social: 1.2, youtube: 1.1, ctv: 1.1, shopping: 0 },
-    tuned: "search and social, where banks put the largest shares of their budgets, with video to build familiarity.",
+    short: "financial services", tuned: "search and social, where banks put the largest shares of their budgets, with video to build familiarity.",
     rules: "credit and lending ads fall under Google's and Meta's special ad category rules, which limit targeting by age, gender and ZIP code.",
     note: "National totals for all financial services advertisers, including national banks, card issuers and insurers; local bank, credit union and advisor mixes vary." },
   { id: "furniture", label: "Furniture", noun: "home furnishings", digital: 15.01, traditional: 1.970, social: 5.660,
@@ -194,8 +191,7 @@ var CATEGORIES = [
              "Retail-wide, CTV spend grows 21.1% in 2026 while linear TV falls 11.1%." ],
     source: "EMARKETER forecasts, 2026; store budgets: Furniture Today, 2025 furniture store performance (February 2026), via SalesFuel AdMall",
     fine: "EMARKETER's Retail figures used for the split don't separate display from video.",
-    short: "furniture", mod: { shopping: 1.3, social: 1.2, retarget: 1.2, display: 1.1 },
-    tuned: "product ads, social and retargeting, matching how shoppers browse furniture before they buy.",
+    short: "furniture", tuned: "product ads, social and retargeting, matching how shoppers browse furniture before they buy.",
     note: "EMARKETER reports the home furnishings digital total; the traditional spend and format split are estimated from its Retail shares. National totals; local store mixes vary." },
   { id: "legal", label: "Legal", noun: "law firm", heading: "How law firms spend", local: true, total: 9.3, digital: 4.675, traditional: 4.625,
     intro: "U.S. local law firm ad spend, 2026, and how the budget splits by medium.",
@@ -204,8 +200,7 @@ var CATEGORIES = [
              "Direct mail (19%) and TV (25% with cable and CTV) carry most of the traditional budget.",
              "When researching a lawyer, consumers say they'd use Google (87%), ChatGPT (28%), Facebook (25%) and YouTube (20%)." ],
     fine: "Medium shares are BIA's 2025 mix. Mobile, PC/laptop and CTV are digital; the digital parts of TV, radio, newspaper and other are estimated from BIA's ratios for local auto dealers.",
-    short: "law firms", mod: { search: 1.3, retarget: 1.2, youtube: 1.2, ctv: 1.2, display: 0.8, dooh: 0.8, shopping: 0 },
-    tuned: "search first, since that's where people start looking for a lawyer, with retargeting and video to build the trust that wins the call.",
+    short: "law firms", tuned: "search first, since that's where people start looking for a lawyer, with retargeting and video to build the trust that wins the call.",
     market: "Avvo, FindLaw and Google Local Services Ads (pay per lead) are bought directly or managed separately, outside this plan.",
     rules: "state bar rules govern attorney ads, including claims about results and required disclaimers.",
     footSrc: "BIA local forecast, law firms (local advertisers only)",
@@ -216,8 +211,7 @@ var CATEGORIES = [
     facts: [ "Direct mail is the largest traditional channel, at $455M (28% of the total).",
              "Digital spend grows 6.4% from 2025; traditional grows 2.1%.",
              "CTV/streaming is projected for double-digit growth in 2026." ],
-    short: "higher education", mod: { social: 1.4, youtube: 1.3, ctv: 1.2, retarget: 1.1, display: 0.9, shopping: 0 },
-    tuned: "more social and video, where prospective students spend their time, with retargeting through a long decision process.",
+    short: "higher education", tuned: "more social and video, where prospective students spend their time, with retargeting through a long decision process.",
     note: "U.S. local ad spend for BIA's Education category, which includes colleges along with other schools and training. Local advertisers only; excludes national campaigns." },
   { id: "home-services", label: "Home Services", noun: "home services", heading: "How home services advertisers likely spend", local: true, noTotal: true, digital: 0.5829, traditional: 0.4171,
     intro: "Modeled from similar-in-appeal local categories: how the budget likely splits by medium.",
@@ -226,8 +220,7 @@ var CATEGORIES = [
              "75% of home service companies invest in digital advertising, ahead of print (42%) and out-of-home (41%); phone calls are the top-performing call to action (44%).",
              "Share of contractors advertising in each: Facebook 29%, Google Ads 26%, Instagram 20%, newspapers and magazines 14%, radio 3%, YouTube 2%, TV 2%." ],
     fine: "A model, not measured home services spend. Mobile, PC/laptop and CTV are digital; the digital parts of the other media are estimated from BIA's auto-dealer ratios.",
-    short: "home services", mod: { search: 1.3, social: 1.4, retarget: 1.2, ctv: 0.7, youtube: 0.6, dooh: 0.7, shopping: 0 },
-    tuned: "search first, to be there when something breaks, with more social, where contractors' customers already see them, and retargeting to stay top of mind until the job is booked. Less video, which contractors rarely use.",
+    short: "home services", tuned: "search first, to be there when something breaks, with more social, where contractors' customers already see them, and retargeting to stay top of mind until the job is booked. Less video, which contractors rarely use.",
     market: "Angi, Thumbtack and Google Local Services Ads (pay per lead) are bought directly or managed separately, outside this plan.",
     footSrc: "modeled from similar-in-appeal BIA local categories",
     source: "Modeled from similar-in-appeal categories using BIA Advisory Services data: Legal Services (April 2025) and Automotive Tiers 1, 2 & 3 (February 2026); channel use: Scorpion, 2026 State of Home Services Marketing, SORCI, State of Residential Construction Industry (2024), and Improve & Grow, U.S. Construction & Contractor Market Report (2025), via SalesFuel AdMall",
@@ -235,8 +228,7 @@ var CATEGORIES = [
   { id: "apartments", label: "Apartments", noun: "real estate", local: true, digital: 5.184, traditional: 1.216,
     formats: [ { label: "Search and display", value: 4.14 }, { label: "Video, social and other digital", value: 1.044, sub: "remainder of digital" } ],
     facts: [ "Digital spend grows 6.6% from 2025." ],
-    short: "apartments", mod: { search: 1.2, social: 1.3, retarget: 1.2, youtube: 0.8, ctv: 0.8, dooh: 0.7, shopping: 0 },
-    tuned: "search and social for renters who are actively looking, with retargeting to bring them back to book a tour.",
+    short: "apartments", tuned: "search and social for renters who are actively looking, with retargeting to bring them back to book a tour.",
     market: "Apartments.com, Zillow and other rental listing sites are bought directly, outside this plan.",
     rules: "housing ads fall under Google's and Meta's special ad category rules, which limit targeting by age, gender and ZIP code, and fair housing law applies to all housing ads.",
     note: "Stand-in: BIA's local Real Estate category, which also includes brokers, agents and developers. Apartment communities lean heavily on rental listing sites as well. Local advertisers only; excludes national campaigns." }
@@ -353,9 +345,7 @@ var P = window.AdtaxiPlan, CHANNELS = P.CHANNELS, ROLES = P.ROLES, STRATEGIES = 
   // Channel plan math is shared with the analyzers (../shared/media-plan.js)
   // A category's mod multiplies the strategy's channel weights (0 drops a channel, e.g. Shopping where nothing is sold online)
   function tunedStrategy(s, c) {
-    if (!s || !c || !c.mod) return s;
-    var w = {}; Object.keys(s.weights).forEach(function (k) { var m = c.mod[k] != null ? c.mod[k] : 1, v = Math.round(s.weights[k] * m * 10) / 10; if (v > 0) w[k] = v; });
-    return Object.assign({}, s, { weights: w });
+    return s && c ? P.tune(s, c.id) : s;   // category tuning lives in shared/media-plan.js, shared with the analyzers
   }
   function buildPlan(s, budget, c) { return P.buildPlan(tunedStrategy(s, c), budget); }
 

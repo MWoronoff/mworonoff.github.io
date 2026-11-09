@@ -114,10 +114,24 @@
     items.forEach(function (it) { var v = it.f && it.f[key], ww = it[wkey]; if (v != null && ww > 0) { s += ww * (v - mean) * (v - mean); w += ww; } });
     return w > 0 ? Math.sqrt(s / w) : null;
   }
+  // Solve H x = g (small, symmetric positive definite) by Gaussian elimination with partial pivoting
+  function solveLin(H, g) {
+    var n = g.length, A = H.map(function (r, i) { return r.slice().concat([g[i]]); });
+    for (var c = 0; c < n; c++) {
+      var p = c; for (var r = c + 1; r < n; r++) if (Math.abs(A[r][c]) > Math.abs(A[p][c])) p = r;
+      if (Math.abs(A[p][c]) < 1e-12) return null;
+      var t = A[c]; A[c] = A[p]; A[p] = t;
+      for (var r2 = c + 1; r2 < n; r2++) { var f = A[r2][c] / A[c][c]; for (var k = c; k <= n; k++) A[r2][k] -= f * A[c][k]; }
+    }
+    var x = new Array(n);
+    for (var i = n - 1; i >= 0; i--) { var s = A[i][n]; for (var j = i + 1; j < n; j++) s -= A[i][j] * x[j]; x[i] = s / A[i][i]; }
+    return x;
+  }
   // Plain-English description of the fitted distance curve
-  function distText(R, unit) {
+  function distText(R, unit, short) {
     var lv = R.floorPct ? ", then declines much more slowly farther out" : "";
-    if (R.halfMiles) return "Your " + unit + " rate falls to half its near-location level within about " + NF1.format(R.halfMiles) + " miles" + lv + ".";
+    var thin = !short && R.inMarket < 300 ? " With fewer than 300 " + unit + "s in the trade area, treat this distance as a rough guide." : "";
+    if (R.halfMiles) return "Your " + unit + " rate falls to half its near-location level within about " + NF1.format(R.halfMiles) + " miles" + lv + "." + thin;
     return "Your " + unit + " rate falls gradually with distance from your nearest location" + lv + ".";
   }
   // Poisson tail probabilities: exact for small counts (a normal approximation would flag too many ZIPs). For large
@@ -601,6 +615,72 @@
       var f0 = fit(sc, 0); if (f0.ll > best.ll + 1e-9) best = f0;
       FLOORS.forEach(function (fl) { SLOW.forEach(function (s2) { if (s2 <= sc * 1.5) return; var f = fit(sc, fl, s2); if (f.ll > best.ll + 1e-9) best = f; }); });
     }
+    // Distance and customer type fitted together. When the kind of household that buys clusters near (or far from) a
+    // location, a distance-only fit reads that clustering as distance. So each candidate distance curve is scored
+    // after also fitting the 4 characteristics that best track customers (a Poisson regression on standardized traits,
+    // with the curve as offset), and the curve that explains customers best with those traits held constant is kept.
+    // Only the distance curve uses this: each ZIP's expected count below still comes from distance and potential
+    // alone, so the profile of the strongest ZIPs is found the same way as before.
+    if (useDist && best.s && totA >= 100) {
+      var stdz = {};
+      S.fields.filter(function (f) { return f.sim; }).forEach(function (f) {
+        var m = wmean(items, f.key, "B"), sd = m == null ? null : wsd(items, f.key, "B", m); if (sd > 0) stdz[f.key] = { m: m, sd: sd };
+      });
+      var zx = function (it, k) { var v = it.f && it.f[k]; return v == null ? 0 : (v - stdz[k].m) / stdz[k].sd; };
+      // traits: strongest link to customers per household with no distance assumed, skipping near-duplicates
+      var rate0 = totA / items.reduce(function (t, it) { return t + it.B; }, 0);
+      var wcorr = function (fx, fy) {
+        var sw = 0, sx = 0, sy = 0, sxx = 0, syy = 0, sxy = 0;
+        items.forEach(function (it) { var w = it.B * rate0, x = fx(it), y = fy(it); sw += w; sx += w * x; sy += w * y; sxx += w * x * x; syy += w * y * y; sxy += w * x * y; });
+        var vx = sxx / sw - (sx / sw) * (sx / sw), vy = syy / sw - (sy / sw) * (sy / sw);
+        return vx > 0 && vy > 0 ? (sxy / sw - sx * sy / sw / sw) / Math.sqrt(vx * vy) : 0;
+      };
+      var lres = function (it) { return Math.log((it.A + 0.5) / (it.B * rate0 + 0.5)); };
+      var pick = [];
+      Object.keys(stdz).map(function (k) { return { k: k, r: wcorr(function (it) { return zx(it, k); }, lres) }; })
+        .sort(function (a, b) { return Math.abs(b.r) - Math.abs(a.r); })
+        .forEach(function (c) {
+          if (pick.length >= 4 || Math.abs(c.r) < 0.15) return;
+          if (pick.every(function (q) { return Math.abs(wcorr(function (it) { return zx(it, q); }, function (it) { return zx(it, c.k); })) <= 0.75; })) pick.push(c.k);
+        });
+      if (pick.length) {
+        var X = items.map(function (it) { return [1].concat(pick.map(function (k) { return zx(it, k); })); }), K = pick.length + 1;
+        var glm = function (shape) {   // Poisson regression, offset log(potential x distance shape); returns log-likelihood
+          var off = items.map(function (it) { return it.B * shape(it.d); });
+          var beta = [Math.log(totA / (off.reduce(function (t, v) { return t + v; }, 0) || 1))].concat(pick.map(function () { return 0; })), ll = 0;
+          for (var iter = 0; iter < 30; iter++) {
+            var g = beta.map(function (b, i) { return i ? -b : 0; }), H = beta.map(function (_, i) { return beta.map(function (_, j) { return i === j && i ? 1 : 0; }); });
+            ll = 0;
+            for (var n = 0; n < items.length; n++) {
+              var x = X[n], eta = 0; for (var i = 0; i < K; i++) eta += beta[i] * x[i];
+              var mu = off[n] * Math.exp(Math.max(-20, Math.min(20, eta))), A = items[n].A;
+              if (mu > 0) ll += A * Math.log(mu) - mu;
+              for (var i2 = 0; i2 < K; i2++) { g[i2] += (A - mu) * x[i2]; for (var j = i2; j < K; j++) H[i2][j] += mu * x[i2] * x[j]; }
+            }
+            for (var a1 = 0; a1 < K; a1++) for (var b1 = 0; b1 < a1; b1++) H[a1][b1] = H[b1][a1];
+            var st = solveLin(H, g); if (!st) break;
+            var mx = 0; for (var i3 = 0; i3 < K; i3++) { beta[i3] += st[i3]; mx = Math.max(mx, Math.abs(st[i3])); }
+            if (mx < 1e-5) break;
+          }
+          for (var b2 = 1; b2 < K; b2++) ll -= beta[b2] * beta[b2] / 2;   // the ridge penalty counts against the fit
+          return ll;
+        };
+        var shapeOf = function (sc, fl, s2) { return function (d) { return (1 - fl) * Math.exp(-d / sc) + (fl ? fl * Math.exp(-d / s2) : 0); }; };
+        var jb = { ll: glm(function () { return 1; }), s: 0, f: 0, s2: null };   // "no distance effect" is a candidate too
+        var JF = [0, 0.05, 0.1, 0.2, 0.3, 0.5], JS2 = [12, 25, 50, 100, 200];
+        for (var sc2 = 1; sc2 <= 400; sc2 *= 1.25) JF.forEach(function (fl) {
+          (fl ? JS2 : [null]).forEach(function (s2) {
+            if (fl && s2 <= sc2 * 1.5) return;
+            var ll = glm(shapeOf(sc2, fl, s2)); if (ll > jb.ll + 1e-9) jb = { ll: ll, s: sc2, f: fl, s2: s2 };
+          });
+        });
+        if (jb.s) {   // refine the near-store scale around the winner
+          for (var sc3 = jb.s / 1.25; sc3 <= jb.s * 1.25; sc3 *= 1.03) { var ll3 = glm(shapeOf(sc3, jb.f, jb.s2)); if (ll3 > jb.ll + 1e-9) jb = { ll: ll3, s: sc3, f: jb.f, s2: jb.s2 }; }
+          best = fit(jb.s, jb.f, jb.s2);   // re-level to each ZIP's potential alone
+        } else best = fit(0);
+        S.jointTraits = pick;
+      }
+    }
     var rateAt = function (d) { return best.a * (best.s ? (1 - best.f) * Math.exp(-d / best.s) + (best.f ? best.f * Math.exp(-d / best.s2) : 0) : 1); };
     items.forEach(function (it) { it.E = it.B * rateAt(useDist ? it.d : 0); });
     // for the chart: observed rate by distance band next to the fitted curve
@@ -1072,7 +1152,7 @@
       k(NF0.format(R.cand.filter(function (c) { return c.opp; }).length), "untapped look-alike ZIPs")]));
     var bot = $("crm-print-bottom"); bot.innerHTML = "";
     var find = [];
-    if (R.distFit) find.push(distText(R, unit).replace(/\.$/, "") + "; expected " + unit + " account for this.");
+    if (R.distFit) find.push(distText(R, unit, true).replace(/\.$/, "") + "; expected " + unit + " account for this.");
     if (traits.length) find.push((R.weakSignal ? "Tentatively, your" : "Your") + " strongest ZIPs differ most from the area in " + traits.slice(0, 3).map(function (p) {
       return p.f.label.toLowerCase() + " (" + (p.strong >= p.market ? "higher" : "lower") + ": " + fmt(p.strong, p.f.unit) + " vs. " + fmt(p.market, p.f.unit) + " across the area)"; }).join(", ") + ".");
     if (under.length) find.push("The biggest gaps: " + under.slice(0, 3).map(function (it) { return zipName(it.z) + " (" + NF0.format(it.A) + " vs. " + NF0.format(it.E) + " expected)"; }).join("; ") + ".");
@@ -1122,7 +1202,7 @@
         el("h3", { text: "Your data stays with you" }),
         el("p", { text: "The customer file is read by your browser. Only ZIP codes and amounts are kept, and only in this page's memory; nothing is sent to a server. Closing the page clears it." }),
         el("h3", { text: "Expected customers" }),
-        el("p", { text: "Each ZIP's potential is its households, or the audience you choose, such as homeowners, renters, adults 65+ or households earning $100K+. When you open the tool from a category analyzer, potential starts at that category's core audience (adults 65+ for hearing care, homeowners for home services, renters for apartments and so on). When you give your location ZIPs, the tool fits a smooth curve to your own data showing how your customer rate falls with distance from your nearest location (or finds that distance doesn't matter). A ZIP's expected customers are its potential times the rate on that curve for its distance. This keeps far-away ZIPs from being marked weak just because they're far away." }),
+        el("p", { text: "Each ZIP's potential is its households, or the audience you choose, such as homeowners, renters, adults 65+ or households earning $100K+. When you open the tool from a category analyzer, potential starts at that category's core audience (adults 65+ for hearing care, homeowners for home services, renters for apartments and so on). When you give your location ZIPs, the tool fits a smooth curve to your own data showing how your customer rate falls with distance from your nearest location (or finds that distance doesn't matter). The curve is fitted together with the few characteristics that best track your customers, so a cluster of your kind of household near a location isn't mistaken for distance. A ZIP's expected customers are its potential times the rate on that curve for its distance. This keeps far-away ZIPs from being marked weak just because they're far away." }),
         el("h3", { text: "Performance index" }),
         el("p", { text: "Index = customers ÷ expected × 100, after adding two customers' worth of 'average' to both, so ZIPs with only a handful of customers aren't over-read. Over-performing means an index of 120+ and a customer count that would happen by chance less than 2.5% of the time if the ZIP were average (an exact Poisson test); under-performing means an index of 80 or below on the same test. ZIPs expecting fewer than 1.5 customers with fewer than 3 actual are marked too few to judge." }),
         el("h3", { text: "What your strongest ZIPs have in common" }),
