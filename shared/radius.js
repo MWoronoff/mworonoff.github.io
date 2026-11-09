@@ -69,6 +69,10 @@
                   "18_34": ["18_24", "25_34"], "35_64": ["35p"], "65_74": ["35p"], "75p": ["35p"] };
   var EMPLOY = { emp: "employed", unemp: "unemployed", nilf: "nilf" };
   var RINC = [["lt35", "Under $35K"], ["35_50", "$35K–$49K"], ["50_75", "$50K–$74K"], ["75_100", "$75K–$99K"], ["100_150", "$100K–$149K"], ["150p", "$150K+"]];
+  var EDU = [["hsless", "High school or less"], ["some", "Some college or associate's"], ["ba", "Bachelor's degree"], ["grad", "Graduate degree"]];
+  // Radius age groups -> education age groups (zip_audience_demo.json)
+  var EDU_AGE = { "18_34": ["18_34"], "35_64": ["35_64"], "65_74": ["65p"], "75p": ["65p"], "18_24": ["18_34"], "25_34": ["18_34"],
+                  "35_44": ["35_64"], "45_54": ["35_64"], "55p": ["35_64", "65p"], "55_64": ["35_64"], "65p": ["65p"] };
   var FILTERS = {
     gender:   { label: "Gender", type: "multi", options: [["m", "Male"], ["f", "Female"]] },
     age:      { label: "Age", type: "multi", options: AGE },
@@ -109,6 +113,37 @@
                 byAge: function (c, i, b) { return b === "u18" || b === "15_17" ? 0 : ratio(c.veterans[i], c.vet_tot[i]); } },
     somecollege: { label: "Some college, no degree", type: "flag", text: "Adults 25+ who started college but didn't finish",
                    byAge: function (c, i, b) { return b === "u18" || b === "15_17" || b === "18_24" ? 0 : ratio(c.some_college[i], c.adults25[i]); } },
+    // Trade Area Tool (general audience). Education: each age group's own rate (Census B15001, zip_audience_demo.json);
+    // until that file loads, the 25+ rate (B15003). Children aren't counted once either filter is chosen.
+    edu:      { label: "Education", type: "multi", options: EDU,
+                byAge: function (c, i, b, sel) {
+                  if (b === "u18" || b === "15_17") return 0;
+                  var g = EDU_AGE[b];
+                  if (g && c["edt_" + g[0]]) {
+                    var x = 0, t = 0;
+                    for (var k = 0; k < g.length; k++) {
+                      var tt = c["edt_" + g[k]][i]; if (tt == null) return null; t += tt;
+                      for (var q = 0; q < sel.length; q++) { var v = c["ed_" + sel[q] + "_" + g[k]][i]; if (v == null) return null; x += v; }
+                    }
+                    return t ? Math.min(1, x / t) : 0;
+                  }
+                  var a = c.adults25[i]; if (a == null) return null;
+                  var lv = { some: c.some_college[i] + c.assoc[i], ba: c.ba_only[i], grad: c.grad_deg[i] };
+                  lv.hsless = a - lv.some - lv.ba - lv.grad;
+                  return a ? Math.min(1, Math.max(0, sum(sel, function (k) { return lv[k]; })) / a) : 0;
+                } },
+    // Marital status (Census B12001, people 15+): the ZIP's adult rate, taking 15-17 year olds out as never married.
+    // Census doesn't publish it with the radius age groups at the ZIP level, so the same rate applies to every adult age.
+    marital:  { label: "Marital status", type: "multi", options: [["married", "Married"], ["never", "Never married"], ["other", "Divorced, separated or widowed"]],
+                byAge: function (c, i, b, sel) {
+                  if (b === "u18") return 0;
+                  if (b === "15_17") return sel.indexOf("never") >= 0 ? 1 : 0;
+                  if (!c.mar_married) return null;
+                  var y = (c.m15_17[i] || 0) + (c.f15_17[i] || 0), t = c.marital_tot[i]; if (t == null) return null; t -= y;
+                  var v = { married: c.mar_married[i], never: c.mar_never[i] == null ? null : Math.max(0, c.mar_never[i] - y), other: c.mar_other[i] };
+                  var x = sum(sel, function (k) { return v[k]; }); if (x == null) return null;
+                  return t > 0 ? Math.min(1, x / t) : 0;
+                } },
     homeowners: { label: "Homeowners", type: "flag", text: "Owner-occupied households", share: function (c, i) { return ratio(c.owners ? c.owners[i] : null, c.hhed_tot[i]); } },
 
     // Healthcare (age set "health"): applied within each age group
@@ -1255,7 +1290,7 @@
     if (window.AdtaxiPlan) { done(); return; }
     if (loadPlan.waiting) { loadPlan.waiting.push(done); return; }
     loadPlan.waiting = [done];
-    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261102d";
+    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261109a";
     sc.onload = function () { var w = loadPlan.waiting; loadPlan.waiting = null; w.forEach(function (f) { f(); }); };
     sc.onerror = function () { loadPlan.waiting = null; };
     document.head.appendChild(sc);
@@ -1874,7 +1909,7 @@
     if (!b.amount || !A.strat || !A.withDollars || !A.plan || !A.plan.tier || !A.channels.length) { st.textContent = "Enter a monthly budget and choose a media strategy first."; return Promise.resolve(null); }
     st.textContent = "Building…";
     var base = this.proposalBase();
-    return Promise.all([loadScriptOnce(this.cfg.pptxScript || "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261102d"), this.benchmarks(), this.logoImage()])
+    return Promise.all([loadScriptOnce(this.cfg.pptxScript || "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261109a"), this.benchmarks(), this.logoImage()])
       .then(function (res) { return window.AdtaxiProposal.build(self.proposalContext(res[2], res[3]), opt); })
       .then(function (out) { st.textContent = "Downloaded. Open it in PowerPoint or Google Slides to edit."; return out; })
       .catch(function (e) { st.textContent = "The proposal couldn't be built (" + e.message + "). Try again in a minute."; throw e; });
@@ -2203,6 +2238,7 @@
     if ((this.cfg.profiles || []).length) secs.push(["Target audiences", "Each category starts from a profile of its likely customers, built from the same Census and CDC data. A profile is a starting point: change any filter to fit the client. Each target audience shows only the filters that pertain to it; choose Custom audience to see them all. When a profile includes an \"either\" condition (such as 65 and older, or diabetes), people who meet either one are counted once. " + (this.cfg.blendScore ? "Counties come first, then ZIPs, both ranked by Score (0\u2013100): 40% index (how concentrated likely customers are), 30% estimated audience (how many there are) and 30% the profile's ZIP-wide rates, each a percentile among the area's counties or ZIPs. ZIPs and county parts with fewer than 1,000 residents aren't scored, since a high share of a tiny ZIP is too few people to reach. Sort by Index or Est. audience to see either on its own." : "The ZIP list is sorted by index, so the ZIPs where likely customers are most concentrated come first; ZIPs with fewer than 1,000 residents are listed after the rest, since a high share of a tiny ZIP is too few people to reach. Sort by Est. audience to see the largest counts.")]);
     if (cf.indexOf("built") >= 0) secs.push(["Homeowners", "Year built, home value, single-family detached and years in the home are Census counts of owner-occupied homes in each ZIP. The tool applies the homeowner rate for each age of householder once, then each selected trait's share among owner homes, so combining them doesn't count owners twice."]);
     if (cf.indexOf("renter") >= 0) secs.push(["Renters", "Renter income, rental type, recent moves, rent burden and children at home are Census counts of renter households in each ZIP. The tool applies the renter rate for each age of householder once, then each selected trait's share among renter households, so combining them doesn't count renters twice. Counts are adults in renter households."]);
+    if (cf.indexOf("edu") >= 0 || cf.indexOf("marital") >= 0) secs.push(["Education and marital status", "Both count people, not households, and leave out children. Education uses Census counts of each age group's highest degree in each ZIP, for adults 18 and older. Marital status uses each ZIP's rate for adults; Census doesn't publish it by these age groups for ZIPs, so the same rate applies at every age, and an age and marital status combination is a rougher estimate than either alone."]);
     if (cf.indexOf("parented") >= 0) secs.push(["Parents' education", "This is the education of the head of household in every household in the ZIP. Combine it with Children at home to estimate households with children whose head of household has no college."]);
     secs.push(["Index vs. U.S.", "A ZIP's audience share of its population, divided by the same share nationally, times 100. Above 100 means the audience is more concentrated there than in the U.S. overall."]);
     secs = secs.concat((this.cfg.methodology || []).map(function (m) { return [m.title, m.body]; }));
