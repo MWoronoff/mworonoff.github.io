@@ -34,6 +34,8 @@ Result: **PASSED**
 | Car commuters never exceeds its total | PASS | 0 ZIPs over |
 | Homes worth $300K+ never exceeds its total | PASS | 0 ZIPs over |
 | Limited-English households never exceeds its total | PASS | 0 ZIPs over |
+| Education by age group: levels add up (Trade Area Tool) | PASS | 0 ZIP-groups off |
+| Marital status: never married + married + divorced/separated/widowed = total | PASS | 0 ZIPs off |
 | Education by age (B15001): each age group adds up | PASS | 0 ZIP-groups off |
 | Education by age: male age groups add up to the male total | PASS | 0 ZIPs off |
 | Education by age: female age groups add up to the female total | PASS | 0 ZIPs off |
