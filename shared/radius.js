@@ -1290,7 +1290,7 @@
     if (window.AdtaxiPlan) { done(); return; }
     if (loadPlan.waiting) { loadPlan.waiting.push(done); return; }
     loadPlan.waiting = [done];
-    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261109c";
+    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261109d";
     sc.onload = function () { var w = loadPlan.waiting; loadPlan.waiting = null; w.forEach(function (f) { f(); }); };
     sc.onerror = function () { loadPlan.waiting = null; };
     document.head.appendChild(sc);
@@ -1442,12 +1442,32 @@
     loadResults(this.cfg.resultsScript, function () { self.renderResults(); });
     if (this.resultsPanel.showModal) { if (!this.resultsPanel.open) this.resultsPanel.showModal(); } else this.resultsPanel.setAttribute("open", "");
   };
+  /* Proposal wording for each target audience ("930,000 estimated likely credit union members in the trade area") */
+  var AUD_NOUNS = {
+    "apartment:all": "likely renters", "apartment:luxury": "likely luxury renters", "apartment:mid": "likely workforce renters",
+    "apartment:affordable": "likely affordable housing renters", "apartment:student": "likely student renters", "apartment:senior": "likely active adult (55+) renters",
+    "auto:newcar": "likely new car buyers", "auto:newtruck": "likely new truck and SUV buyers", "auto:usedcar": "likely used car buyers", "auto:usedtruck": "likely used truck and SUV buyers",
+    "financial:tax": "likely tax preparation clients", "financial:wealth": "likely wealth management clients", "financial:retire": "likely retirement planning clients",
+    "financial:purchase": "likely home buyers", "financial:refi": "likely refinance and home equity borrowers", "financial:bank": "likely bank customers", "financial:cu": "likely credit union members",
+    "furniture:any": "likely furniture shoppers", "furniture:living": "likely living room furniture shoppers", "furniture:bedroom": "likely bedroom furniture shoppers",
+    "furniture:mattress": "likely mattress shoppers", "furniture:dining": "likely dining furniture shoppers", "furniture:outdoor": "likely outdoor furniture shoppers", "furniture:baby": "likely nursery furniture shoppers",
+    "healthcare:primary": "likely primary care patients", "healthcare:hospital": "likely hospital patients", "healthcare:urgent": "likely urgent care patients",
+    "healthcare:pharmacy": "likely pharmacy customers", "healthcare:dental": "likely dental patients", "healthcare:hearing": "likely hearing care patients",
+    "healthcare:eye": "likely eye care patients", "healthcare:chiro": "likely chiropractic and physical therapy patients", "healthcare:behavioral": "likely behavioral health patients",
+    "healthcare:medspa": "likely med spa clients", "healthcare:senior": "likely senior and home care clients",
+    "higher-ed:fouryear": "likely four-year college students", "higher-ed:community": "likely community college students", "higher-ed:trade": "likely trade school students",
+    "higher-ed:graduate": "likely graduate students", "higher-ed:adult": "likely adult degree students",
+    "home-services:any": "likely home services customers", "home-services:hvac": "likely HVAC customers", "home-services:roof": "likely roofing customers",
+    "home-services:plumb": "likely plumbing customers", "home-services:elec": "likely electrical customers", "home-services:paint": "likely painting customers", "home-services:floor": "likely flooring customers",
+    "legal:pi": "likely personal injury clients", "legal:family": "likely family law clients", "legal:estate": "likely estate planning clients",
+    "legal:bankruptcy": "likely bankruptcy clients", "legal:employment": "likely employment law clients"
+  };
   /* ---------- Slides: category slides and platform guides (shared/slides.js) ---------- */
   function loadSlides(done) {
     if (window.AdtaxiSlides) { done(); return; }
     if (loadSlides.waiting) { loadSlides.waiting.push(done); return; }
     loadSlides.waiting = [done];
-    var sc = document.createElement("script"); sc.src = "../shared/slides.js?v=20261109c";
+    var sc = document.createElement("script"); sc.src = "../shared/slides.js?v=20261109d";
     sc.onload = sc.onerror = function () { var w = loadSlides.waiting; loadSlides.waiting = null; w.forEach(function (f) { f(); }); };
     document.head.appendChild(sc);
   }
@@ -1598,6 +1618,9 @@
     var need = P.imprForGoal(R, F, aud), strat = b.strat ? P.STRATEGIES.filter(function (x) { return x.id === b.strat; })[0] : null;
     var goalTrp = R * F / aud * 100;
     var txt = (Math.round(pc * 10) / 10) + "% reach \u00d7 " + (Math.round(F * 10) / 10) + " frequency = " + NF0.format(Math.round(goalTrp)) + " TRPs (" + NF0.format(Math.round(R / 100) * 100) + " of the " + NF0.format(Math.round(aud)) + " people in the plan's ZIPs), about " + NF0.format(Math.round(need / 1000) * 1000) + " targeted impressions a month.";
+    // One reach curve sets reach and frequency together: a low-reach, high-frequency goal gets its TRPs spread wider
+    var got = P.reachFreq(need, aud);
+    if (got && got.freq < F - 0.05) txt += " At that weight the plan's estimate is about " + Math.round(got.share * 100) + "% reach at a " + NF1.format(got.freq) + " frequency: the same TRPs, spread across more people, since digital delivery can't hold reach that low.";
     if (!strat) { out.textContent = txt + " Choose a media strategy below to size the budget."; return; }
     var found = this.budgetFor(pc, F, strat);
     if (!found) { out.textContent = txt + " That's more than " + money(1000000) + " a month with " + strat.label + "; the strategy team can plan a goal this size."; return; }
@@ -1852,7 +1875,7 @@
     // Trade-area counts describe the audience chosen in the tool; ad-response reasons describe AudienceSCAN's target group
     var hasSel = Object.keys(s.sel || {}).some(function (k) { return s.sel[k]; });
     var PC = this.cfg.proposal || {};   // page-specific proposal wording (franchise pages): goals by strategy, platform roles, a footnote line
-    var audienceNoun = prof && PC.nouns && PC.nouns[s.profile] ? PC.nouns[s.profile] : prof ? (/candidates|buyers|prospects|owners/i.test(prof.label) ? prof.label.toLowerCase() : "likely " + prof.label.toLowerCase() + " customers") : hasSel ? "people in the selected audience" : "residents";
+    var audienceNoun = prof && PC.nouns && PC.nouns[s.profile] ? PC.nouns[s.profile] : prof && AUD_NOUNS[this.resultsCat() + ":" + s.profile] ? AUD_NOUNS[this.resultsCat() + ":" + s.profile] : prof ? (/candidates|buyers|prospects|owners/i.test(prof.label) ? prof.label.toLowerCase() : "likely " + prof.label.toLowerCase() + " customers") : hasSel ? "people in the selected audience" : "residents";
     var adNoun = adSub && (adSub.noun || adSub.audience) ? adSub.noun || adSub.audience : audienceNoun;   // noun: how a blended audience reads in a sentence
     var rows = this.visible(), aud = 0, pop = 0;
     var basis = 0;
@@ -1928,7 +1951,7 @@
     if (!b.amount || !A.strat || !A.withDollars || !A.plan || !A.plan.tier || !A.channels.length) { st.textContent = "Enter a monthly budget and choose a media strategy first."; return Promise.resolve(null); }
     st.textContent = "Building…";
     var base = this.proposalBase();
-    return Promise.all([loadScriptOnce(this.cfg.pptxScript || "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261109c"), this.benchmarks(), this.logoImage()])
+    return Promise.all([loadScriptOnce(this.cfg.pptxScript || "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261109d"), this.benchmarks(), this.logoImage()])
       .then(function (res) { return window.AdtaxiProposal.build(self.proposalContext(res[2], res[3]), opt); })
       .then(function (out) { st.textContent = "Downloaded. Open it in PowerPoint or Google Slides to edit."; return out; })
       .catch(function (e) { st.textContent = "The proposal couldn't be built (" + e.message + "). Try again in a minute."; throw e; });

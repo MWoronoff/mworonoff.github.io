@@ -233,8 +233,8 @@ def measures(client):
     L_MKT = [l for l in L_ALL if l != "zip"]
     buyers = client["buyers"]["label"] if client else "Businesses with employees"
     bhelp = client["buyers"]["help"] if client else "All businesses with paid employees (Census ZIP Code Business Patterns): the base of potential customers for a business-to-business franchise."
-    score_help = ("0–100. Candidates 50%, Territory Opportunity 30%, Competition 20%, each a percentile among areas at the same level. ZIPs use Candidates only."
-                  if client else "0–100. Candidates 62.5%, Market Opportunity 37.5% (each a percentile among areas at the same level). ZIPs use Candidates only.")
+    score_help = ("0–100. Candidates 50%, Territory Opportunity 30%, Competition 20%, each a percentile among areas at the same level. ZIPs use Candidates only. Counties under 10,000 residents aren't ranked."
+                  if client else "0–100. Candidates 62.5%, Market Opportunity 37.5% (each a percentile among areas at the same level). ZIPs use Candidates only. Counties under 10,000 residents aren't ranked.")
     m = [
         {"key": "score", "label": "Franchise Opportunity Score", "short": "Score", "format": "score", "perSub": True, "levels": L_ALL, "help": score_help},
         {"key": "demand", "label": "Candidates", "short": "Candidates", "format": "score", "perSub": True, "levels": L_ALL,
@@ -283,7 +283,7 @@ def measures(client):
 def methodology(client):
     out = [{"title": "Franchise Opportunity Score", "body": [
         "Where are a franchise system's best owner candidates, and which " + ("territories" if client else "markets") + " deserve the most franchise-development ad dollars?",
-        ("Score = 50% Candidates + 30% Territory Opportunity + 20% Competition." if client else "Score = 62.5% Candidates + 37.5% Market Opportunity .")
+        ("Score = 50% Candidates + 30% Territory Opportunity + 20% Competition." if client else "Score = 62.5% Candidates + 37.5% Market Opportunity.")
         + " Each part is a percentile (0–100) against areas at the same level. No score is shown when a part has no data."]},
         {"title": "Candidates", "body": [
             "Master franchise candidates, first-time or not: householders 45–64 earning $125K+ (count and share), the IRS shares of returns with income of $200K+ and with capital gains, the IRS average salary per wage earner, the share of adults 25+ with a bachelor's degree or higher, and the share of workers in management occupations (a master franchisee recruits and supports sub-franchisees, so professional and management background matters). Each input counts equally. Census reports householder age only as 25–44 and 45–64, so the score uses 45–64, as does the Trade area.",
