@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script>/* site-version: if this page is an old saved copy, reload it once with the current version (shared/version.json; bump both on each release) */
-(function(){var V="20261110a";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
+(function(){var V="20261110b";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>TV + Digital Video Allocation Analyzer</title>
 <meta name="robots" content="noindex">
@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
-<link rel="stylesheet" href="../shared/engine.css?v=20261110a">
+<link rel="stylesheet" href="../shared/engine.css?v=20261110b">
 <style>
   .tv-map { height: 440px; }
   .tv-side { max-height: 440px; }
@@ -26,6 +26,9 @@
   .tv-stream[hidden] { display: none; }
   .tv-stream h2 { margin: 0 0 4px; font-size: 17px; color: var(--navy); }
   .tv-stream > p { margin: 0 0 12px; color: var(--muted); font-size: 13px; }
+  a.az-btn.tv-snapbtn { text-decoration: none; display: inline-flex; align-items: center; }
+  .tv-pdf .tv-snapbtn { display: none; }
+  @media print { .tv-snapbtn { display: none !important; } }
   .tv-scards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
   .tv-scard { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
   .tv-scard h3 { margin: 0 0 8px; font-size: 13px; color: #44586c; font-weight: 600; }
@@ -267,6 +270,7 @@
         <label class="az-field" id="fHandCat"><span>Business category</span><select id="handCat"><option value="">Choose a category…</option></select></label>
         <div class="tv-hand-amt" id="handAmt"></div>
         <button type="button" class="az-btn primary" id="handBtn" disabled>See how Digital Video fits into your media mix</button>
+        <a class="az-btn tv-snapbtn" href="snapshot.html" target="_blank" rel="noopener" title="Streaming vs. broadcast and cable: average share of U.S. TV-set viewing (Nielsen The Gauge, updated monthly)">TV Set Viewing</a>
       </div>
       <p class="tv-hand-msg" id="handMsg"></p>
       </div>
