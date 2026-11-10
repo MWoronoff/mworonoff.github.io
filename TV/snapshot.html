@@ -26,6 +26,7 @@
   .toolbar button.ghost { background: #fff; color: var(--teal-dk); border: 1.5px solid var(--teal); }
   .toolbar button.ghost:hover { background: var(--mint); }
   .toolbar button[disabled] { opacity: .6; cursor: progress; }
+  .toolbar button[hidden] { display: none; }
   .tb-actions { display: flex; gap: 10px; }
   .tb-note { flex-basis: 100%; margin: 0; text-align: right; font-size: 12.5px; color: var(--muted); }
   .sheet { width: 816px; height: 1056px; margin: 0 auto 32px; background: #fff; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 2px 14px rgba(0,0,0,.12); }
@@ -96,9 +97,9 @@
   <nav aria-label="Related tools"><a href="../TV/">TV-to-Digital Analyzer</a><a href="../analyzers/">Home</a></nav>
   <div class="tb-actions">
     <button type="button" id="pdfBtn">Download PDF</button>
-    <button type="button" id="emailBtn" class="ghost">Email</button>
+    <button type="button" id="emailBtn" class="ghost" hidden>Email</button>
   </div>
-  <p class="tb-note" id="tbNote">Email opens a draft with the key figures and downloads the PDF to attach.</p>
+  <p class="tb-note" id="tbNote"></p>
 </div>
 <div class="sheet-scroll">
 <main class="sheet">
@@ -202,7 +203,6 @@
     ]
   };
   var pdfBtn = document.getElementById("pdfBtn"), emailBtn = document.getElementById("emailBtn"), note = document.getElementById("tbNote");
-  var NOTE = note.textContent;
   function loadScript(src) { return new Promise(function (ok, no) { var s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); }); }
   var libs = null;
   function loadLibs() {
@@ -232,17 +232,17 @@
       pdf.save(EMAIL.file);
     }, function (e) { logo.setAttribute("src", oldSrc); throw e; });
   }
-  function busy(on, msg) { pdfBtn.disabled = emailBtn.disabled = on; note.textContent = msg || NOTE; }
+  function busy(on, msg) { pdfBtn.disabled = emailBtn.disabled = on; note.textContent = msg || ""; }
+  // Email appears only after the PDF has downloaded, so the rep has the file in hand to attach
   pdfBtn.addEventListener("click", function () {
     busy(true, "Preparing the PDF…");
-    makePdf().then(function () { busy(false); }, function () { busy(false, "The PDF couldn't be made here. Use your browser's Print, then Save as PDF."); });
+    makePdf().then(function () {
+      busy(false, "Saved as " + EMAIL.file + ". Email opens a draft with the key figures; attach the PDF.");
+      emailBtn.hidden = false;
+    }, function () { busy(false, "The PDF couldn't be made here. Use your browser's Print, then Save as PDF."); });
   });
   emailBtn.addEventListener("click", function () {
-    // Open the draft first (inside the click, so the browser allows it), then download the PDF to attach
     location.href = "mailto:?subject=" + encodeURIComponent(EMAIL.subject) + "&body=" + encodeURIComponent(EMAIL.lines.join("\n"));
-    busy(true, "Downloading the PDF to attach…");
-    makePdf().then(function () { busy(false, "PDF downloaded. Attach " + EMAIL.file + " to the email draft."); },
-                   function () { busy(false, "The PDF couldn't be made here. Use your browser's Print, then Save as PDF, and attach it."); });
   });
 })();
 </script>
