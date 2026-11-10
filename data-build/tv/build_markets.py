@@ -56,6 +56,7 @@ print(len(out["markets"]), "markets written")
 
 # ---- Streaming and connected TV by DMA (Scarborough USA+ 2026 Release 1, DMA profile reports) ----
 # Sources (Oct 2026, supplied by the user): adults 18+ and adults 55+ in each DMA who streamed video
+# (adults 18-54 is derived by subtracting the 55+ counts from the 18+ counts)
 # in the past 7 / 30 days and who have any connected-TV device. The antenna column is not used.
 import pandas as pd
 
@@ -66,20 +67,22 @@ def norm(n):
     return " ".join(n.replace("-", " ").split())
 
 def streaming(path):
+    # Projected counts: column 1 = adults in the group, 3 = streamed past 7 days, 6 = past 30 days, 12 = any connected-TV device
     df = pd.read_excel(path, header=None)
-    us = df.iloc[7]
-    out = {"_us": {"w7": us[3] / us[1], "m30": us[6] / us[1], "ctv": us[12] / us[1]}}
+    cnt = lambda r: {"n": r[1], "w7": r[3], "m30": r[6], "ctv": r[12]}
+    out = {"_us": cnt(df.iloc[7])}
     for _, r in df.iloc[10:].iterrows():
         if isinstance(r[0], str) and r[0].endswith("DMA") and r[1] == r[1]:
-            out[norm(r[0])] = {"w7": r[3] / r[1], "m30": r[6] / r[1], "ctv": r[12] / r[1]}
+            out[norm(r[0])] = cnt(r)
     return out
 
 S18 = streaming("data-build/tv/sources/streaming_adults18.xls")
 S55 = streaming("data-build/tv/sources/streaming_adults55.xls")
-rnd = lambda d: {k: round(v, 4) for k, v in d.items()}
-out["streaming_us"] = {"a18": rnd(S18["_us"]), "a55": rnd(S55["_us"])}
+def rates(c): return {k: round(c[k] / c["n"], 4) for k in ("w7", "m30", "ctv")}
+def minus(a, b): return {k: a[k] - b[k] for k in a}   # adults 18-54 = adults 18+ minus adults 55+ (counts, then rates)
+def groups(k): return {"a18": rates(S18[k]), "a1854": rates(minus(S18[k], S55[k])), "a55": rates(S55[k])}
+out["streaming_us"] = groups("_us")
 for m in out["markets"]:
-    key = norm(m["name"])
-    m["streaming"] = {"a18": rnd(S18[key]), "a55": rnd(S55[key])}
+    m["streaming"] = groups(norm(m["name"]))
 json.dump(out, open("TV/data/markets.json", "w"), separators=(",", ":"))
 print("streaming added for", len(out["markets"]), "markets")
