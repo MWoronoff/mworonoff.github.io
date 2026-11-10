@@ -23,6 +23,11 @@
   .toolbar a { color: var(--teal-dk); font-weight: 600; font-size: 14px; text-underline-offset: 3px; }
   .toolbar button { font: inherit; font-size: 14px; font-weight: 600; min-height: 44px; padding: 0 18px; border-radius: 6px; border: 0; background: var(--teal); color: #fff; cursor: pointer; }
   .toolbar button:hover { background: var(--teal-dk); }
+  .toolbar button.ghost { background: #fff; color: var(--teal-dk); border: 1.5px solid var(--teal); }
+  .toolbar button.ghost:hover { background: var(--mint); }
+  .toolbar button[disabled] { opacity: .6; cursor: progress; }
+  .tb-actions { display: flex; gap: 10px; }
+  .tb-note { flex-basis: 100%; margin: 0; text-align: right; font-size: 12.5px; color: var(--muted); }
   .sheet { width: 816px; height: 1056px; margin: 0 auto 32px; background: #fff; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 2px 14px rgba(0,0,0,.12); }
   header.top { background: #111; color: #fff; padding: 18px 48px 22px; display: flex; flex-direction: column; gap: 7px; }
   .top-row { display: flex; justify-content: space-between; align-items: center; }
@@ -88,8 +93,12 @@
 </head>
 <body>
 <div class="toolbar">
-  <nav aria-label="Related tools"><a href="../TV/">TV + Digital Video tool</a><a href="../analyzers/">Home</a></nav>
-  <button type="button" onclick="window.print()">Download PDF</button>
+  <nav aria-label="Related tools"><a href="../TV/">TV-to-Digital Analyzer</a><a href="../analyzers/">Home</a></nav>
+  <div class="tb-actions">
+    <button type="button" id="pdfBtn">Download PDF</button>
+    <button type="button" id="emailBtn" class="ghost">Email</button>
+  </div>
+  <p class="tb-note" id="tbNote">Email opens a draft with the key figures and downloads the PDF to attach.</p>
 </div>
 <div class="sheet-scroll">
 <main class="sheet">
@@ -171,5 +180,71 @@
   <footer class="src">Source: Nielsen, The Gauge™ and Media Distributor Gauge, August 2026 (7/27–8/30/26), August 2025 and August 2024; Aug ’25 and Aug ’24 “Other” derived by subtraction. Total day, persons 2+, Live+7; includes ad-supported and ad-free viewing. Streaming excludes linear viewing via vMVPD apps (e.g., YouTube TV), which credits to broadcast or cable. “Other” includes gaming, DVD and unmeasured tuning/VOD. Disney = Disney+, Hulu SVOD, ESPN+; Paramount = Paramount+, Pluto TV. Tubi measurement changed June 2026. Nielsen is adjusting The Gauge’s methodology from the September 2026 interval to align with its TV currency data; shares may shift.</footer>
 </main>
 </div>
+<script>
+/* Download PDF and Email. Update EMAIL each month along with the figures on the sheet. */
+(function () {
+  var EMAIL = {
+    file: "TV-Set-Viewing-August-2026.pdf",
+    subject: "TV set viewing: streaming vs. broadcast and cable (Nielsen, August 2026)",
+    lines: [
+      "TV set viewing, August 2026 (Nielsen The Gauge)",
+      "",
+      "More TV-set viewing goes to streaming than to broadcast and cable combined.",
+      "",
+      "- Streaming: 49.6% average share of TV-set viewing (46.4% in August 2025, 41.0% in August 2024)",
+      "- Broadcast and cable combined: 36.4% (cable 18.9%, broadcast 17.5%)",
+      "- YouTube alone: 15.8%, an average 1-in-6 share of TV-set viewers",
+      "- YouTube, The Roku Channel and Tubi together: 20.6%, more than broadcast or cable alone",
+      "",
+      "The one-page summary is attached.",
+      "",
+      "Source: Nielsen, The Gauge, August 2026. Average share of TV-set viewing, total day, persons 2+."
+    ]
+  };
+  var pdfBtn = document.getElementById("pdfBtn"), emailBtn = document.getElementById("emailBtn"), note = document.getElementById("tbNote");
+  var NOTE = note.textContent;
+  function loadScript(src) { return new Promise(function (ok, no) { var s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); }); }
+  var libs = null;
+  function loadLibs() {
+    if (!libs) libs = Promise.all([loadScript("https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"),
+                                   loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js")]);
+    return libs;
+  }
+  // html2canvas drops an SVG <img> with no intrinsic size, so the logo is swapped for a PNG while the page is captured
+  function logoPng(img) {
+    return fetch(img.src).then(function (r) { return r.text(); }).then(function (svg) {
+      return new Promise(function (ok, no) {
+        var i = new Image(); i.onload = function () { var c = document.createElement("canvas"); c.width = c.height = 512; c.getContext("2d").drawImage(i, 0, 0, 512, 512); ok(c.toDataURL("image/png")); };
+        i.onerror = no; i.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg.replace("<svg ", '<svg width="512" height="512" '));
+      });
+    });
+  }
+  function makePdf() {
+    var sheet = document.querySelector(".sheet"), logo = sheet.querySelector(".top-row img"), oldSrc = logo.getAttribute("src");
+    return Promise.all([loadLibs(), document.fonts ? document.fonts.ready : null, logoPng(logo).catch(function () { return null; })]).then(function (r) {
+      if (r[2]) logo.src = r[2];
+      return (logo.decode ? logo.decode().catch(function () {}) : Promise.resolve()).then(function () {
+        return window.html2canvas(sheet, { scale: 2, backgroundColor: "#ffffff", useCORS: true, logging: false }); });
+    }).then(function (canvas) {
+      logo.setAttribute("src", oldSrc);
+      var pdf = new window.jspdf.jsPDF({ unit: "pt", format: "letter", orientation: "portrait" });
+      pdf.addImage(canvas.toDataURL("image/jpeg", 0.92), "JPEG", 0, 0, 612, 792);
+      pdf.save(EMAIL.file);
+    }, function (e) { logo.setAttribute("src", oldSrc); throw e; });
+  }
+  function busy(on, msg) { pdfBtn.disabled = emailBtn.disabled = on; note.textContent = msg || NOTE; }
+  pdfBtn.addEventListener("click", function () {
+    busy(true, "Preparing the PDF…");
+    makePdf().then(function () { busy(false); }, function () { busy(false, "The PDF couldn't be made here. Use your browser's Print, then Save as PDF."); });
+  });
+  emailBtn.addEventListener("click", function () {
+    // Open the draft first (inside the click, so the browser allows it), then download the PDF to attach
+    location.href = "mailto:?subject=" + encodeURIComponent(EMAIL.subject) + "&body=" + encodeURIComponent(EMAIL.lines.join("\n"));
+    busy(true, "Downloading the PDF to attach…");
+    makePdf().then(function () { busy(false, "PDF downloaded. Attach " + EMAIL.file + " to the email draft."); },
+                   function () { busy(false, "The PDF couldn't be made here. Use your browser's Print, then Save as PDF, and attach it."); });
+  });
+})();
+</script>
 </body>
 </html>

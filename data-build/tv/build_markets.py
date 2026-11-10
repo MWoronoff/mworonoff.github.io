@@ -1,4 +1,4 @@
-"""Build TV/data/markets.json for the TV + Digital Video Allocation Analyzer.
+"""Build TV/data/markets.json for the TV-to-Digital Analyzer.
 
 Source: Scarborough USA+ 2026 Release 1 broadcast audience data (ABC, CBS, CW, FOX, NBC,
 635 network/half-hour observations per market) as embedded in the archived tool pages:
