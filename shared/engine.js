@@ -1082,7 +1082,7 @@
     }
     if (window.AdtaxiRadius) go();
     else {
-      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261109e";   // version tag: browsers fetch the new file after an update
+      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261110a";   // version tag: browsers fetch the new file after an update
       sc.onload = go; sc.onerror = function () { self.showError("The radius tool didn't load. Refresh the page and try again."); };
       document.head.appendChild(sc);
     }
@@ -1228,12 +1228,12 @@
   };
 
   /* ---------- Slides (shared/slides.js) ---------- */
-  var SLIDE_CATS = { auto: "Auto", "higher-ed": "Education", financial: "Finance", furniture: "Furniture", healthcare: "Healthcare" };
+  var SLIDE_CATS = { auto: "Auto", "higher-ed": "Education", financial: "Finance", furniture: "Furniture", healthcare: "Healthcare", "home-services": "Home Improvement", legal: "Legal" };
   function loadSlides(done) {
     if (window.AdtaxiSlides) { done(); return; }
     if (loadSlides.waiting) { loadSlides.waiting.push(done); return; }
     loadSlides.waiting = [done];
-    var sc = document.createElement("script"); sc.src = "../shared/slides.js?v=20261109e";
+    var sc = document.createElement("script"); sc.src = "../shared/slides.js?v=20261110a";
     sc.onload = sc.onerror = function () { var w = loadSlides.waiting; loadSlides.waiting = null; w.forEach(function (f) { f(); }); };
     document.head.appendChild(sc);
   }

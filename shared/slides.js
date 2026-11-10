@@ -9,7 +9,10 @@
     "higher-ed": { id: "education", name: "Education", title: "U.S. Education" },
     financial:   { id: "finance", name: "Finance", title: "U.S. Finance" },
     furniture:   { id: "furniture", name: "Furniture", title: "U.S. Furniture and Mattress" },
-    healthcare:  { id: "healthcare", name: "Healthcare", title: "U.S. Healthcare" }
+    healthcare:  { id: "healthcare", name: "Healthcare", title: "U.S. Healthcare" },
+    "home-services": { id: "home-improvement", name: "Home Improvement", title: "U.S. Home Improvement",
+                       src: "Source: Nielsen Scarborough USA+ Spring 2026 and U.S. Bureau of Economic Analysis (via FRED). National figures. Select a slide to open it full size." },
+    legal:       { id: "legal", name: "Legal", title: "U.S. Legal Services" }
   };
   var PLATFORMS = [
     { id: "streaming-tv", name: "Streaming TV", line: "Who streams TV and video, and how often" },
@@ -59,7 +62,7 @@
         el("button", { type: "button", class: "az-modal-close", "aria-label": "Close", text: "×", onclick: o.close })]));
       if (c) body.appendChild(el("section", { class: "az-results-sec" }, [el("h3", { text: c.title }),
         slide(c.id + "-market", c.name + ": market size and buyers"), slide(c.id + "-media", c.name + ": how buyers use media")]));
-      if (o.only === "category") { body.appendChild(el("p", { class: "az-results-note", text: "Source: Nielsen Scarborough USA+ Spring 2026 and AdMall. National figures. Select a slide to open it full size." })); return; }
+      if (o.only === "category") { body.appendChild(el("p", { class: "az-results-note", text: (c && c.src) || "Source: Nielsen Scarborough USA+ Spring 2026 and AdMall. National figures. Select a slide to open it full size." })); return; }
       // Platforms tied to the plan first, then (no plan) the ad response ranking, then the rest
       var first = [], add = function (ids) { (ids || []).forEach(function (id) { if (first.indexOf(id) < 0) first.push(id); }); };
       plan.forEach(function (id) { add(FROM_CHANNEL[id]); });
