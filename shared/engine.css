@@ -757,3 +757,31 @@ details.az-sources.az-fold > summary { font-size: 14px; font-weight: 700; }
 .az-tm-dtable td:first-child { white-space: nowrap; font-weight: 600 !important; }
 @media (max-width: 640px) { .az-tm-dtable td:first-child { white-space: normal; } }
 @media (max-width: 640px) { .rz-alloc-ch th:nth-child(2), .rz-alloc-ch td:nth-child(2) { display: none; } .rz-alloc-ch { min-width: 0 !important; } }
+
+/* Local newspapers: switch above ranked lists, columns, and the market panel box */
+.az-newsbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0 0 8px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 9px; background: var(--bg); font-size: 13px; }
+.az-newsbar[hidden] { display: none; }
+.az-newsbar select { font: inherit; padding: 4px 8px; border: 1px solid var(--line); border-radius: 7px; background: var(--card); color: var(--ink); max-width: 100%; }
+.az-news-toggle[aria-pressed="true"] { background: var(--navy); color: #fff; border-color: var(--navy); }
+.az-news-hint { color: var(--muted); }
+.az-news-one { color: var(--navy); }
+.az-table td.az-news-cell { white-space: nowrap; background: rgba(15, 126, 112, 0.05); }
+.az-news { border-top: 1px solid var(--line); padding-top: 10px; margin-top: 10px; font-size: 13px; }
+.az-news summary { cursor: pointer; font-weight: 700; color: var(--navy); }
+.az-news-count { color: var(--muted); font-weight: 400; }
+.az-news-paper { margin-top: 10px; }
+.az-news-name { font-weight: 600; color: var(--ink); margin-bottom: 3px; }
+.az-news-t { width: 100%; border-collapse: collapse; }
+.az-news-t th { text-align: left; font-weight: 400; color: var(--muted); padding: 2px 0; }
+.az-news-t td { text-align: right; padding: 2px 0 2px 10px; white-space: nowrap; }
+.az-news-lead th, .az-news-lead td { font-weight: 700; color: var(--ink); }
+.az-news-off, .az-news-src { color: var(--muted); font-size: 12px; margin: 4px 0 0; }
+.az-news-src { margin-top: 10px; }
+.az-news-more { margin-top: 8px; background: none; border: 0; padding: 0; color: var(--teal); font: inherit; font-weight: 600; cursor: pointer; }
+.rz-news { grid-column: 1 / -1; background: #fff; padding: 10px 14px; font-size: 13px; border-top: 1px solid var(--line); }
+.rz-news summary { cursor: pointer; color: var(--ink); }
+.rz-news summary b { color: var(--navy); }
+.rz-news[open] summary { margin-bottom: 4px; }
+.rz-news .az-news-paper { display: inline-block; vertical-align: top; width: min(100%, 300px); margin: 8px 18px 0 0; }
+.rz-news-pick { display: block; margin-top: 10px; color: var(--muted); }
+.rz-news-pick select { font: inherit; padding: 3px 6px; border: 1px solid var(--line); border-radius: 7px; margin-left: 4px; max-width: 100%; }

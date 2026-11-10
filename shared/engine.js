@@ -221,6 +221,7 @@
 
   Analyzer.prototype.measure = function (key) {
     for (var i = 0; i < this.cfg.measures.length; i++) if (this.cfg.measures[i].key === key) return this.cfg.measures[i];
+    if (key && String(key).indexOf("news:") === 0) { var nc = this.newsColumns(true); for (var j = 0; j < nc.length; j++) if (nc[j].key === key) return nc[j]; }
     return null;
   };
   Analyzer.prototype.availableAt = function (m, level) { return !m.levels || m.levels.indexOf(level) >= 0; };
@@ -237,6 +238,7 @@
   Analyzer.prototype.valueKey = function (m) { return m.perSub && this.state.sub ? m.key + "@" + this.state.sub : m.key; };
   Analyzer.prototype.val = function (row, m) {
     if (!row || !m) return undefined;
+    if (m.get) return m.get(row);
     var k = this.valueKey(m);
     return Object.prototype.hasOwnProperty.call(row.v, k) ? row.v[k] : null;
   };
@@ -972,9 +974,11 @@
     // Pick several DMAs, metros or counties and open them together as one trade area (Custom area in the Trade area tool)
     this.pick = { level: null, ids: {} };
     this.pickBar = el("div", { class: "az-pickbar", hidden: true, role: "status" });
+    this.newsBar = el("div", { class: "az-newsbar", hidden: true });
     this.tablePanel = el("section", { class: "az-panel az-table-panel" }, [
       this.crumbs = cfg.footprint ? el("nav", { class: "az-crumbs", "aria-label": "Where you are", hidden: true }) : null,
       el("div", { class: "az-table-head" }, [el("div", { class: "az-table-title" }, [this.tableTitle, this.backBtn]), this.tableNote]),
+      this.newsBar,
       this.pickBar,
       el("div", { class: "az-tablewrap" }, [el("table", { class: "az-table" }, [this.thead, this.tbody])])
     ]);
@@ -1082,7 +1086,7 @@
     }
     if (window.AdtaxiRadius) go();
     else {
-      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261110h";   // version tag: browsers fetch the new file after an update
+      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261110n";   // version tag: browsers fetch the new file after an update
       sc.onload = go; sc.onerror = function () { self.showError("The radius tool didn't load. Refresh the page and try again."); };
       document.head.appendChild(sc);
     }
@@ -1195,6 +1199,7 @@
     if (!keepError) this.errorBox.hidden = true;
     var mapLevel = s.level === "us" ? (this.cfg.usMapLevel || "dma") : s.level;
     var needed = [this.ensureLevel(s.level)];
+    if (s.level !== "us") needed.push(this.newsLoad());
     if (mapLevel !== s.level) needed.push(this.ensureLevel(mapLevel));
     var ticket = this.refreshTicket = (this.refreshTicket || 0) + 1;   // a newer refresh supersedes this one
     Promise.all(needed).then(function () {
@@ -1225,6 +1230,116 @@
       }
       self.errorBox.textContent = e.message + ". Refresh the page; if it keeps happening, the data files for this view are missing.";
     });
+  };
+
+
+  /* ---------- Local newspapers (shared/media/newspapers.json, built by data-build/build_newspapers.py) ---------- */
+  var DAY_FULL = { Sun: "Sunday", Mon: "Monday", Tue: "Tuesday", Wed: "Wednesday", Thu: "Thursday", Fri: "Friday", Sat: "Saturday" };
+  var NEWS_LEVELS = { zip: 1, county: 1, metro: 1, dma: 1 };
+  function newsDate(iso) {
+    var p = String(iso || "").split("-");
+    return p.length === 3 ? new Date(+p[0], +p[1] - 1, +p[2]).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : String(iso || "");
+  }
+  // One paper's figures for an area, in reporting order: Gross (print + web) first when web uniques are loaded,
+  // then each print day (Sunday, the main weekday, other days), then web. Gross = main print day + web monthly uniques.
+  function newsLines(p, vals, hh) {
+    var at = function (d) { var i = p.days.indexOf(d); return i >= 0 ? vals[i] || 0 : null; };
+    var pct = function (n) { return hh > 0 && n != null ? n / hh : null; };
+    var printDays = p.days.filter(function (d) { return d !== "Web"; }), web = at("Web"), main = printDays[0], out = [];
+    if (web != null) { var g = (at(main) || 0) + web; out.push({ key: "gross", label: "Gross (print + web)", n: g, pct: pct(g), lead: true }); }
+    printDays.forEach(function (d) {
+      out.push({ key: d === "Sun" ? "sun" : d === p.wk ? "wk" : d.toLowerCase(), label: (d === "Sun" ? "Sunday" : d === p.wk ? "Weekday (" + d + ".)" : DAY_FULL[d]) + " print", n: at(d), pct: pct(at(d)) });
+    });
+    if (web != null) out.push({ key: "web", label: "Web (monthly uniques)", n: web, pct: pct(web) });
+    return out;
+  }
+  Analyzer.prototype.newsLoad = function () {
+    var self = this;
+    if (this.cfg.newspapers === false) return Promise.resolve(null);
+    if (!this.newsP) this.newsP = this.loadJSON(this.cfg.newspapers || "../shared/media/newspapers.json").then(function (d) { self.news = d; return d; }, function () { return null; });
+    return this.newsP;
+  };
+  // Papers with copies in one area, biggest first: [{i, p, vals}]
+  Analyzer.prototype.newsAt = function (level, id) {
+    var N = this.news, t = N && NEWS_LEVELS[level] && N[level] && N[level][id];
+    if (!t) return [];
+    return Object.keys(t).map(function (i) { return { i: i, p: N.papers[+i], vals: t[i] }; })
+      .sort(function (a, b) { return Math.max.apply(null, b.vals) - Math.max.apply(null, a.vals); });
+  };
+  // Papers in the current ranked list (counties, metros or ZIPs inside a market), biggest across the list first
+  Analyzer.prototype.newsInTable = function (tl, rows) {
+    var N = this.news;
+    if (!N || !NEWS_LEVELS[tl] || !N[tl] || !(tl === "zip" || this.isInside(tl))) return [];
+    var tot = {};
+    rows.forEach(function (r) { var t = N[tl][r.id]; if (t) Object.keys(t).forEach(function (i) { tot[i] = (tot[i] || 0) + Math.max.apply(null, t[i]); }); });
+    return Object.keys(tot).sort(function (a, b) { return tot[b] - tot[a]; });
+  };
+  // Table columns for the chosen paper: Gross, Sunday print, weekday print, Web. Cells read "copies · % of households";
+  // sorting uses the % (copies when the area has no household count).
+  Analyzer.prototype.newsColumns = function (force) {
+    var s = this.state, N = this.news;
+    if (!N || !s.newsOn || s.news == null || !N.papers[+s.news]) return [];
+    if (!force && !(this.newsAvail && this.newsAvail.indexOf(s.news) >= 0)) return [];
+    var p = N.papers[+s.news], tl = this.tableLevel(), web = p.days.indexOf("Web") >= 0;
+    var lines = function (row) { var t = N[tl] && N[tl][row.id] && N[tl][row.id][s.news]; return newsLines(p, t || p.days.map(function () { return 0; }), row.v && row.v.households); };
+    var all = lines({ id: null, v: {} }), keys = all.filter(function (x) { return x.key === "gross" || x.key === "sun" || x.key === "wk" || x.key === "web"; });
+    if (!keys.some(function (x) { return x.key === "sun" || x.key === "wk"; })) keys = keys.concat(all.filter(function (x) { return x.key !== "gross" && x.key !== "web"; }).slice(0, 1));
+    return keys.map(function (k) {
+      var line = function (row) { return lines(row).filter(function (x) { return x.key === k.key; })[0]; };
+      var unit = k.key === "web" ? "monthly uniques" : k.key === "gross" ? "print copies + web uniques" : "copies";
+      return { key: "news:" + k.key, news: true, label: p.name + " " + k.label.toLowerCase(), short: k.label.replace(" print", "").replace(" (print + web)", "").replace(" (monthly uniques)", ""),
+        unit: unit, help: p.name + ": " + k.label + ", " + unit + " · % of households",
+        get: function (row) { var x = line(row); return x && x.n ? (x.pct != null ? x.pct : x.n) : null; },
+        cell: function (row) { var x = line(row); return x && x.n ? NF0.format(x.n) + (x.pct != null ? " · " + NF1.format(x.pct * 100) + "%" : "") : null; },
+        csv: function (row) { var x = line(row); return [x && x.n ? x.n : 0, x && x.n && x.pct != null ? Math.round(x.pct * 10000) / 100 : ""]; } };
+    });
+  };
+  // The switch above a ranked list: shown only when papers have copies in the list
+  Analyzer.prototype.renderNewsBar = function (tl) {
+    var self = this, s = this.state, N = this.news, bar = this.newsBar, d = this.d(tl);
+    var avail = this.newsAvail = d ? this.newsInTable(tl, d.rows) : [];
+    bar.innerHTML = "";
+    bar.hidden = !avail.length || this.mode === "radius";
+    if (!avail.length) return;
+    if (avail.indexOf(s.news) < 0) s.news = avail[0];   // keep the chosen paper while it's here; otherwise the biggest local paper
+    var p = N.papers[+s.news];
+    bar.appendChild(el("button", { type: "button", class: "az-btn az-news-toggle", "aria-pressed": String(!!s.newsOn), title: "Add newspaper coverage columns to this list",
+      text: s.newsOn ? "Hide newspaper coverage" : "Show newspaper coverage", onclick: function () {
+        s.newsOn = !s.newsOn;
+        if (!s.newsOn && s.sortKey && s.sortKey.indexOf("news:") === 0) s.sortKey = null;
+        self.renderTable(); self.renderDetail(); } }));
+    if (!s.newsOn) { bar.appendChild(el("span", { class: "az-news-hint", text: avail.length === 1 ? p.name : NF0.format(avail.length) + " papers in this market" })); return; }
+    if (avail.length > 1) {
+      var sel = el("select", { "aria-label": "Newspaper", onchange: function () { s.news = this.value; if (s.sortKey && s.sortKey.indexOf("news:") === 0) s.sortKey = null; self.renderTable(); } },
+        avail.map(function (i) { var q = N.papers[+i]; return el("option", { value: i, selected: i === s.news ? "selected" : null, text: q.name + (q.free ? " (mostly non-paid)" : "") }); }));
+      bar.appendChild(sel);
+    } else bar.appendChild(el("b", { class: "az-news-one", text: p.name }));
+    bar.appendChild(el("span", { class: "az-news-hint", text: "Copies · % of households. Print: NMS, " + newsDate(p.asOf) + (p.webAsOf ? ". Web: " + p.webAsOf : "") + "." }));
+  };
+  // Market panel: every paper with copies in the selected area
+  Analyzer.prototype.newsBox = function (level, row) {
+    var self = this, list = this.newsAt(level, row.id);
+    if (!list.length) return null;
+    var hh = row.v && row.v.households, MAX = 4, showAll = !!this.newsAll;
+    var box = el("details", { class: "az-news", open: this.state.newsOn || this.newsOpen ? "open" : null, ontoggle: function () { self.newsOpen = this.open; } },
+      [el("summary", null, ["Local newspapers ", el("span", { class: "az-news-count", text: "(" + NF0.format(list.length) + ")" })])]);
+    list.forEach(function (x, k) {
+      if (k >= MAX && !showAll) return;
+      var off = level === "dma" && x.p.home === row.id ? x.p.days.filter(function (d) { return x.p.off && x.p.off[d]; }) : [];
+      box.appendChild(el("div", { class: "az-news-paper" }, [
+        el("div", { class: "az-news-name" }, [x.p.name, x.p.free ? el("span", { class: "az-tag", title: "Most of this paper's copies are non-paid (qualified) distribution", text: "Mostly non-paid" }) : null]),
+        el("table", { class: "az-news-t" }, [el("tbody", null, newsLines(x.p, x.vals, hh).map(function (l) {
+          return el("tr", { class: l.lead ? "az-news-lead" : null }, [el("th", { scope: "row", text: l.label }), el("td", { class: "num", text: NF0.format(l.n || 0) }),
+            el("td", { class: "num", text: l.pct != null ? NF1.format(l.pct * 100) + "%" : "–" })]);
+        }))]),
+        off.length ? el("p", { class: "az-news-off", text: "Not in these totals: " + off.map(function (d) { return NF0.format(x.p.off[d]) + " " + DAY_FULL[d]; }).join(" and ") + " copies with no ZIP (e-edition and other)." }) : null
+      ]));
+    });
+    if (list.length > MAX) box.appendChild(el("button", { type: "button", class: "az-news-more", text: showAll ? "Show fewer papers" : "Show " + NF0.format(list.length - MAX) + " more", onclick: function () { self.newsAll = !showAll; self.newsOpen = true; self.renderDetail(); } }));
+    var dates = {}; list.forEach(function (x) { dates[x.p.asOf] = 1; });
+    box.appendChild(el("p", { class: "az-news-src", text: "Print: NMS circulation, " + Object.keys(dates).sort().map(newsDate).join(" and ") + "." +
+      (hh ? " % of households uses this area's " + NF0.format(hh) + " households." : "") + " Papers are shown separately because their readers can overlap." }));
+    return box;
   };
 
   /* ---------- Slides (shared/slides.js) ---------- */
@@ -1545,7 +1660,7 @@
   Analyzer.prototype.columns = function () {
     var self = this, lv = this.tableLevel();
     var keys = this.cfg.tableColumns || this.cfg.measures.map(function (m) { return m.key; });
-    return keys.map(function (k) { return self.measure(k); }).filter(function (m) { return m && self.availableAt(m, lv) && self.relevant(m); });
+    return keys.map(function (k) { return self.measure(k); }).filter(function (m) { return m && self.availableAt(m, lv) && self.relevant(m); }).concat(this.newsColumns());
   };
   Analyzer.prototype.sortedRows = function () {
     var self = this, s = this.state, d = this.d(this.tableLevel());
@@ -1568,6 +1683,8 @@
       return;
     }
     this.tablePanel.hidden = this.mode === "radius";   // stays hidden behind the Radius view
+    this.renderNewsBar(tl);
+    if (s.sortKey && String(s.sortKey).indexOf("news:") === 0 && !this.measure(s.sortKey)) s.sortKey = null;
     var cols = this.columns(), rankM = this.measure(s.rank);
     var all = this.sortedRows();
     // Rank numbers follow the "rank by" measure, independent of column sorting.
@@ -1630,8 +1747,9 @@
         mkCol ? el("td", { class: "az-mkcol", text: r.mk || "" }) : null
       ]);
       cols.forEach(function (m) {
-        var v = fmt(self.val(r, m), m.format);
-        if (v == null && r.u && (m.key === s.rank || m.key.indexOf("score") === 0 || m.key.indexOf("p_") === 0)) tr.appendChild(el("td", { class: "az-na", title: (r.f && r.f[0]) || "Not ranked", text: "Not ranked" }));
+        var v = m.cell ? m.cell(r) : fmt(self.val(r, m), m.format);
+        if (m.news) tr.appendChild(el("td", { class: "num az-news-cell" + (v == null ? " az-na" : ""), title: v == null ? "No copies reported here" : null, text: v == null ? "\u2013" : v }));
+        else if (v == null && r.u && (m.key === s.rank || m.key.indexOf("score") === 0 || m.key.indexOf("p_") === 0)) tr.appendChild(el("td", { class: "az-na", title: (r.f && r.f[0]) || "Not ranked", text: "Not ranked" }));
         else if (v == null) tr.appendChild(el("td", { class: "az-na", title: "No data for this area", text: "No data" }));
         else { var mk = self.mark(r, m); if (mk) anyMark = true; tr.appendChild(el("td", { class: "num", title: mk ? "Uses estimated values; see this market's Data notes" : null, text: v + mk })); }
       });
@@ -1645,6 +1763,7 @@
     if (!shown.length) { var emptyTd = el("td", { colspan: String(cols.length + (pickable ? 3 : 2) + (inCol ? 1 : 0) + (mkCol ? 1 : 0)), class: "az-empty", text: "No markets match \u201c" + s.query + "\u201d. Clear the search to see all markets." });
       this.tbody.appendChild(el("tr", null, [emptyTd])); if (s.query) this.countySuggest(s.query, emptyTd); }
     this.tbody.appendChild(frag);
+    if (cols.some(function (m) { return m.news; })) this.tableNote.textContent += " Newspaper cells show copies \u00b7 % of households.";
     if (anyMark) this.tableNote.textContent += " * Uses estimated health values; select the market and see its Data notes.";
     if (pickable) this.tableNote.textContent += drillNav ? " Tick boxes in any list (DMAs, metros, counties or ZIPs) to combine them into one trade area." : " Tick several to open them together as one trade area.";
     this.renderPick();
@@ -1747,6 +1866,8 @@
         return el("div", { class: "az-measure", title: (mk ? "Estimated for this area; see Data notes. " : "") + (m.help || "") || null }, [el("span", { text: m.label }), el("b", { class: "num" + (v == null ? " az-na" : ""), text: v == null ? "No data" : v + mk })]);
       })));
     }
+    var newsBox = s.level !== "us" ? this.newsBox(s.level, row) : null;
+    if (newsBox) box.appendChild(newsBox);
     if (cfg.drill && s.level !== "us") {
       // Look inside this market (metros, counties and ZIPs inside a DMA; counties and ZIPs inside a metro; ZIPs inside a county), and add it to the combined area
       var RCd = cfg.radius === true ? window.ADTAXI_RADIUS : cfg.radius, isIn = this.inBasket(s.level, row.id);
@@ -1967,11 +2088,14 @@
     if (!d) return;
     var cols = this.cfg.measures.filter(function (m) { return self.availableAt(m, level) && self.relevant(m); });
     var rows = level === "us" ? d.rows : this.sortedRows().filter(function (r) { return !s.query || r.name.toLowerCase().indexOf(s.query) >= 0; });
-    var lines = [["Level", level === "zip" ? "ZIP" : "ID", "Name"].concat(this.subLabel() ? ["Category"] : []).concat(cols.map(function (m) { return m.label; })).map(csvCell).join(",")];
+    var nc = level !== "us" ? this.newsColumns() : [], nh = [];
+    nc.forEach(function (m) { nh.push(m.label + " (" + m.unit + ")", m.label + " (% of households)"); });
+    var lines = [["Level", level === "zip" ? "ZIP" : "ID", "Name"].concat(this.subLabel() ? ["Category"] : []).concat(cols.map(function (m) { return m.label; })).concat(nh).map(csvCell).join(",")];
     rows.forEach(function (r) {
+      var nv = []; nc.forEach(function (m) { nv = nv.concat(m.csv(r)); });
       lines.push([LEVEL_LABELS[level], r.id, r.name].concat(self.subLabel() ? [self.subLabel()] : []).concat(cols.map(function (m) {
         var v = self.val(r, m); return v == null ? "" : v;
-      })).map(csvCell).join(","));
+      })).concat(nv).map(csvCell).join(","));
     });
     var blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
     var a = el("a", { href: URL.createObjectURL(blob), download: (this.cfg.exportName || "adtaxi-analyzer") + "-" + (level === "zip" ? "zips-in-" + s.parent.level + "-" + s.parent.id : level) + (s.sub ? "-" + s.sub : "") + ".csv" });

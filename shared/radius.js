@@ -944,6 +944,8 @@
     this.summary.appendChild(stat(NF0.format(rows.length), "ZIPs"));
     this.summary.appendChild(stat(NF0.format(pop), "Population"));
     if (cfg.summaryNote) this.summary.appendChild(el("p", { class: "rz-summary-note", text: cfg.summaryNote }));
+    this.newsLoad();
+    this.renderNewsSummary(rows);
     this.renderPersona(rows, A, share, idx);
   };
 
@@ -1165,8 +1167,8 @@
     var self = this, c = this.c, by = {}, keys = this.contextKeys();
     this.visible().forEach(function (r) {
       var f = self.zipCounty && self.zipCounty[r.zip]; if (!f) return;
-      var x = by[f] || (by[f] = { fips: f, town: self.countyLabel(f), zips: 0, pop: 0, base: 0, aud: 0, any: false, w: {}, p: {} });
-      x.zips++; x.pop += r.pop || 0; if (r.aud != null) x.base += r.base || 0; if (r.aud != null) { x.aud += r.aud; x.any = true; }
+      var x = by[f] || (by[f] = { fips: f, town: self.countyLabel(f), zips: 0, pop: 0, base: 0, aud: 0, any: false, w: {}, p: {}, members: [] });
+      x.zips++; x.members.push(r); x.pop += r.pop || 0; if (r.aud != null) x.base += r.base || 0; if (r.aud != null) { x.aud += r.aud; x.any = true; }
       keys.forEach(function (k) { var v = CONTEXT[k].value(c, r.i); if (v != null && r.pop) { x.w[k] = (x.w[k] || 0) + v * r.pop; x.p[k] = (x.p[k] || 0) + r.pop; } });
     });
     return Object.keys(by).map(function (f) {
@@ -1183,13 +1185,15 @@
       this.loadCounties().then(function () { if (self.state.unit === "county" && self.rows) { self.renderTable(); self.renderMap(false); } }); return; }
     var rows = this.countyRows(), ctx = this.contextKeys(), sc = !!this.cfg.blendScore;
     this.addScore(rows, ctx);
-    if (["town", "zips", "pop", "aud", "share", "idx"].concat(sc ? ["score"] : []).indexOf(s.sortKey) < 0 && !/^x_/.test(s.sortKey)) { s.sortKey = sc ? "score" : "aud"; s.sortDir = "desc"; }
+    var nk = this.newsZipCols(rows);
+    if (["town", "zips", "pop", "aud", "share", "idx"].concat(sc ? ["score"] : []).concat(nk.map(function (x) { return "np_" + x.key; })).indexOf(s.sortKey) < 0 && !/^x_/.test(s.sortKey)) { s.sortKey = sc ? "score" : "aud"; s.sortDir = "desc"; }
     var cols = [["town", "County", "l"]].concat(sc ? [["score", "Score", "n"]] : []).concat([["zips", "ZIPs", "n"], ["pop", "Population", "n"]]).concat([ ["aud", est ? "Est. audience" : "Audience", "n"], ["share", this.cfg.shareShort || "Share", "n"], ["idx", "Index", "n"]])
-      .concat(ctx.map(function (k) { return ["x_" + k, CONTEXT[k].label, "n", CONTEXT[k].long + "; ZIPs averaged by population"]; }));
+      .concat(ctx.map(function (k) { return ["x_" + k, CONTEXT[k].label, "n", CONTEXT[k].long + "; ZIPs averaged by population"]; }))
+      .concat(nk.map(function (x) { return ["np_" + x.key, x.label, "n", x.help + " (the area's ZIPs in this county)"]; }));
     this.sortRows(rows);
     var k = s.sortKey;
     this.tableTitle.textContent = area ? "Counties in the custom area" : "Counties within " + s.r + " miles";
-    this.tableNote.textContent = NF0.format(rows.length) + (rows.length === 1 ? " county" : " counties") + ". Each county adds up the area's ZIPs in that county, so a county partly outside the area counts only the part inside. Click a column to sort." + (sc ? this.scoreNote(ctx, "counties") : "");
+    this.tableNote.textContent = NF0.format(rows.length) + (rows.length === 1 ? " county" : " counties") + ". Each county adds up the area's ZIPs in that county, so a county partly outside the area counts only the part inside. Click a column to sort." + (sc ? this.scoreNote(ctx, "counties") : "") + (nk.length ? " Newspaper cells show copies \u00b7 % of households." : "");
     this.thead.innerHTML = "";
     var hr = el("tr");
     cols.forEach(function (cdef) {
@@ -1212,7 +1216,8 @@
         el("td", { class: "num", text: r.aud == null ? "No data" : NF0.format(Math.round(r.aud)) }),
         el("td", { class: "num", text: r.share == null ? "—" : NF1.format(r.share * 100) + "%" }),
         el("td", { class: "num", text: r.idx == null ? "—" : NF0.format(r.idx) })].concat(ctx.map(function (k) {
-          var v = r["x_" + k]; return el("td", { class: "num rz-ctx", text: v == null ? "—" : NF1.format(v * 100) + "%" }); }))));
+          var v = r["x_" + k]; return el("td", { class: "num rz-ctx", text: v == null ? "—" : NF1.format(v * 100) + "%" }); }))
+          .concat(nk.map(function (x) { var t = r["npc_" + x.key]; return el("td", { class: "num az-news-cell" + (t ? "" : " az-na"), title: t ? null : "No copies reported here", text: t || "\u2013" }); }))));
     });
     if (!rows.length) frag.appendChild(el("tr", null, [el("td", { colspan: String(cols.length), class: "az-empty", text: "No ZIPs meet the index cutoff." })]));
     this.tbody.appendChild(frag);
@@ -1242,15 +1247,18 @@
     this.addScore(rows, ctx);
     if (/^x_/.test(s.sortKey) && ctx.indexOf(s.sortKey.slice(2)) < 0) { s.sortKey = sc ? "score" : "idx"; s.sortDir = "desc"; }
     if (s.sortKey === "score" && !sc) s.sortKey = "idx";
+    var nk = this.newsZipCols(rows);
+    if (/^np_/.test(s.sortKey || "") && !nk.some(function (x) { return "np_" + x.key === s.sortKey; })) { s.sortKey = "idx"; s.sortDir = "desc"; }
     var cols = [["zip", "ZIP", "l"], ["town", "Town", "l"]].concat(area ? [["county", "County", "l"]] : []).concat(sc ? [["score", "Score", "n"]] : []).concat(!area || circ ? [["dist", area ? "Miles to location" : "Miles", "n"]] : [])
       .concat([["pop", "Population", "n"], ["aud", est ? "Est. audience" : "Audience", "n"], ["share", this.cfg.shareShort || "Share", "n"], ["idx", "Index", "n"]])
-      .concat(ctx.map(function (k) { return ["x_" + k, CONTEXT[k].label, "n", CONTEXT[k].long]; }));
+      .concat(ctx.map(function (k) { return ["x_" + k, CONTEXT[k].label, "n", CONTEXT[k].long]; }))
+      .concat(nk.map(function (x) { return ["np_" + x.key, x.label, "n", x.help]; }));
     this.sortRows(rows);
     var k = s.sortKey, nSmall = (k === "idx" || k === "score" || /^x_/.test(k)) ? rows.filter(function (r) { return (r.pop || 0) < SMALL_ZIP; }).length : 0;
     this.tableTitle.textContent = area ? "ZIPs in the custom area" : "ZIPs within " + s.r + " miles";
     this.tableNote.textContent = (rows.length > s.show ? "Showing " + s.show + " of " + NF0.format(rows.length) + " ZIPs. Export includes all." : NF0.format(rows.length) + " ZIPs.") + (nSmall ? " ZIPs under " + NF0.format(SMALL_ZIP) + " residents are listed last." : "") + " Click a column to sort." +
       (ctx.length ? " " + listAnd(ctx.map(function (k) { return CONTEXT[k].label; })) + (ctx.length > 1 ? " are ZIP-wide rates" : " is a ZIP-wide rate") + (sc ? ", not applied to the audience count (see Score below)" : ", shown for context and not applied to the audience") + "; point to a heading for its source." : "") +
-      (sc ? this.scoreNote(ctx, "ZIPs") : "");
+      (sc ? this.scoreNote(ctx, "ZIPs") : "") + (nk.length ? " Newspaper cells show copies \u00b7 % of households." : "");
     this.thead.innerHTML = "";
     var hr = el("tr");
     cols.forEach(function (cdef) {
@@ -1275,12 +1283,101 @@
         el("td", { class: "num", text: r.aud == null ? "No data" : NF0.format(Math.round(r.aud)) }),
         el("td", { class: "num", text: r.share == null ? "—" : NF1.format(r.share * 100) + "%" }),
         el("td", { class: "num", text: r.idx == null ? "—" : NF0.format(r.idx) })].concat(ctx.map(function (k) {
-          var v = r["x_" + k]; return el("td", { class: "num rz-ctx", text: v == null ? "—" : NF1.format(v * 100) + "%" }); }))));
+          var v = r["x_" + k]; return el("td", { class: "num rz-ctx", text: v == null ? "—" : NF1.format(v * 100) + "%" }); }))
+          .concat(nk.map(function (x) { var t = r["npc_" + x.key]; return el("td", { class: "num az-news-cell" + (t ? "" : " az-na"), title: t ? null : "No copies reported here", text: t || "\u2013" }); }))));
     });
     if (!rows.length) frag.appendChild(el("tr", null, [el("td", { colspan: String(cols.length), class: "az-empty", text: area ? "No ZIPs meet the index cutoff. Lower the Show setting or add to the area." : "No ZIPs meet the index cutoff. Lower the Show setting or widen the radius." })]));
     this.tbody.appendChild(frag);
     if (rows.length > s.show) this.tbody.appendChild(el("tr", null, [el("td", { colspan: String(cols.length) }, [el("button", { type: "button", class: "az-btn", text: "Show all " + NF0.format(rows.length), onclick: function () { s.show = 1e9; self.renderTable(); } })])]));
     this.renderBudget();
+  };
+
+
+  /* ---------- Local newspapers in the trade area (shared/media/newspapers.json, built by data-build/build_newspapers.py) ----------
+     Totals for the ZIPs in the area against their households: Gross (print + web monthly uniques) first when web is loaded,
+     then each print day, then web. Papers stay separate because their readers can overlap. */
+  var NEWS_DAY = { Sun: "Sunday", Mon: "Monday", Tue: "Tuesday", Wed: "Wednesday", Thu: "Thursday", Fri: "Friday", Sat: "Saturday" };
+  function newsDate(iso) {
+    var p = String(iso || "").split("-");
+    return p.length === 3 ? new Date(+p[0], +p[1] - 1, +p[2]).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : String(iso || "");
+  }
+  function newsLines(p, vals, hh) {
+    var at = function (d) { var i = p.days.indexOf(d); return i >= 0 ? vals[i] || 0 : null; };
+    var pct = function (n) { return hh > 0 && n != null ? n / hh : null; };
+    var printDays = p.days.filter(function (d) { return d !== "Web"; }), web = at("Web"), main = printDays[0], out = [];
+    if (web != null) { var g = (at(main) || 0) + web; out.push({ key: "gross", label: "Gross (print + web)", n: g, pct: pct(g), lead: true }); }
+    printDays.forEach(function (d) {
+      out.push({ key: d === "Sun" ? "sun" : d === p.wk ? "wk" : d.toLowerCase(), label: (d === "Sun" ? "Sunday" : d === p.wk ? "Weekday (" + d + ".)" : NEWS_DAY[d]) + " print", n: at(d), pct: pct(at(d)) });
+    });
+    if (web != null) out.push({ key: "web", label: "Web (monthly uniques)", n: web, pct: pct(web) });
+    return out;
+  }
+  function newsCellText(x) { return x && x.n ? NF0.format(x.n) + (x.pct != null ? " · " + NF1.format(x.pct * 100) + "%" : "") : null; }
+  Radius.prototype.newsLoad = function () {
+    var self = this;
+    if (this.cfg.newspapers === false || this.newsP) return;
+    this.newsP = fetch(this.cfg.newspapers || "../shared/media/newspapers.json", { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) { self.news = d; if (d && self.rows) { self.renderSummary(); self.renderTable(); } }, function () { return null; });
+  };
+  // Papers with copies in these ZIPs, biggest first, with the households of all ZIPs in the area
+  Radius.prototype.newsTotals = function (rows) {
+    var N = this.news, c = this.c, hh = 0, tot = {};
+    if (!N) return null;
+    rows.forEach(function (r) {
+      hh += (c.households && c.households[r.i]) || 0;
+      var t = N.zip[r.zip]; if (!t) return;
+      Object.keys(t).forEach(function (i) { var a = tot[i] || (tot[i] = t[i].map(function () { return 0; })); t[i].forEach(function (v, j) { a[j] += v; }); });
+    });
+    var list = Object.keys(tot).map(function (i) { return { i: i, p: N.papers[+i], vals: tot[i] }; })
+      .sort(function (a, b) { return Math.max.apply(null, b.vals) - Math.max.apply(null, a.vals); });
+    return { hh: hh, list: list };
+  };
+  Radius.prototype.renderNewsSummary = function (rows) {
+    var self = this, s = this.state, T = this.newsTotals(rows);
+    if (!T || !T.list.length) { if (s.newsZip != null) s.newsZip = null; return; }
+    if (s.newsZip != null && !T.list.some(function (x) { return x.i === s.newsZip; })) s.newsZip = null;
+    var top = T.list[0], lead = newsLines(top.p, top.vals, T.hh)[0];
+    var box = el("details", { class: "rz-news", open: this.newsOpen ? "open" : null, ontoggle: function () { self.newsOpen = this.open; } }, [
+      el("summary", null, [el("b", { text: "Newspaper coverage: " }), top.p.name + ", " + lead.label + " " + newsCellText(lead) + " of households",
+        T.list.length > 1 ? el("span", { class: "az-news-count", text: " · " + NF0.format(T.list.length - 1) + " more paper" + (T.list.length > 2 ? "s" : "") }) : null])]);
+    T.list.forEach(function (x) {
+      box.appendChild(el("div", { class: "az-news-paper" }, [
+        el("div", { class: "az-news-name" }, [x.p.name, x.p.free ? el("span", { class: "az-tag", title: "Most of this paper's copies are non-paid (qualified) distribution", text: "Mostly non-paid" }) : null]),
+        el("table", { class: "az-news-t" }, [el("tbody", null, newsLines(x.p, x.vals, T.hh).map(function (l) {
+          return el("tr", { class: l.lead ? "az-news-lead" : null }, [el("th", { scope: "row", text: l.label }), el("td", { class: "num", text: NF0.format(l.n || 0) }),
+            el("td", { class: "num", text: l.pct != null ? NF1.format(l.pct * 100) + "%" : "–" })]);
+        }))])]));
+    });
+    box.appendChild(el("label", { class: "rz-news-pick" }, ["Add to the county and ZIP lists: ",
+      el("select", { onchange: function () { s.newsZip = this.value === "" ? null : this.value; if (/^np_/.test(s.sortKey || "")) { s.sortKey = "idx"; s.sortDir = "desc"; } self.renderTable(); } },
+        [el("option", { value: "", text: "None" })].concat(T.list.map(function (x) { return el("option", { value: x.i, selected: x.i === s.newsZip ? "selected" : null, text: x.p.name }); })))]));
+    var dates = {}; T.list.forEach(function (x) { dates[x.p.asOf] = 1; });
+    box.appendChild(el("p", { class: "az-news-src", text: "Copies in the area's ZIPs · % of its " + NF0.format(T.hh) + " households. Print: NMS circulation, " + Object.keys(dates).sort().map(newsDate).join(" and ") +
+      ". E-edition copies with no ZIP aren't included. Papers are shown separately because their readers can overlap." }));
+    this.summary.appendChild(box);
+  };
+  // ZIP list columns for the paper picked above; cells read "copies · % of households" and sort by the %
+  Radius.prototype.newsZipCols = function (rows) {
+    var s = this.state, N = this.news, c = this.c;
+    if (!N || s.newsZip == null || !N.papers[+s.newsZip]) return [];
+    var p = N.papers[+s.newsZip], pi = s.newsZip, zeros = p.days.map(function () { return 0; });
+    var all = newsLines(p, zeros, 0), keys = all.filter(function (x) { return ["gross", "sun", "wk", "web"].indexOf(x.key) >= 0; });
+    if (!keys.some(function (x) { return x.key === "sun" || x.key === "wk"; })) keys = keys.concat(all.filter(function (x) { return x.key !== "gross" && x.key !== "web"; }).slice(0, 1));
+    rows.forEach(function (r) {
+      var sum = zeros.slice(), hh = 0;
+      (r.members || [r]).forEach(function (m) { var t = N.zip[m.zip] && N.zip[m.zip][pi]; if (t) t.forEach(function (v, j) { sum[j] += v; }); hh += (c.households && c.households[m.i]) || 0; });
+      var L = newsLines(p, sum, hh);
+      keys.forEach(function (k) {
+        var x = L.filter(function (y) { return y.key === k.key; })[0], has = x && x.n;
+        r["np_" + k.key] = has ? (x.pct != null ? x.pct : x.n) : null;
+        r["npc_" + k.key] = has ? newsCellText(x) : null;
+        r["npn_" + k.key] = has ? x.n : 0;
+        r["npp_" + k.key] = has && x.pct != null ? (x.pct * 100).toFixed(1) + "%" : "";
+      });
+    });
+    return keys.map(function (k) {
+      return { key: k.key, label: k.label.replace(" print", "").replace(" (print + web)", "").replace(" (monthly uniques)", ""), help: p.name + ": " + k.label + " · % of households", full: p.name + " " + k.label };
+    });
   };
 
   /* ---------- Recommended allocation (closed until opened) ----------
@@ -2247,13 +2344,15 @@
     var ctx = this.addContext(rows), sc = !!this.cfg.blendScore;
     this.addScore(rows, ctx); this.sortRows(rows);
     if (sc) head.push("Score (within this area)");
-    var lines = [head.concat(["Population", est ? "Estimated audience" : "Audience", "Audience share", "Index vs US"]).concat(ctx.map(function (k) { return CONTEXT[k].long; })).concat(["Audience definition"]).map(csvCell).join(",")];
+    var nk = this.newsZipCols(rows), nh = [];
+    nk.forEach(function (x) { nh.push(x.full + (x.key === "web" ? " (monthly uniques)" : x.key === "gross" ? " (copies + uniques)" : " (copies)"), x.full + " (% of households)"); });
+    var lines = [head.concat(["Population", est ? "Estimated audience" : "Audience", "Audience share", "Index vs US"]).concat(ctx.map(function (k) { return CONTEXT[k].long; })).concat(nh).concat(["Audience definition"]).map(csvCell).join(",")];
     var def = this.describe();
     rows.forEach(function (r) {
       var lead = [r.zip, r.town].concat(area ? [r.county || ""] : []).concat(!area || circ ? [r.dist == null ? "" : r.dist.toFixed(1)] : []);
       if (sc) lead.push(r.score == null ? "" : Math.round(r.score));
       lines.push(lead.concat([r.pop, r.aud == null ? "" : Math.round(r.aud), r.share == null ? "" : (r.share * 100).toFixed(1) + "%", r.idx == null ? "" : Math.round(r.idx)])
-        .concat(ctx.map(function (k) { var v = r["x_" + k]; return v == null ? "" : (v * 100).toFixed(1) + "%"; })).concat([def]).map(csvCell).join(","));
+        .concat(ctx.map(function (k) { var v = r["x_" + k]; return v == null ? "" : (v * 100).toFixed(1) + "%"; })).concat([].concat.apply([], nk.map(function (x) { return [r["npn_" + x.key], r["npp_" + x.key]]; }))).concat([def]).map(csvCell).join(","));
     });
     var blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
     var a = el("a", { href: URL.createObjectURL(blob), download: (this.cfg.exportName || "adtaxi-radius") + (area ? "-custom-area.csv" : "-" + s.zip + "-" + s.r + "mi.csv") });
