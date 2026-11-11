@@ -54,6 +54,8 @@
   .reports li.pair { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
   .reports li.pair a.dl { flex: none; padding: 10px 2px; font-size: 14px; font-weight: 600; color: var(--teal); }
   .reports li.pair a.dl:hover { text-decoration: underline; text-underline-offset: 3px; }
+  .reports a.ar { display: block; }
+  .reports .for { display: block; color: var(--muted); font-size: 13px; margin-top: 2px; }
   .cat.hit { border-color: var(--teal-2); box-shadow: 0 0 0 2px rgba(19, 161, 150, .25); }
   .pf-item { scroll-margin-top: 16px; }
   .chips { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -271,22 +273,32 @@
 
   if (view !== "digital") CATS.forEach(function (c) { jump.appendChild(el("a", { href: "#" + c.id, text: c.name })); });
   // Ad response one-sheets (shared/slides/ar-*.png and .pdf, built by data-build/build_ad_response_slides.py;
-  // the list of audiences is in shared/media/ad-response.json). Same layout as Category Activity and Digital Slides.
+  // the list of audiences is in shared/media/ad-response.json). Laid out like Category Reports.
   if (view === "response") {
+    // Same layout as Category Reports: a two-column grid of category cards, each a list of its audiences.
+    // The name opens the one-sheet full size; PDF downloads it.
+    var arGrid = el("div", { class: "rgrid" });
+    lib.appendChild(arGrid);
     CATS.forEach(function (c) {
-      var host = el("div", { class: "slides" });
-      lib.appendChild(el("section", { class: "cat", id: c.id, "aria-labelledby": c.id + "-t" }, [head(c), host]));
+      var host = el("ul", { class: "reports" });
+      arGrid.appendChild(el("section", { class: "cat", id: c.id, "aria-labelledby": c.id + "-t" }, [head(c), host]));
       c.arHost = host;
     });
-    lib.appendChild(el("p", { class: "note", text: "Source: 2026 AudienceSCAN® study. National figures, the same in every market. Select a one-sheet to open it full size." }));
+    lib.appendChild(el("p", { class: "note", text: "Source: 2026 AudienceSCAN\u00ae study. National figures, the same in every market. Select an audience to open its one-sheet full size." }));
     fetch("../shared/media/ad-response.json", { cache: "no-cache" }).then(function (r) { return r.json(); }).then(function (d) {
       CATS.forEach(function (c) {
         var cat = d.cats.filter(function (x) { return x.id === c.id; })[0];
         if (!cat) { c.arHost.parentNode.replaceChild(el("p", { class: "none", text: "Ad response isn't available for this category yet." }), c.arHost); return; }
-        cat.groups.forEach(function (g) { c.arHost.appendChild(slide(g.file, g.short)); });
+        cat.groups.slice().sort(function (a, b) { return a.short.localeCompare(b.short); }).forEach(function (g) {
+          c.arHost.appendChild(el("li", { class: "pair" }, [
+            el("a", { class: "ar", href: SL + g.file + ".png", target: "_blank", rel: "noopener" }, [
+              el("b", { text: g.short }),
+              (g["for"] && g["for"].length) ? el("span", { class: "for", text: "Used for " + g["for"].join(", ") }) : null]),
+            el("a", { class: "dl", href: SL + g.file + ".pdf", download: g.file + ".pdf", text: "PDF" })]));
+        });
       });
       if (location.hash) { var t = document.getElementById(decodeURIComponent(location.hash.slice(1))); if (t) t.scrollIntoView(); }
-    }, function () { CATS.forEach(function (c) { c.arHost.appendChild(el("p", { class: "none", text: "Ad response couldn't load. Refresh the page to try again." })); }); });
+    }, function () { CATS.forEach(function (c) { c.arHost.appendChild(el("li", null, [el("p", { class: "none", text: "Ad response couldn't load. Refresh the page to try again." })])); }); });
   }
   if (view === "reports") {
     lib.appendChild(el("div", { class: "rgrid" }, CATS.map(function (c) {
