@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script>/* site-version: if this page is an old saved copy, reload it once with the current version (shared/version.json; bump both on each release) */
-(function(){var V="20261111i";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
+(function(){var V="20261111j";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>From the Research Library</title>
 <meta name="robots" content="noindex">
@@ -291,18 +291,14 @@
     });
   }
   if (view === "digital") {
-    // Same layout as Category Reports: a card per platform with a short list (open the slide full size, or download its PDF)
-    PLATFORMS.forEach(function (p) { jump.appendChild(el("a", { href: "#pf-" + p.id, text: p.name })); });
-    lib.appendChild(el("div", { class: "rgrid" }, PLATFORMS.map(function (p) {
-      return el("section", { class: "cat", id: "pf-" + p.id, "aria-labelledby": "pf-" + p.id + "-t" }, [
+    // Same layout as Category Activity: a full-width card per platform with its two slides
+    PLATFORMS.forEach(function (p) {
+      jump.appendChild(el("a", { href: "#pf-" + p.id, text: p.name }));
+      lib.appendChild(el("section", { class: "cat", id: "pf-" + p.id, "aria-labelledby": "pf-" + p.id + "-t" }, [
         el("div", { class: "cat-head" }, [el("h2", { id: "pf-" + p.id + "-t", text: p.name }), el("span", { class: "cat-line", text: p.line })]),
-        el("ul", { class: "reports" }, [["trend", "Reach and growth"], ["demo", "By demographic"]].map(function (x) {
-          var f = p.id + "-" + x[0];
-          return el("li", { class: "pair" }, [el("a", { href: SL + f + ".png", target: "_blank", rel: "noopener", title: "Open full size" }, [el("b", { text: p.name + ": " + x[1].toLowerCase() })]),
-            el("a", { class: "dl", href: SL + f + ".pdf", download: f + ".pdf", text: "Download PDF" })]);
-        }))]);
-    })));
-    lib.appendChild(el("p", { class: "note", text: "Source: Nielsen Scarborough USA+ Spring 2026; ad spend from EMARKETER. National figures. Each slide opens full size in a new tab." }));
+        el("div", { class: "slides" }, [slide(p.id + "-trend", p.name + ": reach and growth"), slide(p.id + "-demo", p.name + ": by demographic")])]));
+    });
+    lib.appendChild(el("p", { class: "note", text: "Source: Nielsen Scarborough USA+ Spring 2026; ad spend from EMARKETER. National figures. Select a slide to open it full size." }));
   }
   if (!view) {
     jump.appendChild(el("a", { href: "#platforms", text: "Digital slides" }));
