@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script>/* site-version: if this page is an old saved copy, reload it once with the current version (shared/version.json; bump both on each release) */
-(function(){var V="20261111l";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
+(function(){var V="20261111m";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Adtaxi Market Analyzers</title>
 <meta name="robots" content="noindex">
@@ -90,10 +90,18 @@
 
   /* tools that work with any category */
   .tools { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
-  .tools-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .tools-2 .tool-art { aspect-ratio: auto; height: 240px; overflow: hidden; }
-  .tools-2 .tool-art svg { width: 100%; height: 240px; }
-  @media (max-width: 640px) { .tools-2 .tool-art, .tools-2 .tool-art svg { height: 200px; } }
+  /* Research Library: four narrower panels in one row */
+  .tools-2 { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+  .tools-2 .tool-art { aspect-ratio: auto; height: 160px; overflow: hidden; }
+  .tools-2 .tool-art svg { width: 100%; height: 160px; }
+  .tools-2 .tool-body { padding: 16px 16px 18px; }
+  .tools-2 .tool h3 { font-size: 19px; }
+  .tools-2 .tool p { font-size: 14.5px; line-height: 1.5; margin-bottom: 14px; }
+  .tools-2 .tool-actions { flex-direction: column; align-items: stretch; gap: 8px; }
+  .tools-2 .tool select { flex: none; min-height: 40px; }
+  .tools-2 .btn { min-height: 42px; }
+  @media (max-width: 1100px) { .tools-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 640px) { .tools-2 { grid-template-columns: 1fr; } }
   @media (max-width: 640px) { .tools-2 { grid-template-columns: 1fr; } }
   .tool { background: var(--card); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; }
   .tool-art { background: var(--navy-3); aspect-ratio: 16 / 10; display: grid; place-items: center; }
@@ -298,7 +306,7 @@
           </svg></div>
           <div class="tool-body">
             <h3>Category Activity</h3>
-            <p>Each category's market size and buyers, and how those buyers use media. Slides open full size or download as a PDF.</p>
+            <p>Each category's market size and buyers, and how those buyers use media.</p>
             <div class="tool-actions"><select class="lib-pick" data-view="activity" aria-label="Category for activity slides"></select><a class="btn btn-navy" data-go="activity" href="/analyzers/library.html?view=activity">View slides</a></div>
           </div>
         </article>
@@ -317,7 +325,7 @@
           </svg></div>
           <div class="tool-body">
             <h3>Ad Response</h3>
-            <p>Which media move each category's buyers to act: 17 ad types ranked for 41 target audiences, from doctor switchers to used vehicle shoppers, compared with all U.S. adults.</p>
+            <p>Which media move each category's buyers to act: 17 ad types ranked for 41 audiences.</p>
             <div class="tool-actions"><select class="lib-pick" data-view="response" aria-label="Category for ad response"></select><a class="btn btn-navy" data-go="response" href="/analyzers/library.html?view=response">View ad response</a></div>
           </div>
         </article>
@@ -335,7 +343,7 @@
           </svg></div>
           <div class="tool-body">
             <h3>Category Reports</h3>
-            <p>AdMall Local Account Intelligence reports for 37 business types, from dentists and HVAC dealers to credit unions and colleges. Each opens as a PDF.</p>
+            <p>AdMall reports for 37 business types, from dentists and HVAC dealers to credit unions.</p>
             <div class="tool-actions"><select class="lib-pick" data-view="reports" aria-label="Category for reports"></select><a class="btn btn-navy" data-go="reports" href="/analyzers/library.html?view=reports">View reports</a></div>
           </div>
         </article>
@@ -354,7 +362,7 @@
           </svg></div>
           <div class="tool-body">
             <h3>Digital Slides</h3>
-            <p>Reach, growth and audience by demographic for Streaming TV, Connected TV, Social, Search, Streaming audio and Ecommerce.</p>
+            <p>Reach, growth and demographics for six platforms, from Streaming TV to Search.</p>
             <div class="tool-actions"><select class="lib-pick" data-view="digital" aria-label="Digital platform"></select><a class="btn btn-navy" data-go="digital" href="/analyzers/library.html?view=digital">View slides</a></div>
           </div>
         </article>
