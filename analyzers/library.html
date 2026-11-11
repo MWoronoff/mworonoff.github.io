@@ -68,6 +68,8 @@
   .viewer .vacts a:hover { background: var(--navy-2); border-color: var(--navy-2); }
   .viewer .vacts button { background: var(--card); color: var(--navy); border: 1px solid var(--line); }
   .viewer .vacts button:hover { border-color: var(--teal-2); }
+  .viewer iframe { display: block; width: 100%; height: calc(100vh - 110px); border: 0; background: var(--paper); }
+  .viewer [hidden] { display: none !important; }
   .viewer img { display: block; width: 100%; height: auto; max-height: calc(100vh - 110px); object-fit: contain; background: var(--paper); }
   .reports .for { display: block; color: var(--muted); font-size: 13px; margin-top: 2px; }
   .cat.hit { border-color: var(--teal-2); box-shadow: 0 0 0 2px rgba(19, 161, 150, .25); }
@@ -255,7 +257,7 @@
   // Three collections, opened from the hub's Research Library panels: ?view=reports | activity | digital (no view: everything)
   var VIEWS = {
     activity: { name: "Category Activity", lead: "Each category's market size and buyers, and how those buyers use media. Open a slide full size or download it as a PDF." },
-    reports:  { name: "Category Reports", lead: "AdMall Local Account Intelligence reports for each business category. Each opens as a PDF in a new tab." },
+    reports:  { name: "Category Reports", lead: "AdMall Local Account Intelligence reports for each business category. Select View to preview one and download it as a PDF." },
     response: { name: "Ad Response", lead: "One-sheets ranking 17 media by how many of each category's buyers acted on an ad in the past 30 days, compared with all U.S. adults. Select View to preview one and download it as a PDF." },
     digital:  { name: "Digital Slides", lead: "Reach, growth and audience by demographic for six digital platforms. Open a slide full size or download it as a PDF." }
   };
@@ -273,7 +275,10 @@
 
   function reportList(c) {
     return el("ul", { class: "reports" }, c.reports.map(function (k) {
-      return el("li", null, [el("a", { href: RP + k + ".pdf", target: "_blank", rel: "noopener" }, [el("b", { text: R[k][0] })])]);
+      var view = el("button", { type: "button", class: "view", text: "View", "aria-label": "View the " + R[k][0] + " report" });
+      view.addEventListener("click", function () { showItem({ title: R[k][0], pdf: RP + k + ".pdf", file: k }); });
+      return el("li", { class: "pair" }, [el("div", { class: "ar" }, [el("b", { text: R[k][0] }), R[k][1] ? el("span", { class: "for", text: R[k][1] }) : null]),
+        el("span", { class: "acts" }, [view])]);
     }));
   }
   function activity(c) {
@@ -288,23 +293,27 @@
   if (view !== "digital") CATS.forEach(function (c) { jump.appendChild(el("a", { href: "#" + c.id, text: c.name })); });
   // Ad response one-sheets (shared/slides/ar-*.png and .pdf, built by data-build/build_ad_response_slides.py;
   // the list of audiences is in shared/media/ad-response.json). Laid out like Category Reports.
-  // One-sheet preview: View opens the slide in a box, with Download PDF and Close
+  // Preview box: View opens a one-sheet (image) or a category report (PDF) over the page, with Download PDF and Close
   var viewer = null;
-  function showSlide(g) {
+  function showItem(o) {
     if (!viewer) {
       viewer = el("dialog", { class: "viewer", "aria-labelledby": "vtitle" }, [
         el("div", { class: "vbar" }, [el("b", { id: "vtitle" }), el("div", { class: "vacts" }, [
           el("a", { id: "vdl", text: "Download PDF" }), el("button", { type: "button", id: "vclose", text: "Close" })])]),
-        el("img", { id: "vimg", alt: "" })]);
+        el("img", { id: "vimg", alt: "" }), el("iframe", { id: "vpdf", title: "Report preview" })]);
       document.body.appendChild(viewer);
       document.getElementById("vclose").addEventListener("click", function () { viewer.close(); });
-      viewer.addEventListener("click", function (e) { if (e.target === viewer) viewer.close(); });  // click outside the slide closes it
+      viewer.addEventListener("click", function (e) { if (e.target === viewer) viewer.close(); });  // click outside closes it
+      viewer.addEventListener("close", function () { document.getElementById("vpdf").removeAttribute("src"); });
     }
-    document.getElementById("vtitle").textContent = "Ad response: " + g.short;
-    var dl = document.getElementById("vdl"); dl.href = SL + g.file + ".pdf"; dl.setAttribute("download", g.file + ".pdf");
-    var img = document.getElementById("vimg"); img.src = SL + g.file + ".png"; img.alt = "Ad response one-sheet: " + g.short;
+    document.getElementById("vtitle").textContent = o.title;
+    var dl = document.getElementById("vdl"); dl.href = o.pdf; dl.setAttribute("download", o.file + ".pdf");
+    var img = document.getElementById("vimg"), pdf = document.getElementById("vpdf");
+    img.hidden = !o.img; pdf.hidden = !!o.img;
+    if (o.img) { img.src = o.img; img.alt = o.title; } else pdf.src = o.pdf + "#view=FitH";
     viewer.showModal();
   }
+  function showSlide(g) { showItem({ title: "Ad response: " + g.short, pdf: SL + g.file + ".pdf", img: SL + g.file + ".png", file: g.file }); }
   if (view === "response") {
     // Same layout as Category Reports: a two-column grid of category cards, each a list of its audiences.
     // The name opens the one-sheet full size; PDF downloads it.
@@ -336,7 +345,7 @@
     lib.appendChild(el("div", { class: "rgrid" }, CATS.map(function (c) {
       return el("section", { class: "cat", id: c.id, "aria-labelledby": c.id + "-t" }, [head(c), reportList(c)]);
     })));
-    lib.appendChild(el("p", { class: "note", text: "AdMall Local Account Intelligence. Each report opens as a PDF in a new tab." }));
+    lib.appendChild(el("p", { class: "note", text: "AdMall Local Account Intelligence. Select View to preview a report and download it." }));
   } else if (view === "activity") {
     CATS.forEach(function (c) {
       lib.appendChild(el("section", { class: "cat", id: c.id, "aria-labelledby": c.id + "-t" }, [head(c), activity(c)]));
@@ -349,7 +358,7 @@
         el("details", { class: "rep" }, [
           el("summary", null, [el("span", { text: "View " + c.reports.length + " report" + (c.reports.length === 1 ? "" : "s") })]),
           reportList(c),
-          el("p", { class: "note", text: "AdMall Local Account Intelligence. Opens as a PDF in a new tab." })])]);
+          el("p", { class: "note", text: "AdMall Local Account Intelligence. Select View to preview and download." })])]);
       lib.appendChild(el("section", { class: "cat", id: c.id, "aria-labelledby": c.id + "-t" }, [head(c), el("div", { class: "cat-grid" }, [left, right])]));
     });
   }
