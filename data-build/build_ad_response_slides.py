@@ -1,6 +1,7 @@
 """Ad response one-sheets for the Research Library, in the Adtaxi slide design used by shared/slides
-(teal top rule, uppercase title, dark green stat banner, full-width chart, adtaxi circle).
-No callout box or Marketers' Note: the chart runs the full width (Nov 2026).
+(teal top rule, uppercase title, dark green stat banner, chart with a callout box, adtaxi circle).
+The callout box shows the biggest lift among the digital media Adtaxi sells (DIGITAL below), never a traditional medium;
+no Marketers' Note line (Nov 2026). The banner's top three stay the top three of all 17 media.
 
 One slide per AudienceSCAN 2026 audience in shared/media/ad-response.json (run data-build/build_ad_response.js first).
 Writes shared/slides/ar-<category>-<audience>.png (1467x825) and .pdf (13.333 x 7.5 in), and adds each audience's
@@ -45,6 +46,9 @@ IN_SENTENCE = {"Social": "social", "Search": "search", "Mobile app or text": "mo
 
 IN_LIST = dict(IN_SENTENCE, Circulars="circulars")
 
+# Media eligible for the callout box (digital platforms Adtaxi sells; podcast left out)
+DIGITAL = {"Social", "Mobile app or text", "Streaming TV", "Search", "Pre-roll video", "Online display", "Email", "Text link"}
+
 
 def art(w):
     return ("an " if w[0] in "aeiou" else "a ") + w
@@ -75,6 +79,7 @@ def slide_html(cat, g):
     rows = sorted(g["rows"], key=lambda r: -r[1])
     rows = [{"name": SHORT.get(r[0], r[0]), "t": r[1], "a": r[2], "d": lift(r[1], r[2])} for r in rows]
     top = rows[:3]
+    big = sorted([r for r in rows if r["name"] in DIGITAL], key=lambda r: (-r["d"], -r["t"]))[0]
     avg_lift = round(sum(r["d"] for r in rows) / len(rows))
     scale = max(r["t"] for r in rows) * 1.08
     who = g["short"]
@@ -111,13 +116,19 @@ def slide_html(cat, g):
   .legend span {{ display: inline-flex; align-items: center; gap: 10px; }}
   .legend .sw {{ width: 13px; height: 13px; background: #157968; }}
   .legend .mk {{ width: 3px; height: 15px; background: #222727; }}
-  .chart {{ position: absolute; left: 50px; top: 298px; width: 1177px; }}
+  .chart {{ position: absolute; left: 50px; top: 298px; width: 830px; }}
   .row {{ display: flex; align-items: center; height: 17.6px; }}
   .lab {{ width: 150px; flex: none; text-align: right; padding-right: 8px; font-size: 11.5px; color: #3f4746; white-space: nowrap; }}
   .track {{ position: relative; flex: 1; height: 13px; background: #eef1f2; }}
   .bar {{ position: absolute; left: 0; top: 0; bottom: 0; background: #157968; display: flex; align-items: center; justify-content: flex-end; }}
   .bar b {{ font-size: 10px; font-weight: 700; color: #fff; padding-right: 5px; font-style: normal; }}
   .avg {{ position: absolute; top: -2px; bottom: -2px; width: 3px; margin-left: -1.5px; background: #222727; }}
+  .box {{ position: absolute; left: 930px; top: 300px; width: 297px; height: 278px; background: #f2f8f6; border-radius: 26px; padding: 28px 26px;
+          box-shadow: 0 4px 8px rgba(0,0,0,.18); }}
+  .box h2 {{ font-size: 13.5px; font-weight: 700; color: #0d4a44; text-transform: uppercase; }}
+  .box .med {{ font-size: 30px; font-weight: 700; color: #0d4a44; margin-top: 14px; line-height: 1.1; }}
+  .box .num {{ font-size: 30px; font-weight: 700; color: #0d4a44; margin-top: 26px; }}
+  .box p {{ font-size: 15.5px; font-weight: 600; color: #0d4a44; margin-top: 4px; line-height: 1.3; }}
   .src {{ position: absolute; left: 65px; top: 674px; width: 980px; font-size: 10.5px; color: #3f4746; }}
   .logo {{ position: absolute; left: 1110px; top: 613px; width: 81px; height: 81px; }}
   .logo svg {{ width: 100%; height: 100%; display: block; }}
@@ -134,6 +145,8 @@ def slide_html(cat, g):
 <div class="chart-title">Ad response by medium</div>
 <div class="legend"><span><i class="sw"></i>{html.escape(who)}</span><span><i class="mk"></i>U.S. adults</span></div>
 <div class="chart">{"".join(bars)}</div>
+<div class="box"><h2>Biggest digital lift</h2><div class="med">{html.escape(big["name"])}</div>
+  <div class="num">{'+' if big['d'] >= 0 else ''}{big["d"]}%</div><p>more likely than U.S. adults to act on {art(IN_SENTENCE.get(big["name"], big["name"].lower()))} ad</p></div>
 <div class="src">2026 AudienceSCAN® study. Percent who saw or heard an ad of each type that led them to take action in the past 30 days, based on everyone in the group, not just users of each medium. “More likely” figures are percent differences vs. all U.S. adults; the banner figure averages all 17 media.</div>
 <div class="logo">{LOGO}</div>
 </body></html>'''
