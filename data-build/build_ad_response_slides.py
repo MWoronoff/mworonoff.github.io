@@ -1,6 +1,7 @@
 """Ad response one-sheets for the Research Library, in the Adtaxi slide design used by shared/slides
 (teal top rule, uppercase title, dark green stat banner, chart with a callout box, adtaxi circle).
-The callout box shows the biggest lift among the digital media Adtaxi sells (DIGITAL below), never a traditional medium;
+The callout box shows the biggest lift among the digital media Adtaxi sells (DIGITAL below), or Newspaper when it posts a
+strong over-index (at least NEWS_MIN and above the best digital lift); never another traditional medium;
 no Marketers' Note line (Nov 2026). The banner's top three stay the top three of all 17 media.
 
 One slide per AudienceSCAN 2026 audience in shared/media/ad-response.json (run data-build/build_ad_response.js first).
@@ -48,6 +49,8 @@ IN_LIST = dict(IN_SENTENCE, Circulars="circulars")
 
 # Media eligible for the callout box (digital platforms Adtaxi sells; podcast left out)
 DIGITAL = {"Social", "Mobile app or text", "Streaming TV", "Search", "Pre-roll video", "Online display", "Email", "Text link"}
+# Newspaper takes the box only with a strong over-index: at least this many points above U.S. adults and above the best digital lift
+NEWS_MIN = 25
 
 
 def art(w):
@@ -80,6 +83,10 @@ def slide_html(cat, g):
     rows = [{"name": SHORT.get(r[0], r[0]), "t": r[1], "a": r[2], "d": lift(r[1], r[2])} for r in rows]
     top = rows[:3]
     big = sorted([r for r in rows if r["name"] in DIGITAL], key=lambda r: (-r["d"], -r["t"]))[0]
+    news = [r for r in rows if r["name"] == "Newspaper"]
+    if news and news[0]["d"] >= NEWS_MIN and news[0]["d"] > big["d"]:
+        big = news[0]
+    box_head = "Strong newspaper lift" if big["name"] == "Newspaper" else "Biggest digital lift"
     avg_lift = round(sum(r["d"] for r in rows) / len(rows))
     scale = max(r["t"] for r in rows) * 1.08
     who = g["short"]
@@ -145,7 +152,7 @@ def slide_html(cat, g):
 <div class="chart-title">Ad response by medium</div>
 <div class="legend"><span><i class="sw"></i>{html.escape(who)}</span><span><i class="mk"></i>U.S. adults</span></div>
 <div class="chart">{"".join(bars)}</div>
-<div class="box"><h2>Biggest digital lift</h2><div class="med">{html.escape(big["name"])}</div>
+<div class="box"><h2>{box_head}</h2><div class="med">{html.escape(big["name"])}</div>
   <div class="num">{'+' if big['d'] >= 0 else ''}{big["d"]}%</div><p>more likely than U.S. adults to act on {art(IN_SENTENCE.get(big["name"], big["name"].lower()))} ad</p></div>
 <div class="src">2026 AudienceSCAN® study. Percent who saw or heard an ad of each type that led them to take action in the past 30 days, based on everyone in the group, not just users of each medium. “More likely” figures are percent differences vs. all U.S. adults; the banner figure averages all 17 media.</div>
 <div class="logo">{LOGO}</div>
