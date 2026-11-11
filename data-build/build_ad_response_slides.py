@@ -1,5 +1,6 @@
 """Ad response one-sheets for the Research Library, in the Adtaxi slide design used by shared/slides
-(teal top rule, uppercase title, dark green stat banner, chart with a callout box, Marketers' Note, adtaxi circle).
+(teal top rule, uppercase title, dark green stat banner, full-width chart, adtaxi circle).
+No callout box or Marketers' Note: the chart runs the full width (Nov 2026).
 
 One slide per AudienceSCAN 2026 audience in shared/media/ad-response.json (run data-build/build_ad_response.js first).
 Writes shared/slides/ar-<category>-<audience>.png (1467x825) and .pdf (13.333 x 7.5 in), and adds each audience's
@@ -74,16 +75,10 @@ def slide_html(cat, g):
     rows = sorted(g["rows"], key=lambda r: -r[1])
     rows = [{"name": SHORT.get(r[0], r[0]), "t": r[1], "a": r[2], "d": lift(r[1], r[2])} for r in rows]
     top = rows[:3]
-    by_lift = sorted(rows, key=lambda r: -r["d"])
-    big = by_lift[0]
     avg_lift = round(sum(r["d"] for r in rows) / len(rows))
     scale = max(r["t"] for r in rows) * 1.08
     who = g["short"]
     title = "Ad response: " + who
-    listed = [IN_LIST.get(r["name"], r["name"]) for r in top]
-    listed[0] = listed[0][0].upper() + listed[0][1:]
-    note = (f"{join3(listed)} move the most {plain(g['audience'])} to act. "
-            f"{big['name']} shows the biggest lift over the average adult ({'+' if big['d'] >= 0 else ''}{big['d']}%).")
     bars = []
     for r in rows:
         w = r["t"] / scale * 100
@@ -116,21 +111,13 @@ def slide_html(cat, g):
   .legend span {{ display: inline-flex; align-items: center; gap: 10px; }}
   .legend .sw {{ width: 13px; height: 13px; background: #157968; }}
   .legend .mk {{ width: 3px; height: 15px; background: #222727; }}
-  .chart {{ position: absolute; left: 50px; top: 298px; width: 830px; }}
+  .chart {{ position: absolute; left: 50px; top: 298px; width: 1177px; }}
   .row {{ display: flex; align-items: center; height: 17.6px; }}
   .lab {{ width: 150px; flex: none; text-align: right; padding-right: 8px; font-size: 11.5px; color: #3f4746; white-space: nowrap; }}
   .track {{ position: relative; flex: 1; height: 13px; background: #eef1f2; }}
   .bar {{ position: absolute; left: 0; top: 0; bottom: 0; background: #157968; display: flex; align-items: center; justify-content: flex-end; }}
   .bar b {{ font-size: 10px; font-weight: 700; color: #fff; padding-right: 5px; font-style: normal; }}
   .avg {{ position: absolute; top: -2px; bottom: -2px; width: 3px; margin-left: -1.5px; background: #222727; }}
-  .box {{ position: absolute; left: 930px; top: 300px; width: 297px; height: 278px; background: #f2f8f6; border-radius: 26px; padding: 28px 26px;
-          box-shadow: 0 4px 8px rgba(0,0,0,.18); }}
-  .box h2 {{ font-size: 13.5px; font-weight: 700; color: #0d4a44; text-transform: uppercase; }}
-  .box .med {{ font-size: 30px; font-weight: 700; color: #0d4a44; margin-top: 14px; line-height: 1.1; }}
-  .box .num {{ font-size: 30px; font-weight: 700; color: #0d4a44; margin-top: 26px; }}
-  .box p {{ font-size: 15.5px; font-weight: 600; color: #0d4a44; margin-top: 4px; line-height: 1.3; }}
-  .note {{ position: absolute; left: 81px; top: 604px; width: 920px; font-size: 18px; line-height: 1.3; color: #5c6564; }}
-  .note b {{ font-weight: 700; }}
   .src {{ position: absolute; left: 65px; top: 674px; width: 980px; font-size: 10.5px; color: #3f4746; }}
   .logo {{ position: absolute; left: 1110px; top: 613px; width: 81px; height: 81px; }}
   .logo svg {{ width: 100%; height: 100%; display: block; }}
@@ -147,9 +134,6 @@ def slide_html(cat, g):
 <div class="chart-title">Ad response by medium</div>
 <div class="legend"><span><i class="sw"></i>{html.escape(who)}</span><span><i class="mk"></i>U.S. adults</span></div>
 <div class="chart">{"".join(bars)}</div>
-<div class="box"><h2>Biggest lift vs. U.S. adults</h2><div class="med">{html.escape(big["name"])}</div>
-  <div class="num">{'+' if big['d'] >= 0 else ''}{big["d"]}%</div><p>more likely than U.S. adults to act on {art(IN_SENTENCE.get(big["name"], big["name"].lower()))} ad</p></div>
-<div class="note"><b>Marketers’ Note:</b>&nbsp; {html.escape(note)}</div>
 <div class="src">2026 AudienceSCAN® study. Percent who saw or heard an ad of each type that led them to take action in the past 30 days, based on everyone in the group, not just users of each medium. “More likely” figures are percent differences vs. all U.S. adults; the banner figure averages all 17 media.</div>
 <div class="logo">{LOGO}</div>
 </body></html>'''
@@ -171,9 +155,7 @@ def main():
             page.set_content(slide_html(cat, g))
             # Long audience names: once Inter has loaded, shrink the title until it clears the AudienceSCAN label
             page.evaluate("""() => document.fonts.ready.then(() => { const t = document.getElementById("t"); let s = 33;
-              while (t.getBoundingClientRect().right > 1040 && s > 22) { s -= 1; t.style.fontSize = s + "px"; }
-              const n = document.querySelector(".note"); let f = 18;
-              while (n.getBoundingClientRect().height > 50 && f > 14) { f -= 0.5; n.style.fontSize = f + "px"; } })""")
+              while (t.getBoundingClientRect().right > 1040 && s > 22) { s -= 1; t.style.fontSize = s + "px"; } })""")
             base = os.path.join(OUT, g["file"])
             page.screenshot(path=base + ".png", clip={"x": 0, "y": 0, "width": 1280, "height": 720})
             page.pdf(path=base + ".pdf", width="1280px", height="720px", print_background=True, page_ranges="1")
