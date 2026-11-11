@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script>/* site-version: if this page is an old saved copy, reload it once with the current version (shared/version.json; bump both on each release) */
-(function(){var V="20261111g";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
+(function(){var V="20261111h";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Adtaxi Market Analyzers</title>
 <meta name="robots" content="noindex">
@@ -282,6 +282,22 @@
       </div>
       <div class="tools">
         <article class="tool">
+          <div class="tool-art"><svg viewBox="0 0 640 400" role="img" aria-label="A category slide with market size and a table of how buyers use media">
+            <rect width="640" height="400" fill="#0c2138"/>
+            <g transform="translate(150 70)"><rect width="340" height="230" rx="6" fill="#ffffff"/>
+              <rect x="18" y="16" width="120" height="10" rx="3" fill="#0f2742"/>
+              <rect x="18" y="38" width="304" height="46" rx="5" fill="#0f5a4f"/><rect x="32" y="50" width="96" height="14" rx="3" fill="#ffffff"/><rect x="32" y="70" width="60" height="6" rx="3" fill="#8fe0c9"/>
+              <g fill="#dce4ec"><rect x="18" y="100" width="304" height="10" rx="2" fill="#0f5a4f" opacity=".85"/><rect x="18" y="118" width="304" height="8" rx="2"/><rect x="18" y="134" width="304" height="8" rx="2"/><rect x="18" y="150" width="304" height="8" rx="2"/><rect x="18" y="166" width="304" height="8" rx="2"/><rect x="18" y="182" width="304" height="8" rx="2"/></g>
+              <g fill="#35b09d"><rect x="190" y="118" width="40" height="8" rx="2"/><rect x="190" y="134" width="56" height="8" rx="2"/><rect x="190" y="150" width="30" height="8" rx="2"/><rect x="190" y="166" width="48" height="8" rx="2"/><rect x="190" y="182" width="22" height="8" rx="2"/></g>
+              <circle cx="306" cy="208" r="12" fill="#0f7e70"/></g>
+          </svg></div>
+          <div class="tool-body">
+            <h3>Category Activity</h3>
+            <p>Each category's market size and buyers, and how those buyers use media. Slides open full size or download as a PDF.</p>
+            <div class="tool-actions"><select class="lib-pick" data-view="activity" aria-label="Category for activity slides"></select><a class="btn btn-navy" data-go="activity" href="/analyzers/library.html?view=activity">View slides</a></div>
+          </div>
+        </article>
+        <article class="tool">
           <div class="tool-art"><svg viewBox="0 0 640 400" role="img" aria-label="A stack of category report pages and presentation slides">
             <rect width="640" height="400" fill="#0c2138"/>
             <g transform="translate(118 74) rotate(-7 130 120)"><rect width="260" height="170" rx="6" fill="#173c63"/><rect x="18" y="20" width="120" height="12" rx="3" fill="#35b09d"/><rect x="18" y="44" width="200" height="8" rx="3" fill="#2a5478"/><rect x="18" y="60" width="170" height="8" rx="3" fill="#2a5478"/></g>
@@ -297,22 +313,6 @@
             <h3>Category Reports</h3>
             <p>AdMall Local Account Intelligence reports for 37 business types, from dentists and HVAC dealers to credit unions and colleges. Each opens as a PDF.</p>
             <div class="tool-actions"><select class="lib-pick" data-view="reports" aria-label="Category for reports"></select><a class="btn btn-navy" data-go="reports" href="/analyzers/library.html?view=reports">View reports</a></div>
-          </div>
-        </article>
-        <article class="tool">
-          <div class="tool-art"><svg viewBox="0 0 640 400" role="img" aria-label="A category slide with market size and a table of how buyers use media">
-            <rect width="640" height="400" fill="#0c2138"/>
-            <g transform="translate(150 70)"><rect width="340" height="230" rx="6" fill="#ffffff"/>
-              <rect x="18" y="16" width="120" height="10" rx="3" fill="#0f2742"/>
-              <rect x="18" y="38" width="304" height="46" rx="5" fill="#0f5a4f"/><rect x="32" y="50" width="96" height="14" rx="3" fill="#ffffff"/><rect x="32" y="70" width="60" height="6" rx="3" fill="#8fe0c9"/>
-              <g fill="#dce4ec"><rect x="18" y="100" width="304" height="10" rx="2" fill="#0f5a4f" opacity=".85"/><rect x="18" y="118" width="304" height="8" rx="2"/><rect x="18" y="134" width="304" height="8" rx="2"/><rect x="18" y="150" width="304" height="8" rx="2"/><rect x="18" y="166" width="304" height="8" rx="2"/><rect x="18" y="182" width="304" height="8" rx="2"/></g>
-              <g fill="#35b09d"><rect x="190" y="118" width="40" height="8" rx="2"/><rect x="190" y="134" width="56" height="8" rx="2"/><rect x="190" y="150" width="30" height="8" rx="2"/><rect x="190" y="166" width="48" height="8" rx="2"/><rect x="190" y="182" width="22" height="8" rx="2"/></g>
-              <circle cx="306" cy="208" r="12" fill="#0f7e70"/></g>
-          </svg></div>
-          <div class="tool-body">
-            <h3>Category Activity</h3>
-            <p>Each category's market size and buyers, and how those buyers use media. Slides open full size or download as a PDF.</p>
-            <div class="tool-actions"><select class="lib-pick" data-view="activity" aria-label="Category for activity slides"></select><a class="btn btn-navy" data-go="activity" href="/analyzers/library.html?view=activity">View slides</a></div>
           </div>
         </article>
         <article class="tool">
