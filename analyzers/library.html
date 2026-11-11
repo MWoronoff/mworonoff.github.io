@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <script>/* site-version: if this page is an old saved copy, reload it once with the current version (shared/version.json; bump both on each release) */
-(function(){var V="20261111b";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
+(function(){var V="20261111c";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Category Reports & Slides</title>
+<title>From the Research Library</title>
 <meta name="robots" content="noindex">
 <meta name="description" content="Adtaxi category reports and presentation slides for every business category, ready to share.">
 <link rel="icon" href="/shared/adtaxi-logo.svg" type="image/svg+xml">
@@ -108,7 +108,7 @@
     </nav>
   </div>
   <div class="wrap hero-body">
-    <h1>Category Reports &amp; Slides</h1>
+    <h1>From the Research Library</h1>
     <p class="hero-lead">Market reports and presentation slides for every business category, ready to share before or after a call. Open a slide full size, download it as a PDF, or open a category report in a new tab.</p>
     <nav class="chips" id="jump" aria-label="Jump to a category"></nav>
   </div>
@@ -213,7 +213,7 @@
       : el("div", null, [el("h3", { text: "Slides" }), el("p", { class: "none", text: "Slides for this category are coming soon." })]);
     var right = el("div", null, [el("h3", { text: "Category reports" }),
       el("ul", { class: "reports" }, c.reports.map(function (k) {
-        return el("li", null, [el("a", { href: RP + k + ".pdf", target: "_blank", rel: "noopener" }, [el("b", { text: R[k][0] }), el("small", { text: R[k][1] })])]);
+        return el("li", null, [el("a", { href: RP + k + ".pdf", target: "_blank", rel: "noopener" }, [el("b", { text: R[k][0] })])]);
       })),
       el("p", { class: "note", text: "AdMall Local Account Intelligence. Opens as a PDF in a new tab." })]);
     lib.appendChild(el("section", { class: "cat", id: c.id, "aria-labelledby": c.id + "-t" }, [
