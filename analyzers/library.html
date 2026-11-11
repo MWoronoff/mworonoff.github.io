@@ -55,6 +55,20 @@
   .reports li.pair a.dl { flex: none; padding: 10px 2px; font-size: 14px; font-weight: 600; color: var(--teal); }
   .reports li.pair a.dl:hover { text-decoration: underline; text-underline-offset: 3px; }
   .reports a.ar { display: block; }
+  .reports li.pair .acts { flex: none; display: flex; gap: 18px; }
+  .reports li.pair button.view { font: inherit; padding: 10px 2px; font-size: 14px; font-weight: 600; color: var(--teal); background: none; border: 0; cursor: pointer; }
+  .reports li.pair button.view:hover { text-decoration: underline; text-underline-offset: 3px; }
+  dialog.viewer { border: 0; padding: 0; border-radius: 10px; width: min(1100px, calc(100vw - 32px)); max-height: calc(100vh - 32px); background: var(--card); color: var(--ink); box-shadow: 0 20px 60px rgba(0,0,0,.35); }
+  dialog.viewer::backdrop { background: rgba(12, 33, 56, .72); }
+  .viewer .vbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+  .viewer .vbar b { font-size: 16px; color: var(--navy); }
+  .viewer .vacts { display: flex; gap: 10px; flex: none; }
+  .viewer .vacts a, .viewer .vacts button { font: inherit; font-size: 14px; font-weight: 600; border-radius: 6px; padding: 8px 14px; cursor: pointer; text-decoration: none; }
+  .viewer .vacts a { background: var(--teal); color: #fff; border: 1px solid var(--teal); }
+  .viewer .vacts a:hover { background: var(--navy-2); border-color: var(--navy-2); }
+  .viewer .vacts button { background: var(--card); color: var(--navy); border: 1px solid var(--line); }
+  .viewer .vacts button:hover { border-color: var(--teal-2); }
+  .viewer img { display: block; width: 100%; height: auto; max-height: calc(100vh - 110px); object-fit: contain; background: var(--paper); }
   .reports .for { display: block; color: var(--muted); font-size: 13px; margin-top: 2px; }
   .cat.hit { border-color: var(--teal-2); box-shadow: 0 0 0 2px rgba(19, 161, 150, .25); }
   .pf-item { scroll-margin-top: 16px; }
@@ -274,6 +288,23 @@
   if (view !== "digital") CATS.forEach(function (c) { jump.appendChild(el("a", { href: "#" + c.id, text: c.name })); });
   // Ad response one-sheets (shared/slides/ar-*.png and .pdf, built by data-build/build_ad_response_slides.py;
   // the list of audiences is in shared/media/ad-response.json). Laid out like Category Reports.
+  // One-sheet preview: View (or the audience name) opens the slide in a box, with Download PDF and Close
+  var viewer = null;
+  function showSlide(g) {
+    if (!viewer) {
+      viewer = el("dialog", { class: "viewer", "aria-labelledby": "vtitle" }, [
+        el("div", { class: "vbar" }, [el("b", { id: "vtitle" }), el("div", { class: "vacts" }, [
+          el("a", { id: "vdl", text: "Download PDF" }), el("button", { type: "button", id: "vclose", text: "Close" })])]),
+        el("img", { id: "vimg", alt: "" })]);
+      document.body.appendChild(viewer);
+      document.getElementById("vclose").addEventListener("click", function () { viewer.close(); });
+      viewer.addEventListener("click", function (e) { if (e.target === viewer) viewer.close(); });  // click outside the slide closes it
+    }
+    document.getElementById("vtitle").textContent = "Ad response: " + g.short;
+    var dl = document.getElementById("vdl"); dl.href = SL + g.file + ".pdf"; dl.setAttribute("download", g.file + ".pdf");
+    var img = document.getElementById("vimg"); img.src = SL + g.file + ".png"; img.alt = "Ad response one-sheet: " + g.short;
+    viewer.showModal();
+  }
   if (view === "response") {
     // Same layout as Category Reports: a two-column grid of category cards, each a list of its audiences.
     // The name opens the one-sheet full size; PDF downloads it.
@@ -290,11 +321,14 @@
         var cat = d.cats.filter(function (x) { return x.id === c.id; })[0];
         if (!cat) { c.arHost.parentNode.replaceChild(el("p", { class: "none", text: "Ad response isn't available for this category yet." }), c.arHost); return; }
         cat.groups.slice().sort(function (a, b) { return a.short.localeCompare(b.short); }).forEach(function (g) {
-          c.arHost.appendChild(el("li", { class: "pair" }, [
-            el("a", { class: "ar", href: SL + g.file + ".png", target: "_blank", rel: "noopener" }, [
+          var name = el("a", { class: "ar", href: SL + g.file + ".png", target: "_blank", rel: "noopener" }, [
               el("b", { text: g.short }),
-              (g["for"] && g["for"].length) ? el("span", { class: "for", text: "Used for " + g["for"].join(", ") }) : null]),
-            el("a", { class: "dl", href: SL + g.file + ".pdf", download: g.file + ".pdf", text: "PDF" })]));
+              (g["for"] && g["for"].length) ? el("span", { class: "for", text: "Used for " + g["for"].join(", ") }) : null]);
+          var view = el("button", { type: "button", class: "view", text: "View", "aria-label": "View the " + g.short + " one-sheet" });
+          view.addEventListener("click", function () { showSlide(g); });
+          name.addEventListener("click", function (e) { e.preventDefault(); showSlide(g); });
+          c.arHost.appendChild(el("li", { class: "pair" }, [name, el("span", { class: "acts" }, [view,
+            el("a", { class: "dl", href: SL + g.file + ".pdf", download: g.file + ".pdf", text: "PDF" })])]));
         });
       });
       if (location.hash) { var t = document.getElementById(decodeURIComponent(location.hash.slice(1))); if (t) t.scrollIntoView(); }
