@@ -1348,7 +1348,7 @@
     if (window.AdtaxiSlides) { done(); return; }
     if (loadSlides.waiting) { loadSlides.waiting.push(done); return; }
     loadSlides.waiting = [done];
-    var sc = document.createElement("script"); sc.src = "../shared/slides.js?v=20261110h";
+    var sc = document.createElement("script"); sc.src = "../shared/slides.js?v=20261111a";
     sc.onload = sc.onerror = function () { var w = loadSlides.waiting; loadSlides.waiting = null; w.forEach(function (f) { f(); }); };
     document.head.appendChild(sc);
   }
@@ -1866,8 +1866,6 @@
         return el("div", { class: "az-measure", title: (mk ? "Estimated for this area; see Data notes. " : "") + (m.help || "") || null }, [el("span", { text: m.label }), el("b", { class: "num" + (v == null ? " az-na" : ""), text: v == null ? "No data" : v + mk })]);
       })));
     }
-    var newsBox = s.level !== "us" ? this.newsBox(s.level, row) : null;
-    if (newsBox) box.appendChild(newsBox);
     if (cfg.drill && s.level !== "us") {
       // Look inside this market (metros, counties and ZIPs inside a DMA; counties and ZIPs inside a metro; ZIPs inside a county), and add it to the combined area
       var RCd = cfg.radius === true ? window.ADTAXI_RADIUS : cfg.radius, isIn = this.inBasket(s.level, row.id);

@@ -542,7 +542,8 @@
     // Table
     this.tableTitle = el("h2"); this.tableNote = el("span");
     this.thead = el("thead"); this.tbody = el("tbody");
-    var table = el("section", { class: "az-panel az-table-panel" }, [el("div", { class: "az-table-head" }, [this.tableTitle, this.tableNote]),
+    this.newsBar = el("div", { class: "az-newsbar", hidden: true });   // opt-in newspaper coverage columns (renderNewsBar)
+    var table = el("section", { class: "az-panel az-table-panel" }, [el("div", { class: "az-table-head" }, [this.tableTitle, this.tableNote]), this.newsBar,
       el("div", { class: "az-tablewrap" }, [el("table", { class: "az-table" }, [this.thead, this.tbody])])]);
     this.modalBody = el("div", { class: "az-modal-body" });
     this.modal = el("dialog", { class: "az-modal", "aria-labelledby": "rz-method-title" }, [this.modalBody]);
@@ -1332,29 +1333,25 @@
       .sort(function (a, b) { return Math.max.apply(null, b.vals) - Math.max.apply(null, a.vals); });
     return { hh: hh, list: list };
   };
+  // Opt-in switch above the county and ZIP lists: newspaper coverage stays out of the summary and only shows as table columns when a rep turns it on
   Radius.prototype.renderNewsSummary = function (rows) {
-    var self = this, s = this.state, T = this.newsTotals(rows);
-    if (!T || !T.list.length) { if (s.newsZip != null) s.newsZip = null; return; }
-    if (s.newsZip != null && !T.list.some(function (x) { return x.i === s.newsZip; })) s.newsZip = null;
-    var top = T.list[0], lead = newsLines(top.p, top.vals, T.hh)[0];
-    var box = el("details", { class: "rz-news", open: this.newsOpen ? "open" : null, ontoggle: function () { self.newsOpen = this.open; } }, [
-      el("summary", null, [el("b", { text: "Newspaper coverage: " }), top.p.name + ", " + lead.label + " " + newsCellText(lead) + " of households",
-        T.list.length > 1 ? el("span", { class: "az-news-count", text: " · " + NF0.format(T.list.length - 1) + " more paper" + (T.list.length > 2 ? "s" : "") }) : null])]);
-    T.list.forEach(function (x) {
-      box.appendChild(el("div", { class: "az-news-paper" }, [
-        el("div", { class: "az-news-name" }, [x.p.name, x.p.free ? el("span", { class: "az-tag", title: "Most of this paper's copies are non-paid (qualified) distribution", text: "Mostly non-paid" }) : null]),
-        el("table", { class: "az-news-t" }, [el("tbody", null, newsLines(x.p, x.vals, T.hh).map(function (l) {
-          return el("tr", { class: l.lead ? "az-news-lead" : null }, [el("th", { scope: "row", text: l.label }), el("td", { class: "num", text: NF0.format(l.n || 0) }),
-            el("td", { class: "num", text: l.pct != null ? NF1.format(l.pct * 100) + "%" : "–" })]);
-        }))])]));
-    });
-    box.appendChild(el("label", { class: "rz-news-pick" }, ["Add to the county and ZIP lists: ",
-      el("select", { onchange: function () { s.newsZip = this.value === "" ? null : this.value; if (/^np_/.test(s.sortKey || "")) { s.sortKey = "idx"; s.sortDir = "desc"; } self.renderTable(); } },
-        [el("option", { value: "", text: "None" })].concat(T.list.map(function (x) { return el("option", { value: x.i, selected: x.i === s.newsZip ? "selected" : null, text: x.p.name }); })))]));
+    var self = this, s = this.state, bar = this.newsBar, T = this.newsTotals(rows);
+    if (!bar) return;
+    bar.innerHTML = "";
+    if (!T || !T.list.length) { bar.hidden = true; if (s.newsZip != null) s.newsZip = null; return; }
+    bar.hidden = false;
+    var ids = T.list.map(function (x) { return x.i; });
+    if (s.newsZip != null && ids.indexOf(s.newsZip) < 0) s.newsZip = null;
+    if (s.newsPick == null || ids.indexOf(s.newsPick) < 0) s.newsPick = ids[0];
+    var on = s.newsZip != null;
+    function redraw() { if (/^np_/.test(s.sortKey || "")) { s.sortKey = self.cfg.blendScore ? "score" : "idx"; s.sortDir = "desc"; } self.renderNewsSummary(self.visible()); self.renderTable(); }
+    bar.appendChild(el("button", { type: "button", class: "az-btn az-news-toggle", "aria-pressed": String(on), title: "Add newspaper coverage columns to the county and ZIP lists",
+      text: on ? "Hide newspaper coverage" : "Show newspaper coverage", onclick: function () { s.newsZip = on ? null : s.newsPick; redraw(); } }));
+    if (!on) { bar.appendChild(el("span", { class: "az-news-hint", text: T.list.length === 1 ? T.list[0].p.name : NF0.format(T.list.length) + " papers in this area" })); return; }
+    bar.appendChild(el("select", { "aria-label": "Newspaper", onchange: function () { s.newsZip = s.newsPick = this.value; redraw(); } },
+      T.list.map(function (x) { return el("option", { value: x.i, selected: x.i === s.newsZip ? "selected" : null, text: x.p.name + (x.p.free ? " (mostly non-paid)" : "") }); })));
     var dates = {}; T.list.forEach(function (x) { dates[x.p.asOf] = 1; });
-    box.appendChild(el("p", { class: "az-news-src", text: "Copies in the area's ZIPs · % of its " + NF0.format(T.hh) + " households. Print: NMS circulation, " + Object.keys(dates).sort().map(newsDate).join(" and ") +
-      ". E-edition copies with no ZIP aren't included. Papers are shown separately because their readers can overlap." }));
-    this.summary.appendChild(box);
+    bar.appendChild(el("span", { class: "az-news-hint", text: "Print: NMS circulation, " + Object.keys(dates).sort().map(newsDate).join(" and ") + "; e-edition copies with no ZIP aren't included." }));
   };
   // ZIP list columns for the paper picked above; cells read "copies · % of households" and sort by the %
   Radius.prototype.newsZipCols = function (rows) {
@@ -1387,7 +1384,7 @@
     if (window.AdtaxiPlan) { done(); return; }
     if (loadPlan.waiting) { loadPlan.waiting.push(done); return; }
     loadPlan.waiting = [done];
-    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261110h";
+    var sc = document.createElement("script"); sc.src = src || "../shared/media-plan.js?v=20261111a";
     sc.onload = function () { var w = loadPlan.waiting; loadPlan.waiting = null; w.forEach(function (f) { f(); }); };
     sc.onerror = function () { loadPlan.waiting = null; };
     document.head.appendChild(sc);
@@ -1570,7 +1567,7 @@
     if (window.AdtaxiSlides) { done(); return; }
     if (loadSlides.waiting) { loadSlides.waiting.push(done); return; }
     loadSlides.waiting = [done];
-    var sc = document.createElement("script"); sc.src = "../shared/slides.js?v=20261110h";
+    var sc = document.createElement("script"); sc.src = "../shared/slides.js?v=20261111a";
     sc.onload = sc.onerror = function () { var w = loadSlides.waiting; loadSlides.waiting = null; w.forEach(function (f) { f(); }); };
     document.head.appendChild(sc);
   }
@@ -2052,7 +2049,7 @@
     if (!b.amount || !A.strat || !A.withDollars || !A.plan || !A.plan.tier || !A.channels.length) { st.textContent = "Enter a monthly budget and choose a media strategy first."; return Promise.resolve(null); }
     st.textContent = "Building…";
     var base = this.proposalBase();
-    return Promise.all([loadScriptOnce(this.cfg.pptxScript || "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261110h"), this.benchmarks(), this.logoImage()])
+    return Promise.all([loadScriptOnce(this.cfg.pptxScript || "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261111a"), this.benchmarks(), this.logoImage()])
       .then(function (res) { return window.AdtaxiProposal.build(self.proposalContext(res[2], res[3]), opt); })
       .then(function (out) { st.textContent = "Downloaded. Open it in PowerPoint or Google Slides to edit."; return out; })
       .catch(function (e) { st.textContent = "The proposal couldn't be built (" + e.message + "). Try again in a minute."; throw e; });
