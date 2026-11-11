@@ -124,11 +124,11 @@ def slide_html(cat, g):
   .legend .sw {{ width: 13px; height: 13px; background: #157968; }}
   .legend .mk {{ width: 3px; height: 15px; background: #222727; }}
   .chart {{ position: absolute; left: 50px; top: 298px; width: 830px; }}
-  .row {{ display: flex; align-items: center; height: 17.6px; }}
-  .lab {{ width: 150px; flex: none; text-align: right; padding-right: 8px; font-size: 11.5px; color: #3f4746; white-space: nowrap; }}
-  .track {{ position: relative; flex: 1; height: 13px; background: #eef1f2; }}
+  .row {{ display: flex; align-items: center; height: 21px; }}
+  .lab {{ width: 150px; flex: none; text-align: right; padding-right: 8px; font-size: 12.5px; color: #3f4746; white-space: nowrap; }}
+  .track {{ position: relative; flex: 1; height: 15px; background: #eef1f2; }}
   .bar {{ position: absolute; left: 0; top: 0; bottom: 0; background: #157968; display: flex; align-items: center; justify-content: flex-end; }}
-  .bar b {{ font-size: 10px; font-weight: 700; color: #fff; padding-right: 5px; font-style: normal; }}
+  .bar b {{ font-size: 10.5px; font-weight: 700; color: #fff; padding-right: 5px; font-style: normal; }}
   .avg {{ position: absolute; top: -2px; bottom: -2px; width: 3px; margin-left: -1.5px; background: #222727; }}
   .box {{ position: absolute; left: 930px; top: 300px; width: 297px; height: 278px; background: #f2f8f6; border-radius: 26px; padding: 28px 26px;
           box-shadow: 0 4px 8px rgba(0,0,0,.18); }}
