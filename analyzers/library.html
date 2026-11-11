@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<script>/* site-version: if this page is an old saved copy, reload it once with the current version (shared/version.json; bump both on each release) */
+(function(){var V="20261111b";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Category Reports & Slides</title>
+<meta name="robots" content="noindex">
+<meta name="description" content="Adtaxi category reports and presentation slides for every business category, ready to share.">
+<link rel="icon" href="/shared/adtaxi-logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,500..800&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+  :root {
+    --navy: #0f2742; --navy-2: #173c63; --navy-3: #0c2138;
+    --teal: #0f7e70; --teal-2: #13a196; --mint: #8fe0c9;
+    --ink: #182432; --muted: #5a6d81; --line: #dce4ec; --paper: #f4f7fa; --card: #ffffff;
+    --display: "Archivo", "Arial Narrow", Arial, sans-serif;
+    --body: "Inter", "Segoe UI", Arial, sans-serif;
+    color-scheme: light;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body { margin: 0; font-family: var(--body); font-size: 16px; line-height: 1.55; color: var(--ink); background: var(--paper); }
+  a { color: var(--teal); }
+  :focus-visible { outline: 3px solid var(--teal-2); outline-offset: 3px; }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 0 28px; }
+
+  .hero { background: var(--navy); color: #fff; }
+  .bar { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding-top: 18px; padding-bottom: 18px; }
+  .brand { display: flex; align-items: center; gap: 12px; color: #fff; text-decoration: none; }
+  .brand img { width: 56px; height: 56px; }
+  .brand span { font-family: var(--display); font-stretch: 112%; font-weight: 700; font-size: 19px; letter-spacing: .01em; }
+  .bar nav { display: flex; gap: 22px; flex-wrap: wrap; }
+  .bar nav a { color: #cfe0ee; text-decoration: none; font-size: 14px; font-weight: 500; }
+  .bar nav a:hover { color: #fff; text-decoration: underline; text-underline-offset: 4px; }
+  .hero-body { padding-top: 26px; padding-bottom: 40px; }
+  .hero h1 { font-family: var(--display); font-stretch: 125%; font-weight: 750; font-size: clamp(30px, 3.6vw, 48px);
+             line-height: 1.04; letter-spacing: -.015em; margin: 0 0 14px; }
+  .hero-lead { margin: 0 0 22px; color: #cfe0ee; font-size: 17px; max-width: 70ch; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chips a { font-size: 13px; color: #cfe0ee; text-decoration: none; border: 1px solid rgba(207, 224, 238, .28); border-radius: 999px; padding: 4px 12px; }
+  .chips a:hover { border-color: var(--mint); color: #fff; }
+
+  main { padding: 18px 0 0; }
+  .cat { background: var(--card); border: 1px solid var(--line); border-radius: 8px; margin-top: 28px; padding: 24px 26px 26px; scroll-margin-top: 16px; }
+  .cat-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 20px; margin-bottom: 18px; }
+  .cat h2 { font-family: var(--display); font-stretch: 118%; font-weight: 720; font-size: clamp(22px, 2.2vw, 30px); line-height: 1.1; margin: 0; color: var(--navy); }
+  .cat-head a { font-weight: 600; font-size: 14px; text-decoration: none; color: var(--navy); }
+  .cat-head a:hover { text-decoration: underline; text-underline-offset: 3px; }
+  .cat-grid { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 28px; align-items: start; }
+  .cat-grid.solo { grid-template-columns: 1fr; }
+  h3 { font-size: 13px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--teal); margin: 0 0 10px; }
+
+  .slides { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+  .slide { margin: 0; }
+  .slide > a { display: block; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: var(--paper); }
+  .slide img { display: block; width: 100%; height: auto; aspect-ratio: 1467 / 825; object-fit: cover; }
+  .slide > a:hover { border-color: var(--teal-2); }
+  .slide figcaption { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 13.5px; margin-top: 6px; color: var(--ink); }
+  .slide figcaption a { font-weight: 600; text-decoration: none; white-space: nowrap; }
+  .slide figcaption a:hover { text-decoration: underline; }
+  .none { color: var(--muted); font-size: 14.5px; margin: 0; padding: 16px; border: 1px dashed var(--line); border-radius: 6px; }
+
+  .reports { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+  .reports li { border-bottom: 1px solid var(--line); }
+  .reports a { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 10px 2px; text-decoration: none; color: var(--ink); }
+  .reports a:hover b { color: var(--teal); text-decoration: underline; text-underline-offset: 3px; }
+  .reports b { font-weight: 600; color: var(--navy); }
+  .reports small { color: var(--muted); font-size: 13px; white-space: nowrap; }
+  .note { color: var(--muted); font-size: 13px; margin: 10px 0 0; }
+
+  .pf { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px 18px; }
+  .pf h4 { margin: 0 0 2px; font-size: 16px; color: var(--navy); }
+  .pf p { margin: 0 0 8px; color: var(--muted); font-size: 14px; }
+  .pf .slides { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .pf .slide figcaption { font-size: 12.5px; }
+
+  footer { margin-top: 64px; background: var(--navy); color: #cfe0ee; padding: 30px 0 36px; font-size: 14px; }
+  footer a { color: #fff; }
+  footer p { margin: 0; }
+
+  @media (max-width: 1000px) {
+    .cat-grid { grid-template-columns: 1fr; }
+    .pf { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 640px) {
+    .wrap { padding: 0 16px; }
+    .bar nav { display: none; }
+    .cat { padding: 18px 16px 20px; }
+    .slides, .pf { grid-template-columns: 1fr; }
+    .reports small { white-space: normal; text-align: right; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap bar">
+    <a class="brand" href="/analyzers/"><img src="/shared/adtaxi-logo.svg" alt=""><span>Adtaxi Market Analyzers</span></a>
+    <nav aria-label="Site">
+      <a href="/analyzers/#categories">Categories</a>
+      <a href="/analyzers/#tools">Planning tools</a>
+      <a href="/analyzers/guide.html">Sales guide</a>
+    </nav>
+  </div>
+  <div class="wrap hero-body">
+    <h1>Category Reports &amp; Slides</h1>
+    <p class="hero-lead">Market reports and presentation slides for every business category, ready to share before or after a call. Open a slide full size, download it as a PDF, or open a category report in a new tab.</p>
+    <nav class="chips" id="jump" aria-label="Jump to a category"></nav>
+  </div>
+</header>
+
+<main class="wrap" id="lib"></main>
+
+<footer>
+  <div class="wrap"><p><a href="/analyzers/">All analyzers and tools</a> · Slides: Nielsen Scarborough USA+ Spring 2026, AdMall and U.S. Bureau of Economic Analysis. Category reports: AdMall Local Account Intelligence. National figures unless a report names its market.</p></div>
+</footer>
+
+<script>
+(function () {
+  var SL = "../shared/slides/", RP = "../reports/";
+  // Report files in /reports/ (same catalog as the analyzers' category report buttons in shared/engine.js)
+  var R = {
+    "auto-dealerships": ["Auto Dealerships (All Makes)", "Boston TV market"],
+    "used-car-dealers": ["Used Car Dealers", "New York TV market"],
+    "tax-preparation": ["Tax Preparation Services", "Minnesota"],
+    "accounting-services": ["Accounting Services", "New York TV market"],
+    "financial-advisory": ["Financial Advisory Services", "Minnesota"],
+    "mortgage-companies": ["Mortgage Companies", "Minnesota"],
+    "banks-community": ["Banks (Community)", "Minnesota"],
+    "banks-regional-national": ["Banks (Regional and National)", "Minnesota"],
+    "credit-unions": ["Credit Unions", "New York TV market"],
+    "general-contractors": ["General Contractors", "New York TV market"],
+    "hvac-dealers": ["Heating/Ventilation/Cooling Dealers", "Minnesota"],
+    "roofing-siding": ["Roofing/Siding Contractors", "Minnesota"],
+    "plumbing-contractors": ["Plumbing Contractors", "New York TV market"],
+    "electrical-contractors": ["Electrical Contractors", "New York TV market"],
+    "painting-services": ["Painting and Power Washing Services", "Minnesota"],
+    "floor-covering-stores": ["Floor Covering Stores", "Minnesota"],
+    "attorneys-personal-injury": ["Attorneys – Personal Injury", "Minnesota"],
+    "attorneys-wills-probate": ["Attorneys, Wills and Probate", "Minnesota"],
+    "attorneys-bankruptcy": ["Attorneys, Bankruptcy", "Minnesota"],
+    "attorneys-legal-services": ["Attorneys/Legal Services", "Minnesota"],
+    "colleges-universities": ["Colleges, Universities and Professional Schools", "Minnesota"],
+    "community-colleges": ["Colleges, Community", "Minnesota"],
+    "technical-trade-schools": ["Technical and Trade Schools", "Minnesota"],
+    "apartment-rental-management": ["Apartment Rental and Management Companies", "Minnesota"],
+    "senior-living-care": ["Senior Living and Care Services", "Minnesota"],
+    "furniture-stores": ["Furniture Stores", "Minnesota"],
+    "bedding-mattress-stores": ["Bedding/Mattress Stores", "Minnesota"],
+    "dentists-orthodontists": ["Dentists and Orthodontists", "Minnesota"],
+    "optical-optometrists": ["Optical Stores/Optometrists", "Minnesota"],
+    "hearing-aid-centers": ["Hearing Aid Centers", "Minnesota"],
+    "urgent-care-centers": ["Urgent Care Centers", "Minnesota"],
+    "drugstores-pharmacies": ["Drugstores/Pharmacies", "Minnesota"],
+    "medical-spas": ["Medical Spas", "Minnesota"],
+    "medical-clinics": ["Medical Clinics", "Minnesota"],
+    "chiropractors": ["Doctors, Chiropractors", "Minnesota"],
+    "physical-occupational-therapists": ["Physical/Occupational Therapists", "Minnesota"],
+    "mental-health-professionals": ["Mental Health Professionals", "Minnesota"]
+  };
+  // Same order as the hub's category tiles. slides: file prefix in shared/slides; reports: files in /reports/
+  var CATS = [
+    { id: "healthcare", name: "Healthcare", path: "/healthcare/", slides: "healthcare", slideName: "Healthcare",
+      reports: ["medical-clinics", "urgent-care-centers", "drugstores-pharmacies", "dentists-orthodontists", "hearing-aid-centers", "optical-optometrists",
+                "chiropractors", "physical-occupational-therapists", "mental-health-professionals", "medical-spas", "senior-living-care"] },
+    { id: "legal", name: "Legal", path: "/legal/", slides: "legal", slideName: "Legal",
+      reports: ["attorneys-personal-injury", "attorneys-wills-probate", "attorneys-bankruptcy", "attorneys-legal-services"] },
+    { id: "higher-ed", name: "Higher Education", path: "/higher-ed/", slides: "education", slideName: "Education",
+      reports: ["colleges-universities", "community-colleges", "technical-trade-schools"] },
+    { id: "home-services", name: "Home Services", path: "/home-services/", slides: "home-improvement", slideName: "Home Improvement",
+      reports: ["general-contractors", "hvac-dealers", "roofing-siding", "plumbing-contractors", "electrical-contractors", "painting-services", "floor-covering-stores"] },
+    { id: "furniture", name: "Furniture", path: "/furniture-analyzer/", slides: "furniture", slideName: "Furniture and Mattress",
+      reports: ["furniture-stores", "bedding-mattress-stores"] },
+    { id: "apartments", name: "Apartments", path: "/apartment-analyzer/", slides: null,
+      reports: ["apartment-rental-management", "senior-living-care"] },
+    { id: "financial", name: "Financial", path: "/financial/", slides: "finance", slideName: "Finance",
+      reports: ["banks-community", "banks-regional-national", "credit-unions", "mortgage-companies", "financial-advisory", "tax-preparation", "accounting-services"] },
+    { id: "auto", name: "Auto", path: "/auto/", slides: "auto", slideName: "Automotive",
+      reports: ["auto-dealerships", "used-car-dealers"] }
+  ];
+  var PLATFORMS = [
+    { id: "streaming-tv", name: "Streaming TV", line: "Who streams TV and video, and how often" },
+    { id: "ctv", name: "Connected TV", line: "Households with a CTV device, compared with cable" },
+    { id: "social", name: "Social", line: "Social media reach by age, sex and income" },
+    { id: "search", name: "Search", line: "Search engine reach by age, sex and income" },
+    { id: "streaming-audio", name: "Streaming audio", line: "Audio streaming reach and digital audio ad spend" },
+    { id: "ecommerce", name: "Ecommerce", line: "Who shops online, and retail digital ad spend" }
+  ];
+
+  function el(tag, attrs, kids) {
+    var n = document.createElement(tag);
+    for (var k in attrs || {}) { if (k === "text") n.textContent = attrs[k]; else if (attrs[k] != null) n.setAttribute(k, attrs[k]); }
+    (kids || []).forEach(function (c) { if (c != null) n.appendChild(typeof c === "string" ? document.createTextNode(c) : c); });
+    return n;
+  }
+  function slide(file, label) {
+    return el("figure", { class: "slide" }, [
+      el("a", { href: SL + file + ".png", target: "_blank", rel: "noopener", title: "Open full size" }, [el("img", { src: SL + file + ".png", alt: label, loading: "lazy", width: "1467", height: "825" })]),
+      el("figcaption", null, [el("span", { text: label }), el("a", { href: SL + file + ".pdf", download: file + ".pdf", text: "Download PDF" })])]);
+  }
+
+  var lib = document.getElementById("lib"), jump = document.getElementById("jump");
+  CATS.forEach(function (c) {
+    jump.appendChild(el("a", { href: "#" + c.id, text: c.name }));
+    var left = c.slides
+      ? el("div", null, [el("h3", { text: "Slides" }), el("div", { class: "slides" }, [
+          slide(c.slides + "-market", c.slideName + ": market size and buyers"), slide(c.slides + "-media", c.slideName + ": how buyers use media")])])
+      : el("div", null, [el("h3", { text: "Slides" }), el("p", { class: "none", text: "Slides for this category are coming soon." })]);
+    var right = el("div", null, [el("h3", { text: "Category reports" }),
+      el("ul", { class: "reports" }, c.reports.map(function (k) {
+        return el("li", null, [el("a", { href: RP + k + ".pdf", target: "_blank", rel: "noopener" }, [el("b", { text: R[k][0] }), el("small", { text: R[k][1] })])]);
+      })),
+      el("p", { class: "note", text: "AdMall Local Account Intelligence. Opens as a PDF in a new tab." })]);
+    lib.appendChild(el("section", { class: "cat", id: c.id, "aria-labelledby": c.id + "-t" }, [
+      el("div", { class: "cat-head" }, [el("h2", { id: c.id + "-t", text: c.name }), el("a", { href: c.path, text: "Open the " + c.name + " analyzer ›" })]),
+      el("div", { class: "cat-grid" }, [left, right])]));
+  });
+  jump.appendChild(el("a", { href: "#platforms", text: "Platform guides" }));
+  lib.appendChild(el("section", { class: "cat", id: "platforms", "aria-labelledby": "platforms-t" }, [
+    el("div", { class: "cat-head" }, [el("h2", { id: "platforms-t", text: "Platform guides" })]),
+    el("div", { class: "pf" }, PLATFORMS.map(function (p) {
+      return el("div", null, [el("h4", { text: p.name }), el("p", { text: p.line }), el("div", { class: "slides" }, [
+        slide(p.id + "-trend", "Reach and growth"), slide(p.id + "-demo", "By demographic")])]);
+    })),
+    el("p", { class: "note", text: "Source: Nielsen Scarborough USA+ Spring 2026; ad spend from EMARKETER. National figures." })]));
+})();
+</script>
+</body>
+</html>
