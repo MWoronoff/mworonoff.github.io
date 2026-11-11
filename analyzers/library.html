@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script>/* site-version: if this page is an old saved copy, reload it once with the current version (shared/version.json; bump both on each release) */
-(function(){var V="20261111e";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
+(function(){var V="20261111f";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>From the Research Library</title>
 <meta name="robots" content="noindex">
@@ -67,6 +67,14 @@
   .slide figcaption a:hover { text-decoration: underline; }
   .none { color: var(--muted); font-size: 14.5px; margin: 0; padding: 16px; border: 1px dashed var(--line); border-radius: 6px; }
 
+  .rep summary { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+                 padding: 12px 14px; border: 1px solid var(--line); border-radius: 6px; font-weight: 600; color: var(--navy); background: var(--paper); }
+  .rep summary::-webkit-details-marker { display: none; }
+  .rep summary::after { content: ""; width: 8px; height: 8px; border-right: 2px solid var(--teal); border-bottom: 2px solid var(--teal); transform: rotate(45deg); margin-top: -4px; transition: transform .15s; }
+  .rep[open] summary::after { transform: rotate(-135deg); margin-top: 4px; }
+  .rep summary:hover { border-color: var(--teal-2); background: #fff; }
+  .rep[open] summary { margin-bottom: 10px; }
+  @media (prefers-reduced-motion: reduce) { .rep summary::after { transition: none; } }
   .reports { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
   .reports li { border-bottom: 1px solid var(--line); }
   .reports a { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 10px 2px; text-decoration: none; color: var(--ink); }
@@ -219,11 +227,14 @@
       ? el("div", null, [el("h3", { text: "Slides" }), el("div", { class: "slides" }, [
           slide(c.slides + "-market", c.slideName + ": market size and buyers"), slide(c.slides + "-media", c.slideName + ": how buyers use media")])])
       : el("div", null, [el("h3", { text: "Slides" }), el("p", { class: "none", text: "Slides for this category are coming soon." })]);
+    // Report list closed until the rep clicks it open
     var right = el("div", null, [el("h3", { text: "Category reports" }),
-      el("ul", { class: "reports" }, c.reports.map(function (k) {
-        return el("li", null, [el("a", { href: RP + k + ".pdf", target: "_blank", rel: "noopener" }, [el("b", { text: R[k][0] })])]);
-      })),
-      el("p", { class: "note", text: "AdMall Local Account Intelligence. Opens as a PDF in a new tab." })]);
+      el("details", { class: "rep" }, [
+        el("summary", null, [el("span", { text: "View " + c.reports.length + " report" + (c.reports.length === 1 ? "" : "s") })]),
+        el("ul", { class: "reports" }, c.reports.map(function (k) {
+          return el("li", null, [el("a", { href: RP + k + ".pdf", target: "_blank", rel: "noopener" }, [el("b", { text: R[k][0] })])]);
+        })),
+        el("p", { class: "note", text: "AdMall Local Account Intelligence. Opens as a PDF in a new tab." })])]);
     lib.appendChild(el("section", { class: "cat", id: c.id, "aria-labelledby": c.id + "-t" }, [
       el("div", { class: "cat-head" }, [el("h2", { id: c.id + "-t", text: c.name }), el("a", { href: c.path, text: "Open the " + c.name + " analyzer ›" })]),
       el("div", { class: "cat-grid" }, [left, right])]));
