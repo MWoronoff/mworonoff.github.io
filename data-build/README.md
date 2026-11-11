@@ -18,15 +18,7 @@ data" action; it also runs on the 5th of every month and finds each public sourc
 
 To refresh Deluxe, replace the ten workbooks in `sources/deluxe/` (keep one file per leading digit) and run the action.
 
-## Local newspapers
+## Local newspapers (on hold)
 
-`build_newspapers.py` builds `shared/media/newspapers.json` from the NMS circulation-by-ZIP export
-(`sources/newspapers/nms_circulation_by_zip.xlsx`, sheet "By ZIP"): every paper and edition, copies by reported day for each
-ZIP, with county, metro and DMA totals (ZIPs assigned through `shared/geo/zip_market.json`). Copies with no ZIP (e-edition
-"Digital Replica" and "all other" lines) are kept per paper and shown only as a note at the paper's home DMA. Papers under 50%
-paid copies are labeled "Mostly non-paid". The analyzers work out % of households on the page from their own household counts.
-
-Web: add CSV files to `sources/newspapers/web/` with columns `paper` (the display name, e.g. The Denver Post, or the NMS
-member name), `zip`, `uniques` (monthly unique visitors) and optional `month`. Gross = the main print day (Sunday) + web uniques.
-
-To refresh: replace the workbook (and web files), run `python3 data-build/build_newspapers.py`, and commit.
+Newspaper coverage by ZIP is off until all circulation and web data is in. The full feature (build script, NMS workbook,
+`shared/media/newspapers.json` and the page code) is saved on the `newspaper-coverage` branch; merge that branch to bring it back.

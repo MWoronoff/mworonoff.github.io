@@ -1086,7 +1086,7 @@
     }
     if (window.AdtaxiRadius) go();
     else {
-      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261110n";   // version tag: browsers fetch the new file after an update
+      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261111p";   // version tag: browsers fetch the new file after an update
       sc.onload = go; sc.onerror = function () { self.showError("The radius tool didn't load. Refresh the page and try again."); };
       document.head.appendChild(sc);
     }
@@ -1255,8 +1255,9 @@
   }
   Analyzer.prototype.newsLoad = function () {
     var self = this;
-    if (this.cfg.newspapers === false) return Promise.resolve(null);
-    if (!this.newsP) this.newsP = this.loadJSON(this.cfg.newspapers || "../shared/media/newspapers.json").then(function (d) { self.news = d; return d; }, function () { return null; });
+    // Newspaper coverage is off until all circulation and web data is in (saved on the newspaper-coverage branch); a page turns it on with cfg.newspapers = path
+    if (!this.cfg.newspapers) return Promise.resolve(null);
+    if (!this.newsP) this.newsP = this.loadJSON(this.cfg.newspapers).then(function (d) { self.news = d; return d; }, function () { return null; });
     return this.newsP;
   };
   // Papers with copies in one area, biggest first: [{i, p, vals}]

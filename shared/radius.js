@@ -1316,8 +1316,9 @@
   function newsCellText(x) { return x && x.n ? NF0.format(x.n) + (x.pct != null ? " · " + NF1.format(x.pct * 100) + "%" : "") : null; }
   Radius.prototype.newsLoad = function () {
     var self = this;
-    if (this.cfg.newspapers === false || this.newsP) return;
-    this.newsP = fetch(this.cfg.newspapers || "../shared/media/newspapers.json", { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : null; })
+    // Newspaper coverage is off until all circulation and web data is in (saved on the newspaper-coverage branch); a page turns it on with cfg.newspapers = path
+    if (!this.cfg.newspapers || this.newsP) return;
+    this.newsP = fetch(this.cfg.newspapers, { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : null; })
       .then(function (d) { self.news = d; if (d && self.rows) { self.renderSummary(); self.renderTable(); } }, function () { return null; });
   };
   // Papers with copies in these ZIPs, biggest first, with the households of all ZIPs in the area
