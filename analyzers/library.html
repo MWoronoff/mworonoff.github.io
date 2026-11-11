@@ -54,7 +54,7 @@
   .reports li.pair { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
   .reports li.pair a.dl { flex: none; padding: 10px 2px; font-size: 14px; font-weight: 600; color: var(--teal); }
   .reports li.pair a.dl:hover { text-decoration: underline; text-underline-offset: 3px; }
-  .reports a.ar { display: block; }
+  .reports .ar { display: block; padding: 10px 2px; }
   .reports li.pair .acts { flex: none; display: flex; gap: 18px; }
   .reports li.pair button.view { font: inherit; padding: 10px 2px; font-size: 14px; font-weight: 600; color: var(--teal); background: none; border: 0; cursor: pointer; }
   .reports li.pair button.view:hover { text-decoration: underline; text-underline-offset: 3px; }
@@ -288,7 +288,7 @@
   if (view !== "digital") CATS.forEach(function (c) { jump.appendChild(el("a", { href: "#" + c.id, text: c.name })); });
   // Ad response one-sheets (shared/slides/ar-*.png and .pdf, built by data-build/build_ad_response_slides.py;
   // the list of audiences is in shared/media/ad-response.json). Laid out like Category Reports.
-  // One-sheet preview: View (or the audience name) opens the slide in a box, with Download PDF and Close
+  // One-sheet preview: View opens the slide in a box, with Download PDF and Close
   var viewer = null;
   function showSlide(g) {
     if (!viewer) {
@@ -321,12 +321,11 @@
         var cat = d.cats.filter(function (x) { return x.id === c.id; })[0];
         if (!cat) { c.arHost.parentNode.replaceChild(el("p", { class: "none", text: "Ad response isn't available for this category yet." }), c.arHost); return; }
         cat.groups.slice().sort(function (a, b) { return a.short.localeCompare(b.short); }).forEach(function (g) {
-          var name = el("a", { class: "ar", href: SL + g.file + ".png", target: "_blank", rel: "noopener" }, [
+          var name = el("div", { class: "ar" }, [
               el("b", { text: g.short }),
               (g["for"] && g["for"].length) ? el("span", { class: "for", text: "Used for " + g["for"].join(", ") }) : null]);
           var view = el("button", { type: "button", class: "view", text: "View", "aria-label": "View the " + g.short + " one-sheet" });
           view.addEventListener("click", function () { showSlide(g); });
-          name.addEventListener("click", function (e) { e.preventDefault(); showSlide(g); });
           c.arHost.appendChild(el("li", { class: "pair" }, [name, el("span", { class: "acts" }, [view])]));
         });
       });
