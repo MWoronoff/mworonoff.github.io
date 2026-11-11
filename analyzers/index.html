@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script>/* site-version: if this page is an old saved copy, reload it once with the current version (shared/version.json; bump both on each release) */
-(function(){var V="20261111j";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
+(function(){var V="20261111l";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Adtaxi Market Analyzers</title>
 <meta name="robots" content="noindex">
@@ -90,6 +90,11 @@
 
   /* tools that work with any category */
   .tools { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+  .tools-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tools-2 .tool-art { aspect-ratio: auto; height: 240px; overflow: hidden; }
+  .tools-2 .tool-art svg { width: 100%; height: 240px; }
+  @media (max-width: 640px) { .tools-2 .tool-art, .tools-2 .tool-art svg { height: 200px; } }
+  @media (max-width: 640px) { .tools-2 { grid-template-columns: 1fr; } }
   .tool { background: var(--card); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; }
   .tool-art { background: var(--navy-3); aspect-ratio: 16 / 10; display: grid; place-items: center; }
   .tool-art svg, .tool-art canvas { width: 100%; height: 100%; display: block; }
@@ -278,9 +283,9 @@
     <div class="wrap">
       <div class="block-head">
         <h2 id="library-title">From the Research Library</h2>
-        <p>Reports and presentation slides to share before or after a call, no analyzer needed. Pick a category or platform to go straight to it, or browse the whole collection.</p>
+        <p>Reports, slides and ad response data to share before or after a call, no analyzer needed. Pick a category or platform to go straight to it, or browse the whole collection.</p>
       </div>
-      <div class="tools">
+      <div class="tools tools-2">
         <article class="tool">
           <div class="tool-art"><svg viewBox="0 0 640 400" role="img" aria-label="A category slide with market size and a table of how buyers use media">
             <rect width="640" height="400" fill="#0c2138"/>
@@ -295,6 +300,25 @@
             <h3>Category Activity</h3>
             <p>Each category's market size and buyers, and how those buyers use media. Slides open full size or download as a PDF.</p>
             <div class="tool-actions"><select class="lib-pick" data-view="activity" aria-label="Category for activity slides"></select><a class="btn btn-navy" data-go="activity" href="/analyzers/library.html?view=activity">View slides</a></div>
+          </div>
+        </article>
+        <article class="tool">
+          <div class="tool-art"><svg viewBox="0 0 640 400" role="img" aria-label="A ranked list of media with bars showing how many buyers acted on an ad in each">
+            <rect width="640" height="400" fill="#0c2138"/>
+            <g transform="translate(140 70)" font-family="Inter, Arial, sans-serif" font-size="15" fill="#cfe0ee">
+              <text x="0" y="16">1</text><rect x="26" y="4" width="74" height="14" rx="3" fill="#2a5478"/><rect x="118" y="4" width="230" height="14" rx="4" fill="#35b09d"/>
+              <text x="0" y="56">2</text><rect x="26" y="44" width="62" height="14" rx="3" fill="#2a5478"/><rect x="118" y="44" width="212" height="14" rx="4" fill="#35b09d"/>
+              <text x="0" y="96">3</text><rect x="26" y="84" width="80" height="14" rx="3" fill="#2a5478"/><rect x="118" y="84" width="196" height="14" rx="4" fill="#35b09d"/>
+              <text x="0" y="136">4</text><rect x="26" y="124" width="56" height="14" rx="3" fill="#2a5478"/><rect x="118" y="124" width="170" height="14" rx="4" fill="#1f7f7a"/>
+              <text x="0" y="176">5</text><rect x="26" y="164" width="70" height="14" rx="3" fill="#2a5478"/><rect x="118" y="164" width="150" height="14" rx="4" fill="#1f7f7a"/>
+              <text x="0" y="216">6</text><rect x="26" y="204" width="60" height="14" rx="3" fill="#2a5478"/><rect x="118" y="204" width="122" height="14" rx="4" fill="#17566b"/>
+              <g fill="#e8a33d"><rect x="230" y="0" width="3" height="22" rx="1.5"/><rect x="222" y="40" width="3" height="22" rx="1.5"/><rect x="216" y="80" width="3" height="22" rx="1.5"/><rect x="214" y="120" width="3" height="22" rx="1.5"/><rect x="200" y="160" width="3" height="22" rx="1.5"/><rect x="190" y="200" width="3" height="22" rx="1.5"/></g>
+            </g>
+          </svg></div>
+          <div class="tool-body">
+            <h3>Ad Response</h3>
+            <p>Which media move each category's buyers to act: 17 ad types ranked for 41 target audiences, from doctor switchers to used vehicle shoppers, compared with all U.S. adults.</p>
+            <div class="tool-actions"><select class="lib-pick" data-view="response" aria-label="Category for ad response"></select><a class="btn btn-navy" data-go="response" href="/analyzers/library.html?view=response">View ad response</a></div>
           </div>
         </article>
         <article class="tool">

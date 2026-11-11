@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script>/* site-version: if this page is an old saved copy, reload it once with the current version (shared/version.json; bump both on each release) */
-(function(){var V="20261111j";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
+(function(){var V="20261111l";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>From the Research Library</title>
 <meta name="robots" content="noindex">
@@ -48,6 +48,24 @@
   .tabs a { color: #cfe0ee; text-decoration: none; font-size: 15px; font-weight: 600; padding: 6px 0 10px; border-bottom: 3px solid transparent; margin-bottom: -1px; }
   .tabs a:hover { color: #fff; }
   .tabs a[aria-current="page"] { color: #fff; border-bottom-color: var(--mint); }
+  .ar-pills { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 14px; }
+  .ar-pills button { font: inherit; font-size: 13.5px; color: var(--navy); background: #fff; border: 1px solid #c3d0dc; border-radius: 999px; padding: 5px 13px; cursor: pointer; }
+  .ar-pills button:hover { border-color: var(--navy); }
+  .ar-pills button[aria-selected="true"] { background: var(--navy); color: #fff; border-color: var(--navy); font-weight: 600; }
+  .ar-for { margin: 0 0 10px; color: var(--muted); font-size: 14px; }
+  .ar-wrap { overflow-x: auto; }
+  .ar-t { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+  .ar-t th { text-align: left; font-size: 12.5px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; padding: 6px 10px; border-bottom: 2px solid var(--line); white-space: nowrap; }
+  .ar-t td { padding: 7px 10px; border-bottom: 1px solid var(--line); }
+  .ar-t .n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .ar-t .rk { color: var(--muted); width: 2.5em; font-variant-numeric: tabular-nums; }
+  .ar-t td.n b { font-weight: 600; color: var(--navy); }
+  .ar-bar { display: inline-block; vertical-align: middle; width: 120px; height: 8px; background: #edf2f6; border-radius: 4px; margin-right: 10px; overflow: hidden; }
+  .ar-bar i { display: block; height: 100%; background: var(--teal-2); border-radius: 4px; }
+  .ar-t td.up { color: var(--teal); font-weight: 600; }
+  .ar-t td.dn { color: #8d2c1f; font-weight: 600; }
+  .ar-t tbody tr:nth-child(-n+3) td:nth-child(2) { font-weight: 600; }
+  @media (max-width: 640px) { .ar-bar { display: none; } .ar-t { font-size: 13.5px; } .ar-t td, .ar-t th { padding: 6px 6px; } }
   .rgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 24px; align-items: start; }
   .rgrid .cat-head h2 { font-size: 22px; }
   .cat-line { color: var(--muted); font-size: 14px; flex-basis: 100%; }
@@ -239,6 +257,7 @@
   // Three collections, opened from the hub's Research Library panels: ?view=reports | activity | digital (no view: everything)
   var VIEWS = {
     activity: { name: "Category Activity", lead: "Each category's market size and buyers, and how those buyers use media. Open a slide full size or download it as a PDF." },
+    response: { name: "Ad Response", lead: "How each category's buyers respond to advertising: the percent who acted on an ad in each of 17 media in the past 30 days, compared with all U.S. adults. AudienceSCAN 2026; national data, the same in every market." },
     reports:  { name: "Category Reports", lead: "AdMall Local Account Intelligence reports for each business category. Each opens as a PDF in a new tab." },
     digital:  { name: "Digital Slides", lead: "Reach, growth and audience by demographic for six digital platforms. Open a slide full size or download it as a PDF." }
   };
@@ -269,6 +288,51 @@
   }
 
   if (view !== "digital") CATS.forEach(function (c) { jump.appendChild(el("a", { href: "#" + c.id, text: c.name })); });
+  // Ad response (shared/media/ad-response.json, built by data-build/build_ad_response.js from the analyzers' AudienceSCAN data)
+  var SHORT = { "Ad on a social network": "Social", "Streaming TV advertising (such as Hulu, Pluto TV or YouTube TV)": "Streaming TV",
+    "Ad on search results pages (like on Google, Yahoo or Bing)": "Search", "Mobile phone app or text message": "Mobile app or text",
+    "Television (traditional, including cable or satellite subscription)": "TV, cable or satellite", "Ad that plays before or during the video you want to watch": "Pre-roll video",
+    "Online display ads (banners and pop-up ads)": "Online display", "Emailed ad or newsletter": "Email", "Text link ad on a website": "Text link",
+    "Ads/Coupons in your mailbox": "Direct mail", "Advertising circulars in your mailbox or inserted in the newspaper": "Circulars",
+    "Radio (over-the-air, online, mobile or tablet)": "Radio", "Outdoor ad/sign/billboard/transit": "Outdoor", "Newspaper (print, online, mobile or tablet)": "Newspaper",
+    "Ads at movie theater": "Movie theater", "Ad on a podcast": "Podcast", "Magazine (print, online, mobile or on tablet)": "Magazine" };
+  function adTable(g) {
+    var rows = g.rows.slice().sort(function (a, b) { return b[1] - a[1]; }), max = rows[0][1];
+    return el("div", { class: "ar" }, [
+      el("p", { class: "ar-for", text: "Target group: " + g.audience + ". Used for " + g.for.join(", ") + "." }),
+      el("div", { class: "ar-wrap" }, [el("table", { class: "ar-t" }, [
+        el("thead", null, [el("tr", null, [el("th", { text: "#" }), el("th", { text: "Medium" }), el("th", { class: "n", text: g.short }), el("th", { class: "n", text: "U.S. adults" }), el("th", { class: "n", text: "vs. average" })])]),
+        el("tbody", null, rows.map(function (r, i) {
+          var d = Math.round((r[1] / r[2] - 1) * 100);
+          return el("tr", null, [el("td", { class: "rk", text: String(i + 1) }), el("td", { title: r[0], text: SHORT[r[0]] || r[0] }),
+            el("td", { class: "n" }, [el("span", { class: "ar-bar" }, [el("i", { style: "width:" + (r[1] / max * 100).toFixed(1) + "%" })]), el("b", { text: r[1].toFixed(1) + "%" })]),
+            el("td", { class: "n", text: r[2].toFixed(1) + "%" }), el("td", { class: "n" + (d >= 0 ? " up" : " dn"), text: (d >= 0 ? "+" : "") + d + "%" })]);
+        }))])])]);
+  }
+  function adResponse(cat, host) {
+    var c = AR && AR.cats.filter(function (x) { return x.id === cat; })[0];
+    if (!c) { host.appendChild(el("p", { class: "none", text: "Ad response isn't available for this category yet." })); return; }
+    var pane = el("div"), pills = c.groups.length > 1 ? el("div", { class: "ar-pills", role: "tablist", "aria-label": "Audience" }) : null;
+    function show(i) {
+      pane.innerHTML = ""; pane.appendChild(adTable(c.groups[i]));
+      if (pills) [].forEach.call(pills.children, function (b, j) { b.setAttribute("aria-selected", String(i === j)); });
+    }
+    if (pills) c.groups.forEach(function (g, i) { pills.appendChild(el("button", { type: "button", role: "tab", text: g.short })).onclick = function () { show(i); }; });
+    host.appendChild(el("div", null, [pills, pane])); show(0);
+  }
+  var AR = null;
+  if (view === "response") {
+    CATS.forEach(function (c) {
+      var host = el("div");
+      lib.appendChild(el("section", { class: "cat", id: c.id, "aria-labelledby": c.id + "-t" }, [head(c), host]));
+      c.arHost = host;
+    });
+    lib.appendChild(el("p", { class: "note", text: "Source: 2026 AudienceSCAN® study. The percent who saw or heard an ad of each type that led them to take action in the past 30 days, based on everyone in the group, not just users of each medium. \"vs. average\" is how much more likely the target group is to have responded than all U.S. adults (a percent difference, not percentage points)." }));
+    fetch("../shared/media/ad-response.json", { cache: "no-cache" }).then(function (r) { return r.json(); }).then(function (d) {
+      AR = d; CATS.forEach(function (c) { adResponse(c.id, c.arHost); });
+      if (location.hash) { var t = document.getElementById(decodeURIComponent(location.hash.slice(1))); if (t) t.scrollIntoView(); }
+    }, function () { CATS.forEach(function (c) { c.arHost.appendChild(el("p", { class: "none", text: "Ad response couldn't load. Refresh the page to try again." })); }); });
+  }
   if (view === "reports") {
     lib.appendChild(el("div", { class: "rgrid" }, CATS.map(function (c) {
       return el("section", { class: "cat", id: c.id, "aria-labelledby": c.id + "-t" }, [head(c), reportList(c)]);
