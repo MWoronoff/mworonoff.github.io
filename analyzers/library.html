@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script>/* site-version: if this page is an old saved copy, reload it once with the current version (shared/version.json; bump both on each release) */
-(function(){var V="20261111h";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
+(function(){var V="20261111i";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>From the Research Library</title>
 <meta name="robots" content="noindex">
@@ -50,6 +50,10 @@
   .tabs a[aria-current="page"] { color: #fff; border-bottom-color: var(--mint); }
   .rgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 24px; align-items: start; }
   .rgrid .cat-head h2 { font-size: 22px; }
+  .cat-line { color: var(--muted); font-size: 14px; flex-basis: 100%; }
+  .reports li.pair { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .reports li.pair a.dl { flex: none; padding: 10px 2px; font-size: 14px; font-weight: 600; color: var(--teal); }
+  .reports li.pair a.dl:hover { text-decoration: underline; text-underline-offset: 3px; }
   .cat.hit { border-color: var(--teal-2); box-shadow: 0 0 0 2px rgba(19, 161, 150, .25); }
   .pf-item { scroll-margin-top: 16px; }
   .chips { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -286,9 +290,22 @@
       lib.appendChild(el("section", { class: "cat", id: c.id, "aria-labelledby": c.id + "-t" }, [head(c), el("div", { class: "cat-grid" }, [left, right])]));
     });
   }
-  if (!view || view === "digital") {
-    if (view === "digital") PLATFORMS.forEach(function (p) { jump.appendChild(el("a", { href: "#pf-" + p.id, text: p.name })); });
-    else jump.appendChild(el("a", { href: "#platforms", text: "Digital slides" }));
+  if (view === "digital") {
+    // Same layout as Category Reports: a card per platform with a short list (open the slide full size, or download its PDF)
+    PLATFORMS.forEach(function (p) { jump.appendChild(el("a", { href: "#pf-" + p.id, text: p.name })); });
+    lib.appendChild(el("div", { class: "rgrid" }, PLATFORMS.map(function (p) {
+      return el("section", { class: "cat", id: "pf-" + p.id, "aria-labelledby": "pf-" + p.id + "-t" }, [
+        el("div", { class: "cat-head" }, [el("h2", { id: "pf-" + p.id + "-t", text: p.name }), el("span", { class: "cat-line", text: p.line })]),
+        el("ul", { class: "reports" }, [["trend", "Reach and growth"], ["demo", "By demographic"]].map(function (x) {
+          var f = p.id + "-" + x[0];
+          return el("li", { class: "pair" }, [el("a", { href: SL + f + ".png", target: "_blank", rel: "noopener", title: "Open full size" }, [el("b", { text: p.name + ": " + x[1].toLowerCase() })]),
+            el("a", { class: "dl", href: SL + f + ".pdf", download: f + ".pdf", text: "Download PDF" })]);
+        }))]);
+    })));
+    lib.appendChild(el("p", { class: "note", text: "Source: Nielsen Scarborough USA+ Spring 2026; ad spend from EMARKETER. National figures. Each slide opens full size in a new tab." }));
+  }
+  if (!view) {
+    jump.appendChild(el("a", { href: "#platforms", text: "Digital slides" }));
     lib.appendChild(el("section", { class: "cat", id: "platforms", "aria-labelledby": "platforms-t" }, [
       view ? null : el("div", { class: "cat-head" }, [el("h2", { id: "platforms-t", text: "Digital slides" })]),
       el("div", { class: "pf" }, PLATFORMS.map(function (p) {
