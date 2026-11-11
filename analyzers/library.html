@@ -256,7 +256,7 @@
   var VIEWS = {
     activity: { name: "Category Activity", lead: "Each category's market size and buyers, and how those buyers use media. Open a slide full size or download it as a PDF." },
     reports:  { name: "Category Reports", lead: "AdMall Local Account Intelligence reports for each business category. Each opens as a PDF in a new tab." },
-    response: { name: "Ad Response", lead: "One-sheets ranking 17 media by how many of each category's buyers acted on an ad in the past 30 days, compared with all U.S. adults. Open one full size or download it as a PDF." },
+    response: { name: "Ad Response", lead: "One-sheets ranking 17 media by how many of each category's buyers acted on an ad in the past 30 days, compared with all U.S. adults. Select View to preview one and download it as a PDF." },
     digital:  { name: "Digital Slides", lead: "Reach, growth and audience by demographic for six digital platforms. Open a slide full size or download it as a PDF." }
   };
   var view = new URLSearchParams(location.search).get("view");
@@ -315,7 +315,7 @@
       arGrid.appendChild(el("section", { class: "cat", id: c.id, "aria-labelledby": c.id + "-t" }, [head(c), host]));
       c.arHost = host;
     });
-    lib.appendChild(el("p", { class: "note", text: "Source: 2026 AudienceSCAN\u00ae study. National figures, the same in every market. Select an audience to open its one-sheet full size." }));
+    lib.appendChild(el("p", { class: "note", text: "Source: 2026 AudienceSCAN\u00ae study. National figures, the same in every market. Select View to see a one-sheet and download it as a PDF." }));
     fetch("../shared/media/ad-response.json", { cache: "no-cache" }).then(function (r) { return r.json(); }).then(function (d) {
       CATS.forEach(function (c) {
         var cat = d.cats.filter(function (x) { return x.id === c.id; })[0];
@@ -327,8 +327,7 @@
           var view = el("button", { type: "button", class: "view", text: "View", "aria-label": "View the " + g.short + " one-sheet" });
           view.addEventListener("click", function () { showSlide(g); });
           name.addEventListener("click", function (e) { e.preventDefault(); showSlide(g); });
-          c.arHost.appendChild(el("li", { class: "pair" }, [name, el("span", { class: "acts" }, [view,
-            el("a", { class: "dl", href: SL + g.file + ".pdf", download: g.file + ".pdf", text: "PDF" })])]));
+          c.arHost.appendChild(el("li", { class: "pair" }, [name, el("span", { class: "acts" }, [view])]));
         });
       });
       if (location.hash) { var t = document.getElementById(decodeURIComponent(location.hash.slice(1))); if (t) t.scrollIntoView(); }
