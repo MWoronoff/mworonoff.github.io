@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script>/* site-version: if this page is an old saved copy, reload it once with the current version (shared/version.json; bump both on each release) */
-(function(){var V="20261111f";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
+(function(){var V="20261111g";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>From the Research Library</title>
 <meta name="robots" content="noindex">
@@ -43,6 +43,15 @@
   .hero h1 { font-family: var(--display); font-stretch: 125%; font-weight: 750; font-size: clamp(30px, 3.6vw, 48px);
              line-height: 1.04; letter-spacing: -.015em; margin: 0 0 14px; }
   .hero-lead { margin: 0 0 22px; color: #cfe0ee; font-size: 17px; max-width: 70ch; }
+  .kicker { margin: 0 0 6px; color: var(--mint); font-size: 13px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; }
+  .tabs { display: flex; flex-wrap: wrap; gap: 4px 22px; margin: 0 0 16px; border-bottom: 1px solid rgba(207, 224, 238, .2); }
+  .tabs a { color: #cfe0ee; text-decoration: none; font-size: 15px; font-weight: 600; padding: 6px 0 10px; border-bottom: 3px solid transparent; margin-bottom: -1px; }
+  .tabs a:hover { color: #fff; }
+  .tabs a[aria-current="page"] { color: #fff; border-bottom-color: var(--mint); }
+  .rgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 24px; align-items: start; }
+  .rgrid .cat-head h2 { font-size: 22px; }
+  .cat.hit { border-color: var(--teal-2); box-shadow: 0 0 0 2px rgba(19, 161, 150, .25); }
+  .pf-item { scroll-margin-top: 16px; }
   .chips { display: flex; flex-wrap: wrap; gap: 6px; }
   .chips a { font-size: 13px; color: #cfe0ee; text-decoration: none; border: 1px solid rgba(207, 224, 238, .28); border-radius: 999px; padding: 4px 12px; }
   .chips a:hover { border-color: var(--mint); color: #fff; }
@@ -94,7 +103,7 @@
   footer p { margin: 0; }
 
   @media (max-width: 1000px) {
-    .cat-grid { grid-template-columns: 1fr; }
+    .cat-grid, .rgrid { grid-template-columns: 1fr; }
     .pf { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
   @media (max-width: 640px) {
@@ -120,9 +129,11 @@
   </div>
   <div class="wrap hero-body">
     <a class="home" href="/analyzers/">‹ Back to all analyzers and tools</a>
-    <h1>From the Research Library</h1>
-    <p class="hero-lead">Market reports and presentation slides for every business category, ready to share before or after a call. Open a slide full size, download it as a PDF, or open a category report in a new tab.</p>
-    <nav class="chips" id="jump" aria-label="Jump to a category"></nav>
+    <p class="kicker" id="lib-kicker" hidden>From the Research Library</p>
+    <h1 id="lib-title">From the Research Library</h1>
+    <p class="hero-lead" id="lib-lead">Market reports and presentation slides for every business category, ready to share before or after a call. Open a slide full size, download it as a PDF, or open a category report in a new tab.</p>
+    <nav class="tabs" id="tabs" aria-label="Collections"></nav>
+    <nav class="chips" id="jump" aria-label="Jump to"></nav>
   </div>
 </header>
 
@@ -217,36 +228,77 @@
       el("figcaption", null, [el("span", { text: label }), el("a", { href: SL + file + ".pdf", download: file + ".pdf", text: "Download PDF" })])]);
   }
 
-  // Alphabetical, categories and the reports inside each; Platform guides stay last
+  // Alphabetical, categories and the reports inside each
   CATS.sort(function (a, b) { return a.name.localeCompare(b.name); });
   CATS.forEach(function (c) { c.reports.sort(function (a, b) { return R[a][0].localeCompare(R[b][0]); }); });
-  var lib = document.getElementById("lib"), jump = document.getElementById("jump");
-  CATS.forEach(function (c) {
-    jump.appendChild(el("a", { href: "#" + c.id, text: c.name }));
-    var left = c.slides
-      ? el("div", null, [el("h3", { text: "Slides" }), el("div", { class: "slides" }, [
-          slide(c.slides + "-market", c.slideName + ": market size and buyers"), slide(c.slides + "-media", c.slideName + ": how buyers use media")])])
-      : el("div", null, [el("h3", { text: "Slides" }), el("p", { class: "none", text: "Slides for this category are coming soon." })]);
-    // Report list closed until the rep clicks it open
-    var right = el("div", null, [el("h3", { text: "Category reports" }),
-      el("details", { class: "rep" }, [
-        el("summary", null, [el("span", { text: "View " + c.reports.length + " report" + (c.reports.length === 1 ? "" : "s") })]),
-        el("ul", { class: "reports" }, c.reports.map(function (k) {
-          return el("li", null, [el("a", { href: RP + k + ".pdf", target: "_blank", rel: "noopener" }, [el("b", { text: R[k][0] })])]);
-        })),
-        el("p", { class: "note", text: "AdMall Local Account Intelligence. Opens as a PDF in a new tab." })])]);
-    lib.appendChild(el("section", { class: "cat", id: c.id, "aria-labelledby": c.id + "-t" }, [
-      el("div", { class: "cat-head" }, [el("h2", { id: c.id + "-t", text: c.name }), el("a", { href: c.path, text: "Open the " + c.name + " analyzer ›" })]),
-      el("div", { class: "cat-grid" }, [left, right])]));
-  });
-  jump.appendChild(el("a", { href: "#platforms", text: "Platform guides" }));
-  lib.appendChild(el("section", { class: "cat", id: "platforms", "aria-labelledby": "platforms-t" }, [
-    el("div", { class: "cat-head" }, [el("h2", { id: "platforms-t", text: "Platform guides" })]),
-    el("div", { class: "pf" }, PLATFORMS.map(function (p) {
-      return el("div", null, [el("h4", { text: p.name }), el("p", { text: p.line }), el("div", { class: "slides" }, [
-        slide(p.id + "-trend", "Reach and growth"), slide(p.id + "-demo", "By demographic")])]);
-    })),
-    el("p", { class: "note", text: "Source: Nielsen Scarborough USA+ Spring 2026; ad spend from EMARKETER. National figures." })]));
+
+  // Three collections, opened from the hub's Research Library panels: ?view=reports | activity | digital (no view: everything)
+  var VIEWS = {
+    reports:  { name: "Category Reports", lead: "AdMall Local Account Intelligence reports for each business category. Each opens as a PDF in a new tab." },
+    activity: { name: "Category Activity", lead: "Each category's market size and buyers, and how those buyers use media. Open a slide full size or download it as a PDF." },
+    digital:  { name: "Digital Slides", lead: "Reach, growth and audience by demographic for six digital platforms. Open a slide full size or download it as a PDF." }
+  };
+  var view = new URLSearchParams(location.search).get("view");
+  if (!VIEWS[view]) view = null;
+  var lib = document.getElementById("lib"), jump = document.getElementById("jump"), tabs = document.getElementById("tabs");
+  if (view) {
+    document.getElementById("lib-title").textContent = VIEWS[view].name;
+    document.getElementById("lib-kicker").hidden = false;
+    document.getElementById("lib-lead").textContent = VIEWS[view].lead;
+    document.title = VIEWS[view].name + " · From the Research Library";
+  }
+  tabs.appendChild(el("a", { href: "library.html", "aria-current": view ? null : "page", text: "Everything" }));
+  Object.keys(VIEWS).forEach(function (k) { tabs.appendChild(el("a", { href: "library.html?view=" + k, "aria-current": view === k ? "page" : null, text: VIEWS[k].name })); });
+
+  function reportList(c) {
+    return el("ul", { class: "reports" }, c.reports.map(function (k) {
+      return el("li", null, [el("a", { href: RP + k + ".pdf", target: "_blank", rel: "noopener" }, [el("b", { text: R[k][0] })])]);
+    }));
+  }
+  function activity(c) {
+    return c.slides
+      ? el("div", { class: "slides" }, [slide(c.slides + "-market", c.slideName + ": market size and buyers"), slide(c.slides + "-media", c.slideName + ": how buyers use media")])
+      : el("p", { class: "none", text: "Slides for this category are coming soon." });
+  }
+  function head(c) {
+    return el("div", { class: "cat-head" }, [el("h2", { id: c.id + "-t", text: c.name }), el("a", { href: c.path, text: "Open the " + c.name + " analyzer ›" })]);
+  }
+
+  if (view !== "digital") CATS.forEach(function (c) { jump.appendChild(el("a", { href: "#" + c.id, text: c.name })); });
+  if (view === "reports") {
+    lib.appendChild(el("div", { class: "rgrid" }, CATS.map(function (c) {
+      return el("section", { class: "cat", id: c.id, "aria-labelledby": c.id + "-t" }, [head(c), reportList(c)]);
+    })));
+    lib.appendChild(el("p", { class: "note", text: "AdMall Local Account Intelligence. Each report opens as a PDF in a new tab." }));
+  } else if (view === "activity") {
+    CATS.forEach(function (c) {
+      lib.appendChild(el("section", { class: "cat", id: c.id, "aria-labelledby": c.id + "-t" }, [head(c), activity(c)]));
+    });
+  } else if (!view) {
+    CATS.forEach(function (c) {
+      var left = el("div", null, [el("h3", { text: "Category activity" }), activity(c)]);
+      // Report list closed until the rep clicks it open
+      var right = el("div", null, [el("h3", { text: "Category reports" }),
+        el("details", { class: "rep" }, [
+          el("summary", null, [el("span", { text: "View " + c.reports.length + " report" + (c.reports.length === 1 ? "" : "s") })]),
+          reportList(c),
+          el("p", { class: "note", text: "AdMall Local Account Intelligence. Opens as a PDF in a new tab." })])]);
+      lib.appendChild(el("section", { class: "cat", id: c.id, "aria-labelledby": c.id + "-t" }, [head(c), el("div", { class: "cat-grid" }, [left, right])]));
+    });
+  }
+  if (!view || view === "digital") {
+    if (view === "digital") PLATFORMS.forEach(function (p) { jump.appendChild(el("a", { href: "#pf-" + p.id, text: p.name })); });
+    else jump.appendChild(el("a", { href: "#platforms", text: "Digital slides" }));
+    lib.appendChild(el("section", { class: "cat", id: "platforms", "aria-labelledby": "platforms-t" }, [
+      view ? null : el("div", { class: "cat-head" }, [el("h2", { id: "platforms-t", text: "Digital slides" })]),
+      el("div", { class: "pf" }, PLATFORMS.map(function (p) {
+        return el("div", { id: "pf-" + p.id, class: "pf-item" }, [el("h4", { text: p.name }), el("p", { text: p.line }), el("div", { class: "slides" }, [
+          slide(p.id + "-trend", "Reach and growth"), slide(p.id + "-demo", "By demographic")])]);
+      })),
+      el("p", { class: "note", text: "Source: Nielsen Scarborough USA+ Spring 2026; ad spend from EMARKETER. National figures." })]));
+  }
+  // Built after load, so jump to the #category the hub linked to
+  if (location.hash) { var t = document.getElementById(decodeURIComponent(location.hash.slice(1))); if (t) { t.classList.add("hit"); t.scrollIntoView(); } }
 })();
 </script>
 </body>
