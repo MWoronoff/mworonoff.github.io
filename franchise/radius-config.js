@@ -313,7 +313,7 @@ window.ADTAXI_RADIUS = {
   {
    "id": "owner",
    "label": "First-time franchise buyers",
-   "note": "Households headed by someone 25–64 earning $100K+, counted directly by Census: most people who buy a business are 40 to 60, often making a career change. The ZIP-wide $200K+ income share feeds the Score; self-employment and $500K+ homes show for context.",
+   "note": "Households headed by someone 25–64 earning $100K+, counted directly by Census: small business owners over-index at 35–64, $100K+ and with a bachelor's degree or more (Scarborough). ZIP-wide signals feed the Score in two equal groups: affluence ($200K+ income) and background (bachelor's degrees); self-employment and $500K+ homes show for context.",
    "sel": {
     "age": [
      "2544",
@@ -328,12 +328,16 @@ window.ADTAXI_RADIUS = {
    },
    "context": [
     "hi200",
+    "ba",
     "selfemp",
     "val500"
    ],
    "scoreGroups": [
     [
      "hi200"
+    ],
+    [
+     "ba"
     ]
    ]
   }

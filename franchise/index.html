@@ -10,13 +10,13 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
-<link rel="stylesheet" href="../shared/engine.css?v=20261112u">
+<link rel="stylesheet" href="../shared/engine.css?v=20261027d">
 </head>
 <body>
 <div id="app"><p class="az-loading">Loading the Franchise Development Analyzer…</p></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js" crossorigin=""></script>
-<script src="../shared/engine.js?v=20261112u"></script>
+<script src="../shared/engine.js?v=20261027d"></script>
 <script src="radius-config.js?v=20261027d"></script>
 <script>
 AdtaxiAnalyzer.start({
@@ -49,7 +49,8 @@ AdtaxiAnalyzer.start({
    "o100",
    "o100_share",
    "avg_wage",
-   "married_share"
+   "married_share",
+   "ba_share"
   ]
  },
  "levels": {
@@ -84,7 +85,7 @@ AdtaxiAnalyzer.start({
  },
  "statesGeo": "../shared/geo/states.topo.json",
  "zipIndex": "../shared/geo/zip_market.json",
- "radiusScript": "../shared/radius.js?v=20261112u",
+ "radiusScript": "../shared/radius.js?v=20261027d",
  "benchmarks": false,
  "timing": false,
  "subcategoryLabel": "Owner profile",
@@ -205,9 +206,10 @@ AdtaxiAnalyzer.start({
    "label": "Share of adults 25+ with a bachelor's degree or higher",
    "format": "pct",
    "subs": [
-    "exec"
+    "exec",
+    "owner"
    ],
-   "help": "Census ACS, area-level. A master franchisee recruits and supports sub-franchisees, so a professional background matters."
+   "help": "Census ACS, area-level. A master franchisee recruits and supports sub-franchisees, so a professional background matters; small business owners also over-index with a bachelor's degree or more (Scarborough index 126–141)."
   },
   {
    "key": "mgmt_share",
@@ -333,7 +335,7 @@ AdtaxiAnalyzer.start({
    "title": "Candidates",
    "body": [
     "Master franchise candidates, first-time or not: householders 45–64 earning $125K+ (count and share), the IRS shares of returns with income of $200K+ and with capital gains, the IRS average salary per wage earner, the share of adults 25+ with a bachelor's degree or higher, and the share of workers in management occupations (a master franchisee recruits and supports sub-franchisees, so professional and management background matters). Each input counts equally. Census reports householder age only as 25–44 and 45–64, so the score uses 45–64, as does the Trade area.",
-    "First-time franchise buyers: householders 25–64 earning $100K+ (count and share), the IRS average salary per wage earner (corporate earners, who make up most first-time buyers) and the share of married-couple households (the dual-income cushion many new owners rely on). Education isn't used here: many good single-unit buyers are career changers without a degree. Census groups householders 25–44 together, so the score starts at 25, as does the Trade area.",
+    "First-time franchise buyers: householders 25–64 earning $100K+ (count and share), the IRS average salary per wage earner (corporate earners, who make up most first-time buyers), the share of married-couple households (the dual-income cushion many new owners rely on) and the share of adults 25+ with a bachelor's degree or higher. These follow Nielsen Scarborough USA+ 2026 small business owners (index 100 = average): ages 35–64 (122–143), household income of $100K+ (127–196), a bachelor's degree or more (126–141), married (120) and homeowners (120). Self-employment isn't scored: Scarborough's self-employed skew part-time (index 292), so it mixes gig work with business owners. Census groups householders 25–44 together, so the score starts at 25, as does the Trade area.",
     "Census doesn't publish net worth, liquid capital or job titles for areas, so household income and investment income stand in for them. IRS figures are area-level rates, not facts about individuals."
    ]
   },
@@ -347,6 +349,9 @@ AdtaxiAnalyzer.start({
   }
  ],
  "sources": [
+  {
+   "label": "Nielsen Scarborough USA+ 2026 Release 1 (small business owner profile)"
+  },
   {
    "label": "Census American Community Survey 5-year (age of householder by household income, educational attainment, occupation, veterans)",
    "url": "https://www.census.gov/programs-surveys/acs"
