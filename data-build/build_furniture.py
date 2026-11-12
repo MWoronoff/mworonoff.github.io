@@ -51,7 +51,7 @@ SUBCATS = [
 ]
 EASI_LINES = sorted({e for s in SUBCATS for e in s["easi"]})
 DEMAND_LABELS = {"movers": "Households that moved in 2020 or later", "movers_share": "Share of households that moved in 2020 or later",
-                 "owners": "Homeowner households", "households": "Households", "kids_share": "Households with children",
+                 "owners": "Homeowner households", "households": "Households", "kids_share": "Households with children", "inc100_share": "Households earning $100K+",
                  "pop18_34": "Adults 18-34", "sfd_own": "Owners in single-family detached homes",
                  "sfd_share": "Share of owner homes that are single-family detached", "f25_34": "Women 25-34",
                  "hh_kids": "Households with children (count)"}
