@@ -69,11 +69,11 @@ DEMAND_LABELS = {"owners": "Homeowners", "sfd_own": "Owners of single-family det
                  "clim_stress": "Heating or cooling need, whichever is greater"}
 COUNTS = ["population", "households", "owners", "sfd_own"]
 DENSITY = ["density"]                                    # households per square mile of land
-RATES = ["own_share", "pre1980_share", "pre2000_share", "sfd_share", "lt_share", "val300_share", "inc75_share"]
+RATES = ["own_share", "pre1980_share", "pre2000_share", "sfd_share", "lt_share", "val300_share", "inc75_share", "inc100_share"]
 CLIMATE = ["hdd", "cdd", "degdays", "hail_days"]           # household-weighted averages of county values
 RATE_PARTS = {"own_share": ("owners", "hh_tot"), "pre1980_share": ("hb_pre1980", "hb_tot"), "pre2000_share": ("hb_pre2000", "hb_tot"),
               "sfd_share": ("sfd_own", "hu_tot"), "lt_share": ("lt_own", "hm_tot"), "val300_share": ("val300", "val_tot"),
-              "inc75_share": ("inc75", "inc_tot")}
+              "inc75_share": ("inc75", "inc_tot"), "inc100_share": ("inc100", "inc_tot")}
 ACS_COLS = ["own_tot", "hh_tot", "inc_tot", "inc_75_100", "inc_100_150", "inc_150_200", "inc_200p", "val_tot", "val300"]
 HOME_COLS = ["hb_tot", "hb_pre1980", "hb_80_99", "hb_2000p", "hu_tot", "sfd_own", "hm_tot", "lt_own"]
 # NOAA climate division state codes (alphabetical, no DC or Hawaii; Alaska is 50) -> Census state FIPS
@@ -250,6 +250,7 @@ def main():
     if miss: sys.exit(f"The audience files have no Home Services columns ({miss[:4]}...); the audience step must run first.")
     acs = acs[["zip"] + ACS_COLS].merge(home[["zip"] + HOME_COLS], on="zip", how="left")
     acs["inc75"] = acs[["inc_75_100", "inc_100_150", "inc_150_200", "inc_200p"]].sum(axis=1, min_count=4)
+    acs["inc100"] = acs[["inc_100_150", "inc_150_200", "inc_200p"]].sum(axis=1, min_count=3)
     acs["hb_pre2000"] = acs.hb_pre1980 + acs.hb_80_99
     acs = acs.rename(columns={"own_tot": "owners"})
     z = z.merge(acs.drop(columns=["inc_75_100", "inc_100_150", "inc_150_200", "inc_200p"]), on="zip", how="left")
@@ -394,7 +395,7 @@ def main():
     def score(df, parts=tuple(WEIGHTS), mask=None):
         if mask is None: mask = pd.Series(True, index=df.index)
         P = lambda s: pct(s.where(mask))
-        spend = P(df.inc75_share)
+        spend = P(df.inc100_share)   # Scarborough: households doing or planning these projects over-index at $100K+ (117-132)
         if "hdd" in df.columns and "cdd" in df.columns:      # percentile of the more extreme need, heating or cooling
             df["clim_stress"] = pd.concat([P(df.hdd), P(df.cdd)], axis=1).max(axis=1)
         dem_pct = {k: P(df[k]) for k in DEMAND_LABELS if k in df.columns}

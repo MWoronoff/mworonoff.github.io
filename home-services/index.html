@@ -19,7 +19,7 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js" crossorigin=""></script>
 <script src="../shared/engine.js?v=20261112u"></script>
-<script src="radius-config.js?v=20261028b"></script>
+<script src="radius-config.js?v=20261112a"></script>
 <script>
 AdtaxiAnalyzer.start({
  "title": "Home Services Market Analyzer",
@@ -41,7 +41,76 @@ AdtaxiAnalyzer.start({
  "defaultLevel": "us",
  "usMapLevel": "dma",
  "drill": true,
- "zipScore": {"weights": {"demand": 0.4, "spend": 0.15}, "subs": {"any": {"demand": ["owners", "pre2000_share", "sfd_share", "lt_share"], "spend": "inc75_share"}, "hvac": {"demand": ["owners", "clim_stress"], "spend": "inc75_share"}, "roof": {"demand": ["sfd_own", "hail_days", "pre2000_share"], "spend": "inc75_share"}, "plumb": {"demand": ["owners", "pre1980_share"], "spend": "inc75_share"}, "elec": {"demand": ["owners", "pre1980_share", "val300_share"], "spend": "inc75_share"}, "paint": {"demand": ["owners", "val300_share", "lt_share"], "spend": "inc75_share"}, "floor": {"demand": ["owners", "pre2000_share", "lt_share"], "spend": "inc75_share"}}, "derived": {"clim_stress": ["max", "hdd", "cdd"]}},
+ "zipScore": {
+  "weights": {
+   "demand": 0.4,
+   "spend": 0.15
+  },
+  "subs": {
+   "any": {
+    "demand": [
+     "owners",
+     "pre2000_share",
+     "sfd_share",
+     "lt_share"
+    ],
+    "spend": "inc100_share"
+   },
+   "hvac": {
+    "demand": [
+     "owners",
+     "clim_stress"
+    ],
+    "spend": "inc100_share"
+   },
+   "roof": {
+    "demand": [
+     "sfd_own",
+     "hail_days",
+     "pre2000_share"
+    ],
+    "spend": "inc100_share"
+   },
+   "plumb": {
+    "demand": [
+     "owners",
+     "pre1980_share"
+    ],
+    "spend": "inc100_share"
+   },
+   "elec": {
+    "demand": [
+     "owners",
+     "pre1980_share",
+     "val300_share"
+    ],
+    "spend": "inc100_share"
+   },
+   "paint": {
+    "demand": [
+     "owners",
+     "val300_share",
+     "lt_share"
+    ],
+    "spend": "inc100_share"
+   },
+   "floor": {
+    "demand": [
+     "owners",
+     "pre2000_share",
+     "lt_share"
+    ],
+    "spend": "inc100_share"
+   }
+  },
+  "derived": {
+   "clim_stress": [
+    "max",
+    "hdd",
+    "cdd"
+   ]
+  }
+ },
  "levels": {
   "us": {
    "label": "U.S.",
@@ -157,7 +226,7 @@ AdtaxiAnalyzer.start({
     "county",
     "zip"
    ],
-   "help": "Percentile of the share of households earning $75K or more."
+   "help": "Percentile of the share of households earning $100K or more."
   },
   {
    "key": "comp",
@@ -731,13 +800,19 @@ AdtaxiAnalyzer.start({
    "key": "inc75_share",
    "label": "Households earning $75K+",
    "format": "pct"
+  },
+  {
+   "key": "inc100_share",
+   "label": "Households earning $100K+",
+   "format": "pct",
+   "short": "$100K+"
   }
  ],
  "rankBy": [
-   "score",
-   "easi_total",
-   "density"
-  ],
+  "score",
+  "easi_total",
+  "density"
+ ],
  "defaultRank": "score",
  "components": [
   "demand",
@@ -775,7 +850,8 @@ AdtaxiAnalyzer.start({
   "est",
   "per10k",
   "growth",
-  "under"
+  "under",
+  "inc100_share"
  ],
  "tableColumns": [
   "score",
@@ -814,7 +890,7 @@ AdtaxiAnalyzer.start({
   },
   {
    "title": "Spending Power",
-   "body": "Share of households earning $75K+ (Census ACS). Held to 15% because EASI already reflects income."
+   "body": "Share of households earning $100K+ (Census ACS): in Nielsen Scarborough USA+ 2026, households that did or plan flooring, electrical, painting, HVAC, plumbing, roofing or window work over-index at $100K+ (index 104–158, most 117–132). Held to 15% because EASI already reflects income."
   },
   {
    "title": "Competition",
@@ -857,6 +933,9 @@ AdtaxiAnalyzer.start({
   {
    "label": "Census ZIP and County Business Patterns",
    "url": "https://www.census.gov/programs-surveys/cbp.html"
+  },
+  {
+   "label": "Nielsen Scarborough USA+ 2026 Release 1 (customer profiles)"
   },
   {
    "label": "Census American Community Survey 5-year"
