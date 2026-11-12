@@ -1,6 +1,6 @@
 # Legal data check report
 
-Built 2026-10-28. Result: **PASSED**
+Built 2026-11-12. Result: **PASSED**
 
 | Check | Result | Detail |
 | --- | --- | --- |
@@ -13,8 +13,8 @@ Built 2026-10-28. Result: **PASSED**
 | EASI U.S. legal fees per household | INFO | $54.93 |
 | EASI legal fees matched to DMAs | PASS | 210 of 210 |
 | EASI legal fees matched to metros | PASS | 387 of 387 |
-| Score reality check, DMAs: rank correlation with law offices' employees per 1,000 households, score (without Competition) | INFO | Personal injury 0.10 (0.50); Family law and divorce 0.06 (0.51); Estate planning and elder law 0.33 (0.56); Bankruptcy and debt relief -0.47 (0.04); Employment law 0.19 (0.52). Weak (under 0.20 without Competition): Bankruptcy and debt relief |
-| Score reality check, metros: rank correlation with law offices' employees per 1,000 households, score (without Competition) | INFO | Personal injury 0.07 (0.46); Family law and divorce -0.07 (0.39); Estate planning and elder law 0.21 (0.47); Bankruptcy and debt relief -0.41 (0.11); Employment law 0.06 (0.41). Weak (under 0.20 without Competition): Bankruptcy and debt relief |
+| Score reality check, DMAs: rank correlation with law offices' employees per 1,000 households, score (without Competition) | INFO | Personal injury 0.07 (0.48); Family law and divorce 0.06 (0.51); Estate planning and elder law 0.33 (0.56); Bankruptcy and debt relief -0.51 (-0.03); Employment law 0.19 (0.52). Weak (under 0.20 without Competition): Bankruptcy and debt relief |
+| Score reality check, metros: rank correlation with law offices' employees per 1,000 households, score (without Competition) | INFO | Personal injury -0.01 (0.41); Family law and divorce -0.07 (0.39); Estate planning and elder law 0.21 (0.47); Bankruptcy and debt relief -0.47 (0.05); Employment law 0.06 (0.41). Weak (under 0.20 without Competition): Bankruptcy and debt relief |
 | EASI legal fees total, DMAs vs. EASI's own total | PASS | 98.7% of EASI's $7.19B |
 | DMA scores within 0–100 | PASS | 0 out of range; 1,050 scores computed, 0 not computed (missing input) |
 | Metro scores within 0–100 | PASS | 0 out of range; 1,935 scores computed, 0 not computed (missing input) |
