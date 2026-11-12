@@ -1,6 +1,6 @@
 # Higher Education data check report
 
-Built 2026-10-28. Result: **PASSED**
+Built 2026-11-12. Result: **PASSED**
 
 | Check | Result | Detail |
 | --- | --- | --- |
