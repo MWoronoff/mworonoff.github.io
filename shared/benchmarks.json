@@ -230,6 +230,19 @@
     "cpl": 500
    },
    "source": "Franchise Update Media, 2026 Annual Franchise Development Report: average cost per lead $142 to $802 by segment (service, brick-and-mortar $608)"
+  },
+  "travel": {
+   "label": "Travel",
+   "search": {
+    "cpc": 2.14,
+    "cvr": 5.83,
+    "ctr": 9.32,
+    "cpl": 44.7
+   },
+   "socialTraffic": {
+    "cpc": 0.42
+   },
+   "socialLeads": null
   }
  },
  "map": {
@@ -293,6 +306,12 @@
    "_default": [
     "franchise",
     false
+   ]
+  },
+  "travel": {
+   "_default": [
+    "travel",
+    true
    ]
   }
  }

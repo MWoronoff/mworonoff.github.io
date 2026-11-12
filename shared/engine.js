@@ -106,7 +106,13 @@
     "medical-clinics": ["Medical Clinics", "Minnesota"],
     "chiropractors": ["Doctors, Chiropractors", "Minnesota"],
     "physical-occupational-therapists": ["Physical/Occupational Therapists", "Minnesota"],
-    "mental-health-professionals": ["Mental Health Professionals", "Minnesota"]
+    "mental-health-professionals": ["Mental Health Professionals", "Minnesota"],
+    "hotels-lodging": ["Hotels & Lodging", "Albany TV market"],
+    "resorts": ["Resorts", "Albany TV market"],
+    "cruise-ships": ["Cruise Ships", "Albany TV market"],
+    "casinos": ["Casinos", "Albany TV market"],
+    "tour-operators": ["Tour Operators", "Albany TV market"],
+    "convention-visitors-bureaus": ["Convention and Visitors Bureaus", "Albany TV market"]
   };
   var CATEGORY_REPORTS = {
     "auto": { newcar: ["auto-dealerships"], newtruck: ["auto-dealerships"], usedcar: ["used-car-dealers"], usedtruck: ["used-car-dealers"] },
@@ -124,7 +130,9 @@
       dining: ["furniture-stores"], outdoor: ["furniture-stores"], baby: ["furniture-stores"] },
     "healthcare": { primary: ["medical-clinics"], hospital: ["medical-clinics"], urgent: ["urgent-care-centers"], pharmacy: ["drugstores-pharmacies"],
       dental: ["dentists-orthodontists"], hearing: ["hearing-aid-centers"], eye: ["optical-optometrists"],
-      chiro: ["chiropractors", "physical-occupational-therapists"], behavioral: ["mental-health-professionals"], medspa: ["medical-spas"], senior: ["senior-living-care"] }
+      chiro: ["chiropractors", "physical-occupational-therapists"], behavioral: ["mental-health-professionals"], medspa: ["medical-spas"], senior: ["senior-living-care"] },
+    "travel": { hotels: ["hotels-lodging"], resorts: ["resorts"], cruises: ["cruise-ships"], casinos: ["casinos"], tours: ["tour-operators"],
+      cvb: ["convention-visitors-bureaus"] }
   };
   // "Primary care" -> "Primary Care", "Med spa and aesthetics" -> "Med Spa and Aesthetics"; acronyms (HVAC, SUVs) kept.
   function titleCase(t) {
@@ -135,7 +143,8 @@
     }).join(" ");
   }
   // Button wording where the category name reads better singular ("New Car report", not "New Cars report").
-  var REPORT_LABELS = { auto: { newcar: "New Car", newtruck: "New Truck and SUV", usedcar: "Used Car", usedtruck: "Used Truck and SUV" } };
+  var REPORT_LABELS = { auto: { newcar: "New Car", newtruck: "New Truck and SUV", usedcar: "Used Car", usedtruck: "Used Truck and SUV" },
+    travel: { hotels: "Hotels & Lodging", resorts: "Resorts", cruises: "Cruise Ships", casinos: "Casinos", tours: "Tour Operators", cvb: "Convention & Visitors Bureaus" } };
   function analyzerFolder() { return (location.pathname.split("/").filter(Boolean)[0] || "").toLowerCase(); }
   function categoryReports(sub) {
     var map = CATEGORY_REPORTS[analyzerFolder()];
@@ -1086,7 +1095,7 @@
     }
     if (window.AdtaxiRadius) go();
     else {
-      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261111p";   // version tag: browsers fetch the new file after an update
+      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261112t";   // version tag: browsers fetch the new file after an update
       sc.onload = go; sc.onerror = function () { self.showError("The radius tool didn't load. Refresh the page and try again."); };
       document.head.appendChild(sc);
     }
@@ -1344,12 +1353,12 @@
   };
 
   /* ---------- Slides (shared/slides.js) ---------- */
-  var SLIDE_CATS = { auto: "Auto", "higher-ed": "Education", financial: "Finance", furniture: "Furniture", healthcare: "Healthcare", "home-services": "Home Improvement", legal: "Legal" };
+  var SLIDE_CATS = { auto: "Auto", "higher-ed": "Education", financial: "Finance", furniture: "Furniture", healthcare: "Healthcare", "home-services": "Home Improvement", legal: "Legal", travel: "Travel" };
   function loadSlides(done) {
     if (window.AdtaxiSlides) { done(); return; }
     if (loadSlides.waiting) { loadSlides.waiting.push(done); return; }
     loadSlides.waiting = [done];
-    var sc = document.createElement("script"); sc.src = "../shared/slides.js?v=20261111o";
+    var sc = document.createElement("script"); sc.src = "../shared/slides.js?v=20261112t";
     sc.onload = sc.onerror = function () { var w = loadSlides.waiting; loadSlides.waiting = null; w.forEach(function (f) { f(); }); };
     document.head.appendChild(sc);
   }
@@ -1923,8 +1932,8 @@
         .then(function (b) { if (b.map && (b.map[cfg.exportName] || (b.drivers && b.drivers[cfg.exportName]))) { self[key] = b; self.tabBar.querySelector('[data-tab="' + tab + '"]').hidden = false; self.tabBar.hidden = false; } })
         .catch(function () { /* no tab without data */ });
     }
-    if (cfg.benchmarks !== false) load(cfg.benchmarksData || "../shared/benchmarks.json?v=20261022f", "bench", "bench");
-    if (cfg.timing !== false) load(cfg.timingData || "../shared/timing.json?v=20261031e", "timing", "timing");
+    if (cfg.benchmarks !== false) load(cfg.benchmarksData || "../shared/benchmarks.json?v=20261112t", "bench", "bench");
+    if (cfg.timing !== false) load(cfg.timingData || "../shared/timing.json?v=20261112t", "timing", "timing");
   };
   Analyzer.prototype.setTab = function (tab) {
     var self = this, prev = this.tab;
@@ -1974,7 +1983,7 @@
     if (!m) {   // no monthly series for this category (e.g. Legal): the documented patterns alone
       box.appendChild(this.tabControls(this.renderTiming, "A clean page of these timing patterns to send after the meeting", true));
       box.appendChild(el("section", { class: "az-panel az-bench-panel" }, [el("h2", { text: "When demand peaks: " + (cfg.title || "").replace(/ Market Analyzer$/, "") }),
-        el("p", { class: "az-bench-ind", text: "There's no monthly sales or website series for this category, so this tab lists documented seasonal patterns by practice area." })]));
+        el("p", { class: "az-bench-ind", text: "There's no monthly sales or website series for this category, so this tab lists documented seasonal patterns by " + (cfg.subcategoryLabel || "category").toLowerCase() + "." })]));
       var dp = driversPanel(); if (dp) box.appendChild(dp);
       box.appendChild(el("p", { class: "az-bench-note", text: T.note }));
       return;
@@ -2065,6 +2074,15 @@
       el("p", { class: "az-bench-ind", text: "Benchmarks for " + I.label + (R.exact ? "" : " (closest published category)") + ", " + B.updated + "." }),
       el("div", { class: "az-tablewrap" }, [el("table", { class: "az-table az-bench-table" }, [thead, tbody])]),
       el("p", { class: "az-bench-note", text: (I.socialLeads ? "" : "Facebook and Instagram lead-ad figures aren't published for this category. ") + B.note })]));
+    // Optional (cfg.budgets): typical ad budget as a share of sales and the national media split, per category
+    var G = cfg.budgets && cfg.budgets.subs && cfg.budgets.subs[s.sub];
+    if (G) box.appendChild(el("section", { class: "az-panel az-bench-panel" }, [
+      el("h2", { text: "Typical ad budgets" + (subLabel ? ": " + subLabel : "") }),
+      el("div", { class: "az-tablewrap" }, [el("table", { class: "az-table az-bench-table" }, [el("tbody", null, [
+        el("tr", null, [el("th", { scope: "row" }, ["Annual ad budget", el("small", { text: "Share of sales (revenue for visitors bureaus)" })]), el("td", null, [el("b", { class: "num", text: G.budget })])]),
+        el("tr", null, [el("th", { scope: "row" }, ["How the category spends nationally", el("small", { text: "Share of ad dollars by medium" })]),
+          el("td", null, G.split ? G.split.map(function (x, i) { return el("span", null, [i ? " \u00b7 " : "", x[0] + " ", el("b", { class: "num", text: x[1] + "%" })]); }) : [el("span", { class: "az-bench-na", text: "Not published for this category" })])])])])]),
+      el("p", { class: "az-bench-note", text: cfg.budgets.note || "" })]));
     box.appendChild(el("section", { class: "az-panel az-sources" }, [el("h2", { text: "Sources" }),
       el("p", null, B.sources.map(function (x, i) { return el("span", null, [i ? " \u00b7 " : "", el("a", { href: x.url, target: "_blank", rel: "noopener", text: x.label })]); }))]));
   };

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script>/* site-version: if this page is an old saved copy, reload it once with the current version (shared/version.json; bump both on each release) */
-(function(){var V="20261111p";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
+(function(){var V="20261112t";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Adtaxi Market Analyzers</title>
 <meta name="robots" content="noindex">
@@ -449,6 +449,9 @@
     { key: "auto", name: "Auto", path: "/auto/", shown: "New trucks and SUVs",
       desc: "Vehicle buyers by household vehicles, income, commuting, rural share and vehicle spending.",
       lines: "New cars, new trucks and SUVs, used cars, used trucks and SUVs" },
+    { key: "travel", name: "Travel", path: "/travel/", shown: "Resorts",
+      desc: "Feeder markets for travel businesses: likely guests by household income, age, family stage and travel spending.",
+      lines: "Hotels and lodging, resorts, cruises, casinos, tour operators, visitors bureaus" },
     { key: "franchise", name: "Franchise Development", chip: "Franchise", path: "/franchise/", shown: "Master franchise candidates", crm: false,
       desc: "Potential franchise owners by age, household income, management background, tax-return wealth signals and local businesses.",
       lines: "Master and multi-unit candidates, first-time franchise buyers" }

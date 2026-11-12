@@ -444,6 +444,44 @@
     "src": "U.S. Census Bureau (2009 data)",
     "url": "https://www.census.gov/content/dam/Census/library/working-papers/2011/demo/2009-Seasonality.pdf"
    }
+  ],
+  "travel": [
+   {
+    "applies": "Hotels and lodging",
+    "text": "Top sales months are July through December: summer vacations, fall travel, and November–December holiday trips.",
+    "src": "AdMall (SalesFuel) Local Account Intelligence",
+    "url": null
+   },
+   {
+    "applies": "Resorts",
+    "text": "Top sales months are June, July and August, the summer vacation season.",
+    "src": "AdMall (SalesFuel) Local Account Intelligence",
+    "url": null
+   },
+   {
+    "applies": "Cruises",
+    "text": "Top sales months are January, February and March, the cruise lines' \"wave season\" for bookings.",
+    "src": "AdMall (SalesFuel) Local Account Intelligence",
+    "url": null
+   },
+   {
+    "applies": "Casinos",
+    "text": "Top sales months are October, November and December.",
+    "src": "AdMall (SalesFuel) Local Account Intelligence",
+    "url": null
+   },
+   {
+    "applies": "Tour operators",
+    "text": "Top sales months are July, August and September.",
+    "src": "AdMall (SalesFuel) Local Account Intelligence",
+    "url": null
+   },
+   {
+    "applies": "Visitors bureaus",
+    "text": "Top months are June, July and August, the summer travel season.",
+    "src": "AdMall (SalesFuel) Local Account Intelligence",
+    "url": null
+   }
   ]
  }
 }

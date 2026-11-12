@@ -1,0 +1,1 @@
+Held for the Travel analyzer (supplied Nov 12 2026): EASI 2025 DMA and metro spending on food away from home, food on out-of-town trips, other lodging, lodging on out-of-town trips, rented vehicles, auto/truck rental and parking on out-of-town trips, and public and other transportation. data-build/sources/easi_travel_spend_*.csv are built from these.

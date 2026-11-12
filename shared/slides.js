@@ -12,7 +12,9 @@
     healthcare:  { id: "healthcare", name: "Healthcare", title: "U.S. Healthcare" },
     "home-services": { id: "home-improvement", name: "Home Improvement", title: "U.S. Home Improvement",
                        src: "Source: Nielsen Scarborough USA+ Spring 2026 and U.S. Bureau of Economic Analysis (via FRED). National figures. Select a slide to open it full size." },
-    legal:       { id: "legal", name: "Legal", title: "U.S. Legal Services" }
+    legal:       { id: "legal", name: "Legal", title: "U.S. Legal Services" },
+    travel:      { id: "travel", name: "Travel", title: "U.S. Travel",
+                   src: "Source: Nielsen Scarborough USA+ Spring 2026 and U.S. Travel Association 2026. National figures. Select a slide to open it full size." }
   };
   var PLATFORMS = [
     { id: "streaming-tv", name: "Streaming TV", line: "Who streams TV and video, and how often" },

@@ -1561,18 +1561,20 @@
     "home-services:any": "likely home services customers", "home-services:hvac": "likely HVAC customers", "home-services:roof": "likely roofing customers",
     "home-services:plumb": "likely plumbing customers", "home-services:elec": "likely electrical customers", "home-services:paint": "likely painting customers", "home-services:floor": "likely flooring customers",
     "legal:pi": "likely personal injury clients", "legal:family": "likely family law clients", "legal:estate": "likely estate planning clients",
-    "legal:bankruptcy": "likely bankruptcy clients", "legal:employment": "likely employment law clients"
+    "legal:bankruptcy": "likely bankruptcy clients", "legal:employment": "likely employment law clients",
+    "travel:hotels": "likely hotel and lodging guests", "travel:resorts": "likely resort guests", "travel:cruises": "likely cruise travelers",
+    "travel:casinos": "likely casino guests", "travel:tours": "likely tour customers", "travel:cvb": "likely visitors"
   };
   /* ---------- Slides: category slides and platform guides (shared/slides.js) ---------- */
   function loadSlides(done) {
     if (window.AdtaxiSlides) { done(); return; }
     if (loadSlides.waiting) { loadSlides.waiting.push(done); return; }
     loadSlides.waiting = [done];
-    var sc = document.createElement("script"); sc.src = "../shared/slides.js?v=20261111o";
+    var sc = document.createElement("script"); sc.src = "../shared/slides.js?v=20261112t";
     sc.onload = sc.onerror = function () { var w = loadSlides.waiting; loadSlides.waiting = null; w.forEach(function (f) { f(); }); };
     document.head.appendChild(sc);
   }
-  var SLIDE_CATS = { auto: "Auto", "higher-ed": "Education", financial: "Finance", furniture: "Furniture", "furniture-analyzer": "Furniture", healthcare: "Healthcare" };
+  var SLIDE_CATS = { auto: "Auto", "higher-ed": "Education", financial: "Finance", furniture: "Furniture", "furniture-analyzer": "Furniture", healthcare: "Healthcare", travel: "Travel" };
   Radius.prototype.slidesLabel = function () { return "Platform guides"; };
   Radius.prototype.openSlides = function (adOrder) {
     var self = this, P = window.AdtaxiPlan;
