@@ -19,7 +19,7 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js" crossorigin=""></script>
 <script src="../shared/engine.js?v=20261112u"></script>
-<script src="radius-config.js?v=20261028a"></script>
+<script src="radius-config.js?v=20261112a"></script>
 <script>
 AdtaxiAnalyzer.start({
  "title": "Healthcare Market Analyzer",
@@ -47,7 +47,8 @@ AdtaxiAnalyzer.start({
     "demand": [
      "population",
      "kids_share",
-     "ins1864"
+     "ins1864",
+     "a35_54s"
     ],
     "spend": "inc75_share"
    },
@@ -84,7 +85,7 @@ AdtaxiAnalyzer.start({
    },
    "chiro": {
     "demand": [
-     "a30_64",
+     "a35p",
      "arthritis",
      "obesity"
     ],
@@ -92,7 +93,7 @@ AdtaxiAnalyzer.start({
    },
    "behavioral": {
     "demand": [
-     "adults",
+     "a18_44",
      "depression",
      "mhlth"
     ],
@@ -308,6 +309,30 @@ AdtaxiAnalyzer.start({
    "short": "HH/sq mi",
    "format": "int",
    "help": "Households divided by land area (Census Gazetteer). Denser markets put more likely customers inside each service area and radius."
+  },
+  {
+   "key": "a18_44",
+   "label": "Adults 18–44",
+   "format": "int",
+   "subs": [
+    "behavioral"
+   ]
+  },
+  {
+   "key": "a35p",
+   "label": "Adults 35+",
+   "format": "int",
+   "subs": [
+    "chiro"
+   ]
+  },
+  {
+   "key": "a35_54s",
+   "label": "Share of residents 35–54",
+   "format": "pct",
+   "subs": [
+    "urgent"
+   ]
   },
   {
    "key": "est",
@@ -1344,10 +1369,11 @@ AdtaxiAnalyzer.start({
   }
  ],
  "rankBy": [
-   "score",
-   "easi_total",
-   "density"
-  ],
+  "score",
+  "easi_total",
+  "a35_54s",
+  "density"
+ ],
  "defaultRank": "score",
  "components": [
   "demand",
@@ -1411,7 +1437,10 @@ AdtaxiAnalyzer.start({
   "easi_vision_idx",
   "easi_vision_30",
   "easi_vision_g",
-  "easi_vision_gidx"
+  "easi_vision_gidx",
+  "a35_54s",
+  "a35p",
+  "a18_44"
  ],
  "tableColumns": [
   "score",
@@ -1434,8 +1463,9 @@ AdtaxiAnalyzer.start({
    "title": "Consumer Demand",
    "body": [
     "Each category's likely customers, count and concentration.",
-    "Primary care: population, share of residents 65+, insured adults 18–64, fair or poor health. Hospitals: adults, share of residents 65+, arthritis, high blood pressure. Urgent care: population, households with children, insured adults 18–64. Pharmacy: residents 65+ (count and share), diabetes, high blood pressure. Dental: adults, no dental visit in the past year (household income counts once, under Spending Power). Hearing: age 65+, hearing disability. Eye care: residents 45+ (count and share), diabetes. Chiropractic and PT: adults 25–64, arthritis, obesity. Behavioral health: adults, depression, frequent mental distress. Med spa: residents 30–64 (count and share), households earning $150K+. Senior and home care: age 65+, 75+, independent-living disability.",
-    "Health measures are CDC PLACES adult estimates."
+    "Primary care: population, share of residents 65+, insured adults 18–64, fair or poor health. Hospitals: adults, share of residents 65+, arthritis, high blood pressure. Urgent care: population, households with children, insured adults 18–64, share of residents 35–54. Pharmacy: residents 65+ (count and share), diabetes, high blood pressure. Dental: adults, no dental visit in the past year (household income counts once, under Spending Power). Hearing: age 65+, hearing disability. Eye care: residents 45+ (count and share), diabetes. Chiropractic and PT: adults 35+, arthritis, obesity. Behavioral health: adults 18–44, depression, frequent mental distress. Med spa: residents 30–64 (count and share), households earning $150K+. Senior and home care: age 65+, 75+, independent-living disability.",
+    "Health measures are CDC PLACES adult estimates.",
+    "The age inputs for Urgent care, Chiropractic and PT, and Behavioral health follow Nielsen Scarborough USA+ 2026 patient profiles (index 100 = average): urgent care users over-index at 35–54 (108–112) and among parents (119); chiropractic and physical therapy patients at 35+ (104–152); mental healthcare users at 18–44 (133–146; 55+ only 36–71). Scarborough also confirms Eye care's 45+ and Hospitals' older-adult inputs, and Med spa's 35–54, $100K+ profile."
    ]
   },
   {
@@ -1494,6 +1524,9 @@ AdtaxiAnalyzer.start({
   {
    "label": "Census ZIP and County Business Patterns",
    "url": "https://www.census.gov/programs-surveys/cbp.html"
+  },
+  {
+   "label": "Nielsen Scarborough USA+ 2026 Release 1 (customer profiles)"
   },
   {
    "label": "CDC PLACES",

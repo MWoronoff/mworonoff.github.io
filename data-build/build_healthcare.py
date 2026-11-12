@@ -47,7 +47,7 @@ SUBCATS = [
     {"id": "hospital", "label": "Hospitals and health systems", "naics": ["622110"], "easi": "hosp",
      "demand": ["adults", "a65s", "arthritis", "bphigh"]},
     {"id": "urgent",  "label": "Urgent and emergency care", "naics": ["621493"], "counts": False,
-     "demand": ["population", "kids_share", "ins1864"],
+     "demand": ["population", "kids_share", "ins1864", "a35_54s"],   # Scarborough: urgent care users skew 35-54 and parents
      "note": "No Competition part: Census's urgent care industry is mostly outpatient surgery centers, and many urgent care clinics are counted as physician offices."},
     {"id": "pharmacy", "label": "Pharmacy", "naics": ["456110"], "easi": "rx", "spend": False,
      "demand": ["a65p", "a65s", "diabetes", "bphigh"],
@@ -60,9 +60,9 @@ SUBCATS = [
     {"id": "eye", "label": "Eye care", "naics": ["621320", "456130"], "easi": "eye",
      "demand": ["a45p", "a45s", "diabetes"]},
     {"id": "chiro", "label": "Chiropractic and physical therapy", "naics": ["621310", "621340"],
-     "demand": ["a25_64", "arthritis", "obesity"]},
+     "demand": ["a35p", "arthritis", "obesity"]},          # Scarborough: chiropractic and PT patients skew 35+
     {"id": "behavioral", "label": "Behavioral health", "naics": ["621330", "621420"],
-     "demand": ["adults", "depression", "mhlth"]},
+     "demand": ["a18_44", "depression", "mhlth"]},         # Scarborough: mental healthcare users skew 18-44
     {"id": "medspa", "label": "Med spa and aesthetics", "naics": ["621111"], "counts": False, "easi": "pcs", "catw": 0.10,
      "demand": ["a30_64", "a30_64s", "inc150_share"],
      "note": "No Competition part: Census has no med spa industry and counts aesthetics practices with all physician offices."},
@@ -77,7 +77,8 @@ PLACES = {"fairpoor": ("GHLTH", False), "diabetes": ("DIABETES", False), "bphigh
           "arthritis": ("ARTHRITIS", False), "obesity": ("OBESITY", False), "depression": ("DEPRESSION", False),
           "mhlth": ("MHLTH", False), "indeplive": ("INDEPLIVE", False)}
 DEMAND_LABELS = {"population": "Population", "adults": "Adults 18+", "a65p": "Age 65+", "a75p": "Age 75+", "a45p": "Age 45+",
-                 "a25_64": "Adults 25–64", "a30_64": "Adults 30–64",
+                 "a25_64": "Adults 25–64", "a30_64": "Adults 30–64", "a35p": "Adults 35+", "a18_44": "Adults 18–44",
+                 "a35_54s": "Share of residents 35–54",
                  "a45s": "Share of residents 45+", "a65s": "Share of residents 65+", "a30_64s": "Share of residents 30–64",
                  "ins1864": "Adults 18–64 with health insurance", "kids_share": "Households with children",
                  "inc75_share": "Households $75K+", "inc150_share": "Households $150K+",
@@ -85,7 +86,7 @@ DEMAND_LABELS = {"population": "Population", "adults": "Adults 18+", "a65p": "Ag
                  "nodental": "No dental visit in past year", "hearing": "Hearing disability", "vision": "Vision disability",
                  "arthritis": "Arthritis", "obesity": "Obesity", "depression": "Depression",
                  "mhlth": "Frequent mental distress", "indeplive": "Independent-living disability"}
-SHARES = ["a45s", "a65s", "a30_64s", "ins1864"]          # age shares of ACS population; insured share of adults 18-64
+SHARES = ["a45s", "a65s", "a30_64s", "a35_54s", "ins1864"]          # age shares of ACS population; insured share of adults 18-64
 RATES = ["kids_share", "inc75_share", "inc150_share"] + SHARES + list(PLACES)
 COUNTED = lambda s: s.get("counts", True)                # False: no Census industry matches the category, so no Competition
 # Measures offered as health conditions in the Healthcare radius tool
@@ -726,7 +727,12 @@ def main():
     if any(c not in acs.columns for c in need):
         sys.exit("shared/audience/zip_audience.json has no Healthcare age groups; the audience step must run first with the new build_audience.py.")
     edu = [c for c in ("hhed_nocol", "hhed_ba", "hhed_tot") if c in acs.columns]
-    acs = acs[["zip", "acs_pop", "adults18", "hh_kids", "hh_tot", "inc_tot", "inc_lt35", "inc_75_100", "inc_100_150", "inc_150_200", "inc_200p"] + need + edu]
+    bands = ["m18_24", "m25_34", "m35_44", "m45_54", "f18_24", "f25_34", "f35_44", "f45_54"]
+    acs = acs[["zip", "acs_pop", "adults18", "hh_kids", "hh_tot", "inc_tot", "inc_lt35", "inc_75_100", "inc_100_150", "inc_150_200", "inc_200p"] + need + edu + bands]
+    acs["a35p"] = acs.m35_44 + acs.f35_44 + acs.a45p
+    acs["a18_44"] = acs[["m18_24", "m25_34", "m35_44", "f18_24", "f25_34", "f35_44"]].sum(axis=1, min_count=6)
+    acs["a35_54"] = acs[["m35_44", "f35_44", "m45_54", "f45_54"]].sum(axis=1, min_count=4)
+    acs = acs.drop(columns=bands)
     acs["inc75"] = acs[["inc_75_100", "inc_100_150", "inc_150_200", "inc_200p"]].sum(axis=1, min_count=4)
     acs["inc150"] = acs[["inc_150_200", "inc_200p"]].sum(axis=1, min_count=2)
     z = z.merge(acs.drop(columns=["inc_75_100", "inc_100_150", "inc_150_200", "inc_200p"]), on="zip", how="left")
@@ -839,9 +845,9 @@ def main():
              "acs_pop": g.acs_pop.sum(min_count=1), "adults": g.adults18.sum(min_count=1)}
         land = g.land.where(g.land > 0).sum()
         r["density"] = g.households.where(g.land > 0, 0).sum() / land if land > 0 else np.nan
-        for c in ("a65p", "a75p", "a45p", "a25_64", "a30_64"): r[c] = g[c].sum(min_count=1)
+        for c in ("a65p", "a75p", "a45p", "a25_64", "a30_64", "a35p", "a18_44", "a35_54"): r[c] = g[c].sum(min_count=1)
         ap = g.acs_pop.sum()
-        for c, k in (("a45p", "a45s"), ("a65p", "a65s"), ("a30_64", "a30_64s")): r[k] = g[c].sum() / ap if ap > 0 else np.nan
+        for c, k in (("a45p", "a45s"), ("a65p", "a65s"), ("a30_64", "a30_64s"), ("a35_54", "a35_54s")): r[k] = g[c].sum() / ap if ap > 0 else np.nan
         ib = g.ins_base.sum(); r["ins1864"] = g.ins_yes.sum() / ib if ib > 0 else np.nan
         r["kids_share"] = g.hh_kids.sum() / g.hh_tot.sum() if g.hh_tot.sum() > 0 else np.nan
         r["inc75_share"] = g.inc75.sum() / g.inc_tot.sum() if g.inc_tot.sum() > 0 else np.nan
@@ -1005,7 +1011,7 @@ def main():
 
     # ---------------- Write ----------------
     easi_spend_cols = [f"easi_{e}_{x}" for e in EASI_SPEND for x in ("hh", "total", "idx")]
-    keep_common = ["population", "households", "adults", "a45p", "a65p", "a75p", "a30_64", "density"] + RATES + easi_spend_cols
+    keep_common = ["population", "households", "adults", "a45p", "a65p", "a75p", "a30_64", "a35p", "a18_44", "density"] + RATES + easi_spend_cols
     per_sub = ["score", "demand", "category", "spend", "comp", "est", "per10k", "growth", "under"]
     easi_cols = [f"easi_{c}{x}" for c in conds for x in ("", "_rate", "_idx", "_30", "_g", "_gidx")]
 
@@ -1033,7 +1039,7 @@ def main():
                     if k in df.columns:
                         x = clean(r[k])
                         v[k] = round(x, 3 if p == "score" else 2) if p in SCORE_KEYS and x is not None else x   # two decimals: ranks use the real value, so near-equal markets don't show as ties
-            for k in ("population", "households", "adults", "a45p", "a65p", "a75p", "a30_64") + tuple(c for c in easi_spend_cols if c.endswith("_total")) + tuple(e for e in extra if not e.endswith(("_rate", "_g"))):
+            for k in ("population", "households", "adults", "a45p", "a65p", "a75p", "a30_64", "a35p", "a18_44") + tuple(c for c in easi_spend_cols if c.endswith("_total")) + tuple(e for e in extra if not e.endswith(("_rate", "_g"))):
                 if v.get(k) is not None: v[k] = int(round(v[k]))
             for s in SUBCATS:
                 if v.get(f"est@{s['id']}") is not None: v[f"est@{s['id']}"] = int(round(v[f"est@{s['id']}"]))
@@ -1095,8 +1101,8 @@ def main():
             f = pd.DataFrame(index=df.index)
             f["population"], f["households"], f["adults"] = df.population, df.households, df.adults18
             f["density"] = (df.households / df.land).where(df.land > 0)
-            for c in ("a65p", "a75p", "a45p", "a25_64", "a30_64"): f[c] = df[c]
-            for c, k in (("a45p", "a45s"), ("a65p", "a65s"), ("a30_64", "a30_64s")): f[k] = (df[c] / df.acs_pop).where(df.acs_pop > 0)
+            for c in ("a65p", "a75p", "a45p", "a25_64", "a30_64", "a35p", "a18_44", "a35_54"): f[c] = df[c]
+            for c, k in (("a45p", "a45s"), ("a65p", "a65s"), ("a30_64", "a30_64s"), ("a35_54", "a35_54s")): f[k] = (df[c] / df.acs_pop).where(df.acs_pop > 0)
             f["ins1864"] = (df.ins_yes / df.ins_base).where(df.ins_base > 0)
             f["kids_share"] = (df.hh_kids / df.hh_tot).where(df.hh_tot > 0)
             f["inc75_share"] = (df.inc75 / df.inc_tot).where(df.inc_tot > 0)
