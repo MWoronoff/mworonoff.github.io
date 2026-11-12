@@ -5,7 +5,7 @@ Built 2026-11-12. Result: **PASSED**
 | Check | Result | Detail |
 | --- | --- | --- |
 | Formula tests | PASS | percentile and weighted-average hand checks reproduce exactly |
-| Land area source | INFO | Census 2026 Gazetteer ZCTA file (32,690 ZIPs) |
+| Land area source | INFO | Census 2026 Gazetteer ZCTA file (33,791 ZIPs) |
 | EASI U.S. lodging on out-of-town trips per household | INFO | $912.17 |
 | EASI U.S. other lodging per household | INFO | $1,448.38 |
 | EASI U.S. public and other transportation per household | INFO | $1,240.24 |
