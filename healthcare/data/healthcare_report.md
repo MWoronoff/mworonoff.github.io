@@ -1,6 +1,6 @@
 # Healthcare data check report
 
-Built 2026-10-28. Result: **PASSED**
+Built 2026-11-12. Result: **PASSED**
 
 | Check | Result | Detail |
 | --- | --- | --- |
@@ -36,8 +36,8 @@ Built 2026-10-28. Result: **PASSED**
 | EASI healthcare spending matched to DMAs | PASS | 210 of 210 |
 | EASI healthcare spending matched to metros | PASS | 387 of 387 |
 | Score reality check: categories not checked | INFO | Urgent and emergency care; Hearing and audiology; Med spa and aesthetics (no Census industry matches these categories, so business employment isn't a meaningful benchmark) |
-| Score reality check, DMAs: rank correlation with category businesses' employees per 1,000 households, score (without Competition) | INFO | Primary care 0.03 (0.23); Hospitals and health systems -0.03 (-0.09); Pharmacy -0.14 (0.35); Dental 0.09 (0.46); Eye care -0.06 (0.26); Chiropractic and physical therapy -0.05 (0.32); Behavioral health 0.08 (0.40); Senior and home care 0.20 (0.43). Weak (under 0.20 without Competition): Hospitals and health systems |
-| Score reality check, metros: rank correlation with category businesses' employees per 1,000 households, score (without Competition) | INFO | Primary care -0.09 (0.07); Hospitals and health systems -0.28 (-0.22); Pharmacy -0.27 (0.21); Dental -0.08 (0.28); Eye care -0.19 (0.08); Chiropractic and physical therapy -0.10 (0.24); Behavioral health -0.05 (0.27); Senior and home care 0.05 (0.29). Weak (under 0.20 without Competition): Primary care, Hospitals and health systems Reviewed and kept (benchmark doesn't fit): Eye care (need (age 45+, diabetes, vision difficulty) runs highest where providers are scarcer; the DMA check passes). |
+| Score reality check, DMAs: rank correlation with category businesses' employees per 1,000 households, score (without Competition) | INFO | Primary care 0.03 (0.23); Hospitals and health systems -0.03 (-0.09); Pharmacy -0.14 (0.35); Dental 0.09 (0.46); Eye care -0.06 (0.26); Chiropractic and physical therapy -0.05 (0.31); Behavioral health 0.07 (0.40); Senior and home care 0.20 (0.43). Weak (under 0.20 without Competition): Hospitals and health systems |
+| Score reality check, metros: rank correlation with category businesses' employees per 1,000 households, score (without Competition) | INFO | Primary care -0.09 (0.07); Hospitals and health systems -0.28 (-0.22); Pharmacy -0.27 (0.21); Dental -0.08 (0.28); Eye care -0.19 (0.08); Chiropractic and physical therapy -0.10 (0.24); Behavioral health -0.04 (0.27); Senior and home care 0.05 (0.29). Weak (under 0.20 without Competition): Primary care, Hospitals and health systems Reviewed and kept (benchmark doesn't fit): Eye care (need (age 45+, diabetes, vision difficulty) runs highest where providers are scarcer; the DMA check passes). |
 | EASI medical services total, DMAs vs. EASI's own total | PASS | 98.7% of EASI's $159.0B |
 | EASI prescription drugs total, DMAs vs. EASI's own total | PASS | 98.7% of EASI's $28.2B |
 | EASI physician's services total, DMAs vs. EASI's own total | PASS | 98.7% of EASI's $31.1B |
