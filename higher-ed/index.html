@@ -19,7 +19,7 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js" crossorigin=""></script>
 <script src="../shared/engine.js?v=20261112u"></script>
-<script src="radius-config.js?v=20261027d"></script>
+<script src="radius-config.js?v=20261112a"></script>
 <script>
 AdtaxiAnalyzer.start({
  "title": "Higher Education Market Analyzer",
@@ -37,7 +37,54 @@ AdtaxiAnalyzer.start({
  "defaultLevel": "us",
  "usMapLevel": "dma",
  "drill": true,
- "zipScore": {"weights": {"demand": 0.4, "spend": 0.15}, "subs": {"fouryear": {"demand": ["age15_24", "age15_24_share", "inc100_share"], "spend": "inc75_share"}, "community": {"demand": ["age18_24", "hs_only", "hs_share"], "spend": "inc75_share"}, "trade": {"demand": ["nodeg18_34", "nodeg_share", "unemp_rate"], "spend": "inc75_share"}, "graduate": {"demand": ["ba_only", "ba_share", "inc100_share"], "spend": "inc75_share"}, "adult": {"demand": ["somecol25_64", "somecol_share"], "spend": "inc75_share"}}},
+ "zipScore": {
+  "weights": {
+   "demand": 0.4,
+   "spend": 0.15
+  },
+  "subs": {
+   "fouryear": {
+    "demand": [
+     "age15_24",
+     "age15_24_share",
+     "inc100_share"
+    ],
+    "spend": "inc75_share"
+   },
+   "community": {
+    "demand": [
+     "age18_24",
+     "hs_only",
+     "hs_share"
+    ],
+    "spend": "inc75_share"
+   },
+   "trade": {
+    "demand": [
+     "nodeg18_34",
+     "nodeg_share",
+     "unemp_rate"
+    ],
+    "spend": "inc75_share"
+   },
+   "graduate": {
+    "demand": [
+     "ba_only",
+     "ba_share",
+     "a18_34_share",
+     "inc50_share"
+    ],
+    "spend": "inc75_share"
+   },
+   "adult": {
+    "demand": [
+     "somecol25_64",
+     "somecol_share"
+    ],
+    "spend": "inc75_share"
+   }
+  }
+ },
  "levels": {
   "us": {
    "label": "U.S.",
@@ -166,6 +213,22 @@ AdtaxiAnalyzer.start({
    "short": "HH/sq mi",
    "format": "int",
    "help": "Households divided by land area (Census Gazetteer). Denser markets put more likely customers inside each service area and radius."
+  },
+  {
+   "key": "inc50_share",
+   "label": "Households earning $50K+",
+   "format": "pct",
+   "subs": [
+    "graduate"
+   ]
+  },
+  {
+   "key": "a18_34_share",
+   "label": "Share of adults 18–34",
+   "format": "pct",
+   "subs": [
+    "graduate"
+   ]
   },
   {
    "key": "est",
@@ -375,10 +438,12 @@ AdtaxiAnalyzer.start({
   }
  ],
  "rankBy": [
-   "score",
-   "easi_total",
-   "density"
-  ],
+  "score",
+  "easi_total",
+  "a18_34_share",
+  "inc50_share",
+  "density"
+ ],
  "defaultRank": "score",
  "components": [
   "demand",
@@ -411,7 +476,9 @@ AdtaxiAnalyzer.start({
   "inc100_share",
   "enr_college",
   "inc75_share",
-  "hisp_share"
+  "hisp_share",
+  "a18_34_share",
+  "inc50_share"
  ],
  "tableColumns": [
   "score",
@@ -433,7 +500,8 @@ AdtaxiAnalyzer.start({
    "title": "Consumer Demand",
    "body": [
     "Each school type's likely students, from Census ACS.",
-    "Four-year: people 15–24, their share, and households earning $100K+. Community colleges: people 18–24, and adults 25+ whose highest education is high school or GED (count and share). Trade and career: adults 18–34 without a degree (count and share) and the unemployment rate. Graduate: adults 25+ whose highest degree is a bachelor's (count and share) and households earning $100K+. Adult and online: adults 25–64 with some college, no degree (count and share)."
+    "Four-year: people 15–24, their share, and households earning $100K+. Community colleges: people 18–24, and adults 25+ whose highest education is high school or GED (count and share). Trade and career: adults 18–34 without a degree (count and share) and the unemployment rate. Graduate: adults 25+ whose highest degree is a bachelor's (count and share), the share of adults 18–34 and households earning $50K+. Adult and online: adults 25–64 with some college, no degree (count and share).",
+    "Graduate's age and income inputs follow Nielsen Scarborough USA+ 2026 adults with a bachelor's degree who are going back to school for another degree or certificate: they over-index at ages 18–34 (index 205–249; 45+ only 7–50) and household income of $50K–$249K (121–128), and skew women (111), employed full time (142) and never married (190)."
    ]
   },
   {
@@ -486,6 +554,9 @@ AdtaxiAnalyzer.start({
   {
    "label": "Department of Education IPEDS institution directory",
    "url": "https://nces.ed.gov/ipeds/"
+  },
+  {
+   "label": "Nielsen Scarborough USA+ 2026 Release 1 (customer profiles)"
   },
   {
    "label": "Census American Community Survey 5-year"

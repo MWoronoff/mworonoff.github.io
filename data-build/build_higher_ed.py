@@ -36,7 +36,8 @@ SUBCATS = [
     {"id": "fouryear", "label": "Four-year colleges and universities", "demand": ["age15_24", "age15_24_share", "inc100_share"]},
     {"id": "community", "label": "Community colleges", "demand": ["age18_24", "hs_only", "hs_share"]},
     {"id": "trade", "label": "Trade and career schools", "demand": ["nodeg18_34", "nodeg_share", "unemp_rate"]},
-    {"id": "graduate", "label": "Graduate and professional programs", "demand": ["ba_only", "ba_share", "inc100_share"]},
+    # Graduate: Scarborough degree holders going back for another degree or certificate skew 18-34 (index 205-249) and $50K-$249K (121-128)
+    {"id": "graduate", "label": "Graduate and professional programs", "demand": ["ba_only", "ba_share", "a18_34_share", "inc50_share"]},
     {"id": "adult", "label": "Adult and online degree completion", "demand": ["somecol25_64", "somecol_share"]},
 ]
 DEMAND_LABELS = {"age15_24": "Ages 15-24", "age15_24_share": "Share ages 15-24", "inc100_share": "Households earning $100K+",
@@ -44,16 +45,18 @@ DEMAND_LABELS = {"age15_24": "Ages 15-24", "age15_24_share": "Share ages 15-24",
                  "nodeg18_34": "Adults 18-34 without a college degree", "nodeg_share": "Share of 18-34s without a degree",
                  "unemp_rate": "Unemployment rate", "ba_only": "Adults whose highest degree is a bachelor's",
                  "ba_share": "Share whose highest is a bachelor's", "somecol25_64": "Adults 25-64 with some college, no degree",
-                 "somecol_share": "Share of 25-64s with some college, no degree"}
+                 "somecol_share": "Share of 25-64s with some college, no degree",
+                 "a18_34_share": "Share of adults 18-34", "inc50_share": "Households earning $50K+"}
 COUNTS = ["population", "households", "age15_24", "age18_24", "hs_only", "nodeg18_34", "ba_only", "somecol25_64", "enr_college"]
 # numerator, denominator for each rate (summed over ZIPs, so markets get true rates)
 RATE_PARTS = {"age15_24_share": ("age15_24", "acs_pop"), "hs_share": ("hs_only", "adults25"), "nodeg_share": ("nodeg18_34", "pop18_34"),
               "ba_share": ("ba_only", "adults25"), "somecol_share": ("somecol25_64", "pop25_64"), "unemp_rate": ("unemployed", "labor_civ"),
-              "inc75_share": ("inc75", "inc_tot"), "inc100_share": ("inc100", "inc_tot"), "hisp_share": ("hispanic", "hisp_tot")}
+              "inc75_share": ("inc75", "inc_tot"), "inc100_share": ("inc100", "inc_tot"), "hisp_share": ("hispanic", "hisp_tot"),
+              "a18_34_share": ("pop18_34", "adults18"), "inc50_share": ("inc50", "inc_tot")}
 RATES = list(RATE_PARTS)
 ACS_COLS = ["acs_pop", "m15_17", "m18_24", "f15_17", "f18_24", "inc_tot", "inc_75_100", "inc_100_150", "inc_150_200", "inc_200p",
             "adults25", "hs_only", "ba_only", "pop18_34", "nodeg18_34", "pop25_64", "somecol25_64", "labor_civ", "unemployed",
-            "hispanic", "hisp_tot", "enr_college"]
+            "hispanic", "hisp_tot", "enr_college", "adults18", "inc_lt35", "inc_35_50"]
 # Expected counts of active schools of each type nationwide (IPEDS has about 5,800-6,300 Title IV schools in all)
 BENCH = {"all": (5000, 7500), "fouryear": (1800, 3100), "community": (750, 1350), "trade": (1700, 3900), "graduate": (1400, 2600), "adult": (3000, 4600)}
 SUB_DEF = {"fouryear": "public and private schools whose highest award is a bachelor's or higher, excluding mainly two-year colleges",
@@ -144,6 +147,7 @@ def main():
     acs["age18_24"] = acs[["m18_24", "f18_24"]].sum(axis=1, min_count=2)
     acs["inc100"] = acs[["inc_100_150", "inc_150_200", "inc_200p"]].sum(axis=1, min_count=3)
     acs["inc75"] = acs.inc100 + acs.inc_75_100
+    acs["inc50"] = acs.inc_tot - acs.inc_lt35 - acs.inc_35_50
     z = z.merge(acs, on="zip", how="left")
     z["land"] = z.zip.map(zcta_land(a.cache, rep))          # square miles, for households per square mile
 

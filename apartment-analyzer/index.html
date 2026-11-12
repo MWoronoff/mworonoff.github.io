@@ -19,7 +19,7 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js" crossorigin=""></script>
 <script src="../shared/engine.js?v=20261112u"></script>
-<script src="radius-config.js?v=20261027d"></script>
+<script src="radius-config.js?v=20261112a"></script>
 <script>
 AdtaxiAnalyzer.start({
  "title": "Apartment Market Analyzer",
@@ -37,7 +37,63 @@ AdtaxiAnalyzer.start({
  "defaultLevel": "us",
  "usMapLevel": "dma",
  "drill": true,
- "zipScore": {"weights": {"demand": 0.4, "spend": 0.15}, "subs": {"all": {"demand": ["renters", "renter_share", "moved_share", "apt_share"], "spend": "rinc50_share"}, "luxury": {"demand": ["rinc100", "r25_44_share", "apt_share"], "spend": "rinc100_share"}, "mid": {"demand": ["rinc_mid", "rinc_mid_share", "apt_share"], "spend": "rinc50_share"}, "affordable": {"demand": ["rinc_lt35", "rinc_lt35_share", "burden_share"], "spend": null}, "student": {"demand": ["college", "college_share", "r_u25"], "spend": null}, "senior": {"demand": ["r55p", "r55_share"], "spend": "rinc50_share"}}},
+ "zipScore": {
+  "weights": {
+   "demand": 0.4,
+   "spend": 0.15
+  },
+  "subs": {
+   "all": {
+    "demand": [
+     "renters",
+     "renter_share",
+     "moved_share",
+     "apt_share",
+     "r_u35_share"
+    ],
+    "spend": null
+   },
+   "luxury": {
+    "demand": [
+     "rinc100",
+     "r25_44_share",
+     "apt_share"
+    ],
+    "spend": "rinc100_share"
+   },
+   "mid": {
+    "demand": [
+     "rinc_mid",
+     "rinc_mid_share",
+     "apt_share"
+    ],
+    "spend": "rinc50_share"
+   },
+   "affordable": {
+    "demand": [
+     "rinc_lt35",
+     "rinc_lt35_share",
+     "burden_share"
+    ],
+    "spend": null
+   },
+   "student": {
+    "demand": [
+     "college",
+     "college_share",
+     "r_u25"
+    ],
+    "spend": null
+   },
+   "senior": {
+    "demand": [
+     "r55p",
+     "r55_share"
+    ],
+    "spend": "rinc50_share"
+   }
+  }
+ },
  "levels": {
   "us": {
    "label": "U.S.",
@@ -109,7 +165,7 @@ AdtaxiAnalyzer.start({
     "county",
     "zip"
    ],
-   "help": "0–100. Consumer Demand 40%, Category Spending 25%, Spending Power 15%, Competition 20%, each a percentile among markets at the same level. Affordable and Student housing omit Spending Power. ZIPs use Demand and Spending Power only. Counties have no Category Spending; under 10,000 residents aren't ranked."
+   "help": "0–100. Consumer Demand 40%, Category Spending 25%, Spending Power 15%, Competition 20%, each a percentile among markets at the same level. All apartments, Affordable and Student housing omit Spending Power. ZIPs use Demand and Spending Power only. Counties have no Category Spending; under 10,000 residents aren't ranked."
   },
   {
    "key": "demand",
@@ -149,9 +205,8 @@ AdtaxiAnalyzer.start({
     "county",
     "zip"
    ],
-   "help": "Percentile of the share of renter households in this category's income range: $50K+ for All apartments, Mid-market and Active adult; $100K+ for Luxury.",
+   "help": "Percentile of the share of renter households in this category's income range: $50K+ for Mid-market and Active adult; $100K+ for Luxury.",
    "subs": [
-    "all",
     "luxury",
     "mid",
     "senior"
@@ -202,6 +257,14 @@ AdtaxiAnalyzer.start({
    "format": "int",
    "short": "HH/sq mi",
    "help": "Households divided by land area (Census Gazetteer). Denser markets put more likely customers inside each service area and radius."
+  },
+  {
+   "key": "r_u35_share",
+   "label": "Renter householders under 35",
+   "format": "pct",
+   "subs": [
+    "all"
+   ]
   },
   {
    "key": "rent",
@@ -470,10 +533,11 @@ AdtaxiAnalyzer.start({
   }
  ],
  "rankBy": [
-   "score",
-   "easi_total",
-   "density"
-  ],
+  "score",
+  "easi_total",
+  "r_u35_share",
+  "density"
+ ],
  "defaultRank": "score",
  "components": [
   "demand",
@@ -515,7 +579,8 @@ AdtaxiAnalyzer.start({
   "r_u25",
   "r55p",
   "r55_share",
-  "easi_hh"
+  "easi_hh",
+  "r_u35_share"
  ],
  "tableColumns": [
   "score",
@@ -531,12 +596,15 @@ AdtaxiAnalyzer.start({
    "title": "Market Potential Score",
    "body": [
     "Where are an apartment advertiser's likely residents, and which geographies deserve the most ad dollars?",
-    "Score = 40% Consumer Demand + 25% Category Spending + 15% Spending Power + 20% Competition. Each part is a percentile (0–100) against markets at the same level. Affordable and Student housing leave out Spending Power (those renters aren't defined by what they can pay). No score is shown when a part has no data."
+    "Score = 40% Consumer Demand + 25% Category Spending + 15% Spending Power + 20% Competition. Each part is a percentile (0–100) against markets at the same level. All apartments, Affordable and Student housing leave out Spending Power: recent renters skew under $50K (Scarborough), and affordable and student renters aren't defined by what they can pay. No score is shown when a part has no data."
    ]
   },
   {
    "title": "Consumer Demand",
-   "body": "Each category's likely residents (Census ACS). All apartments: renter households, share renting, renters who moved in 2020+ (leases to fill) and renters in 5+ unit buildings. Luxury: renters earning $100K+, renter householders 25–44, apartment renters. Mid-market: renters earning $35K–$99K (count and share), apartment renters. Affordable: renters earning under $35K (count and share), renters paying 30%+ of income in rent. Student: college and graduate students (count and share), renter householders under 25. Active adult 55+: renter householders 55+ (count and share of renters)."
+   "body": [
+    "Each category's likely residents (Census ACS). All apartments: renter households, share renting, renters who moved in 2020+ (leases to fill), renters in 5+ unit buildings and renter householders under 35. Luxury: renters earning $100K+, renter householders 25–44, apartment renters. Mid-market: renters earning $35K–$99K (count and share), apartment renters. Affordable: renters earning under $35K (count and share), renters paying 30%+ of income in rent. Student: college and graduate students (count and share), renter householders under 25. Active adult 55+: renter householders 55+ (count and share of renters).",
+    "All apartments' age input follows Nielsen Scarborough USA+ 2026 adults who rent and moved into their home in the past year: they over-index at ages 18–34 (index 191–249; 45+ only 18–61) and household income under $50K (123–194; $100K+ only 47–52), and skew never married (186), separated (231) and parents (123)."
+   ]
   },
   {
    "title": "Category Spending",
@@ -544,7 +612,7 @@ AdtaxiAnalyzer.start({
   },
   {
    "title": "Spending Power",
-   "body": "Share of renter households in each category's income range: $50K+ for All, Mid-market and Active adult; $100K+ for Luxury. Not used for Affordable or Student."
+   "body": "Share of renter households in each category's income range: $50K+ for Mid-market and Active adult; $100K+ for Luxury. Not used for All apartments, Affordable or Student."
   },
   {
    "title": "Competition",
@@ -587,6 +655,9 @@ AdtaxiAnalyzer.start({
  "sources": [
   {
    "label": "Census American Community Survey 5-year"
+  },
+  {
+   "label": "Nielsen Scarborough USA+ 2026 Release 1 (renter profile)"
   },
   {
    "label": "Census ZIP and County Business Patterns",

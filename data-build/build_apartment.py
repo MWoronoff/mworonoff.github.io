@@ -38,7 +38,8 @@ ZIP_PARTS = ("demand", "spend")       # ZIPs: no EASI spending by ZIP, and ZIP b
 # demand: inputs averaged as percentiles. spend: the renter-income share used as Spending Power (None = not used,
 # because the category's renters aren't defined by what they can pay).
 SUBCATS = [
-    {"id": "all", "label": "All apartments", "demand": ["renters", "renter_share", "moved_share", "apt_share"], "spend": "rinc50_share"},
+    # All: Scarborough renters who moved in the past year skew 18-34 (index 191-249) and under $50K (123-194), so no Spending Power
+    {"id": "all", "label": "All apartments", "demand": ["renters", "renter_share", "moved_share", "apt_share", "r_u35_share"], "spend": None},
     {"id": "luxury", "label": "Luxury / Class A", "demand": ["rinc100", "r25_44_share", "apt_share"], "spend": "rinc100_share"},
     {"id": "mid", "label": "Mid-market / workforce", "demand": ["rinc_mid", "rinc_mid_share", "apt_share"], "spend": "rinc50_share"},
     {"id": "affordable", "label": "Affordable housing", "demand": ["rinc_lt35", "rinc_lt35_share", "burden_share"], "spend": None},
@@ -52,12 +53,13 @@ DEMAND_LABELS = {"renters": "Renter households", "renter_share": "Share of house
                  "burden_share": "Renters paying 30%+ of income in rent", "college": "College and graduate students",
                  "college_share": "College students, share of residents", "r_u25": "Renter householders under 25",
                  "r55p": "Renter householders 55+", "r55_share": "Share of renters 55+", "r_kids": "Renter households with children",
-                 "rkids_share": "Share of renters with children", "sfd_share": "Renters in single-family houses"}
+                 "rkids_share": "Share of renters with children", "sfd_share": "Renters in single-family houses",
+                 "r_u35_share": "Renter householders under 35"}
 SPEND_LABELS = {"rinc50_share": "Renters earning $50K+", "rinc75_share": "Renters earning $75K+", "rinc100_share": "Renters earning $100K+"}
 COUNTS = ["population", "households", "renters", "rinc100", "rinc_mid", "rinc_lt35", "college", "r_u25", "r55p", "r_kids", "r_5p"]
 # numerator, denominator for each rate (summed over ZIPs, so markets get true rates)
 RATE_PARTS = {"renter_share": ("r_tot", "hh_tot"), "moved_share": ("r_moved20", "r_mtot"), "apt_share": ("r_5p", "r_tot"),
-              "sfd_share": ("r_sfd", "r_tot"), "r25_44_share": ("r25_44", "r_age"), "r55_share": ("r55p", "r_age"),
+              "sfd_share": ("r_sfd", "r_tot"), "r25_44_share": ("r25_44", "r_age"), "r_u35_share": ("r_u35", "r_age"), "r55_share": ("r55p", "r_age"),
               "rinc100_share": ("rinc100", "rinc_tot"), "rinc_mid_share": ("rinc_mid", "rinc_tot"), "rinc_lt35_share": ("rinc_lt35", "rinc_tot"),
               "rinc50_share": ("rinc50", "rinc_tot"), "rinc75_share": ("rinc75", "rinc_tot"), "burden_share": ("rb_30p", "rb_base"),
               "rkids_share": ("r_kids", "rk_tot"), "college_share": ("college", "acs_pop"), "vacancy": ("vac_rent", "vac_base")}
@@ -175,6 +177,7 @@ def main():
     acs["r_age"] = acs[AGE_COLS].sum(axis=1, min_count=5)
     acs["r25_44"] = acs.r25_34 + acs.r35_44
     acs["r_u25"] = acs.r18_24
+    acs["r_u35"] = acs.r18_24 + acs.r25_34
     acs["vac_base"] = acs.vac_rent + acs.vac_rented + acs.r_tot
     acs["renters"] = acs.r_tot
     z = z.merge(acs, on="zip", how="left")
@@ -215,7 +218,7 @@ def main():
     # ---------------- Aggregate ----------------
     SUMS = ["population", "households", "acs_pop", "hh_tot", "renters", "r_tot", "r_sfd", "r_5p", "r_mtot", "r_moved20", "rinc_tot", "rinc100",
             "rinc_mid", "rinc_lt35", "rinc50", "rinc75", "rb_base", "rb_30p", "vac_rent", "vac_base", "rk_tot", "r_kids", "college",
-            "r_age", "r25_44", "r55p", "r_u25"]
+            "r_age", "r25_44", "r55p", "r_u25", "r_u35"]
 
     def agg(g):
         r = {c: g[c].sum(min_count=1) for c in SUMS}

@@ -18,7 +18,7 @@ window.ADTAXI_RADIUS = {
   filters: ["age", "renter", "rinc", "rtype", "rmoved", "rburden", "enrolled"],
   profileLabel: "Target audience",
   profiles: [
-    { id: "all", filters: ["age", "renter", "rinc", "rtype", "rmoved", "rburden"], label: "All apartments", note: "Adults renting in apartment buildings with 5 or more units.", sel: { rtype: ["apt"] } },
+    { id: "all", filters: ["age", "renter", "rinc", "rtype", "rmoved", "rburden"], label: "All apartments", note: "Adults 18–44 renting in apartment buildings with 5 or more units who moved recently: renters who moved in the past year over-index at 18–34 (index 191–249) and under $50K (123–194; Scarborough). Census flags renters who moved in 2020 or later.", sel: { age: ["18_24", "25_34", "35_44"], rtype: ["apt"], rmoved: true } },
     { id: "luxury", filters: ["age", "rinc", "rtype", "rmoved"], label: "Luxury / Class A", note: "Adults renting in apartment buildings, in renter households earning $100K+.", sel: { rinc: ["100_150", "150p"], rtype: ["apt"] } },
     { id: "mid", filters: ["age", "rinc", "rtype", "rmoved", "rburden"], label: "Mid-market / workforce", note: "Adults renting in apartment buildings, in renter households earning $35K–$99K.", sel: { rinc: ["35_50", "50_75", "75_100"], rtype: ["apt"] } },
     { id: "affordable", filters: ["age", "rinc", "rtype", "rburden"], label: "Affordable housing", note: "Adults in renter households earning under $35K.", sel: { rinc: ["lt35"] } },
