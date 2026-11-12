@@ -19,7 +19,7 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js" crossorigin=""></script>
 <script src="../shared/engine.js?v=20261112u"></script>
-<script src="radius-config.js?v=20261028b"></script>
+<script src="radius-config.js?v=20261112a"></script>
 <script>
 AdtaxiAnalyzer.start({
  "title": "Furniture Market Analyzer",
@@ -37,7 +37,73 @@ AdtaxiAnalyzer.start({
  "defaultLevel": "us",
  "usMapLevel": "dma",
  "drill": true,
- "zipScore": {"weights": {"demand": 0.4, "spend": 0.15}, "subs": {"any": {"demand": ["movers", "movers_share", "owners", "households"], "spend": "inc75_share"}, "living": {"demand": ["movers", "movers_share", "households"], "spend": "inc75_share"}, "bedroom": {"demand": ["movers", "movers_share", "kids_share"], "spend": "inc75_share"}, "mattress": {"demand": ["households", "movers", "pop18_34"], "spend": "inc75_share"}, "dining": {"demand": ["owners", "movers", "kids_share"], "spend": "inc75_share"}, "outdoor": {"demand": ["owners", "sfd_own", "sfd_share"], "spend": "inc75_share"}, "baby": {"demand": ["f25_34", "hh_kids", "movers_share"], "spend": "inc75_share"}}},
+ "zipScore": {
+  "weights": {
+   "demand": 0.4,
+   "spend": 0.15
+  },
+  "subs": {
+   "any": {
+    "demand": [
+     "movers",
+     "movers_share",
+     "owners",
+     "households",
+     "inc100_share",
+     "kids_share"
+    ],
+    "spend": "inc75_share"
+   },
+   "living": {
+    "demand": [
+     "movers",
+     "movers_share",
+     "households"
+    ],
+    "spend": "inc75_share"
+   },
+   "bedroom": {
+    "demand": [
+     "movers",
+     "movers_share",
+     "kids_share"
+    ],
+    "spend": "inc75_share"
+   },
+   "mattress": {
+    "demand": [
+     "households",
+     "movers",
+     "pop18_34"
+    ],
+    "spend": "inc75_share"
+   },
+   "dining": {
+    "demand": [
+     "owners",
+     "movers",
+     "kids_share"
+    ],
+    "spend": "inc75_share"
+   },
+   "outdoor": {
+    "demand": [
+     "owners",
+     "sfd_own",
+     "sfd_share"
+    ],
+    "spend": "inc75_share"
+   },
+   "baby": {
+    "demand": [
+     "f25_34",
+     "hh_kids",
+     "movers_share"
+    ],
+    "spend": "inc75_share"
+   }
+  }
+ },
  "levels": {
   "us": {
    "label": "U.S.",
@@ -292,7 +358,8 @@ AdtaxiAnalyzer.start({
    "key": "kids_share",
    "label": "Households with children",
    "short": "Kids %",
-   "format": "pct"
+   "format": "pct",
+   "subs": null
   },
   {
    "key": "hh_kids",
@@ -336,14 +403,15 @@ AdtaxiAnalyzer.start({
    "key": "inc100_share",
    "label": "Households earning $100K+",
    "short": "$100K+",
-   "format": "pct"
+   "format": "pct",
+   "subs": null
   }
  ],
  "rankBy": [
-   "score",
-   "easi_total",
-   "density"
-  ],
+  "score",
+  "easi_total",
+  "density"
+ ],
  "defaultRank": "score",
  "components": [
   "demand",
@@ -397,7 +465,8 @@ AdtaxiAnalyzer.start({
    "body": [
     "Census buyer signals for each line, averaged as percentiles.",
     "Any furniture: recent movers (count and share), homeowners and households. Sofas and living room: recent movers (count and share) and households. Bedroom: recent movers (count and share) and households with children. Mattresses: households, recent movers and adults 18–34. Kitchen and dining: homeowners, recent movers and households with children. Outdoor and patio: homeowners, owners of single-family detached homes and their share. Baby and nursery: women 25–34, households with children and the share of recent movers.",
-    "Recent movers: households that moved in 2020 or later (Census ACS B25038), the strongest furniture-buying trigger."
+    "Recent movers: households that moved in 2020 or later (Census ACS B25038), the strongest furniture-buying trigger.",
+    "Any furniture also adds households earning $100K+ and households with children: in Nielsen Scarborough USA+ 2026, households that plan to buy furniture over-index at ages 18–54 (index 102–122), among parents (137) and at $100K+ (108–123), and recent furniture buyers at $100K+ (118–139). Scarborough doesn't break furniture out by room, so the other lines keep their own traits."
    ]
   },
   {
@@ -442,6 +511,9 @@ AdtaxiAnalyzer.start({
   {
    "label": "Census ZIP and County Business Patterns",
    "url": "https://www.census.gov/programs-surveys/cbp.html"
+  },
+  {
+   "label": "Nielsen Scarborough USA+ 2026 Release 1 (customer profiles)"
   },
   {
    "label": "Census American Community Survey 5-year"

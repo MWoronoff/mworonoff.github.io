@@ -35,7 +35,7 @@ PALM_SPRINGS, RIVERSIDE_METRO = "804", "40140"
 # easi: EASI line(s) added together for Category Spending
 SUBCATS = [
     {"id": "any", "label": "Any furniture", "easi": ["furniture"],
-     "demand": ["movers", "movers_share", "owners", "households"]},
+     "demand": ["movers", "movers_share", "owners", "households", "inc100_share", "kids_share"]},   # Scarborough: furniture plans/purchases skew $100K+ and parents
     {"id": "living", "label": "Sofas and living room", "easi": ["sofas", "living_room_chairs", "living_room_tables"],
      "demand": ["movers", "movers_share", "households"]},
     {"id": "bedroom", "label": "Bedroom furniture", "easi": ["bedroom_furniture"],

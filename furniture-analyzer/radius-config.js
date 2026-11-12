@@ -15,7 +15,7 @@ window.ADTAXI_RADIUS = {
   filters: ["age", "income5", "home"],
   profileLabel: "Target audience",
   profiles: [
-    { id: "any", label: "Any furniture", note: "Adults 25–54 with household income of $50K or more. Furniture store customers typically come from within about 10 miles (AdMall).", sel: { age: ["25_34", "35_44", "45_54"], income5: ["50_75", "75_100", "100_150", "150p"] } },
+    { id: "any", label: "Any furniture", note: "Adults 25–54 with household income of $100K or more: furniture buyers over-index at $100K+ (index 118–139) and among parents (137; Scarborough). Furniture store customers typically come from within about 10 miles (AdMall).", sel: { age: ["25_34", "35_44", "45_54"], income5: ["100_150", "150p"] } },
     { id: "living", label: "Sofas and living room", note: "Adults 25–44 with household income of $50K or more. Furniture store customers typically come from within about 10 miles (AdMall).", sel: { age: ["25_34", "35_44"], income5: ["50_75", "75_100", "100_150", "150p"] } },
     { id: "bedroom", label: "Bedroom furniture", note: "Adults 25–44, the ages most often setting up a new home or a child's room. Furniture store customers typically come from within about 10 miles (AdMall).", sel: { age: ["25_34", "35_44"] } },
     { id: "mattress", label: "Mattresses", note: "Adults 18–34, the ages that move most often. Mattress store customers typically come from within about 20 miles (AdMall).", sel: { age: ["18_24", "25_34"] } },
