@@ -1523,12 +1523,12 @@
   /* ---------- Results: case studies for this plan (shared/results.js) ----------
      Category matches first, then case studies that used the most of the plan's channels. Four show and up to
      four more are behind "Show more". */
-  var RESULT_CATS = ["healthcare", "legal", "higher-ed", "home-services", "apartment", "auto", "financial", "furniture", "franchise"];
+  var RESULT_CATS = ["healthcare", "legal", "higher-ed", "home-services", "apartment", "auto", "financial", "furniture", "franchise", "travel"];
   function loadResults(src, done) {
     if (window.AdtaxiResults) { done(); return; }
     if (loadResults.waiting) { loadResults.waiting.push(done); return; }
     loadResults.waiting = [done];
-    var sc = document.createElement("script"); sc.src = src || "../shared/results.js?v=20261028e";
+    var sc = document.createElement("script"); sc.src = src || "../shared/results.js?v=20261112u";
     sc.onload = sc.onerror = function () { var w = loadResults.waiting; loadResults.waiting = null; w.forEach(function (f) { f(); }); };
     document.head.appendChild(sc);
   }
@@ -1570,7 +1570,7 @@
     if (window.AdtaxiSlides) { done(); return; }
     if (loadSlides.waiting) { loadSlides.waiting.push(done); return; }
     loadSlides.waiting = [done];
-    var sc = document.createElement("script"); sc.src = "../shared/slides.js?v=20261112t";
+    var sc = document.createElement("script"); sc.src = "../shared/slides.js?v=20261112u";
     sc.onload = sc.onerror = function () { var w = loadSlides.waiting; loadSlides.waiting = null; w.forEach(function (f) { f(); }); };
     document.head.appendChild(sc);
   }

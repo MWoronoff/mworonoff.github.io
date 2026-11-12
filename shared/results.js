@@ -4,7 +4,7 @@
      client    who it was for (as the case study names them)
      headline  one line, the strongest number(s) from the case study
      cats      analyzer categories it belongs to (healthcare, legal, higher-ed, home-services, apartment,
-               auto, financial, furniture, franchise); [] for general examples
+               auto, financial, furniture, franchise, travel); [] for general examples
      channels  plan channel ids it used (same ids as shared/media-plan.js: ctv, youtube, dooh, social,
                display, audio, search, shopping, tiktok, snapchat, retarget)
      related   optional: other categories it fits on audience or business, each { cat, why }; "why" is shown on the card
@@ -40,13 +40,13 @@
     { client: "USA Kilts", headline: "11.85x ROAS (48% over goal); $536.7K revenue",
       cats: [], channels: ["tiktok", "social", "display"], file: "ecommerce-usa-kilts-social-2601.pdf", date: 2601 },
     { client: "Amusement park & hotel resort", headline: "1,310% average ROAS over 9 seasonal campaigns",
-      cats: [], channels: ["ctv", "display", "social"], file: "attractions-hotel-omnichannel-2503.pdf", date: 2503 },
+      cats: ["travel"], channels: ["ctv", "display", "social"], file: "attractions-hotel-omnichannel-2503.pdf", date: 2503 },
     { client: "Motorcycle parts maker (online)", headline: "62.8% higher ROAS; 46.9% more purchase revenue",
       cats: [], channels: ["social", "retarget"], group: "meta-advantage", file: "ecommerce-motorcycle-parts-meta-2403.pdf", date: 2403 },
     { client: "Eco-fashion brand (online)", headline: "62% higher ROAS; 102% more purchase revenue",
       cats: [], channels: ["social", "retarget"], group: "meta-advantage", file: "ecommerce-fashion-meta-2402.pdf", date: 2402 },
     { client: "Hotel management company", headline: "12x ROAS; 30% more revenue from call-in bookings",
-      cats: [], channels: ["search"], related: [{ cat: "apartment", why: "Same problem: filling units with direct bookings instead of relying on third-party sites, as apartments do with listing sites." }], file: "hospitality-hotel-search-2209.pdf", date: 2209 },
+      cats: ["travel"], channels: ["search"], related: [{ cat: "apartment", why: "Same problem: filling units with direct bookings instead of relying on third-party sites, as apartments do with listing sites." }], file: "hospitality-hotel-search-2209.pdf", date: 2209 },
     { client: "Nonprofit", headline: "$3.4M in donations in 5 weeks",
       cats: [], channels: ["display", "social", "youtube", "retarget"], file: "nonprofit-programmatic-2209.pdf", date: 2209 },
     { client: "Health system (nurse hiring)", headline: "4,000+ conversions for a nursing hiring event",
@@ -75,7 +75,7 @@
     { client: "Computer service & support company", headline: "37% more customer sign-ups; 45% lower cost per lead",
       cats: [], channels: ["search", "display"], related: [{ cat: "home-services", why: "Same business model: service leads, with CRM data showing which leads became paying customers." }], file: "tech-computer-repair-search-1907.pdf", date: 1907 },
     { client: "Racetrack", headline: "634% ROAS; 515% more ticket purchases; 77% lower cost per purchase",
-      cats: [], channels: ["social", "display"], file: "attractions-racetrack-social-display-2202.pdf", date: 2202 },
+      cats: ["travel"], channels: ["social", "display"], file: "attractions-racetrack-social-display-2202.pdf", date: 2202 },
     { client: "Cold-weather apparel brand", headline: "941% average ROAS; $178K average monthly revenue",
       cats: [], channels: ["display", "social", "retarget"], file: "ecommerce-cold-weather-apparel-2210.pdf", date: 2210 },
     { client: "National camera retailer", headline: "636% average ROAS; 182% more revenue over six months",
@@ -110,7 +110,7 @@
   }
 
   var CATS = { healthcare: "Healthcare", legal: "Legal", "higher-ed": "Higher Education", "home-services": "Home Services",
-    apartment: "Apartments", apartments: "Apartments", auto: "Auto", financial: "Financial", furniture: "Furniture", franchise: "Franchise" };
+    apartment: "Apartments", apartments: "Apartments", auto: "Auto", financial: "Financial", furniture: "Furniture", franchise: "Franchise", travel: "Travel" };
   var BASE = "../shared/results/";
 
   // The Results panel, shared by every Trade area's Recommended allocation and the Media Mix Planner.
