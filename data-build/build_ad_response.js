@@ -4,7 +4,7 @@
 const fs = require("fs");
 const CATS = [["apartments", "Apartments", "apartment-analyzer"], ["auto", "Auto", "auto"], ["financial", "Financial", "financial"],
   ["furniture", "Furniture", "furniture-analyzer"], ["healthcare", "Healthcare", "healthcare"], ["higher-ed", "Higher Education", "higher-ed"],
-  ["home-services", "Home Services", "home-services"], ["legal", "Legal", "legal"]];
+  ["home-services", "Home Services", "home-services"], ["legal", "Legal", "legal"], ["travel", "Travel", "travel"]];
 function block(s, key) {
   const i = s.indexOf('"' + key + '"'); if (i < 0) return null;
   const open = s.slice(i).search(/[\[{]/) + i, o = s[open], c = o === "{" ? "}" : "]";

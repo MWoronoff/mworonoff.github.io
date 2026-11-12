@@ -372,7 +372,7 @@
 <script>
 (function () {
   var CATS = [["apartments", "Apartments"], ["auto", "Auto"], ["financial", "Financial"], ["furniture", "Furniture"], ["healthcare", "Healthcare"],
-              ["higher-ed", "Higher Education"], ["home-services", "Home Services"], ["legal", "Legal"]];
+              ["higher-ed", "Higher Education"], ["home-services", "Home Services"], ["legal", "Legal"], ["travel", "Travel"]];
   var PF = [["streaming-tv", "Streaming TV"], ["ctv", "Connected TV"], ["social", "Social"], ["search", "Search"], ["streaming-audio", "Streaming audio"], ["ecommerce", "Ecommerce"]];
   document.querySelectorAll(".lib-pick").forEach(function (sel) {
     var v = sel.getAttribute("data-view"), list = v === "digital" ? PF : CATS, go = document.querySelector('[data-go="' + v + '"]');
