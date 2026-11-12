@@ -1,13 +1,13 @@
 # Financial data check report
 
-Built 2026-10-29. Result: **PASSED**
+Built 2026-11-12. Result: **PASSED**
 
 | Check | Result | Detail |
 | --- | --- | --- |
 | Formula tests | PASS | percentile and weighted-average hand checks reproduce exactly |
 | Bank and credit union branches | INFO | FDIC 2026: 75,859 bank branches; NCUA 2026-06: 22,827 credit union branches |
 | HMDA mortgage data | INFO | 2025: 2,984,541 purchase, 1,175,299 refinance and 1,896,690 home equity loans on owner-occupied homes; 0.2% had no census tract and aren't placed |
-| IRS tax year | INFO | unknown |
+| IRS tax year | INFO | 2023 |
 | Land area source | INFO | Census 2026 Gazetteer ZCTA file (33,791 ZIPs) |
 | Business Patterns years | INFO | 2023 (growth measured from 2022) |
 | Published benchmark: tax establishments | PASS | 28,761 (expected 18,000–60,000) |
@@ -27,8 +27,8 @@ Built 2026-10-29. Result: **PASSED**
 | EASI U.S. change in mortgage principal (owned home) per household | INFO | $3,352.51 |
 | EASI finance matched to DMAs | PASS | 210 of 210 |
 | EASI finance matched to metros | PASS | 387 of 387 |
-| Score reality check, DMAs: rank correlation with category businesses' employees per 1,000 households, score (without Competition) | INFO | Tax preparation -0.20 (0.22); Wealth management 0.75 (0.84); Retirement planning 0.50 (0.74); Home purchase mortgage 0.44 (0.66); Refinance and home equity 0.45 (0.63); Banks -0.17 (0.04); Credit unions -0.13 (0.09). Weak (under 0.20 without Competition): Banks, Credit unions |
-| Score reality check, metros: rank correlation with category businesses' employees per 1,000 households, score (without Competition) | INFO | Tax preparation -0.19 (0.19); Wealth management 0.54 (0.70); Retirement planning 0.26 (0.56); Home purchase mortgage 0.45 (0.64); Refinance and home equity 0.41 (0.59); Banks -0.11 (0.12); Credit unions -0.22 (0.02). Weak (under 0.20 without Competition): Banks, Credit unions Reviewed and kept (benchmark doesn't fit): Tax preparation (offices follow market size; the score uses IRS counts of returns filed through paid preparers, the direct measure of customers). |
+| Score reality check, DMAs: rank correlation with category businesses' employees per 1,000 households, score (without Competition) | INFO | Tax preparation -0.17 (0.15); Wealth management 0.71 (0.83); Retirement planning 0.50 (0.74); Home purchase mortgage 0.44 (0.66); Refinance and home equity 0.45 (0.63); Banks -0.17 (0.04); Credit unions -0.14 (0.09). Weak (under 0.20 without Competition): Banks, Credit unions Reviewed and kept (benchmark doesn't fit): Tax preparation (offices follow market size; the score uses IRS counts of returns filed through paid preparers, the direct measure of customers). |
+| Score reality check, metros: rank correlation with category businesses' employees per 1,000 households, score (without Competition) | INFO | Tax preparation -0.22 (0.07); Wealth management 0.50 (0.68); Retirement planning 0.27 (0.56); Home purchase mortgage 0.45 (0.64); Refinance and home equity 0.41 (0.58); Banks -0.11 (0.12); Credit unions -0.22 (-0.00). Weak (under 0.20 without Competition): Banks, Credit unions Reviewed and kept (benchmark doesn't fit): Tax preparation (offices follow market size; the score uses IRS counts of returns filed through paid preparers, the direct measure of customers). |
 | EASI accounting fees, DMAs vs. EASI's own total | PASS | 98.7% |
 | EASI value of stocks, bonds and mutual funds, DMAs vs. EASI's own total | PASS | 98.7% |
 | EASI contributions to retirement plans, DMAs vs. EASI's own total | PASS | 98.7% |
@@ -39,27 +39,27 @@ Built 2026-10-29. Result: **PASSED**
 | EASI value of retirement plans, DMAs vs. EASI's own total | PASS | 98.7% |
 | EASI change in net property holdings (owned home), DMAs vs. EASI's own total | PASS | 98.7% |
 | EASI change in mortgage principal (owned home), DMAs vs. EASI's own total | PASS | 98.7% |
-| U.S. share of returns with a paid preparer | PASS | 53.0% (expected 40%–65%) |
-| U.S. share of returns claiming the earned income credit | PASS | 15.1% (expected 10%–22%) |
-| U.S. share of returns with dividends | PASS | 20.4% (expected 12%–30%) |
-| U.S. share of returns with capital gains | PASS | 18.9% (expected 10%–28%) |
-| U.S. share of returns with income of $200k+ | PASS | 7.9% (expected 4%–12%) |
-| U.S. share of returns with ira distributions | PASS | 10.4% (expected 8%–20%) |
-| U.S. share of returns with pension or annuity income | PASS | 18.9% (expected 12%–25%) |
+| U.S. share of returns with a paid preparer | PASS | 52.7% (expected 40%–65%) |
+| U.S. share of returns claiming the earned income credit | PASS | 15.0% (expected 10%–22%) |
+| U.S. share of returns with dividends | PASS | 20.9% (expected 12%–30%) |
+| U.S. share of returns with capital gains | PASS | 18.2% (expected 10%–28%) |
+| U.S. share of returns with income of $200k+ | PASS | 8.5% (expected 4%–12%) |
+| U.S. share of returns with ira distributions | PASS | 10.5% (expected 8%–20%) |
+| U.S. share of returns with pension or annuity income | PASS | 18.7% (expected 12%–25%) |
 | U.S. share who moved in the past year | PASS | 12.3% (expected 8%–16%) |
 | U.S. share of owner homes with a mortgage | PASS | 60.6% (expected 55%–70%) |
-| U.S. inc75_share | PASS | 53.1% (expected 40%–60%) |
+| U.S. households earning $75k+ | PASS | 53.1% (expected 40%–60%) |
 | U.S. share of adults who are 50–64 | PASS | 24.2% (expected 20%–30%) |
-| IRS returns vs. households | PASS | 1.19 returns per household (expected 1.0–1.4) |
+| IRS returns vs. households | PASS | 1.20 returns per household (expected 1.0–1.4) |
 | HMDA purchase loans placed in ZIPs vs. national total | PASS | 98.5% |
 | DMA scores within 0–100 | PASS | 0 out of range; 1,470 computed, 0 not computed (missing input) |
 | Metro scores within 0–100 | PASS | 0 out of range; 2,709 computed, 0 not computed (missing input) |
-| Top DMAs: Tax preparation | INFO | Philadelphia, New York, Wilkes Barre-Scranton, Nashville, Paducah-Cape Girardeau-Harrisburg |
-| Top DMAs: Wealth management | INFO | Washington, Dc-Hagrstwn, New York, Seattle-Tacoma, San Francisco-Oakland-San Jose, Philadelphia |
+| Top DMAs: Tax preparation | INFO | Green Bay-Appleton, Boston, Philadelphia, Harrisburg-Lancaster-Lebanon-York, Hartford-New Haven |
+| Top DMAs: Wealth management | INFO | Washington, Dc-Hagrstwn, New York, Philadelphia, Hartford-New Haven, Boston |
 | Top DMAs: Retirement planning | INFO | Harrisburg-Lancaster-Lebanon-York, Albany-Schenectady-Troy, Hartford-New Haven, Honolulu, Detroit |
 | Top DMAs: Home purchase mortgage | INFO | Austin, Denver, Madison, Washington, Dc-Hagrstwn, Seattle-Tacoma |
-| Top DMAs: Refinance and home equity | INFO | Boston, Madison, Washington, Dc-Hagrstwn, Milwaukee, Seattle-Tacoma |
+| Top DMAs: Refinance and home equity | INFO | Boston, Washington, Dc-Hagrstwn, Madison, New York, Seattle-Tacoma |
 | Top DMAs: Banks | INFO | Austin, Phoenix, Washington, Dc-Hagrstwn, Salt Lake City, Dallas-Fort Worth |
-| Top DMAs: Credit unions | INFO | Phoenix, Denver, Seattle-Tacoma, San Francisco-Oakland-San Jose, Austin |
+| Top DMAs: Credit unions | INFO | New York, San Francisco-Oakland-San Jose, West Palm Beach-Ft Pierce, Los Angeles, Boston |
 | Counties built from ZIPs | PASS | 3,144 counties (2,400 with 10,000+ residents are ranked) |
 | County scores within 0–100 | PASS | 0 out of range; 16,800 scores computed |
