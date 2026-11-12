@@ -32,25 +32,25 @@ ZIP_PARTS = ("demand", "spend")      # ZIPs: no EASI spending by ZIP, and ZIP bu
 PALM_SPRINGS, RIVERSIDE_METRO = "804", "40140"
 
 SUBCATS = [
-    {"id": "pi", "label": "Personal injury", "demand": ["adults", "car_commute", "car_share"]},
+    {"id": "pi", "label": "Personal injury", "demand": ["adults", "car_commute", "car_share", "a45_64_share"]},   # Scarborough: PI attorney clients skew 45-64
     {"id": "family", "label": "Family law and divorce", "demand": ["divsep", "divsep_share", "kids_share"]},
     {"id": "estate", "label": "Estate planning and elder law", "demand": ["own55", "a65p", "val300_share"]},
     # Bankruptcy leaves out Spending Power: its demand is financial strain, and a $75K+ share works against it
-    {"id": "bankruptcy", "label": "Bankruptcy and debt relief", "demand": ["households", "pov_share", "inc_lt35_share", "unemp_rate"], "spend": False},
+    {"id": "bankruptcy", "label": "Bankruptcy and debt relief", "demand": ["households", "pov_share", "inc_lt35_share", "unemp_rate", "divsep_share"], "spend": False},   # Scarborough: bankruptcy clients skew separated/divorced
     {"id": "employment", "label": "Employment law", "demand": ["employed", "unemp_rate"]},
 ]
 DEMAND_LABELS = {"adults": "Adults 18+", "car_commute": "Workers commuting by car", "car_share": "Share of workers commuting by car",
                  "divsep": "Divorced or separated adults", "divsep_share": "Share divorced or separated", "kids_share": "Households with children",
                  "own55": "Homeowners 55+", "a65p": "Age 65+", "val300_share": "Homes worth $300K+",
                  "households": "Households", "pov_share": "Households below poverty", "inc_lt35_share": "Households under $35K",
-                 "unemp_rate": "Unemployment rate", "employed": "Employed workers"}
+                 "unemp_rate": "Unemployment rate", "employed": "Employed workers", "a45_64_share": "Adults 45–64 (share of adults)"}
 COUNTS = ["population", "households", "adults", "a65p", "divsep", "own55", "employed", "car_commute"]
-RATES = ["kids_share", "inc75_share", "inc_lt35_share", "divsep_share", "val300_share", "pov_share", "unemp_rate", "car_share", "lep_share"]
+RATES = ["a45_64_share", "kids_share", "inc75_share", "inc_lt35_share", "divsep_share", "val300_share", "pov_share", "unemp_rate", "car_share", "lep_share"]
 # numerator, denominator for each rate (summed over ZIPs, so markets get true rates)
-RATE_PARTS = {"kids_share": ("hh_kids", "hh_tot"), "inc75_share": ("inc75", "inc_tot"), "inc_lt35_share": ("inc_lt35", "inc_tot"),
+RATE_PARTS = {"a45_64_share": ("a45_64", "adults18"), "kids_share": ("hh_kids", "hh_tot"), "inc75_share": ("inc75", "inc_tot"), "inc_lt35_share": ("inc_lt35", "inc_tot"),
               "divsep_share": ("divsep", "marital_tot"), "val300_share": ("val300", "val_tot"), "pov_share": ("pov_hh", "pov_tot"),
               "unemp_rate": ("unemployed", "labor_civ"), "car_share": ("car_commute", "workers"), "lep_share": ("lep_hh", "lang_hh")}
-ACS_COLS = ["acs_pop", "adults18", "a65p", "hh_kids", "hh_tot", "inc_tot", "inc_lt35", "inc_75_100", "inc_100_150", "inc_150_200",
+ACS_COLS = ["acs_pop", "adults18", "a45p", "a65p", "hh_kids", "hh_tot", "inc_tot", "inc_lt35", "inc_75_100", "inc_100_150", "inc_150_200",
             "inc_200p", "marital_tot", "divsep", "own_tot", "own55", "pov_hh", "pov_tot", "labor_civ", "employed", "unemployed",
             "workers", "car_commute", "val_tot", "val300", "lang_hh", "lep_hh"]
 
@@ -87,6 +87,7 @@ def main():
     if miss: sys.exit(f"shared/audience/zip_audience.json has no Legal columns ({miss[:4]}...); the audience step must run first with the new build_audience.py.")
     acs = acs[["zip"] + ACS_COLS]
     acs["inc75"] = acs[["inc_75_100", "inc_100_150", "inc_150_200", "inc_200p"]].sum(axis=1, min_count=4)
+    acs["a45_64"] = acs.a45p - acs.a65p
     z = z.merge(acs.drop(columns=["inc_75_100", "inc_100_150", "inc_150_200", "inc_200p"]), on="zip", how="left")
     z["land"] = z.zip.map(zcta_land(a.cache, rep))          # square miles, for households per square mile
 
