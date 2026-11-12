@@ -44,7 +44,8 @@ MIN_POP = 500
 WEIGHTS = {"demand": 0.50, "category": 0.30, "comp": 0.20}
 SUBCATS = [
     {"id": "exec", "label": "Master franchise candidates", "demand": ["x125", "x125_share", "hi200_share", "cg_share", "avg_wage", "ba_share", "mgmt_share"]},
-    {"id": "owner", "label": "First-time franchise buyers", "demand": ["o100", "o100_share", "avg_wage", "married_share"]},
+    # Scarborough small business owners: 35-64 (index 122-143), $100K+ (127-196), bachelor's+ (126-141), married (120), homeowners (120)
+    {"id": "owner", "label": "First-time franchise buyers", "demand": ["o100", "o100_share", "avg_wage", "married_share", "ba_share"]},
 ]
 # Census LODES job sectors (CNS codes) by 2-digit NAICS sector
 LODES_SECTOR = {"11": "cns01", "21": "cns02", "22": "cns03", "23": "cns04", "31": "cns05", "42": "cns06", "44": "cns07",

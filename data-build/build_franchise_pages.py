@@ -147,6 +147,7 @@ PROPOSAL = {
     "note": "Franchise leads: the 2026 Annual Franchise Development Report puts average cost per lead at $142 to $802 and average cost per franchise sale at $6,700 to $25,145, depending on the sector; this proposal doesn't forecast sales.",
 }
 SOURCES = [
+    {"label": "Nielsen Scarborough USA+ 2026 Release 1 (small business owner profile)"},
     {"label": "Census American Community Survey 5-year (age of householder by household income, educational attainment, occupation, veterans)", "url": "https://www.census.gov/programs-surveys/acs"},
     {"label": "IRS Statistics of Income, individual income tax ZIP Code data", "url": "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-statistics-zip-code-data-soi"},
     {"label": "Census ZIP Code Business Patterns", "url": "https://www.census.gov/programs-surveys/cbp.html"},
@@ -215,9 +216,9 @@ def radius_cfg(title, export, depth, links):
             {"id": "exec", "label": "Master franchise candidates", "note": "Households headed by someone 45–64 earning $125K+, counted directly by Census, including first-time franchise buyers (add 25–44 to widen). ZIP-wide signals feed the Score in two equal groups: affluence ($200K+ income, capital gains) and background (bachelor's degrees, managers). Self-employment and $500K+ homes show for context.",
              "sel": {"age": ["4564"], "income8": ["125_150", "150_200", "200p"]}, "context": ["hi200", "cg", "selfemp", "ba", "mgmt", "val500"],
              "scoreGroups": [["hi200", "cg"], ["ba", "mgmt"]]},
-            {"id": "owner", "label": "First-time franchise buyers", "note": "Households headed by someone 25–64 earning $100K+, counted directly by Census: most people who buy a business are 40 to 60, often making a career change. The ZIP-wide $200K+ income share feeds the Score; self-employment and $500K+ homes show for context.",
-             "sel": {"age": ["2544", "4564"], "income8": ["100_125", "125_150", "150_200", "200p"]}, "context": ["hi200", "selfemp", "val500"],
-             "scoreGroups": [["hi200"]]}],
+            {"id": "owner", "label": "First-time franchise buyers", "note": "Households headed by someone 25–64 earning $100K+, counted directly by Census: small business owners over-index at 35–64, $100K+ and with a bachelor's degree or more (Scarborough). ZIP-wide signals feed the Score in two equal groups: affluence ($200K+ income) and background (bachelor's degrees); self-employment and $500K+ homes show for context.",
+             "sel": {"age": ["2544", "4564"], "income8": ["100_125", "125_150", "150_200", "200p"]}, "context": ["hi200", "ba", "selfemp", "val500"],
+             "scoreGroups": [["hi200"], ["ba"]]}],
         "methodology": [
             {"title": "Who counts", "body": "Counts are households, by the householder's age and the household's income, taken directly from one Census table (age of householder by household income), so an age and income selection is a count, not an estimate. One household is one potential buyer. Census groups householders as 25 to 44, 45 to 64 and 65 and older. Share and index compare qualified households with all households. Census doesn't publish net worth or job titles by ZIP, so household income stands in for capital, and the ZIP-wide signals in the Score add the rest."},
             {"title": "Qualified households vs. buyers", "body": "Qualified households are every household that fits the owner profile's age and income, the pool that ads can reach. Only a small fraction buy a franchise in any year (the industry adds roughly 12,000 to 13,000 net new units a year, and many go to existing multi-unit owners), so the count sizes the reachable audience, not the number of buyers. The index is the better guide to where to spend."},
@@ -257,8 +258,8 @@ def measures(client):
          "help": "Households headed by someone 25–64 with income of $100K or more (Census ACS)."},
         {"key": "o100_share", "label": "Share of householders 25–64 earning $100K+", "format": "pct", "subs": ["owner"]},
         {"key": "avg_wage", "label": "Average salary per wage earner", "format": "money", "help": "IRS wages divided by returns with wages, area-level: higher where more corporate and professional earners live."},
-        {"key": "ba_share", "label": "Share of adults 25+ with a bachelor's degree or higher", "format": "pct", "subs": ["exec"],
-         "help": "Census ACS, area-level. A master franchisee recruits and supports sub-franchisees, so a professional background matters."},
+        {"key": "ba_share", "label": "Share of adults 25+ with a bachelor's degree or higher", "format": "pct", "subs": ["exec", "owner"],
+         "help": "Census ACS, area-level. A master franchisee recruits and supports sub-franchisees, so a professional background matters; small business owners also over-index with a bachelor's degree or more (Scarborough index 126–141)."},
         {"key": "mgmt_share", "label": "Share of workers in management occupations", "format": "pct", "subs": ["exec"],
          "help": "Census ACS, area-level: employed people 16+ working as managers (operations, sales, general and top executives and others). The closest public measure of the management background a master franchisee needs."},
         {"key": "selfemp_share", "label": "Share of tax returns with self-employment income", "format": "pct",
@@ -287,7 +288,7 @@ def methodology(client):
         + " Each part is a percentile (0–100) against areas at the same level. No score is shown when a part has no data."]},
         {"title": "Candidates", "body": [
             "Master franchise candidates, first-time or not: householders 45–64 earning $125K+ (count and share), the IRS shares of returns with income of $200K+ and with capital gains, the IRS average salary per wage earner, the share of adults 25+ with a bachelor's degree or higher, and the share of workers in management occupations (a master franchisee recruits and supports sub-franchisees, so professional and management background matters). Each input counts equally. Census reports householder age only as 25–44 and 45–64, so the score uses 45–64, as does the Trade area.",
-            "First-time franchise buyers: householders 25–64 earning $100K+ (count and share), the IRS average salary per wage earner (corporate earners, who make up most first-time buyers) and the share of married-couple households (the dual-income cushion many new owners rely on). Education isn't used here: many good single-unit buyers are career changers without a degree. Census groups householders 25–44 together, so the score starts at 25, as does the Trade area.",
+            "First-time franchise buyers: householders 25–64 earning $100K+ (count and share), the IRS average salary per wage earner (corporate earners, who make up most first-time buyers), the share of married-couple households (the dual-income cushion many new owners rely on) and the share of adults 25+ with a bachelor's degree or higher. These follow Nielsen Scarborough USA+ 2026 small business owners (index 100 = average): ages 35–64 (122–143), household income of $100K+ (127–196), a bachelor's degree or more (126–141), married (120) and homeowners (120). Self-employment isn't scored: Scarborough's self-employed skew part-time (index 292), so it mixes gig work with business owners. Census groups householders 25–44 together, so the score starts at 25, as does the Trade area.",
             "Census doesn't publish net worth, liquid capital or job titles for areas, so household income and investment income stand in for them. IRS figures are area-level rates, not facts about individuals."]},
         {"title": "Territory Opportunity" if client else "Market Opportunity", "body":
             (client["buyers"]["help"] + " " if client else "All businesses with paid employees. ") +
@@ -327,7 +328,7 @@ def analyzer_cfg(client):
         "logo": f"{up}shared/adtaxi-logo.svg", "exportName": "franchise-" + client["id"] if client else "franchise", "links": links,
         "radiusDefault": 25, "radiusProfiles": True, "defaultLevel": "us", "usMapLevel": "territory" if client else "dma", "drill": not client,
         # ZIPs across several selected DMAs are re-ranked in the page with the same inputs as build_franchise.py SUBCATS
-        **({} if client else {"zipScore": {"exec": ["x125", "x125_share", "hi200_share", "cg_share", "avg_wage", "ba_share", "mgmt_share"], "owner": ["o100", "o100_share", "avg_wage", "married_share"]}}),
+        **({} if client else {"zipScore": {"exec": ["x125", "x125_share", "hi200_share", "cg_share", "avg_wage", "ba_share", "mgmt_share"], "owner": ["o100", "o100_share", "avg_wage", "married_share", "ba_share"]}}),
         "levels": levels, "statesGeo": f"{up}shared/geo/states.topo.json", "zipIndex": f"{up}shared/geo/zip_market.json",
         "radiusScript": f"{up}shared/radius.js?v={V}", "benchmarks": False, "timing": False,
         "subcategoryLabel": "Owner profile", "subcategories": SUBS,
