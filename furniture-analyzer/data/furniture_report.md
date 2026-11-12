@@ -1,6 +1,6 @@
 # Furniture data check report
 
-Built 2026-10-28. Result: **PASSED**
+Built 2026-11-12. Result: **PASSED**
 
 | Check | Result | Detail |
 | --- | --- | --- |
@@ -13,8 +13,8 @@ Built 2026-10-28. Result: **PASSED**
 | EASI U.S. spending per household | INFO | Any furniture $647.29; Sofas and living room $220.50; Bedroom furniture $74.67; Mattresses $93.23; Kitchen and dining $22.38; Outdoor and patio $37.66; Baby and nursery $5.93 |
 | EASI furniture spending matched to DMAs | PASS | 210 of 210 |
 | EASI furniture spending matched to metros | PASS | 387 of 387 |
-| Score reality check, DMAs: rank correlation with furniture retailers' employees per 1,000 households, score (without Competition) | INFO | Any furniture 0.09 (0.26); Sofas and living room 0.09 (0.27); Bedroom furniture 0.05 (0.26); Mattresses 0.10 (0.24); Kitchen and dining 0.05 (0.25); Outdoor and patio 0.01 (0.16); Baby and nursery 0.08 (0.27). None weak. Reviewed and kept (benchmark doesn't fit): Outdoor and patio (stores cluster in regional hubs and showroom centers and buyers travel to them). |
-| Score reality check, metros: rank correlation with furniture retailers' employees per 1,000 households, score (without Competition) | INFO | Any furniture -0.05 (0.13); Sofas and living room -0.05 (0.14); Bedroom furniture -0.09 (0.15); Mattresses -0.05 (0.11); Kitchen and dining -0.10 (0.12); Outdoor and patio -0.11 (0.08); Baby and nursery -0.05 (0.16). None weak. Reviewed and kept (benchmark doesn't fit): Any furniture, Sofas and living room, Bedroom furniture, Mattresses, Kitchen and dining, Outdoor and patio, Baby and nursery (stores cluster in regional hubs and showroom centers and buyers travel to them). |
+| Score reality check, DMAs: rank correlation with furniture retailers' employees per 1,000 households, score (without Competition) | INFO | Any furniture 0.08 (0.25); Sofas and living room 0.09 (0.27); Bedroom furniture 0.05 (0.26); Mattresses 0.10 (0.24); Kitchen and dining 0.05 (0.25); Outdoor and patio 0.01 (0.16); Baby and nursery 0.08 (0.27). None weak. Reviewed and kept (benchmark doesn't fit): Outdoor and patio (stores cluster in regional hubs and showroom centers and buyers travel to them). |
+| Score reality check, metros: rank correlation with furniture retailers' employees per 1,000 households, score (without Competition) | INFO | Any furniture -0.08 (0.12); Sofas and living room -0.05 (0.14); Bedroom furniture -0.09 (0.15); Mattresses -0.05 (0.11); Kitchen and dining -0.10 (0.12); Outdoor and patio -0.11 (0.08); Baby and nursery -0.05 (0.16). None weak. Reviewed and kept (benchmark doesn't fit): Any furniture, Sofas and living room, Bedroom furniture, Mattresses, Kitchen and dining, Outdoor and patio, Baby and nursery (stores cluster in regional hubs and showroom centers and buyers travel to them). |
 | EASI furniture total, DMAs vs. EASI's own total | PASS | 98.7% of EASI's $84.68B |
 | DMA scores within 0–100 | PASS | 0 out of range; 1,470 scores computed, 0 not computed (missing input) |
 | Metro scores within 0–100 | PASS | 0 out of range; 2,709 scores computed, 0 not computed (missing input) |
