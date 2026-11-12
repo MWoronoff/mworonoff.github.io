@@ -19,7 +19,7 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js" crossorigin=""></script>
 <script src="../shared/engine.js?v=20261112u"></script>
-<script src="radius-config.js?v=20261028b"></script>
+<script src="radius-config.js?v=20261112a"></script>
 <script>
 AdtaxiAnalyzer.start({
  "title": "Financial Market Analyzer",
@@ -47,7 +47,8 @@ AdtaxiAnalyzer.start({
     "demand": [
      "prep",
      "prep_share",
-     "eitc_share"
+     "a45p_share",
+     "inc75_share"
     ],
     "spend": null
    },
@@ -56,7 +57,8 @@ AdtaxiAnalyzer.start({
      "div",
      "div_share",
      "cg_share",
-     "hi200_share"
+     "hi200_share",
+     "a55p_share"
     ],
     "spend": "inc75_share"
    },
@@ -83,7 +85,8 @@ AdtaxiAnalyzer.start({
      "refieq",
      "refieq_rate",
      "mortg",
-     "mortg_share"
+     "mortg_share",
+     "inc100_share"
     ],
     "spend": "inc75_share"
    },
@@ -98,7 +101,8 @@ AdtaxiAnalyzer.start({
    "cu": {
     "demand": [
      "adults",
-     "mover_share"
+     "a45p_share",
+     "inc75_share"
     ],
     "spend": "inc75_share"
    }
@@ -259,6 +263,31 @@ AdtaxiAnalyzer.start({
    "help": "Households divided by land area (Census Gazetteer). Denser markets put more likely customers inside each service area and radius."
   },
   {
+   "key": "inc100_share",
+   "label": "Households earning $100K+",
+   "format": "pct",
+   "subs": [
+    "refi"
+   ]
+  },
+  {
+   "key": "a55p_share",
+   "label": "Adults 55+ (share of adults)",
+   "format": "pct",
+   "subs": [
+    "wealth"
+   ]
+  },
+  {
+   "key": "a45p_share",
+   "label": "Adults 45+ (share of adults)",
+   "format": "pct",
+   "subs": [
+    "tax",
+    "cu"
+   ]
+  },
+  {
    "key": "prep",
    "label": "Returns with a paid preparer",
    "format": "int",
@@ -282,7 +311,7 @@ AdtaxiAnalyzer.start({
    "subs": [
     "tax"
    ],
-   "help": "Earned Income Credit filers are among the heaviest users of paid preparers."
+   "help": "Shown, not scored. Earned Income Credit filers are heavy users of paid preparers, but Scarborough shows tax preparation clients overall skew $75K+."
   },
   {
    "key": "selfemp_share",
@@ -408,8 +437,7 @@ AdtaxiAnalyzer.start({
    "format": "pct",
    "subs": [
     "purchase",
-    "bank",
-    "cu"
+    "bank"
    ],
    "help": "New residents pick a new home lender, bank and credit union."
   },
@@ -530,7 +558,8 @@ AdtaxiAnalyzer.start({
   {
    "key": "inc75_share",
    "label": "Households earning $75K+",
-   "format": "pct"
+   "format": "pct",
+   "subs": null
   },
   {
    "key": "easi_acct_fees_hh",
@@ -959,25 +988,28 @@ AdtaxiAnalyzer.start({
   }
  ],
  "rankBy": [
-   "score",
-   "prep",
-   "prep_share",
-   "div",
-   "hi200_share",
-   "a50_64",
-   "ira_share",
-   "purch",
-   "purch_rate",
-   "refieq",
-   "mortg",
-   "easi_acct_fees_total",
-   "easi_stocks_total",
-   "easi_ret_contrib_total",
-   "easi_home_purchase_total",
-   "easi_home_value_total",
-   "easi_deposits_total",
-   "density"
-  ],
+  "score",
+  "prep",
+  "prep_share",
+  "div",
+  "hi200_share",
+  "a50_64",
+  "ira_share",
+  "purch",
+  "purch_rate",
+  "refieq",
+  "mortg",
+  "easi_acct_fees_total",
+  "easi_stocks_total",
+  "easi_ret_contrib_total",
+  "easi_home_purchase_total",
+  "easi_home_value_total",
+  "easi_deposits_total",
+  "a45p_share",
+  "a55p_share",
+  "inc100_share",
+  "density"
+ ],
  "defaultRank": "score",
  "components": [
   "demand",
@@ -1047,7 +1079,10 @@ AdtaxiAnalyzer.start({
   "inc75_share",
   "bank_br",
   "bank_dep",
-  "cu_br"
+  "cu_br",
+  "a45p_share",
+  "a55p_share",
+  "inc100_share"
  ],
  "tableColumns": [
   "score",
@@ -1061,14 +1096,15 @@ AdtaxiAnalyzer.start({
    "body": [
     "Where are a financial advertiser's likely customers, and which geographies deserve the most ad dollars?",
     "Score = 40% Consumer Demand + 25% Category Spending + 15% Spending Power + 20% Competition. Each part is a percentile (0–100) against markets at the same level. No score is shown when a part has no data.",
-    "Every line has its own Category Spending measure. Tax preparation leaves out Spending Power (its clients skew to moderate incomes); its remaining parts keep their relative weights."
+    "Every line has its own Category Spending measure. Tax preparation leaves out Spending Power, since income is already part of its Consumer Demand; its remaining parts keep their relative weights."
    ]
   },
   {
    "title": "Consumer Demand",
    "body": [
     "Each line's likely customers, count and concentration.",
-    "Tax preparation: returns with a paid preparer, their share, and the share claiming the Earned Income Credit (IRS). Wealth management: returns with dividends and their share, the share with capital gains, the share with income of $200K+ (IRS). Retirement planning: adults 50–64 and their share (Census ACS); the shares of returns with IRA distributions and with pension income (IRS). Home purchase: purchase loans and loans per 1,000 households (HMDA), renters earning $75K+, the share who moved in the past year (Census ACS). Refinance and home equity: refinance and home equity loans and loans per 1,000 owner homes (HMDA), owner homes with a mortgage and their share (Census ACS). Banks: adults, the share who moved in the past year (new residents choose a new bank) and the share of returns with business income (small-business banking). Credit unions: adults and the share who moved in the past year."
+    "Tax preparation: returns with a paid preparer and their share (IRS), adults 45+ and households earning $75K+ (Census ACS). Wealth management: returns with dividends and their share, the share with capital gains, the share with income of $200K+ (IRS), adults 55+ (Census ACS). Retirement planning: adults 50–64 and their share (Census ACS); the shares of returns with IRA distributions and with pension income (IRS). Home purchase: purchase loans and loans per 1,000 households (HMDA), renters earning $75K+, the share who moved in the past year (Census ACS). Refinance and home equity: refinance and home equity loans and loans per 1,000 owner homes (HMDA), owner homes with a mortgage and their share, households earning $100K+ (Census ACS). Banks: adults, the share who moved in the past year (new residents choose a new bank) and the share of returns with business income (small-business banking). Credit unions: adults, adults 45+ and households earning $75K+.",
+    "The age and income traits follow Nielsen Scarborough USA+ 2026 customer profiles (index 100 = average): tax preparation service users skew 45+ (index 107–135) and $75K+ (110–145); financial planner clients 55+ (137–177; 45–54 only 86); households that refinanced $100K+ (166–229); credit union members 45+ (106–113) and $75K+ (110–123). Retirement planning (55+, $75K+) is confirmed as it was."
    ]
   },
   {
@@ -1131,6 +1167,9 @@ AdtaxiAnalyzer.start({
   {
    "label": "IRS Statistics of Income, individual income tax ZIP Code data",
    "url": "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-statistics-zip-code-data-soi"
+  },
+  {
+   "label": "Nielsen Scarborough USA+ 2026 Release 1 (customer profiles)"
   },
   {
    "label": "FFIEC/CFPB Home Mortgage Disclosure Act (HMDA) national loan-level data",

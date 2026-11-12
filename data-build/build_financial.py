@@ -53,21 +53,22 @@ PALM_SPRINGS, RIVERSIDE_METRO = "804", "40140"
 NAICS = {"tax": ["541213"], "advice": ["523920", "523930"], "mortgage": ["522292", "522310"], "bank": ["522110"], "cu": ["522130"]}
 SUBCATS = [
     {"id": "tax", "label": "Tax preparation", "naics": "tax", "spend": False,
-     "demand": ["prep", "prep_share", "eitc_share"]},
+     "demand": ["prep", "prep_share", "a45p_share", "inc75_share"]},
     {"id": "wealth", "label": "Wealth management", "naics": "advice",
-     "demand": ["div", "div_share", "cg_share", "hi200_share"]},
+     "demand": ["div", "div_share", "cg_share", "hi200_share", "a55p_share"]},
     {"id": "retire", "label": "Retirement planning", "naics": "advice",
      "demand": ["a50_64", "a50_64_share", "ira_share", "pens_share"]},
     {"id": "purchase", "label": "Home purchase mortgage", "naics": "mortgage",
      "demand": ["purch", "purch_rate", "rent75", "mover_share"]},
     {"id": "refi", "label": "Refinance and home equity", "naics": "mortgage",
-     "demand": ["refieq", "refieq_rate", "mortg", "mortg_share"]},
+     "demand": ["refieq", "refieq_rate", "mortg", "mortg_share", "inc100_share"]},
     {"id": "bank", "label": "Banks", "naics": "bank",
      "demand": ["adults", "mover_share", "selfemp_share"]},
     {"id": "cu", "label": "Credit unions", "naics": "cu",
-     "demand": ["adults", "mover_share"]},
+     "demand": ["adults", "a45p_share", "inc75_share"]},
 ]
 DEMAND_LABELS = {
+    "a45p_share": "Adults 45+ (share of adults)", "a55p_share": "Adults 55+ (share of adults)", "inc100_share": "Households earning $100K+", "inc75_share": "Households earning $75K+",
     "prep": "Returns with a paid preparer", "prep_share": "Share of returns with a paid preparer",
     "eitc_share": "Share of returns claiming the Earned Income Credit",
     "div": "Returns with dividend income", "div_share": "Share of returns with dividends",
@@ -82,7 +83,7 @@ DEMAND_LABELS = {
 COUNTS = ["population", "households", "adults", "a50_64", "a65p", "prep", "eitc", "div", "cg", "ira", "pens", "selfemp",
           "returns", "purch", "refi", "equity", "refieq", "mortg", "rent75"]
 # rate: numerator, denominator (summed over ZIPs, so markets get true rates; IRS rates use only ZIPs with IRS data)
-RATE_PARTS = {"prep_share": ("prep", "returns"), "eitc_share": ("eitc", "returns"), "div_share": ("div", "returns"),
+RATE_PARTS = {"a45p_share": ("a45p_x", "adults18"), "a55p_share": ("a55p", "adults18"), "inc100_share": ("inc100", "inc_tot"), "prep_share": ("prep", "returns"), "eitc_share": ("eitc", "returns"), "div_share": ("div", "returns"),
               "cg_share": ("cg", "returns"), "hi200_share": ("hi200", "returns"), "ira_share": ("ira", "returns"),
               "pens_share": ("pens", "returns"), "selfemp_share": ("selfemp", "returns"),
               "a50_64_share": ("a50_64", "adults18"), "a65p_share": ("a65p", "acs_pop"),
@@ -90,7 +91,7 @@ RATE_PARTS = {"prep_share": ("prep", "returns"), "eitc_share": ("eitc", "returns
               "inc75_share": ("inc75", "inc_tot"), "val300_share": ("val300", "val_tot"), "rent75_share": ("rent75", "rinc_tot")}
 PER_K = {"purch_rate": ("purch", "households", 1000), "refieq_rate": ("refieq", "own_units", 1000)}
 RATES = list(RATE_PARTS) + list(PER_K)
-SUMS = ["population", "households", "adults18", "acs_pop", "a50_64", "a65p", "returns", "prep", "eitc", "div", "cg", "hi200", "ira",
+SUMS = ["a45p_x", "a55p", "inc100", "population", "households", "adults18", "acs_pop", "a50_64", "a65p", "returns", "prep", "eitc", "div", "cg", "hi200", "ira",
         "pens", "selfemp", "purch", "refi", "equity", "refieq", "mortg", "own_units", "movers", "mob_tot", "inc75", "inc_tot",
         "val300", "val_tot", "rent75", "rinc_tot"]
 IRS_COLS = {"irs_n1": "returns", "irs_prep": "prep", "irs_n59660": "eitc", "irs_n00600": "div", "irs_n01000": "cg",
@@ -116,11 +117,14 @@ def load_inputs(rep):
 
     aud = json.load(open(os.path.join(AUD, "zip_audience.json")))
     a = pd.DataFrame(aud["cols"])
-    need = ["acs_pop", "adults18", "a65p", "inc_tot", "inc_75_100", "inc_100_150", "inc_150_200", "inc_200p", "val300", "val_tot"]
+    need = ["acs_pop", "adults18", "a65p", "inc_tot", "inc_75_100", "inc_100_150", "inc_150_200", "inc_200p", "val300", "val_tot", "a45p", "f55p", "m55p"]
     miss = [c for c in need if c not in a.columns]
     if miss: sys.exit(f"shared/audience/zip_audience.json lacks {miss}; the audience step must run first.")
     a["inc75"] = a[["inc_75_100", "inc_100_150", "inc_150_200", "inc_200p"]].sum(axis=1, min_count=4)
-    z = z.merge(a[["zip", "acs_pop", "adults18", "a65p", "inc75", "inc_tot", "val300", "val_tot"]], on="zip", how="left")
+    a["a45p_x"] = a.a45p
+    a["a55p"] = a.m55p + a.f55p
+    a["inc100"] = a.inc_100_150 + a.inc_150_200 + a.inc_200p
+    z = z.merge(a[["zip", "acs_pop", "adults18", "a65p", "inc75", "inc_tot", "val300", "val_tot", "a45p_x", "a55p", "inc100"]], on="zip", how="left")
 
     apt = pd.DataFrame(json.load(open(os.path.join(AUD, "zip_audience_apt.json")))["cols"])
     apt["rent75"] = apt[["rinc_75_100", "rinc_100_150", "rinc_150p"]].sum(axis=1, min_count=3)
