@@ -19,7 +19,7 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js" crossorigin=""></script>
 <script src="../shared/engine.js?v=20261112u"></script>
-<script src="radius-config.js?v=20261027d"></script>
+<script src="radius-config.js?v=20261112a"></script>
 <script>
 AdtaxiAnalyzer.start({
  "title": "Auto Market Analyzer",
@@ -37,7 +37,52 @@ AdtaxiAnalyzer.start({
  "defaultLevel": "us",
  "usMapLevel": "dma",
  "drill": true,
- "zipScore": {"weights": {"demand": 0.4, "spend": 0.15}, "subs": {"newcar": {"demand": ["vehicles", "inc100_share", "car_share"], "spend": "inc75_share"}, "newtruck": {"demand": ["vehicles", "veh3p_share", "rural_share", "kids_share"], "spend": "inc75_share"}, "usedcar": {"demand": ["vehicles", "inc35_100_share", "car_share"], "spend": null}, "usedtruck": {"demand": ["vehicles", "veh3p_share", "rural_share", "inc35_100_share"], "spend": null}}},
+ "zipScore": {
+  "weights": {
+   "demand": 0.4,
+   "spend": 0.15
+  },
+  "subs": {
+   "newcar": {
+    "demand": [
+     "vehicles",
+     "a18_54_share",
+     "inc35p_share",
+     "car_share"
+    ],
+    "spend": null
+   },
+   "newtruck": {
+    "demand": [
+     "vehicles",
+     "veh3p_share",
+     "rural_share",
+     "a45p_share",
+     "inc100_share"
+    ],
+    "spend": "inc75_share"
+   },
+   "usedcar": {
+    "demand": [
+     "vehicles",
+     "a18_44_share",
+     "inclt50_share",
+     "car_share"
+    ],
+    "spend": null
+   },
+   "usedtruck": {
+    "demand": [
+     "vehicles",
+     "veh3p_share",
+     "rural_share",
+     "a25_54_share",
+     "inclt75_share"
+    ],
+    "spend": null
+   }
+  }
+ },
  "levels": {
   "us": {
    "label": "U.S.",
@@ -94,7 +139,7 @@ AdtaxiAnalyzer.start({
    "label": "Market Potential Score",
    "format": "score",
    "short": "Score",
-   "help": "0–100. Consumer Demand 40%, Category Spending 25%, Spending Power 15%, Competition 20%, each a percentile among markets at the same level. Used lines omit Spending Power (Demand 47%, Category Spending 29%, Competition 24%). ZIPs use Demand and Spending Power only. Counties have no Category Spending; under 10,000 residents aren't ranked.",
+   "help": "0–100. Consumer Demand 40%, Category Spending 25%, Spending Power 15%, Competition 20%, each a percentile among markets at the same level. New cars and the used lines omit Spending Power (Demand 47%, Category Spending 29%, Competition 24%). ZIPs use Demand and Spending Power only. Counties have no Category Spending; under 10,000 residents aren't ranked.",
    "perSub": true,
    "levels": [
     "dma",
@@ -135,7 +180,6 @@ AdtaxiAnalyzer.start({
    "format": "score",
    "short": "Spend",
    "subs": [
-    "newcar",
     "newtruck"
    ],
    "help": "Percentile of the share of households earning $75K or more.",
@@ -210,27 +254,77 @@ AdtaxiAnalyzer.start({
    "key": "kids_share",
    "label": "Households with children",
    "format": "pct",
-   "subs": [
-    "newtruck"
-   ],
-   "help": "Families drive SUV and minivan demand."
+   "help": "Shown, not scored."
   },
   {
-   "key": "inc100_share",
-   "label": "Households earning $100K+",
+   "key": "a18_54_share",
+   "label": "Adults 18–54 (share of adults)",
    "format": "pct",
    "subs": [
     "newcar"
    ]
   },
   {
+   "key": "inc35p_share",
+   "label": "Households earning $35K+",
+   "format": "pct",
+   "subs": [
+    "newcar"
+   ]
+  },
+  {
+   "key": "a45p_share",
+   "label": "Adults 45+ (share of adults)",
+   "format": "pct",
+   "subs": [
+    "newtruck"
+   ]
+  },
+  {
+   "key": "a18_44_share",
+   "label": "Adults 18–44 (share of adults)",
+   "format": "pct",
+   "subs": [
+    "usedcar"
+   ]
+  },
+  {
+   "key": "inclt50_share",
+   "label": "Households earning under $50K",
+   "format": "pct",
+   "subs": [
+    "usedcar"
+   ]
+  },
+  {
+   "key": "a25_54_share",
+   "label": "Adults 25–54 (share of adults)",
+   "format": "pct",
+   "subs": [
+    "usedtruck"
+   ]
+  },
+  {
+   "key": "inclt75_share",
+   "label": "Households earning under $75K",
+   "format": "pct",
+   "subs": [
+    "usedtruck"
+   ]
+  },
+  {
+   "key": "inc100_share",
+   "label": "Households earning $100K+",
+   "format": "pct",
+   "subs": [
+    "newtruck"
+   ]
+  },
+  {
    "key": "inc35_100_share",
    "label": "Households earning $35K–$99K",
    "format": "pct",
-   "subs": [
-    "usedcar",
-    "usedtruck"
-   ]
+   "help": "Shown, not scored."
   },
   {
    "key": "car_share",
@@ -507,21 +601,26 @@ AdtaxiAnalyzer.start({
   }
  ],
  "rankBy": [
-   "score",
-   "easi_new_cars_total",
-   "easi_new_trucks_total",
-   "easi_used_cars_total",
-   "easi_used_trucks_total",
-   "inc100_share",
-   "inc35_100_share",
-   "car_share",
-   "veh3p_share",
-   "rural_share",
-   "kids_share",
-   "vehicles",
-   "per10k",
-   "density"
-  ],
+  "score",
+  "easi_new_cars_total",
+  "easi_new_trucks_total",
+  "easi_used_cars_total",
+  "easi_used_trucks_total",
+  "a18_54_share",
+  "inc35p_share",
+  "a45p_share",
+  "inc100_share",
+  "a18_44_share",
+  "inclt50_share",
+  "a25_54_share",
+  "inclt75_share",
+  "car_share",
+  "veh3p_share",
+  "rural_share",
+  "vehicles",
+  "per10k",
+  "density"
+ ],
  "defaultRank": "score",
  "components": [
   "demand",
@@ -555,6 +654,13 @@ AdtaxiAnalyzer.start({
   "veh3p_share",
   "rural_share",
   "kids_share",
+  "a18_54_share",
+  "inc35p_share",
+  "a45p_share",
+  "a18_44_share",
+  "inclt50_share",
+  "a25_54_share",
+  "inclt75_share",
   "inc100_share",
   "inc35_100_share",
   "car_commute",
@@ -575,14 +681,14 @@ AdtaxiAnalyzer.start({
    "body": [
     "Where are an auto dealer's likely customers, and which geographies deserve the most ad dollars?",
     "Score = 40% Consumer Demand + 25% Category Spending + 15% Spending Power + 20% Competition. Each part is a percentile (0–100) against markets at the same level. No score is shown when a part has no data.",
-    "Used lines leave out Spending Power (used buyers span middle incomes). Remaining parts keep their relative weights."
+    "New cars and the used lines leave out Spending Power: Scarborough shows new car buyers spread evenly across incomes from $35K up, and used buyers concentrated under $75K. Remaining parts keep their relative weights."
    ]
   },
   {
    "title": "Consumer Demand",
    "body": [
-    "Every line starts with household vehicles (Census ACS: cars, vans and trucks kept at home), then adds what marks its buyers.",
-    "New cars: households earning $100K+, share commuting by car. New trucks and SUVs: households with 3+ vehicles, share living in small-town and rural ZIPs, households with children. Used cars: households earning $35K–$99K, share commuting by car. Used trucks and SUVs: households with 3+ vehicles, rural share, households earning $35K–$99K.",
+    "Every line starts with household vehicles (Census ACS: cars, vans and trucks kept at home), then adds the buyer profile from Nielsen Scarborough USA+ 2026 (households planning to buy in the next 12 months; index 100 = average).",
+    "New cars (compact, midsize and full-size): adults 18–54 (index 115–118; 55+ only 75), households earning $35K+ (no lift above $100K), share commuting by car. New trucks and SUVs (pickups, SUVs and vans): adults 45+ (45–64 index 120–130), households earning $100K+ (127–158), households with 3+ vehicles, share living in small-town and rural ZIPs. Used cars: adults 18–44 (116–187), households earning under $50K (130–146), share commuting by car. Used trucks and SUVs: adults 25–54 (110–131), households earning under $75K (107–117), households with 3+ vehicles, rural share.",
     "Registrations by model aren't published free, so Census vehicles stand in for vehicles on the road. Rural ZIPs: USDA rural-urban commuting codes 4–10."
    ]
   },
@@ -592,7 +698,7 @@ AdtaxiAnalyzer.start({
   },
   {
    "title": "Spending Power",
-   "body": "Share of households earning $75K+ (Census ACS). New lines only."
+   "body": "Share of households earning $75K+ (Census ACS). New trucks and SUVs only."
   },
   {
    "title": "Competition",
@@ -636,6 +742,9 @@ AdtaxiAnalyzer.start({
    "label": "Census American Community Survey 5-year (vehicles available, income, commuting)"
   },
   {
+   "label": "Nielsen Scarborough USA+ 2026 Release 1 (buyer profiles: vehicle plans to buy in the next 12 months)"
+  },
+  {
    "label": "USDA rural-urban commuting area codes",
    "url": "https://www.ers.usda.gov/data-products/rural-urban-commuting-area-codes/"
   },
@@ -657,7 +766,7 @@ AdtaxiAnalyzer.start({
    "url": "https://github.com/BritCrit/dma_county_zip"
   }
  ],
- "sourcesNote": "Vehicle spending: EASI. Vehicles, income, children and commuting: Census ACS. Rural ZIPs: USDA. Dealers: Census Business Patterns. Population and households: Deluxe. Ad response: AudienceSCAN 2026. Category ad spend: EMARKETER 2026.",
+ "sourcesNote": "Vehicle spending: EASI. Buyer profiles: Nielsen Scarborough. Vehicles, income, children and commuting: Census ACS. Rural ZIPs: USDA. Dealers: Census Business Patterns. Population and households: Deluxe. Ad response: AudienceSCAN 2026. Category ad spend: EMARKETER 2026.",
  "radius": true,
  "pointLayer": {
   "key": "est",

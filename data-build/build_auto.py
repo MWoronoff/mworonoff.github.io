@@ -36,23 +36,30 @@ EASI = {"newcar": ("new_cars", "New cars"), "newtruck": ("new_trucks", "New truc
         "usedcar": ("used_cars", "Used cars"), "usedtruck": ("used_trucks", "Used trucks")}
 PALM_SPRINGS, RIVERSIDE_METRO = "804", "40140"
 NAICS = {"new": ["441110"], "used": ["441120"]}
-SUBCATS = [
-    {"id": "newcar", "label": "New cars", "naics": "new", "demand": ["vehicles", "inc100_share", "car_share"]},
-    {"id": "newtruck", "label": "New trucks and SUVs", "naics": "new", "demand": ["vehicles", "veh3p_share", "rural_share", "kids_share"]},
-    {"id": "usedcar", "label": "Used cars", "naics": "used", "spend": False, "demand": ["vehicles", "inc35_100_share", "car_share"]},
-    {"id": "usedtruck", "label": "Used trucks and SUVs", "naics": "used", "spend": False, "demand": ["vehicles", "veh3p_share", "rural_share", "inc35_100_share"]},
+SUBCATS = [   # buyer profiles follow Nielsen Scarborough USA+ 2026 R1 (vehicle household plans to buy in the next 12 months)
+    {"id": "newcar", "label": "New cars", "naics": "new", "spend": False, "demand": ["vehicles", "a18_54_share", "inc35p_share", "car_share"]},
+    {"id": "newtruck", "label": "New trucks and SUVs", "naics": "new", "demand": ["vehicles", "veh3p_share", "rural_share", "a45p_share", "inc100_share"]},
+    {"id": "usedcar", "label": "Used cars", "naics": "used", "spend": False, "demand": ["vehicles", "a18_44_share", "inclt50_share", "car_share"]},
+    {"id": "usedtruck", "label": "Used trucks and SUVs", "naics": "used", "spend": False, "demand": ["vehicles", "veh3p_share", "rural_share", "a25_54_share", "inclt75_share"]},
 ]
 DEMAND_LABELS = {"vehicles": "Household vehicles", "inc100_share": "Households earning $100K+", "car_share": "Share of workers commuting by car",
                  "veh3p_share": "Households with 3+ vehicles", "rural_share": "Share of residents in small-town and rural ZIPs",
-                 "kids_share": "Households with children", "inc35_100_share": "Households earning $35K–$99K"}
+                 "kids_share": "Households with children", "inc35_100_share": "Households earning $35K–$99K",
+                 "inc35p_share": "Households earning $35K+", "inclt50_share": "Households earning under $50K",
+                 "inclt75_share": "Households earning under $75K", "a18_54_share": "Adults 18–54 (share of adults)",
+                 "a18_44_share": "Adults 18–44 (share of adults)", "a25_54_share": "Adults 25–54 (share of adults)",
+                 "a45p_share": "Adults 45+ (share of adults)"}
 COUNTS = ["population", "households", "adults", "vehicles", "veh_hh", "veh3p", "car_commute"]
-RATE_PARTS = {"inc100_share": ("inc100", "inc_tot"), "inc35_100_share": ("inc35_100", "inc_tot"), "inc75_share": ("inc75", "inc_tot"),
+RATE_PARTS = {"inc35p_share": ("inc35p", "inc_tot"), "inclt50_share": ("inclt50", "inc_tot"), "inclt75_share": ("inclt75", "inc_tot"),
+              "a18_54_share": ("a18_54", "adults18"), "a18_44_share": ("a18_44", "adults18"), "a25_54_share": ("a25_54", "adults18"),
+              "a45p_share": ("a45p", "adults18"), "inc100_share": ("inc100", "inc_tot"), "inc35_100_share": ("inc35_100", "inc_tot"), "inc75_share": ("inc75", "inc_tot"),
               "car_share": ("car_commute", "workers"), "veh3p_share": ("veh3p", "veh_tot"), "noveh_share": ("veh0", "veh_tot"),
               "rural_share": ("rural_pop", "acs_pop"), "kids_share": ("hh_kids", "hh_tot"), "own_share": ("veh_own", "veh_tot")}
 PER = {"veh_per_hh": ("vehicles", "veh_tot")}
 RATES = list(RATE_PARTS) + list(PER)
 SUMS = ["population", "households", "adults18", "acs_pop", "vehicles", "veh_hh", "veh0", "veh3p", "veh_tot", "veh_own", "car_commute",
-        "workers", "inc100", "inc35_100", "inc75", "inc_tot", "rural_pop", "hh_kids", "hh_tot"]
+        "workers", "inc100", "inc35_100", "inc75", "inc_tot", "rural_pop", "hh_kids", "hh_tot",
+        "inc35p", "inclt50", "inclt75", "a18_54", "a18_44", "a25_54", "a45p"]
 
 
 def log(*a): print(*a, flush=True)
@@ -72,14 +79,22 @@ def load_inputs(rep):
     z["cbsa_code"] = z.cbsa_code.fillna(""); z["dma_code"] = z.dma_code.fillna("0")
     aud = json.load(open(os.path.join(AUD, "zip_audience.json")))
     a = pd.DataFrame(aud["cols"])
-    need = ["acs_pop", "adults18", "inc_tot", "inc_35_50", "inc_50_75", "inc_75_100", "inc_100_150", "inc_150_200", "inc_200p",
+    need = ["acs_pop", "adults18", "a25_64", "a45p", "a65p", "m55p", "f55p", "m18_24", "m25_34", "m35_44", "f18_24", "f25_34", "f35_44", "inc_lt35", "inc_tot", "inc_35_50", "inc_50_75", "inc_75_100", "inc_100_150", "inc_150_200", "inc_200p",
             "car_commute", "workers", "hh_kids", "hh_tot"]
     miss = [c for c in need if c not in a.columns]
     if miss: sys.exit(f"shared/audience/zip_audience.json lacks {miss}; the audience step must run first.")
     a["inc100"] = a[["inc_100_150", "inc_150_200", "inc_200p"]].sum(axis=1, min_count=3)
     a["inc75"] = a[["inc_75_100", "inc100"]].sum(axis=1, min_count=2)
     a["inc35_100"] = a[["inc_35_50", "inc_50_75", "inc_75_100"]].sum(axis=1, min_count=3)
-    z = z.merge(a[["zip", "acs_pop", "adults18", "inc100", "inc75", "inc35_100", "inc_tot", "car_commute", "workers", "hh_kids", "hh_tot"]], on="zip", how="left")
+    a["inc35p"] = a.inc_tot - a.inc_lt35
+    a["inclt50"] = a.inc_lt35 + a.inc_35_50
+    a["inclt75"] = a.inclt50 + a.inc_50_75
+    a["a55p"] = a.m55p + a.f55p
+    a["a18_54"] = a.adults18 - a.a55p
+    a["a18_44"] = a[["m18_24", "m25_34", "m35_44", "f18_24", "f25_34", "f35_44"]].sum(axis=1, min_count=6)
+    a["a25_54"] = a.a25_64 - (a.a55p - a.a65p)
+    z = z.merge(a[["zip", "acs_pop", "adults18", "inc100", "inc75", "inc35_100", "inc_tot", "car_commute", "workers", "hh_kids", "hh_tot",
+                   "inc35p", "inclt50", "inclt75", "a18_54", "a18_44", "a25_54", "a45p"]], on="zip", how="left")
     v = pd.read_csv(os.path.join(MASTER, "zip_acs.csv.gz"), dtype={"zip": str}, usecols=["zip"] + [f"B25044_E{n:03d}" for n in range(1, 16)])
     m = pd.DataFrame({"zip": v.zip})
     for k, (o, r) in {"0": (3, 10), "1": (4, 11), "2": (5, 12), "3": (6, 13), "4": (7, 14), "5": (8, 15)}.items():
@@ -226,7 +241,8 @@ def main():
 
     # ---------------- Checks ----------------
     U = lambda k: float(us[k].iloc[0])
-    for k, lo, hi in (("inc100_share", .30, .48), ("inc35_100_share", .30, .45), ("car_share", .70, .90), ("veh3p_share", .18, .26),
+    for k, lo, hi in (("inc35p_share", .70, .84), ("inclt50_share", .20, .34), ("inclt75_share", .34, .52), ("a18_54_share", .52, .68),
+                      ("a18_44_share", .40, .54), ("a25_54_share", .42, .56), ("a45p_share", .46, .58), ("inc100_share", .30, .48), ("inc35_100_share", .30, .45), ("car_share", .70, .90), ("veh3p_share", .18, .26),
                       ("noveh_share", .06, .11), ("rural_share", .12, .25), ("kids_share", .25, .35)):
         rep.append((f"U.S. {DEMAND_LABELS.get(k, k).lower()}" if k in DEMAND_LABELS else f"U.S. {k}", "PASS" if lo <= U(k) <= hi else "FAIL", f"{U(k):.1%} (expected {lo:.0%}–{hi:.0%})"))
     vph = U("veh_per_hh")
