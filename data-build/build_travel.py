@@ -39,7 +39,9 @@ EASI = {"lodging_trips": "Lodging on out-of-town trips", "other_lodging": "Other
 # Hotels and Casinos demand follow Nielsen Scarborough USA+ 2026 R1 indexes (adults 18+): hotel/motel guests index 103-107
 # at ages 25-64 and 117-128 at household income $100K+; casino visitors index 110-113 at ages 35-64 and 107-111 at $75K+; foreign travelers (Tour operators) index
 # 104-111 at ages 35-64, 138 at $100K-$249K and 210 at $250K+; cruise passengers (past 3 years) index 108-112 at ages
-# 45+ and 106-143 at $75K+.
+# 45+ and 106-143 at $75K+. Resort vacation planners (any resort type) index 109-114 at ages 25-54, 121-141 at $100K+
+# and 117 for parents; visitors-bureau travelers (weekend and family trips) 105-111 at 25-54, 105-129 at $75K+, 119 for
+# parents; escorted tour planners 115-162 at ages 55+ and 128-183 at $100K+.
 # Casinos: gambling spending per person by state, 2025 (U.S. Bureau of Economic Analysis state household spending,
 # released Sep 30 2026), spread to ZIPs by state and summed
 # up to each market, so a market's figure is the population-weighted average of its states.
@@ -47,22 +49,22 @@ GAMBLING = ("gambling", "Gambling")
 PALM_SPRINGS, RIVERSIDE_METRO = "804", "40140"
 SUBCATS = [
     {"id": "hotels", "label": "Hotels and lodging", "easi": "lodging_trips", "demand": ["inc100", "inc100_share", "a25_64_share"]},
-    {"id": "resorts", "label": "Resorts", "easi": "other_lodging", "demand": ["inc100", "inc100_share", "a55p_share", "kids_share"]},
+    {"id": "resorts", "label": "Resorts", "easi": "other_lodging", "demand": ["inc100", "inc100_share", "a25_54_share", "kids_share"]},
     {"id": "cruises", "label": "Cruises", "easi": "public_transport", "demand": ["inc75", "a45p_share", "inc75_share"]},
     {"id": "casinos", "label": "Casinos", "easi": "gambling", "demand": ["inc75", "a35_64_share", "inc75_share"]},
-    {"id": "tours", "label": "Tour operators", "easi": "public_transport", "demand": ["inc150", "inc150_share", "a35_64_share"]},
-    {"id": "cvb", "label": "Visitors bureaus", "easi": "lodging_trips", "demand": ["inc75", "inc75_share", "kids_share"]},
+    {"id": "tours", "label": "Tour operators", "easi": "public_transport", "demand": ["inc100", "inc100_share", "a55p_share"]},
+    {"id": "cvb", "label": "Visitors bureaus", "easi": "lodging_trips", "demand": ["inc75", "inc75_share", "a25_54_share", "kids_share"]},
 ]
 DEMAND_LABELS = {"inc100": "Households earning $100K+", "inc75": "Households earning $75K+",
                  "inc100_share": "Share of households earning $100K+", "inc75_share": "Share of households earning $75K+",
                  "inc150": "Households earning $150K+", "inc150_share": "Share of households earning $150K+",
-                 "a35_64_share": "Adults 35–64 (share of adults)", "a45p_share": "Adults 45+ (share of adults)", "a55p_share": "Adults 55+ (share of adults)",
+                 "a35_64_share": "Adults 35–64 (share of adults)", "a45p_share": "Adults 45+ (share of adults)", "a25_54_share": "Adults 25–54 (share of adults)", "a55p_share": "Adults 55+ (share of adults)",
                  "a25_64_share": "Adults 25–64 (share of adults)", "kids_share": "Households with children"}
 COUNTS = ["population", "households", "adults", "inc100", "inc75", "inc150", "a55p"]
 RATE_PARTS = {"inc100_share": ("inc100", "inc_tot"), "inc150_share": ("inc150", "inc_tot"), "inc75_share": ("inc75", "inc_tot"), "kids_share": ("hh_kids", "hh_tot"),
-              "a35_64_share": ("a35_64", "adults18"), "a55p_share": ("a55p", "adults18"), "a45p_share": ("a45p", "adults18"), "a25_64_share": ("a25_64", "adults18")}
+              "a35_64_share": ("a35_64", "adults18"), "a55p_share": ("a55p", "adults18"), "a45p_share": ("a45p", "adults18"), "a25_54_share": ("a25_54", "adults18"), "a25_64_share": ("a25_64", "adults18")}
 RATES = list(RATE_PARTS)
-SUMS = ["population", "households", "adults18", "inc100", "inc75", "inc150", "inc_tot", "hh_kids", "hh_tot", "a35_64", "a55p", "a45p", "a25_64", "gam_dollars"]
+SUMS = ["population", "households", "adults18", "inc100", "inc75", "inc150", "inc_tot", "hh_kids", "hh_tot", "a35_64", "a55p", "a45p", "a25_64", "a25_54", "gam_dollars"]
 
 
 def log(*a): print(*a, flush=True)
@@ -91,6 +93,7 @@ def load_inputs():
     a["inc150"] = a[["inc_150_200", "inc_200p"]].sum(axis=1, min_count=2)
     a["a55p"] = a[["m55p", "f55p"]].sum(axis=1, min_count=2)
     a["a35_64"] = a.m35_44 + a.f35_44 + a.a45p - a.a65p
+    a["a25_54"] = a.a25_64 - (a.a55p - a.a65p)
     g = pd.read_csv(os.path.join(HERE, "sources", "gambling_spend_state.csv"))
     ab = {"Alabama": "AL", "Alaska": "AK", "Arizona": "AZ", "Arkansas": "AR", "California": "CA", "Colorado": "CO", "Connecticut": "CT",
           "Delaware": "DE", "District of Columbia": "DC", "Florida": "FL", "Georgia": "GA", "Hawaii": "HI", "Idaho": "ID", "Illinois": "IL",
@@ -104,7 +107,7 @@ def load_inputs():
     pp = {k: v for k, v in pp.items() if isinstance(k, str)}
     if len(pp) != 51: sys.exit("gambling_spend_state.csv must list all 50 states and DC")
     z["gam_dollars"] = z.state.map(pp) * z.population
-    z = z.merge(a[["zip", "adults18", "a25_64", "a35_64", "a45p", "a55p", "inc100", "inc75", "inc150", "inc_tot", "hh_kids", "hh_tot"]], on="zip", how="left")
+    z = z.merge(a[["zip", "adults18", "a25_64", "a25_54", "a35_64", "a45p", "a55p", "inc100", "inc75", "inc150", "inc_tot", "hh_kids", "hh_tot"]], on="zip", how="left")
     return z, aud
 
 
@@ -205,7 +208,7 @@ def main():
     # ---------------- Checks ----------------
     U = lambda k: float(us[k].iloc[0])
     for k, lo, hi in (("inc100_share", .30, .48), ("inc75_share", .42, .62), ("inc150_share", .14, .26), ("kids_share", .25, .35),
-                      ("a35_64_share", .44, .56), ("a55p_share", .30, .42), ("a45p_share", .46, .58), ("a25_64_share", .60, .72)):
+                      ("a35_64_share", .44, .56), ("a55p_share", .30, .42), ("a45p_share", .46, .58), ("a25_54_share", .42, .56), ("a25_64_share", .60, .72)):
         rep.append((f"U.S. {DEMAND_LABELS[k].lower()}", "PASS" if lo <= U(k) <= hi else "FAIL", f"{U(k):.1%} (expected {lo:.0%}–{hi:.0%})"))
     for name, df in (("DMA", dma), ("Metro", met)):
         sc = df[[f"score@{s['id']}" for s in SUBCATS]]

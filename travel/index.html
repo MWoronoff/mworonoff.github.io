@@ -54,7 +54,7 @@ AdtaxiAnalyzer.start({
     "demand": [
      "inc100",
      "inc100_share",
-     "a55p_share",
+     "a25_54_share",
      "kids_share"
     ],
     "spend": null
@@ -77,9 +77,9 @@ AdtaxiAnalyzer.start({
    },
    "tours": {
     "demand": [
-     "inc150",
-     "inc150_share",
-     "a35_64_share"
+     "inc100",
+     "inc100_share",
+     "a55p_share"
     ],
     "spend": null
    },
@@ -87,6 +87,7 @@ AdtaxiAnalyzer.start({
     "demand": [
      "inc75",
      "inc75_share",
+     "a25_54_share",
      "kids_share"
     ],
     "spend": null
@@ -205,14 +206,7 @@ AdtaxiAnalyzer.start({
    "format": "int",
    "subs": [
     "hotels",
-    "resorts"
-   ]
-  },
-  {
-   "key": "inc150",
-   "label": "Households earning $150K+",
-   "format": "int",
-   "subs": [
+    "resorts",
     "tours"
    ]
   },
@@ -232,14 +226,7 @@ AdtaxiAnalyzer.start({
    "format": "pct",
    "subs": [
     "hotels",
-    "resorts"
-   ]
-  },
-  {
-   "key": "inc150_share",
-   "label": "Share of households earning $150K+",
-   "format": "pct",
-   "subs": [
+    "resorts",
     "tours"
    ]
   },
@@ -258,8 +245,7 @@ AdtaxiAnalyzer.start({
    "label": "Adults 35–64 (share of adults)",
    "format": "pct",
    "subs": [
-    "casinos",
-    "tours"
+    "casinos"
    ]
   },
   {
@@ -267,7 +253,16 @@ AdtaxiAnalyzer.start({
    "label": "Adults 55+ (share of adults)",
    "format": "pct",
    "subs": [
-    "resorts"
+    "tours"
+   ]
+  },
+  {
+   "key": "a25_54_share",
+   "label": "Adults 25–54 (share of adults)",
+   "format": "pct",
+   "subs": [
+    "resorts",
+    "cvb"
    ]
   },
   {
@@ -516,15 +511,14 @@ AdtaxiAnalyzer.start({
   "easi_public_transport_total",
   "easi_gambling_total",
   "inc100_share",
-  "inc150_share",
   "inc75_share",
   "a55p_share",
   "a45p_share",
   "a35_64_share",
+  "a25_54_share",
   "a25_64_share",
   "kids_share",
   "inc100",
-  "inc150",
   "inc75",
   "density"
  ],
@@ -552,10 +546,9 @@ AdtaxiAnalyzer.start({
   "adults",
   "inc100",
   "inc100_share",
-  "inc150",
-  "inc150_share",
   "inc75",
   "inc75_share",
+  "a25_54_share",
   "a35_64_share",
   "a45p_share",
   "a55p_share",
@@ -580,8 +573,8 @@ AdtaxiAnalyzer.start({
    "title": "Consumer Demand",
    "body": [
     "Every category starts with the number of its target households, then adds the traits that mark its guests (Census ACS).",
-    "Hotels and lodging: households earning $100K+ (count and share), adults 25–64. Resorts: households earning $100K+ (count and share), adults 55+, households with children. Cruises: households earning $75K+ (count and share), adults 45+. Casinos: households earning $75K+ (count and share), adults 35–64. Tour operators: households earning $150K+ (count and share), adults 35–64. Visitors bureaus: households earning $75K+ (count and share), households with children.",
-    "Hotels and Casinos follow Nielsen Scarborough USA+ 2026 indexes (adults 18+): hotel and motel guests over-index at ages 25–64 and household income of $100K+ (index 117–128); casino visitors at ages 35–64 (110–113) and $75K+ (107–111). Tour operators follow foreign travelers, who over-index at ages 35–64 (104–111) and climb with income (138 at $100K–$249K, 210 at $250K+). Cruises follow cruise passengers of the past 3 years: ages 45+ (108–112) and $75K+ (106–143). The other profiles follow AdMall's customer descriptions."
+    "Hotels and lodging: households earning $100K+ (count and share), adults 25–64. Resorts: households earning $100K+ (count and share), adults 25–54, households with children. Cruises: households earning $75K+ (count and share), adults 45+. Casinos: households earning $75K+ (count and share), adults 35–64. Tour operators: households earning $100K+ (count and share), adults 55+. Visitors bureaus: households earning $75K+ (count and share), adults 25–54, households with children.",
+    "All six profiles follow Nielsen Scarborough USA+ 2026 indexes (adults 18+, 100 = average). Hotel and motel guests: ages 25–64, $100K+ (117–128). Resort vacation planners (all-inclusive, beach or lake, mountain, spa, golf or tennis): ages 25–54 (109–114), $100K+ (121–141), parents (117). Cruise passengers of the past 3 years: ages 45+ (108–112), $75K+ (106–143). Casino visitors: ages 35–64 (110–113), $75K+ (107–111). Escorted tour planners: ages 55+ (115–162), $100K+ (128–183). Weekend and family vacation planners (Visitors bureaus): ages 25–54 (105–111), $75K+ (105–129), parents (119)."
    ]
   },
   {
@@ -628,10 +621,10 @@ AdtaxiAnalyzer.start({
    "label": "U.S. Bureau of Economic Analysis, state household spending 2025 (gambling, for Casinos)"
   },
   {
-   "label": "AdMall Local Account Intelligence (travel distances, peak months, customer profiles)"
+   "label": "AdMall Local Account Intelligence (travel distances, peak months, ad budgets)"
   },
   {
-   "label": "Nielsen Scarborough USA+ Spring 2026 (Travel slides; hotel, casino, cruise and foreign-travel profiles)"
+   "label": "Nielsen Scarborough USA+ Spring 2026 (Travel slides and all six travel profiles)"
   },
   {
    "label": "Census Gazetteer (land area)"
