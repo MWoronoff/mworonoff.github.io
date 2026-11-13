@@ -968,14 +968,14 @@
       cfg.tv === false ? null : el("button", { type: "button", class: "az-btn az-only", text: "TV to Digital",
         title: "TV-to-Digital Analyzer: see what happens when budget moves from local broadcast TV into targeted digital video, starting from this category and market",
         onclick: function () { location.href = self.tvUrl(); } }),
-      // Results lives in the Trade area's Recommended allocation (shared/radius.js), matched to the plan's channels
-      (this.reportBtn = reportButton(function () { return self.state.sub; }, function () {
-        var s = (cfg.subcategories || []).filter(function (x) { return x.id === self.state.sub; })[0];
-        return s ? s.label : ""; })),
       // Category slides (market size and buyers, then media use): an opening conversation, so on every tab from the start
       SLIDE_CATS[cfg.exportName] ? el("button", { type: "button", class: "az-btn az-slides-btn", "aria-haspopup": "dialog", text: SLIDE_CATS[cfg.exportName] + " slides",
         title: "U.S. market size, buyers and how they use media", onclick: function () {
           loadSlides(function () { if (window.AdtaxiSlides) AdtaxiSlides.open({ cat: cfg.exportName, only: "category" }); }); } }) : null,
+      // Results lives in the Trade area's Recommended allocation (shared/radius.js), matched to the plan's channels
+      (this.reportBtn = reportButton(function () { return self.state.sub; }, function () {
+        var s = (cfg.subcategories || []).filter(function (x) { return x.id === self.state.sub; })[0];
+        return s ? s.label : ""; })),
       exportBtn
     ]));
     var controlBar = el("section", { class: "az-controls", "aria-label": "Analyzer controls" }, controls);
@@ -1114,7 +1114,7 @@
     }
     if (window.AdtaxiRadius) go();
     else {
-      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261113e";   // version tag: browsers fetch the new file after an update
+      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261113f";   // version tag: browsers fetch the new file after an update
       sc.onload = go; sc.onerror = function () { self.showError("The radius tool didn't load. Refresh the page and try again."); };
       document.head.appendChild(sc);
     }
@@ -1389,7 +1389,7 @@
     if (window.AdtaxiSlides) { done(); return; }
     if (loadSlides.waiting) { loadSlides.waiting.push(done); return; }
     loadSlides.waiting = [done];
-    var sc = document.createElement("script"); sc.src = "../shared/slides.js?v=20261113e";
+    var sc = document.createElement("script"); sc.src = "../shared/slides.js?v=20261113f";
     sc.onload = sc.onerror = function () { var w = loadSlides.waiting; loadSlides.waiting = null; w.forEach(function (f) { f(); }); };
     document.head.appendChild(sc);
   }
@@ -1963,8 +1963,8 @@
         .then(function (b) { if (b.map && (b.map[cfg.exportName] || (b.drivers && b.drivers[cfg.exportName]))) { self[key] = b; self.tabBar.querySelector('[data-tab="' + tab + '"]').hidden = false; self.tabBar.hidden = false; } })
         .catch(function () { /* no tab without data */ });
     }
-    if (cfg.benchmarks !== false) load(cfg.benchmarksData || "../shared/benchmarks.json?v=20261113e", "bench", "bench");
-    if (cfg.timing !== false) load(cfg.timingData || "../shared/timing.json?v=20261113e", "timing", "timing");
+    if (cfg.benchmarks !== false) load(cfg.benchmarksData || "../shared/benchmarks.json?v=20261113f", "bench", "bench");
+    if (cfg.timing !== false) load(cfg.timingData || "../shared/timing.json?v=20261113f", "timing", "timing");
   };
   Analyzer.prototype.setTab = function (tab) {
     var self = this, prev = this.tab;
