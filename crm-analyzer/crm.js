@@ -982,7 +982,17 @@
       if (S.params.sub && site) h += "&sub=" + encodeURIComponent(S.params.sub);
       location.href = "../" + to + "/" + h;
     } });
-    return el("div", { class: "crm-plan-row" }, [sel, btn,
+    // TV to Digital: the same category and the DMA where most of the advertiser's in-market customers live
+    var byDma = {}; (R.items || []).forEach(function (it) { if (it.z && it.z.dma) byDma[it.z.dma] = (byDma[it.z.dma] || 0) + (it.A || 0); });
+    var topDma = Object.keys(byDma).sort(function (a, b) { return byDma[b] - byDma[a]; })[0];
+    var tv = el("button", { class: "az-btn", type: "button", text: "TV to Digital →", title: "Compare a broadcast TV buy with digital video in the DMA where most of these customers live", onclick: function () {
+      var to = site || (sel && sel.value), q = [];
+      if (to) q.push("cat=" + encodeURIComponent(to));
+      if (topDma) q.push("dma=" + encodeURIComponent(topDma));
+      q.push("from=" + encodeURIComponent("Customer Analysis"), "back=crm-analyzer");
+      location.href = "../TV/?" + q.join("&");
+    } });
+    return el("div", { class: "crm-plan-row" }, [sel, btn, tv,
       el("span", { class: "crm-note", text: "Opens the proposal builder with " + NF0.format(Math.min(nOver, zips.length)) + " over-performing ZIP" + (nOver === 1 ? "" : "s") +
         (nLook ? " and the " + NF0.format(nLook) + " best untapped look-alike" + (nLook === 1 ? "" : "s") : "") + " as the trade area." })].filter(Boolean));
   }

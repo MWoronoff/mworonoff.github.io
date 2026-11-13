@@ -558,6 +558,8 @@ body.az-printing .az-map { height: 420px; }
 .az-tag { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 999px; background: #fff4d6; color: #6b5200; border: 1px solid #ead58d; font-size: 11px; font-weight: 600; vertical-align: middle; white-space: nowrap; }
 h2 .az-tag { font-size: 12px; }
 .az-pickcol { width: 30px; padding-left: 8px !important; padding-right: 0 !important; }
+.az-table th.az-pickhead { width: 62px; white-space: normal; font-size: 10.5px; line-height: 1.15; font-weight: 700; color: var(--teal); text-transform: none; letter-spacing: 0; text-align: center; padding-right: 4px !important; }
+.az-table td.az-pickcol { text-align: center; }
 .az-pickcol input { width: 16px; height: 16px; margin: 0; accent-color: var(--teal); cursor: pointer; }
 .az-pickbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin: 0 0 10px; padding: 10px 14px; border: 1px solid var(--teal); border-radius: 10px; background: #eef8f6; }
 .az-pickbar[hidden] { display: none; }
@@ -710,7 +712,14 @@ h2 .az-tag { font-size: 12px; }
 .az-next > input, .az-next > select, .az-next > textarea, textarea.az-next, button.az-next { background-color: #d3f2e7; border: 2px solid var(--teal) !important; box-shadow: 0 0 0 4px rgba(15,126,112,.14); }
 button.az-btn.primary.az-next { background: var(--teal); box-shadow: 0 0 0 4px rgba(15,126,112,.25); }
 .az-nexttag { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 999px; background: var(--teal); color: #fff; font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; vertical-align: 1px; }
-.az-startline { margin: -4px 2px 12px; font-size: 13px; color: #44586c; }
+.az-startline { display: flex; align-items: flex-start; gap: 6px; margin: 0 0 12px; padding: 9px 10px 9px 14px; font-size: 14px; line-height: 1.4; color: #1d3a52;
+  background: #e6f6f1; border: 1px solid #b9e0d8; border-left: 5px solid var(--teal); border-radius: 10px; }
+.az-startline[hidden] { display: none; }
+.az-startline > span { flex: 1; }
+.az-startstep { white-space: nowrap; color: var(--teal) !important; }
+.az-startx { flex: none; margin: -3px -2px 0 6px; width: 28px; height: 28px; border: 0; border-radius: 6px; background: transparent; color: #44586c; font-size: 15px; line-height: 1; cursor: pointer; }
+.az-startx:hover, .az-startx:focus-visible { background: #cdeee4; color: var(--navy); }
+@media print { .az-startline { display: none !important; } }
 /* Guided next step on the market views (engine guideCue): one highlighted field or panel at a time */
 .az-field.az-guide > span::after { content: "Next"; display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 999px; background: var(--teal); color: #fff; font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; vertical-align: 1px; }
 .az-field.az-guide > span { color: var(--teal); font-weight: 700; }

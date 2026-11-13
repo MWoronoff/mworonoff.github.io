@@ -1492,6 +1492,8 @@
           el("div", { class: "rz-budget-actions" }, [
             this.pBtn = el("button", { type: "button", class: "az-btn primary", text: "Build proposal", onclick: function () { self.pBox.hidden = !self.pBox.hidden; if (!self.pBox.hidden) self.pClient.focus(); self.guideNext(); } }),
             el("button", { type: "button", class: "az-btn", text: "Export allocation (CSV)", onclick: function () { self.exportBudget(); } }),
+            el("button", { type: "button", class: "az-btn", text: "TV to Digital", title: "Compare a broadcast TV buy with digital video in this trade area\u2019s main DMA, then bring the shift back to this plan",
+              onclick: function () { location.href = self.tvUrl(); } }),
             this.resultsBtn = el("button", { type: "button", class: "az-btn az-results-btn", text: "Results", "aria-haspopup": "dialog", hidden: RESULT_CATS.indexOf(this.resultsCat()) < 0 ? true : null,
               title: "Case studies from this category and from the same channels as this plan", onclick: function () { self.openResults(); } })])]),
         this.bSuggest, this.pBox, this.bRates, this.bHand, this.bSummary, this.bWarn, this.cWrap, this.bDeliver,
@@ -1567,7 +1569,7 @@
     if (window.AdtaxiResults) { done(); return; }
     if (loadResults.waiting) { loadResults.waiting.push(done); return; }
     loadResults.waiting = [done];
-    var sc = document.createElement("script"); sc.src = src || "../shared/results.js?v=20261113i";
+    var sc = document.createElement("script"); sc.src = src || "../shared/results.js?v=20261113j";
     sc.onload = sc.onerror = function () { var w = loadResults.waiting; loadResults.waiting = null; w.forEach(function (f) { f(); }); };
     document.head.appendChild(sc);
   }
@@ -1609,7 +1611,7 @@
     if (window.AdtaxiSlides) { done(); return; }
     if (loadSlides.waiting) { loadSlides.waiting.push(done); return; }
     loadSlides.waiting = [done];
-    var sc = document.createElement("script"); sc.src = "../shared/slides.js?v=20261113i";
+    var sc = document.createElement("script"); sc.src = "../shared/slides.js?v=20261113j";
     sc.onload = sc.onerror = function () { var w = loadSlides.waiting; loadSlides.waiting = null; w.forEach(function (f) { f(); }); };
     document.head.appendChild(sc);
   }
@@ -1622,6 +1624,16 @@
       var plan = P && self.budget && self.budget.strat ? (self.allocation().channels || []).map(function (c) { return c.id; }) : [];
       AdtaxiSlides.open({ cat: self.resultsCat(), only: "platforms", plan: plan, strategy: self.budget && self.budget.strat, adOrder: adOrder || self.adOrder || [], channels: P && P.CHANNELS });
     });
+  };
+  // TV-to-Digital Analyzer: this category and the DMA holding most of the trade area's people
+  Radius.prototype.tvUrl = function () {
+    var q = [], key = (location.pathname.split("/").filter(Boolean)[0] || ""), byDma = {};
+    if (key && key !== "radius") q.push("cat=" + encodeURIComponent(key));
+    (this.rows || []).forEach(function (r) { if (r.dma && r.dma !== "0") byDma[r.dma] = (byDma[r.dma] || 0) + (r.pop || r.base || 1); });
+    var top = Object.keys(byDma).sort(function (a, b) { return byDma[b] - byDma[a]; })[0];
+    if (top) q.push("dma=" + encodeURIComponent(top));
+    q.push("from=" + encodeURIComponent(((this.cfg.embedded ? document.title : this.cfg.title) || "the Trade area").replace(/\s*[\u2013\u2014|-]\s*Adtaxi.*$/i, "")));
+    return "../TV/?" + q.join("&");
   };
   Radius.prototype.resultsCat = function () { return String(this.cfg.resultsCategory || this.cfg.exportName || "").replace(/-radius$/, ""); };
   Radius.prototype.renderResults = function () {

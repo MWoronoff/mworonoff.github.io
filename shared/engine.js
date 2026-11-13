@@ -539,7 +539,7 @@
     var NOUN = { dma: ["DMA", "DMAs"], metro: ["metro", "metros"], county: ["county", "counties"], zip: ["ZIP", "ZIPs"] };
     var mix = ["dma", "metro", "county", "zip"].filter(function (k) { return count[k]; }).map(function (k) { return NF0.format(count[k]) + " " + NOUN[k][count[k] === 1 ? 0 : 1]; }).join(", ");
     bar.appendChild(el("div", { class: "az-pickinfo" }, [
-      el("p", null, [el("b", { text: "Combined area: " + mix }), pop ? " · " + (overlap ? "about " : "") + NF0.format(pop) + " people" + (overlap ? " before overlaps are removed" : "") : ""]),
+      el("p", null, [el("b", { text: "Trade area so far: " + mix }), pop ? " · " + (overlap ? "about " : "") + NF0.format(pop) + " people" + (overlap ? " before overlaps are removed" : "") : ""]),
       el("div", { class: "az-chips" }, B.map(function (b) {
         return el("span", { class: "az-chip" }, [b.name, el("button", { type: "button", "aria-label": "Remove " + b.name, title: "Remove", text: "×", onclick: function () { self.toggleBasket(b.level, b.id, null, false); } })]);
       })),
@@ -1034,8 +1034,12 @@
     this.benchPanel = el("section", { class: "az-bench", hidden: true, "aria-live": "polite" });
     this.timingPanel = el("section", { class: "az-bench az-timing", hidden: true, "aria-live": "polite" });
     this.tab = "markets";
-    this.startLine = GUIDE ? el("p", { class: "az-startline az-only" }, [el("b", { text: "Start here: " }), "choose a category, then click a market on the map or in the ranked list. " +
-      (cfg.radius ? "Open Trade area to size a business's area and build its plan." : "")]) : null;
+    var startOff = false; try { startOff = localStorage.getItem("az-startline-off") === "1"; } catch (e) {}
+    this.startOff = startOff;
+    this.startLine = GUIDE ? el("div", { class: "az-startline az-only", role: "status", "aria-live": "polite" }, [
+      this.startStep = el("b", { class: "az-startstep" }), this.startText = el("span"),
+      el("button", { type: "button", class: "az-startx", "aria-label": "Hide these step-by-step tips", title: "Hide these tips (the green highlights stay)", text: "\u2715",
+        onclick: function () { self.startOff = true; try { localStorage.setItem("az-startline-off", "1"); } catch (e) {} self.startLine.hidden = true; } })]) : null;
     this.tabParts = [controlBar, this.startLine, this.notice, this.errorBox, this.drillBar, stage, this.adPanel, this.tablePanel, sources, this.radiusBox];
     var main = el("main", { class: "az-main" }, [controlBar, this.startLine, this.notice, this.errorBox, this.drillBar, stage, this.adPanel, this.tablePanel, sources, this.radiusBox, this.benchPanel, this.timingPanel]);
     this.root.innerHTML = "";
@@ -1114,7 +1118,7 @@
     }
     if (window.AdtaxiRadius) go();
     else {
-      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261113i";   // version tag: browsers fetch the new file after an update
+      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261113j";   // version tag: browsers fetch the new file after an update
       sc.onload = go; sc.onerror = function () { self.showError("The radius tool didn't load. Refresh the page and try again."); };
       document.head.appendChild(sc);
     }
@@ -1189,7 +1193,6 @@
     if (this.tvBtn) this.tvBtn.hidden = this.state.level === "us" || this.mode === "radius";
     if (!GUIDE) return;
     var s = this.state, rad = this.mode === "radius", g = this.gDone || (this.gDone = {});
-    if (this.startLine) this.startLine.hidden = rad;
     if (s.level !== "us") g.geo = true;
     var picked = !!s.area && s.level !== "us";   // the U.S. view keeps the national total selected; that isn't a pick
     if (picked || g.geo) g.cat = true;
@@ -1201,6 +1204,20 @@
     var tb = this.levelSeg && this.levelSeg.querySelector('[data-level="radius"]');
     if (!tb && this.nav && this.nav.radius && this.nav.radius.tagName === "BUTTON") tb = this.nav.radius;
     if (tb) tb.classList.toggle("az-cue", step === "trade");
+    // The Start here banner says what to do next, in step order
+    if (this.startLine) {
+      this.startLine.hidden = rad || this.startOff;
+      var steps = (this.catField ? ["cat"] : []).concat(["geo", "pick"]).concat(this.cfg.radius ? ["trade"] : []);
+      var n = steps.indexOf(step), catWord = (this.catField && this.catField.firstChild && this.catField.firstChild.textContent || "category").toLowerCase();
+      var TXT = {
+        cat: "Choose a " + catWord + " above. The map and rankings update to match.",
+        geo: "Choose how to view markets: DMA, Metro, County or ZIPs.",
+        pick: "Click a market on the map or in the ranked list to see its numbers. Tick the boxes to add several markets to one trade area.",
+        trade: "Open Trade area to size this business\u2019s area, count likely customers and build its plan."
+      };
+      if (n < 0) { this.startStep.textContent = "Next: "; this.startText.textContent = this.cfg.radius ? "Open Trade area to size this business\u2019s area and build its plan." : "Look inside a market to rank its counties and ZIPs, or export the list."; }
+      else { this.startStep.textContent = "Step " + (n + 1) + " of " + steps.length + ": "; this.startText.textContent = TXT[step]; }
+    }
   };
   Analyzer.prototype.select = function (id, opts) {
     this.state.area = id;
@@ -1391,7 +1408,7 @@
     if (window.AdtaxiSlides) { done(); return; }
     if (loadSlides.waiting) { loadSlides.waiting.push(done); return; }
     loadSlides.waiting = [done];
-    var sc = document.createElement("script"); sc.src = "../shared/slides.js?v=20261113i";
+    var sc = document.createElement("script"); sc.src = "../shared/slides.js?v=20261113j";
     sc.onload = sc.onerror = function () { var w = loadSlides.waiting; loadSlides.waiting = null; w.forEach(function (f) { f(); }); };
     document.head.appendChild(sc);
   }
@@ -1757,7 +1774,7 @@
     var pickable = !!(RCf && RCf.customArea) && (drillNav ? AREA_PREFIX[tl] != null : PICK_PREFIX[s.level] != null);
     if (!drillNav && this.pick.level !== s.level) this.pick = { level: s.level, ids: {} };
     var mkCol = drillNav && !!s.parent && s.parent.level === "sel";   // several DMAs: which DMA each row is in
-    var hr = el("tr", null, [pickable ? el("th", { scope: "col", class: "az-pickcol", title: drillNav ? "Add to a combined trade area" : "Select markets to combine into one trade area" }, [el("span", { class: "az-visually-hidden", text: "Select" })]) : null,
+    var hr = el("tr", null, [pickable ? el("th", { scope: "col", class: "az-pickcol az-pickhead", title: "Tick markets to combine them into one trade area" }, [el("span", { text: "Add to trade area" })]) : null,
       el("th", { scope: "col", text: "Rank" }), el("th", { scope: "col", text: lvLabel }), mkCol ? el("th", { scope: "col", class: "az-mkcol", text: "DMA" }) : null]);
     var inCol = (fp || drillNav) && !isZip && this.cfg.levels.zip;   // "Inside" button: a DMA or metro's counties, a county's ZIPs
     cols.forEach(function (m) {
@@ -1771,7 +1788,7 @@
         } })
       ]));
     });
-    if (inCol) hr.appendChild(el("th", { scope: "col", class: "az-incol", text: "Look inside" }));
+    if (inCol) hr.appendChild(el("th", { scope: "col", class: "az-incol", title: "Rank the smaller areas inside a market", text: "Look inside" }));
     this.thead.appendChild(hr);
 
     var frag = document.createDocumentFragment(), anyMark = false;
@@ -1781,7 +1798,7 @@
       var tr = el("tr", { tabindex: "0", "data-id": r.id, "aria-selected": r.id === s.area ? "true" : "false",
         onclick: function () { choose(r.id); },
         onkeydown: function (e) { if (e.target.tagName === "INPUT" || e.target.tagName === "BUTTON") return; if (e.key === "Enter" || e.key === " ") { e.preventDefault(); choose(r.id); } } }, [
-        pickable ? el("td", { class: "az-pickcol", onclick: function (e) { e.stopPropagation(); } }, [el("input", { type: "checkbox", "aria-label": (drillNav ? "Add to combined area: " : "Select ") + r.name,
+        pickable ? el("td", { class: "az-pickcol", onclick: function (e) { e.stopPropagation(); } }, [el("input", { type: "checkbox", "aria-label": "Add to trade area: " + r.name,
           checked: (drillNav ? self.inBasket(tl, r.id) : self.pick.ids[r.id]) ? "checked" : null, onchange: function () {
             if (drillNav) { self.toggleBasket(tl, r.id, r, this.checked); return; }
             if (this.checked) self.pick.ids[r.id] = 1; else delete self.pick.ids[r.id]; self.renderPick(); } })]) : null,
@@ -1796,7 +1813,7 @@
         else if (v == null) tr.appendChild(el("td", { class: "az-na", title: "No data for this area", text: "No data" }));
         else { var mk = self.mark(r, m); if (mk) anyMark = true; tr.appendChild(el("td", { class: "num", title: mk ? "Uses estimated values; see this market's Data notes" : null, text: v + mk })); }
       });
-      if (inCol && drillNav) tr.appendChild(el("td", { class: "az-incol" }, [el("button", { type: "button", class: "az-inbtn", text: tl === "county" ? "ZIPs \u203a" : "Look inside \u203a",
+      if (inCol && drillNav) tr.appendChild(el("td", { class: "az-incol" }, [el("button", { type: "button", class: "az-inbtn", text: tl === "county" ? "ZIPs \u203a" : tl === "dma" && self.cfg.levels.metro ? "Metros \u203a" : "Counties \u203a",
         title: tl === "county" ? "Rank the ZIPs in " + r.name : "Rank the " + (tl === "dma" ? "metros, " : "") + "counties and ZIPs in " + self.areaName(tl, r), onclick: function (e) { e.stopPropagation(); self.lookInside(tl, r.id); } })]));
       else if (inCol) tr.appendChild(el("td", { class: "az-incol" }, [el("button", { type: "button", class: "az-inbtn", text: s.level === "county" ? "ZIPs \u203a" : "Counties \u203a",
         title: (s.level === "county" ? "Rank the ZIPs in " : "Rank the counties and ZIPs in ") + r.name, onclick: function (e) { e.stopPropagation(); self.openInside(r.id); } })]));
@@ -1808,7 +1825,7 @@
     this.tbody.appendChild(frag);
     if (cols.some(function (m) { return m.news; })) this.tableNote.textContent += " Newspaper cells show copies \u00b7 % of households.";
     if (anyMark) this.tableNote.textContent += " * Uses estimated health values; select the market and see its Data notes.";
-    if (pickable) this.tableNote.textContent += drillNav ? " Tick boxes in any list (DMAs, metros, counties or ZIPs) to combine them into one trade area." : " Tick several to open them together as one trade area.";
+    if (pickable) this.tableNote.textContent += inCol ? " Tick \u201cAdd to trade area\u201d to combine markets into one trade area; the buttons on the right rank the areas inside a market." : " Tick \u201cAdd to trade area\u201d on several markets to open them together as one trade area.";
     this.renderPick();
   };
   Analyzer.prototype.markRow = function () {
@@ -1915,8 +1932,8 @@
       var nm = this.areaName(s.level, row);
       if (s.level !== "zip" && this.cfg.levels.zip) box.appendChild(el("button", { type: "button", class: "az-btn primary az-drill",
         text: s.level === "county" ? "Rank the ZIPs in this county" : "Look inside: rank its " + (s.level === "dma" ? "metros, " : "") + "counties and ZIPs", onclick: function () { self.lookInside(s.level, row.id); } }));
-      if (RCd && RCd.customArea) box.appendChild(el("button", { type: "button", class: "az-btn az-drill", text: isIn ? "Remove from combined area" : "Add to combined area",
-        title: isIn ? "Take " + nm + " out of the combined trade area" : "Add " + nm + " to a combined trade area with other DMAs, metros, counties or ZIPs", onclick: function () { self.toggleBasket(s.level, row.id, row, !isIn); } }));
+      if (RCd && RCd.customArea) box.appendChild(el("button", { type: "button", class: "az-btn az-drill", text: isIn ? "Remove from trade area" : "Add to trade area",
+        title: isIn ? "Take " + nm + " out of the trade area you're building" : "Add " + nm + " to one trade area with other DMAs, metros, counties or ZIPs", onclick: function () { self.toggleBasket(s.level, row.id, row, !isIn); } }));
     } else if (cfg.footprint && s.level !== "zip" && this.cfg.levels.zip) {
       box.appendChild(el("button", { type: "button", class: "az-btn primary az-drill", text: s.level === "county" ? "Rank the ZIPs in this county" : "Rank the counties and ZIPs in this market", onclick: function () { self.openInside(row.id); } }));
     } else if (this.cfg.levels.zip && this.drillable(s.level)) {
@@ -1965,8 +1982,8 @@
         .then(function (b) { if (b.map && (b.map[cfg.exportName] || (b.drivers && b.drivers[cfg.exportName]))) { self[key] = b; self.tabBar.querySelector('[data-tab="' + tab + '"]').hidden = false; self.tabBar.hidden = false; } })
         .catch(function () { /* no tab without data */ });
     }
-    if (cfg.benchmarks !== false) load(cfg.benchmarksData || "../shared/benchmarks.json?v=20261113i", "bench", "bench");
-    if (cfg.timing !== false) load(cfg.timingData || "../shared/timing.json?v=20261113i", "timing", "timing");
+    if (cfg.benchmarks !== false) load(cfg.benchmarksData || "../shared/benchmarks.json?v=20261113j", "bench", "bench");
+    if (cfg.timing !== false) load(cfg.timingData || "../shared/timing.json?v=20261113j", "timing", "timing");
   };
   Analyzer.prototype.setTab = function (tab) {
     var self = this, prev = this.tab;
