@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script>/* site-version: if this page is an old saved copy, reload it once with the current version (shared/version.json; bump both on each release) */
-(function(){var V="20261112z";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
+(function(){var V="20261113a";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>TV-to-Digital Analyzer</title>
 <meta name="robots" content="noindex">
@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
-<link rel="stylesheet" href="../shared/engine.css?v=20261112z">
+<link rel="stylesheet" href="../shared/engine.css?v=20261113a">
 <style>
   .tv-map { height: 440px; }
   .tv-side { max-height: 440px; }
@@ -72,6 +72,12 @@
   .tv-slider span { color: var(--muted); font-size: 13px; }
   .tv-cols { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
   .tv-col { padding: 12px 14px; border-right: 1px solid var(--line); }
+  /* Each column is a header plus the same 12 measures; subgrid shares the row heights so every measure lines up across columns */
+  @supports (grid-template-rows: subgrid) {
+    .tv-col { display: grid; grid-row: span 13; grid-template-rows: subgrid; row-gap: 0; align-content: start; }
+    .tv-col > .az-measure { align-items: center; }
+  }
+  .tv-colhead h3 { margin-bottom: 8px; }
   .tv-col:last-child { border-right: 0; background: #f2f9f8; }
   /* The two columns that change with the slider (trimmed Broadcast + Digital Video) are grouped in a light green band with a teal outline,
      set apart from the 100% Broadcast starting point that never changes */
@@ -167,7 +173,7 @@
   @media (max-width: 1000px) { .tv-cols, .tv-insights { grid-template-columns: 1fr 1fr; } .tv-col:nth-child(2) { border-right: 0; } .tv-col { border-bottom: 1px solid var(--line); } }
   @media (max-width: 560px) { .tv-cols, .tv-insights { grid-template-columns: 1fr; } .tv-col { border-right: 0; } .tv-map { height: 320px; } }
 </style>
-<link rel="stylesheet" href="../shared/depth.css?v=20261112z">
+<link rel="stylesheet" href="../shared/depth.css?v=20261113a">
 </head>
 <body>
 <header class="az-header">
@@ -509,7 +515,8 @@
     var row = function (l, v, cl) { return '<div class="az-measure"><span>' + l + '</span><b class="num ' + (cl || "") + '">' + v + "</b></div>"; };
     var range = function (lo, hi, f) { var a = f(Math.min(lo, hi)), b = f(Math.max(lo, hi)); return a === b ? a : a + " – " + b; };
     var tvCol = function (s, full) {
-      return row("Spend", money0(s.ts)) + row("Spots", fmt(s.spots)) + row("Target impressions", fmt(s.tvT)) +
+      // Every column lists the same 12 measures in the same order, so each row lines up across the four columns
+      return row("Spend", money0(s.ts)) + row("Spots", fmt(s.spots)) + row("Impressions", fmt(s.tvGross)) + row("Target impressions", fmt(s.tvT)) +
         row("Off-target impressions", fmt(s.tvGross - s.tvT), "tv-loss") + row("Target efficiency", pct(s.tvGross ? s.tvT / s.tvGross : 0)) +
         row("Target GRPs", s.grp.toFixed(1)) +
         row("Frequency", full ? s.freqLo.toFixed(1) : range(s.freqLo, s.freqHi, function (x) { return x.toFixed(1); })) +
@@ -518,16 +525,17 @@
         row("Target CPP", s.grp ? money(s.ts / s.grp) : "—") + row("Effective target CPM", s.tvT ? money(s.ts / s.tvT * 1000) : "—");
     };
     var digCol = p === 0 ? '<p class="tv-wait">Move the slider to shift budget to Digital Video.</p>' :
-      row("Spend", money0(b.ds)) + row("Impressions", fmt(b.dImp)) + row("Target impressions", fmt(b.dT)) +
-      row("Target efficiency", pct(inp.ontarget)) +
+      row("Spend", money0(b.ds)) + row("Spots", '<span class="az-na">Not applicable</span>') + row("Impressions", fmt(b.dImp)) + row("Target impressions", fmt(b.dT)) +
+      row("Off-target impressions", fmt(b.dImp - b.dT), b.dImp - b.dT > 0 ? "tv-loss" : "") + row("Target efficiency", pct(inp.ontarget)) +
       row("Target GRPs", (b.dT / t.universe * 100).toFixed(1)) +
       row("Frequency", b.dFreq.toFixed(1)) + row("Target reach", fmt(b.dReach)) + row("Target reach %", pct(b.dReach / t.universe)) +
       row("Target CPP", b.dT ? money(b.ds / (b.dT / t.universe * 100)) : "—") +
       row("Effective target CPM", b.dT ? money(b.ds / b.dT * 1000) : "—");
-    var comb = row("Spend", money0(b.ts + b.ds)) + row("Target impressions", fmt(b.totT)) + row("Off-target impressions", fmt(b.waste), "tv-loss") +
-      row("Target efficiency", pct(b.eff)) + row("Target GRPs", (b.totT / t.universe * 100).toFixed(1)) +
-      row("Target CPP", b.totT ? money((b.ts + b.ds) / (b.totT / t.universe * 100)) : "—") + row("Effective target CPM", money(b.cpm)) +
-      row("Combined reach", '<span class="az-na">Not modeled</span>') + row("Combined frequency", '<span class="az-na">Not modeled</span>');
+    // Combined reach and frequency aren't modeled (the Broadcast/Digital overlap is unknown); those rows say so in place, keeping the rows aligned
+    var comb = row("Spend", money0(b.ts + b.ds)) + row("Spots", fmt(b.spots)) + row("Impressions", fmt(b.gross)) + row("Target impressions", fmt(b.totT)) +
+      row("Off-target impressions", fmt(b.waste), "tv-loss") + row("Target efficiency", pct(b.eff)) + row("Target GRPs", (b.totT / t.universe * 100).toFixed(1)) +
+      row("Frequency", '<span class="az-na">Not modeled</span>') + row("Target reach", '<span class="az-na">Not modeled</span>') + row("Target reach %", '<span class="az-na">Not modeled</span>') +
+      row("Target CPP", b.totT ? money((b.ts + b.ds) / (b.totT / t.universe * 100)) : "—") + row("Effective target CPM", money(b.cpm));
 
     // Plausibility checks
     var flags = [];
@@ -549,10 +557,10 @@
     body.innerHTML =
       (flags.length ? '<div class="az-flags" style="margin-bottom:12px"><b>Check these inputs</b><ul>' + flags.map(function (f) { return "<li>" + esc(f) + "</li>"; }).join("") + "</ul></div>" : "") +
       '<div class="tv-cols">' +
-        '<div class="tv-col tv-base"><span class="tv-eyebrow">Starting point</span><h3>100% Broadcast</h3>' + tvCol(a, true) + "</div>" +
-        '<div class="tv-col tv-shift tv-shift-a"><span class="tv-eyebrow">Shifted plan</span><h3>' + Math.round((1 - p) * 100) + "% Broadcast</h3>" + (p === 1 ? '<p class="tv-wait">No Broadcast spend.</p>' : tvCol(b, p === 0)) + "</div>" +
-        '<div class="tv-col tv-shift tv-shift-b"><span class="tv-eyebrow">Shifted plan</span><h3>' + Math.round(p * 100) + "% Digital Video</h3>" + digCol + "</div>" +
-        '<div class="tv-col"><span class="tv-eyebrow">Shifted plan total</span><h3>Combined campaign</h3>' + comb + "</div>" +
+        '<div class="tv-col tv-base"><div class="tv-colhead"><span class="tv-eyebrow">Starting point</span><h3>100% Broadcast</h3></div>' + tvCol(a, true) + "</div>" +
+        '<div class="tv-col tv-shift tv-shift-a"><div class="tv-colhead"><span class="tv-eyebrow">Shifted plan</span><h3>' + Math.round((1 - p) * 100) + "% Broadcast</h3></div>" + (p === 1 ? '<p class="tv-wait">No Broadcast spend.</p>' : tvCol(b, p === 0)) + "</div>" +
+        '<div class="tv-col tv-shift tv-shift-b"><div class="tv-colhead"><span class="tv-eyebrow">Shifted plan</span><h3>' + Math.round(p * 100) + "% Digital Video</h3></div>" + digCol + "</div>" +
+        '<div class="tv-col"><div class="tv-colhead"><span class="tv-eyebrow">Shifted plan total</span><h3>Combined campaign</h3></div>' + comb + "</div>" +
       "</div>" +
       (p > 0 && p < 1 ? '<p class="tv-hint" style="margin:8px 0 0">Ranges for the trimmed Broadcast schedule: the low reach holds the entered frequency; the high reach holds the full schedule\'s reach.</p>' : "") +
       '<div class="tv-insights">' + ins.map(function (x) { return '<div class="tv-insight"><span>' + x[0] + "</span><b class=\"num\">" + x[1] + "</b><small>" + x[2] + "</small></div>"; }).join("") + "</div>";
