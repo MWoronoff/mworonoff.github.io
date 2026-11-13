@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script>/* site-version: if this page is an old saved copy, reload it once with the current version (shared/version.json; bump both on each release) */
-(function(){var V="20261113b";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
+(function(){var V="20261113c";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>TV-to-Digital Analyzer</title>
 <meta name="robots" content="noindex">
@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
-<link rel="stylesheet" href="../shared/engine.css?v=20261113b">
+<link rel="stylesheet" href="../shared/engine.css?v=20261113c">
 <style>
   .tv-map { height: 440px; }
   .tv-side { max-height: 440px; }
@@ -173,7 +173,7 @@
   @media (max-width: 1000px) { .tv-cols, .tv-insights { grid-template-columns: 1fr 1fr; } .tv-col:nth-child(2) { border-right: 0; } .tv-col { border-bottom: 1px solid var(--line); } }
   @media (max-width: 560px) { .tv-cols, .tv-insights { grid-template-columns: 1fr; } .tv-col { border-right: 0; } .tv-map { height: 320px; } }
 </style>
-<link rel="stylesheet" href="../shared/depth.css?v=20261113b">
+<link rel="stylesheet" href="../shared/depth.css?v=20261113c">
 </head>
 <body>
 <header class="az-header">
@@ -255,7 +255,7 @@
       <div class="tv-group">Digital Video</div>
       <label class="az-field"><span>Digital Video product</span><select id="dprod"><option value="50">CTV / Advanced TV ($50 CPM)</option><option value="45">Dynamic Video ($45 CPM)</option><option value="24">Pre-roll ($24 CPM)</option></select><span class="tv-hint">Adtaxi rate card (Nov 2025). Picking a product fills in its CPM.</span></label>
       <label class="az-field"><span>Digital Video CPM ($)<span class="tv-src" data-src="dcpm"></span></span><input id="dcpm" type="number" min="0" step="0.5" inputmode="decimal" value="50"><span class="tv-hint">Starts at the selected product's rate card CPM; edit to match the buy.</span></label>
-      <label class="az-field"><span>Digital on-target (%)<span class="tv-src" data-src="dot"></span></span><input id="dot" type="number" min="1" max="100" step="1" inputmode="decimal" value="75"><span class="tv-hint">Share of Digital Video impressions that reach the target audience. Starts at a national average of 75%; edit it when a campaign's verified rate is known. <button type="button" class="tv-reset" id="dotReset" hidden>Reset to average</button></span></label>
+      <label class="az-field"><span>Digital on-target (%)<span class="tv-src" data-src="dot"></span></span><input id="dot" type="number" min="1" max="100" step="1" inputmode="decimal" value="100"><span class="tv-hint">Share of Digital Video impressions that reach the target audience. Starts at 100%; lower it when a campaign's verified rate is known. <button type="button" class="tv-reset" id="dotReset" hidden>Reset to 100%</button></span></label>
       <label class="az-field"><span>Frequency cap, per month</span><input id="dfreq" type="number" min="1" step="0.1" inputmode="decimal"></label>
     </div>
   </section>
@@ -303,7 +303,7 @@
     <p><b>Broadcast delivery.</b> Spots = Broadcast spend ÷ average spot price. Target impressions = spots × average target audience per spot. Target GRPs = target impressions ÷ target population × 100. Target reach = GRPs ÷ the schedule's frequency. Off-target (wasted) impressions are the spots' audience outside the selected target. The spot price starts at the market average: the market's average adult audience per spot × the Broadcast CPM ÷ 1,000. The Broadcast CPM starts at a planning figure that declines with DMA rank, set so Denver (DMA 17) is $7.00 for adults 18+; it is not a quoted market rate, so adjust the CPM or the spot price to match the schedule. The average audience per spot starts at Scarborough's average for the selected target and can also be adjusted. Changing the market resets the CPM, spot price and audience to that market's averages; changing the target resets the audience.</p>
     <p><b>Smaller Broadcast schedules.</b> The frequency entered describes the full schedule. When part of the budget moves to Digital Video, the remaining schedule's reach is shown as a range: the low end holds frequency steady (reach falls with GRPs); the high end holds reach steady (frequency falls with GRPs). The actual result for a trimmed schedule falls between the two.</p>
     <p><b>Streaming in the market.</b> Scarborough USA+ 2026 Release 1 DMA profiles: the share of adults 18+, and of adults 55+, in the market who streamed video in the past 7 and past 30 days and who have any connected-TV device, with the U.S. figure for comparison.</p>
-    <p><b>Digital Video.</b> Impressions = spend ÷ CPM × 1,000. Digital Video is targeted by gender, age and household income. Target impressions = impressions × the digital on-target rate, which starts at a 75% national average and can be edited to a campaign's verified rate; the rest are off-target impressions. Target reach = target impressions ÷ frequency cap, limited to the target population.</p>
+    <p><b>Digital Video.</b> Impressions = spend ÷ CPM × 1,000. Digital Video is targeted by gender, age and household income. Target impressions = impressions × the digital on-target rate, which starts at 100% and can be lowered to a campaign's verified rate; the rest are off-target impressions. Target reach = target impressions ÷ frequency cap, limited to the target population.</p>
     <p><b>Into the media mix.</b> The share entered is applied to the monthly campaign budget. CTV / Advanced TV goes to the analyzer's CTV line; Dynamic Video and Pre-roll go to its online video (YouTube) line. That amount is held in the Recommended allocation at the Digital Video CPM entered here (rate card, management included, so no fee is added to it), which starts at Brand awareness with the smallest monthly budget at which that strategy would put at least that much on the line; the rep can change the budget and strategy.</p>
     <p><b>Combined campaign.</b> Spend, target and off-target impressions, target efficiency and effective target CPM are added across Broadcast and Digital Video. Combined reach and frequency are not shown because the overlap between the Broadcast and Digital Video audiences is not measured.</p>
     <p class="az-disclaimer">Estimates for planning. Scores and figures are modeled from public government and licensed third-party data.</p>
@@ -319,7 +319,7 @@
   var $ = function (id) { return document.getElementById(id); };
   var DATA = null, M = null, gender = "A";
   var edited = { bcpm: false, spot: false, avgaud: false };  // true once the user changes a filled-in average
-  var DIGITAL_ON_TARGET = 75;   // national average on-target rate for Digital Video (%), editable on the page
+  var DIGITAL_ON_TARGET = 100;   // default on-target rate for Digital Video (%), editable on the page
   var AGE_BANDS = { "18-34": ["18-24", "25-34"], "35-54": ["35-44", "45-54"], "35-64": ["35-44", "45-54", "55-64"], "55+": ["55-64", "65+"], "65+": ["65+"] };
   var ANCHOR = { "18-34": "18-49", "35-54": "25-54", "35-64": "25-54", "55+": "50+", "65+": "50+" };
   var HHI_KEYS = ["u25", "25to49", "50to74", "75to99", "100to149", "150to249", "250plus"];
@@ -480,7 +480,7 @@
     $("printSum").innerHTML = '<div style="display:flex;justify-content:space-between;align-items:baseline"><b style="font-size:18px;color:#0f2742">' + esc(M.name) + " · " + esc(demoLabel()) + '</b><span style="font-size:12px;color:#5f7286">' + today + "</span></div>" +
       '<div class="tv-psum">' + it("Monthly budget", money0(inp.budget)) + it("Split", Math.round((1 - p) * 100) + "% Broadcast / " + Math.round(p * 100) + "% Digital") +
       it("Broadcast CPM (A18+)", money(cpmVal(M))) + it("Average :30 spot", money(inp.spot)) + it("Target audience per spot", fmt(inp.avgT)) +
-      it("Broadcast frequency", inp.tvfreq.toFixed(1)) + it("Digital Video", $("dprod").options[$("dprod").selectedIndex].text.replace(/ \(.*$/, "")) + it("Digital Video CPM", money(inp.dcpm)) + it("Digital on-target", Math.round(inp.ontarget * 100) + "%" + (Math.round(inp.ontarget * 100) === DIGITAL_ON_TARGET ? " (national avg.)" : "")) + it("Digital frequency cap", p > 0 ? inp.dfreq.toFixed(1) : "—") + "</div>";
+      it("Broadcast frequency", inp.tvfreq.toFixed(1)) + it("Digital Video", $("dprod").options[$("dprod").selectedIndex].text.replace(/ \(.*$/, "")) + it("Digital Video CPM", money(inp.dcpm)) + it("Digital on-target", Math.round(inp.ontarget * 100) + "%" + (Math.round(inp.ontarget * 100) === DIGITAL_ON_TARGET ? " (default)" : "")) + it("Digital frequency cap", p > 0 ? inp.dfreq.toFixed(1) : "—") + "</div>";
   }
 
   function renderResults() {
@@ -679,7 +679,7 @@
     // Where each filled-in figure comes from
     var srcs = { bcpm: M && (edited.bcpm ? "Edited" : "Market avg."), spot: M && (edited.spot ? "Edited" : "Market avg."), avgaud: M && (edited.avgaud ? "Edited" : "Market avg."),
                  dcpm: String(num("dcpm")) === $("dprod").value ? "Rate card" : "Edited",
-                 dot: num("dot") === DIGITAL_ON_TARGET ? "National avg." : "Edited" };
+                 dot: num("dot") === DIGITAL_ON_TARGET ? "Default" : "Edited" };
     $("dotReset").hidden = num("dot") === DIGITAL_ON_TARGET;
     Object.keys(srcs).forEach(function (k) {
       var t = document.querySelector('[data-src="' + k + '"]'); t.textContent = srcs[k] || ""; t.hidden = !srcs[k];
