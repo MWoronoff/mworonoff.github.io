@@ -1114,7 +1114,7 @@
     }
     if (window.AdtaxiRadius) go();
     else {
-      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261113d";   // version tag: browsers fetch the new file after an update
+      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261113e";   // version tag: browsers fetch the new file after an update
       sc.onload = go; sc.onerror = function () { self.showError("The radius tool didn't load. Refresh the page and try again."); };
       document.head.appendChild(sc);
     }
@@ -1389,7 +1389,7 @@
     if (window.AdtaxiSlides) { done(); return; }
     if (loadSlides.waiting) { loadSlides.waiting.push(done); return; }
     loadSlides.waiting = [done];
-    var sc = document.createElement("script"); sc.src = "../shared/slides.js?v=20261113d";
+    var sc = document.createElement("script"); sc.src = "../shared/slides.js?v=20261113e";
     sc.onload = sc.onerror = function () { var w = loadSlides.waiting; loadSlides.waiting = null; w.forEach(function (f) { f(); }); };
     document.head.appendChild(sc);
   }
@@ -1963,8 +1963,8 @@
         .then(function (b) { if (b.map && (b.map[cfg.exportName] || (b.drivers && b.drivers[cfg.exportName]))) { self[key] = b; self.tabBar.querySelector('[data-tab="' + tab + '"]').hidden = false; self.tabBar.hidden = false; } })
         .catch(function () { /* no tab without data */ });
     }
-    if (cfg.benchmarks !== false) load(cfg.benchmarksData || "../shared/benchmarks.json?v=20261113d", "bench", "bench");
-    if (cfg.timing !== false) load(cfg.timingData || "../shared/timing.json?v=20261113d", "timing", "timing");
+    if (cfg.benchmarks !== false) load(cfg.benchmarksData || "../shared/benchmarks.json?v=20261113e", "bench", "bench");
+    if (cfg.timing !== false) load(cfg.timingData || "../shared/timing.json?v=20261113e", "timing", "timing");
   };
   Analyzer.prototype.setTab = function (tab) {
     var self = this, prev = this.tab;
