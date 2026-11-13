@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script>/* site-version: if this page is an old saved copy, reload it once with the current version (shared/version.json; bump both on each release) */
-(function(){var V="20261111o";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
+(function(){var V="20261113h";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sales Guide: Adtaxi Market Analyzers</title>
 <meta name="robots" content="noindex">
@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
-<link rel="stylesheet" href="../shared/engine.css?v=20261113g">
+<link rel="stylesheet" href="../shared/engine.css?v=20261113h">
 <style>
   .g-wrap { max-width: 980px; margin: 0 auto; padding: 26px 28px 40px; }
   .g-sec { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 24px; margin: 0 0 18px; }
@@ -22,7 +22,7 @@
   .g-steps li { counter-increment: step; position: relative; padding: 0 0 14px 40px; max-width: 76ch; line-height: 1.5; }
   .g-steps li::before { content: counter(step); position: absolute; left: 0; top: 0; width: 26px; height: 26px; border-radius: 50%;
                         background: var(--navy); color: #fff; font-weight: 700; font-size: 13px; display: grid; place-items: center; }
-  .g-steps b { display: block; }
+  .g-steps li > b:first-child { display: block; }
   .g-table { width: 100%; border-collapse: collapse; margin-top: 6px; font-size: 14px; }
   .g-table th, .g-table td { text-align: left; vertical-align: top; padding: 9px 10px; border-top: 1px solid var(--line); }
   .g-table th { color: var(--muted); font-weight: 600; font-size: 13px; border-top: 0; }
@@ -36,14 +36,14 @@
   @media (max-width: 760px) { .g-cols { grid-template-columns: 1fr; } .g-wrap { padding: 18px 16px 30px; } .g-table td:first-child { white-space: normal; } }
   @media print { .az-header { -webkit-print-color-adjust: exact; print-color-adjust: exact; } .g-back { display: none; } .g-sec { break-inside: avoid; } }
 </style>
-<link rel="stylesheet" href="../shared/depth.css?v=20261113g">
+<link rel="stylesheet" href="../shared/depth.css?v=20261113h">
 </head>
 <body>
 <header class="az-header">
   <div class="az-header-inner">
     <div class="az-title">
       <h1>Sales Guide: Adtaxi Market Analyzers</h1>
-      <p>How to use the Healthcare, Legal, Higher Education and Home Services analyzers in a client meeting, and what the numbers do and don't mean.</p>
+      <p>A step-by-step walkthrough of the Adtaxi Market Analyzers and planning tools, from choosing a category to handing the client a proposal, and what the numbers do and don't mean.</p>
       <nav class="az-links" aria-label="Related tools"><a href="./">Home</a></nav>
     </div>
     <img class="az-logo" src="../shared/adtaxi-logo.svg" alt="Adtaxi">
@@ -53,31 +53,57 @@
 <main class="g-wrap">
   <section class="g-sec">
     <h2>What the tools are for</h2>
-    <p>The analyzers show a client or potential client that Adtaxi has data on their industry, analyzes it, and knows where in their market the best customers are. Use them to earn the business and to back up where the budget should go. The Plan tab, after the Trade area, suggests a monthly budget from a reach and frequency goal, splits it across Adtaxi's platforms and the best ZIPs, and builds an editable proposal. Treat both as a starting point: the plan is still your call.</p>
+    <p>The analyzers show a client or prospect that Adtaxi knows their industry and knows where in their market the best customers are. Use them to open the conversation, to show where the budget should go, and to leave the client with a proposal built on the same numbers.</p>
+    <p>There is one analyzer per business category: Apartments, Auto, Financial, Franchise Development, Furniture, Healthcare, Higher Education, Home Services, Legal and Travel. Every analyzer works the same way, so once you know one, you know them all. Three planning tools work alongside any category: the Trade Area Tool, Customer Analysis (CRM) and the TV-to-Digital Analyzer.</p>
   </section>
 
   <section class="g-sec">
-    <h2>A five-minute walkthrough</h2>
+    <h2>Follow the green highlight</h2>
+    <p>Every page walks you through it. The box you need to fill in next is shaded light green with a teal edge and a <b>Next</b> tag. When you complete it, the highlight moves to the next step. Nothing is locked: you can work in any order, and the highlight follows whatever is still missing.</p>
+  </section>
+
+  <section class="g-sec">
+    <h2>Part 1: Find the client's best markets</h2>
     <ol class="g-steps">
-      <li><b>Open the analyzer for the client's industry and pick their category.</b>For example, Home Services and then Roofing and gutters, or Legal and then Personal injury.</li>
-      <li><b>Show where their market ranks.</b>Leave Rank and map by on Market Potential Score, then type the client's DMA or metro in Search. "Your market ranks 12th of 210 for roofing" opens the conversation.</li>
-      <li><b>Explain why, from the market's details.</b>The four bars show what drives the score. Point to the strongest one, for example "households here spend 20% more than average on this service."</li>
-      <li><b>Drill into ZIPs.</b>Click Look inside on the market, then ZIPs. The map shows which neighborhoods hold the most potential, so ad dollars can go there first.</li>
-      <li><b>Size the audience in their trade area.</b>Click Trade area. Use Radius for one location, or Custom area for a list of ZIPs, counties, towns, DMAs, metros, states or Census regions. Choose their category under Target audience. Opened from inside a market, the Trade area starts with that market and category; Clear all and start fresh empties it. The ranked ZIP list ends with Build a plan from these ZIPs.</li>
-      <li><b>Set the goal and the budget on the Plan tab.</b>Optionally enter a reach goal as a percent of the audience and an average frequency: "40% reach at a 4 frequency is 160 TRPs." Choose a media strategy, and the monthly budget fills in with a suggested amount for the goal (or the strategy's default goal). Type any budget to see what it buys; Use suggested puts the suggestion back.</li>
-      <li><b>Read the plan in TV terms, then build the proposal.</b>Each channel shows one monthly cost (fees are never shown separately). Estimated monthly delivery shows targeted impressions, reach, frequency, TRPs, targeted CPP and CPM, and whether the plan meets the goal. Click Build proposal to download an editable two-slide PowerPoint with the same figures.</li>
+      <li><b>Open the client's analyzer.</b> From the <a href="./">home page</a>, pick the client's category under Category analyzers, for example Home Services or Legal.</li>
+      <li><b>Choose the category.</b> The first highlighted box is the category list (Service, Practice area, Vehicle line and so on). Pick the client's line of business, for example Roofing and gutters or Personal injury.</li>
+      <li><b>Choose a geography.</b> Next, Geography is highlighted. Pick DMA, Metro or County to rank markets at that level. Leave <b>Rank and map by</b> on Market Potential Score unless you want to show total spending or households per square mile.</li>
+      <li><b>Click the client's market.</b> Click it on the map, click its row in the ranked list, or type its name in Search. The details panel shows where it ranks ("12th of 210 DMAs") and the four parts of the score. Point to the strongest bar, for example "households here spend 20% more than average on this service."</li>
+      <li><b>See where in the market the best customers are.</b> Click <b>Look inside</b> on the market's row to rank the metros, counties or ZIPs inside it. Use this to show which neighborhoods hold the most potential. Looking inside doesn't select anything; it's for exploring.</li>
+      <li><b>Pick the areas the client covers.</b> Tick the boxes beside the markets, counties or ZIPs the client serves (any mix), then click <b>Open as trade area</b>. Or click <b>Trade area</b> in Geography to start from a ZIP and a radius instead.</li>
     </ol>
+    <p>Along the top of every analyzer you'll also find: <b>How scores work</b> (the method and data dates), <b>Your CRM footprint</b> (Customer Analysis for this category), <b>TV to Digital</b> (appears once you're on a DMA, Metro or County view), the category <b>slides</b> and the subcategory <b>report</b> to share before or after a call, and <b>Export</b> for a leave-behind PDF or the table as a CSV. The <b>Timing</b> tab shows the category's busiest and slowest months, and <b>Benchmarks</b> shows typical cost per click, click-through, conversion rate and cost per lead by platform.</p>
+  </section>
+
+  <section class="g-sec">
+    <h2>Part 2: Build the trade area and the plan</h2>
+    <ol class="g-steps">
+      <li><b>Trade area.</b> Use <b>Radius</b> for a business with one location: a ZIP or town and a distance. Use <b>Custom area</b> for a list, one item per line: ZIPs, counties ("Wake County, NC"), towns, DMAs, metros, states or Census regions. You can also upload a client's spreadsheet of ZIPs or counties. Anything the tool can't read is listed rather than guessed.</li>
+      <li><b>Audience.</b> Choose the target audience. Each category has a ready-made profile of its likely customers, such as homeowners in older homes for plumbing; change any filter to fit the client. The ranked ZIP list shows each ZIP's estimated audience and its index (100 is average; 150 means 50% more concentrated). When you're happy with the area, click <b>Build a plan from these ZIPs</b>.</li>
+      <li><b>Plan.</b> Optionally enter a goal: the percent of the audience to reach and how often ("40% reach at a 4 frequency"). Then choose a media strategy, such as Brand awareness or Lead generation. The monthly budget fills in with a suggested amount for the goal; type any budget to see what it buys, or click <b>Use suggested</b> to put the suggestion back.</li>
+      <li><b>Recommended allocation.</b> The budget is split across Adtaxi's platforms, each with one monthly cost and the reason it's recommended. Estimated monthly delivery shows targeted impressions, reach, frequency, TRPs, targeted cost per point and CPM, and whether the plan meets the goal. Click <b>Results</b> to show client case studies that match the plan's category and platforms.</li>
+      <li><b>Proposal.</b> Enter the client's name and click <b>Build proposal</b> to download an editable PowerPoint with the trade area, the recommended investment by platform and the estimated delivery.</li>
+    </ol>
+  </section>
+
+  <section class="g-sec">
+    <h2>Part 3: The planning tools</h2>
+    <table class="g-table">
+      <tr><th>Tool</th><th>Use it when</th><th>How it works</th></tr>
+      <tr><td><a href="/TV/">TV-to-Digital Analyzer</a></td><td>A client spends on local broadcast TV.</td><td>1. Choose the market and audience. 2. Enter the monthly budget and the schedule's frequency (CPMs and spot prices fill in with market averages; Digital Video starts at the rate card and 100% on-target, all editable). 3. Drag the slider to shift budget to Digital Video and compare the 100% Broadcast starting point with the shifted plan, row by row. 4. Enter the share of the TV budget to move and the client's category, then click <b>See how Digital Video fits into your media mix</b>. The plan opens with the market, audience, Digital Video amount and on-target rate already filled in. <b>Download PDF summary</b> gives the client a one-page comparison.</td></tr>
+      <tr><td><a href="/crm-analyzer/">Customer Analysis (CRM)</a></td><td>A client can share a customer list or a Google Ads or Meta report.</td><td>Upload the file (it never leaves the browser), confirm the ZIP column, enter the client's location ZIPs and click <b>Analyze customers</b>. The results show where the client over- and under-performs, what its best ZIPs have in common and the untapped look-alike ZIPs to target. <b>Build a plan from these ZIPs</b> opens the Plan with the over-performing and look-alike ZIPs as the trade area.</td></tr>
+      <tr><td><a href="/radius/">Trade Area Tool</a></td><td>You want an audience count around a location without starting from a category's market rankings.</td><td>Pick a ZIP and a radius, choose the audience, and get the people in range, how they respond to advertising and a ranked ZIP list to export.</td></tr>
+      <tr><td><a href="library.html">Research Library</a></td><td>Before or after a call.</td><td>Category reports, category activity, ad response by audience and digital slides, to share without opening an analyzer.</td></tr>
+    </table>
   </section>
 
   <section class="g-sec">
     <h2>The three ways to rank and map</h2>
     <table class="g-table">
-      <thead><tr><th>Choice</th><th>What it tells you</th><th>Use it to say</th></tr></thead>
-      <tbody>
-        <tr><td>Market Potential Score</td><td>The overall best places to put ad dollars, 0 to 100.</td><td>"These are the strongest markets for your business."</td></tr>
-        <tr><td>Total spending</td><td>How big the market is in dollars a year.</td><td>"There's an estimated $780 million a year spent on this here."</td></tr>
-        <tr><td>Households per square mile</td><td>How many likely customers a service area or radius can reach.</td><td>"A 10-mile radius here reaches far more households than in a spread-out market."</td></tr>
-      </tbody>
+      <tr><th>Choice</th><th>What it tells you</th><th>Use it to say</th></tr>
+      <tr><td>Market Potential Score</td><td>The overall best places to put ad dollars, 0 to 100.</td><td>"These are the strongest markets for your business."</td></tr>
+      <tr><td>Total spending</td><td>How big the market is in dollars a year.</td><td>"There's an estimated $780 million a year spent on this here."</td></tr>
+      <tr><td>Households per square mile</td><td>How many likely customers a service area or radius can reach.</td><td>"A 10-mile radius here reaches far more households than in a spread-out market."</td></tr>
     </table>
   </section>
 
@@ -87,20 +113,6 @@
     <p><b>Underserved.</b> "Yes" means strong demand but few competitors per resident: a strong case for a client weighing a new location or service area.</p>
     <p><b>Competitor locations.</b> The checkbox on the map adds circles sized by the number of competing businesses in each market or ZIP. They are counts by area, not addresses.</p>
     <p><b>Data notes.</b> Some markets show notes under their details, such as estimated values or provisional boundaries. Read them before quoting that market's numbers.</p>
-  </section>
-
-  <section class="g-sec">
-    <h2>Trade areas: one location or a whole region</h2>
-    <p><b>Radius</b> draws a circle around a ZIP or town, for a business with one location.</p>
-    <p><b>Custom area</b> takes a list, one item per line, in any mix: ZIPs, counties ("Wake County, NC"), towns, DMAs ("Raleigh-Durham DMA"), metros ("Charlotte metro"), states ("NC" or "North Carolina") and Census regions or divisions ("South Atlantic", "Midwest region"). You can also upload a client's spreadsheet of ZIPs or counties. Anything the tool can't read, or a name that matches more than one market, is listed rather than guessed.</p>
-    <p><b>Several markets at once.</b> In the DMA, Metro or County rankings, tick the markets you want and click Open as trade area. This fits a regional client, such as a master franchisee developing several DMAs or a group with locations across a state.</p>
-  </section>
-
-  <section class="g-sec">
-    <h2>Using the Trade area tool</h2>
-    <p><b>Target audience</b> loads a ready-made profile of each category's likely customers, such as homeowners in homes built before 1980 for Plumbing. Change any filter to fit the client.</p>
-    <p><b>Index</b> compares a ZIP's share of likely customers with the national share; 100 is average and 150 means 50% more concentrated. The list is sorted so the most concentrated ZIPs come first. Sort by Est. audience to see the largest counts.</p>
-    <p>Audience counts that combine several filters are estimates, and the tool labels them that way.</p>
   </section>
 
   <div class="g-cols">
@@ -120,15 +132,15 @@
         <li>That spending figures are actual sales. They're EASI's modeled estimates of household spending.</li>
         <li>That the competitor circles show specific businesses. They're Census counts by area.</li>
         <li>That a radius count is exact when it combines filters. It's an estimate.</li>
-        <li>That a proposal's targeted impressions, reach, frequency, clicks or leads are guaranteed. They're planning estimates from Adtaxi's rate card and published industry benchmarks.</li>
+        <li>That a proposal's or the TV-to-Digital comparison's impressions, reach, frequency, clicks or leads are guaranteed. They're planning estimates from Adtaxi's rate card and published industry benchmarks.</li>
       </ul>
     </section>
   </div>
 
   <section class="g-sec">
     <h2>Where the data comes from</h2>
-    <p>Census American Community Survey (people, homes and income by ZIP), Census Business Patterns (competing businesses), EASI Demographics 2025 (household spending), CDC PLACES (health conditions), the Department of Education's IPEDS directory (schools), NOAA (climate and hail), IRS Statistics of Income (tax returns by ZIP) and the 2026 AudienceSCAN® study (how each target group responds to advertising). Proposal estimates use the Adtaxi rate card and published benchmarks from WordStream, Innovid and the Annual Franchise Development Report. Each analyzer's How scores work button explains its method, data dates and limits.</p>
-    <p>Every data build checks the numbers against published national totals. For Healthcare, Legal and Home Services, it also compares each category's scores with where Census finds that industry's employees, and flags any category where the two don't line up.</p>
+    <p>Census American Community Survey (people, homes and income by ZIP), Census Business Patterns (competing businesses), EASI Demographics 2025 (household spending), CDC PLACES (health conditions), the Department of Education's IPEDS directory (schools), NOAA (climate and hail), IRS Statistics of Income (tax returns by ZIP), the 2026 AudienceSCAN&reg; study (how each target group responds to advertising) and Scarborough (broadcast TV audiences in the TV-to-Digital Analyzer). Proposal estimates use the Adtaxi rate card and published benchmarks from WordStream, Innovid and the Annual Franchise Development Report.</p>
+    <p>Each analyzer's <b>How scores work</b> button explains its method, data dates and limits. Every data build checks the numbers against published national totals.</p>
   </section>
 </main>
 </body>
