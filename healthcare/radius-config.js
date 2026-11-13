@@ -25,10 +25,10 @@ window.ADTAXI_RADIUS = {
       sel: { age: ["35_64", "65_74", "75p"], insurance: ["ins"] }, context: ["arthritis", "bphigh"] },
     { id: "urgent", filters: ["age", "insurance", "income5"], label: "Urgent and emergency care", note: "Families: children and adults 35–64 with health insurance and household income of $100K or more. Urgent care users over-index at 35–54 (index 108–112), among parents (119) and at $100K+ (125–128; Scarborough). Patients typically travel up to about 20 miles (AdMall).",
       sel: { age: ["u18", "35_64"], insurance: ["ins"], income5: ["100_150", "150p"] } },
-    { id: "pharmacy", filters: ["age", "insurance"], label: "Pharmacy", note: "Adults 65 and older. Diabetes and high blood pressure rates (CDC) show by ZIP. Customers typically shop within about 2 miles (AdMall), so small radii fit best.",
+    { id: "pharmacy", filters: ["age", "insurance"], label: "Pharmacy", note: "Adults 65 and older: drug store prescription buyers over-index at 65+ (index 118; 55–64 is 111; Scarborough). Diabetes and high blood pressure rates (CDC) show by ZIP. Customers typically shop within about 2 miles (AdMall), so small radii fit best.",
       sel: { age: ["65_74", "75p"] }, context: ["diabetes", "bphigh"] },
-    { id: "dental", filters: ["age", "income5", "insurance"], label: "Dental", note: "Adults 18–64 with household income of $75K or more and health insurance. The share of adults with no dental visit in the past year (CDC) shows by ZIP. Patients typically travel up to about 30 miles (AdMall).",
-      sel: { age: ["18_34", "35_64"], income5: ["75_100", "100_150", "150p"], insurance: ["ins"] }, context: ["nodental"] },
+    { id: "dental", filters: ["age", "income5", "insurance"], label: "Dental", note: "Adults 35 and older with household income of $100K or more and health insurance: dental patients over-index at 55+ (index 108–125; under 45 only 81–90) and $100K+ (122–130; Scarborough). Orthodontics leans the other way: parents of teens (227) and $250K+ (149). The share of adults with no dental visit in the past year (CDC) shows by ZIP. Patients typically travel up to about 30 miles (AdMall).",
+      sel: { age: ["35_64", "65_74", "75p"], income5: ["100_150", "150p"], insurance: ["ins"] }, context: ["nodental"] },
     { id: "hearing", filters: ["age", "hearing", "income5"], label: "Hearing and audiology", note: "Adults 65 and older with hearing difficulty.",
       sel: { age: ["65_74", "75p"], hearing: true } },
     { id: "eye", filters: ["age", "vision", "income5", "insurance"], label: "Eye care", note: "Adults 35 and older with vision difficulty; optometrist patients over-index at 45+ (index 107–141) and ophthalmologist patients at 65+ (230; Scarborough). Diabetes rates (CDC) show by ZIP. Optical and optometry customers typically travel up to about 20 miles (AdMall).",
@@ -39,7 +39,7 @@ window.ADTAXI_RADIUS = {
       sel: { age: ["18_34"], insurance: ["ins"] }, context: ["depression", "mhlth"], sortBy: "depression" },
     { id: "medspa", filters: ["gender", "age", "income5"], label: "Med spa and aesthetics", note: "Women 35–64 with household income of $100K or more. Clients typically come from within about 10 miles (AdMall).",
       sel: { gender: ["f"], age: ["35_64"], income5: ["100_150", "150p"] } },
-    { id: "senior", filters: ["age", "alone", "hearing", "vision", "income5"], label: "Senior and home care", note: "Adults 75 and older living alone.",
+    { id: "senior", filters: ["age", "alone", "hearing", "vision", "income5"], label: "Senior and home care", note: "Adults 75 and older living alone, the people who need care. The ads usually reach their adult children: caregivers of an aging parent or relative over-index at 45–64 (index 130–153) and among women (124; Scarborough).",
       sel: { age: ["75p"], alone: true } }
   ],
   methodology: [
