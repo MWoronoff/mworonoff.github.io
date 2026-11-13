@@ -19,7 +19,7 @@ window.ADTAXI_RADIUS = {
   filters: ["gender", "age", "income5", "insurance", "hearing", "vision", "alone"],
   profileLabel: "Target audience",
   profiles: [
-    { id: "primary", filters: ["age", "insurance", "income5"], label: "Primary care", note: "Adults 18 and older with health insurance. Fair or poor health rates (CDC) show by ZIP. Patients typically travel up to about 20 miles for primary care (AdMall).",
+    { id: "primary", filters: ["gender", "age", "insurance", "income5"], label: "Primary care", note: "Adults 18 and older with health insurance. Adults 65+ visit most often, and women 18–64 visit more than men the same age (CDC National Ambulatory Medical Care Survey); private insurance pays for most visits under 65 and Medicare for most at 65+. Use the gender and age filters to focus on a practice's patients. Fair or poor health rates (CDC) show by ZIP. Patients typically travel up to about 20 miles for primary care (AdMall).",
       sel: { age: ["18_34", "35_64", "65_74", "75p"], insurance: ["ins"] }, context: ["fairpoor"] },
     { id: "hospital", filters: ["age", "insurance", "income5"], label: "Hospitals and health systems", note: "Adults 35 and older with health insurance, the core of elective surgery (orthopedics, cardiac and similar); orthopedist patients over-index most at 55+ (index 131–174; Scarborough). Arthritis and high blood pressure rates (CDC) show by ZIP. Scarborough's service-line users point the same way: cardiac care, cancer care, orthopedics and same-day surgery patients over-index at 55+ (index 114–184), neurology at 45+ (113–117).",
       sel: { age: ["35_64", "65_74", "75p"], insurance: ["ins"] }, context: ["arthritis", "bphigh"] },
