@@ -628,6 +628,17 @@
     if (dma) q.push("dma=" + encodeURIComponent(dma));
     return (cfg.crmUrl || "../crm-analyzer/") + "?" + q.join("&");
   };
+  // Link to the TV-to-Digital Analyzer with this analyzer's category and selected DMA, so the TV tool opens on that market
+  // and its hand-off back to the Recommended allocation already points at this category
+  Analyzer.prototype.tvUrl = function () {
+    var s = this.state, q = [];
+    var key = (location.pathname.split("/").filter(Boolean)[0] || "");
+    if (key) q.push("cat=" + encodeURIComponent(key));
+    var dma = s.level === "dma" && s.area ? s.area : (s.parent && s.parent.level === "dma" ? s.parent.id : (s.chain || []).filter(function (c) { return c.level === "dma"; }).map(function (c) { return c.id; })[0]);
+    if (dma) q.push("dma=" + encodeURIComponent(dma));
+    q.push("from=" + encodeURIComponent(this.cfg.title || ""));
+    return (this.cfg.tvUrl || "../TV/") + "?" + q.join("&");
+  };
   Analyzer.prototype.readHash = function () {
     var h = (location.hash || "").replace(/^#/, "");
     this.ptLayers = this.cfg.pointLayers || (this.cfg.pointLayer ? [this.cfg.pointLayer] : []);
@@ -639,7 +650,10 @@
     // Radius view (also where the old radius.html links forward to): #level=radius&sub=..&zip=..&r=..
     this.wantRadius = (p.level === "radius" || p.level === "area") && cfg.radius ? { zip: p.zip, r: p.r, p: p.p, mode: p.level === "area" ? "area" : "radius", ca: p.ca, view: p.tab === "plan" ? "plan" : null } : null;
     // From the TV + Video tool: the Digital Video amount to hold in the Recommended allocation (tvv dollars, tvl line, tvp product)
-    if (this.wantRadius && +p.tvv > 0 && /^(ctv|youtube)$/.test(p.tvl || "")) this.wantRadius.hand = { dollars: Math.round(+p.tvv), id: p.tvl, product: (p.tvp || "").slice(0, 60), market: (p.tvm || "").slice(0, 80), cpm: +p.tvc > 0 && +p.tvc < 1000 ? +p.tvc : null };   // a profile applies only when the link names one (p=); no preset otherwise
+    if (this.wantRadius && +p.tvv > 0 && /^(ctv|youtube)$/.test(p.tvl || "")) this.wantRadius.hand = { dollars: Math.round(+p.tvv), id: p.tvl, product: (p.tvp || "").slice(0, 60), market: (p.tvm || "").slice(0, 80), cpm: +p.tvc > 0 && +p.tvc < 1000 ? +p.tvc : null,
+      // the audience and the Digital on-target rate chosen there
+      aud: { g: /^[AMW]$/.test(p.tvg || "") ? p.tvg : "A", a: /^\d+(-\d+|\+)$/.test(p.tva || "") ? p.tva : "", h: (p.tvh || "").split(",").filter(function (x) { return /^[a-z0-9]{2,10}$/.test(x); }) },
+      ot: +p.tvo > 0 && +p.tvo < 100 ? +p.tvo / 100 : null };   // a profile applies only when the link names one (p=); no preset otherwise
     if (this.wantRadius && p.p && cfg.subcategories && cfg.subcategories.some(function (x) { return x.id === p.p; })) this.state.sub = p.p;
     if (cfg.levels[p.level]) this.state.level = p.level;
     if (p.level === "zip") {
@@ -951,6 +965,9 @@
       cfg.crm === false ? null : el("button", { type: "button", class: "az-btn az-only", text: "Your CRM footprint",
         title: "Customer Analysis (CRM): upload the advertiser's customer list to see where its customers are against this market's potential, ZIP by ZIP",
         onclick: function () { location.href = self.crmUrl(); } }),
+      cfg.tv === false ? null : el("button", { type: "button", class: "az-btn az-only", text: "TV to Digital",
+        title: "TV-to-Digital Analyzer: see what happens when budget moves from local broadcast TV into targeted digital video, starting from this category and market",
+        onclick: function () { location.href = self.tvUrl(); } }),
       // Results lives in the Trade area's Recommended allocation (shared/radius.js), matched to the plan's channels
       (this.reportBtn = reportButton(function () { return self.state.sub; }, function () {
         var s = (cfg.subcategories || []).filter(function (x) { return x.id === self.state.sub; })[0];
@@ -1097,7 +1114,7 @@
     }
     if (window.AdtaxiRadius) go();
     else {
-      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261113c";   // version tag: browsers fetch the new file after an update
+      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261113d";   // version tag: browsers fetch the new file after an update
       sc.onload = go; sc.onerror = function () { self.showError("The radius tool didn't load. Refresh the page and try again."); };
       document.head.appendChild(sc);
     }
@@ -1372,7 +1389,7 @@
     if (window.AdtaxiSlides) { done(); return; }
     if (loadSlides.waiting) { loadSlides.waiting.push(done); return; }
     loadSlides.waiting = [done];
-    var sc = document.createElement("script"); sc.src = "../shared/slides.js?v=20261113c";
+    var sc = document.createElement("script"); sc.src = "../shared/slides.js?v=20261113d";
     sc.onload = sc.onerror = function () { var w = loadSlides.waiting; loadSlides.waiting = null; w.forEach(function (f) { f(); }); };
     document.head.appendChild(sc);
   }
@@ -1946,8 +1963,8 @@
         .then(function (b) { if (b.map && (b.map[cfg.exportName] || (b.drivers && b.drivers[cfg.exportName]))) { self[key] = b; self.tabBar.querySelector('[data-tab="' + tab + '"]').hidden = false; self.tabBar.hidden = false; } })
         .catch(function () { /* no tab without data */ });
     }
-    if (cfg.benchmarks !== false) load(cfg.benchmarksData || "../shared/benchmarks.json?v=20261113c", "bench", "bench");
-    if (cfg.timing !== false) load(cfg.timingData || "../shared/timing.json?v=20261113c", "timing", "timing");
+    if (cfg.benchmarks !== false) load(cfg.benchmarksData || "../shared/benchmarks.json?v=20261113d", "bench", "bench");
+    if (cfg.timing !== false) load(cfg.timingData || "../shared/timing.json?v=20261113d", "timing", "timing");
   };
   Analyzer.prototype.setTab = function (tab) {
     var self = this, prev = this.tab;

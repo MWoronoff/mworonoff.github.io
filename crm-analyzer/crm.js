@@ -790,6 +790,7 @@
         kpi(NF0.format(over.length), "over-performing ZIPs", NF0.format(over.reduce(function (s, it) { return s + it.A; }, 0)) + " customers"),
         kpi(NF0.format(under.length), "under-performing ZIPs", NF0.format(Math.round(under.reduce(function (s, it) { return s + it.E - it.A; }, 0))) + " customers short of expected")
       ]),
+      planRow(R, over),
       R.useDist ? null : el("p", { class: "crm-warn", text: "No location ZIP was entered, so expected customers don't account for distance. ZIPs near your business will look stronger than they are. Add your location ZIPs above and analyze again for a fairer comparison." }),
       el("div", { class: "crm-print-row" }, [
         el("input", { id: "crm-bizname", type: "text", placeholder: "Business name for the summary (optional)", "aria-label": "Business name for the printed summary",
@@ -949,6 +950,41 @@
     });
     box.appendChild(el("div", { class: "az-tablewrap" }, [el("table", { class: "az-table" }, [el("thead", {}, [el("tr", {}, ["ZIP", "Town", "Miles", "Similarity", "Customers", "Index", "Status", "Households"].map(function (h) { return el("th", { text: h }); }))]), tb])]));
     if (!rows.length) box.appendChild(el("p", { class: "az-empty", text: "No untapped look-alike ZIPs in this search area. Widen the search area in step 2 or switch to all ZIPs." }));
+  }
+  /* ---------- Hand-off to the proposal builder ----------
+     "Build a plan from these ZIPs" opens the category analyzer's Plan with the advertiser's over-performing ZIPs plus the
+     best untapped look-alikes (up to 25, most similar first) as a custom trade area, keeping the category and subcategory
+     it was opened with. Opened without a category, the rep picks one first. */
+  var PLAN_SITES = [["healthcare", "Healthcare"], ["legal", "Legal"], ["higher-ed", "Higher Education"], ["home-services", "Home Services"],
+    ["apartment-analyzer", "Apartments"], ["furniture-analyzer", "Furniture"], ["financial", "Financial Services"], ["auto", "Automotive"], ["travel", "Travel"], ["franchise", "Franchise Development"]];
+  var SITE_ALIAS = { apartments: "apartment-analyzer", furniture: "furniture-analyzer" };
+  function planSite() {
+    var c = (S.params.category || "").toLowerCase(); c = SITE_ALIAS[c] || c;
+    return PLAN_SITES.some(function (x) { return x[0] === c; }) ? c : "";
+  }
+  function planZips(R, over) {
+    var seen = {}, out = [];
+    over.forEach(function (it) { if (!seen[it.z.zip]) { seen[it.z.zip] = true; out.push(it.z.zip); } });
+    R.cand.filter(function (c) { return c.opp; }).sort(function (a, b) { return b.sim - a.sim; }).slice(0, 25)
+      .forEach(function (c) { if (!seen[c.z.zip]) { seen[c.z.zip] = true; out.push(c.z.zip); } });
+    return out.slice(0, 400);
+  }
+  function planRow(R, over) {
+    var zips = planZips(R, over);
+    if (!zips.length) return null;
+    var site = planSite();
+    var sel = site ? null : el("select", { "aria-label": "Business category for the plan", onchange: function () { btn.disabled = !this.value; } },
+      [el("option", { value: "", text: "Choose the business category…" })].concat(PLAN_SITES.map(function (x) { return el("option", { value: x[0], text: x[1] }); })));
+    var nOver = over.length, nLook = zips.length - Math.min(nOver, zips.length);
+    var btn = el("button", { class: "az-btn primary", type: "button", text: "Build a plan from these ZIPs →", disabled: site ? null : "disabled", onclick: function () {
+      var to = site || (sel && sel.value); if (!to) return;
+      var h = "#level=area&ca=" + encodeURIComponent(zips.map(function (z) { return "z" + z; }).join(",")) + "&tab=plan";
+      if (S.params.sub && site) h += "&sub=" + encodeURIComponent(S.params.sub);
+      location.href = "../" + to + "/" + h;
+    } });
+    return el("div", { class: "crm-plan-row" }, [sel, btn,
+      el("span", { class: "crm-note", text: "Opens the proposal builder with " + NF0.format(Math.min(nOver, zips.length)) + " over-performing ZIP" + (nOver === 1 ? "" : "s") +
+        (nLook ? " and the " + NF0.format(nLook) + " best untapped look-alike" + (nLook === 1 ? "" : "s") : "") + " as the trade area." })].filter(Boolean));
   }
   function flashMsg(box, t) { var p = el("p", { class: "crm-toast", text: t }); box.appendChild(p); setTimeout(function () { p.remove(); }, 2500); }
 

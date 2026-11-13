@@ -152,3 +152,7 @@ body.crm-printing .crm-maps > section { padding: 6px 8px; }
 .crm-howto p { margin: 8px 0; font-size: 14px; line-height: 1.45; }
 /* Guided steps (preview ?guide=1) */
 .crm-drop.az-next { background: #e9f6f3; border: 2px solid var(--teal); box-shadow: 0 0 0 4px rgba(15,126,112,.14); }
+
+/* Build a plan from these ZIPs (hand-off to the proposal builder) */
+.crm-plan-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin: 14px 0 4px; padding: 12px 14px; border-radius: 10px; background: #e6f4f1; border: 1px solid #b9e0d8; }
+.crm-plan-row select { font: inherit; font-size: 14px; min-height: 40px; padding: 0 10px; border: 2px solid var(--teal, #0f7e70); border-radius: 8px; background: #d3f2e7; }

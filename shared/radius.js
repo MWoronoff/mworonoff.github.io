@@ -408,10 +408,48 @@
       if (ini.p && this.profiles[ini.p]) { this.state.profile = ini.p; this.state.sel = JSON.parse(JSON.stringify(this.profiles[ini.p].sel)); this.state.sortKey = this.cfg.blendScore ? "score" : presetSort(this.profiles[ini.p]); }
       if (ini.mode === "area" && cfg.customArea) { this.state.mode = "area"; if (ini.ca) this.pendingCA = ini.ca; }
       if (ini.hand) this.hand = ini.hand;   // Digital Video amount from the TV + Video tool
+      if (ini.hand && ini.hand.aud) this.applyAudience(ini.hand.aud);   // and the audience chosen there (gender, age, household income)
       if (ini.view === "plan" || ini.hand) this.wantPlan = true;   // open on the Plan tab once the trade area has ZIPs
       if (ini.carry) this.carry = ini.carry;   // what the analyzer's market views passed in (shown as "From your market analysis")
     } else this.readHash();
   }
+
+  /* ---------- Audience from the TV-to-Digital tool ----------
+     aud = { g: "A"|"M"|"W", a: "25-54" | "55+" | "18+", h: ["u25","25to49",...] (empty = all incomes) }.
+     Mapped onto this site's own bands: an age band is picked when at least half of it falls inside the TV age range,
+     an income band when any part of it is in the TV income selection. Filters the site doesn't have are skipped. */
+  var TV_INC = { u25: ["lt35"], "25to49": ["lt35", "35_50"], "50to74": ["50_75"], "75to99": ["75_100"], "100to149": ["100_150"], "150to249": ["150_200", "200p"], "250plus": ["200p"] };
+  function ageSpan(id) {
+    var m;
+    if ((m = /^u(\d+)$/.exec(id))) return [0, +m[1] - 1];
+    if ((m = /^(\d+)_(\d+)$/.exec(id))) return [+m[1], +m[2]];
+    if ((m = /^(\d\d)(\d\d)$/.exec(id))) return [+m[1], +m[2]];
+    if ((m = /^(\d+)p$/.exec(id))) return [+m[1], 85];
+    return null;
+  }
+  Radius.prototype.applyAudience = function (aud) {
+    var s = this.state, defs = this.filterDefs, has = function (k) { return (this.cfg.filters || []).indexOf(k) >= 0; }.bind(this), sel = {}, labels = [];
+    if (has("gender") && (aud.g === "M" || aud.g === "W")) { sel.gender = [aud.g === "M" ? "m" : "f"]; labels.push(aud.g === "M" ? "men" : "women"); }
+    var am = /^(\d+)(?:-(\d+)|\+)$/.exec(aud.a || "");
+    if (has("age") && am && aud.a !== "18+") {
+      var lo = +am[1], hi = am[2] ? +am[2] : 85;
+      var ages = defs.age.options.filter(function (o) { var r = ageSpan(o[0]); if (!r) return false; var ov = Math.min(hi, r[1]) - Math.max(lo, r[0]) + 1; return ov > 0 && ov / (r[1] - r[0] + 1) >= 0.5; }).map(function (o) { return o[0]; });
+      if (ages.length && ages.length < defs.age.options.length) { sel.age = ages; labels.push("ages " + aud.a.replace("-", "–")); }
+    }
+    var want = {};
+    (aud.h || []).forEach(function (k) { (TV_INC[k] || []).forEach(function (x) { want[x] = true; }); });
+    var incKey = ["income", "income5", "income4", "rinc"].filter(has)[0];
+    if (incKey && aud.h && aud.h.length && aud.h.length < Object.keys(TV_INC).length) {
+      var inc = defs[incKey].options.filter(function (o) {
+        var mem = INC4[o[0]] || INC5[o[0]] || (o[0] === "150p" ? ["150_200", "200p"] : [o[0]]);
+        return mem.some(function (x) { return want[x]; });
+      }).map(function (o) { return o[0]; });
+      if (inc.length && inc.length < defs[incKey].options.length) { sel[incKey] = inc; labels.push("selected household incomes"); }
+    }
+    if (!labels.length) return;
+    s.profile = null; s.sel = sel;
+    this.audNote = "Audience carried over from TV-to-Digital: " + labels.join(", ") + ". Adjust it below if needed.";
+  };
 
   /* ---------- URL state ---------- */
   Radius.prototype.readHash = function () {
@@ -582,7 +620,8 @@
       srcBox = el("details", { class: "az-panel az-sources az-fold" }, [el("summary", { text: "Sources" })].concat(Array.prototype.slice.call(sources.childNodes, 1)));
     }
     this.carryBar = el("div", { class: "rz-carry", hidden: true });
-    this.areaParts = [stepHead, this.carryBar, controls, this.areaPanel, stage, table].filter(Boolean);
+    this.audBar = this.audNote ? el("p", { class: "rz-hand", text: this.audNote }) : null;   // audience carried over from TV-to-Digital
+    this.areaParts = [stepHead, this.carryBar, this.audBar, controls, this.areaPanel, stage, table].filter(Boolean);
     this.planParts = [this.planHead, this.extraWrap, this.budgetBox];
     main = el("main", { class: "az-main" + (GUIDE ? " az-guided" : "") }, [this.viewSeg ? el("div", { class: "rz-viewbar" }, [this.viewSeg]) : null].concat(this.areaParts.slice(0, 2), [this.errorBox], this.areaParts.slice(2), this.planParts, [srcBox]).filter(Boolean));
     this.root.innerHTML = ""; if (header) this.root.appendChild(header); this.root.appendChild(main); this.root.appendChild(this.modal);
@@ -1498,7 +1537,7 @@
     if (!h || !P || !P.CHANNELS[h.id]) return;
     var s = this.stratFor("awareness") || P.STRATEGIES[0];
     var label = h.product ? h.product + (h.id === "youtube" ? " (online video)" : "") : P.CHANNELS[h.id].label;
-    b.fixed = { id: h.id, dollars: h.dollars, label: label, short: h.product || P.CHANNELS[h.id].short, job: HAND_JOB[h.id] || null, cpm: h.cpm || null };
+    b.fixed = { id: h.id, dollars: h.dollars, label: label, short: h.product || P.CHANNELS[h.id].short, job: HAND_JOB[h.id] || null, cpm: h.cpm || null, ot: h.ot || null };
     b.strat = s.id; this.bStrat.value = s.id;
     b.amount = P.fixedBudget ? P.fixedBudget(s, h.id, h.dollars) : h.dollars; b.userBudget = true;
     this.bAmount.value = money(b.amount);
@@ -1528,7 +1567,7 @@
     if (window.AdtaxiResults) { done(); return; }
     if (loadResults.waiting) { loadResults.waiting.push(done); return; }
     loadResults.waiting = [done];
-    var sc = document.createElement("script"); sc.src = src || "../shared/results.js?v=20261113c";
+    var sc = document.createElement("script"); sc.src = src || "../shared/results.js?v=20261113d";
     sc.onload = sc.onerror = function () { var w = loadResults.waiting; loadResults.waiting = null; w.forEach(function (f) { f(); }); };
     document.head.appendChild(sc);
   }
@@ -1570,7 +1609,7 @@
     if (window.AdtaxiSlides) { done(); return; }
     if (loadSlides.waiting) { loadSlides.waiting.push(done); return; }
     loadSlides.waiting = [done];
-    var sc = document.createElement("script"); sc.src = "../shared/slides.js?v=20261113c";
+    var sc = document.createElement("script"); sc.src = "../shared/slides.js?v=20261113d";
     sc.onload = sc.onerror = function () { var w = loadSlides.waiting; loadSlides.waiting = null; w.forEach(function (f) { f(); }); };
     document.head.appendChild(sc);
   }
@@ -1638,7 +1677,8 @@
     channels.forEach(function (c) {
       var amount = c.cost != null ? c.cost : c.dollars; if (!amount) return;
       out.n++;
-      var e = c.fixed && held && held.cpm > 0 ? { impr: amount / held.cpm * 1000 } : P.estimate(c.id, amount, bench);
+      // the held Digital Video line: impressions at the TV tool's CPM, times its on-target rate when the rep lowered it there
+      var e = c.fixed && held && held.cpm > 0 ? { impr: amount / held.cpm * 1000 * (held.ot || 1) } : P.estimate(c.id, amount, bench);
       if (e && e.impr != null) { out.impr += e.impr; out.cost += amount; out.with++; }
     });
     return out;
@@ -2014,7 +2054,7 @@
       return { id: ch.id, label: ch.id === "social" ? "Meta (Facebook & Instagram)" : ch.ch.label, role: ch.ch.role.charAt(0).toUpperCase() + ch.ch.role.slice(1),
                amount: amount, reasons: reasons,
                // the held Digital Video line: impressions at the CPM the TV + Video tool used (rate card, management included)
-               est: ch.fixed && held && held.cpm > 0 ? { impr: amount / held.cpm * 1000, clicks: null, leads: null, views: ch.id === "ctv" ? amount / held.cpm * 1000 * P.EST.vcr : null, basis: "cpm", cpm: held.cpm } : P.estimate(ch.id, amount, bench) };
+               est: ch.fixed && held && held.cpm > 0 ? { impr: amount / held.cpm * 1000 * (held.ot || 1), clicks: null, leads: null, views: ch.id === "ctv" ? amount / held.cpm * 1000 * P.EST.vcr : null, basis: "cpm", cpm: held.cpm } : P.estimate(ch.id, amount, bench) };
     });
     var total = plan.reduce(function (t, p) { return t + p.amount; }, 0);
     // Whole-number shares that add to 100 (largest remainder)
