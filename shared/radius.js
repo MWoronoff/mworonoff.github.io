@@ -1528,7 +1528,7 @@
     if (window.AdtaxiResults) { done(); return; }
     if (loadResults.waiting) { loadResults.waiting.push(done); return; }
     loadResults.waiting = [done];
-    var sc = document.createElement("script"); sc.src = src || "../shared/results.js?v=20261113a";
+    var sc = document.createElement("script"); sc.src = src || "../shared/results.js?v=20261113b";
     sc.onload = sc.onerror = function () { var w = loadResults.waiting; loadResults.waiting = null; w.forEach(function (f) { f(); }); };
     document.head.appendChild(sc);
   }
@@ -1570,7 +1570,7 @@
     if (window.AdtaxiSlides) { done(); return; }
     if (loadSlides.waiting) { loadSlides.waiting.push(done); return; }
     loadSlides.waiting = [done];
-    var sc = document.createElement("script"); sc.src = "../shared/slides.js?v=20261113a";
+    var sc = document.createElement("script"); sc.src = "../shared/slides.js?v=20261113b";
     sc.onload = sc.onerror = function () { var w = loadSlides.waiting; loadSlides.waiting = null; w.forEach(function (f) { f(); }); };
     document.head.appendChild(sc);
   }
