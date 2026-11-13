@@ -29,7 +29,7 @@ window.ADTAXI_RADIUS = {
       sel: { age: ["65_74", "75p"] }, context: ["diabetes", "bphigh"] },
     { id: "dental", filters: ["age", "income5", "insurance"], label: "Dental", note: "Adults 35 and older with household income of $100K or more and health insurance: dental patients over-index at 55+ (index 108–125; under 45 only 81–90) and $100K+ (122–130; Scarborough). Orthodontics leans the other way: parents of teens (227) and $250K+ (149). The share of adults with no dental visit in the past year (CDC) shows by ZIP. Patients typically travel up to about 30 miles (AdMall).",
       sel: { age: ["35_64", "65_74", "75p"], income5: ["100_150", "150p"], insurance: ["ins"] }, context: ["nodental"] },
-    { id: "hearing", filters: ["age", "hearing", "income5"], label: "Hearing and audiology", note: "Adults 65 and older with hearing difficulty.",
+    { id: "hearing", filters: ["age", "hearing", "income5"], label: "Hearing and audiology", note: "Adults 65 and older with hearing difficulty: hearing aid shoppers are 39% 65+ vs. 23% of all adults (+70%), while 45–64 run 33–35% below average; they also lean male (+10%), homeowners (+12%) and $75K–$149K (+13%; AudienceSCAN 2026). Income is left open, since those leans are mild.",
       sel: { age: ["65_74", "75p"], hearing: true } },
     { id: "eye", filters: ["age", "vision", "income5", "insurance"], label: "Eye care", note: "Adults 35 and older with vision difficulty; optometrist patients over-index at 45+ (index 107–141) and ophthalmologist patients at 65+ (230; Scarborough). Diabetes rates (CDC) show by ZIP. Optical and optometry customers typically travel up to about 20 miles (AdMall).",
       sel: { age: ["35_64", "65_74", "75p"], vision: true }, context: ["diabetes"] },
