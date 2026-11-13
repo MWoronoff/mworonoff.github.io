@@ -22,6 +22,10 @@
   --dz-lift: 0 1px 0 rgba(255,255,255,.9) inset, 0 4px 8px rgba(15,39,66,.10), 0 22px 36px -12px rgba(15,39,66,.32);
   --dz-face: inset 0 1px 0 rgba(143,224,201,.25), 0 3px 6px rgba(15,39,66,.20), 0 14px 26px -8px rgba(15,39,66,.45);
   --dz-face-hover: inset 0 1px 0 rgba(143,224,201,.40), 0 0 0 2px rgba(143,224,201,.55), 0 22px 34px -10px rgba(15,39,66,.50);
+  /* Work panels sit close to text (hint lines, captions), so their shadows stay
+     tight: a crisp edge plus a short, soft falloff that doesn't reach the words below. */
+  --dz-panel: 0 1px 0 rgba(255,255,255,.9) inset, 0 1px 2px rgba(15,39,66,.10), 0 4px 10px -4px rgba(15,39,66,.16);
+  --dz-panel-hover: 0 1px 0 rgba(255,255,255,.9) inset, 0 1px 3px rgba(15,39,66,.12), 0 6px 14px -6px rgba(15,39,66,.24);
   --dz-tint: #f3fbf8;
   --dz-edge: #13a196;
 }
@@ -34,9 +38,12 @@ html[data-depth="library"] .cat,
 html[data-depth="guide"] .g-sec,
 .tv-goal, .tv-adv, .tv-insight, .tv-psum,
 .mm-call, .mm-draft {
-  box-shadow: var(--dz-rest);
+  box-shadow: var(--dz-panel);
   transition: box-shadow var(--dz-ease), border-color var(--dz-ease), background-color var(--dz-ease);
 }
+
+/* The "Start here" hint sits just under the controls panel; give it clear space */
+.az-startline { margin-top: 10px; }
 
 /* ---------- 2. Cards and tiles ---------- */
 html[data-depth="hub"] .tool,
@@ -79,7 +86,7 @@ html[data-depth="hub"] .btn-mint:active, html[data-depth="hub"] .btn-navy:active
   .tv-goal:hover, .tv-adv:hover, .tv-insight:hover, .tv-psum:hover,
   .mm-call:hover, .mm-draft:hover {
     border-color: var(--dz-edge);
-    box-shadow: var(--dz-lift);
+    box-shadow: var(--dz-panel-hover);
   }
   .az-controls:hover, .az-drillbar:hover, .az-results-card:hover, .az-results-quote:hover,
   .rz-carry:hover, .az-slide-pf:hover,
