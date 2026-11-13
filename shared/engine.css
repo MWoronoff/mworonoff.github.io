@@ -707,21 +707,22 @@ h2 .az-tag { font-size: 12px; }
 .az-stepopt { margin-left: 8px; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: none; letter-spacing: 0; }
 .rz-filters-head h2 { display: flex; align-items: center; }
 .rz-pstep { display: flex; align-items: center; margin: 0 0 6px; font-weight: 700; color: var(--navy); font-size: 15px; }
-.az-next > input, .az-next > select, .az-next > textarea, textarea.az-next, button.az-next { background-color: #e9f6f3; border: 2px solid var(--teal) !important; box-shadow: 0 0 0 4px rgba(15,126,112,.14); }
+.az-next > input, .az-next > select, .az-next > textarea, textarea.az-next, button.az-next { background-color: #d3f2e7; border: 2px solid var(--teal) !important; box-shadow: 0 0 0 4px rgba(15,126,112,.14); }
 button.az-btn.primary.az-next { background: var(--teal); box-shadow: 0 0 0 4px rgba(15,126,112,.25); }
 .az-nexttag { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 999px; background: var(--teal); color: #fff; font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; vertical-align: 1px; }
 .az-startline { margin: -4px 2px 12px; font-size: 13px; color: #44586c; }
 /* Guided next step on the market views (engine guideCue): one highlighted field or panel at a time */
 .az-field.az-guide > span::after { content: "Next"; display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 999px; background: var(--teal); color: #fff; font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; vertical-align: 1px; }
 .az-field.az-guide > span { color: var(--teal); font-weight: 700; }
-.az-field.az-guide > select { background-color: #e9f6f3; border: 2px solid var(--teal) !important; box-shadow: 0 0 0 4px rgba(15,126,112,.14); }
+.az-field.az-guide > select { background-color: #d3f2e7; border: 2px solid var(--teal) !important; box-shadow: 0 0 0 4px rgba(15,126,112,.14); }
 .az-field.az-guide > .az-seg { border: 2px solid var(--teal); box-shadow: 0 0 0 4px rgba(15,126,112,.14); }
-.az-field.az-guide > .az-seg button:not([aria-pressed="true"]):not(:disabled) { background-color: #e9f6f3; }
-.az-panel.az-guide { border: 2px solid var(--teal) !important; box-shadow: 0 0 0 4px rgba(15,126,112,.12) !important; }
+.az-field.az-guide > .az-seg button:not([aria-pressed="true"]):not(:disabled) { background-color: #d3f2e7; }
+.az-panel.az-guide { border: 2px solid var(--teal) !important; box-shadow: 0 0 0 5px rgba(143,224,201,.55) !important; }
 .az-map-panel.az-guide::after { content: "Next: click a market"; position: absolute; top: 14px; right: 58px; z-index: 460; pointer-events: none;
   padding: 5px 11px; border-radius: 999px; background: var(--teal); color: #fff; font-size: 12px; font-weight: 700; box-shadow: 0 2px 6px rgba(15,39,66,.2); }
 @media (max-width: 700px) { .az-map-panel.az-guide::after { left: 12px; right: auto; top: auto; bottom: 12px; } }
 .az-startline b { color: var(--navy); }
+.az-seg button.az-cue { background-color: #d3f2e7; box-shadow: inset 0 0 0 2px var(--teal); color: #0b5d53; }
 .az-seg button.az-cue::after { content: "Next"; margin-left: 6px; padding: 1px 6px; border-radius: 999px; background: var(--teal); color: #fff; font-size: 9.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; vertical-align: 1px; }
 .az-showmore { margin: 8px 0 0; padding: 0; border: 0; background: none; color: var(--teal); font: inherit; font-size: 13px; font-weight: 600; text-decoration: underline; cursor: pointer; }
 .az-ad-fold, .az-fold { margin-top: 10px; }
