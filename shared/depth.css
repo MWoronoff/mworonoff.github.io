@@ -1,0 +1,133 @@
+/* ==========================================================================
+   depth.css — shared 3D depth and hover-brighten styling for the Adtaxi
+   analyzer site. Linked last in each page's <head> so it layers on top of
+   engine.css and the page's own <style> block.
+
+   Three treatments:
+     1. Raised work panels (large panels that hold maps, tables, controls):
+        layered shadow at rest; on hover they brighten (mint tint + teal edge)
+        and the shadow deepens. They do NOT move, so maps and tables stay
+        steady while someone is working in them.
+     2. Cards and tiles (hub tiles, tool cards, library slides, KPI cards):
+        layered shadow at rest; on hover they lift a few pixels and brighten.
+     3. Navy "faces" (map and art panels): raised edge at rest; on hover the
+        colors brighten and become a little more vivid.
+   Hover effects only apply on devices with a real pointer, and movement is
+   switched off for visitors who ask for reduced motion.
+   ========================================================================== */
+
+:root {
+  --dz-ease: .25s ease;
+  --dz-rest: 0 1px 0 rgba(255,255,255,.9) inset, 0 2px 4px rgba(15,39,66,.07), 0 10px 24px -8px rgba(15,39,66,.22);
+  --dz-lift: 0 1px 0 rgba(255,255,255,.9) inset, 0 4px 8px rgba(15,39,66,.10), 0 22px 36px -12px rgba(15,39,66,.32);
+  --dz-face: inset 0 1px 0 rgba(143,224,201,.25), 0 3px 6px rgba(15,39,66,.20), 0 14px 26px -8px rgba(15,39,66,.45);
+  --dz-face-hover: inset 0 1px 0 rgba(143,224,201,.40), 0 0 0 2px rgba(143,224,201,.55), 0 22px 34px -10px rgba(15,39,66,.50);
+  --dz-tint: #f3fbf8;
+  --dz-edge: #13a196;
+}
+
+/* ---------- 1. Raised work panels ---------- */
+.az-panel, .az-controls, .rz-summary, .az-drillbar, .az-results-card, .az-results-quote,
+.rz-proposal, .rz-carry, .rz-handoff, .az-slide-pf,
+html[data-depth="hub"] .econ,
+html[data-depth="library"] .cat,
+html[data-depth="guide"] .g-sec,
+.tv-goal, .tv-adv, .tv-insight, .tv-psum,
+.mm-call, .mm-draft {
+  box-shadow: var(--dz-rest);
+  transition: box-shadow var(--dz-ease), border-color var(--dz-ease), background-color var(--dz-ease);
+}
+
+/* ---------- 2. Cards and tiles ---------- */
+html[data-depth="hub"] .tool,
+html[data-depth="library"] .slide > a,
+.az-slide a img, .rz-dtile, .tv-scard, .mm-kpi {
+  box-shadow: var(--dz-rest);
+  transition: transform var(--dz-ease), box-shadow var(--dz-ease), border-color var(--dz-ease), background-color var(--dz-ease), filter var(--dz-ease);
+}
+html[data-depth="hub"] .cats .cat { transition: transform var(--dz-ease); }
+
+/* ---------- 3. Navy faces ---------- */
+html[data-depth="hub"] .cat-map,
+html[data-depth="hub"] .tool-art {
+  transition: filter var(--dz-ease), box-shadow var(--dz-ease);
+}
+html[data-depth="hub"] .cat-map { box-shadow: var(--dz-face); }
+
+/* Hero map on the hub: a slight 3D tilt with a deep drop shadow */
+html[data-depth="hub"] .map-stage canvas {
+  border-radius: 8px;
+  transform: perspective(1400px) rotateY(-6deg) rotateX(3deg);
+  box-shadow: -18px 26px 44px -14px rgba(0,0,0,.6), inset 0 1px 0 rgba(143,224,201,.3);
+  transition: transform .4s ease, filter var(--dz-ease), box-shadow .4s ease;
+}
+html[data-depth="hub"] .hero { box-shadow: 0 14px 28px -14px rgba(15,39,66,.5); position: relative; z-index: 1; }
+
+/* Buttons: a pressed-key edge */
+html[data-depth="hub"] .btn-mint { box-shadow: 0 3px 0 #5fb7a0, 0 6px 12px rgba(0,0,0,.25); transition: filter var(--dz-ease), transform .12s ease, box-shadow .12s ease; }
+html[data-depth="hub"] .btn-navy { box-shadow: 0 3px 0 #08182a, 0 6px 12px rgba(15,39,66,.25); transition: filter var(--dz-ease), transform .12s ease, box-shadow .12s ease; }
+html[data-depth="hub"] .btn-mint:active, html[data-depth="hub"] .btn-navy:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(0,0,0,.25); }
+
+/* ---------- Hover (real pointers only) ---------- */
+@media (hover: hover) and (pointer: fine) {
+  /* Work panels: brighten in place */
+  .az-panel:hover, .az-controls:hover, .rz-summary:hover, .az-drillbar:hover,
+  .az-results-card:hover, .az-results-quote:hover, .rz-proposal:hover, .rz-carry:hover,
+  .rz-handoff:hover, .az-slide-pf:hover,
+  html[data-depth="hub"] .econ:hover,
+  html[data-depth="library"] .cat:hover,
+  html[data-depth="guide"] .g-sec:hover,
+  .tv-goal:hover, .tv-adv:hover, .tv-insight:hover, .tv-psum:hover,
+  .mm-call:hover, .mm-draft:hover {
+    border-color: var(--dz-edge);
+    box-shadow: var(--dz-lift);
+  }
+  .az-controls:hover, .az-drillbar:hover, .az-results-card:hover, .az-results-quote:hover,
+  .rz-carry:hover, .az-slide-pf:hover,
+  html[data-depth="hub"] .econ:hover,
+  html[data-depth="library"] .cat:hover,
+  html[data-depth="guide"] .g-sec:hover,
+  .tv-goal:hover, .tv-adv:hover, .tv-insight:hover, .tv-psum:hover, .mm-call:hover {
+    background-color: var(--dz-tint);
+  }
+
+  /* Cards and tiles: lift and brighten */
+  html[data-depth="hub"] .tool:hover,
+  .rz-dtile:hover, .tv-scard:hover, .mm-kpi:hover {
+    transform: translateY(-5px);
+    border-color: var(--dz-edge);
+    background-color: var(--dz-tint);
+    box-shadow: var(--dz-lift);
+  }
+  html[data-depth="library"] .slide > a:hover, .az-slide a:hover img {
+    transform: translateY(-4px);
+    box-shadow: var(--dz-lift);
+    filter: brightness(1.06);
+  }
+  html[data-depth="hub"] .cats .cat:hover { transform: translateY(-5px); }
+
+  /* Navy faces: brighter, more vivid colors */
+  html[data-depth="hub"] .cats .cat:hover .cat-map { filter: brightness(1.3) saturate(1.15); box-shadow: var(--dz-face-hover); }
+  html[data-depth="hub"] .tool:hover .tool-art { filter: brightness(1.3) saturate(1.15); }
+  html[data-depth="hub"] .map-stage:hover canvas { filter: brightness(1.2) saturate(1.12); transform: perspective(1400px) rotateY(-3deg) rotateX(1.5deg); }
+  html[data-depth="hub"] .btn-mint:hover, html[data-depth="hub"] .btn-navy:hover { filter: brightness(1.08); }
+}
+
+/* ---------- Narrow screens: no tilt on the hero map ---------- */
+@media (max-width: 860px) {
+  html[data-depth="hub"] .map-stage canvas { transform: none; box-shadow: 0 14px 28px -10px rgba(0,0,0,.55); }
+}
+
+/* ---------- Reduced motion: keep the shading, drop the movement ---------- */
+@media (prefers-reduced-motion: reduce) {
+  html[data-depth="hub"] .map-stage canvas,
+  html[data-depth="hub"] .map-stage:hover canvas { transform: none; }
+  html[data-depth="hub"] .tool:hover, html[data-depth="hub"] .cats .cat:hover,
+  html[data-depth="library"] .slide > a:hover, .az-slide a:hover img,
+  .rz-dtile:hover, .tv-scard:hover, .mm-kpi:hover { transform: none; }
+}
+
+/* ---------- Print: flat ---------- */
+@media print {
+  html[data-depth="hub"] .map-stage canvas { transform: none !important; }
+}
