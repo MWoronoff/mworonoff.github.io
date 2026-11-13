@@ -965,7 +965,7 @@
       cfg.crm === false ? null : el("button", { type: "button", class: "az-btn az-only", text: "Your CRM footprint",
         title: "Customer Analysis (CRM): upload the advertiser's customer list to see where its customers are against this market's potential, ZIP by ZIP",
         onclick: function () { location.href = self.crmUrl(); } }),
-      cfg.tv === false ? null : el("button", { type: "button", class: "az-btn az-only", text: "TV to Digital",
+      cfg.tv === false ? null : this.tvBtn = el("button", { type: "button", class: "az-btn az-only", text: "TV to Digital", hidden: true,
         title: "TV-to-Digital Analyzer: see what happens when budget moves from local broadcast TV into targeted digital video, starting from this category and market",
         onclick: function () { location.href = self.tvUrl(); } }),
       // Category slides (market size and buyers, then media use): an opening conversation, so on every tab from the start
@@ -1114,7 +1114,7 @@
     }
     if (window.AdtaxiRadius) go();
     else {
-      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261113f";   // version tag: browsers fetch the new file after an update
+      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261113g";   // version tag: browsers fetch the new file after an update
       sc.onload = go; sc.onerror = function () { self.showError("The radius tool didn't load. Refresh the page and try again."); };
       document.head.appendChild(sc);
     }
@@ -1185,6 +1185,8 @@
   //   3. The map and ranked list (until a market is picked)  4. Trade area (small "Next" cue)
   // Nothing is locked; the highlight just follows whatever is still missing.
   Analyzer.prototype.guideCue = function () {
+    // TV to Digital needs a market, so it appears once the rep is on a view where markets can be picked (not the U.S. view)
+    if (this.tvBtn) this.tvBtn.hidden = this.state.level === "us" || this.mode === "radius";
     if (!GUIDE) return;
     var s = this.state, rad = this.mode === "radius", g = this.gDone || (this.gDone = {});
     if (this.startLine) this.startLine.hidden = rad;
@@ -1389,7 +1391,7 @@
     if (window.AdtaxiSlides) { done(); return; }
     if (loadSlides.waiting) { loadSlides.waiting.push(done); return; }
     loadSlides.waiting = [done];
-    var sc = document.createElement("script"); sc.src = "../shared/slides.js?v=20261113f";
+    var sc = document.createElement("script"); sc.src = "../shared/slides.js?v=20261113g";
     sc.onload = sc.onerror = function () { var w = loadSlides.waiting; loadSlides.waiting = null; w.forEach(function (f) { f(); }); };
     document.head.appendChild(sc);
   }
@@ -1963,8 +1965,8 @@
         .then(function (b) { if (b.map && (b.map[cfg.exportName] || (b.drivers && b.drivers[cfg.exportName]))) { self[key] = b; self.tabBar.querySelector('[data-tab="' + tab + '"]').hidden = false; self.tabBar.hidden = false; } })
         .catch(function () { /* no tab without data */ });
     }
-    if (cfg.benchmarks !== false) load(cfg.benchmarksData || "../shared/benchmarks.json?v=20261113f", "bench", "bench");
-    if (cfg.timing !== false) load(cfg.timingData || "../shared/timing.json?v=20261113f", "timing", "timing");
+    if (cfg.benchmarks !== false) load(cfg.benchmarksData || "../shared/benchmarks.json?v=20261113g", "bench", "bench");
+    if (cfg.timing !== false) load(cfg.timingData || "../shared/timing.json?v=20261113g", "timing", "timing");
   };
   Analyzer.prototype.setTab = function (tab) {
     var self = this, prev = this.tab;
