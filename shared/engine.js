@@ -923,12 +923,14 @@
         radB ? el("div", { class: "az-field" }, [el("span", { text: "Or" }), el("div", { class: "az-seg", role: "group", "aria-label": "Trade area" }, [radB])]) : null
       ].filter(Boolean);
     }
+    this.geoField = controls[0];
     if ((cfg.subcategories || []).length) {
-      this.subSel = el("select", { "aria-label": cfg.subcategoryLabel || "Category", onchange: function () { self.state.sub = this.value; self.state.sortKey = null; if (self.reportBtn) self.reportBtn.sync();
+      this.subSel = el("select", { "aria-label": cfg.subcategoryLabel || "Category", onchange: function () { self.gDone.cat = true; self.state.sub = this.value; self.state.sortKey = null; if (self.reportBtn) self.reportBtn.sync();
         if (self.mode === "radius") { if (self.radius) self.radius.usePreset(self.state.sub); self.writeHash(); } else self.refresh(); } },
         cfg.subcategories.map(function (s) { return el("option", { value: s.id, text: s.label }); }));
-      controls.push(el("label", { class: "az-field" }, [el("span", { text: cfg.subcategoryLabel || "Category" }), this.subSel]));
+      controls.push(this.catField = el("label", { class: "az-field" }, [el("span", { text: cfg.subcategoryLabel || "Category" }), this.subSel]));
     }
+    this.gDone = { cat: false, geo: false };
     this.rankSel = el("select", { onchange: function () { self.state.rank = this.value; self.state.sortKey = null; self.refresh(); } });
     controls.push(el("label", { class: "az-field az-only" }, [el("span", { text: "Rank and map by" }), this.rankSel]));
     this.showSel = el("select", { onchange: function () { self.state.show = +this.value; self.renderTable(); } },
@@ -970,7 +972,7 @@
     this.mapEl = el("div", { class: "az-map", role: "region", "aria-label": "Map of markets" });
     this.detail = el("aside", { class: "az-panel az-detail", "aria-live": "polite" });
     var stage = el("section", { class: "az-stage" }, [
-      el("div", { class: "az-panel az-map-panel" }, [this.mapEl, this.mapHead, this.legend, this.mapMsg]),
+      this.mapPanel = el("div", { class: "az-panel az-map-panel" }, [this.mapEl, this.mapHead, this.legend, this.mapMsg]),
       this.detail
     ]);
 
@@ -1095,7 +1097,7 @@
     }
     if (window.AdtaxiRadius) go();
     else {
-      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261112x";   // version tag: browsers fetch the new file after an update
+      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261112y";   // version tag: browsers fetch the new file after an update
       sc.onload = go; sc.onerror = function () { self.showError("The radius tool didn't load. Refresh the page and try again."); };
       document.head.appendChild(sc);
     }
@@ -1161,13 +1163,25 @@
     if (from === "zip") { s.query = ""; if (this.search) this.search.value = ""; this.resetView = true; }
     this.refresh();
   };
-  // Guided: the start line shows on the market views only; once a market is picked, Trade area carries a small "Next" cue
+  // Guided next step on the market views: one thing is highlighted at a time, in order.
+  //   1. Category (until the rep changes it or moves on)  2. Geography (while on the U.S. view)
+  //   3. The map and ranked list (until a market is picked)  4. Trade area (small "Next" cue)
+  // Nothing is locked; the highlight just follows whatever is still missing.
   Analyzer.prototype.guideCue = function () {
     if (!GUIDE) return;
-    var s = this.state, rad = this.mode === "radius";
+    var s = this.state, rad = this.mode === "radius", g = this.gDone || (this.gDone = {});
     if (this.startLine) this.startLine.hidden = rad;
+    if (s.level !== "us") g.geo = true;
+    var picked = !!s.area && s.level !== "us";   // the U.S. view keeps the national total selected; that isn't a pick
+    if (picked || g.geo) g.cat = true;
+    var step = rad ? "" : (this.catField && !g.cat) ? "cat" : s.level === "us" ? "geo" : !picked ? "pick" : "trade";
+    if (this.catField) this.catField.classList.toggle("az-guide", step === "cat");
+    if (this.geoField) this.geoField.classList.toggle("az-guide", step === "geo");
+    if (this.mapPanel) this.mapPanel.classList.toggle("az-guide", step === "pick");
+    if (this.tablePanel) this.tablePanel.classList.toggle("az-guide", step === "pick");
     var tb = this.levelSeg && this.levelSeg.querySelector('[data-level="radius"]');
-    if (tb) tb.classList.toggle("az-cue", !!s.area && s.level !== "us" && !rad);
+    if (!tb && this.nav && this.nav.radius && this.nav.radius.tagName === "BUTTON") tb = this.nav.radius;
+    if (tb) tb.classList.toggle("az-cue", step === "trade");
   };
   Analyzer.prototype.select = function (id, opts) {
     this.state.area = id;
@@ -1358,7 +1372,7 @@
     if (window.AdtaxiSlides) { done(); return; }
     if (loadSlides.waiting) { loadSlides.waiting.push(done); return; }
     loadSlides.waiting = [done];
-    var sc = document.createElement("script"); sc.src = "../shared/slides.js?v=20261112x";
+    var sc = document.createElement("script"); sc.src = "../shared/slides.js?v=20261112y";
     sc.onload = sc.onerror = function () { var w = loadSlides.waiting; loadSlides.waiting = null; w.forEach(function (f) { f(); }); };
     document.head.appendChild(sc);
   }
@@ -1932,8 +1946,8 @@
         .then(function (b) { if (b.map && (b.map[cfg.exportName] || (b.drivers && b.drivers[cfg.exportName]))) { self[key] = b; self.tabBar.querySelector('[data-tab="' + tab + '"]').hidden = false; self.tabBar.hidden = false; } })
         .catch(function () { /* no tab without data */ });
     }
-    if (cfg.benchmarks !== false) load(cfg.benchmarksData || "../shared/benchmarks.json?v=20261112x", "bench", "bench");
-    if (cfg.timing !== false) load(cfg.timingData || "../shared/timing.json?v=20261112x", "timing", "timing");
+    if (cfg.benchmarks !== false) load(cfg.benchmarksData || "../shared/benchmarks.json?v=20261112y", "bench", "bench");
+    if (cfg.timing !== false) load(cfg.timingData || "../shared/timing.json?v=20261112y", "timing", "timing");
   };
   Analyzer.prototype.setTab = function (tab) {
     var self = this, prev = this.tab;
