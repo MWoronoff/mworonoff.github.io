@@ -143,7 +143,7 @@
       });
       return el("article", { class: "az-results-card" }, [el("h4", { text: it.client }), el("p", { text: it.headline }),
         m.why ? el("p", { class: "az-results-why", text: m.why }) : null, chips,
-        el("a", { href: BASE + it.file, target: "_blank", rel: "noopener", text: "Open the case study" })]);
+        el("a", { href: BASE + it.file + "?v=2611r", target: "_blank", rel: "noopener", text: "Open the case study" })]);
     }
     function section(title, list) {
       if (!list.length) return;
