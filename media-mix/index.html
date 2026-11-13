@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script>/* site-version: if this page is an old saved copy, reload it once with the current version (shared/version.json; bump both on each release) */
-(function(){var V="20261113p";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
+(function(){var V="20261113q";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Digital Media Mix Planner</title>
 <meta name="robots" content="noindex">
@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
-<link rel="stylesheet" href="../shared/engine.css?v=20261113p">
+<link rel="stylesheet" href="../shared/engine.css?v=20261113q">
 <style>
   .mm-main { max-width: 1240px; margin: 0 auto; padding: 22px 20px 40px; }
   .mm-draft { background: var(--warn-bg); border: 1px solid var(--warn-line); border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; font-size: 13px; }
@@ -119,7 +119,7 @@
   .mm-feeline { margin-top: 3px !important; font-size: 12px; color: var(--navy); font-weight: 600; }
   @media print { .mm-toggle { display: none; } }
 </style>
-<link rel="stylesheet" href="../shared/depth.css?v=20261113p">
+<link rel="stylesheet" href="../shared/depth.css?v=20261113q">
 </head>
 <body>
 <header class="az-header">
@@ -147,7 +147,7 @@
 </main>
 
 <script src="../shared/media-plan.js?v=20261111o"></script>
-<script src="../shared/results.js?v=20261113p"></script>
+<script src="../shared/results.js?v=20261113q"></script>
 <script>
 /* =====================  SETTINGS (draft: edit here)  =====================
    CATEGORIES: category ad spend, $ billions. Default source: EMARKETER 2026 (all U.S. advertisers,
@@ -461,7 +461,7 @@ var P = window.AdtaxiPlan, CHANNELS = P.CHANNELS, ROLES = P.ROLES, STRATEGIES = 
     var s = STRATEGIES.filter(function (x) { return x.id === stratSel.value; })[0];
     if (!c || !s) return;
     if (!window.AdtaxiResults || !AdtaxiResults.render) {   // file missing or out of date: load the current one, then open
-      var sc = document.createElement("script"); sc.src = "../shared/results.js?v=20261113p&t=" + Date.now();
+      var sc = document.createElement("script"); sc.src = "../shared/results.js?v=20261113q&t=" + Date.now();
       sc.onload = function () { $("results").click(); }; document.head.appendChild(sc); return;
     }
     AdtaxiResults.render(resBody, { cat: c.id, plan: buildPlan(s, readBudget()).items.map(function (r) { return r.id; }), channels: CHANNELS, close: function () { resPanel.close(); } });
