@@ -1,0 +1,30 @@
+{
+ "photo": "photos/cbd_hdr.jpg",
+ "ill": "assets/ill_prog_social_preroll.png",
+ "title": "The Pandemic Pivot",
+ "subtitle": "Social Display Spurs D2C Brand Growth During COVID and Beyond",
+ "tags": ["Ecommerce", "Programmatic · Social Display · Pre-roll"],
+ "results": [["2x", "increase in revenue"], ["2.5x", "increase in average order value"], ["3rd", "in brand share", "Up from 19th at start of year"]],
+ "table": [
+  ["A dramatic shift from wholesale brick-and-mortar sales to D2C ecommerce", "A programmatic strategy to increase online sales"],
+  ["Evaluating and redefining core audience targets for online customers", "A full funnel, data driven approach to reaching, convincing, and converting new customers online"],
+  ["Developing accurate attribution and reporting methods", "A custom reporting suite to measure prospecting and retargeting audiences"]],
+ "insights": ["Our client was forced to re-evaluate their entire approach to digital marketing due to the startling effects of the pandemic. That pushed us to rethink our approach entirely, allowing us to innovate in new and successful ways that we can use to drive growth for their business and for our other clients in the future. The results of maintaining a 9x ROAS while increasing revenue 2x over the previous period is nothing short of astounding."],
+ "story_head": "How a CBD wholesaler became a D2C brand",
+ "story": [
+  ["h", "A Year of Change"],
+  "2020 saw tectonic shifts in the global economy. Regardless of its clichéd usage, it truly has been a time of uncertainty for most businesses. Especially for clients who had staked their model on brick and mortar commerce. One such business was a national CBD company in the US focused on wholesaling CBD products to brick and mortar stores. But as the economic landscape shifted with COVID, so did the company’s approach to how they sold their products.",
+  "While ecommerce had always been a secondary piece of their business, mass lockdowns country-wide proved that it needed to become the driving force of their revenue in 2020. With that in mind, they worked closely with Adtaxi to develop a programmatic strategy that would dramatically increase spend (2x over current levels into the low-mid 6 figures per month), and would provide an increase in online sales to a level that could sustain their business without lowering our ROAS.",
+  "The programmatic changes in targeting and attribution driven by Adtaxi led the business to a banner year, <b>moving from 19th to 3rd in terms of brand share</b> within the vertical, all while shifting the company’s focus to a direct-to-consumer model. It is a remarkable brand story and a clear illustration of how our agency leveraged digital media to deliver business growth.",
+  ["h", "A New Approach"],
+  "Our approach required a massive shift from the company’s existing strategy within programmatic. It began with a severing of the traditional lens through which they viewed digital advertising, and a shift into a full-funnel, data-driven approach to reaching, convincing, and converting new customers online.",
+  "Among the changes was a re-imagining of the core audience targets. By re-evaluating the consumers buying CBD online, we were able to segment and target several buckets of users with creatives designed specifically for their interests. We also utilized 1st party data to build custom lookalike audiences based on brand actions and further used that data to heavily segment our retargeting audiences. These actions allowed us to build a full-funnel approach to targeting through a variety of channels such as display, native, and pre-roll video.",
+  "We also incorporated developing channels, such as social extended display. Allowing us to serve social creatives in a display environment significantly increased ROAS relative to standard display, allowing us to offset any ROAS dips from our large increase in spend. Using this tactic, we were able to serve more efficient impressions, significantly increasing the value of our client’s programmatic approach.",
+  "To say these approaches were a resounding success would be a dramatic understatement. When comparing performance after these changes were implemented to previous strategies we saw a <b>2x increase in revenue driven, and a nearly 2.5x increase in average order value</b> from programmatic sales.",
+  ["h", "Measuring Success"],
+  "The focus of the programmatic shift was on increasing total digital revenue within the RTB space. We needed a way to judge revenue and ROAS driven not only against our heavily segmented retargeting ad groups, where last-touch models succeed, but also our high-funnel prospecting audiences. Through a deep dive into our existing conversion data we found that upwards of 20% of our sales were brought in by a prospecting first touch, and a retargeting last-touch. Our prospecting ad groups were greatly outperforming our initial estimates, and we needed to shift how we reported on those strategies to assess their success.",
+  "To rectify that problem, we built a custom reporting suite that judged our prospecting tactics on an any-touch model, giving credit to impressions from prospecting ad groups throughout the funnel. The result was identifying large areas where prospecting was driving significant new revenue to the site, and spending more dollars in those areas.",
+  "The results were nothing short of incredible. Our any-touch ROAS after implementing these reporting changes stayed essentially unchanged even after adding hundreds of thousands of dollars spent. That stability allowed us to derive <b>significant revenue growth (2x) from the campaign</b>, and showcase the business as a top competitor in the ecommerce space.",
+  "These implementations have significantly changed the company’s long-term approach to digital marketing, as well as how we can best report on success to clients across our company."
+ ]
+}

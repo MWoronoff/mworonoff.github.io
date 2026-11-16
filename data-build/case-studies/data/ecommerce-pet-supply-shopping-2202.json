@@ -1,0 +1,75 @@
+{
+ "photo": "photos/pet_hdr.jpg",
+ "ill": "assets/ill_search_shopping.png",
+ "title": "Boosting Conversions",
+ "subtitle": "Dual Digital Strategy Provides Higher ROAS and Decreases Ad Spend",
+ "tags": [
+  "Ecommerce",
+  "Google Shopping · Search"
+ ],
+ "results": [
+  [
+   "1,633%",
+   "peak ROAS"
+  ],
+  [
+   "612%",
+   "profit growth"
+  ],
+  [
+   "50%",
+   "decrease in ad spend"
+  ]
+ ],
+ "table": [
+  [
+   "Current campaigns not reaching target ROAS",
+   "Custom scripts to adjust bids based on ROAS and revenue"
+  ],
+  [
+   "Improving profitability, expanding revenue and transaction numbers",
+   "Feed optimization and product grouping to improve campaign profitability"
+  ],
+  [
+   "Utilizing a digital strategy to achieve a competitive advantage over rivals",
+   "Optimized and expanded campaigns to build market share and improve visibility"
+  ]
+ ],
+ "insights": [
+  "Our advanced bidding strategy created huge improvements in overall client profit, revenue, ROAS, and transactions, all while reducing overall spend. We pushed more dollars into the shopping campaigns as profit dictated and expanded our remarketing efforts. Our combination of campaign structures allowed us to hone in precisely on users in each stage of the sales funnel and tailor bids directly to profit, resulting in a clear impact on the client’s bottom line."
+ ],
+ "story_head": "How profit-based bidding tripled Shopping ROAS",
+ "story": [
+  [
+   "h",
+   "Optimizing for Success"
+  ],
+  "You don’t need a crystal ball to see that the future of retail will continue to gravitate to ecommerce and that paid search will be a primary driver of activity. Historically, shopping campaigns have higher conversion rates and ROI than generic search, but to be truly successful is a complicated task that requires infinite testing, a well-optimized feed, and strategic product segmentation.",
+  "A leading online pet supplies retailer wanted to increase their Return on Ad Spend (ROAS), reduce Cost per Transaction (CPA), and maximize profit from their Google Shopping campaigns in an extremely competitive industry against Amazon and other online suppliers and owned domains. To improve overall profitability, we were challenged to overhaul the client’s shopping campaign and increase the contribution of non-branded keywords towards their bottom line.",
+  "At Adtaxi, we are constantly faced with new challenges that push us to get creative, think outside of the box, and sometimes develop new technologies to solve a unique problem or push results to their limits. The changes we implemented <b>tripled our client’s ROAS</b>, increased profitability, and grew transactions, all with a considerable decrease in ad spend. The digital media strategy we developed for this client delivered significant business growth in the competitive ecommerce space.",
+  [
+   "h",
+   "Innovative Solutions"
+  ],
+  "Our client charged us with improving profit margin on their Shopping campaign, maintaining ROAS above 800% and a CPA of below $10 on an ongoing weekly basis. This required us to formulate a new strategy to address all 3 priorities simultaneously.",
+  "Our primary innovation was around adding a custom label in our Google Merchant Center feed optimization process and grouping products by profit margin buckets, which allowed for the calculation of an average profit and finally the extrapolation of profit from conversions.",
+  "It’s important to note that sharing profit margin information was necessary for the success of this strategy, so a relationship of trust and transparency between our organizations was critical.",
+  "This approach allowed for the implementation of an advanced bidding strategy to optimize for profit margin, and the creation of custom scripts focused on adjusting bids based on ROAS and revenue.",
+  [
+   "h",
+   "A Layered Approach"
+  ],
+  "We layered on a strategy to segment products further by brand and item ID for high, medium, and low priority campaigns, additionally adding negative keywords by match type to better control CPCs and Cost on low converting and high funnel search queries. This gave us the ability to push top search terms where we wanted greater market share and to create better visibility on categories/brands having a shift in traffic at both the ad group and campaign level. Finally, we expanded RLSA for the Shopping campaign to maximize transactions and ROAS.",
+  [
+   "h",
+   "Feed Optimization"
+  ],
+  "We know how important an optimized Merchant Center feed is to the success of a Shopping campaign. It can be a full-time job for a client or a campaign manager to manage their feed, let alone optimize it. And let’s face it, feeds break! It’s almost unavoidable. Feed management can provide tremendous support for clients to identify website kinks and fix product issues so they can focus on running their business and the campaign manager can focus on bid management in the Shopping campaigns to drive results. Adtaxi partnered with Feedonomics, a best-in-breed feed management platform, for their feed optimization technology which contributed to the success of our efforts.",
+  [
+   "h",
+   "Custom Scripts"
+  ],
+  "We have found success creating custom Google Scripts as a technology for Shopping campaigns. In this case, we implemented a custom script for our “High Priority, High Margin” Shopping campaign. The goal of the script was to look at the last seven days worth of data and adjust bids based on ROAS for each individual product and reduce the need for manual optimization. We created ROAS ad spend bidding tiers to give products that have performed better higher bids and conversely products that were performing poorly lower bids.",
+  "Our strategy effectively tripled this client’s ROAS, reaching a peak of 1633% within 6 months. Profit grew 612% and transactions grew 64%. This dual strategy of balancing the highest converting products while also grouping products and bids by profit margin allowed us to achieve all this client’s goals while decreasing ad spend by over 50%."
+ ]
+}
