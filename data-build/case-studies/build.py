@@ -49,7 +49,7 @@ table.cs tr:last-child td { border-bottom: .7pt solid #dce4e8 }
 .col { position: absolute; overflow: hidden }
 .col p { font-size: var(--fs, 9pt); line-height: var(--lh, 13pt); margin-bottom: 5pt }
 .col p b { color: #0b7e71; font-weight: 700 }
-.col h3 { font-weight: 700; font-size: 10.5pt; line-height: 1.3; color: #0b7e71; margin: 6pt 0 3pt }
+.col h3 { font-weight: 700; font-size: calc(var(--fs, 9pt) + 1.5pt); line-height: 1.3; color: #0b7e71; margin: 6pt 0 3pt }
 .col h3:first-child { margin-top: 0 }
 .col img { display: block; width: 100%; margin-bottom: 10pt }
 .foot { position: absolute; left: 0; top: 734.4pt; width: 612pt; height: 57.6pt; background: #000; overflow: hidden }
@@ -135,7 +135,7 @@ async def render(d, out):
     async with async_playwright() as p:
         b = await p.chromium.launch(executable_path='/usr/bin/google-chrome', args=['--no-sandbox'])
         pg = await b.new_page()
-        tries = [(2, 9.0), (2, 8.6), (2, 8.2), (3, 9.0)]
+        tries = d.get('tries') and [tuple(t) for t in d['tries']] or [(2, 9.0), (2, 8.6), (2, 8.2), (3, 9.0)]
         for npages, fs in tries:
             await pg.set_content(page_html(d, npages, A)); await pg.evaluate('document.fonts.ready')
             await pg.evaluate("fs => { document.body.style.setProperty('--fs', fs + 'pt'); document.body.style.setProperty('--lh', (fs * 13 / 9).toFixed(2) + 'pt'); }", fs)
