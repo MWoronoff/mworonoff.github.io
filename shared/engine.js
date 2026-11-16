@@ -961,6 +961,14 @@
         { label: "Data (CSV)", note: "The table's data for a spreadsheet", run: function () { self.exportCSV(); } }]);
     exportBtn.classList.add("az-only");
     controls.push(el("div", { class: "az-actions" }, [
+      // Results lives in the Trade area's Recommended allocation (shared/radius.js), matched to the plan's channels
+      (this.reportBtn = reportButton(function () { return self.state.sub; }, function () {
+        var s = (cfg.subcategories || []).filter(function (x) { return x.id === self.state.sub; })[0];
+        return s ? s.label : ""; })),
+      // Category slides (market size and buyers, then media use): an opening conversation, so on every tab from the start
+      SLIDE_CATS[cfg.exportName] ? el("button", { type: "button", class: "az-btn az-slides-btn", "aria-haspopup": "dialog", text: SLIDE_CATS[cfg.exportName] + " slides",
+        title: "U.S. market size, buyers and how they use media", onclick: function () {
+          loadSlides(function () { if (window.AdtaxiSlides) AdtaxiSlides.open({ cat: cfg.exportName, only: "category" }); }); } }) : null,
       el("button", { type: "button", class: "az-btn az-only", text: "How scores work", onclick: function () { self.openMethod(); } }),
       cfg.crm === false ? null : el("button", { type: "button", class: "az-btn az-only", text: "Your CRM footprint",
         title: "Customer Analysis (CRM): upload the advertiser's customer list to see where its customers are against this market's potential, ZIP by ZIP",
@@ -968,14 +976,6 @@
       cfg.tv === false ? null : this.tvBtn = el("button", { type: "button", class: "az-btn az-only", text: "TV to Digital", hidden: true,
         title: "TV-to-Digital Analyzer: see what happens when budget moves from local broadcast TV into targeted digital video, starting from this category and market",
         onclick: function () { location.href = self.tvUrl(); } }),
-      // Category slides (market size and buyers, then media use): an opening conversation, so on every tab from the start
-      SLIDE_CATS[cfg.exportName] ? el("button", { type: "button", class: "az-btn az-slides-btn", "aria-haspopup": "dialog", text: SLIDE_CATS[cfg.exportName] + " slides",
-        title: "U.S. market size, buyers and how they use media", onclick: function () {
-          loadSlides(function () { if (window.AdtaxiSlides) AdtaxiSlides.open({ cat: cfg.exportName, only: "category" }); }); } }) : null,
-      // Results lives in the Trade area's Recommended allocation (shared/radius.js), matched to the plan's channels
-      (this.reportBtn = reportButton(function () { return self.state.sub; }, function () {
-        var s = (cfg.subcategories || []).filter(function (x) { return x.id === self.state.sub; })[0];
-        return s ? s.label : ""; })),
       exportBtn
     ]));
     var controlBar = el("section", { class: "az-controls", "aria-label": "Analyzer controls" }, controls);
