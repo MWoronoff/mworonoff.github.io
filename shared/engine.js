@@ -708,6 +708,22 @@
     if (location.hash !== h) history.replaceState(null, "", h);
   };
 
+  /* ---------- Score scale ----------
+     Market Potential Scores arrive as weighted averages of percentiles, so the best market rarely tops 70-90. Stretch each
+     score column so the strongest market in the set (national DMAs, metros or counties; a market's ZIPs) is 100 and the
+     weakest is 0. Rankings don't change; the parts behind the score keep their percentiles. */
+  function stretchScores(rows) {
+    if (!rows || !rows.length) return;
+    var keys = {};
+    rows.forEach(function (r) { for (var k in (r.v || {})) if (k === "score" || k.indexOf("score@") === 0) keys[k] = 1; });
+    Object.keys(keys).forEach(function (k) {
+      var lo = Infinity, hi = -Infinity;
+      rows.forEach(function (r) { var x = r.v[k]; if (!r.u && typeof x === "number" && isFinite(x)) { if (x < lo) lo = x; if (x > hi) hi = x; } });
+      if (!(hi > lo)) return;
+      rows.forEach(function (r) { var x = r.v[k]; if (typeof x === "number" && isFinite(x)) r.v[k] = Math.round(Math.max(0, Math.min(100, (x - lo) / (hi - lo) * 100)) * 1000) / 1000; });
+    });
+  }
+
   /* ---------- Loading ---------- */
   Analyzer.prototype.loadJSON = function (url) {
     return fetch(url, { cache: "no-cache" }).then(function (r) {
@@ -757,6 +773,7 @@
     if (level === "zip") jobs = jobs.concat(chainJobs);
     if (key && !this.data[key]) jobs.push(this.loadJSON(level === "zip" ? this.url(L.data) : L.data).then(function (d) {
       var byId = {};
+      stretchScores(d.rows);
       d.rows.forEach(function (r) { byId[r.id] = r; });
       self.data[key] = { rows: d.rows, byId: byId, meta: d };
     }));
@@ -795,6 +812,7 @@
         if (g.topo) feats = feats.concat(topojson.feature(g.topo, g.topo.objects[Object.keys(g.topo.objects)[0]]).features);
       });
       self.rescoreZips(rows);
+      stretchScores(rows);
       self.data[key] = { rows: rows, byId: byId, meta: got[0] ? got[0].data : {} };
       self.geo[geoKey] = feats.length ? { type: "FeatureCollection", features: feats } : null;
     })]));
@@ -1118,7 +1136,7 @@
     }
     if (window.AdtaxiRadius) go();
     else {
-      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261113v";   // version tag: browsers fetch the new file after an update
+      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261116b";   // version tag: browsers fetch the new file after an update
       sc.onload = go; sc.onerror = function () { self.showError("The radius tool didn't load. Refresh the page and try again."); };
       document.head.appendChild(sc);
     }
