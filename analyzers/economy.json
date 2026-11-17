@@ -79,7 +79,7 @@
       "bullet": "Consumer spending was little changed in most districts and led by higher-income households. Price-sensitive shoppers are pushing back on increases, squeezing margins for consumer-facing businesses.",
       "source": "Federal Reserve Beige Book, released Oct. 14 (information collected through Oct. 5).",
       "url": "https://www.federalreserve.gov/monetarypolicy/publications/beige-book-default.htm",
-      "report": { "label": "View the Beige Book (Fed PDF)", "file": "https://www.federalreserve.gov/monetarypolicy/files/BeigeBook_20261014.pdf" },
+      "report": { "label": "View the Beige Book", "file": "/analyzers/beige-book.pdf" },
       "chart": {
         "type": "grid",
         "title": "Consumer spending by Fed district",
