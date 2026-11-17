@@ -13,6 +13,7 @@
       "bullet": "Gas is a big part of the gain: gas station sales are up 27.5% from a year ago. Furniture and home furnishings (+8.5%) outpaced the total, while building materials (+4.2%) and auto dealers (+2.7%) trailed it.",
       "source": "U.S. Census Bureau, Monthly Retail Trade (not seasonally adjusted). Released Nov. 17; next release Dec. 16.",
       "url": "https://www.census.gov/retail/index.html",
+      "report": { "label": "View the Retail Sales report", "file": "/analyzers/retail-sales-report.pdf" },
       "chart": {
         "type": "bar",
         "title": "Retail sales, % change from a year earlier",
