@@ -407,8 +407,15 @@
     var base = "/analyzers/library.html?view=" + v;
     sel.appendChild(new Option(v === "digital" ? "All platforms" : "All categories", ""));
     list.forEach(function (x) { sel.appendChild(new Option(x[1], (v === "digital" ? "pf-" : "") + x[0])); });
-    if (v === "results") sel.appendChild(new Option("Other industries", "other"));
-    sel.addEventListener("change", function () { go.href = base + (sel.value ? "#" + sel.value : ""); });
+    if (v === "results") {
+      sel.appendChild(new Option("Other industries", "other"));
+      var g = document.createElement("optgroup"); g.label = "By platform";
+      [["display", "Programmatic display"], ["social", "Social (Meta)"], ["search", "Google Search"], ["retarget", "Retargeting"], ["ctv", "CTV / streaming TV"],
+       ["youtube", "YouTube"], ["tiktok-snapchat", "TikTok and Snapchat"], ["shopping", "Shopping ads"], ["audio-dooh", "Digital audio and DOOH"]]
+        .forEach(function (x) { g.appendChild(new Option(x[1], "ch-" + x[0])); });
+      sel.appendChild(g);
+    }
+    sel.addEventListener("change", function () { go.href = base + (/^ch-/.test(sel.value) ? "&by=platform" : "") + (sel.value ? "#" + sel.value : ""); });
   });
 })();
 </script>

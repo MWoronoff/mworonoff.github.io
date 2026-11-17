@@ -75,6 +75,10 @@
   .cat.hit { border-color: var(--teal-2); box-shadow: 0 0 0 2px rgba(19, 161, 150, .25); }
   .pf-item { scroll-margin-top: 16px; }
   .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .by { display: inline-flex; border: 1px solid rgba(207, 224, 238, .35); border-radius: 999px; padding: 3px; margin: 0 0 12px; }
+  .by a { font-size: 14px; font-weight: 600; color: #cfe0ee; text-decoration: none; padding: 5px 14px; border-radius: 999px; }
+  .by a[aria-current="page"] { background: var(--mint); color: var(--navy); }
+  .reports .also { display: block; font-size: 12.5px; color: var(--muted); margin-top: 2px; }
   .chips a { font-size: 13px; color: #cfe0ee; text-decoration: none; border: 1px solid rgba(207, 224, 238, .28); border-radius: 999px; padding: 4px 12px; }
   .chips a:hover { border-color: var(--mint); color: #fff; }
 
@@ -270,7 +274,7 @@
     reports:  { name: "Category Reports", lead: "AdMall Local Account Intelligence reports for each business category. Select View to preview one and download it as a PDF." },
     response: { name: "Ad Response", lead: "One-sheets ranking 17 media by how many of each category's buyers acted on an ad in the past 30 days, compared with all U.S. adults. Select View to preview one and download it as a PDF." },
     digital:  { name: "Digital Slides", lead: "Reach, growth and audience by demographic for six digital platforms. Open a slide full size or download it as a PDF." },
-    results:  { name: "Case Studies", lead: "Adtaxi client results by business category, with the numbers each campaign delivered. Select View to read a case study and download it as a PDF." }
+    results:  { name: "Case Studies", lead: "Adtaxi client results by business category or platform, with the numbers each campaign delivered. Select View to read a case study and download it as a PDF." }
   };
   var view = new URLSearchParams(location.search).get("view");
   if (!VIEWS[view]) view = null;
@@ -301,8 +305,9 @@
     return el("div", { class: "cat-head" }, [el("h2", { id: c.id + "-t", text: c.name }), el("a", { href: c.path, text: "Open the " + c.name + " analyzer ›" })]);
   }
 
-  if (view !== "digital") CATS.forEach(function (c) { jump.appendChild(el("a", { href: "#" + c.id, text: c.name })); });
-  if (view === "results") jump.appendChild(el("a", { href: "#other", text: "Other industries" }));
+  var byPlatform = view === "results" && new URLSearchParams(location.search).get("by") === "platform";
+  if (view !== "digital" && !byPlatform) CATS.forEach(function (c) { jump.appendChild(el("a", { href: "#" + c.id, text: c.name })); });
+  if (view === "results" && !byPlatform) jump.appendChild(el("a", { href: "#other", text: "Other industries" }));
   // Ad response one-sheets (shared/slides/ar-*.png and .pdf, built by data-build/build_ad_response_slides.py;
   // the list of audiences is in shared/media/ad-response.json). Laid out like Category Reports.
   // Preview box: View opens a one-sheet (image) or a category report (PDF) over the page, with Download PDF and Close
@@ -354,28 +359,61 @@
     }, function () { CATS.forEach(function (c) { c.arHost.appendChild(el("li", null, [el("p", { class: "none", text: "Ad response couldn't load. Refresh the page to try again." })])); }); });
   }
   if (view === "results") {
-    // Case studies (shared/results.js, PDFs in shared/results/). Same layout as Ad Response: a card per category,
-    // newest first, then one card for case studies outside the analyzer categories (ecommerce, nonprofit, apps and more).
+    // Case studies (shared/results.js, PDFs in shared/results/). Two views, switched at the top:
+    //  By category (default): a card per category, newest first, then one card for case studies outside the analyzer categories.
+    //  By platform (?by=platform): a card per platform; a case study appears under every platform it used, with its other platforms listed.
     var CS = (window.AdtaxiResults && window.AdtaxiResults.ITEMS) || [], CSB = "../shared/results/";
-    function csList(items) {
+    var CH = { ctv: "CTV", youtube: "YouTube", dooh: "DOOH", social: "Social", display: "Display", audio: "Audio", search: "Search",
+               shopping: "Shopping", tiktok: "TikTok", snapchat: "Snapchat", retarget: "Retargeting" };
+    // Most case studies first; the smallest platforms are grouped so no card holds a single study
+    var PLAT = [
+      { id: "display", name: "Programmatic display", ch: ["display"] },
+      { id: "social", name: "Social (Meta)", ch: ["social"] },
+      { id: "search", name: "Google Search", ch: ["search"] },
+      { id: "retarget", name: "Retargeting", ch: ["retarget"] },
+      { id: "ctv", name: "CTV / streaming TV", ch: ["ctv"] },
+      { id: "youtube", name: "YouTube", ch: ["youtube"] },
+      { id: "tiktok-snapchat", name: "TikTok and Snapchat", ch: ["tiktok", "snapchat"] },
+      { id: "shopping", name: "Shopping ads", ch: ["shopping"] },
+      { id: "audio-dooh", name: "Digital audio and DOOH", ch: ["audio", "dooh"] }
+    ];
+    var hero = document.getElementById("jump");
+    hero.parentNode.insertBefore(el("nav", { class: "by", "aria-label": "Group case studies" }, [
+      el("a", { href: "library.html?view=results", "aria-current": byPlatform ? null : "page", text: "By category" }),
+      el("a", { href: "library.html?view=results&by=platform", "aria-current": byPlatform ? "page" : null, text: "By platform" })]), hero);
+    function csList(items, plat) {
       if (!items.length) return el("p", { class: "none", text: "No case studies for this category yet." });
       return el("ul", { class: "reports" }, items.slice().sort(function (a, b) { return b.date - a.date || a.client.localeCompare(b.client); }).map(function (it) {
         var v = el("button", { type: "button", class: "view", text: "View", "aria-label": "View the " + it.client + " case study" });
         v.addEventListener("click", function () { showItem({ title: it.client, pdf: CSB + it.file, file: it.file.replace(/\.pdf$/, "") }); });
-        return el("li", { class: "pair" }, [el("div", { class: "ar" }, [el("b", { text: it.client }), el("span", { class: "for", text: it.headline })]),
+        var other = plat ? it.channels.filter(function (c) { return plat.ch.indexOf(c) < 0; }).map(function (c) { return CH[c] || c; }) : [];
+        return el("li", { class: "pair" }, [el("div", { class: "ar" }, [el("b", { text: it.client }), el("span", { class: "for", text: it.headline }),
+            other.length ? el("span", { class: "also", text: "Also: " + other.join(", ") }) : null]),
           el("span", { class: "acts" }, [v])]);
       }));
     }
-    var csGrid = el("div", { class: "rgrid" }, CATS.map(function (c) {
-      var id = c.id === "apartments" ? "apartment" : c.id;
-      return el("section", { class: "cat", id: c.id, "aria-labelledby": c.id + "-t" },
-        [head(c), csList(CS.filter(function (it) { return it.cats.indexOf(id) >= 0; }))]);
-    }));
-    csGrid.appendChild(el("section", { class: "cat", id: "other", "aria-labelledby": "other-t" }, [
-      el("div", { class: "cat-head" }, [el("h2", { id: "other-t", text: "Other industries" }), el("span", { class: "cat-line", text: "Ecommerce, nonprofit, apps and more" })]),
-      csList(CS.filter(function (it) { return !it.cats.length; }))]));
+    var csGrid = el("div", { class: "rgrid" });
+    if (byPlatform) {
+      PLAT.forEach(function (pl) {
+        jump.appendChild(el("a", { href: "#ch-" + pl.id, text: pl.name }));
+        csGrid.appendChild(el("section", { class: "cat", id: "ch-" + pl.id, "aria-labelledby": "ch-" + pl.id + "-t" }, [
+          el("div", { class: "cat-head" }, [el("h2", { id: "ch-" + pl.id + "-t", text: pl.name }), el("span", { class: "cat-line", text: "Campaigns that used " + pl.name.replace(/^Programmatic display$/, "programmatic display") })]),
+          csList(CS.filter(function (it) { return it.channels.some(function (c) { return pl.ch.indexOf(c) >= 0; }); }), pl)]));
+      });
+    } else {
+      CATS.forEach(function (c) {
+        var id = c.id === "apartments" ? "apartment" : c.id;
+        csGrid.appendChild(el("section", { class: "cat", id: c.id, "aria-labelledby": c.id + "-t" },
+          [head(c), csList(CS.filter(function (it) { return it.cats.indexOf(id) >= 0; }))]));
+      });
+      csGrid.appendChild(el("section", { class: "cat", id: "other", "aria-labelledby": "other-t" }, [
+        el("div", { class: "cat-head" }, [el("h2", { id: "other-t", text: "Other industries" }), el("span", { class: "cat-line", text: "Ecommerce, nonprofit, apps and more" })]),
+        csList(CS.filter(function (it) { return !it.cats.length; }))]));
+    }
     lib.appendChild(csGrid);
-    lib.appendChild(el("p", { class: "note", text: "Results are from the client named in each case study, not a forecast for another business. Select View to read one and download it as a PDF." }));
+    lib.appendChild(el("p", { class: "note", text: byPlatform
+      ? "Most campaigns used several platforms, so a case study appears under each one it used, and results come from the whole mix. Results are from the client named in each case study, not a forecast for another business."
+      : "Results are from the client named in each case study, not a forecast for another business. Select View to read one and download it as a PDF." }));
   }
   if (view === "reports") {
     lib.appendChild(el("div", { class: "rgrid" }, CATS.map(function (c) {
