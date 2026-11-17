@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script>/* site-version: if this page is an old saved copy, reload it once with the current version (shared/version.json; bump both on each release) */
-(function(){var V="20261117a";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
+(function(){var V="20261117b";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>From the Research Library</title>
 <meta name="robots" content="noindex">
@@ -171,7 +171,7 @@
   <div class="wrap"><p><a href="/analyzers/">All analyzers and tools</a> · Slides: Nielsen Scarborough USA+ Spring 2026, AdMall and U.S. Bureau of Economic Analysis. Category reports: AdMall Local Account Intelligence. National figures unless a report names its market.</p></div>
 </footer>
 
-<script src="../shared/results.js?v=20261117a"></script>
+<script src="../shared/results.js?v=20261117b"></script>
 <script>
 (function () {
   var SL = "../shared/slides/", RP = "../reports/";
@@ -385,7 +385,7 @@
       if (!items.length) return el("p", { class: "none", text: "No case studies for this category yet." });
       return el("ul", { class: "reports" }, items.slice().sort(function (a, b) { return b.date - a.date || a.client.localeCompare(b.client); }).map(function (it) {
         var v = el("button", { type: "button", class: "view", text: "View", "aria-label": "View the " + it.client + " case study" });
-        v.addEventListener("click", function () { showItem({ title: it.client, pdf: CSB + it.file, file: it.file.replace(/\.pdf$/, "") }); });
+        v.addEventListener("click", function () { showItem({ title: it.client, pdf: CSB + it.file + "?v=2611o", file: it.file.replace(/\.pdf$/, "") }); });
         var other = plat ? it.channels.filter(function (c) { return plat.ch.indexOf(c) < 0; }).map(function (c) { return CH[c] || c; }) : [];
         return el("li", { class: "pair" }, [el("div", { class: "ar" }, [el("b", { text: it.client }), el("span", { class: "for", text: it.headline }),
             other.length ? el("span", { class: "also", text: "Also: " + other.join(", ") }) : null]),
