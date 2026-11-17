@@ -34,6 +34,7 @@
       "bullet": "Confidence rose to its highest level since June as gas prices eased, but the Expectations Index (72.6) is still below 80, the Conference Board's recession-signal line.",
       "source": "The Conference Board, Consumer Confidence Index. Released Oct. 27; September revised to 84.2.",
       "url": "https://www.conference-board.org/topics/consumer-confidence",
+      "report": { "label": "View the Consumer Confidence report", "file": "/analyzers/consumer-confidence-report.pdf" },
       "chart": {
         "type": "line",
         "title": "Consumer Confidence Index (1985 = 100)",
