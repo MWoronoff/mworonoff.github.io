@@ -148,6 +148,10 @@
   .econ-bullet { margin: 0 0 12px; padding-left: 18px; position: relative; font-size: 15px; }
   .econ-bullet::before { content: ""; position: absolute; left: 2px; top: .62em; width: 7px; height: 7px; border-radius: 50%; background: var(--teal-2); }
   .econ-src { font-size: 12.5px; color: var(--muted); margin: 0; }
+  .econ-rep { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; }
+  .econ-rep a { font-size: 14px; font-weight: 600; text-decoration: none; border-radius: 6px; padding: 8px 14px; border: 1px solid var(--navy); }
+  .econ-rep a.v { background: var(--navy); color: #fff; } .econ-rep a.v:hover { background: var(--navy-2); }
+  .econ-rep a.d { color: var(--navy); background: #fff; } .econ-rep a.d:hover { background: #eef3f7; }
   .econ-chart { min-width: 0; }
   .econ-chart h3 { font-size: 13px; font-weight: 600; color: var(--muted); margin: 0 0 6px; }
   .econ-chart svg { display: block; width: 100%; overflow: visible; }
@@ -734,6 +738,10 @@
         }
       }
       var src = el("p", { class: "econ-src" }, ["Source: " + s.source + " "]);
+      // Optional current report for the slide (one file, replaced each month): { "label", "file" } in economy.json
+      var rep = s.report && s.report.file ? el("div", { class: "econ-rep" }, [
+        el("a", { class: "v", href: s.report.file, target: "_blank", rel: "noopener", text: s.report.label || "View the report" }),
+        el("a", { class: "d", href: s.report.file, download: s.report.file.split("/").pop(), text: "Download PDF" })]) : null;
       if (s.url) src.appendChild(el("a", { href: s.url, target: "_blank", rel: "noopener", text: "View release" }));
       var slide = el("div", { class: "econ-slide" + (i ? "" : " on"), id: "econ-s" + i, role: "group", "aria-roledescription": "slide", "aria-label": s.pill + " (" + (i + 1) + " of " + E.slides.length + ")" }, [
         el("div", {}, [
@@ -742,6 +750,7 @@
           s.change ? el("p", { class: "econ-change " + (s.tone || ""), text: s.change }) : null,
           el("p", { class: "econ-period", text: s.period }),
           el("p", { class: "econ-bullet", text: s.bullet }),
+          rep,
           src
         ]),
         chartBox
