@@ -741,7 +741,8 @@
       // Optional current report for the slide (one file, replaced each month): { "label", "file" } in economy.json
       var rep = s.report && s.report.file ? el("div", { class: "econ-rep" }, [
         el("a", { class: "v", href: s.report.file, target: "_blank", rel: "noopener", text: s.report.label || "View the report" }),
-        el("a", { class: "d", href: s.report.file, download: s.report.file.split("/").pop(), text: "Download PDF" })]) : null;
+        /^https?:/.test(s.report.file) ? null   // another site's file (e.g. the Fed's Beige Book): browsers won't download it from here, so View only
+          : el("a", { class: "d", href: s.report.file, download: s.report.file.split("/").pop(), text: "Download PDF" })]) : null;
       if (s.url) src.appendChild(el("a", { href: s.url, target: "_blank", rel: "noopener", text: "View release" }));
       var slide = el("div", { class: "econ-slide" + (i ? "" : " on"), id: "econ-s" + i, role: "group", "aria-roledescription": "slide", "aria-label": s.pill + " (" + (i + 1) + " of " + E.slides.length + ")" }, [
         el("div", {}, [
