@@ -21,4 +21,16 @@ To refresh Deluxe, replace the ten workbooks in `sources/deluxe/` (keep one file
 ## Local newspapers (on hold)
 
 Newspaper coverage by ZIP is off until all circulation and web data is in. The full feature (build script, NMS workbook,
-`shared/media/newspapers.json` and the page code) is saved on the `newspaper-coverage` branch; merge that branch to bring it back.
+`shared/media/newspapers.json` and the page code) is saved on the `newspaper-coverage` branch. That branch's last commit is
+already in main, so merging it changes nothing: re-add the feature by hand from it (commit b136ecef removed it on Nov 11, 2026),
+fitting it to the compact ZIP files below.
+
+## Compact ZIP files (Nov 2026)
+
+Each analyzer's `data/zip/` has three sets: by DMA, by county and by metro. Only the DMA files hold full ZIP rows. County
+and metro files keep, per ZIP, just the fields ranked within that area (`score@`, `demand@`, `spend@`, `under@`) and name
+their DMA file(s) in `base`; the engine rebuilds the full rows when a file loads (`expandZips` in `shared/engine.js`).
+ZIPs outside every DMA keep full rows. This cut about 300 MB from the site with no change to any figure.
+
+The "Build analyzer data" action runs `compact_zip_files.py` before committing. After running an analyzer's build script
+by hand, run it yourself: `python3 data-build/compact_zip_files.py <analyzer folder>`. It is safe to run twice.
