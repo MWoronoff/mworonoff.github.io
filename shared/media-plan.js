@@ -51,7 +51,7 @@
       weights: { search: 30, ctv: 30, social: 25, display: 15 } }
   ];
 
-  var MIN_BUDGET = 3000;   // Adtaxi monthly minimum ad spend (Oct 2026: $3,000; Tier 3 below it no longer applies)
+  var MIN_BUDGET = 3000;   // Adtaxi monthly minimum ad spend (Oct 2026: $3,000)
   var TIERS = [ { max: 7500, channels: 1, label: "Under $7.5K: one primary channel" },
                 { max: 12000, channels: 2, label: "$7.5K–$12K: one to two complementary channels" },
                 { max: 20000, channels: 3, label: "$12K–$20K: two to three channels with distinct roles" },
@@ -60,9 +60,9 @@
   // retargeting, plus CTV and audio) $3K; DOOH $5K; Meta, TikTok and Snapchat $3K; Google Search $1.5K; YouTube $750.
   // Shopping isn't on the rate card: $3K per Adtaxi (Oct 2026), sometimes per platform; one channel here, so $3K.
   var MINIMUMS = { display: 3000, retarget: 3000, ctv: 3000, audio: 3000, dooh: 5000, social: 3000, tiktok: 3000, snapchat: 3000, search: 1500, youtube: 750, shopping: 3000 };
+  // Tier 3 ($1,000-$3,000) was removed Nov 2026: budgets under the $3,000 minimum can't be planned. Its old channel
+  // list is in the git history (commit before "Remove the unused Tier 3"); rebuild it from the current rate card if it returns.
   var SERVICE_TIERS = [
-    { label: "Tier 3", min: 1000, max: 3000,
-      available: ["display", "retarget", "social", "tiktok", "snapchat", "search", "youtube"], minimums: MINIMUMS },
     { label: "Tier 2", min: 3000, max: 10000,
       available: ["ctv", "youtube", "dooh", "social", "tiktok", "snapchat", "display", "audio", "search", "shopping", "retarget"], minimums: MINIMUMS },
     { label: "Strategic", min: 10000, max: Infinity,
@@ -87,7 +87,7 @@
     enabled: false,
     budgetIs: "gross",
     tierOn: "gross",
-    rates: { "Tier 3": { pct: null, flat: null }, "Tier 2": { pct: null, flat: null }, "Strategic": { pct: null, flat: null } },
+    rates: { "Tier 2": { pct: null, flat: null }, "Strategic": { pct: null, flat: null } },
     minFee: null,
     showFee: true,
     offNote: "Amounts are each channel's total monthly cost."
@@ -95,7 +95,7 @@
   /* MANAGEMENT FEE SCHEDULE (Adtaxi rate card, Nov 2025), shown only when a user turns on "Show management fees".
      Budgets are gross: the fee comes out of each channel's amount, and the rest is media spend.
        pct:      fee as a share of the channel's monthly amount
-       search:   Google Search fee by the search amount (Tier 3 $1,500-$2,999: 25%; $3,000+: 20%)
+       search:   Google Search fee by the search amount ($1,500-$2,999: 25%; $3,000+: 20%)
        Programmatic channels (prog: true) are priced by CPM with management included: no separate fee line.
        Shopping's fee isn't on the rate card, so no fee is shown for it. */
   var MGMT = {
