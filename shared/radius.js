@@ -13,6 +13,8 @@
  */
 (function () {
   "use strict";
+  // Libraries are served from the site itself (shared/vendor, next to this script), so the tools don't depend on outside CDNs
+  var VENDOR = ((document.currentScript && document.currentScript.src) || "../shared/radius.js").replace(/radius\.js[^/]*$/, "") + "vendor/";
   // Guided steps (numbered steps, one highlighted next field, allocation right after the results). Preview with ?guide=1;
   // set window.ADTAXI_GUIDE = true (or GUIDE_ON below) to turn it on for everyone.
   var GUIDE_ON = true;
@@ -2108,7 +2110,7 @@
     if (!b.amount || !A.strat || !A.withDollars || !A.plan || !A.plan.tier || !A.channels.length) { st.textContent = "Enter a monthly budget and choose a media strategy first."; return Promise.resolve(null); }
     st.textContent = "Building…";
     var base = this.proposalBase();
-    return Promise.all([loadScriptOnce(this.cfg.pptxScript || "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261111o"), this.benchmarks(), this.logoImage()])
+    return Promise.all([loadScriptOnce(this.cfg.pptxScript || VENDOR + "pptxgenjs-4.0.1.bundle.js"), loadScriptOnce(base + "proposal.js?v=20261111o"), this.benchmarks(), this.logoImage()])
       .then(function (res) { return window.AdtaxiProposal.build(self.proposalContext(res[2], res[3]), opt); })
       .then(function (out) { st.textContent = "Downloaded. Open it in PowerPoint or Google Slides to edit."; return out; })
       .catch(function (e) { st.textContent = "The proposal couldn't be built (" + e.message + "). Try again in a minute."; throw e; });
@@ -2502,7 +2504,7 @@
     if (window.XLSX) return Promise.resolve();
     if (loadXLSX.p) return loadXLSX.p;
     return (loadXLSX.p = new Promise(function (ok, fail) {
-      var sc = document.createElement("script"); sc.src = "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js";
+      var sc = document.createElement("script"); sc.src = VENDOR + "xlsx-0.18.5.full.min.js";
       sc.onload = ok; sc.onerror = function () { loadXLSX.p = null; fail(new Error("the Excel reader didn't load")); };
       document.head.appendChild(sc);
     }));
