@@ -771,7 +771,7 @@
     if (level === "zip") jobs.push(this.ensureLevel(this.state.parent.level, true));  // parent names and outline
     if (level === "zip" && this.cfg.footprint && this.state.chain && this.state.chain[0]) jobs.push(this.ensureLevel(this.state.chain[0].level, true));   // breadcrumb names
     if (level === "zip") jobs = jobs.concat(chainJobs);
-    if (key && !this.data[key]) jobs.push(this.loadJSON(level === "zip" ? this.url(L.data) : L.data).then(function (d) {
+    if (key && !this.data[key]) jobs.push(this.loadJSON(level === "zip" ? this.url(L.data) : L.data).then(function (d) { return level === "zip" ? self.expandZips(d) : d; }).then(function (d) {
       var byId = {};
       stretchScores(d.rows);
       d.rows.forEach(function (r) { byId[r.id] = r; });
@@ -789,6 +789,43 @@
       self.geo[states] = topojson.mesh(t, t.objects[Object.keys(t.objects)[0]], function (a, b) { return a !== b; });
     }));
     return Promise.all(jobs);
+  };
+
+  /* Compact ZIP files (Nov 2026). A county's or metro's ZIP file keeps only what differs by area: each ZIP's scores,
+     demand, spend and underserved flags, ranked within that county or metro. Everything else about a ZIP is the same in
+     every area, so it is read from the DMA file(s) named in "base" (one copy instead of three). Rows that still carry a
+     name (ZIPs outside every DMA) are complete as stored. Files without "base" (DMA files, older files) load as before. */
+  var AREA_KEY = /^(score|demand|spend|under)(@|$)/;
+  Analyzer.prototype.expandZips = function (d) {
+    if (!d || !d.base || !d.base.ids || !d.base.ids.length) return Promise.resolve(d);
+    var self = this, L = this.cfg.levels.zip, lv = d.base.level || "dma";
+    var cache = this._zipBase || (this._zipBase = {});
+    var tpl = typeof L.data === "object" ? L.data[lv] || L.data["default"] : L.data;
+    return Promise.all(d.base.ids.map(function (id) {
+      var u = tpl.replace("{level}", lv).replace("{id}", encodeURIComponent(id));
+      if (!cache[u]) cache[u] = self.loadJSON(u).catch(function (e) { delete cache[u]; throw e; });
+      return cache[u];
+    })).then(function (files) {
+      var base = {};
+      files.forEach(function (f) { (f.rows || []).forEach(function (r) { base[r.id] = r; }); });
+      var rows = [], missing = [];
+      d.rows.forEach(function (r) {
+        if (r.name != null) { rows.push(r); return; }
+        var b = base[r.id];
+        if (!b) { missing.push(r.id); return; }
+        var c = {}, k;
+        for (k in b) if (k !== "v") c[k] = b[k];
+        c.v = {};
+        for (k in b.v) if (!AREA_KEY.test(k)) c.v[k] = b.v[k];
+        for (k in r.v) c.v[k] = r.v[k];
+        rows.push(c);
+      });
+      if (missing.length) throw new Error("ZIP data is incomplete for this area (" + missing.length + " ZIPs not found in its DMA file). Refresh the page; if it persists, the data needs a rebuild.");
+      var out = {};
+      for (var x in d) if (x !== "rows" && x !== "base") out[x] = d[x];
+      out.rows = rows;
+      return out;
+    });
   };
 
   // ZIPs across several selected DMAs: each DMA's ZIP file and boundaries, merged. ZIP scores in those files rank ZIPs
@@ -1136,7 +1173,7 @@
     }
     if (window.AdtaxiRadius) go();
     else {
-      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261116b";   // version tag: browsers fetch the new file after an update
+      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261119a";   // version tag: browsers fetch the new file after an update
       sc.onload = go; sc.onerror = function () { self.showError("The radius tool didn't load. Refresh the page and try again."); };
       document.head.appendChild(sc);
     }
@@ -1426,7 +1463,7 @@
     if (window.AdtaxiSlides) { done(); return; }
     if (loadSlides.waiting) { loadSlides.waiting.push(done); return; }
     loadSlides.waiting = [done];
-    var sc = document.createElement("script"); sc.src = "../shared/slides.js?v=20261113v";
+    var sc = document.createElement("script"); sc.src = "../shared/slides.js?v=20261119a";
     sc.onload = sc.onerror = function () { var w = loadSlides.waiting; loadSlides.waiting = null; w.forEach(function (f) { f(); }); };
     document.head.appendChild(sc);
   }
@@ -2000,8 +2037,8 @@
         .then(function (b) { if (b.map && (b.map[cfg.exportName] || (b.drivers && b.drivers[cfg.exportName]))) { self[key] = b; self.tabBar.querySelector('[data-tab="' + tab + '"]').hidden = false; self.tabBar.hidden = false; } })
         .catch(function () { /* no tab without data */ });
     }
-    if (cfg.benchmarks !== false) load(cfg.benchmarksData || "../shared/benchmarks.json?v=20261113v", "bench", "bench");
-    if (cfg.timing !== false) load(cfg.timingData || "../shared/timing.json?v=20261113v", "timing", "timing");
+    if (cfg.benchmarks !== false) load(cfg.benchmarksData || "../shared/benchmarks.json?v=20261119a", "bench", "bench");
+    if (cfg.timing !== false) load(cfg.timingData || "../shared/timing.json?v=20261119a", "timing", "timing");
   };
   Analyzer.prototype.setTab = function (tab) {
     var self = this, prev = this.tab;
