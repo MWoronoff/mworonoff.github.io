@@ -1228,7 +1228,7 @@
       var steps = (this.catField ? ["cat"] : []).concat(["geo", "pick"]).concat(this.cfg.radius ? ["trade"] : []);
       var n = steps.indexOf(step), catWord = (this.catField && this.catField.firstChild && this.catField.firstChild.textContent || "category").toLowerCase();
       var TXT = {
-        cat: "Choose a " + catWord + " above. The map and rankings update to match.",
+        cat: "Choose " + (/^[aeiou]/.test(catWord) ? "an " : "a ") + catWord + " above. The map and rankings update to match.",
         geo: "Choose how to view markets: DMA, Metro, County or ZIPs.",
         pick: "Click a market on the map or in the ranked list to see its numbers. Tick the boxes to add several markets to one trade area.",
         trade: "Open Trade area to size this business\u2019s area, count likely customers and build its plan."
