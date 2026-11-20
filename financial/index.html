@@ -19,12 +19,12 @@
 <div id="app"><p class="az-loading">Loading the Financial Market Analyzer…</p></div>
 <script src="../shared/vendor/leaflet-1.9.4/leaflet.js"></script>
 <script src="../shared/vendor/topojson-client-3.1.0.min.js"></script>
-<script src="../shared/engine.js?v=20261119a"></script>
+<script src="../shared/engine.js?v=20261120a"></script>
 <script src="radius-config.js?v=20261119a"></script>
 <script>
 AdtaxiAnalyzer.start({
  "title": "Financial Market Analyzer",
- "subtitle": "Where financial advertisers' likely customers are: Market Potential Scores for DMAs, metros, counties and ZIPs across seven financial lines, to focus ad dollars on the highest-potential geographies.",
+ "subtitle": "Where financial advertisers' likely customers are: Market Potential Scores for DMAs, metros, counties and ZIPs across eight financial lines, to focus ad dollars on the highest-potential geographies.",
  "logo": "../shared/adtaxi-logo.svg",
  "exportName": "financial",
  "links": [
@@ -106,6 +106,13 @@ AdtaxiAnalyzer.start({
      "inc75_share"
     ],
     "spend": "inc75_share"
+   },
+   "invest": {
+    "demand": [
+     "val300_share",
+     "inc100_share"
+    ],
+    "spend": "hi200_share"
    }
   }
  },
@@ -169,6 +176,10 @@ AdtaxiAnalyzer.start({
   {
    "id": "cu",
    "label": "Credit unions"
+  },
+  {
+   "id": "invest",
+   "label": "Second & investment home buyers"
   }
  ],
  "measures": [
@@ -177,7 +188,7 @@ AdtaxiAnalyzer.start({
    "label": "Market Potential Score",
    "format": "score",
    "short": "Score",
-   "help": "0–100. Consumer Demand 40%, Category Spending 25%, Spending Power 15%, Competition 20%, each a percentile among markets at the same level. The total is then scaled so the strongest market at each level scores 100 and the weakest 0. Tax omits Spending Power. ZIPs use Demand and Spending Power only. Counties have no Category Spending; under 10,000 residents aren't ranked.",
+   "help": "0–100. Consumer Demand 40%, Category Spending 25%, Spending Power 15%, Competition 20%, each a percentile among markets at the same level. The total is then scaled so the strongest market at each level scores 100 and the weakest 0. Tax omits Spending Power. Second & investment home buyers omits Competition. ZIPs use Demand and Spending Power only. Counties have no Category Spending; under 10,000 residents aren't ranked.",
    "perSub": true,
    "levels": [
     "dma",
@@ -217,9 +228,10 @@ AdtaxiAnalyzer.start({
     "purchase",
     "refi",
     "bank",
-    "cu"
+    "cu",
+    "invest"
    ],
-   "help": "Average of the percentiles for EASI spending per household and in total: accounting fees for Tax preparation, value of stocks, bonds and mutual funds for Wealth management, contributions to retirement plans for Retirement planning, purchase price of homes bought for Home purchase, market value of owned homes for Refinance and home equity, and the value of savings, checking, money market accounts and CDs (deposits) for Banks and Credit unions."
+   "help": "Average of the percentiles for EASI spending per household and in total: accounting fees for Tax preparation, value of stocks, bonds and mutual funds for Wealth management, contributions to retirement plans for Retirement planning, purchase price of homes bought for Home purchase, market value of owned homes for Refinance and home equity, and the value of savings, checking, money market accounts and CDs (deposits) for Banks and Credit unions; for Second & investment home buyers, spending on vacation homes and other lodging plus lodging on trips (feeder-market signal, as in the Travel analyzer)."
   },
   {
    "key": "spend",
@@ -232,9 +244,10 @@ AdtaxiAnalyzer.start({
     "purchase",
     "refi",
     "bank",
-    "cu"
+    "cu",
+    "invest"
    ],
-   "help": "Percentile of the share of households earning $75K or more.",
+   "help": "Percentile of the share of households earning $75K or more. Second & investment home buyers: percentile of the share of tax returns with income of $200K+ (IRS).",
    "perSub": true,
    "levels": [
     "dma",
@@ -254,6 +267,15 @@ AdtaxiAnalyzer.start({
     "dma",
     "metro",
     "county"
+   ],
+   "subs": [
+    "tax",
+    "wealth",
+    "retire",
+    "purchase",
+    "refi",
+    "bank",
+    "cu"
    ]
   },
   {
@@ -268,8 +290,10 @@ AdtaxiAnalyzer.start({
    "label": "Households earning $100K+",
    "format": "pct",
    "subs": [
-    "refi"
-   ]
+    "refi",
+    "invest"
+   ],
+   "help": "Census ACS."
   },
   {
    "key": "a55p_share",
@@ -353,7 +377,8 @@ AdtaxiAnalyzer.start({
    "label": "Share of returns with income of $200K+",
    "format": "pct",
    "subs": [
-    "wealth"
+    "wealth",
+    "invest"
    ]
   },
   {
@@ -497,9 +522,10 @@ AdtaxiAnalyzer.start({
    "label": "Owner homes worth $300K+",
    "format": "pct",
    "subs": [
-    "refi"
+    "refi",
+    "invest"
    ],
-   "help": "More equity to borrow against. Shown, not scored."
+   "help": "Refinance: more equity to borrow against (shown, not scored). Second & investment home buyers: part of Consumer Demand."
   },
   {
    "key": "est",
@@ -507,14 +533,32 @@ AdtaxiAnalyzer.start({
    "format": "int",
    "short": "Competitors",
    "help": "Tax: tax preparers. Wealth and Retirement: investment advice and portfolio management firms. Mortgage lines: real estate lenders and mortgage brokers (banks and credit unions not separable in Census). Banks: commercial bank offices and branches. Credit unions: credit union offices and branches. County Business Patterns counts. Census leaves out a county's count when it has only 1 or 2 businesses; those are estimated from the state total. ZIP counts under 3 aren't published and show as 0, so those ZIPs aren't flagged Underserved.",
-   "perSub": true
+   "perSub": true,
+   "subs": [
+    "tax",
+    "wealth",
+    "retire",
+    "purchase",
+    "refi",
+    "bank",
+    "cu"
+   ]
   },
   {
    "key": "per10k",
    "label": "Competing businesses per 10,000 residents",
    "format": "dec2",
    "short": "Per 10K",
-   "perSub": true
+   "perSub": true,
+   "subs": [
+    "tax",
+    "wealth",
+    "retire",
+    "purchase",
+    "refi",
+    "bank",
+    "cu"
+   ]
   },
   {
    "key": "growth",
@@ -522,7 +566,16 @@ AdtaxiAnalyzer.start({
    "format": "pct",
    "short": "Growth",
    "help": "Change from the prior Business Patterns year. Blank where there were fewer than 3.",
-   "perSub": true
+   "perSub": true,
+   "subs": [
+    "tax",
+    "wealth",
+    "retire",
+    "purchase",
+    "refi",
+    "bank",
+    "cu"
+   ]
   },
   {
    "key": "under",
@@ -535,6 +588,15 @@ AdtaxiAnalyzer.start({
     "dma",
     "metro",
     "county"
+   ],
+   "subs": [
+    "tax",
+    "wealth",
+    "retire",
+    "purchase",
+    "refi",
+    "bank",
+    "cu"
    ]
   },
   {
@@ -968,6 +1030,102 @@ AdtaxiAnalyzer.start({
    "help": "EASI per household times the households in this market. Shown, not scored."
   },
   {
+   "key": "easi_other_lodging_hh",
+   "label": "Spending on vacation homes and other lodging per household (EASI)",
+   "short": "Vacation homes $/HH",
+   "format": "money",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "subs": [
+    "invest"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "EASI 2025 estimate per household. Includes owned vacation homes and other lodging away from home. A sign of households that already buy second homes."
+  },
+  {
+   "key": "easi_other_lodging_idx",
+   "label": "Spending on vacation homes and other lodging: index vs. U.S.",
+   "short": "Vacation homes idx",
+   "format": "index",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "subs": [
+    "invest"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "Per household divided by the U.S. average, times 100."
+  },
+  {
+   "key": "easi_other_lodging_total",
+   "label": "Spending on vacation homes and other lodging, est. total",
+   "short": "Vacation homes total",
+   "format": "moneyM",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "subs": [
+    "invest"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "EASI per household times the households in this market."
+  },
+  {
+   "key": "easi_lodging_trips_hh",
+   "label": "Spending on lodging on trips per household (EASI)",
+   "short": "Trip lodging $/HH",
+   "format": "money",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "subs": [
+    "invest"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "EASI 2025 estimate per household. Hotels, motels and rentals while traveling."
+  },
+  {
+   "key": "easi_lodging_trips_idx",
+   "label": "Spending on lodging on trips: index vs. U.S.",
+   "short": "Trip lodging idx",
+   "format": "index",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "subs": [
+    "invest"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "Per household divided by the U.S. average, times 100."
+  },
+  {
+   "key": "easi_lodging_trips_total",
+   "label": "Spending on lodging on trips, est. total",
+   "short": "Trip lodging total",
+   "format": "moneyM",
+   "levels": [
+    "us",
+    "dma",
+    "metro"
+   ],
+   "subs": [
+    "invest"
+   ],
+   "hideWhenUnavailable": true,
+   "help": "EASI per household times the households in this market."
+  },
+  {
    "key": "bank_br",
    "label": "Bank branches",
    "short": "Bank branches",
@@ -1009,6 +1167,8 @@ AdtaxiAnalyzer.start({
   "a45p_share",
   "a55p_share",
   "inc100_share",
+  "val300_share",
+  "easi_other_lodging_total",
   "density"
  ],
  "defaultRank": "score",
@@ -1083,7 +1243,13 @@ AdtaxiAnalyzer.start({
   "cu_br",
   "a45p_share",
   "a55p_share",
-  "inc100_share"
+  "inc100_share",
+  "easi_other_lodging_hh",
+  "easi_other_lodging_idx",
+  "easi_other_lodging_total",
+  "easi_lodging_trips_hh",
+  "easi_lodging_trips_idx",
+  "easi_lodging_trips_total"
  ],
  "tableColumns": [
   "score",
@@ -1097,23 +1263,26 @@ AdtaxiAnalyzer.start({
    "body": [
     "Where are a financial advertiser's likely customers, and which geographies deserve the most ad dollars?",
     "Score = 40% Consumer Demand + 25% Category Spending + 15% Spending Power + 20% Competition. Each part is a percentile (0–100) against markets at the same level. The total is then scaled so the strongest market at each level scores 100 and the weakest 0 (a market’s ZIPs: its best ZIP is 100); rankings don’t change. No score is shown when a part has no data.",
-    "Every line has its own Category Spending measure. Tax preparation leaves out Spending Power, since income is already part of its Consumer Demand; its remaining parts keep their relative weights."
+    "Every line has its own Category Spending measure. Tax preparation leaves out Spending Power, since income is already part of its Consumer Demand; its remaining parts keep their relative weights.",
+    "Second & investment home buyers leaves out Competition: buyers often live far from where they buy, so the developers and agents near a property don’t compete for them (the same feeder-market logic as the Travel analyzer). Its remaining parts keep their relative weights."
    ]
   },
   {
    "title": "Consumer Demand",
    "body": [
     "Each line's likely customers, count and concentration.",
-    "Tax preparation: returns with a paid preparer and their share (IRS), adults 45+ and households earning $75K+ (Census ACS). Wealth management: returns with dividends and their share, the share with capital gains, the share with income of $200K+ (IRS), adults 55+ (Census ACS). Retirement planning: adults 50–64 and their share (Census ACS); the shares of returns with IRA distributions and with pension income (IRS). Home purchase: purchase loans and loans per 1,000 households (HMDA), renters earning $75K+, the share who moved in the past year (Census ACS). Refinance and home equity: refinance and home equity loans and loans per 1,000 owner homes (HMDA), owner homes with a mortgage and their share, households earning $100K+ (Census ACS). Banks: adults, the share who moved in the past year (new residents choose a new bank) and the share of returns with business income (small-business banking). Credit unions: adults, adults 45+ and households earning $75K+.",
+    "Tax preparation: returns with a paid preparer and their share (IRS), adults 45+ and households earning $75K+ (Census ACS). Wealth management: returns with dividends and their share, the share with capital gains, the share with income of $200K+ (IRS), adults 55+ (Census ACS). Retirement planning: adults 50–64 and their share (Census ACS); the shares of returns with IRA distributions and with pension income (IRS). Home purchase: purchase loans and loans per 1,000 households (HMDA), renters earning $75K+, the share who moved in the past year (Census ACS). Refinance and home equity: refinance and home equity loans and loans per 1,000 owner homes (HMDA), owner homes with a mortgage and their share, households earning $100K+ (Census ACS). Banks: adults, the share who moved in the past year (new residents choose a new bank) and the share of returns with business income (small-business banking). Credit unions: adults, adults 45+ and households earning $75K+. Second & investment home buyers: owner homes worth $300K+ and households earning $100K+ (Census ACS), scored where buyers live, not where they buy. Any property type counts.",
     "A Nielsen Scarborough USA+ 2026 pull of financial products households have or use backs up the current profiles: checking and savings accounts run near average across ages and incomes (77–119), mobile banking leans 25–54 (115–117) and $100K+ (132–153), refinanced mortgages 35–54 (128–143) and $100K+ (166–229), home equity loans 45–64 (139–142) and $100K+ (159–186), and CDs and money market accounts 65+ (163–187) and $250K+ (162–218).",
     "Banks follows the 2026 AudienceSCAN Potential Bank Switchers profile: ages 25–44 (+32–34% vs. all adults), 45–54 (+25%) and 18–24 (+22%), with 65+ 64% below; household income $150K+ (+18%) and $75K–$149K (+8%), with under $35K 23% below; parents of children 2–9 (+56–66%), men (+17%) and city dwellers (+30%). So Banks starts at adults 18–54 earning $75K+.",
     "Home purchase and Refinance follow Nielsen Scarborough USA+ 2026 adults planning each in the next 12 months: home buyers over-index at 25–44 (134–174), $100K+ (117–138), renters (159) and parents (139); refinancers at 25–54 (127–163), $100K+ (151–189), homeowners (147) and parents (175).",
-    "The age and income traits follow Nielsen Scarborough USA+ 2026 customer profiles (index 100 = average): tax preparation service users skew 45+ (index 107–135) and $75K+ (110–145); financial planner clients 55+ (137–177; 45–54 only 86); households that refinanced $100K+ (166–229); credit union members 45+ (106–113) and $75K+ (110–123). Retirement planning (55+, $75K+) is confirmed as it was."
+    "The age and income traits follow Nielsen Scarborough USA+ 2026 customer profiles (index 100 = average): tax preparation service users skew 45+ (index 107–135) and $75K+ (110–145); financial planner clients 55+ (137–177; 45–54 only 86); households that refinanced $100K+ (166–229); credit union members 45+ (106–113) and $75K+ (110–123). Retirement planning (55+, $75K+) is confirmed as it was.",
+    "Second & investment home buyers is checked against Nielsen Scarborough USA+ 2026 Release 1 households with a second home or other real estate property (7.1% of adults): across its 83 measured DMAs, the line’s DMA score lines up with the ownership rate (rank correlation about 0.5), so read it as a ranking of likely markets, not a forecast. Owners skew $250K+ (index 338), $100K–$249K (156), homeowners (144) and postgraduate degrees (180). The AudienceSCAN 2026 Investment Property Shoppers profile (5.7% of adults plan to buy in the next year) leans 25–44, $150K+, men and city dwellers.",
+    "International buyers aren’t scored (no market-level data). NAR’s 2026 International Transactions report (April 2025–March 2026): foreign buyers bought 67,100 U.S. homes, 1.7% of sales, 48% in all cash, median price $465,000. Top origins: Canada 16%, Mexico 14%, China 11%, India 9%, United Kingdom 4%. Top destinations: Florida 20%, California 19%, Texas 12%."
    ]
   },
   {
    "title": "Category Spending",
-   "body": "EASI 2025, half per household, half market total. Tax preparation: accounting fees (EASI's measure covers all household accounting fees, of which tax preparation is the largest part). Wealth management: value of stocks, bonds and mutual funds (the investments advisers manage). Retirement planning: contributions to retirement plans (what households put in each year). Home purchase: purchase price of homes bought in the year. Refinance and home equity: estimated market value of owned homes (the value refinancing and equity loans draw on). Banks and Credit unions: the value of savings, checking, money market accounts and CDs (the deposits they compete for). Shown, not scored: value of retirement plans, checking and bank service charges, change in net property holdings and change in mortgage principal. Palm Springs uses the Riverside–San Bernardino metro's rate. Not available by county or ZIP."
+   "body": "EASI 2025, half per household, half market total. Tax preparation: accounting fees (EASI's measure covers all household accounting fees, of which tax preparation is the largest part). Wealth management: value of stocks, bonds and mutual funds (the investments advisers manage). Retirement planning: contributions to retirement plans (what households put in each year). Home purchase: purchase price of homes bought in the year. Refinance and home equity: estimated market value of owned homes (the value refinancing and equity loans draw on). Banks and Credit unions: the value of savings, checking, money market accounts and CDs (the deposits they compete for). Second & investment home buyers: spending on vacation homes and other lodging plus lodging on trips (EASI; the Travel analyzer’s measures). Shown, not scored: value of retirement plans, checking and bank service charges, change in net property holdings and change in mortgage principal. Palm Springs uses the Riverside–San Bernardino metro's rate. Not available by county or ZIP."
   },
   {
    "title": "Data sources and timing",
@@ -1125,15 +1294,15 @@ AdtaxiAnalyzer.start({
   },
   {
    "title": "Spending Power",
-   "body": "Share of households earning $75K+ (Census ACS)."
+   "body": "Share of households earning $75K+ (Census ACS). Second & investment home buyers: share of tax returns with income of $200K+ (IRS)."
   },
   {
    "title": "Competition",
-   "body": "Competitors per 10,000 residents, reversed: fewer scores higher (Census County Business Patterns). Tax: tax preparation services. Wealth and Retirement: investment advice and portfolio management firms. Mortgage lines: real estate lenders and mortgage and loan brokers (banks and credit unions also lend, but Census counts them with all their other business). Banks: commercial bank offices and branches. Credit unions: credit union offices and branches. Not used for ZIPs: Census hides ZIP counts under 3."
+   "body": "Competitors per 10,000 residents, reversed: fewer scores higher (Census County Business Patterns). Tax: tax preparation services. Wealth and Retirement: investment advice and portfolio management firms. Mortgage lines: real estate lenders and mortgage and loan brokers (banks and credit unions also lend, but Census counts them with all their other business). Banks: commercial bank offices and branches. Credit unions: credit union offices and branches. Not used for ZIPs: Census hides ZIP counts under 3. Second & investment home buyers: not used."
   },
   {
    "title": "Underserved",
-   "body": "Strong demand (70th percentile+) with few competitors per resident (30th percentile or lower). Shown, not scored."
+   "body": "Strong demand (70th percentile+) with few competitors per resident (30th percentile or lower). Shown, not scored. Not shown for Second & investment home buyers, which has no Competition part."
   },
   {
    "title": "Map toggles",
@@ -1163,7 +1332,7 @@ AdtaxiAnalyzer.start({
    "body": [
     "Trade area view only, after the area is chosen: the percent of the target group and of all U.S. adults who acted on an ad in each of 17 media in the past 30 days (AudienceSCAN 2026). Rates cover everyone in each group, not just media users, and measure response, not reach. National data, the same for every market.",
     "\"Vs. average\" is a percent difference: 53.5% vs. 36.7% is 46% more likely, not 17 points.",
-    "The panel follows the radius tool's \"Target audience\" preset. Groups: accounting and tax service clients (Tax), financial / retirement planning clients (Wealth, Retirement), homebuyers buying a larger or smaller home (Home purchase), mortgage refinancing customers (Refinance), potential bank switchers (Banks), credit union members (Credit unions). For financial / retirement planning clients, AudienceSCAN gives the group's percentages only; the all-adults figures are the same national figures used everywhere."
+    "The panel follows the radius tool's \"Target audience\" preset. Groups: accounting and tax service clients (Tax), financial / retirement planning clients (Wealth, Retirement), homebuyers buying a larger or smaller home (Home purchase), mortgage refinancing customers (Refinance), potential bank switchers (Banks), credit union members (Credit unions), investment property shoppers (Second & investment home buyers). For financial / retirement planning clients, AudienceSCAN gives the group's percentages only; the all-adults figures are the same national figures used everywhere."
    ]
   }
  ],
@@ -1183,7 +1352,7 @@ AdtaxiAnalyzer.start({
    "label": "Census American Community Survey 5-year"
   },
   {
-   "label": "EASI Demographics 2025 (retirement plan values, savings and checking balances, bank service charges)"
+   "label": "EASI Demographics 2025 (retirement plan values, savings and checking balances, bank service charges, vacation home and trip lodging spending)"
   },
   {
    "label": "Census ZIP and County Business Patterns",
@@ -1203,9 +1372,13 @@ AdtaxiAnalyzer.start({
   {
    "label": "NCUA quarterly Call Report data",
    "url": "https://ncua.gov/analysis/credit-union-corporate-call-report-data/quarterly-data"
+  },
+  {
+   "label": "NAR 2026 International Transactions in U.S. Residential Real Estate",
+   "url": "https://www.nar.realtor/research-and-statistics/research-reports/international-transactions-in-u-s-residential-real-estate"
   }
  ],
- "sourcesNote": "Accounting fees, investments, retirement plans, home purchases and values, and savings and checking balances: EASI. Tax returns: IRS. Mortgages: HMDA. Bank branches: FDIC. Credit unions: NCUA. Ages, income, homeownership and moves: Census ACS. Competitors: Census Business Patterns. Population and households: Deluxe. Ad response: AudienceSCAN 2026.",
+ "sourcesNote": "Accounting fees, investments, retirement plans, home purchases and values, and savings and checking balances, vacation homes and trip lodging: EASI. Tax returns: IRS. Mortgages: HMDA. Bank branches: FDIC. Credit unions: NCUA. Ages, income, homeownership and moves: Census ACS. Competitors: Census Business Patterns. Population and households: Deluxe. Ad response: AudienceSCAN 2026. International buyers: NAR.",
  "radius": true,
  "adResponse": {
   "title": "How your target group responds to advertising",
@@ -1845,6 +2018,97 @@ AdtaxiAnalyzer.start({
      [
       "Ads at movie theater",
       19.6,
+      21.5
+     ]
+    ]
+   },
+   "invest": {
+    "short": "Investment property shoppers",
+    "audience": "investment property shoppers",
+    "rows": [
+     [
+      "Streaming TV advertising (such as Hulu, Pluto TV or YouTube TV)",
+      58.8,
+      36.7
+     ],
+     [
+      "Ad on a social network",
+      57.3,
+      35.9
+     ],
+     [
+      "Ad on search results pages (like on Google, Yahoo or Bing)",
+      55.3,
+      35.8
+     ],
+     [
+      "Mobile phone app or text message",
+      55.2,
+      36.6
+     ],
+     [
+      "Television (traditional, including cable or satellite subscription)",
+      54.4,
+      34.7
+     ],
+     [
+      "Online display ads (banners and pop-up ads)",
+      52.3,
+      30.0
+     ],
+     [
+      "Ad that plays before or during the video you want to watch",
+      50.3,
+      31.1
+     ],
+     [
+      "Emailed ad or newsletter",
+      48.1,
+      28.6
+     ],
+     [
+      "Text link ad on a website",
+      47.2,
+      27.3
+     ],
+     [
+      "Outdoor ad/sign/billboard/transit",
+      45.9,
+      23.6
+     ],
+     [
+      "Ad on a podcast",
+      44.5,
+      22.7
+     ],
+     [
+      "Radio (over-the-air, online, mobile or tablet)",
+      44.5,
+      25.5
+     ],
+     [
+      "Newspaper (print, online, mobile or tablet)",
+      43.5,
+      23.5
+     ],
+     [
+      "Ads at movie theater",
+      43.3,
+      21.5
+     ],
+     [
+      "Advertising circulars in your mailbox or inserted in the newspaper",
+      43.3,
+      27.2
+     ],
+     [
+      "Ads/Coupons in your mailbox",
+      41.3,
+      29.9
+     ],
+     [
+      "Magazine (print, online, mobile or on tablet)",
+      41.1,
       21.5
      ]
     ]

@@ -773,6 +773,7 @@
     if (level === "zip") jobs = jobs.concat(chainJobs);
     if (key && !this.data[key]) jobs.push(this.loadJSON(level === "zip" ? this.url(L.data) : L.data).then(function (d) { return level === "zip" ? self.expandZips(d) : d; }).then(function (d) {
       var byId = {};
+      if (level === "zip") self.rescoreMissingZips(d.rows);   // lines added after the ZIP files were built
       stretchScores(d.rows);
       d.rows.forEach(function (r) { byId[r.id] = r; });
       self.data[key] = { rows: d.rows, byId: byId, meta: d };
@@ -858,7 +859,16 @@
   // (or the short form { sub: [demand inputs] }, demand only). Same steps as the data builds: each input a percentile
   // (pandas rank(pct=True), average ties, 2 decimals) among ranked ZIPs (no "u"), demand = mean of the available ones,
   // score = demand, or demand and spend weighted when the category has a spend part.
-  Analyzer.prototype.rescoreZips = function (rows) {
+  // A line in cfg.zipScore whose scores aren't stored in this area's ZIP file (added since the files were built) is
+  // scored here, ranked among the area's ZIPs: the same steps the data build uses. Lines with stored scores are left as is.
+  Analyzer.prototype.rescoreMissingZips = function (rows) {
+    var Z = this.cfg.zipScore; if (!Z || !rows || !rows.length) return;
+    var subs = Z.subs || Z;
+    var missing = Object.keys(subs).filter(function (sub) { return !rows.some(function (r) { return r.v && ("score@" + sub) in r.v; }); });
+    if (missing.length) this.rescoreZips(rows, missing);
+  };
+
+  Analyzer.prototype.rescoreZips = function (rows, only) {
     var Z = this.cfg.zipScore; if (!Z) return;
     var subs = Z.subs || Z, W = Z.weights || { demand: 0.4, spend: 0.15 }, derived = Z.derived || {};
     var ok = rows.filter(function (r) { return !r.u; }), memo = {};
@@ -880,7 +890,7 @@
       }
       return (memo[k] = pctMap(function (r) { return val(r, k); }));
     };
-    Object.keys(subs).forEach(function (sub) {
+    Object.keys(subs).filter(function (sub) { return !only || only.indexOf(sub) >= 0; }).forEach(function (sub) {
       var def = Array.isArray(subs[sub]) ? { demand: subs[sub], spend: null } : subs[sub];
       var ins = def.demand.filter(function (k) { return derived[k] || ok.some(function (r) { return val(r, k) != null; }); }).map(P);
       var sp = def.spend ? P(def.spend) : null;
