@@ -2,8 +2,8 @@
 financial columns in shared/audience/zip_audience_fin.json.
 
 The analyzer shows financial advertisers where their likely customers are and how to focus ad dollars geographically,
-for five lines: tax preparation, wealth management, retirement planning, home purchase mortgages, and refinance and
-home equity.
+for eight lines: tax preparation, wealth management, retirement planning, home purchase mortgages, refinance and
+home equity, banks, credit unions, and second and investment home buyers.
 
 Sources, all public with no key, already built into the repo:
   - data-build/master/zip_irs.csv.gz: IRS Statistics of Income by ZIP (paid-preparer returns, Earned Income Credit,
@@ -13,6 +13,8 @@ Sources, all public with no key, already built into the repo:
   - shared/audience/zip_audience*.json: Census ACS income, ages, home values, renter income (built earlier in the workflow)
   - Census County and ZIP Business Patterns (downloaded): tax preparers, investment advisers and portfolio managers,
     mortgage lenders and brokers
+  - data-build/sources/easi_travel_spend_dma.csv / _metro.csv (the Travel analyzer's EASI files): spending on other
+    lodging (includes owned vacation homes) and lodging on trips, the Category Spending of Second & investment home buyers
 Geography comes from data-build/geo (ZIP -> county, metro, DMA). Race, ethnicity, sex and age-of-borrower fields are
 not used to score any area: these are credit and financial products, covered by fair-lending rules.
 
@@ -49,6 +51,10 @@ EASI_MEASURES = list(dict.fromkeys(list(EASI.values()) + [
     ("bank_fees", "Checking accounts and other bank service charges"), ("ret_value", "Value of retirement plans"),
     ("net_property", "Change in net property holdings (owned home)"),
     ("mortg_principal", "Change in mortgage principal (owned home)")]))
+# Second & investment home buyers: Category Spending from the Travel analyzer's EASI lodging measures, summed
+# (per household and in total), scored where buyers live
+TRAVEL_EASI = [("other_lodging", "Other lodging (includes owned vacation homes)"), ("lodging_trips", "Lodging on out-of-town trips")]
+EASI["invest"] = ("vacation", "Vacation homes and other lodging plus lodging on trips")
 PALM_SPRINGS, RIVERSIDE_METRO = "804", "40140"
 NAICS = {"tax": ["541213"], "advice": ["523920", "523930"], "mortgage": ["522292", "522310"], "bank": ["522110"], "cu": ["522130"]}
 SUBCATS = [
@@ -66,6 +72,10 @@ SUBCATS = [
      "demand": ["adults", "mover_share", "selfemp_share"]},
     {"id": "cu", "label": "Credit unions", "naics": "cu",
      "demand": ["adults", "a45p_share", "inc75_share"]},
+    # Feeder-market line (Nov 2026): buyers often live far from where they buy, so no Competition (as in Travel).
+    # Checked against Scarborough USA+ 2026 second-home / real estate owners in 83 DMAs: rank correlation about 0.49.
+    {"id": "invest", "label": "Second & investment home buyers", "naics": None, "spendKey": "hi200_share",
+     "demand": ["val300_share", "inc100_share"]},
 ]
 DEMAND_LABELS = {
     "a45p_share": "Adults 45+ (share of adults)", "a55p_share": "Adults 55+ (share of adults)", "inc100_share": "Households earning $100K+", "inc75_share": "Households earning $75K+",
@@ -79,7 +89,8 @@ DEMAND_LABELS = {
     "rent75": "Renter households earning $75K+", "mover_share": "Share who moved in the past year",
     "refieq": "Refinance and home equity loans", "refieq_rate": "Refinance and home equity loans per 1,000 owner homes",
     "mortg": "Owner homes with a mortgage", "mortg_share": "Share of owner homes with a mortgage",
-    "adults": "Adults 18+", "selfemp_share": "Share of returns with business income"}
+    "adults": "Adults 18+", "selfemp_share": "Share of returns with business income",
+    "val300_share": "Owner homes worth $300K+"}
 COUNTS = ["population", "households", "adults", "a50_64", "a65p", "prep", "eitc", "div", "cg", "ira", "pens", "selfemp",
           "returns", "purch", "refi", "equity", "refieq", "mortg", "rent75"]
 # rate: numerator, denominator (summed over ZIPs, so markets get true rates; IRS rates use only ZIPs with IRS data)
@@ -223,6 +234,7 @@ def main():
             r[k] = g[n][ok].sum() / den * mult if den > 0 else np.nan
         for s in SUBCATS:
             i, k = s["id"], s["naics"]
+            if k is None: continue
             r[f"est@{i}"], r[f"prev@{i}"] = g[f"cest_{k}"].sum(), g[f"cprev_{k}"].sum()
         return r
 
@@ -233,24 +245,33 @@ def main():
         if mask is None: mask = pd.Series(True, index=df.index)
         P = lambda s: pct(s.where(mask))
         dem = {k: P(df[k]) for k in DEMAND_LABELS if k in df.columns}
-        spend = P(df.inc75_share)
+        spends = {}
         for s in SUBCATS:
             i = s["id"]
-            est, prev = df[f"est@{i}"], df[f"prev@{i}"]
-            df[f"per10k@{i}"] = (est / df.population * 1e4).where(df.population > 0)
-            df[f"growth@{i}"] = ((est - prev) / prev).where(prev >= 3)
+            sk = s.get("spendKey", "inc75_share")
+            if sk not in spends: spends[sk] = P(df[sk])
+            spend = spends[sk]
+            comp_ok = s["naics"] is not None
+            if comp_ok:
+                est, prev = df[f"est@{i}"], df[f"prev@{i}"]
+                df[f"per10k@{i}"] = (est / df.population * 1e4).where(df.population > 0)
+                df[f"growth@{i}"] = ((est - prev) / prev).where(prev >= 3)
             ins = [dem[k] for k in s["demand"] if k in dem and df[k].notna().any()]
             df[f"demand@{i}"] = combine(ins, [1] * len(ins)) if ins else np.nan
             e = EASI.get(i, (None,))[0]
             has_cat = "category" in parts and e is not None and f"easi_{e}_hh" in df.columns
             df[f"category@{i}"] = combine([P(df[f"easi_{e}_hh"]), P(df[f"easi_{e}_total"])], [0.5, 0.5]) if has_cat else np.nan
-            use = [c for c in parts if not (c == "category" and not has_cat) and not (c == "spend" and not s.get("spend", True))]
+            use = [c for c in parts if not (c == "category" and not has_cat) and not (c == "spend" and not s.get("spend", True))
+                   and not (c == "comp" and not comp_ok)]
             df[f"spend@{i}"] = spend if "spend" in use else np.nan
             df[f"comp@{i}"] = P(-df[f"per10k@{i}"]) if "comp" in use else np.nan
             cols = [df[f"{c}@{i}"] for c in use]
             full = pd.concat(cols, axis=1).notna().all(axis=1)
             df[f"score@{i}"] = combine(cols, [WEIGHTS[c] for c in use]).where(full & mask).round(3)
             for c in WEIGHTS: df[f"{c}@{i}"] = df[f"{c}@{i}"].round(2)
+            if not comp_ok:
+                df.drop(columns=[f"comp@{i}"], inplace=True)
+                continue
             under = (df[f"demand@{i}"] >= 70) & (P(df[f"per10k@{i}"]) <= 30)
             known = df[f"demand@{i}"].notna() & df[f"per10k@{i}"].notna() & mask
             if "comp" not in parts: known &= df[f"per10k@{i}"] > 0   # ZIPs: a 0 count may be 1-2 hidden by Census
@@ -271,6 +292,15 @@ def main():
     for e, lab in EASI_MEASURES:
         us_hh[e] = sd[f"{e}_total"].sum() / sd.households.sum()
         rep.append((f"EASI U.S. {lab.lower()} per household", "INFO", f"${us_hh[e]:,.2f}"))
+    # The Travel analyzer's EASI lodging files, for Second & investment home buyers
+    td = pd.read_csv(os.path.join(src, "easi_travel_spend_dma.csv"))
+    td = td.merge(xw[["easi_market", "dma_code"]], left_on="market", right_on="easi_market", how="left")
+    if td.dma_code.isna().any(): sys.exit("easi_dma_crosswalk.csv is missing EASI travel DMAs: " + ", ".join(td[td.dma_code.isna()].market))
+    tm = pd.read_csv(os.path.join(src, "easi_travel_spend_metro.csv"))
+    tm["cbsa_code"] = tm.market.map(key).map(dict(zip(em.metro.map(key), em.cbsa_code)))
+    for e, lab in TRAVEL_EASI:
+        us_hh[e] = td[f"{e}_total"].sum() / td.households.sum()
+        rep.append((f"EASI U.S. {lab.lower()} per household", "INFO", f"${us_hh[e]:,.2f}"))
 
     def add_easi(df, table, idcol, label):
         t = table.dropna(subset=[idcol]).set_index(idcol)
@@ -286,23 +316,49 @@ def main():
         rep.append((f"EASI finance matched to {label}", "PASS" if len(miss) <= (2 if label == "metros" else 0) else "FAIL",
                     f"{len(df) - len(miss)} of {len(df)}" + (f"; missing {miss[:8]}" if miss else "")))
 
+    def add_travel_easi(df, table, metro_table, idcol, label):
+        t = table.dropna(subset=[idcol]).set_index(idcol)
+        for e, lab in TRAVEL_EASI:
+            per = t[f"{e}_per_hh"].copy()
+            if idcol == "dma_code" and PALM_SPRINGS not in per.index:
+                pm = metro_table.dropna(subset=["cbsa_code"]).set_index("cbsa_code")[f"{e}_per_hh"]
+                if RIVERSIDE_METRO in pm.index: per.loc[PALM_SPRINGS] = pm.loc[RIVERSIDE_METRO]
+            df[f"easi_{e}_hh"] = df.index.map(per).astype(float)
+            df[f"easi_{e}_total"] = df[f"easi_{e}_hh"] * df.households
+            df[f"easi_{e}_idx"] = (df[f"easi_{e}_hh"] / us_hh[e] * 100).round(0)
+        df["easi_vacation_hh"] = sum(df[f"easi_{e}_hh"] for e, _ in TRAVEL_EASI)
+        df["easi_vacation_total"] = sum(df[f"easi_{e}_total"] for e, _ in TRAVEL_EASI)
+        miss = [str(i) for i in df.index if df.at[i, "easi_vacation_hh"] != df.at[i, "easi_vacation_hh"]]
+        rep.append((f"EASI lodging (Second & investment homes) matched to {label}", "PASS" if len(miss) <= (2 if label == "metros" else 0) else "FAIL",
+                    f"{len(df) - len(miss)} of {len(df)}" + (f"; missing {miss[:8]}" if miss else "")))
+
     zd = z[z.dma_code != "0"]
-    dma = frame(zd.groupby("dma_code")); add_easi(dma, sd, "dma_code", "DMAs"); dma = score(dma)
+    dma = frame(zd.groupby("dma_code")); add_easi(dma, sd, "dma_code", "DMAs"); add_travel_easi(dma, td, tm, "dma_code", "DMAs"); dma = score(dma)
     zm = z[z.cbsa_code.isin(metros)]
-    met = frame(zm.groupby("cbsa_code")); add_easi(met, sm, "cbsa_code", "metros"); met = score(met)
+    met = frame(zm.groupby("cbsa_code")); add_easi(met, sm, "cbsa_code", "metros"); add_travel_easi(met, tm, tm, "cbsa_code", "metros"); met = score(met)
     cty = county_frame(z, frame); cty = score(cty, parts=COUNTY_PARTS, mask=county_mask(cty))
-    validate_scores(rep, z, co, [(s["id"], s["label"], NAICS[s["naics"]]) for s in SUBCATS],
+    validate_scores(rep, z, co, [(s["id"], s["label"], NAICS[s["naics"]]) for s in SUBCATS if s["naics"]],
                     [("DMAs", dma, "dma_code"), ("metros", met, "cbsa_code")], "category businesses")
+    # Second & investment home buyers check: Scarborough adults whose household has a second home or other real estate,
+    # by DMA (reported, not enforced). Owners, not shoppers, but the closest market-level measure available.
+    shp = os.path.join(src, "scarborough_second_home_dma.csv")
+    if os.path.exists(shp):
+        sh = pd.read_csv(shp, dtype={"dma_code": str}).set_index("dma_code")
+        rate = sh.second_home_or_real_estate / sh.adults
+        sc_ = dma["score@invest"].reindex(sh.index); ok = sc_.notna() & rate.notna()
+        rep.append(("Second & investment home buyers check: rank correlation with Scarborough second-home and real estate owners",
+                    "INFO", f"{sc_[ok].rank().corr(rate[ok].rank()):.2f} across {int(ok.sum())} DMAs"))
     us = frame([("us", z)])
     for s in SUBCATS:
+        if s["naics"] is None: continue
         codes = NAICS[s["naics"]]; i = s["id"]
         us[f"est@{i}"], us[f"prev@{i}"] = nat_or(y, codes, co), nat_or(y - 1, codes, co0)   # national file
         us[f"per10k@{i}"] = us[f"est@{i}"] / us.population * 1e4
         us[f"growth@{i}"] = (us[f"est@{i}"] - us[f"prev@{i}"]) / us[f"prev@{i}"]
-    for e, lab in EASI_MEASURES:
+    for e, lab in EASI_MEASURES + TRAVEL_EASI:
         us[f"easi_{e}_hh"], us[f"easi_{e}_idx"] = us_hh[e], 100.0
         us[f"easi_{e}_total"] = us_hh[e] * us.households
-        r_ = dma[f"easi_{e}_total"].sum() / sd[f"{e}_total"].sum()
+        r_ = dma[f"easi_{e}_total"].sum() / (td if e in dict(TRAVEL_EASI) else sd)[f"{e}_total"].sum()
         rep.append((f"EASI {lab.lower()}, DMAs vs. EASI's own total", "PASS" if 0.95 <= r_ <= 1.05 else "FAIL", f"{r_:.1%}"))
 
     # ---------------- Checks ----------------
@@ -334,10 +390,10 @@ def main():
     if failed: sys.exit("A check failed; the Financial data was not updated. See financial/data/financial_report.md.")
 
     # ---------------- Write ----------------
-    keep = COUNTS + BR + RATES + ["density"] + [f"easi_{e}_{k}" for e, _ in EASI_MEASURES for k in ("hh", "total", "idx")]
+    keep = COUNTS + BR + RATES + ["density"] + [f"easi_{e}_{k}" for e, _ in EASI_MEASURES + TRAVEL_EASI for k in ("hh", "total", "idx")]
     per_sub = ["score", "demand", "category", "spend", "comp", "under", "est", "per10k", "growth"]
     SCORE_KEYS = ("score", "demand", "category", "spend", "comp")
-    INTS = set(COUNTS) | set(BR) | {"est"} | {f"easi_{e}_total" for e, _ in EASI_MEASURES}
+    INTS = set(COUNTS) | set(BR) | {"est"} | {f"easi_{e}_total" for e, _ in EASI_MEASURES + TRAVEL_EASI}
 
     def clean(v):
         if v is None: return None
@@ -391,6 +447,7 @@ def main():
     for k, (n, d) in RATE_PARTS.items(): zf[k] = (zz[n] / zz[d]).where(zz[d] > 0)
     for k, (n, d, mult) in PER_K.items(): zf[k] = (zz[n] / zz[d] * mult).where(zz[d] > 0)
     for s in SUBCATS:
+        if s["naics"] is None: continue
         zf[f"est@{s['id']}"], zf[f"prev@{s['id']}"] = zz[f"zest_{s['naics']}"], zz[f"zest_prev_{s['naics']}"]
     nfiles = 0
     zip_parts = ("demand", "spend")

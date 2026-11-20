@@ -1,8 +1,9 @@
 """Builds the Home Services Market Analyzer data (Market Potential Scores) into home-services/data/.
 
 The analyzer shows home service companies where their potential customers are and how to focus ad dollars
-geographically. It covers only the categories with EASI household spending: HVAC, Roofing and gutters, Plumbing,
-Electrical, Painting and wallpaper, Flooring, and Any home service (all of them together).
+geographically. It covers the categories with EASI household spending: HVAC, Roofing and gutters, Plumbing,
+Electrical, Painting and wallpaper, Flooring, and Any home service (all of them together), plus Windows and doors,
+which has no EASI or Census contractor data and is scored on Consumer Demand alone.
 
 Sources, all public downloads with no key (plus Adtaxi's EASI file in data-build/sources):
   - Census County and ZIP Business Patterns: roofing (238160), electrical (238210), plumbing, heating and
@@ -14,6 +15,9 @@ Sources, all public downloads with no key (plus Adtaxi's EASI file in data-build
   - data-build/sources/easi_home_spend_metro.csv: EASI 2025 household spending by metro and micro area on heat, a/c
     and electrical work; roofing and gutters; and plumbing and water heating (Category Spending). EASI has no DMA
     version, so DMA spending is the household-weighted average of the metro and micro areas inside the DMA.
+  - data-build/sources/scarborough_windows_doors_dma.csv: Nielsen Scarborough USA+ 2026 Release 1 households that
+    replaced windows or doors in the past 12 months or plan to in the next 12, in Scarborough's 83 measured DMAs (the
+    Windows and doors check; not scored).
   - data-build/sources/easi_paint_floor_spend_dma.csv: EASI 2025 household spending by DMA on painting and papering,
     paints, wallpaper and supplies, and flooring installation, repair and replacement. A metro's spending is the
     household-weighted average of the DMAs its ZIPs fall in. easi_dma_crosswalk.csv ties EASI's DMA names to DMA codes.
@@ -61,12 +65,18 @@ SUBCATS = [
     {"id": "elec", "label": "Electrical", "naics": ["238210"], "easi": ["hvac"], "demand": ["owners", "pre1980_share", "val300_share"]},
     {"id": "paint", "label": "Painting and wallpaper", "naics": ["238320"], "easi": ["paint"], "demand": ["owners", "val300_share", "lt_share"]},
     {"id": "floor", "label": "Flooring", "naics": ["238330"], "easi": ["floor"], "demand": ["owners", "pre2000_share", "lt_share"]},
+    # Windows and doors (Nov 2026): no EASI spending and no Census contractor count of its own, and household income runs
+    # against replacement at the market level, so the score is Consumer Demand alone. Inputs chosen against Scarborough's
+    # households replacing or planning to replace windows or doors (83 DMAs; see the Windows and doors check in the report).
+    {"id": "windows", "label": "Windows and doors", "naics": [], "easi": [], "parts": ("demand",),
+     "demand": ["owners", "own_share", "pre1980_share", "hdd"]},
 ]
 DEMAND_LABELS = {"owners": "Homeowners", "sfd_own": "Owners of single-family detached homes", "pre1980_share": "Owner homes built before 1980",
                  "pre2000_share": "Owner homes built before 2000", "sfd_share": "Owner homes that are single-family detached",
                  "lt_share": "Owners in their home since before 2010", "val300_share": "Owner homes worth $300K+",
                  "degdays": "Heating + cooling degree days", "hail_days": "Days a year with 1-inch+ hail",
-                 "clim_stress": "Heating or cooling need, whichever is greater"}
+                 "clim_stress": "Heating or cooling need, whichever is greater",
+                 "own_share": "Homeownership rate", "hdd": "Heating degree days"}
 COUNTS = ["population", "households", "owners", "sfd_own"]
 DENSITY = ["density"]                                    # households per square mile of land
 RATES = ["own_share", "pre1980_share", "pre2000_share", "sfd_share", "lt_share", "val300_share", "inc75_share", "inc100_share"]
@@ -292,6 +302,7 @@ def main():
 
     # Business Patterns
     all_naics = sorted({n for s in SUBCATS for n in s["naics"]})
+    HAS_N = [s for s in SUBCATS if s["naics"]]          # lines with a Census contractor count
     y = cbp_years(a.cache)
     rep.append(("Business Patterns years", "INFO", f"{y} (growth measured from {y - 1})"))
     zb, zb0 = zbp(y, a.cache), zbp(y - 1, a.cache)
@@ -303,7 +314,7 @@ def main():
                               ("238320", 25000, 70000, "painting and wall covering contractors"), ("238330", 9000, 35000, "flooring contractors")):
         n = co[co.naics == nid].est.sum()
         rep.append((f"Published benchmark: {name}", "PASS" if lo <= n <= hi else "FAIL", f"{int(n):,} (expected {lo:,}–{hi:,})"))
-    for s in SUBCATS:
+    for s in HAS_N:
         i = s["id"]
         for tag, src in (("", zb), ("_prev", zb0)):
             z[f"zest{tag}_{i}"] = z.zip.map(src[src.naics.isin(s["naics"])].groupby("zip").est.sum()).fillna(0)
@@ -366,7 +377,7 @@ def main():
         for k in CLIMATE:
             ok = g[k].notna() & (w > 0)
             r[k] = (g.loc[ok, k] * w[ok]).sum() / w[ok].sum() if w[ok].sum() > 0 else np.nan
-        for s in SUBCATS:
+        for s in HAS_N:
             i = s["id"]; r[f"est@{i}"], r[f"prev@{i}"] = g[f"cest_{i}"].sum(), g[f"cprev_{i}"].sum()
             r[f"emp@{i}"] = g[f"cemp_{i}"].sum()
         for k in DMA_EASI:  # household-weighted DMA rates (exact for a DMA: one value)
@@ -401,10 +412,17 @@ def main():
         dem_pct = {k: P(df[k]) for k in DEMAND_LABELS if k in df.columns}
         for s in SUBCATS:
             i = s["id"]
-            df[f"per10k@{i}"] = (df[f"est@{i}"] / df.population * 1e4).where(df.population > 0)
-            df[f"growth@{i}"] = ((df[f"est@{i}"] - df[f"prev@{i}"]) / df[f"prev@{i}"]).where(df[f"prev@{i}"] >= 3)
             ins = [dem_pct[k] for k in s["demand"] if k in dem_pct and df[k].notna().any()]
             df[f"demand@{i}"] = combine(ins, [1] * len(ins)) if ins else np.nan
+            if not s["naics"]:       # no contractor count or EASI (Windows and doors): Consumer Demand only
+                use = [c for c in parts if c in s.get("parts", WEIGHTS)]
+                cols = [df[f"{c}@{i}"] for c in use]
+                full = pd.concat(cols, axis=1).notna().all(axis=1)
+                df[f"score@{i}"] = combine(cols, [WEIGHTS[c] for c in use]).where(full & mask).round(3)
+                df[f"demand@{i}"] = df[f"demand@{i}"].round(2)
+                continue
+            df[f"per10k@{i}"] = (df[f"est@{i}"] / df.population * 1e4).where(df.population > 0)
+            df[f"growth@{i}"] = ((df[f"est@{i}"] - df[f"prev@{i}"]) / df[f"prev@{i}"]).where(df[f"prev@{i}"] >= 3)
             ek = "any" if i == "any" else s["easi"][0]
             if "category" in parts and f"easi_{ek}_hh" in df.columns:
                 df[f"category@{i}"] = combine([P(df[f"easi_{ek}_hh"]), P(df[f"easi_{ek}_total"])], [0.5, 0.5])
@@ -429,7 +447,7 @@ def main():
     met = frame(zm.groupby("cbsa_code")); add_easi(met); met = score(met)
     cty = county_frame(z, frame); cty = score(cty, parts=COUNTY_PARTS, mask=county_mask(cty))
     us = frame([("us", z)])
-    for s in SUBCATS:
+    for s in HAS_N:
         i = s["id"]
         us[f"est@{i}"] = nat_or(y, s["naics"], co)           # Census's national file (matches published U.S. totals)
         us[f"prev@{i}"] = nat_or(y - 1, s["naics"], co0)
@@ -437,7 +455,7 @@ def main():
         us[f"growth@{i}"] = (us[f"est@{i}"] - us[f"prev@{i}"]) / us[f"prev@{i}"]
     for k in ALL_EASI: us[f"easi_{k}_hh"] = us_hh[k]
     add_easi(us)
-    for s in SUBCATS:
+    for s in HAS_N:
         ek = "any" if s["id"] == "any" else s["easi"][0]
         for t in ("hh", "idx", "total"): us[f"easi_{t}@{s['id']}"] = us[f"easi_{ek}_{t}"]
 
@@ -468,7 +486,22 @@ def main():
         rep.append((f"HVAC validation, {label}: rank correlation with contractor employees per 1,000 households", "INFO", "; ".join(out)))
 
     validate(dma, "DMAs"); validate(met, "metros")
-    validate_scores(rep, z, co, [(x["id"], x["label"], x["naics"]) for x in SUBCATS],
+
+    # Windows and doors check: Scarborough households that replaced windows or doors in the past 12 months or plan to in
+    # the next 12, by DMA. Survey rates are noisy by market (past and planned agree only loosely), so this is reported,
+    # not enforced. Inputs were chosen on it: replacement runs higher with homeownership, older homes and colder winters,
+    # and lower in high-income, high-home-value markets.
+    wp = os.path.join(src, "scarborough_windows_doors_dma.csv")
+    if os.path.exists(wp):
+        wd = pd.read_csv(wp, dtype={"dma_code": str}).set_index("dma_code")
+        rate = (wd.replaced_past_12 + wd.plan_next_12) / wd.households
+        sc_ = dma["score@windows"].reindex(wd.index)
+        ok = sc_.notna() & rate.notna()
+        rho = sc_[ok].rank().corr(rate[ok].rank())
+        agree = (wd.replaced_past_12 / wd.households).rank().corr((wd.plan_next_12 / wd.households).rank())
+        rep.append(("Windows and doors check: rank correlation with Scarborough households replacing or planning to replace windows or doors",
+                    "INFO", f"{rho:.2f} across {int(ok.sum())} DMAs (past-year and planned rates agree {agree:.2f} with each other)"))
+    validate_scores(rep, z, co, [(x["id"], x["label"], x["naics"]) for x in HAS_N],
                     [("DMAs", dma, "dma_code"), ("metros", met, "cbsa_code")], "contractors")
 
     # ---------------- Checks ----------------
@@ -485,7 +518,7 @@ def main():
     rep.append(("EASI painting total, DMAs vs. EASI's own total", "PASS" if 0.93 <= r2 <= 1.07 else "FAIL", f"{r2:.1%}"))
     rep.append(("EASI heat, a/c and electrical total, metros vs. EASI's own metro totals", "PASS" if 0.93 <= r_ <= 1.07 else "FAIL",
                 f"{r_:.1%}"))
-    for s in SUBCATS:
+    for s in HAS_N:
         i = s["id"]
         tot_d = dma[f"est@{i}"].sum()
         tot_c = co_in[co_in.naics.isin(s["naics"])].est.sum() - z[z.dma_code == "0"][f"cest_{i}"].sum()
@@ -583,7 +616,7 @@ def main():
             for c in ("population", "households", "owners", "sfd_own") + tuple(CLIMATE): f[c] = df[c]
             f["density"] = (df.households / df.land).where(df.land > 0)
             for k, (n, d) in RATE_PARTS.items(): f[k] = (df[n] / df[d]).where(df[d] > 0)
-            for s in SUBCATS: f[f"est@{s['id']}"], f[f"prev@{s['id']}"] = df[f"zest_{s['id']}"], df[f"zest_prev_{s['id']}"]
+            for s in HAS_N: f[f"est@{s['id']}"], f[f"prev@{s['id']}"] = df[f"zest_{s['id']}"], df[f"zest_prev_{s['id']}"]
             # Mostly group quarters (dorms, bases, prisons): households under 15% of residents. Per-household rates
             # there rest on a handful of homes, so these ZIPs are shown but not ranked.
             gq = f.households.fillna(0) < 0.15 * f.population
