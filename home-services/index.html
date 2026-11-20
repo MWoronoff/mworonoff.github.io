@@ -24,7 +24,7 @@
 <script>
 AdtaxiAnalyzer.start({
  "title": "Home Services Market Analyzer",
- "subtitle": "Where home service companies' potential customers are: Market Potential Scores for DMAs, metros, counties and ZIPs across HVAC, roofing, plumbing, electrical, painting and flooring, to focus ad dollars on the highest-potential geographies.",
+ "subtitle": "Where home service companies' potential customers are: Market Potential Scores for DMAs, metros, counties and ZIPs across HVAC, roofing, plumbing, electrical, painting, flooring, and windows and doors, to focus ad dollars on the highest-potential geographies.",
  "logo": "../shared/adtaxi-logo.svg",
  "exportName": "home-services",
  "links": [
@@ -103,6 +103,15 @@ AdtaxiAnalyzer.start({
      "lt_share"
     ],
     "spend": "inc100_share"
+   },
+   "windows": {
+    "demand": [
+     "owners",
+     "sfd_share",
+     "pre1980_share",
+     "clim_stress"
+    ],
+    "spend": "inc100_share"
    }
   },
   "derived": {
@@ -173,6 +182,10 @@ AdtaxiAnalyzer.start({
   {
    "id": "floor",
    "label": "Flooring"
+  },
+  {
+   "id": "windows",
+   "label": "Windows and doors"
   }
  ],
  "measures": [
@@ -188,7 +201,7 @@ AdtaxiAnalyzer.start({
     "county",
     "zip"
    ],
-   "help": "0–100. Consumer Demand 40%, Category Spending 25%, Spending Power 15%, Competition 20%, each a percentile among markets at the same level. The total is then scaled so the strongest market at each level scores 100 and the weakest 0. ZIPs use Demand and Spending Power only. Counties have no Category Spending; under 10,000 residents aren't ranked."
+   "help": "0–100. Consumer Demand 40%, Category Spending 25%, Spending Power 15%, Competition 20%, each a percentile among markets at the same level. The total is then scaled so the strongest market at each level scores 100 and the weakest 0. Windows and doors uses Demand and Spending Power only. ZIPs use Demand and Spending Power only. Counties have no Category Spending; under 10,000 residents aren't ranked."
   },
   {
    "key": "demand",
@@ -214,7 +227,16 @@ AdtaxiAnalyzer.start({
     "dma",
     "metro"
    ],
-   "help": "Average of the percentiles for EASI household spending on this service, per household and in total."
+   "help": "Average of the percentiles for EASI household spending on this service, per household and in total.",
+   "subs": [
+    "any",
+    "hvac",
+    "roof",
+    "plumb",
+    "elec",
+    "paint",
+    "floor"
+   ]
   },
   {
    "key": "spend",
@@ -241,7 +263,16 @@ AdtaxiAnalyzer.start({
     "metro",
     "county"
    ],
-   "help": "Percentile of contractors per 10,000 residents, reversed: fewer competing contractors scores higher, since each ad dollar faces less competition."
+   "help": "Percentile of contractors per 10,000 residents, reversed: fewer competing contractors scores higher, since each ad dollar faces less competition.",
+   "subs": [
+    "any",
+    "hvac",
+    "roof",
+    "plumb",
+    "elec",
+    "paint",
+    "floor"
+   ]
   },
   {
    "key": "easi_hh",
@@ -255,7 +286,16 @@ AdtaxiAnalyzer.start({
     "metro"
    ],
    "hideWhenUnavailable": true,
-   "help": "EASI 2025 annual household spending on the selected service. HVAC and Electrical: heat, a/c and electrical work. Roofing: roofing and gutters. Plumbing: plumbing and water heating. Painting: hired painting and papering. Flooring: installation, repair and replacement. Any: all five."
+   "help": "EASI 2025 annual household spending on the selected service. HVAC and Electrical: heat, a/c and electrical work. Roofing: roofing and gutters. Plumbing: plumbing and water heating. Painting: hired painting and papering. Flooring: installation, repair and replacement. Any: all five.",
+   "subs": [
+    "any",
+    "hvac",
+    "roof",
+    "plumb",
+    "elec",
+    "paint",
+    "floor"
+   ]
   },
   {
    "key": "easi_idx",
@@ -269,7 +309,16 @@ AdtaxiAnalyzer.start({
     "metro"
    ],
    "hideWhenUnavailable": true,
-   "help": "Spending per household divided by the U.S. average, times 100. Above 100 means households here spend more on this service than average."
+   "help": "Spending per household divided by the U.S. average, times 100. Above 100 means households here spend more on this service than average.",
+   "subs": [
+    "any",
+    "hvac",
+    "roof",
+    "plumb",
+    "elec",
+    "paint",
+    "floor"
+   ]
   },
   {
    "key": "easi_total",
@@ -283,7 +332,16 @@ AdtaxiAnalyzer.start({
     "metro"
    ],
    "hideWhenUnavailable": true,
-   "help": "EASI spending per household times the households in this market: the size of the prize."
+   "help": "EASI spending per household times the households in this market: the size of the prize.",
+   "subs": [
+    "any",
+    "hvac",
+    "roof",
+    "plumb",
+    "elec",
+    "paint",
+    "floor"
+   ]
   },
   {
    "key": "density",
@@ -298,14 +356,32 @@ AdtaxiAnalyzer.start({
    "format": "int",
    "short": "Contractors",
    "perSub": true,
-   "help": "Contractors in this service's industries; HVAC and Plumbing share one Census count. County Business Patterns counts. Census leaves out a county's count when it has only 1 or 2 businesses; those are estimated from the state total. ZIP counts under 3 aren't published and show as 0, so those ZIPs aren't flagged Underserved."
+   "help": "Contractors in this service's industries; HVAC and Plumbing share one Census count. County Business Patterns counts. Census leaves out a county's count when it has only 1 or 2 businesses; those are estimated from the state total. ZIP counts under 3 aren't published and show as 0, so those ZIPs aren't flagged Underserved.",
+   "subs": [
+    "any",
+    "hvac",
+    "roof",
+    "plumb",
+    "elec",
+    "paint",
+    "floor"
+   ]
   },
   {
    "key": "per10k",
    "label": "Contractors per 10,000 residents",
    "format": "dec2",
    "short": "Per 10K",
-   "perSub": true
+   "perSub": true,
+   "subs": [
+    "any",
+    "hvac",
+    "roof",
+    "plumb",
+    "elec",
+    "paint",
+    "floor"
+   ]
   },
   {
    "key": "growth",
@@ -313,7 +389,16 @@ AdtaxiAnalyzer.start({
    "format": "pct",
    "short": "Growth",
    "perSub": true,
-   "help": "Change in contractor count from the prior Business Patterns year. Blank where there were fewer than 3."
+   "help": "Change in contractor count from the prior Business Patterns year. Blank where there were fewer than 3.",
+   "subs": [
+    "any",
+    "hvac",
+    "roof",
+    "plumb",
+    "elec",
+    "paint",
+    "floor"
+   ]
   },
   {
    "key": "under",
@@ -327,7 +412,16 @@ AdtaxiAnalyzer.start({
     "county",
     "zip"
    ],
-   "help": "Strong customer demand (70th percentile or higher) but few contractors per resident (30th percentile or lower): worth a look for companies weighing a new location or service area. Shown, not scored."
+   "help": "Strong customer demand (70th percentile or higher) but few contractors per resident (30th percentile or lower): worth a look for companies weighing a new location or service area. Shown, not scored.",
+   "subs": [
+    "any",
+    "hvac",
+    "roof",
+    "plumb",
+    "elec",
+    "paint",
+    "floor"
+   ]
   },
   {
    "key": "easi_any_hh",
@@ -713,7 +807,8 @@ AdtaxiAnalyzer.start({
    "format": "pct",
    "subs": [
     "any",
-    "roof"
+    "roof",
+    "windows"
    ]
   },
   {
@@ -723,7 +818,8 @@ AdtaxiAnalyzer.start({
    "subs": [
     "any",
     "plumb",
-    "elec"
+    "elec",
+    "windows"
    ],
    "help": "Older plumbing and wiring are the most common reasons for repair and replacement work."
   },
@@ -765,7 +861,8 @@ AdtaxiAnalyzer.start({
    "short": "Degree days",
    "subs": [
     "any",
-    "hvac"
+    "hvac",
+    "windows"
    ],
    "help": "NOAA's yearly heating plus cooling degree days (base 65°F), averaged over the last 10 complete years and weighted by households. Higher means heating and air conditioning work harder."
   },
@@ -775,7 +872,8 @@ AdtaxiAnalyzer.start({
    "format": "int",
    "subs": [
     "any",
-    "hvac"
+    "hvac",
+    "windows"
    ]
   },
   {
@@ -784,7 +882,8 @@ AdtaxiAnalyzer.start({
    "format": "int",
    "subs": [
     "any",
-    "hvac"
+    "hvac",
+    "windows"
    ]
   },
   {
@@ -868,19 +967,21 @@ AdtaxiAnalyzer.start({
    "title": "Market Potential Score",
    "body": [
     "Where are a home service company's customers, and which geographies deserve the most ad dollars?",
-    "Score = 40% Consumer Demand + 25% Category Spending + 15% Spending Power + 20% Competition. Each part is a percentile (0–100) against markets at the same level. The total is then scaled so the strongest market at each level scores 100 and the weakest 0 (a market’s ZIPs: its best ZIP is 100); rankings don’t change. No score is shown when a part has no data."
+    "Score = 40% Consumer Demand + 25% Category Spending + 15% Spending Power + 20% Competition. Each part is a percentile (0–100) against markets at the same level. The total is then scaled so the strongest market at each level scores 100 and the weakest 0 (a market’s ZIPs: its best ZIP is 100); rankings don’t change. No score is shown when a part has no data.",
+    "Windows and doors has no EASI spending data and no Census contractor count of its own, so its score is Consumer Demand (40%) and Spending Power (15%), kept in that ratio: 73% Demand, 27% Spending Power at every level."
    ]
   },
   {
    "title": "Services covered",
-   "body": "Services with EASI spending data: HVAC, roofing and gutters, plumbing, electrical, painting and wallpaper, flooring, and Any home service (all combined). Windows and doors, remodeling, landscaping and pest control have no EASI data, so aren't included."
+   "body": "Services with EASI spending data: HVAC, roofing and gutters, plumbing, electrical, painting and wallpaper, flooring, and Any home service (all combined). Windows and doors is scored on Consumer Demand and Spending Power only (no EASI or Census contractor data for it), so it isn’t part of Any. Remodeling, landscaping and pest control have no EASI data, so aren’t included."
   },
   {
    "title": "Consumer Demand",
    "body": [
     "Homeowners and home traits from Census ACS; climate and hail from NOAA.",
-    "HVAC: homeowners and heating or cooling need, whichever is greater (Minneapolis winters and Houston summers both count). Home age isn't used: systems wear out every 15–20 years regardless. Roofing: owners of single-family detached homes, days with 1-inch+ hail, share of owner homes built before 2000. Plumbing: homeowners, share built before 1980. Electrical: homeowners, share built before 1980, share worth $300K+. Painting: homeowners, share worth $300K+, share of owners in place since before 2010. Flooring: homeowners, share built before 2000, share in place since before 2010. Any: homeowners, share built before 2000, share single-family detached, share in place since before 2010.",
-    "Degree days: NOAA county heating and cooling degree days (base 65°F), 10-year average; each market scores on the higher percentile. Hail: days with 1-inch+ hail in NOAA Storm Events, same years. Alaska and Hawaii have no NOAA county climate files, so their HVAC demand omits degree days; DC uses its two Maryland neighbors; Connecticut ZIPs use the average of the state's eight former counties."
+    "HVAC: homeowners and heating or cooling need, whichever is greater (Minneapolis winters and Houston summers both count). Home age isn't used: systems wear out every 15–20 years regardless. Roofing: owners of single-family detached homes, days with 1-inch+ hail, share of owner homes built before 2000. Plumbing: homeowners, share built before 1980. Electrical: homeowners, share built before 1980, share worth $300K+. Painting: homeowners, share worth $300K+, share of owners in place since before 2010. Flooring: homeowners, share built before 2000, share in place since before 2010. Any: homeowners, share built before 2000, share single-family detached, share in place since before 2010. Windows and doors: homeowners, the share of single-family detached homes, the share of homes built before 1980, and heating or cooling need, whichever is greater (energy efficiency is a top reason to replace).",
+    "Degree days: NOAA county heating and cooling degree days (base 65°F), 10-year average; each market scores on the higher percentile. Hail: days with 1-inch+ hail in NOAA Storm Events, same years. Alaska and Hawaii have no NOAA county climate files, so their HVAC demand omits degree days; DC uses its two Maryland neighbors; Connecticut ZIPs use the average of the state's eight former counties.",
+    "Windows and doors follows Nielsen Scarborough USA+ 2026 Release 1 households that replaced windows or doors in the past 12 months (3.5% of households) or plan to in the next 12 (4.3%): homeowners (index 129–130), single-family houses (124–128), $100K–$249K (122–124), children under 6 (144–163) and, for work already done, 10+ years in the home (115). Planners lean 25–54 (109–115) and away from 65+ (77). AdMall: AudienceSCAN 2026 Replacement Window Shoppers are 11.9% of adults; sales peak April–July (about 9% of the year each month). National profiles; not checked market by market."
    ]
   },
   {
@@ -892,15 +993,15 @@ AdtaxiAnalyzer.start({
   },
   {
    "title": "Spending Power",
-   "body": "Share of households earning $100K+ (Census ACS): in Nielsen Scarborough USA+ 2026, households that did or plan flooring, electrical, painting, HVAC, plumbing, roofing or window work over-index at $100K+ (index 104–158, most 117–132). Held to 15% because EASI already reflects income."
+   "body": "Share of households earning $100K+ (Census ACS): in Nielsen Scarborough USA+ 2026, households that did or plan flooring, electrical, painting, HVAC, plumbing, roofing or window work over-index at $100K+ (index 104–158, most 117–132). Held to 15% because EASI already reflects income. Windows and doors uses it too."
   },
   {
    "title": "Competition",
-   "body": "Contractors per 10,000 residents, reversed: fewer contractors scores higher (Census County Business Patterns: roofing, electrical, plumbing/HVAC, painting, flooring). HVAC and Plumbing share one Census industry, so one count; Any counts all five. Not used for ZIPs: Census hides ZIP counts under 3."
+   "body": "Contractors per 10,000 residents, reversed: fewer contractors scores higher (Census County Business Patterns: roofing, electrical, plumbing/HVAC, painting, flooring). HVAC and Plumbing share one Census industry, so one count; Any counts all five. Not used for ZIPs: Census hides ZIP counts under 3. Windows and doors: not scored (no separate Census count for window and door installers)."
   },
   {
    "title": "Underserved",
-   "body": "Strong customer demand (70th percentile+) with few contractors per resident (30th percentile or lower). Shown, not scored."
+   "body": "Strong customer demand (70th percentile+) with few contractors per resident (30th percentile or lower). Shown, not scored. Not shown for Windows and doors."
   },
   {
    "title": "Contractor locations",
@@ -964,7 +1065,7 @@ AdtaxiAnalyzer.start({
    "url": "https://github.com/BritCrit/dma_county_zip"
   }
  ],
- "sourcesNote": "Home services spending: EASI. Contractors: Census Business Patterns. Homes, homeowners and income: Census ACS. Degree days and hail: NOAA. Population and households: Deluxe. Ad response: AudienceSCAN 2026.",
+ "sourcesNote": "Home services spending: EASI. Contractors: Census Business Patterns. Homes, homeowners and income: Census ACS. Degree days and hail: NOAA. Population and households: Deluxe. Ad response: AudienceSCAN 2026. Windows and doors profile: Nielsen Scarborough USA+ 2026 and AdMall.",
  "pointLayer": {
   "key": "est",
   "label": "Show contractor locations",
@@ -1610,6 +1711,97 @@ AdtaxiAnalyzer.start({
      [
       "Ads at movie theater",
       20.7,
+      21.5
+     ]
+    ]
+   },
+   "windows": {
+    "short": "Replacement window shoppers",
+    "audience": "replacement window shoppers",
+    "rows": [
+     [
+      "Streaming TV advertising (such as Hulu, Pluto TV or YouTube TV)",
+      50.0,
+      36.7
+     ],
+     [
+      "Television (traditional, including cable or satellite subscription)",
+      49.3,
+      34.7
+     ],
+     [
+      "Ad on a social network",
+      48.2,
+      35.9
+     ],
+     [
+      "Mobile phone app or text message",
+      47.4,
+      36.6
+     ],
+     [
+      "Ad on search results pages (like on Google, Yahoo or Bing)",
+      46.4,
+      35.8
+     ],
+     [
+      "Online display ads (banners and pop-up ads)",
+      42.1,
+      30.0
+     ],
+     [
+      "Ad that plays before or during the video you want to watch",
+      41.8,
+      31.1
+     ],
+     [
+      "Ads/Coupons in your mailbox",
+      40.6,
+      29.9
+     ],
+     [
+      "Text link ad on a website",
+      39.5,
+      27.3
+     ],
+     [
+      "Emailed ad or newsletter",
+      38.6,
+      28.6
+     ],
+     [
+      "Radio (over-the-air, online, mobile or tablet)",
+      37.0,
+      25.5
+     ],
+     [
+      "Ad on a podcast",
+      36.4,
+      22.7
+     ],
+     [
+      "Newspaper (print, online, mobile or tablet)",
+      36.1,
+      23.5
+     ],
+     [
+      "Advertising circulars in your mailbox or inserted in the newspaper",
+      35.1,
+      27.2
+     ],
+     [
+      "Magazine (print, online, mobile or on tablet)",
+      35.1,
+      21.5
+     ],
+     [
+      "Outdoor ad/sign/billboard/transit",
+      35.0,
+      23.6
+     ],
+     [
+      "Ads at movie theater",
+      33.7,
       21.5
      ]
     ]
