@@ -34,12 +34,13 @@
 
   var NF0 = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
   var NF1 = new Intl.NumberFormat("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  var SCORE_DEC = false;   // true while the national ZIP view is showing
   var NF2 = new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   function fmt(v, f) {
     if (v === null || v === undefined || (typeof v === "number" && !isFinite(v))) return null;
     if (typeof v === "string") return v;
     switch (f) {
-      case "score": return NF0.format(v);
+      case "score": return SCORE_DEC ? NF1.format(v) : NF0.format(v);   // national ZIP scores bunch near 100: one decimal tells them apart
       case "pct": return NF1.format(v * 100) + "%";
       case "pct0": return NF0.format(v * 100) + "%";
       case "dec1": return NF1.format(v);
@@ -1014,7 +1015,7 @@
     this.gDone = { cat: false, geo: false };
     this.rankSel = el("select", { onchange: function () { self.state.rank = this.value; self.state.sortKey = null; self.refresh(); } });
     controls.push(el("label", { class: "az-field az-only" }, [el("span", { text: "Rank and map by" }), this.rankSel]));
-    this.showSel = el("select", { onchange: function () { self.state.show = +this.value; self.renderTable(); } },
+    this.showSel = el("select", { onchange: function () { self.state.show = +this.value; self.renderTable(); if (self.mapLevel === "uszip") self.renderMap(); } },
       [10, 25, 50, 100, 0].map(function (n) { return el("option", { value: n, text: n ? "Top " + n : "All" }); }));
     this.showSel.value = String(this.state.show);
     controls.push(el("label", { class: "az-field az-only" }, [el("span", { text: "Show" }), this.showSel]));
@@ -1062,6 +1063,10 @@
 
     // Table
     this.tableTitle = el("h2");
+    // National ZIPs: Top 10 / 25 / 50 right beside the list's title
+    this.topSeg = el("div", { class: "az-seg az-topseg", role: "group", "aria-label": "How many ZIPs to list", style: "display:none" },
+      [10, 25, 50].map(function (n) { return el("button", { type: "button", "data-n": n, text: "Top " + n,
+        onclick: function () { self.state.show = n; self.renderTable(); self.renderMap(); } }); }));
     this.backBtn = el("button", { type: "button", class: "az-btn", hidden: true, onclick: function () { self.setLevel(self.state.parent.level); } });
     this.tableNote = el("span");
     this.thead = el("thead");
@@ -1072,7 +1077,7 @@
     this.newsBar = el("div", { class: "az-newsbar", hidden: true });
     this.tablePanel = el("section", { class: "az-panel az-table-panel" }, [
       this.crumbs = cfg.footprint ? el("nav", { class: "az-crumbs", "aria-label": "Where you are", hidden: true }) : null,
-      el("div", { class: "az-table-head" }, [el("div", { class: "az-table-title" }, [this.tableTitle, this.backBtn]), this.tableNote]),
+      el("div", { class: "az-table-head" }, [el("div", { class: "az-table-title" }, [this.tableTitle, this.backBtn, this.topSeg]), this.tableNote]),
       this.newsBar,
       this.pickBar,
       el("div", { class: "az-tablewrap" }, [el("table", { class: "az-table" }, [this.thead, this.tbody])])
@@ -1637,6 +1642,7 @@
     return c;
   };
   Analyzer.prototype.renderMap = function () {
+    SCORE_DEC = this.state.level === "uszip";
     var self = this, s = this.state, lv = this.mapLevel, L0 = this.cfg.levels[lv];
     var m = this.measure(s.rank), d = this.d(lv);
     var fc = this.geo[lv === "zip" ? this.url(L0.geo) : L0.geo];
@@ -1826,6 +1832,7 @@
     return rows;
   };
   Analyzer.prototype.renderTable = function () {
+    SCORE_DEC = this.state.level === "uszip";
     var self = this, s = this.state, drillNav = !!this.cfg.drill, tl = this.tableLevel();
     if (s.level === "us" && !drillNav) {
       this.tablePanel.hidden = true;
@@ -1852,6 +1859,8 @@
     if (usZ && rankM && rankM.key === "score") all.forEach(function (r) { var k = r.v["rank@" + s.sub]; if (typeof k === "number") rankOf[r.id] = k; });   // national rank
     Array.prototype.forEach.call(this.showSel.options, function (o) { o.disabled = usZ && (+o.value === 0 || +o.value > 50); });
     this.showSel.value = String(usZ ? nShow : s.show);
+    this.topSeg.style.display = usZ ? "" : "none";   // .az-seg sets display, so the hidden attribute alone wouldn't hide it
+    Array.prototype.forEach.call(this.topSeg.children, function (b) { b.setAttribute("aria-pressed", String(+b.getAttribute("data-n") === nShow)); });
     var isZip = tl === "zip", lvLabel = isZip ? "ZIP" : this.levelLabel(tl);
     var inCounties = tl === "county" && this.key("county") !== "county", inMetros = tl === "metro" && this.key("metro") !== "metro", fp = !!this.cfg.footprint;
     var natTitle = fp ? lvLabel + "s nationally" : drillNav ? (tl === "county" ? "Counties" : lvLabel + "s") + " ranked" : lvLabel + " rankings";
@@ -1919,7 +1928,7 @@
     if (usZ) {
       var dm = this.d(tl), ranked = dm && dm.meta && dm.meta.meta && dm.meta.meta.ranked && dm.meta.meta.ranked[s.sub];
       this.tableNote.textContent = "Showing the top " + NF0.format(shown.length) + (ranked ? " of " + NF0.format(ranked) + " ranked ZIPs nationwide" : " ZIPs nationwide") +
-        ", each scored against every ZIP in the country (inside a market, a ZIP is ranked only against its neighbors). Pick Top 10, 25 or 50 under Show; click a ZIP to see it, then Open in its market.";
+        ", each scored against every ZIP in the country (inside a market, a ZIP is ranked only against its neighbors). Click a ZIP to see it, then Open in its market.";
     }
     if (cols.some(function (m) { return m.news; })) this.tableNote.textContent += " Newspaper cells show copies \u00b7 % of households.";
     if (anyMark) this.tableNote.textContent += " * Uses estimated health values; select the market and see its Data notes.";
@@ -1936,6 +1945,7 @@
 
   /* ---------- Detail ---------- */
   Analyzer.prototype.renderDetail = function () {
+    SCORE_DEC = this.state.level === "uszip";
     var self = this, s = this.state, cfg = this.cfg, box = this.detail;
     box.innerHTML = "";
     var d = this.d(s.level), row = d && d.byId[s.area];
