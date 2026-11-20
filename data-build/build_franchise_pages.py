@@ -155,26 +155,33 @@ SOURCES = [
 ]
 
 
+# Site-version check (same snippet as the other analyzer pages): an old saved copy reloads once when shared/version.json changes
+SITE_V = "20261120d"
+SITE_CHECK = '<script>/* site-version: if this page is an old saved copy, reload it once with the current version (shared/version.json; bump both on each release) */\n(function(){var V="@SITEV@";try{fetch("@UP@shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>\n'
+
+
 def page(cfg, title, depth):
     up = "../" * depth
+    vcheck = SITE_CHECK.replace("@SITEV@", SITE_V).replace("@UP@", up)
     return f"""<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+{vcheck}<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{title}</title>
 <meta name="robots" content="noindex">
 <link rel="icon" href="{up}shared/adtaxi-logo.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<link rel="stylesheet" href="{up}shared/vendor/leaflet-1.9.4/leaflet.css">
 <link rel="stylesheet" href="{up}shared/engine.css?v={V}">
+<link rel="stylesheet" href="{up}shared/depth.css?v={V}">
 </head>
 <body>
 <div id="app"><p class="az-loading">Loading the {title}…</p></div>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-<script src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js" crossorigin=""></script>
+<script src="{up}shared/vendor/leaflet-1.9.4/leaflet.js"></script>
+<script src="{up}shared/vendor/topojson-client-3.1.0.min.js"></script>
 <script src="{up}shared/engine.js?v={V}"></script>
 <script src="radius-config.js?v={V}"></script>
 <script>
@@ -234,8 +241,8 @@ def measures(client):
     L_MKT = [l for l in L_ALL if l != "zip"]
     buyers = client["buyers"]["label"] if client else "Businesses with employees"
     bhelp = client["buyers"]["help"] if client else "All businesses with paid employees (Census ZIP Code Business Patterns): the base of potential customers for a business-to-business franchise."
-    score_help = ("0–100. Candidates 50%, Territory Opportunity 30%, Competition 20%, each a percentile among areas at the same level. ZIPs use Candidates only. Counties under 10,000 residents aren't ranked."
-                  if client else "0–100. Candidates 62.5%, Market Opportunity 37.5% (each a percentile among areas at the same level). ZIPs use Candidates only. Counties under 10,000 residents aren't ranked.")
+    score_help = ("0–100. Candidates 50%, Territory Opportunity 30%, Competition 20%, each a percentile among areas at the same level. The total is then scaled so the strongest area at each level scores 100 and the weakest 0. ZIPs use Candidates only. Counties under 10,000 residents aren't ranked."
+                  if client else "0–100. Candidates 62.5%, Market Opportunity 37.5% (each a percentile among areas at the same level). The total is then scaled so the strongest area at each level scores 100 and the weakest 0. ZIPs use Candidates only. Counties under 10,000 residents aren't ranked.")
     m = [
         {"key": "score", "label": "Franchise Opportunity Score", "short": "Score", "format": "score", "perSub": True, "levels": L_ALL, "help": score_help},
         {"key": "demand", "label": "Candidates", "short": "Candidates", "format": "score", "perSub": True, "levels": L_ALL,
@@ -285,7 +292,7 @@ def methodology(client):
     out = [{"title": "Franchise Opportunity Score", "body": [
         "Where are a franchise system's best owner candidates, and which " + ("territories" if client else "markets") + " deserve the most franchise-development ad dollars?",
         ("Score = 50% Candidates + 30% Territory Opportunity + 20% Competition." if client else "Score = 62.5% Candidates + 37.5% Market Opportunity.")
-        + " Each part is a percentile (0–100) against areas at the same level. No score is shown when a part has no data."]},
+        + " Each part is a percentile (0–100) against areas at the same level. The total is then scaled so the strongest area at each level scores 100 and the weakest 0 (a market’s ZIPs: its best ZIP is 100); rankings don’t change. No score is shown when a part has no data."]},
         {"title": "Candidates", "body": [
             "Master franchise candidates, first-time or not: householders 45–64 earning $125K+ (count and share), the IRS shares of returns with income of $200K+ and with capital gains, the IRS average salary per wage earner, the share of adults 25+ with a bachelor's degree or higher, and the share of workers in management occupations (a master franchisee recruits and supports sub-franchisees, so professional and management background matters). Each input counts equally. Census reports householder age only as 25–44 and 45–64, so the score uses 45–64, as does the Trade area.",
             "First-time franchise buyers: householders 25–64 earning $100K+ (count and share), the IRS average salary per wage earner (corporate earners, who make up most first-time buyers), the share of married-couple households (the dual-income cushion many new owners rely on) and the share of adults 25+ with a bachelor's degree or higher. These follow Nielsen Scarborough USA+ 2026 small business owners (index 100 = average): ages 35–64 (122–143), household income of $100K+ (127–196), a bachelor's degree or more (126–141), married (120) and homeowners (120). Self-employment isn't scored: Scarborough's self-employed skew part-time (index 292), so it mixes gig work with business owners. Census groups householders 25–44 together, so the score starts at 25, as does the Trade area.",
@@ -332,7 +339,7 @@ def analyzer_cfg(client):
         # ZIPs across several selected DMAs are re-ranked in the page with the same inputs as build_franchise.py SUBCATS
         **({} if client else {"zipScore": {"exec": ["x125", "x125_share", "hi200_share", "cg_share", "avg_wage", "ba_share", "mgmt_share"], "owner": ["o100", "o100_share", "avg_wage", "married_share", "ba_share"]}}),
         "levels": levels, "statesGeo": f"{up}shared/geo/states.topo.json", "zipIndex": f"{up}shared/geo/zip_market.json",
-        "radiusScript": f"{up}shared/radius.js?v={V}", "benchmarks": False, "timing": False,
+        "radiusScript": f"{up}shared/radius.js?v={V}", "timing": False,
         "subcategoryLabel": "Owner profile", "subcategories": SUBS,
         "measures": measures(client),
         "rankBy": ["score", "x125", "x125_share", "mgmt_share", "o100", "o100_share", "married_share", "buyers"],   # one per question a client asks; every measure still shows in the detail panel
