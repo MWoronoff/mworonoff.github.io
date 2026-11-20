@@ -1,5 +1,7 @@
 """Builds the national Top U.S. ZIPs lists: for every analyzer and line, the 50 highest-scoring ZIPs in the country,
-written to <analyzer>/data/us_top_zips.json and shown on analyzers/top-zips.html.
+written to <analyzer>/data/us_top_zips.json (shown on analyzers/top-zips.html) and to <analyzer>/data/zip_us.json, the
+analyzer's own "ZIP" geography view (rows in the engine's level format: each listed ZIP's full values, plus its national
+score@, demand@, spend@ and rank@ for the lines it is in the top 50 of, and lat/lon for the map dots).
 
 In the analyzers a ZIP's score ranks it within its own market (DMA, metro or county). Here every ranked ZIP is scored
 against every other ranked ZIP in the U.S., with the same steps and inputs the engine uses inside a market
@@ -118,14 +120,42 @@ def build(folder, geo, built):
            "top": TOP, "lines": out_lines}
     p = os.path.join(ROOT, folder, "data", "us_top_zips.json")
     json.dump(res, open(p, "w"), separators=(",", ":"), ensure_ascii=False)
+
+    # The analyzer's "ZIP" view: every ZIP that is in any line's top 50, in the engine's row format
+    AREA = ("score@", "demand@", "spend@", "under@", "est@", "per10k@", "growth@", "category@", "comp@")
+    raw = {}
+    for f in sorted(glob.glob(os.path.join(ROOT, folder, "data", "zip", "dma", "*.json"))):
+        for r in json.load(open(f))["rows"]:
+            if r["id"] in raw: continue
+            raw[r["id"]] = {k: x for k, x in r["v"].items() if not k.startswith(AREA)}
+    zrows = {}
+    for L in out_lines:
+        sc, dem, sp = lines[L["id"]]
+        for t in L["top"]:
+            z = t["zip"]
+            if z not in zrows:
+                g = geo.get(z, {})
+                zrows[z] = {"id": z, "name": f"{z} {t['city']}, {t['state']}".strip(", "), "mk": t["dmaName"], "dma": t["dma"],
+                            "lat": None if pd.isna(g.get("lat")) else round(float(g["lat"]), 5),
+                            "lon": None if pd.isna(g.get("lon")) else round(float(g["lon"]), 5),
+                            "v": dict(raw.get(z, {}))}
+            v = zrows[z]["v"]
+            v[f"score@{L['id']}"] = t["score"]; v[f"rank@{L['id']}"] = t["rank"]
+            if t["demand"] is not None: v[f"demand@{L['id']}"] = t["demand"]
+            if t["spend"] is not None: v[f"spend@{L['id']}"] = t["spend"]
+    zp = os.path.join(ROOT, folder, "data", "zip_us.json")
+    json.dump({"level": "uszip", "meta": {"built": built, "top": TOP, "ranked": {L["id"]: L["ranked"] for L in out_lines},
+                                          "note": "National scores: each ZIP ranked against all ranked U.S. ZIPs; the best U.S. ZIP is 100."},
+               "rows": list(zrows.values())}, open(zp, "w"), separators=(",", ":"), ensure_ascii=False)
     log(f"{folder}: {len(ok):,} ranked ZIPs of {len(df):,}; {len(out_lines)} lines -> {os.path.relpath(p, ROOT)}")
     return res
 
 
 def main():
     folders = sys.argv[1:] or ANALYZERS
-    g = pd.read_csv(os.path.join(HERE, "geo", "zip_geo.csv"), dtype={"zip": str}, usecols=["zip", "city", "state"])
-    geo = {z: {"city": c if isinstance(c, str) else "", "state": s if isinstance(s, str) else ""} for z, c, s in zip(g.zip, g.city, g.state)}
+    g = pd.read_csv(os.path.join(HERE, "geo", "zip_geo.csv"), dtype={"zip": str}, usecols=["zip", "city", "state", "lat", "lon"])
+    geo = {z: {"city": c if isinstance(c, str) else "", "state": s if isinstance(s, str) else "", "lat": la, "lon": lo}
+           for z, c, s, la, lo in zip(g.zip, g.city, g.state, g.lat, g.lon)}
     built = datetime.date.today().isoformat()
     for f in folders:
         if not os.path.exists(os.path.join(ROOT, f, "index.html")): log(f"{f}: no analyzer page; skipped"); continue
