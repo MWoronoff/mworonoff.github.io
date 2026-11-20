@@ -1,0 +1,25 @@
+# Starts the "Build geography boundaries" workflow for the analyzers named in data-build/build-request.txt
+# (space- or comma-separated targets, e.g. "financial home-services"). Pushing a change to that file runs it, so a
+# build can be started without the Actions page. Builds queue one after another (the build workflow's concurrency group).
+name: Run analyzer builds from a request file
+on:
+  push:
+    branches: [main]
+    paths: ["data-build/build-request.txt"]
+permissions:
+  actions: write
+  contents: read
+jobs:
+  dispatch:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Start the requested builds
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for t in $(grep -v '^#' data-build/build-request.txt | tr ',' ' '); do
+            echo "Starting build: $t"
+            gh workflow run build-geography.yml -f target="$t" --ref main
+            sleep 20
+          done
