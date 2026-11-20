@@ -34,3 +34,12 @@ ZIPs outside every DMA keep full rows. This cut about 300 MB from the site with 
 
 The "Build analyzer data" action runs `compact_zip_files.py` before committing. After running an analyzer's build script
 by hand, run it yourself: `python3 data-build/compact_zip_files.py <analyzer folder>`. It is safe to run twice.
+
+## Top U.S. ZIPs (Nov 2026)
+
+`build_us_top_zips.py` writes `<analyzer>/data/us_top_zips.json`: for every line, the 50 highest-scoring ZIPs in the
+country, scored with the line's own ZIP formula (`cfg.zipScore` in the analyzer page) but with each input ranked against
+all ranked U.S. ZIPs instead of within one market. `analyzers/top-zips.html` shows them (Top 10, 25 or 50, with a CSV
+download), linked from each analyzer's tab row. It reads only the published DMA ZIP files and page configs, needs no
+downloads, and runs in the analyzer data action after the builds (about 10 seconds). By hand:
+`python3 data-build/build_us_top_zips.py [analyzer folder ...]`.

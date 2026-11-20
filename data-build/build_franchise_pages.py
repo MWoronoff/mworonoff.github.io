@@ -310,7 +310,9 @@ def analyzer_cfg(client):
     up = "../" * depth
     nat = "../" if client else ""
     title = client["title"] if client else "Franchise Development Analyzer"
-    links = ([{"label": "All U.S. markets", "url": "../"}] if client else []) + [{"label": "Home", "url": f"{up}analyzers/"}]
+    links = ([{"label": "All U.S. markets", "url": "../"}] if client else []) + \
+            ([] if client else [{"label": "Top U.S. ZIPs", "url": f"{up}analyzers/top-zips.html?a=franchise", "tab": True}]) + \
+            [{"label": "Home", "url": f"{up}analyzers/"}]
     if client:
         levels = {"us": {"label": "U.S.", "data": "data/us.json"},
                   "territory": {"label": "Territory", "data": "data/territory.json", "geo": "geo/territory.topo.json", "idField": "territory_id"},
