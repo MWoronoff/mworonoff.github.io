@@ -7,7 +7,7 @@ import glob, json, os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-V = "20261027d"   # version tag for the shared engine files on these pages (keep in step with the other analyzers)
+V = "20261120c"   # version tag for the shared engine files on these pages (keep in step with the other analyzers)
 
 SUBS = [{"id": "exec", "label": "Master franchise candidates"}, {"id": "owner", "label": "First-time franchise buyers"}]
 # AudienceSCAN 2026, Small Business Owners (4.5% of U.S. adults): saw or heard an ad of each type that led them to take
@@ -311,7 +311,6 @@ def analyzer_cfg(client):
     nat = "../" if client else ""
     title = client["title"] if client else "Franchise Development Analyzer"
     links = ([{"label": "All U.S. markets", "url": "../"}] if client else []) + \
-            ([] if client else [{"label": "Top U.S. ZIPs", "url": f"{up}analyzers/top-zips.html?a=franchise", "tab": True}]) + \
             [{"label": "Home", "url": f"{up}analyzers/"}]
     if client:
         levels = {"us": {"label": "U.S.", "data": "data/us.json"},
@@ -322,6 +321,7 @@ def analyzer_cfg(client):
                   "dma": {"label": "DMA", "data": "data/dma.json", "geo": "../shared/geo/dma.topo.json", "idField": "dma_code"},
                   "metro": {"label": "Metro", "data": "data/metro.json", "geo": "../shared/geo/metro.topo.json", "idField": "cbsa_code"},
                   "county": {"label": "County", "data": "data/county.json", "geo": "../shared/geo/county.topo.json", "idField": "fips"},
+                  "uszip": {"label": "ZIP", "data": "data/zip_us.json", "points": True},   # national top ZIPs (build_us_top_zips.py)
                   "zip": {"label": "ZIPs in market", "data": "data/zip/{level}/{id}.json", "geo": "../shared/geo/zip/{level}/{id}.json", "idField": "zip"}}
     cfg = {
         "title": title,

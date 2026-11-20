@@ -1,6 +1,5 @@
-"""Builds the national Top U.S. ZIPs lists: for every analyzer and line, the 50 highest-scoring ZIPs in the country,
-written to <analyzer>/data/us_top_zips.json (shown on analyzers/top-zips.html) and to <analyzer>/data/zip_us.json, the
-analyzer's own "ZIP" geography view (rows in the engine's level format: each listed ZIP's full values, plus its national
+"""Builds each analyzer's national "ZIP" view: for every line, the 50 highest-scoring ZIPs in the country, written to
+<analyzer>/data/zip_us.json, the analyzer's "ZIP" geography button (rows in the engine's level format: each listed ZIP's full values, plus its national
 score@, demand@, spend@ and rank@ for the lines it is in the top 50 of, and lat/lon for the map dots).
 
 In the analyzers a ZIP's score ranks it within its own market (DMA, metro or county). Here every ranked ZIP is scored
@@ -118,8 +117,6 @@ def build(folder, geo, built):
                           "top": items})
     res = {"analyzer": folder, "title": cfg.get("title", folder), "built": built, "zips": int(len(df)), "rankedZips": int(len(ok)),
            "top": TOP, "lines": out_lines}
-    p = os.path.join(ROOT, folder, "data", "us_top_zips.json")
-    json.dump(res, open(p, "w"), separators=(",", ":"), ensure_ascii=False)
 
     # The analyzer's "ZIP" view: every ZIP that is in any line's top 50, in the engine's row format
     AREA = ("score@", "demand@", "spend@", "under@", "est@", "per10k@", "growth@", "category@", "comp@")
@@ -147,7 +144,7 @@ def build(folder, geo, built):
     json.dump({"level": "uszip", "meta": {"built": built, "top": TOP, "ranked": {L["id"]: L["ranked"] for L in out_lines},
                                           "note": "National scores: each ZIP ranked against all ranked U.S. ZIPs; the best U.S. ZIP is 100."},
                "rows": list(zrows.values())}, open(zp, "w"), separators=(",", ":"), ensure_ascii=False)
-    log(f"{folder}: {len(ok):,} ranked ZIPs of {len(df):,}; {len(out_lines)} lines -> {os.path.relpath(p, ROOT)}")
+    log(f"{folder}: {len(ok):,} ranked ZIPs of {len(df):,}; {len(out_lines)} lines -> {os.path.relpath(zp, ROOT)}")
     return res
 
 

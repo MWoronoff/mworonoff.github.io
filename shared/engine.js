@@ -34,12 +34,13 @@
 
   var NF0 = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
   var NF1 = new Intl.NumberFormat("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  var SCORE_DEC = false;   // true while the national ZIP view is showing
   var NF2 = new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   function fmt(v, f) {
     if (v === null || v === undefined || (typeof v === "number" && !isFinite(v))) return null;
     if (typeof v === "string") return v;
     switch (f) {
-      case "score": return NF0.format(v);
+      case "score": return SCORE_DEC ? NF1.format(v) : NF0.format(v);   // national ZIP scores bunch near 100: one decimal tells them apart
       case "pct": return NF1.format(v * 100) + "%";
       case "pct0": return NF0.format(v * 100) + "%";
       case "dec1": return NF1.format(v);
@@ -233,7 +234,7 @@
     if (key && String(key).indexOf("news:") === 0) { var nc = this.newsColumns(true); for (var j = 0; j < nc.length; j++) if (nc[j].key === key) return nc[j]; }
     return null;
   };
-  Analyzer.prototype.availableAt = function (m, level) { return !m.levels || m.levels.indexOf(level) >= 0; };
+  Analyzer.prototype.availableAt = function (m, level) { if (level === "uszip") level = "zip"; return !m.levels || m.levels.indexOf(level) >= 0; };
   // A measure with "subs" belongs only to those categories (e.g. "No dental visit" only with Dental).
   // "*" marks a value filled in for this area (row.e lists measure keys) and the score and demand of any category whose
   // demand inputs include such a value (row.es lists category ids). The area's data notes explain.
@@ -774,7 +775,7 @@
     if (key && !this.data[key]) jobs.push(this.loadJSON(level === "zip" ? this.url(L.data) : L.data).then(function (d) { return level === "zip" ? self.expandZips(d) : d; }).then(function (d) {
       var byId = {};
       if (level === "zip") self.rescoreMissingZips(d.rows);   // lines added after the ZIP files were built
-      stretchScores(d.rows);
+      if (level !== "uszip") stretchScores(d.rows);   // national ZIP scores (uszip) are already scaled against every U.S. ZIP
       d.rows.forEach(function (r) { byId[r.id] = r; });
       self.data[key] = { rows: d.rows, byId: byId, meta: d };
     }));
@@ -1014,7 +1015,7 @@
     this.gDone = { cat: false, geo: false };
     this.rankSel = el("select", { onchange: function () { self.state.rank = this.value; self.state.sortKey = null; self.refresh(); } });
     controls.push(el("label", { class: "az-field az-only" }, [el("span", { text: "Rank and map by" }), this.rankSel]));
-    this.showSel = el("select", { onchange: function () { self.state.show = +this.value; self.renderTable(); } },
+    this.showSel = el("select", { onchange: function () { self.state.show = +this.value; self.renderTable(); if (self.mapLevel === "uszip") self.renderMap(); } },
       [10, 25, 50, 100, 0].map(function (n) { return el("option", { value: n, text: n ? "Top " + n : "All" }); }));
     this.showSel.value = String(this.state.show);
     controls.push(el("label", { class: "az-field az-only" }, [el("span", { text: "Show" }), this.showSel]));
@@ -1062,6 +1063,10 @@
 
     // Table
     this.tableTitle = el("h2");
+    // National ZIPs: Top 10 / 25 / 50 right beside the list's title
+    this.topSeg = el("div", { class: "az-seg az-topseg", role: "group", "aria-label": "How many ZIPs to list", style: "display:none" },
+      [10, 25, 50].map(function (n) { return el("button", { type: "button", "data-n": n, text: "Top " + n,
+        onclick: function () { self.state.show = n; self.renderTable(); self.renderMap(); } }); }));
     this.backBtn = el("button", { type: "button", class: "az-btn", hidden: true, onclick: function () { self.setLevel(self.state.parent.level); } });
     this.tableNote = el("span");
     this.thead = el("thead");
@@ -1072,7 +1077,7 @@
     this.newsBar = el("div", { class: "az-newsbar", hidden: true });
     this.tablePanel = el("section", { class: "az-panel az-table-panel" }, [
       this.crumbs = cfg.footprint ? el("nav", { class: "az-crumbs", "aria-label": "Where you are", hidden: true }) : null,
-      el("div", { class: "az-table-head" }, [el("div", { class: "az-table-title" }, [this.tableTitle, this.backBtn]), this.tableNote]),
+      el("div", { class: "az-table-head" }, [el("div", { class: "az-table-title" }, [this.tableTitle, this.backBtn, this.topSeg]), this.tableNote]),
       this.newsBar,
       this.pickBar,
       el("div", { class: "az-tablewrap" }, [el("table", { class: "az-table" }, [this.thead, this.tbody])])
@@ -1294,7 +1299,9 @@
     this.markRow();
     this.writeHash();
     if (opts && opts.zoom && this.layerById && this.layerById[id]) {
-      this.map.fitBounds(this.layerById[id].getBounds(), { maxZoom: 6, padding: [40, 40] });
+      var lyr = this.layerById[id];
+      if (lyr.getLatLng) this.map.setView(lyr.getLatLng(), Math.max(this.map.getZoom(), 6));   // a national ZIP dot
+      else this.map.fitBounds(lyr.getBounds(), { maxZoom: 6, padding: [40, 40] });
     }
   };
 
@@ -1635,6 +1642,7 @@
     return c;
   };
   Analyzer.prototype.renderMap = function () {
+    SCORE_DEC = this.state.level === "uszip";
     var self = this, s = this.state, lv = this.mapLevel, L0 = this.cfg.levels[lv];
     var m = this.measure(s.rank), d = this.d(lv);
     var fc = this.geo[lv === "zip" ? this.url(L0.geo) : L0.geo];
@@ -1652,12 +1660,26 @@
     if (this.pointsLayer) { this.map.removeLayer(this.pointsLayer); this.pointsLayer = null; }
     this.layerById = {};
     this.mapMsg.hidden = true;
-    if (!fc) {
+    var pointsView = !!(L0 && L0.points);
+    if (pointsView) {
+      // National ZIPs: a dot at each listed ZIP's center (the table's Top 10, 25 or 50), colored like the areas
+      var nDots = Math.min(s.show || 50, 50), dotRows = this.sortedRows().slice(0, nDots).filter(function (r) { return r.lat != null && r.lon != null; });
+      values = dotRows.map(function (r) { return self.val(r, m); }); br = this.breaks(values); this.currentBreaks = br;
+      this.areaLayer = L.featureGroup(dotRows.map(function (r) {
+        var c = self.classOf(self.val(r, m), br), v = fmt(self.val(r, m), m && m.format);
+        var mk = L.circleMarker([r.lat, r.lon], { radius: 7, color: "#ffffff", weight: 1.2, fillOpacity: 0.95, fillColor: c < 0 ? cssVar("--nodata") : colors[c] });
+        self.layerById[r.id] = mk;
+        mk.bindTooltip('<div class="az-tip"><b>' + r.name + "</b><br>" + (m ? m.label : "") + ": " + (v == null ? "No data" : v) + "</div>", { direction: "top", opacity: 0.97 });
+        mk.on("click", function () { self.select(r.id); });
+        return mk;
+      }));
+    }
+    if (!fc && !pointsView) {
       this.areaLayer = null;
       this.mapMsg.hidden = false;
       this.mapMsg.textContent = "ZIP boundaries for this market aren't available yet. The rankings below still work.";
     }
-    this.areaLayer = fc && L.geoJSON(fc, {
+    if (!pointsView) this.areaLayer = fc && L.geoJSON(fc, {
       style: function (f) {
         if (usSolid) return { color: US_FILL, weight: 0.6, fillOpacity: 1, fillColor: US_FILL };
         var row = d.byId[String(f.properties[idField])];
@@ -1703,9 +1725,11 @@
     this.mapHead.appendChild(el("b", { text: (m ? m.label : "") + (m && m.perSub && this.subLabel() ? ": " + this.subLabel() : "") }));
     this.mapHead.appendChild(el("span", { text: usSolid ? "United States total. Click a DMA, or see the DMAs ranked below." :
       inside ? (lv === "zip" ? "ZIPs" : lv === "metro" ? "Metros" : "Counties") + " in " + this.parentName() + ", ranked within this market." :
+      pointsView ? "The top-ranked ZIPs for this line, each scored against every ZIP in the country. Click a dot for details." :
       "By " + this.levelLabel(lv) + (s.level === "us" ? ". Click a market to rank at that level." : ". Click a market for details.") }));
     (this.ptLayers || []).forEach(function (P0) {
       var pm = self.measure(P0.key);
+      if (pointsView) return;                    // national ZIP dots: no count circles
       if (pm && !self.relevant(pm)) return;      // no toggle for a category without that count
       var box = el("input", { type: "checkbox", onchange: function () { s.pts[P0.key] = this.checked; self.renderPoints(d); self.writeHash(); } });
       box.checked = !!s.pts[P0.key];
@@ -1742,7 +1766,7 @@
     var self = this, s = this.state;
     if (this.pointsLayer) { this.map.removeLayer(this.pointsLayer); this.pointsLayer = null; }
     (this.ptLegends || []).forEach(function (x) { x.remove(); }); this.ptLegends = [];
-    if (!this.layerById) return;
+    if (!this.layerById || this.mapLevel === "uszip") return;
     var layers = (this.ptLayers || []).filter(function (P0) { var m = self.measure(P0.key); return s.pts && s.pts[P0.key] && m && self.relevant(m); });
     if (!layers.length) return;
     // One size scale across the layers that are on, so a bank circle and a credit union circle of the same size mean the same count
@@ -1752,6 +1776,7 @@
       Object.keys(self.layerById).forEach(function (id) {
         var row = d.byId[id], v = row ? self.val(row, m) : null;
         if (typeof v !== "number" || v <= 0) return;
+        if (!self.layerById[id].getBounds) return;
         var b = self.layerById[id].getBounds(); if (!b.isValid()) return;
         pts.push([b.getCenter(), v, row.name, P0, m]); if (v > max) max = v;
       });
@@ -1793,17 +1818,21 @@
     var self = this, s = this.state, d = this.d(this.tableLevel());
     var key = s.sortKey || s.rank, m = this.measure(key), dir = s.sortKey ? s.sortDir : (m && m.lowerIsBetter ? "asc" : "desc");
     var rows = d.rows.slice(), t = this.tieMeasure(m);
+    var usz = this.tableLevel() === "uszip";
+    if (usz) rows = rows.filter(function (r) { return typeof r.v["score@" + s.sub] === "number"; });   // this line's top U.S. ZIPs
     rows.sort(function (a, b) {
       var x = self.val(a, m), y = self.val(b, m);
       var xn = typeof x !== "number", yn = typeof y !== "number";
       if (xn && yn) return a.name.localeCompare(b.name);
       if (xn) return 1; if (yn) return -1;          // no data always sorts last
+      if (x === y && usz && m.key === "score") { var ra = a.v["rank@" + s.sub], rb = b.v["rank@" + s.sub]; return dir === "asc" ? rb - ra : ra - rb; }   // national ZIPs: the build's exact rank breaks rounded ties
       if (x === y && t) { var tx = self.tieVal(a, t), ty = self.tieVal(b, t); if (tx !== ty) return dir === "asc" ? tx - ty : ty - tx; }
       return dir === "asc" ? x - y : y - x;
     });
     return rows;
   };
   Analyzer.prototype.renderTable = function () {
+    SCORE_DEC = this.state.level === "uszip";
     var self = this, s = this.state, drillNav = !!this.cfg.drill, tl = this.tableLevel();
     if (s.level === "us" && !drillNav) {
       this.tablePanel.hidden = true;
@@ -1825,13 +1854,19 @@
       rankOf[r.id] = prevR;
     });
     var rows = all.filter(function (r) { return !s.query || r.name.toLowerCase().indexOf(s.query) >= 0; });
-    var shown = s.show && !s.query ? rows.slice(0, s.show) : rows;
+    var usZ = tl === "uszip", nShow = usZ ? Math.min(s.show || 50, 50) : s.show;   // national ZIPs: Top 10, 25 or 50
+    var shown = nShow && !s.query ? rows.slice(0, nShow) : rows;
+    if (usZ && rankM && rankM.key === "score") all.forEach(function (r) { var k = r.v["rank@" + s.sub]; if (typeof k === "number") rankOf[r.id] = k; });   // national rank
+    Array.prototype.forEach.call(this.showSel.options, function (o) { o.disabled = usZ && (+o.value === 0 || +o.value > 50); });
+    this.showSel.value = String(usZ ? nShow : s.show);
+    this.topSeg.style.display = usZ ? "" : "none";   // .az-seg sets display, so the hidden attribute alone wouldn't hide it
+    Array.prototype.forEach.call(this.topSeg.children, function (b) { b.setAttribute("aria-pressed", String(+b.getAttribute("data-n") === nShow)); });
     var isZip = tl === "zip", lvLabel = isZip ? "ZIP" : this.levelLabel(tl);
     var inCounties = tl === "county" && this.key("county") !== "county", inMetros = tl === "metro" && this.key("metro") !== "metro", fp = !!this.cfg.footprint;
     var natTitle = fp ? lvLabel + "s nationally" : drillNav ? (tl === "county" ? "Counties" : lvLabel + "s") + " ranked" : lvLabel + " rankings";
-    this.tableTitle.textContent = (isZip ? "ZIPs in " + this.parentName() : inCounties ? "Counties in " + this.parentName() : inMetros ? "Metros in " + this.parentName() : natTitle) + (this.subLabel() ? ": " + this.subLabel() : "");
+    this.tableTitle.textContent = (usZ ? "ZIPs ranked" : isZip ? "ZIPs in " + this.parentName() : inCounties ? "Counties in " + this.parentName() : inMetros ? "Metros in " + this.parentName() : natTitle) + (this.subLabel() ? ": " + this.subLabel() : "");
     this.backBtn.hidden = !isZip || fp || drillNav;
-    this.search.placeholder = isZip ? "Find a ZIP or town" : "Find a market";
+    this.search.placeholder = isZip || usZ ? "Find a ZIP or town" : "Find a market";
     if (isZip) this.backBtn.textContent = "Back to " + LEVEL_LABELS[s.parent.level] + " rankings";
     this.tableNote.textContent = "Showing " + NF0.format(shown.length) + " of " + NF0.format(all.length) + (isZip ? " ZIPs" : inCounties ? " counties" : inMetros ? " metros" : drillNav ? { dma: " DMAs", metro: " metros", county: " counties" }[tl] || " markets" : " markets") + ", ranked by " + (rankM ? rankM.label.toLowerCase() : "") + ". Click a column to sort.";
 
@@ -1840,10 +1875,10 @@
     // Tick boxes: with drill-down, any list (DMAs, metros, counties, ZIPs) adds to one combined area that lasts across views
     var pickable = !!(RCf && RCf.customArea) && (drillNav ? AREA_PREFIX[tl] != null : PICK_PREFIX[s.level] != null);
     if (!drillNav && this.pick.level !== s.level) this.pick = { level: s.level, ids: {} };
-    var mkCol = drillNav && !!s.parent && s.parent.level === "sel";   // several DMAs: which DMA each row is in
+    var mkCol = (drillNav && !!s.parent && s.parent.level === "sel") || tl === "uszip";   // several DMAs, or national ZIPs: which DMA each row is in
     var hr = el("tr", null, [pickable ? el("th", { scope: "col", class: "az-pickcol az-pickhead", title: "Tick markets to combine them into one trade area" }, [el("span", { text: "Add to trade area" })]) : null,
       el("th", { scope: "col", text: "Rank" }), el("th", { scope: "col", text: lvLabel }), mkCol ? el("th", { scope: "col", class: "az-mkcol", text: "DMA" }) : null]);
-    var inCol = (fp || drillNav) && !isZip && this.cfg.levels.zip;   // "Inside" button: a DMA or metro's counties, a county's ZIPs
+    var inCol = (fp || drillNav) && !isZip && tl !== "uszip" && this.cfg.levels.zip;   // "Inside" button: a DMA or metro's counties, a county's ZIPs
     cols.forEach(function (m) {
       var active = (s.sortKey || s.rank) === m.key;
       var dir = s.sortKey ? s.sortDir : (m.lowerIsBetter ? "asc" : "desc");
@@ -1890,6 +1925,11 @@
     if (!shown.length) { var emptyTd = el("td", { colspan: String(cols.length + (pickable ? 3 : 2) + (inCol ? 1 : 0) + (mkCol ? 1 : 0)), class: "az-empty", text: "No markets match \u201c" + s.query + "\u201d. Clear the search to see all markets." });
       this.tbody.appendChild(el("tr", null, [emptyTd])); if (s.query) this.countySuggest(s.query, emptyTd); }
     this.tbody.appendChild(frag);
+    if (usZ) {
+      var dm = this.d(tl), ranked = dm && dm.meta && dm.meta.meta && dm.meta.meta.ranked && dm.meta.meta.ranked[s.sub];
+      this.tableNote.textContent = "Showing the top " + NF0.format(shown.length) + (ranked ? " of " + NF0.format(ranked) + " ranked ZIPs nationwide" : " ZIPs nationwide") +
+        ", each scored against every ZIP in the country (inside a market, a ZIP is ranked only against its neighbors). Click a ZIP to see it, then Open in its market.";
+    }
     if (cols.some(function (m) { return m.news; })) this.tableNote.textContent += " Newspaper cells show copies \u00b7 % of households.";
     if (anyMark) this.tableNote.textContent += " * Uses estimated health values; select the market and see its Data notes.";
     if (pickable) this.tableNote.textContent += inCol ? " Tick \u201cAdd to trade area\u201d to combine markets into one trade area; the buttons on the right rank the areas inside a market." : " Tick \u201cAdd to trade area\u201d on several markets to open them together as one trade area.";
@@ -1905,6 +1945,7 @@
 
   /* ---------- Detail ---------- */
   Analyzer.prototype.renderDetail = function () {
+    SCORE_DEC = this.state.level === "uszip";
     var self = this, s = this.state, cfg = this.cfg, box = this.detail;
     box.innerHTML = "";
     var d = this.d(s.level), row = d && d.byId[s.area];
@@ -1921,7 +1962,7 @@
     var metroIn = s.level === "metro" && this.key("metro") !== "metro";
     var LEVEL_PLURAL = { territory: "territories", dma: "DMAs", metro: metroIn ? (s.parent.level === "sel" ? "metros in these DMAs" : "metros in this DMA") : "metros", county: this.key("county") !== "county" && s.level === "county" ? "counties in this market" : "counties", zip: "ZIPs in this market" };
     var rankOf = function (m, v) {
-      if (s.level === "us" || typeof v !== "number") return null;
+      if (s.level === "us" || s.level === "uszip" || typeof v !== "number") return null;
       var vals = [], tm = self.tieMeasure(m), tv = self.tieVal(row, tm), better = 0, ties = 0;
       d.rows.forEach(function (r) {
         var x = self.val(r, m); if (typeof x !== "number") return;
@@ -1931,7 +1972,16 @@
       });
       return { rank: better + 1, total: vals.length, vals: vals, ties: ties };
     };
-    if (head && this.availableAt(head, s.level)) {
+    if (head && s.level === "uszip") {
+      var uv = this.val(row, head), urk = row.v["rank@" + s.sub], umeta = d.meta && d.meta.meta, utot = umeta && umeta.ranked && umeta.ranked[s.sub];
+      if (head.key === "score" && typeof urk === "number") box.appendChild(el("div", { class: "az-score az-rankhead" }, [
+        el("b", { class: "num", text: "#" + NF0.format(urk) }), el("span", { class: "az-rank-of", text: "of " + (utot ? NF0.format(utot) + " " : "") + "ZIPs nationwide" })]));
+      box.appendChild(el("p", { class: "az-score-line", text: head.label + " " + (uv == null ? "\u2014" : fmt(uv, head.format)) + " \u00b7 scored against every ranked ZIP in the U.S.; the best scores 100" }));
+      if (row.dma && this.cfg.levels.zip) box.appendChild(el("button", { type: "button", class: "az-btn az-inmarket", text: "Open in its market \u203a",
+        title: "See this ZIP ranked among the ZIPs in " + (row.mk || "its DMA"), onclick: function () {
+          var zid = row.id; self.drillInto({ level: "dma", id: row.dma }, "zip", []); self.state.area = zid; } }));
+    }
+    else if (head && this.availableAt(head, s.level)) {
       var hv = this.val(row, head), hr = rankOf(head, hv), hvText = fmt(hv, head.format);
       if (hv == null && row.u) {
         box.appendChild(el("div", { class: "az-score" }, [el("b", { class: "num", text: "—" }), el("span", { text: "Not ranked" })]));

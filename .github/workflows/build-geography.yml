@@ -125,8 +125,8 @@ jobs:
           python3 data-build/build_home_maps.py
           python3 data-build/build_zip_index.py
           python3 data-build/build_market_names.py
-      - name: Top U.S. ZIPs
-        # National top-50 ZIP lists per analyzer and line (analyzers/top-zips.html), from the full DMA ZIP files
+      - name: National ZIP view
+        # Each analyzer's ZIP button (data/zip_us.json): the top 50 ZIPs nationally per line, from the full DMA ZIP files
         run: python3 data-build/build_us_top_zips.py
       - name: Compact county and metro ZIP files
         # County and metro ZIP files keep only their area-ranked fields; the rest is read from the DMA files (see data-build/compact_zip_files.py)

@@ -19,7 +19,7 @@
 <div id="app"><p class="az-loading">Loading the Home Services Market Analyzer…</p></div>
 <script src="../shared/vendor/leaflet-1.9.4/leaflet.js"></script>
 <script src="../shared/vendor/topojson-client-3.1.0.min.js"></script>
-<script src="../shared/engine.js?v=20261120b"></script>
+<script src="../shared/engine.js?v=20261120c"></script>
 <script src="radius-config.js?v=20261119a"></script>
 <script>
 AdtaxiAnalyzer.start({
@@ -31,11 +31,6 @@ AdtaxiAnalyzer.start({
   {
    "label": "90-day weather outlook",
    "url": "weather-outlook.html",
-   "tab": true
-  },
-  {
-   "label": "Top U.S. ZIPs",
-   "url": "../analyzers/top-zips.html?a=home-services",
    "tab": true
   },
   {
@@ -149,6 +144,11 @@ AdtaxiAnalyzer.start({
    "data": "data/county.json",
    "geo": "../shared/geo/county.topo.json",
    "idField": "fips"
+  },
+  "uszip": {
+   "label": "ZIP",
+   "data": "data/zip_us.json",
+   "points": true
   },
   "zip": {
    "label": "ZIPs in market",
