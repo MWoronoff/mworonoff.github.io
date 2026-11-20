@@ -510,6 +510,8 @@ body.az-printing .az-map { height: 420px; }
   border-bottom: 3px solid transparent; cursor: pointer; }
 .az-tabs button:hover { color: #fff; }
 .az-tabs button[aria-pressed="true"] { color: #fff; border-bottom-color: var(--teal-2); }
+.az-tabs a.az-tab-link { color: #c7d6e4; font-weight: 700; font-size: 14px; padding: 10px 2px 9px; border-bottom: 3px solid transparent; text-decoration: none; }
+.az-tabs a.az-tab-link:hover { color: #fff; text-decoration: underline; }
 
 /* Benchmarks tab */
 .az-bench { display: flex; flex-direction: column; gap: 16px; }

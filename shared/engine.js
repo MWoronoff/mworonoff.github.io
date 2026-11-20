@@ -947,7 +947,9 @@
   Analyzer.prototype.build = function () {
     var cfg = this.cfg, self = this;
     document.title = cfg.title;
-    var links = (cfg.links || []).map(function (l) { return el("a", { href: l.url, text: l.label }); });
+    // A link with tab: true sits in the section tab bar after the tabs (where the site has Timing or Benchmarks tabs)
+    var tabbed = cfg.timing === false && cfg.benchmarks === false ? [] : (cfg.links || []).filter(function (l) { return l.tab; });
+    var links = (cfg.links || []).filter(function (l) { return tabbed.indexOf(l) < 0; }).map(function (l) { return el("a", { href: l.url, text: l.label }); });
     var header = el("header", { class: "az-header" }, [
       el("div", { class: "az-header-inner" }, [
         el("div", { class: "az-title" }, [
@@ -959,7 +961,7 @@
       ]),
       this.tabBar = el("nav", { class: "az-tabs", "aria-label": "Analyzer sections", hidden: true }, [["markets", "Markets"], ["timing", "Timing"], ["bench", "Benchmarks"]].map(function (t) {
         return el("button", { type: "button", "data-tab": t[0], "aria-pressed": String(t[0] === "markets"), text: t[1], hidden: t[0] !== "markets", onclick: function () { self.setTab(t[0]); } });
-      }))
+      }).concat(tabbed.map(function (l) { return el("a", { class: "az-tab-link", href: l.url, text: l.label }); })))
     ]);
 
     // Controls
@@ -2053,7 +2055,7 @@
   Analyzer.prototype.setTab = function (tab) {
     var self = this, prev = this.tab;
     if (tab === prev) return;
-    Array.prototype.forEach.call(this.tabBar.children, function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-tab") === tab)); });
+    Array.prototype.forEach.call(this.tabBar.children, function (b) { if (b.hasAttribute("data-tab")) b.setAttribute("aria-pressed", String(b.getAttribute("data-tab") === tab)); });
     if (prev === "markets") { this.tabSaved = this.tabParts.map(function (x) { return x.hidden; }); this.tabParts.forEach(function (x) { x.hidden = true; }); }
     this.benchPanel.hidden = tab !== "bench"; this.timingPanel.hidden = tab !== "timing";
     this.tab = tab;
