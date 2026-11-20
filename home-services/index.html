@@ -107,11 +107,11 @@ AdtaxiAnalyzer.start({
    "windows": {
     "demand": [
      "owners",
-     "sfd_share",
+     "own_share",
      "pre1980_share",
-     "clim_stress"
+     "hdd"
     ],
-    "spend": "inc100_share"
+    "spend": null
    }
   },
   "derived": {
@@ -201,7 +201,7 @@ AdtaxiAnalyzer.start({
     "county",
     "zip"
    ],
-   "help": "0–100. Consumer Demand 40%, Category Spending 25%, Spending Power 15%, Competition 20%, each a percentile among markets at the same level. The total is then scaled so the strongest market at each level scores 100 and the weakest 0. Windows and doors uses Demand and Spending Power only. ZIPs use Demand and Spending Power only. Counties have no Category Spending; under 10,000 residents aren't ranked."
+   "help": "0–100. Consumer Demand 40%, Category Spending 25%, Spending Power 15%, Competition 20%, each a percentile among markets at the same level. The total is then scaled so the strongest market at each level scores 100 and the weakest 0. Windows and doors is Consumer Demand only. ZIPs use Demand and Spending Power only. Counties have no Category Spending; under 10,000 residents aren't ranked."
   },
   {
    "key": "demand",
@@ -250,7 +250,16 @@ AdtaxiAnalyzer.start({
     "county",
     "zip"
    ],
-   "help": "Percentile of the share of households earning $100K or more."
+   "help": "Percentile of the share of households earning $100K or more.",
+   "subs": [
+    "any",
+    "hvac",
+    "roof",
+    "plumb",
+    "elec",
+    "paint",
+    "floor"
+   ]
   },
   {
    "key": "comp",
@@ -790,7 +799,8 @@ AdtaxiAnalyzer.start({
   {
    "key": "own_share",
    "label": "Share of households that own",
-   "format": "pct"
+   "format": "pct",
+   "subs": null
   },
   {
    "key": "sfd_own",
@@ -807,8 +817,7 @@ AdtaxiAnalyzer.start({
    "format": "pct",
    "subs": [
     "any",
-    "roof",
-    "windows"
+    "roof"
    ]
   },
   {
@@ -861,8 +870,7 @@ AdtaxiAnalyzer.start({
    "short": "Degree days",
    "subs": [
     "any",
-    "hvac",
-    "windows"
+    "hvac"
    ],
    "help": "NOAA's yearly heating plus cooling degree days (base 65°F), averaged over the last 10 complete years and weighted by households. Higher means heating and air conditioning work harder."
   },
@@ -882,8 +890,7 @@ AdtaxiAnalyzer.start({
    "format": "int",
    "subs": [
     "any",
-    "hvac",
-    "windows"
+    "hvac"
    ]
   },
   {
@@ -968,7 +975,7 @@ AdtaxiAnalyzer.start({
    "body": [
     "Where are a home service company's customers, and which geographies deserve the most ad dollars?",
     "Score = 40% Consumer Demand + 25% Category Spending + 15% Spending Power + 20% Competition. Each part is a percentile (0–100) against markets at the same level. The total is then scaled so the strongest market at each level scores 100 and the weakest 0 (a market’s ZIPs: its best ZIP is 100); rankings don’t change. No score is shown when a part has no data.",
-    "Windows and doors has no EASI spending data and no Census contractor count of its own, so its score is Consumer Demand (40%) and Spending Power (15%), kept in that ratio: 73% Demand, 27% Spending Power at every level."
+    "Windows and doors has no EASI spending data and no Census contractor count of its own, and household income runs the wrong way for it at the market level (see Consumer Demand), so its score is Consumer Demand alone."
    ]
   },
   {
@@ -979,9 +986,10 @@ AdtaxiAnalyzer.start({
    "title": "Consumer Demand",
    "body": [
     "Homeowners and home traits from Census ACS; climate and hail from NOAA.",
-    "HVAC: homeowners and heating or cooling need, whichever is greater (Minneapolis winters and Houston summers both count). Home age isn't used: systems wear out every 15–20 years regardless. Roofing: owners of single-family detached homes, days with 1-inch+ hail, share of owner homes built before 2000. Plumbing: homeowners, share built before 1980. Electrical: homeowners, share built before 1980, share worth $300K+. Painting: homeowners, share worth $300K+, share of owners in place since before 2010. Flooring: homeowners, share built before 2000, share in place since before 2010. Any: homeowners, share built before 2000, share single-family detached, share in place since before 2010. Windows and doors: homeowners, the share of single-family detached homes, the share of homes built before 1980, and heating or cooling need, whichever is greater (energy efficiency is a top reason to replace).",
+    "HVAC: homeowners and heating or cooling need, whichever is greater (Minneapolis winters and Houston summers both count). Home age isn't used: systems wear out every 15–20 years regardless. Roofing: owners of single-family detached homes, days with 1-inch+ hail, share of owner homes built before 2000. Plumbing: homeowners, share built before 1980. Electrical: homeowners, share built before 1980, share worth $300K+. Painting: homeowners, share worth $300K+, share of owners in place since before 2010. Flooring: homeowners, share built before 2000, share in place since before 2010. Any: homeowners, share built before 2000, share single-family detached, share in place since before 2010. Windows and doors: homeowners and the homeownership rate, the share of homes built before 1980, and heating need (heating degree days; energy efficiency is a top reason to replace).",
     "Degree days: NOAA county heating and cooling degree days (base 65°F), 10-year average; each market scores on the higher percentile. Hail: days with 1-inch+ hail in NOAA Storm Events, same years. Alaska and Hawaii have no NOAA county climate files, so their HVAC demand omits degree days; DC uses its two Maryland neighbors; Connecticut ZIPs use the average of the state's eight former counties.",
-    "Windows and doors follows Nielsen Scarborough USA+ 2026 Release 1 households that replaced windows or doors in the past 12 months (3.5% of households) or plan to in the next 12 (4.3%): homeowners (index 129–130), single-family houses (124–128), $100K–$249K (122–124), children under 6 (144–163) and, for work already done, 10+ years in the home (115). Planners lean 25–54 (109–115) and away from 65+ (77). AdMall: AudienceSCAN 2026 Replacement Window Shoppers are 11.9% of adults; sales peak April–July (about 9% of the year each month). National profiles; not checked market by market."
+    "Windows and doors follows Nielsen Scarborough USA+ 2026 Release 1 households that replaced windows or doors in the past 12 months (3.5% of households) or plan to in the next 12 (4.3%): homeowners (index 129–130), single-family houses (124–128), $100K–$249K (122–124), children under 6 (144–163) and, for work already done, 10+ years in the home (115). Planners lean 25–54 (109–115) and away from 65+ (77). AdMall: AudienceSCAN 2026 Replacement Window Shoppers are 11.9% of adults; sales peak April–July (about 9% of the year each month). National profiles; not checked market by market.",
+    "How Windows and doors was checked: against Nielsen Scarborough USA+ 2026 Release 1 households that replaced or plan to replace windows or doors, in its 83 measured DMAs. Replacement runs higher where more households own, homes are older and winters are colder, and lower in high-home-value, high-income markets, even though nationally buyers lean $100K+ (the radius preset keeps that tilt). Scoring on those traits, without Spending Power or cooling need, raised the match with Scarborough from 0.11 to 0.41 (rank correlation; the survey rates themselves are noisy at the market level), and it held on random halves of the markets."
    ]
   },
   {
@@ -993,7 +1001,7 @@ AdtaxiAnalyzer.start({
   },
   {
    "title": "Spending Power",
-   "body": "Share of households earning $100K+ (Census ACS): in Nielsen Scarborough USA+ 2026, households that did or plan flooring, electrical, painting, HVAC, plumbing, roofing or window work over-index at $100K+ (index 104–158, most 117–132). Held to 15% because EASI already reflects income. Windows and doors uses it too."
+   "body": "Share of households earning $100K+ (Census ACS): in Nielsen Scarborough USA+ 2026, households that did or plan flooring, electrical, painting, HVAC, plumbing, roofing or window work over-index at $100K+ (index 104–158, most 117–132). Held to 15% because EASI already reflects income. Not used for Windows and doors."
   },
   {
    "title": "Competition",
