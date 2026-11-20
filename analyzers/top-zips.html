@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Top U.S. ZIPs | Adtaxi Market Analyzers</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="../shared/adtaxi-logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,500..800&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+  :root {
+    --navy: #0f2742; --navy-2: #173c63; --teal: #0f7e70; --teal-2: #13a196; --mint: #8fe0c9;
+    --ink: #182432; --muted: #5a6d81; --line: #dce4ec; --paper: #f4f7fa; --card: #ffffff;
+    --display: "Archivo", "Arial Narrow", Arial, sans-serif; --body: "Inter", "Segoe UI", Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: var(--body); color: var(--ink); background: var(--paper); font-size: 15px; }
+  header { background: linear-gradient(110deg, var(--navy) 0%, var(--navy-2) 100%); color: #fff; padding: 26px 24px 22px; }
+  .wrap { max-width: 1180px; margin: 0 auto; }
+  .head { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; }
+  h1 { font-family: var(--display); font-size: 30px; margin: 0 0 6px; letter-spacing: -0.01em; }
+  header p { margin: 0; color: #c7d6e4; max-width: 760px; line-height: 1.45; }
+  header nav { margin-top: 12px; display: flex; gap: 18px; }
+  header nav a { color: #fff; font-weight: 700; font-size: 14px; }
+  .logo { width: 96px; height: auto; }
+  main { padding: 22px 24px 40px; }
+  .controls { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px;
+    display: flex; flex-wrap: wrap; gap: 16px 22px; align-items: flex-end; }
+  label { display: block; font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 6px; }
+  select { font: inherit; padding: 8px 10px; border: 1px solid #b9c7d4; border-radius: 6px; background: #fff; min-width: 240px; }
+  .seg { display: inline-flex; border: 1px solid var(--teal); border-radius: 6px; overflow: hidden; }
+  .seg button { font: inherit; font-weight: 700; border: 0; background: #fff; color: var(--teal); padding: 8px 16px; cursor: pointer; }
+  .seg button + button { border-left: 1px solid var(--teal); }
+  .seg button[aria-pressed="true"] { background: var(--teal); color: #fff; }
+  .btn { font: inherit; font-weight: 700; border: 1px solid var(--navy); background: var(--navy); color: #fff; padding: 8px 14px; border-radius: 6px; cursor: pointer; }
+  .btn:hover { background: var(--navy-2); }
+  .spacer { flex: 1; }
+  .summary { margin: 18px 2px 10px; color: var(--muted); }
+  .summary b { color: var(--ink); }
+  .tablebox { background: var(--card); border: 1px solid var(--line); border-radius: 10px; overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; min-width: 860px; }
+  th, td { padding: 9px 12px; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  th { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); background: #f8fafc; position: sticky; top: 0; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  tbody tr:hover { background: #f2f8f7; }
+  .rank { font-weight: 700; color: var(--teal); }
+  .bar { display: inline-block; height: 8px; border-radius: 4px; background: var(--teal-2); vertical-align: middle; margin-right: 8px; }
+  td a { color: var(--teal); font-weight: 600; }
+  .note { margin-top: 16px; color: var(--muted); font-size: 13px; line-height: 1.55; max-width: 980px; }
+  .note p { margin: 0 0 8px; }
+  .err { background: #fff4e5; border: 1px solid #f0c27a; padding: 12px 14px; border-radius: 8px; margin-top: 14px; }
+  @media print { header nav, .controls .btn, .controls .seg { display: none; } body { background: #fff; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap head">
+    <div>
+      <h1>Top U.S. ZIPs</h1>
+      <p>The highest-scoring ZIP codes in the country for each analyzer and line. Inside an analyzer, a ZIP is ranked within its own market; here every ZIP is scored against every other ZIP in the U.S., so the list shows where the very best ZIPs are nationally.</p>
+      <nav><a href="./">Home</a><a id="back" href="./" hidden>Back to the analyzer</a></nav>
+    </div>
+    <img class="logo" src="../shared/adtaxi-logo.svg" alt="Adtaxi">
+  </div>
+</header>
+<main class="wrap">
+  <div class="controls">
+    <div><label for="an">Analyzer</label><select id="an"></select></div>
+    <div><label for="line">Line</label><select id="line"></select></div>
+    <div><label>Show</label><div class="seg" id="topn" role="group" aria-label="How many ZIPs">
+      <button type="button" data-n="10" aria-pressed="true">Top 10</button><button type="button" data-n="25" aria-pressed="false">Top 25</button><button type="button" data-n="50" aria-pressed="false">Top 50</button>
+    </div></div>
+    <div class="spacer"></div>
+    <button class="btn" id="csv" type="button">Download CSV</button>
+  </div>
+  <div class="summary" id="summary"></div>
+  <div class="tablebox"><table>
+    <thead><tr id="thead"></tr></thead>
+    <tbody id="tbody"></tbody>
+  </table></div>
+  <div class="note" id="note"></div>
+</main>
+<script>
+(function () {
+  "use strict";
+  // Analyzer folders and their names; each folder has data/us_top_zips.json (data-build/build_us_top_zips.py)
+  var ANALYZERS = [
+    ["apartment-analyzer", "Apartments"], ["auto", "Auto"], ["financial", "Financial"], ["franchise", "Franchise Development"],
+    ["furniture-analyzer", "Furniture"], ["healthcare", "Healthcare"], ["higher-ed", "Higher Education"],
+    ["home-services", "Home Services"], ["legal", "Legal"], ["travel", "Travel"]];
+  var NF0 = new Intl.NumberFormat("en-US"), NF1 = new Intl.NumberFormat("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  var $ = function (id) { return document.getElementById(id); };
+  var q = new URLSearchParams(location.search);
+  var state = { a: q.get("a"), sub: q.get("sub"), n: [10, 25, 50].indexOf(+q.get("n")) >= 0 ? +q.get("n") : 10 };
+  if (!ANALYZERS.some(function (x) { return x[0] === state.a; })) state.a = "healthcare";
+  var data = null, cache = {};
+
+  function el(tag, attrs, kids) {
+    var e = document.createElement(tag);
+    Object.keys(attrs || {}).forEach(function (k) { if (k === "text") e.textContent = attrs[k]; else e.setAttribute(k, attrs[k]); });
+    (kids || []).forEach(function (c) { if (c != null) e.appendChild(typeof c === "string" ? document.createTextNode(c) : c); });
+    return e;
+  }
+  function writeUrl() {
+    var u = new URL(location.href);
+    u.searchParams.set("a", state.a); u.searchParams.set("sub", state.sub || ""); u.searchParams.set("n", String(state.n));
+    history.replaceState(null, "", u.toString());
+    var back = $("back"); back.hidden = !q.get("a"); back.href = "../" + state.a + "/" + (state.sub ? "#sub=" + encodeURIComponent(state.sub) : "");
+  }
+  function load(a) {
+    if (cache[a]) return Promise.resolve(cache[a]);
+    return fetch("../" + a + "/data/us_top_zips.json", { cache: "no-cache" }).then(function (r) {
+      if (!r.ok) throw new Error("Couldn't load the national ZIP list for this analyzer (HTTP " + r.status + ").");
+      return r.json();
+    }).then(function (d) { cache[a] = d; return d; });
+  }
+  function line() { return data && (data.lines.filter(function (l) { return l.id === state.sub; })[0] || data.lines[0]); }
+  function pctText(x) { return x == null ? "" : NF1.format(x); }
+
+  function render() {
+    var L = line(); if (!L) return;
+    state.sub = L.id; writeUrl();
+    Array.prototype.forEach.call($("topn").children, function (b) { b.setAttribute("aria-pressed", String(+b.getAttribute("data-n") === state.n)); });
+    var hasSpend = !!L.spendInput;
+    var cols = [["Rank", ""], ["ZIP", ""], ["City", ""], ["State", ""], ["Market (DMA)", ""], ["U.S. score", "num"], ["Consumer Demand", "num"]]
+      .concat(hasSpend ? [["Spending Power", "num"]] : []).concat([["Households", "num"], ["Population", "num"], ["", ""]]);
+    var th = $("thead"); th.innerHTML = "";
+    cols.forEach(function (c) { th.appendChild(el("th", { class: c[1], text: c[0] })); });
+    var tb = $("tbody"); tb.innerHTML = "";
+    L.top.slice(0, state.n).forEach(function (t) {
+      var link = "../" + state.a + "/#level=zip&sub=" + encodeURIComponent(L.id) + "&in=dma:" + encodeURIComponent(t.dma);
+      var cells = [
+        el("td", { class: "rank", text: String(t.rank) }), el("td", { text: t.zip }), el("td", { text: t.city }), el("td", { text: t.state }),
+        el("td", { text: t.dmaName }),
+        el("td", { class: "num" }, [el("span", { class: "bar", style: "width:" + Math.max(2, Math.round(t.score * 0.6)) + "px" }), NF1.format(t.score)]),
+        el("td", { class: "num", text: pctText(t.demand) })]
+        .concat(hasSpend ? [el("td", { class: "num", text: pctText(t.spend) })] : [])
+        .concat([el("td", { class: "num", text: t.households == null ? "" : NF0.format(t.households) }),
+                 el("td", { class: "num", text: t.population == null ? "" : NF0.format(t.population) }),
+                 el("td", {}, [el("a", { href: link, title: "Open this ZIP's market in the analyzer", text: "Open market" })])]);
+      tb.appendChild(el("tr", {}, cells));
+    });
+    var name = ANALYZERS.filter(function (x) { return x[0] === state.a; })[0][1];
+    $("summary").innerHTML = "";
+    $("summary").appendChild(el("span", {}, ["Top ", el("b", { text: String(state.n) }), " of " + NF0.format(L.ranked) + " ranked U.S. ZIPs for ",
+      el("b", { text: name + ": " + L.label }), "."]));
+    var dem = L.demandInputs.map(function (x) { return x.label; }).join(", ");
+    var w = L.weights || {}, wd = w.demand || 1, ws = w.spend || 0;
+    var how = hasSpend ? ("U.S. score = Consumer Demand " + Math.round(wd / (wd + ws) * 100) + "% and Spending Power " + Math.round(ws / (wd + ws) * 100) +
+      "% (" + L.spendInput.label + ")") : "U.S. score = Consumer Demand";
+    $("note").innerHTML = "";
+    [how + ", the same ZIP formula the analyzer uses, but with every input ranked against all ranked ZIPs in the U.S. instead of within one market. Consumer Demand averages the percentiles of: " + dem + ". The best U.S. ZIP scores 100.",
+     "A ZIP's score here won't match its score inside the analyzer, which ranks it only against the other ZIPs in its market. ZIPs under 500 residents or mostly group quarters (campuses, bases, institutions) aren't ranked, as in the analyzers.",
+     "Open market shows the ZIP in the analyzer, ranked within its DMA. Built " + data.built + "."].forEach(function (t) { $("note").appendChild(el("p", { text: t })); });
+  }
+  function fillLines() {
+    var s = $("line"); s.innerHTML = "";
+    data.lines.forEach(function (l) { var o = el("option", { value: l.id, text: l.label }); if (l.id === state.sub) o.selected = true; s.appendChild(o); });
+    if (!data.lines.some(function (l) { return l.id === state.sub; })) state.sub = data.lines[0] && data.lines[0].id;
+  }
+  function choose(a) {
+    state.a = a;
+    $("tbody").innerHTML = ""; $("summary").textContent = "Loading…";
+    return load(a).then(function (d) { data = d; fillLines(); render(); }).catch(function (e) {
+      $("summary").innerHTML = ""; $("summary").appendChild(el("div", { class: "err", text: e.message }));
+    });
+  }
+  function csv() {
+    var L = line(); if (!L) return;
+    var hasSpend = !!L.spendInput, keys = L.demandInputs.map(function (x) { return x.key; });
+    var head = ["rank", "zip", "city", "state", "dma_code", "dma", "us_score", "consumer_demand"].concat(hasSpend ? ["spending_power"] : [])
+      .concat(["households", "population"]).concat(keys);
+    var q_ = function (v) { v = v == null ? "" : String(v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+    var lines = [head.join(",")].concat(L.top.slice(0, state.n).map(function (t) {
+      return [t.rank, t.zip, t.city, t.state, t.dma, t.dmaName, t.score, t.demand].concat(hasSpend ? [t.spend] : [])
+        .concat([t.households, t.population]).concat(keys.map(function (k) { return t.inputs[k]; })).map(q_).join(",");
+    }));
+    var blob = new Blob([lines.join("\n") + "\n"], { type: "text/csv" });
+    var a = el("a", { href: URL.createObjectURL(blob), download: "top-" + state.n + "-us-zips-" + state.a + "-" + L.id + ".csv" });
+    document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 0);
+  }
+
+  var sel = $("an");
+  ANALYZERS.forEach(function (x) { var o = el("option", { value: x[0], text: x[1] }); if (x[0] === state.a) o.selected = true; sel.appendChild(o); });
+  sel.addEventListener("change", function () { state.sub = null; choose(sel.value); });
+  $("line").addEventListener("change", function () { state.sub = this.value; render(); });
+  $("topn").addEventListener("click", function (e) { var n = e.target.getAttribute && e.target.getAttribute("data-n"); if (n) { state.n = +n; render(); } });
+  $("csv").addEventListener("click", csv);
+  choose(state.a);
+})();
+</script>
+</body>
+</html>
