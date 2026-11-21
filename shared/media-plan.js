@@ -528,7 +528,13 @@
     legal:           { mod: { search: 1.3, retarget: 1.2, youtube: 1.2, ctv: 1.2, display: 0.8, dooh: 0.8, shopping: 0 } },
     "higher-ed":     { mod: { social: 1.4, youtube: 1.3, ctv: 1.2, retarget: 1.1, display: 0.9, shopping: 0 } },
     "home-services": { mod: { search: 1.3, social: 1.4, retarget: 1.2, ctv: 0.7, youtube: 0.6, dooh: 0.7, shopping: 0 } },
-    apartments:      { mod: { search: 1.2, social: 1.3, retarget: 1.2, youtube: 0.8, ctv: 0.8, dooh: 0.7, shopping: 0 } }
+    apartments:      { mod: { search: 1.2, social: 1.3, retarget: 1.2, youtube: 0.8, ctv: 0.8, dooh: 0.7, shopping: 0 } },
+    // EMARKETER 2026: travel puts 61% of digital into search (the most of any industry); social is ~73% of its display
+    travel:          { mod: { search: 1.3, social: 1.1, retarget: 1.2, display: 0.7, shopping: 0 },
+                       note: "search first, since travel puts more of its digital budget into search than any other industry, plus social and retargeting through long booking windows." },
+    // EMARKETER 2026, B2B advertisers (the closest measure for franchise recruiting): search 46% and social 45% of digital, video only 11%
+    franchise:       { mod: { search: 1.2, social: 1.1, retarget: 1.2, youtube: 0.7, ctv: 0.7, dooh: 0.6, shopping: 0 },
+                       note: "search, social and retargeting through a long decision, with less video, which B2B advertisers use sparingly." }
   };
   var CAT_ALIAS = { apartment: "apartments", "apartment-analyzer": "apartments", "furniture-analyzer": "furniture" };
   function tune(s, cat) {

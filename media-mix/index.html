@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script>/* site-version: if this page is an old saved copy, reload it once with the current version (shared/version.json; bump both on each release) */
-(function(){var V="20261120d";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
+(function(){var V="20261121a";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Digital Media Mix Planner</title>
 <meta name="robots" content="noindex">
@@ -146,7 +146,7 @@
   <div class="mm-sheet" id="sheet" aria-live="polite"></div>
 </main>
 
-<script src="../shared/media-plan.js?v=20261119a"></script>
+<script src="../shared/media-plan.js?v=20261121a"></script>
 <script src="../shared/results.js?v=20261119a"></script>
 <script>
 /* =====================  SETTINGS (draft: edit here)  =====================
@@ -194,6 +194,17 @@ var CATEGORIES = [
     fine: "EMARKETER's Retail figures used for the split don't separate display from video.",
     short: "furniture", tuned: "product ads, social and retargeting, matching how shoppers browse furniture before they buy.",
     note: "EMARKETER reports the home furnishings digital total; the traditional spend and format split are estimated from its Retail shares. National totals; local store mixes vary." },
+  { id: "travel", label: "Travel", noun: "travel", digital: 10.38, traditional: 2.06, social: 2.67,
+    formats: [ { label: "Search", value: 6.36 }, { label: "Digital video", value: 2.49, sub: "incl. CTV $0.8B" },
+               { label: "Display", value: 1.18 }, { label: "Other digital", value: 0.35 } ],
+    programmatic: 3.42,
+    facts: [ "Travel puts 61% of its digital budget into search, more than any other industry (41% across all industries): travelers research and compare before they book.",
+             "Hotels and other lodging spend about $3.2 billion a year on digital ads, roughly 30% of all travel digital spend.",
+             "Social takes nearly three-quarters of travel's display spend, and travel video spending grows faster than any industry's but technology's." ],
+    source: "EMARKETER forecasts, 2026",
+    short: "travel", tuned: "search first, since travel puts more of its digital budget into search than any other industry, plus social and retargeting to stay in front of travelers through long booking windows.",
+    market: "listings on online travel agencies such as Expedia and Booking.com, and Google Hotel Ads, are usually managed through the property's booking engine, outside this plan.",
+    note: "National totals for all travel advertisers, including airlines, cruise lines and online travel agencies; local hotel, resort and attraction mixes vary." },
   { id: "legal", label: "Legal", noun: "law firm", heading: "How law firms spend", local: true, total: 9.3, digital: 4.675, traditional: 4.625,
     intro: "U.S. local law firm ad spend, 2026, and how the budget splits by medium.",
     media: [ { label: "Mobile", share: 0.2328, sub: "incl. search and social" }, { label: "Direct mail", share: 0.1908 }, { label: "Local TV", share: 0.1778, sub: "broadcast and station digital" }, { label: "Other", share: 0.1199, sub: "email, directories, OOH, magazines" }, { label: "PC/laptop", share: 0.1019, sub: "incl. search and display" }, { label: "Newspaper", share: 0.0689, sub: "print and digital" }, { label: "Radio", share: 0.0400, sub: "broadcast and streaming" }, { label: "CTV/streaming", share: 0.0370 }, { label: "Cable TV", share: 0.0310 } ],
