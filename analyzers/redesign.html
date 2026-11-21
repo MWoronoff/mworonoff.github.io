@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Preview: Adtaxi Market Analyzers</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="../shared/adtaxi-logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+  :root { --navy: #0f2742; --teal: #0f7e70; --teal-d: #0b5d53; --ink: #182432; --muted: #5f7286; --line: #dce4ec; --bg: #f4f7fa; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: Inter, system-ui, sans-serif; }
+  a { color: var(--teal); text-decoration: none; }
+  a:hover { color: var(--teal-d); text-decoration: underline; }
+  .banner { background: #fff7e0; color: #5c4400; font-weight: 600; font-size: 14px; text-align: center; padding: 9px 16px; border-bottom: 1px solid #f0dfa8; }
+  .banner a { color: var(--navy); }
+  .nav { background: var(--navy); }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 0 32px; }
+  .nav .wrap { height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+  .brand { color: #fff; font-weight: 700; font-size: 17px; }
+  .brand:hover { color: #fff; }
+  .nav nav { display: flex; gap: 28px; flex-wrap: wrap; }
+  .nav nav a { color: #c9d6e3; font-size: 15px; }
+  .nav nav a[aria-current] { color: #fff; font-weight: 600; }
+  .nav nav a:hover { color: #fff; }
+  main.wrap { padding-top: 56px; padding-bottom: 40px; display: flex; flex-direction: column; gap: 56px; }
+  h1 { margin: 0; font-size: 40px; line-height: 1.15; color: var(--navy); }
+  .lead { margin: 10px 0 0; font-size: 18px; color: var(--muted); max-width: 640px; }
+  .tasks { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; margin-top: 28px; }
+  .task { background: #fff; border-radius: 14px; padding: 28px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 1px 3px rgba(15,39,66,.08); }
+  .task.main { outline: 2px solid var(--teal); }
+  .eyebrow { font-size: 13px; font-weight: 600; letter-spacing: .04em; color: var(--muted); }
+  .task.main .eyebrow { color: var(--teal); }
+  .task h2 { margin: 0; font-size: 22px; color: var(--navy); }
+  .task p { margin: 0; font-size: 15px; line-height: 1.5; color: var(--muted); }
+  .task .links { display: flex; flex-direction: column; gap: 10px; font-size: 15px; font-weight: 600; }
+  .btn { margin-top: auto; align-self: flex-start; background: var(--teal); color: #fff; font-weight: 600; font-size: 15px; padding: 12px 20px; border-radius: 8px; }
+  .btn:hover { background: var(--teal-d); color: #fff; text-decoration: none; }
+  .more { margin-top: auto; font-weight: 600; font-size: 15px; }
+  .sechead { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+  .sechead h2 { margin: 0; font-size: 24px; color: var(--navy); }
+  .sechead span { font-size: 14px; color: var(--muted); }
+  .cats { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px; }
+  .cat { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 6px; min-height: 80px; }
+  .cat:hover { border-color: var(--teal); text-decoration: none; }
+  .cat b { font-size: 16px; color: var(--navy); }
+  .cat span { font-size: 13px; color: var(--muted); }
+  .cat em { font-style: normal; font-size: 12px; font-weight: 600; color: var(--teal); }
+  .econ { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 16px 24px; display: flex; align-items: center; gap: 28px; flex-wrap: wrap; font-size: 15px; }
+  .econ[hidden] { display: none; }
+  .econ > b { color: var(--navy); }
+  .econ strong { color: var(--teal); }
+  .econ small { color: var(--muted); font-size: 13px; }
+  .econ a { margin-left: auto; font-weight: 600; }
+  footer { border-top: 1px solid var(--line); margin-top: 24px; }
+  footer .wrap { padding-top: 24px; padding-bottom: 24px; display: flex; gap: 28px; flex-wrap: wrap; font-size: 14px; color: var(--muted); }
+  footer .wrap span { margin-left: auto; }
+  @media (max-width: 900px) { .tasks { grid-template-columns: 1fr; } .cats { grid-template-columns: repeat(2, minmax(0, 1fr)); } h1 { font-size: 32px; } }
+</style>
+</head>
+<body>
+<div class="banner">Preview of a simpler layout. Only Financial opens in the new layout; the other categories open today's version. <a href="index.html">Open the current site</a></div>
+<header class="nav"><div class="wrap">
+  <a class="brand" href="redesign.html">Adtaxi Market Analyzers</a>
+  <nav aria-label="Site"><a href="redesign.html" aria-current="page">Analyzers</a><a href="#tools">Tools</a><a href="library.html">Library</a><a href="guide.html">Sales guide</a></nav>
+</div></header>
+
+<main class="wrap">
+  <section>
+    <h1>What do you want to do?</h1>
+    <p class="lead">Every DMA, metro, county and ZIP, scored for the business in front of you.</p>
+    <div class="tasks" id="tools">
+      <div class="task main">
+        <span class="eyebrow">MOST USED</span>
+        <h2>Find a client's best markets</h2>
+        <p>Pick the client's category. Rank markets, look inside one, then build the plan.</p>
+        <a class="btn" href="#categories">Choose a category</a>
+      </div>
+      <div class="task">
+        <span class="eyebrow">ANY CATEGORY</span>
+        <h2>Size an area or a client's customers</h2>
+        <div class="links">
+          <a href="../radius/">Trade Area Tool ›</a>
+          <a href="../crm-analyzer/">Customer Analysis (CRM) ›</a>
+          <a href="../TV/">TV-to-Digital Analyzer ›</a>
+          <a href="../media-mix/">Digital Media Mix Planner ›</a>
+        </div>
+      </div>
+      <div class="task">
+        <span class="eyebrow">BEFORE OR AFTER A CALL</span>
+        <h2>Get something to share</h2>
+        <p>Category reports, slides, ad response and case studies.</p>
+        <a class="more" href="library.html">Open the Research Library ›</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="categories">
+    <div class="sechead"><h2>Category analyzers</h2><span>Each ranks markets by Market Potential Score</span></div>
+    <div class="cats">
+      <a class="cat" href="../healthcare/"><b>Healthcare</b><span>11 lines</span></a>
+      <a class="cat" href="../legal/"><b>Legal</b><span>5 lines</span></a>
+      <a class="cat" href="../higher-ed/"><b>Higher Education</b><span>5 lines</span></a>
+      <a class="cat" href="../home-services/"><b>Home Services</b><span>8 lines</span></a>
+      <a class="cat" href="../furniture-analyzer/"><b>Furniture</b><span>7 lines</span></a>
+      <a class="cat" href="../apartment-analyzer/"><b>Apartments</b><span>6 lines</span></a>
+      <a class="cat" href="../financial/redesign.html"><b>Financial</b><span>8 lines</span><em>New layout</em></a>
+      <a class="cat" href="../auto/"><b>Auto</b><span>4 lines</span></a>
+      <a class="cat" href="../travel/"><b>Travel</b><span>6 lines</span></a>
+      <a class="cat" href="../franchise/"><b>Franchise Development</b><span>2 lines</span></a>
+    </div>
+  </section>
+
+  <section class="econ" id="econ" aria-label="Economic snapshot" hidden></section>
+</main>
+
+<footer><div class="wrap">
+  <a href="index.html#data">Where the numbers come from</a>
+  <a href="guide.html">Sales guide</a>
+  <a href="https://www.adtaxi.com/">Visit Adtaxi</a>
+  <span>Estimates for planning. Fall 2026.</span>
+</div></footer>
+
+<script>
+/* Economic snapshot: one line from economy.json, the same file the current hub uses */
+(function () {
+  var box = document.getElementById("econ");
+  fetch("economy.json", { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+    if (!j || !j.slides || !j.slides.length) return;
+    box.appendChild(Object.assign(document.createElement("b"), { textContent: "Economic snapshot" }));
+    j.slides.slice(0, 2).forEach(function (s) {
+      var span = document.createElement("span");
+      span.appendChild(document.createTextNode(s.label + " "));
+      span.appendChild(Object.assign(document.createElement("strong"), { textContent: s.value }));
+      span.appendChild(document.createTextNode(" "));
+      span.appendChild(Object.assign(document.createElement("small"), { textContent: "(" + s.period + ")" }));
+      box.appendChild(span);
+    });
+    box.appendChild(Object.assign(document.createElement("a"), { href: "index.html#economy", textContent: "What it means for advertisers ›" }));
+    box.hidden = false;
+  }).catch(function () {});
+})();
+</script>
+</body>
+</html>
