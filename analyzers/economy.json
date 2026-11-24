@@ -34,7 +34,7 @@
       "bullet": "Confidence jumped to its highest level since January 2025 as midterm-election uncertainty faded and gas prices kept falling. The Expectations Index (83.6) rose above 80, the Conference Board's recession-signal line, for the first time this year.",
       "source": "The Conference Board, Consumer Confidence Index. Released Nov. 24 (preliminary; final with the December release); October revised to 91.9.",
       "url": "https://www.conference-board.org/topics/consumer-confidence",
-      "report": { "label": "View the October Consumer Confidence report", "file": "/analyzers/consumer-confidence-report.pdf" },
+      "report": { "label": "View the Consumer Confidence report", "file": "/analyzers/consumer-confidence-report.pdf" },
       "chart": {
         "type": "line",
         "title": "Consumer Confidence Index (1985 = 100)",
