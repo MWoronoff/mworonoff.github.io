@@ -1,5 +1,5 @@
 {
-  "updated": "Nov. 17, 2026",
+  "updated": "Nov. 24, 2026",
   "takeaway": "Consumers can still buy but need a clear reason: lead with value, proof and payment options, and give big-ticket categories more time to convert.",
   "slides": [
     {
@@ -27,45 +27,45 @@
       "id": "confidence",
       "pill": "Consumer confidence",
       "label": "Consumer Confidence Index",
-      "value": "91.7",
-      "change": "▲ 7.5 from September",
+      "value": "103.3",
+      "change": "▲ 11.4 from October",
       "tone": "pos",
-      "period": "October 2026",
-      "bullet": "Confidence rose to its highest level since June as gas prices eased, but the Expectations Index (72.6) is still below 80, the Conference Board's recession-signal line.",
-      "source": "The Conference Board, Consumer Confidence Index. Released Oct. 27; September revised to 84.2.",
+      "period": "November 2026 (preliminary)",
+      "bullet": "Confidence jumped to its highest level since January 2025 as midterm-election uncertainty faded and gas prices kept falling. The Expectations Index (83.6) rose above 80, the Conference Board's recession-signal line, for the first time this year.",
+      "source": "The Conference Board, Consumer Confidence Index. Released Nov. 24 (preliminary; final with the December release); October revised to 91.9.",
       "url": "https://www.conference-board.org/topics/consumer-confidence",
-      "report": { "label": "View the Consumer Confidence report", "file": "/analyzers/consumer-confidence-report.pdf" },
+      "report": { "label": "View the October Consumer Confidence report", "file": "/analyzers/consumer-confidence-report.pdf" },
       "chart": {
         "type": "line",
         "title": "Consumer Confidence Index (1985 = 100)",
         "unit": "",
-        "ticks": [75, 80, 85, 90, 95, 100],
+        "ticks": [75, 80, 85, 90, 95, 100, 105],
         "bands": [
           { "from": 75, "to": 80, "label": "Below 80: recessionary", "color": "red" },
           { "from": 80, "to": 95, "label": "80–95: slowed growth", "color": "amber" }
         ],
-        "labels": ["Oct '25", "Nov '25", "Dec '25", "Jan '26", "Feb '26", "Mar '26", "Apr '26", "May '26", "Jun '26", "Jul '26", "Aug '26", "Sep '26", "Oct '26"],
-        "values": [95.5, 92.9, 94.2, 89.0, 91.0, 91.8, 93.8, 90.6, 92.2, 90.2, 88.6, 84.2, 91.7]
+        "labels": ["Nov '25", "Dec '25", "Jan '26", "Feb '26", "Mar '26", "Apr '26", "May '26", "Jun '26", "Jul '26", "Aug '26", "Sep '26", "Oct '26", "Nov '26"],
+        "values": [92.9, 94.2, 89.0, 91.0, 91.8, 93.8, 90.6, 92.2, 90.2, 88.6, 84.2, 91.9, 103.3]
       }
     },
     {
       "id": "sentiment",
       "pill": "Consumer sentiment",
       "label": "Index of Consumer Sentiment",
-      "value": "48.0",
-      "change": "▼ 0.1 from September",
-      "tone": "neg",
-      "period": "October 2026, final",
-      "bullet": "Sentiment is at its lowest in five months. Buying conditions for big-ticket goods fell 18% on interest rates and affordability, and consumers expect 4.7% inflation over the next year.",
-      "source": "University of Michigan, Surveys of Consumers. Final October reading released Oct. 23.",
+      "value": "51.5",
+      "change": "▲ 3.5 from October",
+      "tone": "pos",
+      "period": "November 2026, final",
+      "bullet": "Sentiment rose to its highest level since August, led by post-election gains in expected business conditions. Falling gas prices helped low- and middle-wealth households, and year-ahead inflation expectations dropped to 3.7% from 4.7%.",
+      "source": "University of Michigan, Surveys of Consumers. Final November reading released Nov. 20.",
       "url": "https://www.sca.isr.umich.edu/",
       "chart": {
         "type": "line",
         "title": "Index of Consumer Sentiment (1966 = 100)",
         "unit": "",
         "ticks": [40, 45, 50, 55, 60],
-        "labels": ["Oct '25", "Nov '25", "Dec '25", "Jan '26", "Feb '26", "Mar '26", "Apr '26", "May '26", "Jun '26", "Jul '26", "Aug '26", "Sep '26", "Oct '26"],
-        "values": [53.6, 51.0, 52.9, 56.4, 56.6, 53.3, 49.8, 44.8, 49.5, 55.2, 51.7, 48.1, 48.0]
+        "labels": ["Nov '25", "Dec '25", "Jan '26", "Feb '26", "Mar '26", "Apr '26", "May '26", "Jun '26", "Jul '26", "Aug '26", "Sep '26", "Oct '26", "Nov '26"],
+        "values": [51.0, 52.9, 56.4, 56.6, 53.3, 49.8, 44.8, 49.5, 55.2, 51.7, 48.1, 48.0, 51.5]
       }
     },
     {
