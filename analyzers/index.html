@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <script src="/shared/gate.js"></script>
 <script>/* site-version: if this page is an old saved copy, reload it once with the current version (shared/version.json; bump both on each release) */
-(function(){var V="20261125h";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
+(function(){var V="20261125i";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Adtaxi Market Analyzers</title>
 <meta name="robots" content="noindex">
@@ -386,27 +386,38 @@
         rowsFor(D.income, document.getElementById("vis-income"), "inc");
         if (D.income) document.getElementById("vis-groups").hidden = false;
       }
-      // The audience mix drifts 1-4 points around Comscore's monthly mix every few seconds so the box reads as live; shares always total 100%
-      function jit() { var m = (1 + Math.random() * 3) / 100; return Math.random() < 0.5 ? -m : m; }
+      // The audience mix drifts continuously, up to about 4 points either side of Comscore's monthly mix,
+      // so the box reads as live. Each bar follows two slow sine waves with random phases; shares always total 100%.
       function valHtml(share, us) { return "<b>" + (share * 100).toFixed(1) + "%</b> of uniques <small>(index " + NF.format(share / us * 100) + ")</small>"; }
-      function mix() {
-        if (!D) return;
-        var m = Math.min(0.9, Math.max(0.1, D.male + jit())), f = 1 - m;
-        demoBox.querySelector(".dm").style.width = (m * 100).toFixed(1) + "%";
-        demoBox.querySelector(".df").style.width = (f * 100).toFixed(1) + "%";
-        elMen.innerHTML = valHtml(m, D.us.male);
-        elWom.innerHTML = valHtml(f, 1 - D.us.male);
-        if (D.income && incRows.length) {
-          var raw = D.income.map(function (x) { return Math.max(0.02, x.share + jit()); });
-          var tot = raw.reduce(function (a, b) { return a + b; }, 0);
-          incRows.forEach(function (r, i) {
-            var sh = raw[i] / tot, x = D.income[i];
-            r.querySelector(".fill").style.width = (sh * 100).toFixed(1) + "%";
-            r.querySelector(".val").innerHTML = valHtml(sh, x.us);
-          });
-        }
+      function wave() {
+        var p1 = Math.random() * 6.283, p2 = Math.random() * 6.283, w1 = 6.283 / (7 + Math.random() * 5), w2 = 6.283 / (3 + Math.random() * 3);
+        return function (t) { return (2.6 * Math.sin(w1 * t + p1) + 1.4 * Math.sin(w2 * t + p2)) / 100; };
       }
-      if (D) { mix(); setInterval(mix, 4000); }
+      if (D) {
+        var dm = demoBox.querySelector(".dm"), df = demoBox.querySelector(".df"), gW = wave();
+        var iW = (D.income || []).map(function () { return wave(); });
+        var fills = incRows.map(function (r) { return r.querySelector(".fill"); }), vals = incRows.map(function (r) { return r.querySelector(".val"); });
+        [dm, df].concat(fills).forEach(function (el) { el.style.transition = "none"; });
+        var lastText = 0;
+        var drift = function (now) {
+          var t = now / 1000, text = now - lastText > 300;
+          var m = Math.min(0.9, Math.max(0.1, D.male + gW(t))), f = 1 - m;
+          dm.style.width = (m * 100).toFixed(2) + "%"; df.style.width = (f * 100).toFixed(2) + "%";
+          if (text) { elMen.innerHTML = valHtml(m, D.us.male); elWom.innerHTML = valHtml(f, 1 - D.us.male); }
+          if (iW.length && fills.length) {
+            var raw = D.income.map(function (x, i) { return Math.max(0.02, x.share + iW[i](t)); });
+            var tot = raw.reduce(function (a, b2) { return a + b2; }, 0);
+            raw.forEach(function (r, i) {
+              var sh = r / tot;
+              fills[i].style.width = (sh * 100).toFixed(2) + "%";
+              if (text) vals[i].innerHTML = valHtml(sh, D.income[i].us);
+            });
+          }
+          if (text) lastText = now;
+          requestAnimationFrame(drift);
+        };
+        requestAnimationFrame(drift);
+      }
       // Both bars share one scale: views per second at about the day's busiest pace
       var maxRate = (vDay || uDay) / 86400 * 1.6;
       function paint(s, u, v) {
