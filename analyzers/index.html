@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script>/* site-version: if this page is an old saved copy, reload it once with the current version (shared/version.json; bump both on each release) */
-(function(){var V="20261121a";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
+(function(){var V="20261125a";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Adtaxi Market Analyzers</title>
 <meta name="robots" content="noindex">
@@ -330,7 +330,7 @@
           </svg></div>
           <div class="tool-body">
             <h3>Category Reports</h3>
-            <p>AdMall reports for 43 business types, from dentists and HVAC dealers to credit unions.</p>
+            <p>AdMall reports for 44 business types, from dentists and HVAC dealers to credit unions.</p>
             <div class="tool-actions"><select class="lib-pick" data-view="reports" aria-label="Category for reports"></select><a class="btn btn-navy" data-go="reports" href="/analyzers/library.html?view=reports">View reports</a></div>
           </div>
         </article>
@@ -424,7 +424,7 @@
     <div class="wrap">
       <div class="block-head">
         <h2 id="data-title">Where the numbers come from</h2>
-        <p>Every score starts from published government and licensed data. Trade-area audiences and reach and frequency are modeled from it, and labeled as estimates. Revisions are made monthly; each analyzer's "How scores work" lists its data years.</p>
+        <p>Every score starts from published government and licensed data. Trade-area audiences and reach and frequency are modeled from it, and labeled as estimates. Market data is rebuilt as each source releases new figures, and the economic snapshot and TV viewing update monthly; each analyzer's "How scores work" lists its data years.</p>
       </div>
       <div class="table-scroll">
         <table class="sources">
@@ -438,12 +438,16 @@
             <tr><td>IRS Statistics of Income</td><td>Household income and tax-return detail by ZIP</td><td>Financial, Franchise Development, Customer Analysis (CRM)</td></tr>
             <tr><td>HMDA mortgage data (FFIEC/CFPB)</td><td>Home purchase, refinance and home equity loans made in each ZIP</td><td>Financial</td></tr>
             <tr><td>FDIC Summary of Deposits and NCUA call reports</td><td>Bank and credit union branches and deposits</td><td>Financial</td></tr>
+            <tr><td>AdMall Local Account Intelligence</td><td>Category reports for 44 business types</td><td>Category report buttons, Research Library</td></tr>
             <tr><td>AudienceSCAN</td><td>How each buyer group responds to different kinds of advertising</td><td>Category analyzers, radius tool</td></tr>
             <tr><td>Comscore Media Trend</td><td>Monthly visits to category websites</td><td>Timing tab</td></tr>
+            <tr><td>Census Monthly Retail Trade, The Conference Board, University of Michigan, Federal Reserve Beige Book</td><td>Retail sales, consumer confidence and sentiment, and regional business conditions</td><td>Economic snapshot, Timing tab</td></tr>
+            <tr><td>Nielsen The Gauge</td><td>Streaming vs. broadcast and cable share of TV viewing, monthly</td><td>TV Set Viewing snapshot, TV-to-Digital Analyzer</td></tr>
             <tr><td>EMARKETER</td><td>Ad spending by category, digital and traditional, by format</td><td>Media Mix Planner, Auto</td></tr>
-            <tr><td>WordStream, Hubfluence, Innovid</td><td>Search and social benchmarks, video CPMs and CTV completion rates for proposal estimates</td><td>Plan tab and proposals, Benchmarks tab</td></tr>
+            <tr><td>BIA Advisory Services</td><td>Advertisers' spending by medium, local and national</td><td>Media Mix Planner, Travel</td></tr>
+            <tr><td>WordStream, Hubfluence, Innovid, Annual Franchise Development Report</td><td>Search and social benchmarks, video CPMs, CTV completion rates and franchise lead costs for proposal estimates</td><td>Plan tab and proposals, Benchmarks tab</td></tr>
             <tr><td>Scarborough USA+</td><td>Measured broadcast TV audiences by market, and customer profiles (age, income, household) that set and check each line's target audience</td><td>TV-to-Digital Analyzer, category analyzers</td></tr>
-            <tr><td>Other federal and market data</td><td>Department of Education (IPEDS), NOAA climate and hail, Census building permits, LEHD jobs, USDA rural codes, FHFA home prices, Zillow rents, the National Association of REALTORS® international buyers report</td><td>Higher Ed, Home Services, Apartments, Financial, Customer Analysis (CRM)</td></tr>
+            <tr><td>Other federal and market data</td><td>Department of Education (IPEDS), NOAA climate, hail and 90-day outlooks, U.S. Bureau of Economic Analysis spending, Census building permits, LEHD jobs, USDA rural codes, FHFA home prices, Zillow rents, the National Association of REALTORS® international buyers report</td><td>Higher Ed, Home Services, Apartments, Financial, Travel, Customer Analysis (CRM)</td></tr>
           </tbody>
         </table>
       </div>
