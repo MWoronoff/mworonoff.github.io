@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <script src="/shared/gate.js"></script>
 <script>/* site-version: if this page is an old saved copy, reload it once with the current version (shared/version.json; bump both on each release) */
-(function(){var V="20261125g";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
+(function(){var V="20261125h";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Adtaxi Market Analyzers</title>
 <meta name="robots" content="noindex">
@@ -367,6 +367,7 @@
       var sNow = stack(nowBox, "Right now");
       // Audience mix: today's uniques split by gender and $100K+ household income (Comscore's monthly mix; the counts grow with the day)
       var D = j.demo, demoBox = document.getElementById("vis-demo"), elMen = document.getElementById("vis-men"), elWom = document.getElementById("vis-women");
+      var incRows = [];
       if (D) {
         demoBox.querySelector(".dm").style.width = (D.male * 100).toFixed(1) + "%";
         demoBox.querySelector(".df").style.width = (D.female * 100).toFixed(1) + "%";
@@ -379,17 +380,33 @@
             r.querySelector(".lab").textContent = x.label;
             r.querySelector(".fill").style.width = (x.share * 100).toFixed(1) + "%";
             r.querySelector(".val").innerHTML = "<b>" + (x.share * 100).toFixed(1) + "%</b> of uniques" + (x.us ? " <small>(index " + NF.format(x.share / x.us * 100) + ")</small>" : "");
-            box.appendChild(r);
+            box.appendChild(r); incRows.push(r);
           });
         };
         rowsFor(D.income, document.getElementById("vis-income"), "inc");
         if (D.income) document.getElementById("vis-groups").hidden = false;
       }
-      function demoText(u) {
+      // The audience mix drifts 1-4 points around Comscore's monthly mix every few seconds so the box reads as live; shares always total 100%
+      function jit() { var m = (1 + Math.random() * 3) / 100; return Math.random() < 0.5 ? -m : m; }
+      function valHtml(share, us) { return "<b>" + (share * 100).toFixed(1) + "%</b> of uniques <small>(index " + NF.format(share / us * 100) + ")</small>"; }
+      function mix() {
         if (!D) return;
-        elMen.innerHTML = "<b>" + NF1.format(D.male * 100) + "%</b> of uniques <small>(index " + NF.format(D.male / D.us.male * 100) + ")</small>";
-        elWom.innerHTML = "<b>" + NF1.format(D.female * 100) + "%</b> of uniques <small>(index " + NF.format(D.female / (1 - D.us.male) * 100) + ")</small>";
+        var m = Math.min(0.9, Math.max(0.1, D.male + jit())), f = 1 - m;
+        demoBox.querySelector(".dm").style.width = (m * 100).toFixed(1) + "%";
+        demoBox.querySelector(".df").style.width = (f * 100).toFixed(1) + "%";
+        elMen.innerHTML = valHtml(m, D.us.male);
+        elWom.innerHTML = valHtml(f, 1 - D.us.male);
+        if (D.income && incRows.length) {
+          var raw = D.income.map(function (x) { return Math.max(0.02, x.share + jit()); });
+          var tot = raw.reduce(function (a, b) { return a + b; }, 0);
+          incRows.forEach(function (r, i) {
+            var sh = raw[i] / tot, x = D.income[i];
+            r.querySelector(".fill").style.width = (sh * 100).toFixed(1) + "%";
+            r.querySelector(".val").innerHTML = valHtml(sh, x.us);
+          });
+        }
       }
+      if (D) { mix(); setInterval(mix, 4000); }
       // Both bars share one scale: views per second at about the day's busiest pace
       var maxRate = (vDay || uDay) / 86400 * 1.6;
       function paint(s, u, v) {
@@ -411,7 +428,7 @@
         var k = Math.min(1, (t - t0) / DUR), e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
         shownU = fromU + (toU - fromU) * e; shownV = fromV + (toV - fromV) * e; shownM = fromM + (toM - fromM) * e;
         elU.textContent = NF.format(shownU); if (vDay) elV.textContent = NF.format(shownV); if (mDay) elM.textContent = NF.format(shownM);
-        demoText(shownU);
+
         requestAnimationFrame(frame);
       }
       // First view: start a little below the current total so the count visibly runs up to it
