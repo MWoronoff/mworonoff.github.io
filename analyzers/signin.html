@@ -45,9 +45,11 @@
   <form class="card" id="f" novalidate>
     <div class="brand"><img src="/shared/adtaxi-logo.svg" alt=""><span>Adtaxi Market Analyzers</span></div>
     <h1>Sign in</h1>
-    <p class="lead">For Adtaxi and MediaNews Group staff. Enter your work email to continue.</p>
-    <label for="email">Work email</label>
-    <input id="email" type="email" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" placeholder="name@adtaxi.com" aria-describedby="err" required autofocus>
+    <p class="lead">For Adtaxi and MediaNews Group staff. Enter your company and email to continue.</p>
+    <label for="company">Company</label>
+    <input id="company" type="text" autocomplete="organization" placeholder="e.g. The Denver Post" aria-describedby="err" required autofocus>
+    <label for="email" style="margin-top:14px">Email</label>
+    <input id="email" type="email" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" placeholder="name@company.com" aria-describedby="err" required>
     <p class="err" id="err" role="alert"></p>
     <button type="submit">Continue</button>
     <p class="note">You'll stay signed in on this device for 30 days.</p>
@@ -56,11 +58,9 @@
 <footer>Adtaxi Market Analyzers · For internal use</footer>
 <script>
 (function () {
-  // Allowed work-email domains; add more here later (e.g. "tribpub.com").
-  var DOMAINS = ["adtaxi.com", "medianewsgroup.com"];
   var KEY = "az-signin", DAYS = 30, HOME = "/analyzers/";
 
-  var f = document.getElementById("f"), inp = document.getElementById("email"), err = document.getElementById("err");
+  var f = document.getElementById("f"), inp = document.getElementById("email"), co = document.getElementById("company"), err = document.getElementById("err");
 
   // Only follow a "next" address on this site (a path starting with a single "/")
   function nextUrl() {
@@ -69,29 +69,22 @@
     return n;
   }
 
-  function ok(email) {
-    var m = /^[^\s@]+@([^\s@]+)$/.exec(email);
-    if (!m) return false;
-    var d = m[1].toLowerCase();
-    return DOMAINS.indexOf(d) >= 0;
-  }
+  // Any email address in a normal format (name@domain.tld)
+  function ok(email) { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email); }
+  function bad(el, msg) { err.textContent = msg; el.setAttribute("aria-invalid", "true"); el.focus(); }
 
   f.addEventListener("submit", function (e) {
     e.preventDefault();
-    var email = inp.value.trim();
-    if (!ok(email)) {
-      err.textContent = email ? "Please use your Adtaxi or MediaNews Group email." : "Please enter your work email.";
-      inp.setAttribute("aria-invalid", "true");
-      inp.focus();
-      return;
-    }
-    var rec = JSON.stringify({ email: email.toLowerCase(), t: Date.now() });
+    var company = co.value.trim(), email = inp.value.trim();
+    if (company.length < 2) return bad(co, "Please enter your company name.");
+    if (!ok(email)) return bad(inp, email ? "Please check your email address." : "Please enter your email.");
+    var rec = JSON.stringify({ company: company, email: email.toLowerCase(), t: Date.now() });
     try { localStorage.setItem(KEY, rec); } catch (x) {}
     document.cookie = "az-signin=" + encodeURIComponent(rec) + "; path=/; max-age=" + (DAYS * 86400) + "; samesite=lax" + (location.protocol === "https:" ? "; secure" : "");
     location.replace(nextUrl());
   });
 
-  inp.addEventListener("input", function () { err.textContent = ""; inp.removeAttribute("aria-invalid"); });
+  [co, inp].forEach(function (el) { el.addEventListener("input", function () { err.textContent = ""; el.removeAttribute("aria-invalid"); }); });
 })();
 </script>
 </body>

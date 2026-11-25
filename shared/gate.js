@@ -1,5 +1,5 @@
 /* Sign-in gate for the Adtaxi Market Analyzers.
-   A visitor enters a work email on /analyzers/signin.html; this check sends anyone without a
+   A visitor enters a company name and email on /analyzers/signin.html; this check sends anyone without a
    recent sign-in there first, then back to the page they asked for.
    This is a deterrent only: a static site can't truly restrict access, and data files and PDFs
    stay reachable by direct address. Remove this script (one line in each page's <head>) when
