@@ -15,6 +15,18 @@
   "use strict";
   // Libraries are served from the site itself (shared/vendor, next to this script), so the tools don't depend on outside CDNs
   var VENDOR = ((document.currentScript && document.currentScript.src) || "../shared/radius.js").replace(/radius\.js[^/]*$/, "") + "vendor/";
+  // Site view (Digital / Digital & Print), the same switch as shared/engine.js; on the standalone Trade Area Tool page
+  // the Digital & Print view adds newspaper coverage for the area (shared/media/newspapers.json).
+  var RZ_NEWS_FILE = VENDOR.replace(/vendor\/$/, "") + "media/newspapers.json";
+  var RzView = {
+    isPrint: function () {
+      var q = /[?&]view=(print|digital)\b/.exec(location.search);
+      if (q) { try { localStorage.setItem("az-view", q[1]); } catch (e) {} return q[1] === "print"; }
+      try { return localStorage.getItem("az-view") === "print"; } catch (e) { return false; }
+    },
+    set: function (v) { try { localStorage.setItem("az-view", v); } catch (e) {} var u = new URL(location.href); u.searchParams.set("view", v); location.replace(u.toString()); },
+    mark: function (print) { try { var u = new URL(location.href); if (u.searchParams.get("view") !== (print ? "print" : "digital")) { u.searchParams.set("view", print ? "print" : "digital"); history.replaceState(history.state, "", u.toString()); } } catch (e) {} }
+  };
   // Guided steps (numbered steps, one highlighted next field, allocation right after the results). Preview with ?guide=1;
   // set window.ADTAXI_GUIDE = true (or GUIDE_ON below) to turn it on for everyone.
   var GUIDE_ON = true;
@@ -395,6 +407,10 @@
 
   function Radius(cfg, root) {
     this.cfg = cfg; this.root = root; this.geo = {};
+    if (!cfg.embedded) {   // inside an analyzer, the analyzer sets cfg.newspapers for its own view
+      this.print = RzView.isPrint(); RzView.mark(this.print);
+      if (this.print && !cfg.newspapers) cfg.newspapers = RZ_NEWS_FILE;
+    }
     this.ages = AGE_SETS[cfg.ageSet || "default"];
     this.filterDefs = {};
     for (var k in FILTERS) this.filterDefs[k] = FILTERS[k];
@@ -497,7 +513,7 @@
     var header = cfg.embedded ? null : el("header", { class: "az-header" }, [el("div", { class: "az-header-inner" }, [
       el("div", { class: "az-title" }, [el("h1", { text: cfg.title }), el("p", { text: cfg.subtitle || "" }),
         links.length ? el("nav", { class: "az-links", "aria-label": "Related tools" }, links) : null]),
-      el("img", { class: "az-logo", src: cfg.logo || "../shared/adtaxi-logo.svg", alt: "Adtaxi" })])]);
+      el("div", { class: "az-head-right" }, [this.viewSwitch(), el("img", { class: "az-logo", src: cfg.logo || "../shared/adtaxi-logo.svg", alt: "Adtaxi" })])])]);
 
     this.zipIn = el("input", { type: "text", inputmode: "search", list: "rz-towns", placeholder: "ZIP or town", "aria-label": "Center ZIP or town", value: s.zip,
       onchange: function () { self.setCenter(this.value); }, onkeydown: function (e) { if (e.key === "Enter") self.setCenter(this.value); },
@@ -1389,10 +1405,16 @@
     var ids = T.list.map(function (x) { return x.i; });
     if (s.newsZip != null && ids.indexOf(s.newsZip) < 0) s.newsZip = null;
     if (s.newsPick == null || ids.indexOf(s.newsPick) < 0) s.newsPick = ids[0];
+    // Digital & Print view (the only time newspaper data is loaded): coverage columns start on until the rep turns them off
+    if (!s.newsSet && s.newsZip == null) { s.newsZip = s.newsPick; s.newsSet = true; }
     var on = s.newsZip != null;
+    // Gross Coverage for the whole area: each paper's main print day (plus web when loaded), added up across papers
+    var gn = 0; T.list.forEach(function (x) { var L = newsLines(x.p, x.vals, 0); gn += (L[0] && L[0].n) || 0; });
+    if (gn > 0 && T.hh > 0) bar.appendChild(el("span", { class: "az-news-gross" }, [el("b", { text: "Gross Coverage " + NF1.format(gn / T.hh * 100) + "%" }),
+      " of households: " + NF0.format(gn) + " copies across " + NF0.format(T.list.length) + (T.list.length === 1 ? " paper" : " papers") + ". Gross includes duplication."]));
     function redraw() { if (/^np_/.test(s.sortKey || "")) { s.sortKey = self.cfg.blendScore ? "score" : "idx"; s.sortDir = "desc"; } self.renderNewsSummary(self.visible()); self.renderTable(); }
     bar.appendChild(el("button", { type: "button", class: "az-btn az-news-toggle", "aria-pressed": String(on), title: "Add newspaper coverage columns to the county and ZIP lists",
-      text: on ? "Hide newspaper coverage" : "Show newspaper coverage", onclick: function () { s.newsZip = on ? null : s.newsPick; redraw(); } }));
+      text: on ? "Hide newspaper coverage" : "Show newspaper coverage", onclick: function () { s.newsZip = on ? null : s.newsPick; s.newsSet = true; redraw(); } }));
     if (!on) { bar.appendChild(el("span", { class: "az-news-hint", text: T.list.length === 1 ? T.list[0].p.name : NF0.format(T.list.length) + " papers in this area" })); return; }
     bar.appendChild(el("select", { "aria-label": "Newspaper", onchange: function () { s.newsZip = s.newsPick = this.value; redraw(); } },
       T.list.map(function (x) { return el("option", { value: x.i, selected: x.i === s.newsZip ? "selected" : null, text: x.p.name + (x.p.free ? " (mostly non-paid)" : "") }); })));
@@ -2953,6 +2975,17 @@
   Radius.prototype.centerOn = function (zip) {
     if (!/^\d{5}$/.test(zip || "") || zip === this.state.zip) return;
     if (this.c) this.setCenter(zip); else this.state.zip = zip;
+  };
+
+  Radius.prototype.viewSwitch = function () {
+    var print = !!this.print, wrap = el("div", { class: "az-viewswitch", role: "group", "aria-label": "Site view" });
+    [["digital", "Digital"], ["print", "Digital & Print"]].forEach(function (o) {
+      var on = (o[0] === "print") === print;
+      wrap.appendChild(el("button", { type: "button", "aria-pressed": String(on), "data-view": o[0],
+        title: o[0] === "print" ? "Add newspaper coverage for the trade area" : "Digital media only",
+        onclick: function () { if (!on) RzView.set(o[0]); } }, [el("span", { class: "az-viewicon", "aria-hidden": "true", text: o[0] === "print" ? "\ud83d\udcf0" : "\u25a2" }), o[1]]));
+    });
+    return wrap;
   };
 
   window.AdtaxiRadius = {

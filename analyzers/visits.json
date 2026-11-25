@@ -1,0 +1,55 @@
+{
+ "asOf": "September 2026",
+ "source": "Comscore Multi-Platform, Total Unique Visitors (desktop and mobile), September 2026",
+ "daysPerMonth": 30,
+ "groups": [
+  {
+   "id": "mng",
+   "name": "MediaNews Group",
+   "monthly": 10629021
+  },
+  {
+   "id": "tribune",
+   "name": "Tribune Publishing",
+   "monthly": 7280562
+  },
+  {
+   "id": "sdut",
+   "name": "The San Diego Union-Tribune",
+   "monthly": 662273
+  }
+ ],
+ "unduplicated": 16050194,
+ "unduplicatedSource": "Comscore Audience Duplication, September 2026 (MediaNews Group, Tribune Publishing and SanDiegoUnionTribune.com)",
+ "views": 72348000,
+ "viewsSource": "Comscore Audience Duplication, September 2026, Total Views",
+ "minutes": 65719000,
+ "minutesSource": "Comscore Audience Duplication, September 2026, Total Minutes",
+ "demo": {
+  "source": "Comscore Demographic Profile, September 2026 (the three groups' audiences combined)",
+  "male": 0.5458,
+  "female": 0.4542,
+  "hhi100": 0.5761,
+  "us": {
+   "male": 0.513,
+   "hhi100": 0.511
+  },
+  "income": [
+   {
+    "label": "Under $60K",
+    "share": 0.2097,
+    "us": 0.275
+   },
+   {
+    "label": "$60K–100K",
+    "share": 0.2142,
+    "us": 0.214
+   },
+   {
+    "label": "$100K+",
+    "share": 0.5761,
+    "us": 0.511
+   }
+  ]
+ }
+}

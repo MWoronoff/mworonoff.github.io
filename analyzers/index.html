@@ -2,8 +2,9 @@
 <html lang="en" data-depth="hub">
 <head>
 <meta charset="utf-8">
+<script src="/shared/gate.js"></script>
 <script>/* site-version: if this page is an old saved copy, reload it once with the current version (shared/version.json; bump both on each release) */
-(function(){var V="20261125a";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
+(function(){var V="20261125c";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Adtaxi Market Analyzers</title>
 <meta name="robots" content="noindex">
@@ -41,6 +42,14 @@
   .bar nav { display: flex; gap: 22px; flex-wrap: wrap; }
   .bar nav a { color: #cfe0ee; text-decoration: none; font-size: 14px; font-weight: 500; }
   .bar nav a:hover { color: #fff; text-decoration: underline; text-underline-offset: 4px; }
+  /* Site view switch: Digital | Digital & Print (same switch as in each analyzer) */
+  .viewswitch { display: inline-flex; flex: 0 0 auto; border: 1px solid rgba(255,255,255,.45); border-radius: 999px; padding: 3px; background: rgba(255,255,255,.08); }
+  .viewswitch button { border: 0; background: transparent; color: #e3edf6; font: 600 13px/1 Inter, system-ui, sans-serif; padding: 9px 14px; min-height: 36px; border-radius: 999px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+  .viewswitch button:hover { color: #fff; }
+  .viewswitch button[aria-pressed="true"] { background: #fff; color: var(--navy); cursor: default; }
+  .printband { background: #fff6e3; border-bottom: 1px solid #e8c98a; color: #4a3a12; font-size: 14px; }
+  .printband .wrap { padding-top: 10px; padding-bottom: 10px; }
+  .printband[hidden] { display: none; }
 
   .hero-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 40px; align-items: center; padding-top: 34px; padding-bottom: 56px; }
   .hero h1 { font-family: var(--display); font-stretch: 125%; font-weight: 750; font-size: clamp(34px, 4.4vw, 58px);
@@ -102,6 +111,17 @@
   .tools-2 .btn { min-height: 42px; }
   @media (max-width: 1280px) { .tools-2 { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
   @media (max-width: 1100px) { .tools-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  /* New from EMARKETER: recent reports for co-workers (internal reading) */
+  .emk { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; }
+  .emk article { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 18px 18px 16px; display: flex; flex-direction: column; gap: 10px; }
+  .emk .when { font-size: 12px; font-weight: 600; letter-spacing: .04em; color: var(--muted); text-transform: uppercase; }
+  .emk h3 { margin: 0; font-size: 18px; line-height: 1.25; color: var(--navy); }
+  .emk ul { margin: 0; padding-left: 18px; font-size: 14px; line-height: 1.45; color: var(--ink); display: flex; flex-direction: column; gap: 6px; }
+  .emk .btn { margin-top: auto; min-height: 42px; }
+  .emk-note { margin: 14px 0 0; font-size: 13px; color: var(--muted); }
+  @media (max-width: 1280px) { .emk { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (max-width: 1100px) { .emk { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 640px) { .emk { grid-template-columns: 1fr; } }
   @media (max-width: 640px) { .tools-2 { grid-template-columns: 1fr; } }
   @media (max-width: 640px) { .tools-2 { grid-template-columns: 1fr; } }
   .tool { background: var(--card); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; }
@@ -127,6 +147,43 @@
 
   /* economic snapshot banner (data: economy.json) */
   #economy { padding-top: 48px; scroll-margin-top: 12px; }
+  /* Digital & Print view: the newspaper-site visitor counter takes the economic snapshot's place */
+  body.print-view #economy, body.print-view #nav-economy { display: none !important; }
+  #visits { padding-top: 48px; }
+  #visits[hidden] { display: none; }
+  .vis { padding: 22px 22px 20px; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 4fr) minmax(0, 4fr); gap: 20px 28px; align-items: end; }
+  .vis .vis-h { font-family: var(--display); font-stretch: 118%; font-weight: 720; font-size: 22px; line-height: 1.1; margin: 0 0 6px; color: var(--navy); }
+  .vis-big { font-family: var(--display); font-stretch: 112%; font-weight: 760; font-size: clamp(44px, 5.4vw, 72px); line-height: 1; color: var(--teal); font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
+  .vis-mid { font-family: var(--display); font-stretch: 112%; font-weight: 740; font-size: clamp(30px, 3.4vw, 46px); line-height: 1; color: var(--navy); font-variant-numeric: tabular-nums; }
+  .vis-sub { margin: 8px 0 0; color: var(--muted); font-size: 14px; }
+  .vis-charts { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-top: 18px; }
+  .vis-charts h3 { margin: 0 0 12px; font-size: 15px; color: var(--navy); }
+  .vstack { display: grid; grid-template-columns: 8.5rem minmax(0, 1fr) 15rem; gap: 12px; align-items: center; font-size: 14px; margin: 0 0 10px; }
+  .vstack .lab { color: var(--ink); font-weight: 600; }
+  .vstack .track { height: 22px; background: #eef3f6; border-radius: 5px; overflow: hidden; display: flex; }
+  .vstack .u { background: var(--teal); transition: width 2.5s ease-in-out; }
+  .vstack .v { background: #8fd3c6; transition: width 2.5s ease-in-out; }
+  .vstack .val { font-variant-numeric: tabular-nums; color: var(--ink); white-space: nowrap; }
+  .vstack .val b { color: var(--teal); }
+  .vdemo { margin-top: 14px; }
+  .vgroups { margin-top: 16px; border-top: 1px solid var(--line); padding-top: 14px; }
+  .vgroups h3 { margin: 0 0 10px; font-size: 15px; color: var(--navy); }
+  .vrow { display: grid; grid-template-columns: 8.5rem minmax(0, 1fr) 15rem; gap: 12px; align-items: center; font-size: 14px; margin: 0 0 7px; }
+  .vrow .track { height: 14px; background: #eef3f6; border-radius: 4px; overflow: hidden; }
+  .vrow .fill { display: block; height: 100%; border-radius: 4px; background: var(--teal); width: 0; transition: width 1s ease; }
+  .vrow .val b { color: var(--teal); }
+  .vrow .val { text-align: left; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .vrow .val small { color: var(--muted); }
+  .vstack .dm { background: var(--navy); width: 0; transition: width 1s ease; }
+  .vstack .df { background: #e8a33d; width: 0; transition: width 1s ease; }
+  .vstack .dh { background: var(--teal); width: 0; transition: width 1s ease; }
+  .vstack .val small { color: var(--muted); }
+  .vkey { display: flex; gap: 18px; font-size: 13px; color: var(--muted); margin-left: calc(8.5rem + 12px); }
+  .vkey i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+  .vkey .k-u { background: var(--teal); } .vkey .k-v { background: #8fd3c6; }
+  .econ-foot.vis-foot { font-size: 13px; color: var(--muted); }
+  @media (max-width: 900px) { .vstack { grid-template-columns: 6rem minmax(0, 1fr); } .vstack .val { grid-column: 2; } .vkey { margin-left: 0; } }
+  @media (max-width: 900px) { .vis { grid-template-columns: minmax(0, 1fr); padding: 18px 16px; } .vrow { grid-template-columns: 6rem minmax(0, 1fr); } .vrow .val { grid-column: 2; } }
   .econ { background: var(--card); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
   .econ-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px; padding: 16px 22px; border-bottom: 1px solid var(--line); }
   .econ-head h2 { font-family: var(--display); font-stretch: 118%; font-weight: 720; font-size: 22px; line-height: 1.1; margin: 0; color: var(--navy); }
@@ -205,10 +262,15 @@
       <a href="#categories">Categories</a>
       <a href="#tools">Planning tools</a>
       <a href="#library">Research library</a>
+      <a href="#emarketer">EMARKETER</a>
       <a href="#data">Data sources</a>
       <a href="/analyzers/guide.html">Sales guide</a>
       <a href="https://www.adtaxi.com/" target="_blank" rel="noopener">Visit Adtaxi</a>
     </nav>
+    <div class="viewswitch" role="group" aria-label="Site view">
+      <button type="button" data-view="digital" aria-pressed="true" title="Digital media only"><span aria-hidden="true">&#9634;</span>Digital</button>
+      <button type="button" data-view="print" aria-pressed="false" title="Add newspaper coverage to the analyzers and the Trade Area Tool"><span aria-hidden="true">&#128240;</span>Digital &amp; Print</button>
+    </div>
   </div>
   <div class="wrap hero-grid">
     <div>
@@ -231,8 +293,170 @@
     </figure>
   </div>
 </header>
+<div class="printband" id="printband" role="note" hidden><div class="wrap"><b>Digital &amp; Print view.</b> Every analyzer and the Trade Area Tool add newspaper coverage: on the map, in the lists inside a market, and in each market's details.</div></div>
+<script>
+/* Site view: "digital" or "print" (Digital & Print). Remembered in this browser and carried in the address as ?view=. */
+(function () {
+  var print = false, q = /[?&]view=(print|digital)\b/.exec(location.search);
+  try { if (q) localStorage.setItem("az-view", q[1]); print = (q ? q[1] : localStorage.getItem("az-view")) === "print"; } catch (e) { print = !!q && q[1] === "print"; }
+  document.querySelectorAll(".viewswitch button").forEach(function (b) {
+    var on = (b.getAttribute("data-view") === "print") === print;
+    b.setAttribute("aria-pressed", String(on));
+    b.addEventListener("click", function () {
+      if (on) return;
+      var v = b.getAttribute("data-view");
+      try { localStorage.setItem("az-view", v); } catch (e) {}
+      var u = new URL(location.href); u.searchParams.set("view", v); location.replace(u.toString());
+    });
+  });
+  document.getElementById("printband").hidden = !print;
+  document.body.classList.toggle("print-view", print);
+  if (print) startVisits();
+
+  /* Newspaper-site visitor counter (Digital & Print view). An approximation from each group's Comscore monthly unique
+     visitors: monthly / 30 = a day; the day is paced by a typical news-site curve (quiet overnight, a morning surge, a
+     midday bump and an evening peak), blended across Eastern and Pacific time and counted from midnight Eastern, so
+     everyone sees the same number at the same moment. */
+  function startVisits() {
+    // Share of a day's visitors by local hour (0-23), relative to an average hour (1.0)
+    var W = [0.45, 0.3, 0.22, 0.2, 0.25, 0.5, 0.95, 1.35, 1.5, 1.45, 1.35, 1.3, 1.35, 1.3, 1.2, 1.15, 1.15, 1.15, 1.2, 1.3, 1.35, 1.25, 1.0, 0.7];
+    var tot = W.reduce(function (a, b) { return a + b; }, 0); W = W.map(function (w) { return w * 24 / tot; });
+    function rateAt(h) { var i = Math.floor(((h % 24) + 24) % 24), f = h - Math.floor(h), j = (i + 1) % 24; return W[i] + (W[j] - W[i]) * f; }   // smooth between hours
+    function blended(hEt) { return (rateAt(hEt) + rateAt(hEt - 3)) / 2; }   // Eastern and Pacific readers
+    // Fraction of the day's visitors reached by hour hEt (Eastern), integrated in one-minute steps
+    var CUM = [0]; for (var m = 1; m <= 1440; m++) CUM[m] = CUM[m - 1] + blended((m - 0.5) / 60) / 1440;
+    function etNow() {
+      var p = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" }).formatToParts(new Date());
+      var g = function (t) { return +p.filter(function (x) { return x.type === t; })[0].value; };
+      return (g("hour") % 24) + g("minute") / 60 + (g("second") + new Date().getMilliseconds() / 1000) / 3600;
+    }
+    function cumAt(h) { var mm = h * 60, i = Math.min(1439, Math.floor(mm)); return CUM[i] + blended(h) / 1440 * (mm - i); }
+    var START = 5;   // the counting day runs 5 a.m. to 5 a.m. Eastern
+    // Share of the day's total reached at hour h: 0 at 5 a.m. Eastern, building to 1 (the day's full count) at the next 5 a.m., never above
+    var CUMEND = CUM[1440];
+    function fraction(h) { var a = cumAt(START), c = cumAt(h), f = (h >= START ? c - a : CUMEND - a + c) / CUMEND; return Math.max(0, Math.min(1, f)); }
+    var NF = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }), NF1 = new Intl.NumberFormat("en-US", { maximumFractionDigits: 1 });
+    // the page below this script is still loading: wait for it before filling the box
+    var ready = document.readyState === "loading" ? new Promise(function (r) { document.addEventListener("DOMContentLoaded", r); }) : Promise.resolve();
+    ready.then(function () { return fetch("visits.json", { cache: "no-cache" }); }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+      if (!j || !j.groups) return;
+      var days = j.daysPerMonth || 30;
+      // One entity: the unduplicated audience across MediaNews Group, Tribune Publishing and The San Diego Union-Tribune
+      var gross = j.groups.reduce(function (a, g) { return a + (g.monthly || 0); }, 0);
+      var uMonth = j.unduplicated > 0 ? j.unduplicated : gross, vMonth = j.views || 0;
+      var uDay = uMonth / days, vDay = vMonth / days;
+      var mMonth = j.minutes || 0, mDay = mMonth / days;
+      document.getElementById("vis-umonth").textContent = "since 5 a.m. Eastern \u00b7 " + NF1.format(uMonth / 1e6) + "M a month, combined";
+      document.getElementById("vis-vmonth").textContent = NF1.format(vMonth / 1e6) + "M a month";
+      document.getElementById("vis-mmonth").textContent = NF1.format(mMonth / 1e6) + "M a month";
+      document.getElementById("vis-foot").textContent = "Source: comScore 2026. Paced through the day; updates every few seconds. Gender and income show the audience mix (index: 100 = U.S. internet users).";
+      var elU = document.getElementById("vis-total"), elV = document.getElementById("vis-views");
+      var elM = document.getElementById("vis-minutes"), nowBox = document.getElementById("vis-now");
+      function stack(box, label) {
+        box.innerHTML = '<span class="lab"></span><span class="track"><span class="u"></span><span class="v"></span></span><span class="val"></span>';
+        box.querySelector(".lab").textContent = label;
+        return { u: box.querySelector(".u"), v: box.querySelector(".v"), val: box.querySelector(".val") };
+      }
+      var sNow = stack(nowBox, "Right now");
+      // Audience mix: today's uniques split by gender and $100K+ household income (Comscore's monthly mix; the counts grow with the day)
+      var D = j.demo, demoBox = document.getElementById("vis-demo"), elMen = document.getElementById("vis-men"), elWom = document.getElementById("vis-women");
+      if (D) {
+        demoBox.querySelector(".dm").style.width = (D.male * 100).toFixed(1) + "%";
+        demoBox.querySelector(".df").style.width = (D.female * 100).toFixed(1) + "%";
+        demoBox.hidden = false;
+        // Income ranges: each bar on the same 0-100% scale as the gender bars; index vs. U.S. internet users
+        var rowsFor = function (list, box, cls) {
+          (list || []).forEach(function (x) {
+            var r = document.createElement("div"); r.className = "vrow " + cls;
+            r.innerHTML = '<span class="lab"></span><span class="track"><span class="fill"></span></span><span class="val"></span>';
+            r.querySelector(".lab").textContent = x.label;
+            r.querySelector(".fill").style.width = (x.share * 100).toFixed(1) + "%";
+            r.querySelector(".val").innerHTML = "<b>" + (x.share * 100).toFixed(1) + "%</b> of uniques" + (x.us ? " <small>(index " + NF.format(x.share / x.us * 100) + ")</small>" : "");
+            box.appendChild(r);
+          });
+        };
+        rowsFor(D.income, document.getElementById("vis-income"), "inc");
+        if (D.income) document.getElementById("vis-groups").hidden = false;
+      }
+      function demoText(u) {
+        if (!D) return;
+        elMen.innerHTML = "<b>" + NF1.format(D.male * 100) + "%</b> of uniques <small>(index " + NF.format(D.male / D.us.male * 100) + ")</small>";
+        elWom.innerHTML = "<b>" + NF1.format(D.female * 100) + "%</b> of uniques <small>(index " + NF.format(D.female / (1 - D.us.male) * 100) + ")</small>";
+      }
+      // Both bars share one scale: views per second at about the day's busiest pace
+      var maxRate = (vDay || uDay) / 86400 * 1.6;
+      function paint(s, u, v) {
+        var top = v > u ? v : u;
+        s.u.style.width = (u / maxRate * 100).toFixed(2) + "%";
+        s.v.style.width = (Math.max(0, top - u) / maxRate * 100).toFixed(2) + "%";
+        s.val.innerHTML = "<b>" + NF1.format(u) + "</b> uniques" + (v ? " \u00b7 " + NF1.format(v) + " views" : "") + " a second";
+      }
+      // Animate: every 3 seconds, work out the new totals and count up to them smoothly
+      var shownU = 0, shownV = 0, shownM = 0, fromU = 0, fromV = 0, fromM = 0, toU = 0, toV = 0, toM = 0, t0 = 0, DUR = 2800;
+      function target() {
+        var h = etNow(), f = fraction(h), r = blended(h);
+        toU = uDay * f; toV = vDay * f; toM = mDay * f;
+        if (toU < shownU) { shownU = toU; shownV = toV; shownM = toM; }   // 5 a.m. Eastern: back to zero at once, no count-down
+        fromU = shownU; fromV = shownV; fromM = shownM; t0 = performance.now();
+        paint(sNow, uDay * r / 86400, vDay * r / 86400);
+      }
+      function frame(t) {
+        var k = Math.min(1, (t - t0) / DUR), e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+        shownU = fromU + (toU - fromU) * e; shownV = fromV + (toV - fromV) * e; shownM = fromM + (toM - fromM) * e;
+        elU.textContent = NF.format(shownU); if (vDay) elV.textContent = NF.format(shownV); if (mDay) elM.textContent = NF.format(shownM);
+        demoText(shownU);
+        requestAnimationFrame(frame);
+      }
+      // First view: start a little below the current total so the count visibly runs up to it
+      var h0 = etNow(), f0 = fraction(h0); shownU = uDay * f0 * 0.985; shownV = vDay * f0 * 0.985; shownM = mDay * f0 * 0.985;
+      target(); requestAnimationFrame(frame); setInterval(target, 3000);
+      if (!vDay) document.querySelector(".vis-side").hidden = true;
+      if (!mDay) document.querySelector(".vis-min").hidden = true;
+      document.getElementById("visits").hidden = false;
+    }).catch(function () {});
+  }
+})();
+</script>
 
 <main>
+  <section id="visits" aria-labelledby="vis-title" hidden>
+    <div class="wrap">
+      <div class="econ vis-shell">
+      <div class="econ-head">
+        <h2 id="vis-title">Site Activity<span class="upd">MediaNews Group &middot; Tribune Publishing &middot; The San Diego Union-Tribune</span></h2>
+      </div>
+      <div class="vis">
+        <div class="vis-main">
+          <h3 class="vis-h">Uniques today</h3>
+          <div class="vis-big" id="vis-total">0</div>
+          <p class="vis-sub" id="vis-umonth">since 5 a.m. Eastern</p>
+        </div>
+        <div class="vis-side">
+          <h3 class="vis-h">Views today</h3>
+          <div class="vis-mid" id="vis-views">0</div>
+          <p class="vis-sub" id="vis-vmonth"></p>
+        </div>
+        <div class="vis-side vis-min">
+          <h3 class="vis-h">Minutes today</h3>
+          <div class="vis-mid" id="vis-minutes">0</div>
+          <p class="vis-sub" id="vis-mmonth"></p>
+        </div>
+        <div class="vis-charts">
+          <div class="vstack" id="vis-now"></div>
+          <div class="vkey"><span><i class="k-u"></i>Uniques</span><span><i class="k-v"></i>Views</span></div>
+          <div class="vdemo" id="vis-demo" hidden>
+            <div class="vstack"><span class="lab">Men</span><span class="track"><span class="dm"></span></span><span class="val" id="vis-men"></span></div>
+            <div class="vstack"><span class="lab">Women</span><span class="track"><span class="df"></span></span><span class="val" id="vis-women"></span></div>
+          </div>
+          <div class="vgroups" id="vis-groups" hidden>
+            <div><h3>Household income</h3><div id="vis-income"></div></div>
+          </div>
+        </div>
+      </div>
+      <p class="econ-foot vis-foot" id="vis-foot"></p>
+      </div>
+    </div>
+  </section>
   <section id="economy" aria-labelledby="econ-title" hidden>
     <div class="wrap">
       <div class="econ" id="econ">
@@ -420,6 +644,48 @@
 })();
 </script>
 
+  <section class="block" id="emarketer" aria-labelledby="emk-title">
+    <div class="wrap">
+      <div class="block-head">
+        <h2 id="emk-title">New from EMARKETER</h2>
+        <p>Recent EMARKETER reports to stay current on where advertising is heading. For Adtaxi and MediaNews Group colleagues: please don't share the reports outside the company.</p>
+      </div>
+      <div class="emk">
+        <article>
+          <span class="when">Nov. 13, 2026</span>
+          <h3>11 Top Trends to Watch in 2027</h3>
+          <ul><li>Ads people can talk to, and AI agents that shop for consumers and buy media for advertisers</li><li>A shakeout among AI platforms, and YouTube spanning TV, social and AI search</li><li>Gen Z turning 30 pushes marketers past traditional life-stage targeting</li></ul>
+          <a class="btn btn-navy" href="/reports/emarketer/top-trends-2027.pdf" target="_blank" rel="noopener">Open report (PDF)</a>
+        </article>
+        <article>
+          <span class="when">Nov. 17, 2026</span>
+          <h3>B2B Marketing Trends to Watch in 2027</h3>
+          <ul><li>Optimizing for AI search answers (GEO) becomes a formal marketing job</li><li>As AI-made content multiplies, standing out as a brand matters more</li><li>AI changes which work stays in-house and which goes to agencies</li></ul>
+          <a class="btn btn-navy" href="/reports/emarketer/b2b-marketing-trends-2027.pdf" target="_blank" rel="noopener">Open report (PDF)</a>
+        </article>
+        <article>
+          <span class="when">Nov. 18, 2026</span>
+          <h3>Video Trends to Watch in 2027</h3>
+          <ul><li>Mergers consolidate the streaming services</li><li>Streaming services run more ads per hour</li><li>Women's sports break through on streaming</li></ul>
+          <a class="btn btn-navy" href="/reports/emarketer/video-trends-2027.pdf" target="_blank" rel="noopener">Open report (PDF)</a>
+        </article>
+        <article>
+          <span class="when">Nov. 19, 2026</span>
+          <h3>Social Trends to Watch in 2027</h3>
+          <ul><li>Meta's personal AI agent faces tough competition</li><li>Brands chasing AI search visibility focus on YouTube over Reddit</li><li>Social networks lean into gaming to hold users' time</li></ul>
+          <a class="btn btn-navy" href="/reports/emarketer/social-trends-2027.pdf" target="_blank" rel="noopener">Open report (PDF)</a>
+        </article>
+        <article>
+          <span class="when">Nov. 19, 2026</span>
+          <h3>Retail Trends to Watch in 2027</h3>
+          <ul><li>TikTok keeps more of the sales it inspires</li><li>Retailers bring AI shopping assistants into stores</li><li>Loyalty programs get personal, and post-purchase experiences build repeat customers</li></ul>
+          <a class="btn btn-navy" href="/reports/emarketer/retail-trends-2027.pdf" target="_blank" rel="noopener">Open report (PDF)</a>
+        </article>
+      </div>
+      <p class="emk-note">Source: EMARKETER, Trends to Watch in 2027 series, November 2026.</p>
+    </div>
+  </section>
+
   <section class="block" id="data" aria-labelledby="data-title">
     <div class="wrap">
       <div class="block-head">
@@ -458,7 +724,7 @@
 <footer>
   <div class="wrap foot">
     <p>Adtaxi Market Analyzers. Customer files used in Customer Analysis (CRM) are read in the browser and are never uploaded or stored.</p>
-    <p><a href="/analyzers/guide.html">Sales guide</a> · <a href="https://www.adtaxi.com/" target="_blank" rel="noopener">Visit Adtaxi</a></p>
+    <p><a href="/analyzers/guide.html">Sales guide</a> · <a href="https://www.adtaxi.com/" target="_blank" rel="noopener">Visit Adtaxi</a> · <a href="#" onclick="AdtaxiSignOut();return false;">Sign out</a></p>
     <p style="font-size:13px;opacity:.85">Estimates for planning. Scores and figures are modeled from public government and licensed third-party data. Adtaxi Market Analyzers · Fall 2026.</p>
   </div>
 </footer>

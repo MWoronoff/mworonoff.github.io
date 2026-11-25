@@ -807,3 +807,17 @@ details.az-sources.az-fold > summary { font-size: 14px; font-weight: 700; }
 .rz-news .az-news-paper { display: inline-block; vertical-align: top; width: min(100%, 300px); margin: 8px 18px 0 0; }
 .rz-news-pick { display: block; margin-top: 10px; color: var(--muted); }
 .rz-news-pick select { font: inherit; padding: 3px 6px; border: 1px solid var(--line); border-radius: 7px; margin-left: 4px; max-width: 100%; }
+
+/* Site view switch: Digital | Digital & Print (shared by the hub, analyzers and the trade-area tool) */
+.az-head-right { display: flex; align-items: center; gap: 18px; flex: 0 0 auto; }
+.az-viewswitch { display: inline-flex; border: 1px solid rgba(255,255,255,.45); border-radius: 999px; padding: 3px; background: rgba(255,255,255,.08); }
+.az-viewswitch button { border: 0; background: transparent; color: #e3edf6; font: 600 13px/1 Inter, system-ui, sans-serif; padding: 9px 14px; min-height: 36px; border-radius: 999px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.az-viewswitch button:hover { color: #fff; }
+.az-viewswitch button[aria-pressed="true"] { background: #fff; color: var(--navy); cursor: default; }
+.az-viewicon { font-size: 14px; line-height: 1; }
+.az-printband { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0 0 14px; padding: 10px 14px; border: 1px solid #e8c98a; background: #fff6e3; border-radius: 10px; font-size: 14px; color: #4a3a12; }
+.az-printband .az-btn { margin-left: auto; }
+.az-news-type button { padding: 5px 10px; font-size: 12px; }
+.az-news-gross { margin: 8px 0 0; color: var(--ink); }
+.az-news-gross b { color: var(--navy); }
+@media (max-width: 760px) { .az-head-right .az-logo { display: none; } }

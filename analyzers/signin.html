@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign in | Adtaxi Market Analyzers</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/shared/adtaxi-logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,500..800&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+  :root {
+    --navy: #0f2742; --navy-2: #173c63; --teal: #0f7e70; --teal-2: #13a196; --mint: #8fe0c9;
+    --ink: #182432; --muted: #5a6d81; --line: #dce4ec; --paper: #f4f7fa; --red: #b3261e;
+    --display: "Archivo", "Arial Narrow", Arial, sans-serif;
+    --body: "Inter", "Segoe UI", Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body { margin: 0; font-family: var(--body); color: var(--ink); background: var(--navy); display: grid; grid-template-rows: 1fr auto; }
+  main { display: grid; place-items: center; padding: 32px 20px; background:
+    radial-gradient(900px 500px at 85% -10%, rgba(19,161,150,.28), transparent 60%),
+    radial-gradient(700px 420px at -10% 110%, rgba(143,224,201,.14), transparent 60%), var(--navy); }
+  .card { width: 100%; max-width: 420px; background: #fff; border-radius: 12px; padding: 34px 32px 30px; box-shadow: 0 24px 60px rgba(4, 16, 30, .45); }
+  .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 26px; }
+  .brand img { width: 48px; height: 48px; }
+  .brand span { font-family: var(--display); font-stretch: 112%; font-weight: 700; font-size: 18px; color: var(--navy); }
+  h1 { font-family: var(--display); font-stretch: 118%; font-weight: 750; font-size: 26px; line-height: 1.15; margin: 0 0 8px; color: var(--navy); }
+  p.lead { margin: 0 0 22px; color: var(--muted); font-size: 15px; line-height: 1.5; }
+  label { display: block; font-weight: 600; font-size: 14px; margin: 0 0 6px; }
+  input { width: 100%; font: inherit; font-size: 16px; padding: 12px 14px; border: 1px solid #b9c6d3; border-radius: 8px; color: var(--ink); }
+  input:focus { outline: 3px solid rgba(19,161,150,.35); border-color: var(--teal); }
+  input[aria-invalid="true"] { border-color: var(--red); }
+  .err { min-height: 22px; margin: 8px 0 6px; color: var(--red); font-size: 14px; }
+  button { width: 100%; font: inherit; font-weight: 700; font-size: 16px; padding: 12px 16px; border: 0; border-radius: 8px; background: var(--teal); color: #fff; cursor: pointer; }
+  button:hover { background: #0c6c60; }
+  button:focus-visible { outline: 3px solid var(--teal-2); outline-offset: 3px; }
+  .note { margin: 18px 0 0; font-size: 13px; color: var(--muted); line-height: 1.5; }
+  footer { color: rgba(255,255,255,.7); font-size: 13px; text-align: center; padding: 16px 20px 22px; }
+</style>
+</head>
+<body>
+<main>
+  <form class="card" id="f" novalidate>
+    <div class="brand"><img src="/shared/adtaxi-logo.svg" alt=""><span>Adtaxi Market Analyzers</span></div>
+    <h1>Sign in</h1>
+    <p class="lead">For Adtaxi and MediaNews Group staff. Enter your work email to continue.</p>
+    <label for="email">Work email</label>
+    <input id="email" type="email" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" placeholder="name@adtaxi.com" aria-describedby="err" required autofocus>
+    <p class="err" id="err" role="alert"></p>
+    <button type="submit">Continue</button>
+    <p class="note">You'll stay signed in on this device for 30 days.</p>
+  </form>
+</main>
+<footer>Adtaxi Market Analyzers · For internal use</footer>
+<script>
+(function () {
+  // Allowed work-email domains; add more here later (e.g. "tribpub.com").
+  var DOMAINS = ["adtaxi.com", "medianewsgroup.com"];
+  var KEY = "az-signin", DAYS = 30, HOME = "/analyzers/";
+
+  var f = document.getElementById("f"), inp = document.getElementById("email"), err = document.getElementById("err");
+
+  // Only follow a "next" address on this site (a path starting with a single "/")
+  function nextUrl() {
+    var n = new URLSearchParams(location.search).get("next") || "";
+    if (!/^\/(?![\/\\])/.test(n) || /signin\.html/.test(n)) return HOME;
+    return n;
+  }
+
+  function ok(email) {
+    var m = /^[^\s@]+@([^\s@]+)$/.exec(email);
+    if (!m) return false;
+    var d = m[1].toLowerCase();
+    return DOMAINS.indexOf(d) >= 0;
+  }
+
+  f.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var email = inp.value.trim();
+    if (!ok(email)) {
+      err.textContent = email ? "Please use your Adtaxi or MediaNews Group email." : "Please enter your work email.";
+      inp.setAttribute("aria-invalid", "true");
+      inp.focus();
+      return;
+    }
+    var rec = JSON.stringify({ email: email.toLowerCase(), t: Date.now() });
+    try { localStorage.setItem(KEY, rec); } catch (x) {}
+    document.cookie = "az-signin=" + encodeURIComponent(rec) + "; path=/; max-age=" + (DAYS * 86400) + "; samesite=lax" + (location.protocol === "https:" ? "; secure" : "");
+    location.replace(nextUrl());
+  });
+
+  inp.addEventListener("input", function () { err.textContent = ""; inp.removeAttribute("aria-invalid"); });
+})();
+</script>
+</body>
+</html>
