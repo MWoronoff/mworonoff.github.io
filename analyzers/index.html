@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <script src="/shared/gate.js"></script>
 <script>/* site-version: if this page is an old saved copy, reload it once with the current version (shared/version.json; bump both on each release) */
-(function(){var V="20261125c";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
+(function(){var V="20261125d";try{fetch("../shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Adtaxi Market Analyzers</title>
 <meta name="robots" content="noindex">
@@ -148,7 +148,7 @@
   /* economic snapshot banner (data: economy.json) */
   #economy { padding-top: 48px; scroll-margin-top: 12px; }
   /* Digital & Print view: the newspaper-site visitor counter takes the economic snapshot's place */
-  body.print-view #economy, body.print-view #nav-economy { display: none !important; }
+  body.print-view #economy, body.print-view #nav-economy, body.print-view #emarketer, body.print-view #nav-emarketer { display: none !important; }
   #visits { padding-top: 48px; }
   #visits[hidden] { display: none; }
   .vis { padding: 22px 22px 20px; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 4fr) minmax(0, 4fr); gap: 20px 28px; align-items: end; }
@@ -262,7 +262,7 @@
       <a href="#categories">Categories</a>
       <a href="#tools">Planning tools</a>
       <a href="#library">Research library</a>
-      <a href="#emarketer">EMARKETER</a>
+      <a href="#emarketer" id="nav-emarketer">EMARKETER</a>
       <a href="#data">Data sources</a>
       <a href="/analyzers/guide.html">Sales guide</a>
       <a href="https://www.adtaxi.com/" target="_blank" rel="noopener">Visit Adtaxi</a>
