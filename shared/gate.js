@@ -5,12 +5,12 @@
    stay reachable by direct address. Remove this script (one line in each page's <head>) when
    the site moves behind the company server's sign-in. */
 (function () {
-  var KEY = "az-signin", DAYS = 30, SIGNIN = "/analyzers/signin.html";
+  var KEY = "az-signin2", DAYS = 30, SIGNIN = "/analyzers/signin.html";
 
   function read() {
     try { var v = localStorage.getItem(KEY); if (v) return JSON.parse(v); } catch (e) {}
     try {
-      var m = document.cookie.match(/(?:^|; )az-signin=([^;]*)/);
+      var m = document.cookie.match(/(?:^|; )az-signin2=([^;]*)/);
       if (m) return JSON.parse(decodeURIComponent(m[1]));
     } catch (e) {}
     return null;
@@ -18,7 +18,7 @@
 
   window.AdtaxiSignOut = function () {
     try { localStorage.removeItem(KEY); } catch (e) {}
-    document.cookie = "az-signin=; path=/; max-age=0; samesite=lax";
+    document.cookie = "az-signin2=; path=/; max-age=0; samesite=lax";
     location.href = SIGNIN;
   };
 

@@ -58,7 +58,7 @@
 <footer>Adtaxi Market Analyzers · For internal use</footer>
 <script>
 (function () {
-  var KEY = "az-signin", DAYS = 30, HOME = "/analyzers/";
+  var KEY = "az-signin2", DAYS = 30, HOME = "/analyzers/";
 
   var f = document.getElementById("f"), inp = document.getElementById("email"), co = document.getElementById("company"), err = document.getElementById("err");
 
@@ -80,7 +80,7 @@
     if (!ok(email)) return bad(inp, email ? "Please check your email address." : "Please enter your email.");
     var rec = JSON.stringify({ company: company, email: email.toLowerCase(), t: Date.now() });
     try { localStorage.setItem(KEY, rec); } catch (x) {}
-    document.cookie = "az-signin=" + encodeURIComponent(rec) + "; path=/; max-age=" + (DAYS * 86400) + "; samesite=lax" + (location.protocol === "https:" ? "; secure" : "");
+    document.cookie = "az-signin2=" + encodeURIComponent(rec) + "; path=/; max-age=" + (DAYS * 86400) + "; samesite=lax" + (location.protocol === "https:" ? "; secure" : "");
     location.replace(nextUrl());
   });
 
