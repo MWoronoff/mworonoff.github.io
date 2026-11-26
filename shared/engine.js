@@ -57,7 +57,7 @@
       [["digital", "Digital"], ["print", "Digital & Print"]].forEach(function (o) {
         var on = (o[0] === "print") === !!print;
         wrap.appendChild(el("button", { type: "button", "aria-pressed": String(on), "data-view": o[0],
-          title: o[0] === "print" ? "Add newspaper coverage to the map, lists, market details and trade area" : "Digital media only",
+          title: o[0] === "print" ? "Add newspaper coverage for the trade area" : "Digital media only",
           onclick: function () { if (!on) AdtaxiView.set(o[0]); } }, [el("span", { class: "az-viewicon", "aria-hidden": "true", text: o[0] === "print" ? "\ud83d\udcf0" : "\u25a2" }), o[1]]));
       });
       return wrap;
@@ -262,7 +262,7 @@
       else if (cfg.radius && typeof cfg.radius === "object" && !cfg.radius.newspapers) cfg.radius.newspapers = NEWS_FILE;
       this.state.newsOn = true;
       this.state.newsType = "both";
-      if (cfg.rankBy && cfg.rankBy.indexOf("news:cov") < 0) cfg.rankBy = cfg.rankBy.concat(["news:cov"]);
+      // Newspaper figures appear only for a defined trade area (shared/radius.js), as totals for the whole area; not in the map, lists or market details
     }
     // Footprint navigation (cfg.footprint): rank DMAs or metros nationally, or counties and ZIPs inside a selected market.
     // There is no U.S. summary view or national county list; old links to them open the national DMA ranking.
@@ -1159,8 +1159,7 @@
     var main = el("main", { class: "az-main" }, [controlBar, this.startLine, this.notice, this.errorBox, this.drillBar, stage, this.adPanel, this.tablePanel, sources, this.radiusBox, this.benchPanel, this.timingPanel]);
     if (this.print) main.insertBefore(el("div", { class: "az-printband", role: "note" }, [
       el("b", { text: "Digital & Print view." }),
-      " Newspaper coverage is in each market's details, in the lists inside a market, and on the map under Rank and map by.",
-      el("button", { type: "button", class: "az-btn", text: "Map Gross Coverage", onclick: function () { self.state.rank = "news:cov"; self.state.sortKey = null; self.refresh(); } })
+      " Newspaper coverage is shown for the whole trade area once you open one."
     ]), main.firstChild);
     this.root.innerHTML = "";
     this.root.appendChild(header);
@@ -1238,7 +1237,7 @@
     }
     if (window.AdtaxiRadius) go();
     else {
-      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261125k";   // version tag: browsers fetch the new file after an update
+      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261126a";   // version tag: browsers fetch the new file after an update
       sc.onload = go; sc.onerror = function () { self.showError("The radius tool didn't load. Refresh the page and try again."); };
       document.head.appendChild(sc);
     }
@@ -1380,7 +1379,6 @@
     if (!keepError) this.errorBox.hidden = true;
     var mapLevel = s.level === "us" ? (this.cfg.usMapLevel || "dma") : s.level;
     var needed = [this.ensureLevel(s.level)];
-    if (s.level !== "us" || this.print) needed.push(this.newsLoad());
     if (mapLevel !== s.level) needed.push(this.ensureLevel(mapLevel));
     var ticket = this.refreshTicket = (this.refreshTicket || 0) + 1;   // a newer refresh supersedes this one
     Promise.all(needed).then(function () {
@@ -1504,10 +1502,9 @@
   // The switch above a ranked list: shown only when papers have copies in the list
   Analyzer.prototype.renderNewsBar = function (tl) {
     var self = this, s = this.state, N = this.news, bar = this.newsBar, d = this.d(tl);
-    var avail = this.newsAvail = d ? this.newsInTable(tl, d.rows) : [];
-    bar.innerHTML = "";
-    bar.hidden = !avail.length || this.mode === "radius";
-    if (!avail.length) return;
+    bar.innerHTML = ""; bar.hidden = true; this.newsAvail = [];
+    return;   // newspaper figures show only for the whole trade area (shared/radius.js)
+    var avail = [];
     if (avail.indexOf(s.news) < 0) s.news = avail[0];   // keep the chosen paper while it's here; otherwise the biggest local paper
     var p = N.papers[+s.news];
     if (this.print) bar.appendChild(this.newsTypeSel());
@@ -1900,8 +1897,7 @@
     var self = this, lv = this.tableLevel();
     var keys = this.cfg.tableColumns || this.cfg.measures.map(function (m) { return m.key; });
     var cols = keys.map(function (k) { return self.measure(k); }).filter(function (m) { return m && self.availableAt(m, lv) && self.relevant(m); });
-    if (this.print && this.news) cols.splice(Math.min(1, cols.length), 0, this.newsCovMeasure());   // Digital & Print: Gross Coverage next to the score
-    return cols.concat(this.newsColumns());
+    return cols;   // no newspaper columns: newspaper figures show only for the whole trade area
   };
   Analyzer.prototype.sortedRows = function () {
     var self = this, s = this.state, d = this.d(this.tableLevel());
@@ -2132,7 +2128,6 @@
         return el("div", { class: "az-measure", title: (mk ? "Estimated for this area; see Data notes. " : "") + (m.help || "") || null }, [el("span", { text: m.label }), el("b", { class: "num" + (v == null ? " az-na" : ""), text: v == null ? "No data" : v + mk })]);
       })));
     }
-    if (this.print && this.news) { var nbx = this.newsBox(s.level === "uszip" ? "zip" : s.level, row); if (nbx) box.appendChild(nbx); }
     if (cfg.drill && s.level !== "us") {
       // Look inside this market (metros, counties and ZIPs inside a DMA; counties and ZIPs inside a metro; ZIPs inside a county), and add it to the combined area
       var RCd = cfg.radius === true ? window.ADTAXI_RADIUS : cfg.radius, isIn = this.inBasket(s.level, row.id);
@@ -2362,7 +2357,7 @@
     if (!d) return;
     var cols = this.cfg.measures.filter(function (m) { return self.availableAt(m, level) && self.relevant(m); });
     var rows = level === "us" ? d.rows : this.sortedRows().filter(function (r) { return !s.query || r.name.toLowerCase().indexOf(s.query) >= 0; });
-    var nc = level !== "us" ? this.newsColumns() : [], nh = [];
+    var nc = [], nh = [];
     nc.forEach(function (m) { nh.push(m.label + " (" + m.unit + ")", m.label + " (% of households)"); });
     var lines = [["Level", level === "zip" ? "ZIP" : "ID", "Name"].concat(this.subLabel() ? ["Category"] : []).concat(cols.map(function (m) { return m.label; })).concat(nh).map(csvCell).join(",")];
     rows.forEach(function (r) {

@@ -1395,13 +1395,26 @@
       .sort(function (a, b) { return Math.max.apply(null, b.vals) - Math.max.apply(null, a.vals); });
     return { hh: hh, list: list };
   };
-  // Opt-in switch above the county and ZIP lists: newspaper coverage stays out of the summary and only shows as table columns when a rep turns it on
+  function newsKind(p) { return p.days.filter(function (d) { return d !== "Web"; }).length > 1 ? "daily" : "weekly"; }
+  // Newspaper coverage for the whole trade area (Digital & Print view): Gross Coverage across the papers, with Both / Dailies / Weeklies.
+  // No per-county or per-ZIP newspaper columns.
   Radius.prototype.renderNewsSummary = function (rows) {
-    var self = this, s = this.state, bar = this.newsBar, T = this.newsTotals(rows);
+    var self = this, s = this.state, bar = this.newsBar, T0 = this.newsTotals(rows), typ = s.newsType || "both";
     if (!bar) return;
-    bar.innerHTML = "";
-    if (!T || !T.list.length) { bar.hidden = true; if (s.newsZip != null) s.newsZip = null; return; }
+    bar.innerHTML = ""; s.newsZip = null;
+    if (!T0 || !T0.list.length) { bar.hidden = true; return; }
     bar.hidden = false;
+    bar.appendChild(el("div", { class: "az-seg az-news-type", role: "group", "aria-label": "Newspapers" }, [["both", "Both"], ["daily", "Dailies"], ["weekly", "Weeklies"]].map(function (o) {
+      return el("button", { type: "button", "aria-pressed": String(typ === o[0]), text: o[1], onclick: function () { if (typ !== o[0]) { s.newsType = o[0]; self.renderNewsSummary(self.visible()); } } });
+    })));
+    var T = { hh: T0.hh, list: T0.list.filter(function (x) { return typ === "both" || newsKind(x.p) === typ; }) };
+    if (!T.list.length) { bar.appendChild(el("span", { class: "az-news-hint", text: "No " + (typ === "daily" ? "daily" : "weekly") + " papers report copies in this area." })); return; }
+    var gn = 0; T.list.forEach(function (x) { var L = newsLines(x.p, x.vals, 0); gn += (L[0] && L[0].n) || 0; });
+    if (gn > 0 && T.hh > 0) bar.appendChild(el("span", { class: "az-news-gross" }, [el("b", { text: "Gross Coverage " + NF1.format(gn / T.hh * 100) + "%" }),
+      " of households: " + NF0.format(gn) + " copies across " + NF0.format(T.list.length) + (T.list.length === 1 ? " paper" : " papers") + ". Gross includes duplication."]));
+    var dates = {}; T.list.forEach(function (x) { dates[x.p.asOf] = 1; });
+    bar.appendChild(el("span", { class: "az-news-hint", text: "Print: NMS circulation, " + Object.keys(dates).sort().map(newsDate).join(" and ") + "; e-edition copies with no ZIP aren't included." }));
+    return;
     var ids = T.list.map(function (x) { return x.i; });
     if (s.newsZip != null && ids.indexOf(s.newsZip) < 0) s.newsZip = null;
     if (s.newsPick == null || ids.indexOf(s.newsPick) < 0) s.newsPick = ids[0];
@@ -1424,6 +1437,7 @@
   // ZIP list columns for the paper picked above; cells read "copies · % of households" and sort by the %
   Radius.prototype.newsZipCols = function (rows) {
     var s = this.state, N = this.news, c = this.c;
+    return [];   // no newspaper columns in the county and ZIP lists
     if (!N || s.newsZip == null || !N.papers[+s.newsZip]) return [];
     var p = N.papers[+s.newsZip], pi = s.newsZip, zeros = p.days.map(function () { return 0; });
     var all = newsLines(p, zeros, 0), keys = all.filter(function (x) { return ["gross", "sun", "wk", "web"].indexOf(x.key) >= 0; });

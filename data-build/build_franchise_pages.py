@@ -7,7 +7,7 @@ import glob, json, os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-V = "20261125k"   # version tag for the shared engine files on these pages (keep in step with the other analyzers)
+V = "20261126a"   # version tag for the shared engine files on these pages (keep in step with the other analyzers)
 
 SUBS = [{"id": "exec", "label": "Master franchise candidates"}, {"id": "owner", "label": "First-time franchise buyers"}]
 # AudienceSCAN 2026, Small Business Owners (4.5% of U.S. adults): saw or heard an ad of each type that led them to take
@@ -156,7 +156,7 @@ SOURCES = [
 
 
 # Site-version check (same snippet as the other analyzer pages): an old saved copy reloads once when shared/version.json changes
-SITE_V = "20261125k"
+SITE_V = "20261126a"
 SITE_CHECK = '<script>/* site-version: if this page is an old saved copy, reload it once with the current version (shared/version.json; bump both on each release) */\n(function(){var V="@SITEV@";try{fetch("@UP@shared/version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.v||j.v===V)return;var k="az-v-"+j.v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");}catch(e){}var u=new URL(location.href);u.searchParams.set("_v",j.v);location.replace(u.toString());}).catch(function(){});}catch(e){}})();</script>\n'
 
 
