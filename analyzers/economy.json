@@ -1,5 +1,5 @@
 {
-  "updated": "Nov. 24, 2026",
+  "updated": "Nov. 27, 2026",
   "takeaway": "Consumers turned more upbeat in November. Confidence has risen two months in a row from September's low, and sentiment posted its first gain since July. But both are coming back from weak levels, and November's confidence figure is still preliminary, so treat this as an opening, not a trend. Plan for firmer holiday and early-2027 demand, and keep leading with value, proof and payment options, because price-sensitive shoppers haven't gone away.",
   "slides": [
     {
@@ -72,21 +72,21 @@
       "id": "beige",
       "pill": "Fed Beige Book",
       "label": "Fed districts reporting growth",
-      "value": "9 of 12",
+      "value": "8 of 12",
       "change": "",
       "tone": "",
-      "period": "October 2026 edition (overall economic activity)",
-      "bullet": "Consumer spending was little changed in most districts and led by higher-income households. Price-sensitive shoppers are pushing back on increases, squeezing margins for consumer-facing businesses.",
-      "source": "Federal Reserve Beige Book, released Oct. 14 (information collected through Oct. 5).",
+      "period": "November 2026 edition (overall economic activity)",
+      "bullet": "Consumer spending was little changed as households stayed price-sensitive and more selective: higher-income shoppers kept spending while lower- and middle-income shoppers traded down. Auto sales softened on fuel prices and interest rates, and rising costs outpaced selling prices.",
+      "source": "Federal Reserve Beige Book, released Nov. 25 (information collected through Nov. 16).",
       "url": "https://www.federalreserve.gov/monetarypolicy/publications/beige-book-default.htm",
       "report": { "label": "View the Beige Book", "file": "/analyzers/beige-book.pdf" },
       "chart": {
         "type": "grid",
         "title": "Consumer spending by Fed district",
         "districts": [
-          ["Boston", "Flat"], ["New York", "Up"], ["Philadelphia", "Down"], ["Cleveland", "Flat"],
-          ["Richmond", "Up"], ["Atlanta", "Up"], ["Chicago", "Flat"], ["St. Louis", "Mixed"],
-          ["Minneapolis", "Down"], ["Kansas City", "Down"], ["Dallas", "Up"], ["San Francisco", "Down"]
+          ["Boston", "Flat"], ["New York", "Flat"], ["Philadelphia", "Up"], ["Cleveland", "Flat"],
+          ["Richmond", "Up"], ["Atlanta", "Flat"], ["Chicago", "Flat"], ["St. Louis", "Mixed"],
+          ["Minneapolis", "Flat"], ["Kansas City", "Up"], ["Dallas", "Up"], ["San Francisco", "Down"]
         ]
       }
     }
