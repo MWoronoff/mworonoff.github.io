@@ -1396,7 +1396,7 @@
     return { hh: hh, list: list };
   };
   function newsKind(p) { return p.days.filter(function (d) { return d !== "Web"; }).length > 1 ? "daily" : "weekly"; }
-  // Newspaper coverage for the whole trade area (Digital & Print view): Gross Coverage across the papers, with Both / Dailies / Weeklies.
+  // Newspaper coverage for the whole trade area (Digital & Print view): Gross HH Penetration across the papers, with Both / Dailies / Weeklies.
   // No per-county or per-ZIP newspaper columns.
   Radius.prototype.renderNewsSummary = function (rows) {
     var self = this, s = this.state, bar = this.newsBar, T0 = this.newsTotals(rows), typ = s.newsType || "both";
@@ -1411,8 +1411,8 @@
     var T = { hh: T0.hh, list: T0.list.filter(function (x) { return typ === "both" || newsKind(x.p) === typ; }) };
     if (!T.list.length) { bar.appendChild(el("span", { class: "az-news-hint", text: "No " + (typ === "daily" ? "daily" : "weekly") + " papers report copies in this area." })); return; }
     var gn = 0; T.list.forEach(function (x) { var L = newsLines(x.p, x.vals, 0); gn += (L[0] && L[0].n) || 0; });
-    if (gn > 0 && T.hh > 0) bar.appendChild(el("span", { class: "az-news-gross" }, [el("b", { text: "Gross Coverage " + NF1.format(gn / T.hh * 100) + "%" }),
-      " of households: " + NF0.format(gn) + " copies across " + NF0.format(T.list.length) + (T.list.length === 1 ? " paper" : " papers") + ". Gross includes duplication."]));
+    if (gn > 0 && T.hh > 0) bar.appendChild(el("span", { class: "az-news-gross" }, [el("b", { text: "Gross HH Penetration " + NF1.format(gn / T.hh * 100) + "%" }),
+      ": " + NF0.format(gn) + " copies across " + NF0.format(T.list.length) + (T.list.length === 1 ? " paper" : " papers") + ". Gross includes duplication."]));
     var dates = {}; T.list.forEach(function (x) { dates[x.p.asOf] = 1; });
     bar.appendChild(el("span", { class: "az-news-hint", text: "Print: NMS circulation, " + Object.keys(dates).sort().map(newsDate).join(" and ") + "; e-edition copies with no ZIP aren't included." }));
     return;
@@ -1422,10 +1422,10 @@
     // Digital & Print view (the only time newspaper data is loaded): coverage columns start on until the rep turns them off
     if (!s.newsSet && s.newsZip == null) { s.newsZip = s.newsPick; s.newsSet = true; }
     var on = s.newsZip != null;
-    // Gross Coverage for the whole area: each paper's main print day (plus web when loaded), added up across papers
+    // Gross HH Penetration for the whole area: each paper's main print day (plus web when loaded), added up across papers
     var gn = 0; T.list.forEach(function (x) { var L = newsLines(x.p, x.vals, 0); gn += (L[0] && L[0].n) || 0; });
-    if (gn > 0 && T.hh > 0) bar.appendChild(el("span", { class: "az-news-gross" }, [el("b", { text: "Gross Coverage " + NF1.format(gn / T.hh * 100) + "%" }),
-      " of households: " + NF0.format(gn) + " copies across " + NF0.format(T.list.length) + (T.list.length === 1 ? " paper" : " papers") + ". Gross includes duplication."]));
+    if (gn > 0 && T.hh > 0) bar.appendChild(el("span", { class: "az-news-gross" }, [el("b", { text: "Gross HH Penetration " + NF1.format(gn / T.hh * 100) + "%" }),
+      ": " + NF0.format(gn) + " copies across " + NF0.format(T.list.length) + (T.list.length === 1 ? " paper" : " papers") + ". Gross includes duplication."]));
     function redraw() { if (/^np_/.test(s.sortKey || "")) { s.sortKey = self.cfg.blendScore ? "score" : "idx"; s.sortDir = "desc"; } self.renderNewsSummary(self.visible()); self.renderTable(); }
     bar.appendChild(el("button", { type: "button", class: "az-btn az-news-toggle", "aria-pressed": String(on), title: "Add newspaper coverage columns to the county and ZIP lists",
       text: on ? "Hide newspaper coverage" : "Show newspaper coverage", onclick: function () { s.newsZip = on ? null : s.newsPick; s.newsSet = true; redraw(); } }));

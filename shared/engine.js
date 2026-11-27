@@ -1237,7 +1237,7 @@
     }
     if (window.AdtaxiRadius) go();
     else {
-      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261127a";   // version tag: browsers fetch the new file after an update
+      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261127b";   // version tag: browsers fetch the new file after an update
       sc.onload = go; sc.onerror = function () { self.showError("The radius tool didn't load. Refresh the page and try again."); };
       document.head.appendChild(sc);
     }
@@ -1442,7 +1442,7 @@
   // Dailies / Weeklies / Both: a weekly reports one print day to NMS, a daily reports Sunday and weekday (or more)
   function newsKind(p) { return p.days.filter(function (d) { return d !== "Web"; }).length > 1 ? "daily" : "weekly"; }
   Analyzer.prototype.newsTypeOk = function (p) { var t = this.state.newsType || "both"; return t === "both" || newsKind(p) === t; };
-  // Gross Coverage: every paper's main print day (Sunday when it has one) plus web, added up across the papers in the
+  // Gross HH Penetration: every paper's main print day (Sunday when it has one) plus web, added up across the papers in the
   // chosen type, as a share of the area's households. Readers of two papers count twice ("Gross includes duplication").
   Analyzer.prototype.newsGross = function (level, row) {
     var N = this.news, self = this, t = N && NEWS_LEVELS[level] && N[level] && N[level][row.id];
@@ -1457,7 +1457,7 @@
   Analyzer.prototype.newsCovMeasure = function () {
     var self = this, t = this.state.newsType || "both";
     if (!this._covM || this._covM.t !== t) this._covM = { t: t, key: "news:cov", news: true, format: "pct",
-      label: "Newspaper Gross Coverage" + (t === "daily" ? " (dailies)" : t === "weekly" ? " (weeklies)" : ""), short: "Gross Coverage",
+      label: "Newspaper Gross HH Penetration" + (t === "daily" ? " (dailies)" : t === "weekly" ? " (weeklies)" : ""), short: "Gross HH Penetration",
       help: "Newspaper copies (each paper's Sunday or main print day, plus web when loaded) as a share of households. Gross includes duplication: a home that gets two papers counts twice.",
       get: function (row) { var lv = self.state.level === "us" ? (self.cfg.usMapLevel || "dma") : self.state.level === "uszip" ? "zip" : self.state.level;
         var g = self.newsGross(lv, row); return g ? g.pct : null; } };
@@ -1539,7 +1539,7 @@
     var box = el("details", { class: "az-news", open: this.state.newsOn || this.newsOpen ? "open" : null, ontoggle: function () { self.newsOpen = this.open; } },
       [el("summary", null, ["Local newspapers ", el("span", { class: "az-news-count", text: "(" + NF0.format(list.length) + ")" })])]);
     var gross = this.newsGross(level, row);
-    if (gross) box.appendChild(el("p", { class: "az-news-gross" }, [el("b", { text: "Gross Coverage " + NF1.format(gross.pct * 100) + "%" }),
+    if (gross) box.appendChild(el("p", { class: "az-news-gross" }, [el("b", { text: "Gross HH Penetration " + NF1.format(gross.pct * 100) + "%" }),
       " of households: " + NF0.format(gross.n) + " copies across these papers. Gross includes duplication."]));
     list.forEach(function (x, k) {
       if (k >= MAX && !showAll) return;
