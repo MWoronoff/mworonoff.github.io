@@ -593,13 +593,13 @@
     this.miniGrid = el("div", { class: "rz-minis", hidden: true });
     this.mapEl = el("div", { class: "az-map rz-map", role: "region", "aria-label": "Map of ZIPs in the radius" });
     this.extra = el("div", { class: "rz-extra" });   // filled by an analyzer page that embeds the tool (ad response and category ad spend, below the ZIP table)
-    var right = el("div", { class: "rz-right" }, [this.summary, el("div", { class: "az-panel az-map-panel rz-map-panel" }, [this.mktBar, this.mapEl, this.miniGrid, this.legend])]);
+    this.newsBar = el("section", { class: "az-panel rz-newsbox", "aria-label": "Newspaper coverage in this trade area", hidden: true });   // Digital & Print: whole-area newspaper total (renderNewsSummary)
+    var right = el("div", { class: "rz-right" }, [this.summary, this.newsBar, el("div", { class: "az-panel az-map-panel rz-map-panel" }, [this.mktBar, this.mapEl, this.miniGrid, this.legend])]);
 
     // Table
     this.tableTitle = el("h2"); this.tableNote = el("span");
     this.thead = el("thead"); this.tbody = el("tbody");
-    this.newsBar = el("div", { class: "az-newsbar", hidden: true });   // opt-in newspaper coverage columns (renderNewsBar)
-    var table = el("section", { class: "az-panel az-table-panel" }, [el("div", { class: "az-table-head" }, [this.tableTitle, this.tableNote]), this.newsBar,
+    var table = el("section", { class: "az-panel az-table-panel" }, [el("div", { class: "az-table-head" }, [this.tableTitle, this.tableNote]),
       el("div", { class: "az-tablewrap" }, [el("table", { class: "az-table" }, [this.thead, this.tbody])])]);
     this.modalBody = el("div", { class: "az-modal-body" });
     this.modal = el("dialog", { class: "az-modal", "aria-labelledby": "rz-method-title" }, [this.modalBody]);
@@ -1404,6 +1404,7 @@
     bar.innerHTML = ""; s.newsZip = null;
     if (!T0 || !T0.list.length) { bar.hidden = true; return; }
     bar.hidden = false;
+    bar.appendChild(el("h3", { class: "rz-newshead" }, [el("span", { "aria-hidden": "true", text: "\ud83d\udcf0 " }), "Newspapers in this trade area"]));
     bar.appendChild(el("div", { class: "az-seg az-news-type", role: "group", "aria-label": "Newspapers" }, [["both", "Both"], ["daily", "Dailies"], ["weekly", "Weeklies"]].map(function (o) {
       return el("button", { type: "button", "aria-pressed": String(typ === o[0]), text: o[1], onclick: function () { if (typ !== o[0]) { s.newsType = o[0]; self.renderNewsSummary(self.visible()); } } });
     })));

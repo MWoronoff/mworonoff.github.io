@@ -821,3 +821,11 @@ details.az-sources.az-fold > summary { font-size: 14px; font-weight: 700; }
 .az-news-gross { margin: 8px 0 0; color: var(--ink); }
 .az-news-gross b { color: var(--navy); }
 @media (max-width: 760px) { .az-head-right .az-logo { display: none; } }
+
+/* Trade area: whole-area newspaper total (Digital & Print view), under the area's summary */
+.rz-newsbox { padding: 14px 16px; margin: 0 0 14px; border-left: 4px solid #e0a03a; background: #fffaf0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+.rz-newsbox[hidden] { display: none; }
+.rz-newshead { flex: 1 0 100%; margin: 0; font-size: 15px; color: #10263f; }
+.rz-newsbox .az-news-gross { flex: 1 1 260px; font-size: 14px; line-height: 1.45; }
+.rz-newsbox .az-news-gross b { font-size: 18px; color: #10263f; }
+.rz-newsbox .az-news-hint { flex: 1 0 100%; font-size: 12px; color: #5a6d81; }

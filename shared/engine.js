@@ -1159,7 +1159,7 @@
     var main = el("main", { class: "az-main" }, [controlBar, this.startLine, this.notice, this.errorBox, this.drillBar, stage, this.adPanel, this.tablePanel, sources, this.radiusBox, this.benchPanel, this.timingPanel]);
     if (this.print) main.insertBefore(el("div", { class: "az-printband", role: "note" }, [
       el("b", { text: "Digital & Print view." }),
-      " Newspaper coverage is shown for the whole trade area once you open one."
+      " Click Trade area: newspaper coverage for the whole area appears right under its audience total."
     ]), main.firstChild);
     this.root.innerHTML = "";
     this.root.appendChild(header);
@@ -1237,7 +1237,7 @@
     }
     if (window.AdtaxiRadius) go();
     else {
-      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261126a";   // version tag: browsers fetch the new file after an update
+      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261127a";   // version tag: browsers fetch the new file after an update
       sc.onload = go; sc.onerror = function () { self.showError("The radius tool didn't load. Refresh the page and try again."); };
       document.head.appendChild(sc);
     }
