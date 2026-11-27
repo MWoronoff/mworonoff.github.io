@@ -829,3 +829,30 @@ details.az-sources.az-fold > summary { font-size: 14px; font-weight: 700; }
 .rz-newsbox .az-news-gross { flex: 1 1 260px; font-size: 14px; line-height: 1.45; }
 .rz-newsbox .az-news-gross b { font-size: 18px; color: #10263f; }
 .rz-newsbox .az-news-hint { flex: 1 0 100%; font-size: 12px; color: #5a6d81; }
+
+/* Newspaper map switch (Digital & Print view, inside a market) */
+.az-mapmode { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin: 0 0 6px; pointer-events: auto; }
+.az-mapmode-l { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #5a6d81; }
+.az-mapmode .az-seg button[aria-pressed="true"] { background: #10263f; color: #fff; }
+.az-swatch-hatch { background: repeating-linear-gradient(45deg, #eef1f4 0 3px, #9aa8b6 3px 5px); }
+.az-legend-note { margin: 6px 0 0; font-size: 11px; color: #5a6d81; max-width: 220px; }
+.rz-mapmode { padding: 10px 12px 8px; margin: 0; }
+.rz-mapmode[hidden] { display: none; }
+
+/* Newspaper map legend: relative scale, highest to lowest */
+.az-legend-scale { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: #10263f; }
+.az-legend-ramp { display: inline-flex; border-radius: 3px; overflow: hidden; }
+.az-legend-ramp span { width: 26px; height: 12px; display: block; }
+
+/* Newspaper channels (Print live; Replica, Web, Gross not yet selectable) and the Papers dropdown */
+.az-news-ch button.az-soon { color: #8a99a8; cursor: not-allowed; background: #f6f8fa; }
+.az-news-ch button small { margin-left: 4px; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #b07a1a; }
+.az-news-drop { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: #5a6d81; text-transform: uppercase; letter-spacing: .05em; }
+.az-news-drop select { font: inherit; text-transform: none; letter-spacing: 0; font-weight: 600; color: #10263f; padding: 5px 8px; border: 1px solid #c9d3dd; border-radius: 6px; background: #fff; }
+.rz-ch { flex: 1 0 100%; border-collapse: collapse; font-size: 14px; }
+.rz-ch th { text-align: left; font-weight: 600; padding: 4px 14px 4px 0; color: #10263f; white-space: nowrap; }
+.rz-ch td { padding: 4px 14px 4px 0; }
+.rz-ch td.num { text-align: right; width: 4.5rem; }
+.rz-ch-soon th, .rz-ch-soon td { color: #8a99a8; }
+.rz-ch-gross { border-top: 1px solid #ead9b5; }
+.rz-ch-gross b { font-size: 17px; }

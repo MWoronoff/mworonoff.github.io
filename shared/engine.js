@@ -1159,7 +1159,7 @@
     var main = el("main", { class: "az-main" }, [controlBar, this.startLine, this.notice, this.errorBox, this.drillBar, stage, this.adPanel, this.tablePanel, sources, this.radiusBox, this.benchPanel, this.timingPanel]);
     if (this.print) main.insertBefore(el("div", { class: "az-printband", role: "note" }, [
       el("b", { text: "Digital & Print view." }),
-      " Click Trade area: newspaper coverage for the whole area appears right under its audience total."
+      " Inside a metro or county, and in Trade area, switch the map to Newspaper to see print penetration by area. In Trade area, the totals appear under the audience count."
     ]), main.firstChild);
     this.root.innerHTML = "";
     this.root.appendChild(header);
@@ -1237,7 +1237,7 @@
     }
     if (window.AdtaxiRadius) go();
     else {
-      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261127b";   // version tag: browsers fetch the new file after an update
+      var sc = document.createElement("script"); sc.src = cfg.radiusScript || "../shared/radius.js?v=20261127d";   // version tag: browsers fetch the new file after an update
       sc.onload = go; sc.onerror = function () { self.showError("The radius tool didn't load. Refresh the page and try again."); };
       document.head.appendChild(sc);
     }
@@ -1379,6 +1379,7 @@
     if (!keepError) this.errorBox.hidden = true;
     var mapLevel = s.level === "us" ? (this.cfg.usMapLevel || "dma") : s.level;
     var needed = [this.ensureLevel(s.level)];
+    if (this.print && s.parent) needed.push(this.newsLoad());   // the newspaper map (inside a market only)
     if (mapLevel !== s.level) needed.push(this.ensureLevel(mapLevel));
     var ticket = this.refreshTicket = (this.refreshTicket || 0) + 1;   // a newer refresh supersedes this one
     Promise.all(needed).then(function () {
@@ -1415,6 +1416,20 @@
   /* ---------- Local newspapers (shared/media/newspapers.json, built by data-build/build_newspapers.py) ---------- */
   var DAY_FULL = { Sun: "Sunday", Mon: "Monday", Tue: "Tuesday", Wed: "Wednesday", Thu: "Thursday", Fri: "Friday", Sat: "Saturday" };
   var NEWS_LEVELS = { zip: 1, county: 1, metro: 1, dma: 1 };
+  // Newspaper map: fixed Gross HH Penetration steps (under 2% · 2-5% · 5-10% · 10-20% · 20%+), light to dark amber
+  var NEWS_BREAKS = [0.02, 0.05, 0.10, 0.20];
+  var NEWS_RAMP = ["#fbecc9", "#f6cf86", "#eaa944", "#c97f17", "#8f540a"];
+  var NEWS_MIN_HH = 100;   // ZIPs with fewer households are hatched: a handful of copies would look like a stronghold
+  function pointsViewOf(L0) { return !!(L0 && L0.points); }
+  function addHatch(map) {
+    var svg = map.getPanes().overlayPane.querySelector("svg");
+    if (!svg || svg.querySelector("#az-hatch")) return;
+    var NS = "http://www.w3.org/2000/svg", defs = document.createElementNS(NS, "defs"), pat = document.createElementNS(NS, "pattern");
+    pat.setAttribute("id", "az-hatch"); pat.setAttribute("width", "6"); pat.setAttribute("height", "6"); pat.setAttribute("patternUnits", "userSpaceOnUse"); pat.setAttribute("patternTransform", "rotate(45)");
+    var bg = document.createElementNS(NS, "rect"); bg.setAttribute("width", "6"); bg.setAttribute("height", "6"); bg.setAttribute("fill", "#eef1f4");
+    var ln = document.createElementNS(NS, "line"); ln.setAttribute("x1", "0"); ln.setAttribute("y1", "0"); ln.setAttribute("x2", "0"); ln.setAttribute("y2", "6"); ln.setAttribute("stroke", "#9aa8b6"); ln.setAttribute("stroke-width", "2");
+    pat.appendChild(bg); pat.appendChild(ln); defs.appendChild(pat); svg.insertBefore(defs, svg.firstChild);
+  }
   function newsDate(iso) {
     var p = String(iso || "").split("-");
     return p.length === 3 ? new Date(+p[0], +p[1] - 1, +p[2]).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : String(iso || "");
@@ -1520,6 +1535,30 @@
       bar.appendChild(sel);
     } else bar.appendChild(el("b", { class: "az-news-one", text: p.name }));
     bar.appendChild(el("span", { class: "az-news-hint", text: "Copies · % of households. Print: NMS, " + newsDate(p.asOf) + (p.webAsOf ? ". Web: " + p.webAsOf : "") + "." }));
+  };
+  // Channels: Print is live; Replica, Web and Gross (all three) are shown but not selectable until their ZIP data arrives
+  var NEWS_CHANNELS = [["print", "Print", true], ["replica", "Replica", false], ["web", "Web", false], ["gross", "Gross", false]];
+  function newsChannelSeg() {
+    return el("div", { class: "az-seg az-news-ch", role: "group", "aria-label": "Newspaper channel" }, NEWS_CHANNELS.map(function (o) {
+      return el("button", { type: "button", "aria-pressed": String(o[0] === "print"), disabled: o[2] ? null : "disabled", title: o[2] ? "Print circulation (NMS)" : null,
+        class: o[2] ? null : "az-soon", text: o[1] });
+    }));
+  }
+  function newsTypeDrop(cur, onPick) {
+    return el("label", { class: "az-news-drop" }, [el("span", { text: "Papers" }),
+      el("select", { "aria-label": "Papers", onchange: function () { onPick(this.value); } }, [["both", "Dailies & weeklies"], ["daily", "Dailies"], ["weekly", "Weeklies"]].map(function (o) {
+        return el("option", { value: o[0], selected: cur === o[0] ? "selected" : null, text: o[1] });
+      }))]);
+  }
+  // Map switch (Digital & Print view, inside a market): Market potential | Newspaper, and Both / Dailies / Weeklies for the newspaper map
+  Analyzer.prototype.newsMapSwitch = function (on) {
+    var self = this, s = this.state;
+    var wrap = el("div", { class: "az-mapmode" }, [el("span", { class: "az-mapmode-l", text: "Map" }),
+      el("div", { class: "az-seg", role: "group", "aria-label": "Map" }, [["score", "Market potential"], ["news", "Newspaper"]].map(function (o) {
+        return el("button", { type: "button", "aria-pressed": String((on ? "news" : "score") === o[0]), text: o[1], onclick: function () { if ((on ? "news" : "score") !== o[0]) { s.mapMode = o[0]; self.renderMap(); } } });
+      }))]);
+    if (on) { wrap.appendChild(newsChannelSeg()); wrap.appendChild(newsTypeDrop(s.newsType || "both", function (v) { s.newsType = v; self.renderMap(); })); }
+    return wrap;
   };
   Analyzer.prototype.newsTypeSel = function () {
     var self = this, s = this.state;
@@ -1734,10 +1773,19 @@
     var inside = lv === "zip" || ((lv === "county" || lv === "metro") && this.key(lv) !== lv);   // a market's metros, counties or ZIPs
     var usSolid = !!this.cfg.drill && s.level === "us";   // the U.S. view: one color for the national total, not the DMA shading
     if (fc && (lv === "county" || lv === "metro") && inside) fc ={ type: "FeatureCollection", features: fc.features.filter(function (f) { return d.byId[String(f.properties[idField])]; }) };
-    var values = d.rows.map(function (r) { return self.val(r, m); });
-    var br = this.breaks(values);
+    // Digital & Print view, inside a market: "Map: Market potential | Newspaper". Newspaper shades each area by Gross HH Penetration
+    // on fixed steps; areas without copies are grey, ZIPs with very few homes are hatched. National views keep the score map.
+    // Not inside a DMA: our papers cover only part of most DMAs, so the map would be mostly grey
+    var newsGeo = this.print && inside && s.parent && s.parent.level !== "dma" && s.parent.level !== "sel" && !pointsViewOf(L0) && !!this.news && d.rows.some(function (r) { return self.newsGross(lv, r); });
+    if (!newsGeo) s.mapMode = "score";
+    var newsMap = newsGeo && s.mapMode === "news";
+    var nmVal = function (r) { var g = r && self.newsGross(lv, r); return g ? g.pct : null; };
+    var nmFew = function (r) { return lv === "zip" && r && !(r.v && r.v.households >= NEWS_MIN_HH); };
+    var values = newsMap ? d.rows.map(nmVal) : d.rows.map(function (r) { return self.val(r, m); });
+    // Newspaper: relative scale, five equal groups of the areas in view that have copies (ZIPs with very few homes left out), highest to lowest
+    var br = newsMap ? this.breaks(d.rows.filter(function (r) { return !nmFew(r) && nmVal(r) > 0; }).map(nmVal)) : this.breaks(values);
     this.currentBreaks = br;
-    var colors = RAMP.map(cssVar);
+    var colors = newsMap ? NEWS_RAMP : RAMP.map(cssVar);
     if (this.areaLayer) this.map.removeLayer(this.areaLayer);
     if (this.stateLayer) this.map.removeLayer(this.stateLayer);
     if (this.parentLayer) { this.map.removeLayer(this.parentLayer); this.parentLayer = null; }
@@ -1767,6 +1815,10 @@
       style: function (f) {
         if (usSolid) return { color: US_FILL, weight: 0.6, fillOpacity: 1, fillColor: US_FILL };
         var row = d.byId[String(f.properties[idField])];
+        if (newsMap) {
+          var nv = nmFew(row) ? null : nmVal(row), cn = nv > 0 ? self.classOf(nv, br) : -1;
+          return { color: "#ffffff", weight: 0.8, fillOpacity: 1, fillColor: cn < 0 ? cssVar("--nodata") : colors[cn] };
+        }
         var c = self.classOf(row ? self.val(row, m) : null, br);
         return { color: "#ffffff", weight: 0.8, fillOpacity: 1, fillColor: c < 0 ? cssVar("--nodata") : colors[c] };
       },
@@ -1779,6 +1831,10 @@
         if (v != null) v += self.mark(row, m);
         layer.bindTooltip(function () {
           if (usSolid) return '<div class="az-tip"><b>' + name + "</b><br>Click to see how this DMA ranks</div>";
+          if (newsMap) {
+            var g = row && self.newsGross(lv, row);
+            return '<div class="az-tip"><b>' + name + "</b>" + (g && !nmFew(row) ? "<br>Gross HH Penetration: " + NF1.format(g.pct * 100) + "%<br>" + NF0.format(g.n) + " copies" : "") + "</div>";
+          }
           return '<div class="az-tip"><b>' + name + "</b><br>" + (m ? m.label : "") + ": " + (v == null ? "No data" : v) + "</div>";
         }, { sticky: true, direction: "top", opacity: 0.97 });
         layer.on("click", function () {
@@ -1806,9 +1862,11 @@
     this.highlight();
     // Header and legend
     this.mapHead.innerHTML = "";
-    this.mapHead.appendChild(el("b", { text: (m ? m.label : "") + (m && m.perSub && this.subLabel() ? ": " + this.subLabel() : "") }));
+    if (newsGeo) this.mapHead.appendChild(this.newsMapSwitch(newsMap));
+    this.mapHead.appendChild(el("b", { text: newsMap ? "Newspaper HH Penetration: print" + ((s.newsType || "both") === "daily" ? " (dailies)" : (s.newsType || "both") === "weekly" ? " (weeklies)" : "") :
+      (m ? m.label : "") + (m && m.perSub && this.subLabel() ? ": " + this.subLabel() : "") }));
     this.mapHead.appendChild(el("span", { text: usSolid ? "United States total. Click a DMA, or see the DMAs ranked below." :
-      inside ? (lv === "zip" ? "ZIPs" : lv === "metro" ? "Metros" : "Counties") + " in " + this.parentName() + ", ranked within this market." :
+      inside ? (lv === "zip" ? "ZIPs" : lv === "metro" ? "Metros" : "Counties") + " in " + this.parentName() + (newsMap ? ": share of households getting our papers. Hover for copies." : ", ranked within this market.") :
       pointsView ? "The top-ranked ZIPs for this line, each scored against every ZIP in the country. Click a dot for details." :
       "By " + this.levelLabel(lv) + (s.level === "us" ? ". Click a market to rank at that level." : ". Click a market for details.") }));
     (this.ptLayers || []).forEach(function (P0) {
@@ -1825,6 +1883,15 @@
     this.legend.innerHTML = "";
     if (usSolid) {
       this.legend.appendChild(el("div", { class: "az-legend-row" }, [el("span", { class: "az-swatch", style: "background:" + US_FILL }), el("span", { text: "U.S. total" })]));
+      this.renderPoints(d);
+      return;
+    }
+    if (newsMap) {
+      this.legend.appendChild(el("div", { class: "az-legend-scale" }, [el("span", { text: "Highest" }),
+        el("span", { class: "az-legend-ramp" }, colors.slice().reverse().map(function (cl) { return el("span", { style: "background:" + cl }); })), el("span", { text: "Lowest" })]));
+      this.legend.appendChild(el("p", { class: "az-legend-note", text: (lv === "zip" ? "ZIPs" : lv === "metro" ? "Metros" : "Counties") + " ranked against each other by print HH penetration. Point to one for its figures." }));
+      var nd = {}; (this.news.papers || []).forEach(function (q) { if (q.asOf) nd[q.asOf] = 1; });
+      this.legend.appendChild(el("p", { class: "az-legend-note", text: "Print: NMS circulation, " + Object.keys(nd).sort().map(newsDate).join(" and ") + "." }));
       this.renderPoints(d);
       return;
     }

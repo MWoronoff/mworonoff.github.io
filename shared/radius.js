@@ -594,7 +594,7 @@
     this.mapEl = el("div", { class: "az-map rz-map", role: "region", "aria-label": "Map of ZIPs in the radius" });
     this.extra = el("div", { class: "rz-extra" });   // filled by an analyzer page that embeds the tool (ad response and category ad spend, below the ZIP table)
     this.newsBar = el("section", { class: "az-panel rz-newsbox", "aria-label": "Newspaper coverage in this trade area", hidden: true });   // Digital & Print: whole-area newspaper total (renderNewsSummary)
-    var right = el("div", { class: "rz-right" }, [this.summary, this.newsBar, el("div", { class: "az-panel az-map-panel rz-map-panel" }, [this.mktBar, this.mapEl, this.miniGrid, this.legend])]);
+    var right = el("div", { class: "rz-right" }, [this.summary, this.newsBar, el("div", { class: "az-panel az-map-panel rz-map-panel" }, [this.mapModeBar = el("div", { class: "az-mapmode rz-mapmode", hidden: true }), this.mktBar, this.mapEl, this.miniGrid, this.legend])]);
 
     // Table
     this.tableTitle = el("h2"); this.tableNote = el("span");
@@ -1380,7 +1380,7 @@
     // Newspaper coverage is off until all circulation and web data is in (saved on the newspaper-coverage branch); a page turns it on with cfg.newspapers = path
     if (!this.cfg.newspapers || this.newsP) return;
     this.newsP = fetch(this.cfg.newspapers, { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (d) { self.news = d; if (d && self.rows) { self.renderSummary(); self.renderTable(); } }, function () { return null; });
+      .then(function (d) { self.news = d; if (d && self.rows) { self.renderSummary(); self.renderTable(); self.renderMapMode(); } }, function () { return null; });
   };
   // Papers with copies in these ZIPs, biggest first, with the households of all ZIPs in the area
   Radius.prototype.newsTotals = function (rows) {
@@ -1396,6 +1396,70 @@
     return { hh: hh, list: list };
   };
   function newsKind(p) { return p.days.filter(function (d) { return d !== "Web"; }).length > 1 ? "daily" : "weekly"; }
+  // Newspaper map (Digital & Print view): Map: Audience | Newspaper. Same fixed steps and amber shades as the analyzer maps.
+  var NEWS_BREAKS = [0.02, 0.05, 0.10, 0.20], NEWS_RAMP = ["#fbecc9", "#f6cf86", "#eaa944", "#c97f17", "#8f540a"], NEWS_NONE = "#e6eaee", NEWS_MIN_HH = 100;
+  // Channels: Print is live; Replica, Web and Gross (all three) are shown but not selectable until their ZIP data arrives
+  var NEWS_CHANNELS = [["print", "Print", true], ["replica", "Replica", false], ["web", "Web", false], ["gross", "Gross", false]];
+  function newsChannelSeg() {
+    return el("div", { class: "az-seg az-news-ch", role: "group", "aria-label": "Newspaper channel" }, NEWS_CHANNELS.map(function (o) {
+      return el("button", { type: "button", "aria-pressed": String(o[0] === "print"), disabled: o[2] ? null : "disabled", title: o[2] ? "Print circulation (NMS)" : null,
+        class: o[2] ? null : "az-soon", text: o[1] });
+    }));
+  }
+  function newsTypeDrop(cur, onPick) {
+    return el("label", { class: "az-news-drop" }, [el("span", { text: "Papers" }),
+      el("select", { "aria-label": "Papers", onchange: function () { onPick(this.value); } }, [["both", "Dailies & weeklies"], ["daily", "Dailies"], ["weekly", "Weeklies"]].map(function (o) {
+        return el("option", { value: o[0], selected: cur === o[0] ? "selected" : null, text: o[1] });
+      }))]);
+  }
+
+  // Relative scale: the area's ZIPs (or counties) with copies, ranked and split into five equal groups, highest to lowest
+  function newsBreaks(vals) {
+    var v = vals.filter(function (x) { return x > 0; }).sort(function (a, b) { return a - b; }), q = [];
+    if (!v.length) return q;
+    for (var i = 1; i < 5; i++) q.push(v[Math.min(v.length - 1, Math.floor(v.length * i / 5))]);
+    return q;
+  }
+  function newsFill(q, br) {
+    if (!q || q.few || !q.n) return NEWS_NONE;
+    var k = 0; while (br && k < br.length && q.pct >= br[k]) k++;
+    return NEWS_RAMP[k];
+  }
+  function newsTipText(q) { return q && q.n && !q.few ? "Gross HH Penetration: " + NF1.format(q.pct * 100) + "%<br>" + NF0.format(q.n) + " copies" : ""; }
+  function rzHatch(map) {
+    var svg = map.getPanes().overlayPane.querySelector("svg");
+    if (!svg || svg.querySelector("#rz-hatch")) return;
+    var NS = "http://www.w3.org/2000/svg", defs = document.createElementNS(NS, "defs"), pat = document.createElementNS(NS, "pattern");
+    pat.setAttribute("id", "rz-hatch"); pat.setAttribute("width", "6"); pat.setAttribute("height", "6"); pat.setAttribute("patternUnits", "userSpaceOnUse"); pat.setAttribute("patternTransform", "rotate(45)");
+    var bg = document.createElementNS(NS, "rect"); bg.setAttribute("width", "6"); bg.setAttribute("height", "6"); bg.setAttribute("fill", "#eef1f4");
+    var ln = document.createElementNS(NS, "line"); ln.setAttribute("x1", "0"); ln.setAttribute("y1", "0"); ln.setAttribute("x2", "0"); ln.setAttribute("y2", "6"); ln.setAttribute("stroke", "#9aa8b6"); ln.setAttribute("stroke-width", "2");
+    pat.appendChild(bg); pat.appendChild(ln); defs.appendChild(pat); svg.insertBefore(defs, svg.firstChild);
+  }
+  // Copies (each paper's main print day, chosen type) and households for a set of the area's ZIPs; whole counties skip the small-ZIP rule
+  Radius.prototype.newsPen = function (rows, noFew) {
+    var N = this.news, c = this.c, typ = this.state.newsType || "both", n = 0, hh = 0;
+    if (!N) return null;
+    rows.forEach(function (r) {
+      hh += (c.households && c.households[r.i]) || 0;
+      var t = N.zip[r.zip]; if (!t) return;
+      Object.keys(t).forEach(function (i) { var p = N.papers[+i]; if (!p || !(typ === "both" || newsKind(p) === typ)) return; var L = newsLines(p, t[i], 0); n += (L[0] && L[0].n) || 0; });
+    });
+    return { n: n, hh: hh, pct: hh > 0 ? n / hh : 0, few: !noFew && hh < NEWS_MIN_HH };
+  };
+  Radius.prototype.newsMapOn = function () { return !!(this.cfg.newspapers && this.news && this.state.mapMode === "news" && this.newsHas); };
+  Radius.prototype.renderMapMode = function () {
+    var self = this, s = this.state, bar = this.mapModeBar;
+    if (!bar) return;
+    this.newsHas = !!(this.cfg.newspapers && this.news && this.rows && this.rows.some(function (r) { return self.news.zip[r.zip]; }));
+    bar.innerHTML = ""; bar.hidden = !this.newsHas;
+    if (!this.newsHas) { s.mapMode = "score"; return; }
+    var on = s.mapMode === "news";
+    bar.appendChild(el("span", { class: "az-mapmode-l", text: "Map" }));
+    bar.appendChild(el("div", { class: "az-seg", role: "group", "aria-label": "Map" }, [["score", "Audience"], ["news", "Newspaper"]].map(function (o) {
+      return el("button", { type: "button", "aria-pressed": String((on ? "news" : "score") === o[0]), text: o[1], onclick: function () { if ((on ? "news" : "score") !== o[0]) { s.mapMode = o[0]; self.renderMap(); } } });
+    })));
+    if (on) { bar.appendChild(newsChannelSeg()); bar.appendChild(newsTypeDrop(s.newsType || "both", function (v) { s.newsType = v; self.renderNewsSummary(self.visible()); self.renderMap(); })); }
+  };
   // Newspaper coverage for the whole trade area (Digital & Print view): Gross HH Penetration across the papers, with Both / Dailies / Weeklies.
   // No per-county or per-ZIP newspaper columns.
   Radius.prototype.renderNewsSummary = function (rows) {
@@ -1405,14 +1469,16 @@
     if (!T0 || !T0.list.length) { bar.hidden = true; return; }
     bar.hidden = false;
     bar.appendChild(el("h3", { class: "rz-newshead" }, [el("span", { "aria-hidden": "true", text: "\ud83d\udcf0 " }), "Newspapers in this trade area"]));
-    bar.appendChild(el("div", { class: "az-seg az-news-type", role: "group", "aria-label": "Newspapers" }, [["both", "Both"], ["daily", "Dailies"], ["weekly", "Weeklies"]].map(function (o) {
-      return el("button", { type: "button", "aria-pressed": String(typ === o[0]), text: o[1], onclick: function () { if (typ !== o[0]) { s.newsType = o[0]; self.renderNewsSummary(self.visible()); } } });
-    })));
+    bar.appendChild(newsTypeDrop(typ, function (v) { s.newsType = v; self.renderNewsSummary(self.visible()); if (self.newsMapOn()) self.renderMap(); }));
     var T = { hh: T0.hh, list: T0.list.filter(function (x) { return typ === "both" || newsKind(x.p) === typ; }) };
     if (!T.list.length) { bar.appendChild(el("span", { class: "az-news-hint", text: "No " + (typ === "daily" ? "daily" : "weekly") + " papers report copies in this area." })); return; }
     var gn = 0; T.list.forEach(function (x) { var L = newsLines(x.p, x.vals, 0); gn += (L[0] && L[0].n) || 0; });
-    if (gn > 0 && T.hh > 0) bar.appendChild(el("span", { class: "az-news-gross" }, [el("b", { text: "Gross HH Penetration " + NF1.format(gn / T.hh * 100) + "%" }),
-      ": " + NF0.format(gn) + " copies across " + NF0.format(T.list.length) + (T.list.length === 1 ? " paper" : " papers") + ". Gross includes duplication."]));
+    var pct = T.hh > 0 ? gn / T.hh : 0, soon = function (lab) { return el("tr", { class: "rz-ch-soon" }, [el("th", { scope: "row", text: lab }), el("td", { class: "num", text: "\u2013" }), el("td")]); };
+    bar.appendChild(el("table", { class: "rz-ch" }, [el("tbody", null, [
+      el("tr", null, [el("th", { scope: "row", text: "Print" }), el("td", { class: "num" }, [el("b", { text: NF1.format(pct * 100) + "%" })]), el("td", { text: NF0.format(gn) + " copies · " + NF0.format(T.list.length) + (T.list.length === 1 ? " paper" : " papers") })]),
+      soon("Replica"), soon("Web"),
+      el("tr", { class: "rz-ch-gross" }, [el("th", { scope: "row", text: "Gross HH Penetration" }), el("td", { class: "num" }, [el("b", { text: NF1.format(pct * 100) + "%" })]), el("td", { text: "Gross includes duplication." })])
+    ])]));
     var dates = {}; T.list.forEach(function (x) { dates[x.p.asOf] = 1; });
     bar.appendChild(el("span", { class: "az-news-hint", text: "Print: NMS circulation, " + Object.keys(dates).sort().map(newsDate).join(" and ") + "; e-edition copies with no ZIP aren't included." }));
     return;
@@ -2260,13 +2326,15 @@
     }).sort(function (a, b) { return b.aud - a.aud; });
   };
   Radius.prototype.zipStyle = function (byZip, vis) {
-    var self = this;
+    var self = this, nm = this.newsMapOn();
     return function (f) {
       var r = byZip[f.properties.zip], on = vis[f.properties.zip];
+      if (nm) { var q = r && self.newsPen([r]); return { color: "#ffffff", weight: 0.7, fillOpacity: on ? 0.95 : 0.3, fillColor: newsFill(q, self.newsBr) }; }
       return { color: "#ffffff", weight: 0.7, fillOpacity: on ? 0.9 : 0.25, fillColor: self.colorFor(r && r.idx) };
     };
   };
   Radius.prototype.zipTip = function (r) {
+    if (this.newsMapOn()) { var tt = newsTipText(this.newsPen([r])); return '<div class="az-tip"><b>' + r.zip + " " + r.town + "</b>" + (tt ? "<br>" + tt : "") + "</div>"; }
     return '<div class="az-tip"><b>' + r.zip + " " + r.town + "</b><br>" + (r.aud == null ? "No data" : NF0.format(Math.round(r.aud)) + " " + (this.cfg.audienceUnit || "people") + ", index " + (r.idx == null ? "—" : NF0.format(r.idx))) + "</div>";
   };
   Radius.prototype.clearMarkets = function () {
@@ -2373,6 +2441,11 @@
       self.layerByZip = {}; self.mapFeats = feats; self.mapByZip = byZip; self.mapVis = vis;   // kept for the proposal map
       // Thousands of ZIP outlines (100+ mile radii) draw much faster on a canvas than as separate SVG shapes
       if (feats.length > 1200 && !self.canvas) self.canvas = L.canvas({ padding: 0.3 });
+      self.canvasOn = feats.length > 1200;
+      if (self.newsMapOn()) {
+        self.newsBr = newsBreaks(self.visible().map(function (r) { var q = self.newsPen([r]); return q.few ? 0 : q.pct; }));
+        if (s.unit === "county") self.newsBrC = newsBreaks(self.countyRows().map(function (x) { var q = self.newsPen(x.members, true); return q.pct; }));
+      }
       self.zipLayer = L.geoJSON({ type: "FeatureCollection", features: feats }, {
         renderer: feats.length > 1200 ? self.canvas : undefined,
         style: self.zipStyle(byZip, vis),
@@ -2386,9 +2459,10 @@
         var cr = {}; self.countyRows().forEach(function (x) { cr[x.fips] = x; });
         self.layerByCounty = {};
         self.countyLayer = L.geoJSON({ type: "FeatureCollection", features: self.countyFC.features.filter(function (f) { return cr[f.properties.fips]; }) }, {
-          style: function (f) { return { color: "#ffffff", weight: 1, fillOpacity: 0.9, fillColor: self.colorFor(cr[f.properties.fips].idx) }; },
+          style: function (f) { var x = cr[f.properties.fips]; return { color: "#ffffff", weight: 1, fillOpacity: 0.9, fillColor: self.newsMapOn() ? newsFill(self.newsPen(x.members, true), self.newsBrC) : self.colorFor(x.idx) }; },
           onEachFeature: function (f, layer) {
             var x = cr[f.properties.fips]; self.layerByCounty[f.properties.fips] = layer;
+            if (self.newsMapOn()) { layer.bindTooltip(function () { var tt = newsTipText(self.newsPen(x.members, true)); return '<div class="az-tip"><b>' + x.town + "</b>" + (tt ? "<br>" + tt + "<br>(its ZIPs inside the area)" : "") + "</div>"; }, { sticky: true, opacity: 0.97 }); return; }
             layer.bindTooltip('<div class="az-tip"><b>' + x.town + "</b><br>" + (x.aud == null ? "No data" : NF0.format(Math.round(x.aud)) + " " + (self.cfg.audienceUnit || "people") + " in " + NF0.format(x.zips) + (x.zips === 1 ? " ZIP" : " ZIPs") + " inside the area, index " + (x.idx == null ? "—" : NF0.format(x.idx))) + "</div>", { sticky: true, opacity: 0.97 });
           }
         }).addTo(self.map);
@@ -2398,7 +2472,16 @@
       if (self.areaLayer) self.areaLayer.eachLayer(function (l) { l.bringToFront(); });
       if (s.mode === "area") self.renderMarkets(moved);
     });
+    this.renderMapMode();
     this.legend.innerHTML = "";
+    if (this.newsMapOn()) {
+      var lg = this.legend, nt = s.newsType || "both";
+      lg.appendChild(el("b", { class: "rz-legend-title", text: "HH Penetration: print" + (nt === "daily" ? " (dailies)" : nt === "weekly" ? " (weeklies)" : "") }));
+      lg.appendChild(el("span", { class: "az-legend-scale" }, [el("span", { text: "Highest" }),
+        el("span", { class: "az-legend-ramp" }, NEWS_RAMP.slice().reverse().map(function (cl) { return el("span", { style: "background:" + cl }); })), el("span", { text: "Lowest" })]));
+      lg.appendChild(el("span", { class: "rz-legend-hint", text: (s.unit === "county" ? "Counties" : "ZIPs") + " in this area ranked against each other. Point to one for its penetration and copies." }));
+      return;
+    }
     this.legend.appendChild(el("b", { class: "rz-legend-title", text: "Index vs. U.S." }));
     for (var k = CLASSES.length - 1; k >= 0; k--) this.legend.appendChild(el("span", { class: "az-legend-row" }, [el("span", { class: "az-swatch", style: "background:" + cssVar(CLASSES[k][2]) }), el("span", { text: CLASSES[k][3] })]));
     this.legend.appendChild(el("span", { class: "az-legend-row" }, [el("span", { class: "az-swatch nodata" }), el("span", { text: "No data" })]));
